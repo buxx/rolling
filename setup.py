@@ -14,5 +14,5 @@ setup(
     packages=["rolling"],
     install_requires=["urwid"],
     extras_require={"dev": dev_require, "test": test_require},
-    entry_points={"console_scripts": ["rolling=rolling.client.command.run:main"]},
+    entry_points={"console_scripts": ["rolling=rolling.gui.run:main"]},
 )
