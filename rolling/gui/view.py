@@ -12,16 +12,22 @@ if typing.TYPE_CHECKING:
 
 
 class SubMenuExample(BaseSubMenu):
-    def _get_menu_items(self):
-        menu_items = [urwid.Text("SubMenu"), urwid.Divider()]
+    title = "TestSubMenu"
 
-        quit_button = urwid.Button("Go back", self.restore_parent_menu)
-        menu_items.append(urwid.AttrMap(quit_button, None, focus_map="reversed"))
-
-        return menu_items
+    def _get_menu_buttons(self):
+        return []
 
 
 class RootMenu(BaseMenu):
+    title = "MainMenu"
+
+    def _get_menu_buttons(self):
+        return [
+            ("Test", self.test_callback),
+            ("Test2", self.test2_callback),
+            ("Quit", self.quit_callback),
+        ]
+
     def test_callback(self, *args, **kwargs):
         self._main_view.main_content_widget.original_widget.set_text(str(time.time()))
 
@@ -34,20 +40,6 @@ class RootMenu(BaseMenu):
 
     def quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()
-
-    def _get_menu_items(self):
-        menu_items = [urwid.Text("Menu"), urwid.Divider()]
-
-        test_button = urwid.Button("Test", self.test_callback)
-        menu_items.append(urwid.AttrMap(test_button, None, focus_map="reversed"))
-
-        test2_button = urwid.Button("Test2", self.test2_callback)
-        menu_items.append(urwid.AttrMap(test2_button, None, focus_map="reversed"))
-
-        quit_button = urwid.Button("Quit", self.quit_callback)
-        menu_items.append(urwid.AttrMap(quit_button, None, focus_map="reversed"))
-
-        return menu_items
 
 
 class View(urwid.WidgetWrap):
