@@ -12,7 +12,10 @@ setup(
     author_email="sevajol.bastien@gmail.com",
     url="https://github.com/buxx/rolling",
     packages=["rolling"],
-    install_requires=["urwid"],
+    install_requires=["urwid", "aiohttp", "hapic[serpyco]"],
     extras_require={"dev": dev_require, "test": test_require},
-    entry_points={"console_scripts": ["rolling=rolling.gui.run:main"]},
+    entry_points={"console_scripts": [
+        "rolling=rolling.gui.run:main",
+        "rolling-server=rolling.server.run:main",
+    ]},
 )
