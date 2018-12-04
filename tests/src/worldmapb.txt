@@ -1,0 +1,7 @@
+::LEGEND
+~ SEA
+^ MOUNTAIN
+::GEO
+~~~~
+~^^~
+~~~~

@@ -2,9 +2,9 @@
 import argparse
 
 from aiohttp import web
+
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.server.application import get_application
 from rolling.server.extension import hapic
 
@@ -21,7 +21,7 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
-    parser.add_argument("--host", type=str, default='127.0.0.1', help="Server host")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
 
     args = parser.parse_args()

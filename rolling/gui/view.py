@@ -4,8 +4,12 @@ import typing
 
 import urwid
 
+from rolling.gui.map.render import WorldMapRenderEngine
+from rolling.gui.map.widget import WorldMap2Widget
+from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
+from rolling.map.source import WorldMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -58,9 +62,14 @@ class View(urwid.WidgetWrap):
         return self._right_menu_widget
 
     def _create_main_content_widget(self):
-        text_widget = urwid.Text(str(time.time()))
-        text_fill = urwid.Filler(text_widget)
-        return text_fill
+        # text_widget = urwid.Text(('test', u"ᙍ---------ᙌ"), align='center')
+        # text_widget = urwid.Text([(u"test", u"ᙍ"), u"---------", ("test", u"ᙌ")], align='center')
+        with open("tests/src/worldmapa.txt", "r") as w:
+            raw_source = w.read()
+        world_map_source = WorldMapSource(raw_source)
+        render_engine = WorldMapRenderEngine(world_map_source)
+        text_widget = WorldMap2Widget(render_engine)
+        return text_widget
 
     def _create_right_menu_widget(self):
         root_menu = RootMenu(self._controller, self)

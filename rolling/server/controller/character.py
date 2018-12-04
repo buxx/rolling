@@ -1,4 +1,4 @@
-# coding: utf-8
+#  coding: utf-8
 import uuid
 
 from aiohttp import web
@@ -14,12 +14,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request) -> CharacterModel:
-        return CharacterModel(
-            id=str(uuid.uuid4()),
-            name='Rick',
-        )
+        return CharacterModel(id=str(uuid.uuid4()), name="Rick")
 
     def bind(self, app: Application) -> None:
-        app.add_routes([
-            web.post('/character', self.create),
-        ])
+        app.add_routes([web.post("/character", self.create)])
