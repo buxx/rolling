@@ -6,8 +6,8 @@ class WorldMapTileType(object):
     _list_cache: typing.Dict[str, typing.Type["WorldMapTileType"]] = None
 
     id = NotImplemented
-    foreground_color = NotImplemented
-    background_color = NotImplemented
+    foreground_color = "white"
+    background_color = ""
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["WorldMapTileType"]]:
@@ -27,9 +27,14 @@ class WorldMapTileType(object):
     def get_for_id(cls, id_: str) -> typing.Type["WorldMapTileType"]:
         return cls.get_all()[id_]
 
+    @classmethod
+    def get_full_id(cls) -> str:
+        return "WORLD_TILE__{}".format(cls.id)
+
 
 class Sea(WorldMapTileType):
     id = "SEA"
+    foreground_color = "dark blue"
 
 
 class Mountain(WorldMapTileType):

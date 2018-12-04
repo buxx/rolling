@@ -3,13 +3,18 @@ import argparse
 
 from rolling.client.http.client import HttpClient
 from rolling.gui.controller import Controller
+from rolling.gui.kernel import Kernel
 
 
 def run(args: argparse.Namespace) -> None:
     client = HttpClient(server_address=args.server_address)
 
-    controler = Controller(client=client)
-    controler.main()
+    with open('tests/src/worldmapa.txt') as world_map_file:
+        world_map_str = world_map_file.read()
+
+    kernel = Kernel(world_map_str)
+    controller = Controller(client=client, kernel=kernel)
+    controller.main()
 
 
 def main() -> None:

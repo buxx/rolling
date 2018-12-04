@@ -18,5 +18,8 @@ class WorldMapLegend(object):
     def get_type_with_str(self, key: str) -> typing.Type[WorldMapTileType]:
         return self._str_to_type[key]
 
-    def get_str_with_type(self, key: WorldMapTileType) -> str:
+    def get_str_with_type(self, key: typing.Type[WorldMapTileType]) -> str:
         return self._type_to_str[key]
+
+    def get_all_types(self) -> typing.Iterable[typing.Type[WorldMapTileType]]:
+        return self._str_to_type.values()

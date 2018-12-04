@@ -84,7 +84,7 @@ class WorldMapRenderEngine(object):
 
         # compute attributes
         for row_i, row in enumerate(self._rows):
-            self._attributes.append([(None, len(row))])
+            self._attributes.append([("WORLD_TILE__SEA", len(row))])
 
         pass
         # self._rows = [u'⁙'.encode()*width]*height

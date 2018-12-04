@@ -47,8 +47,8 @@ class RootMenu(BaseMenu):
 
 
 class View(urwid.WidgetWrap):
-    def __init__(self, gui: "Controller") -> None:
-        self._controller = gui
+    def __init__(self, controller: "Controller") -> None:
+        self._controller = controller
         self._main_content_widget = None
         self._right_menu_widget = None
         urwid.WidgetWrap.__init__(self, self._main_window())
@@ -62,12 +62,7 @@ class View(urwid.WidgetWrap):
         return self._right_menu_widget
 
     def _create_main_content_widget(self):
-        # text_widget = urwid.Text(('test', u"ᙍ---------ᙌ"), align='center')
-        # text_widget = urwid.Text([(u"test", u"ᙍ"), u"---------", ("test", u"ᙌ")], align='center')
-        with open("tests/src/worldmapa.txt", "r") as w:
-            raw_source = w.read()
-        world_map_source = WorldMapSource(raw_source)
-        render_engine = WorldMapRenderEngine(world_map_source)
+        render_engine = WorldMapRenderEngine(self._controller.kernel.world_map_source)
         text_widget = WorldMap2Widget(render_engine)
         return text_widget
 
