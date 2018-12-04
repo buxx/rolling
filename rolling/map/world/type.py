@@ -43,6 +43,7 @@ class Mountain(WorldMapTileType):
 
 class Jungle(WorldMapTileType):
     id = "JUNGLE"
+    foreground_color = "dark green"
 
 
 class Hill(WorldMapTileType):
@@ -51,6 +52,7 @@ class Hill(WorldMapTileType):
 
 class Beach(WorldMapTileType):
     id = "BEACH"
+    foreground_color = "yellow"
 
 
 class Plain(WorldMapTileType):

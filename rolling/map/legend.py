@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+from rolling.exception import TileTypeNotFound
 from rolling.map.world.type import WorldMapTileType
 
 
@@ -16,10 +17,16 @@ class WorldMapLegend(object):
             self._type_to_str[type_] = key
 
     def get_type_with_str(self, key: str) -> typing.Type[WorldMapTileType]:
-        return self._str_to_type[key]
+        try:
+            return self._str_to_type[key]
+        except KeyError:
+            raise TileTypeNotFound('Tile type not found for str "{}"'.format(key))
 
     def get_str_with_type(self, key: typing.Type[WorldMapTileType]) -> str:
-        return self._type_to_str[key]
+        try:
+            return self._type_to_str[key]
+        except KeyError:
+            raise TileTypeNotFound('Tile str not found for type "{}"'.format(str(key)))
 
     def get_all_types(self) -> typing.Iterable[typing.Type[WorldMapTileType]]:
         return self._str_to_type.values()

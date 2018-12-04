@@ -1,6 +1,7 @@
 # coding: utf-8
 from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.map.source import WorldMapSource
+from rolling.map.world import type as world
 
 
 class TestWorldMapRender(object):
@@ -10,6 +11,15 @@ class TestWorldMapRender(object):
         engine.render(width=4, height=3)
 
         assert [b"~~~~", b"~^^~", b"~~~~"] == engine.rows
+        assert [
+            [(world.Sea.get_full_id(), 4)],
+            [
+                (world.Sea.get_full_id(), 1),
+                (world.Mountain.get_full_id(), 2),
+                (world.Sea.get_full_id(), 1)
+            ],
+            [(world.Sea.get_full_id(), 4)],
+        ] == engine.attributes
 
     def test_unit__render__ok__height_more_one(self, worldmapsourceb_txt: str):
         source = WorldMapSource(worldmapsourceb_txt)

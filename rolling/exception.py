@@ -7,3 +7,7 @@ class RollingError(Exception):
 
 class SourceLoadError(RollingError):
     pass
+
+
+class TileTypeNotFound(RollingError):
+    pass
