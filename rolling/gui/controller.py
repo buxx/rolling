@@ -9,11 +9,7 @@ from rolling.gui.view import View
 
 
 class Controller(object):
-    def __init__(
-        self,
-        client: HttpClient,
-        kernel: Kernel,
-    ) -> None:
+    def __init__(self, client: HttpClient, kernel: Kernel) -> None:
         self._client = client
         self._loop = None
         self._kernel = kernel
@@ -33,11 +29,13 @@ class Controller(object):
         for world_map_tile_type in self._kernel.world_map_source.legend.get_all_types():
             # palette can be:
             # (name, foreground, background, mono, foreground_high, background_high)
-            palette.append((
-                world_map_tile_type.get_full_id(),
-                world_map_tile_type.foreground_color,
-                world_map_tile_type.background_color,
-            ))
+            palette.append(
+                (
+                    world_map_tile_type.get_full_id(),
+                    world_map_tile_type.foreground_color,
+                    world_map_tile_type.background_color,
+                )
+            )
 
         return palette
 

@@ -11,3 +11,7 @@ class SourceLoadError(RollingError):
 
 class TileTypeNotFound(RollingError):
     pass
+
+
+class NoDefaultTileType(RollingError):
+    pass

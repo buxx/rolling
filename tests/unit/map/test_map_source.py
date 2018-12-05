@@ -13,6 +13,7 @@ class TestWorldMapSource(object):
         assert source.legend.get_type_with_str("∩") == world.Hill
         assert source.legend.get_type_with_str("⡩") == world.Beach
         assert source.legend.get_type_with_str("⠃") == world.Plain
+        assert world.Sea == source.legend.get_default_type()
 
         # geography
         assert source.geography

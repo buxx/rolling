@@ -9,7 +9,7 @@ from rolling.gui.kernel import Kernel
 def run(args: argparse.Namespace) -> None:
     client = HttpClient(server_address=args.server_address)
 
-    with open('tests/src/worldmapa.txt') as world_map_file:
+    with open("tests/src/worldmapa.txt") as world_map_file:
         world_map_str = world_map_file.read()
 
     kernel = Kernel(world_map_str)

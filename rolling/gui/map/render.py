@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+from rolling.exception import NoDefaultTileType
 from rolling.exception import TileTypeNotFound
 from rolling.map.source import WorldMapSource
 
@@ -11,7 +12,9 @@ class WorldMapRenderEngine(object):
     def __init__(self, world_map_source: WorldMapSource) -> None:
         self._world_map_source = world_map_source
         self._rows: typing.List[str] = None
-        self._attributes: typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]] = None
+        self._attributes: typing.List[
+            typing.List[typing.Tuple[typing.Optional[str], int]]
+        ] = None
 
     @property
     def rows(self) -> typing.List[str]:
@@ -24,6 +27,12 @@ class WorldMapRenderEngine(object):
     def render(self, width: int, height: int) -> None:
         map_width = self._world_map_source.geography.width
         map_height = self._world_map_source.geography.height
+
+        try:
+            default_type = self._world_map_source.legend.get_default_type()
+            default_str = self._world_map_source.legend.get_str_with_type(default_type)
+        except NoDefaultTileType:
+            default_str = WORLD_VOID_STR
 
         # compute static void left and right
         width_difference = width - map_width
@@ -50,11 +59,13 @@ class WorldMapRenderEngine(object):
             bottom_void = 0
 
         # prepare void values
-        self._rows = [WORLD_VOID_STR * width] * top_void
+        self._rows = [default_str * width] * top_void
         map_display_height = map_height if height_difference > 0 else height
-        self._rows.extend([WORLD_VOID_STR * left_void] * map_display_height)
-        self._rows.extend([WORLD_VOID_STR * width] * bottom_void)
-        self._attributes: typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]] = []
+        self._rows.extend([default_str * left_void] * map_display_height)
+        self._rows.extend([default_str * width] * bottom_void)
+        self._attributes: typing.List[
+            typing.List[typing.Tuple[typing.Optional[str], int]]
+        ] = []
 
         # fill rows and attributes line per line
         for row_i, row in enumerate(self._world_map_source.geography.rows):
@@ -77,7 +88,7 @@ class WorldMapRenderEngine(object):
         for row_i, row in enumerate(
             self._rows[top_void : len(self._rows) - bottom_void], start=top_void
         ):
-            self._rows[row_i] += WORLD_VOID_STR * right_void
+            self._rows[row_i] += default_str * right_void
 
         # compute attributes
         for row_i, row in enumerate(self._rows):
@@ -87,8 +98,12 @@ class WorldMapRenderEngine(object):
             for char in row:
                 if last_seen_char != char:
                     try:
-                        tile_type = self._world_map_source.legend.get_type_with_str(char)
-                        self._attributes[row_i].append((tile_type.get_full_id(), len(char.encode())))
+                        tile_type = self._world_map_source.legend.get_type_with_str(
+                            char
+                        )
+                        self._attributes[row_i].append(
+                            (tile_type.get_full_id(), len(char.encode()))
+                        )
                     except TileTypeNotFound:
                         self._attributes[row_i].append((None, 1))
                 else:
