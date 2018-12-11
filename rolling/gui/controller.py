@@ -34,6 +34,9 @@ class Controller(object):
                     world_map_tile_type.get_full_id(),
                     world_map_tile_type.foreground_color,
                     world_map_tile_type.background_color,
+                    world_map_tile_type.mono,
+                    world_map_tile_type.foreground_high_color,
+                    world_map_tile_type.background_high_color,
                 )
             )
 

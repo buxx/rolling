@@ -8,6 +8,9 @@ class WorldMapTileType(object):
     id = NotImplemented
     foreground_color = "white"
     background_color = ""
+    mono = ""
+    foreground_high_color = ""
+    background_high_color = "#000"
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["WorldMapTileType"]]:
@@ -34,26 +37,33 @@ class WorldMapTileType(object):
 
 class Sea(WorldMapTileType):
     id = "SEA"
-    foreground_color = "dark blue"
+    foreground_high_color = "#06f"
+    background_high_color = "#006"
 
 
 class Mountain(WorldMapTileType):
     id = "MOUNTAIN"
+    foreground_color = ""
+    background_color = ""
+    mono = ""
+    foreground_high_color = "#860"
 
 
 class Jungle(WorldMapTileType):
     id = "JUNGLE"
-    foreground_color = "dark green"
+    foreground_high_color = "#060"
 
 
 class Hill(WorldMapTileType):
     id = "HILL"
+    foreground_high_color = "#660"
 
 
 class Beach(WorldMapTileType):
     id = "BEACH"
-    foreground_color = "yellow"
+    foreground_high_color = "#fa0"
 
 
 class Plain(WorldMapTileType):
     id = "PLAIN"
+    foreground_high_color = "#fda"
