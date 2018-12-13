@@ -24,6 +24,7 @@ class WorldMapRenderEngine(object):
     def attributes(self):
         return self._attributes
 
+    # TODO BS 2018-12-17: Ugly algorithm ...
     def render(
         self,
         width: int,
@@ -54,6 +55,10 @@ class WorldMapRenderEngine(object):
             left_void = 0 + offset_horizontal
             right_void = 0 - offset_horizontal
 
+        # Prevent left void superior of width
+        if left_void > width:
+            left_void = width
+
         # compute static void top and bottom
         height_difference = height - map_height
         if height_difference > 1:
@@ -68,11 +73,18 @@ class WorldMapRenderEngine(object):
             top_void = 0 + offset_vertical
             bottom_void = 0 - offset_vertical
 
+        if bottom_void > height:
+            bottom_void = height
+
+        if top_void > height:
+            top_void = height
+
         # prepare void values
         self._rows = [default_str * width] * top_void
-        map_display_height = (map_height if height_difference > 0 else height) - abs(
-            offset_vertical
-        )
+        map_display_height = map_height
+        if map_display_height > height:
+            map_display_height = height
+
         self._rows.extend([default_str * left_void] * map_display_height)
         self._rows.extend([default_str * width] * bottom_void)
         self._attributes: typing.List[
@@ -111,15 +123,25 @@ class WorldMapRenderEngine(object):
                     if col_i == len(row) + row_right_void:
                         break
 
+                # line already completely filled
+                if len(self._rows[row_i + top_void]) >= width:
+                    break
+
                 tile_str = self._world_map_source.legend.get_str_with_type(col)
                 self._rows[row_i + top_void] += tile_str
                 # self._rows[row_i+top_void] += u'a'
 
         # fill right
+        fill_top_void = top_void
+        if top_void < 0:
+            fill_top_void = 0
         for row_i, row in enumerate(
-            self._rows[top_void : len(self._rows) - bottom_void], start=top_void
+            self._rows[fill_top_void:len(self._rows) - bottom_void], start=fill_top_void
         ):
-            self._rows[row_i] += default_str * right_void
+            self._rows[row_i] += default_str * (width - len(self._rows[row_i]))
+
+        # cut if more height
+        self._rows = self._rows[0:height]
 
         # compute attributes
         for row_i, row in enumerate(self._rows):

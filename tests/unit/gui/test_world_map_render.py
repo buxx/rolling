@@ -210,3 +210,180 @@ class TestWorldMapRender(object):
         engine.render(width=7, height=3)
 
         assert [b" ~~~~  ", b" ~^^~  ", b" ~~~~  "] == engine.rows
+
+    def test_unit__render__ok__large(self, worldmapsourceb_txt: str):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=7)
+
+        assert [
+                   b"        ",
+                   b"        ",
+                   b"  ~~~~  ",
+                   b"  ~^^~  ",
+                   b"  ~~~~  ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height(self, worldmapsourceb_txt: str):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=2)
+
+        assert [
+                   b"  ~~~~  ",
+                   b"  ~^^~  ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_vertical_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=2, offset_vertical=-1)
+
+        assert [
+                   b"  ~^^~  ",
+                   b"        ",
+               ] == engine.rows
+
+    # FIXME
+    def test_unit__render__ok__vertical_decal_and_cut_0(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=4, offset_vertical=0)
+
+        assert [
+                   b"        ",
+                   b"  ~~~~  ",
+                   b"  ~^^~  ",
+                   b"  ~~~~  ",
+               ] == engine.rows
+
+    # FIXME
+    def test_unit__render__ok__vertical_decal_and_cut_1(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=4, offset_vertical=-1)
+
+        assert [
+                   b"  ~~~~  ",
+                   b"  ~^^~  ",
+                   b"  ~~~~  ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__vertical_decal_and_cut_2(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=4, offset_vertical=-2)
+
+        assert [
+                   b"  ~^^~  ",
+                   b"  ~~~~  ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_vertical_complete_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=2, offset_vertical=-2)
+
+        assert [
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_vertical_huge_neg_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=2, offset_vertical=-20)
+
+        assert [
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_vertical_huge_pos_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=2, offset_vertical=20)
+
+        assert [
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_horizontal_complete_neg_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=5, offset_horizontal=-8)
+
+        assert [
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_horizontal_complete_pos_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=5, offset_horizontal=8)
+
+        assert [
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_horizontal_huge_neg_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=5, offset_horizontal=-20)
+
+        assert [
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
+
+    def test_unit__render__ok__large_width_less_height_horizontal_huge_pos_offset(
+        self, worldmapsourceb_txt: str
+    ):
+        source = WorldMapSource(worldmapsourceb_txt)
+        engine = WorldMapRenderEngine(source)
+        engine.render(width=8, height=5, offset_horizontal=20)
+
+        assert [
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+                   b"        ",
+               ] == engine.rows
