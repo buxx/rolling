@@ -5,12 +5,7 @@ from urwid import BOX
 from rolling.gui.map.render import WorldMapRenderEngine
 
 
-class WorldMapWidget(urwid.Text):
-    def get_text(self):
-        return "toto", [("test", 11)]
-
-
-class WorldMap2Widget(urwid.Widget):
+class WorldMapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
     def __init__(self, render_engine: WorldMapRenderEngine) -> None:

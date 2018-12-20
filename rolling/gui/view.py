@@ -5,7 +5,7 @@ import typing
 import urwid
 
 from rolling.gui.map.render import WorldMapRenderEngine
-from rolling.gui.map.widget import WorldMap2Widget
+from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
@@ -45,7 +45,7 @@ class RootMenu(BaseMenu):
 
     def world_map_button_callback(self, *args, **kwargs):
         world_map_render_engine = WorldMapRenderEngine(self._controller.kernel.world_map_source)
-        text_widget = WorldMap2Widget(world_map_render_engine)
+        text_widget = WorldMapWidget(world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
 
     def quit_callback(self, *args, **kwargs):
