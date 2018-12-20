@@ -1,30 +1,25 @@
 # coding: utf-8
 import typing
 
+from rolling.map.geography import TileMapGeography
+from rolling.map.geography import WorldMapGeography
+from rolling.map.legend import TileMapLegend
 from rolling.map.legend import WorldMapLegend
-from rolling.map.world.geography import WorldMapGeography
+from rolling.map.type.world import WorldMapTileType
+
+if typing.TYPE_CHECKING:
+    from rolling.gui.kernel import Kernel
 
 BLOCK_LEGEND_NAME = "LEGEND"
 BLOCK_GEOGRAPHY_NAME = "GEO"
 
 
-class WorldMapSource(object):
-    def __init__(self, raw_source: str) -> None:
-        self._legend = self._create_legend(raw_source)
-        self._geography = self._create_geography(raw_source)
-        # self._river = self._create_river(raw_source)
-        # self._others = self._create_others(raw_source)
-
-    @property
-    def legend(self) -> WorldMapLegend:
-        return self._legend
-
-    @property
-    def geography(self) -> WorldMapGeography:
-        return self._geography
+class MapSource(object):
+    def __init__(self, kernel: "Kernel") -> None:
+        self._kernel = kernel
 
     def _get_blocks(
-        self, source: str, block_name: str
+        self, source: str, block_name: str, strip_: bool = True
     ) -> typing.List[typing.List[str]]:
         found = False
         block_lines = []
@@ -34,7 +29,7 @@ class WorldMapSource(object):
         lines.append("") if lines[-1].strip() else None
 
         for raw_line in lines:
-            line = raw_line.strip()
+            line = raw_line.strip() if strip_ else raw_line
 
             # Inspect enter or out searched block
             if line.startswith("::") or line == "":
@@ -50,6 +45,23 @@ class WorldMapSource(object):
 
         return blocks
 
+
+class WorldMapSource(MapSource):
+    def __init__(self, kernel: "Kernel", raw_source: str) -> None:
+        super().__init__(kernel)
+        self._legend = self._create_legend(raw_source)
+        self._geography = self._create_geography(raw_source)
+        # self._river = self._create_river(raw_source)
+        # self._others = self._create_others(raw_source)
+
+    @property
+    def legend(self) -> WorldMapLegend:
+        return self._legend
+
+    @property
+    def geography(self) -> WorldMapGeography:
+        return self._geography
+
     def _create_legend(self, raw_source: str) -> WorldMapLegend:
         # TODO BS 2018-11-03: raise if not found
         legend_lines = self._get_blocks(raw_source, BLOCK_LEGEND_NAME)[0]
@@ -59,9 +71,32 @@ class WorldMapSource(object):
             key, value = legend_line.split(" ")
             raw_legend[key] = value
 
-        return WorldMapLegend(raw_legend)
+        return WorldMapLegend(raw_legend, WorldMapTileType)
 
     def _create_geography(self, raw_source: str) -> WorldMapGeography:
         # TODO BS 2018-11-03: raise if not found
         geography_lines = self._get_blocks(raw_source, BLOCK_GEOGRAPHY_NAME)[0]
         return WorldMapGeography(self._legend, geography_lines)
+
+
+class TileMapSource(MapSource):
+    def __init__(self, kernel: "Kernel", raw_source: str) -> None:
+        super().__init__(kernel)
+        self._geography = self._create_geography(raw_source)
+
+    @property
+    def legend(self) -> TileMapLegend:
+        return self._kernel.tile_map_legend
+
+    @property
+    def geography(self) -> TileMapGeography:
+        return self._geography
+
+    def _create_geography(self, raw_source: str) -> TileMapGeography:
+        # TODO BS 2018-11-03: raise if not found
+        geography_lines = self._get_blocks(
+            raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False
+        )[0]
+        return TileMapGeography(
+            self.legend, geography_lines, missing_right_tile_str=" "
+        )

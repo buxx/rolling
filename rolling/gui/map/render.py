@@ -3,13 +3,13 @@ import typing
 
 from rolling.exception import NoDefaultTileType
 from rolling.exception import TileTypeNotFound
-from rolling.map.source import WorldMapSource
+from rolling.map.source import MapSource
 
 WORLD_VOID_STR = " "
 
 
-class WorldMapRenderEngine(object):
-    def __init__(self, world_map_source: WorldMapSource) -> None:
+class MapRenderEngine(object):
+    def __init__(self, world_map_source: MapSource) -> None:
         self._world_map_source = world_map_source
         self._rows: typing.List[str] = None
         self._attributes: typing.List[
@@ -136,7 +136,8 @@ class WorldMapRenderEngine(object):
         if top_void < 0:
             fill_top_void = 0
         for row_i, row in enumerate(
-            self._rows[fill_top_void:len(self._rows) - bottom_void], start=fill_top_void
+            self._rows[fill_top_void : len(self._rows) - bottom_void],
+            start=fill_top_void,
         ):
             self._rows[row_i] += default_str * (width - len(self._rows[row_i]))
 
@@ -175,3 +176,11 @@ class WorldMapRenderEngine(object):
         # self._attributes = [
         #     [('test', len(u'⁙'.encode()*width))],
         # ]*height
+
+
+class WorldMapRenderEngine(MapRenderEngine):
+    pass
+
+
+class TileMapRenderEngine(MapRenderEngine):
+    pass

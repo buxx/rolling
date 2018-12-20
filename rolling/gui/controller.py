@@ -25,8 +25,11 @@ class Controller(object):
 
     def create_palette(self) -> typing.List[typing.Tuple[str, str, str]]:
         palette = []
+        source_types = list(
+            self._kernel.world_map_source.legend.get_all_types()
+        ) + list(self._kernel.tile_map_legend.get_all_types())
 
-        for world_map_tile_type in self._kernel.world_map_source.legend.get_all_types():
+        for world_map_tile_type in source_types:
             # palette can be:
             # (name, foreground, background, mono, foreground_high, background_high)
             palette.append(

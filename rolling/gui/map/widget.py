@@ -2,13 +2,13 @@
 import urwid
 from urwid import BOX
 
-from rolling.gui.map.render import WorldMapRenderEngine
+from rolling.gui.map.render import MapRenderEngine
 
 
-class WorldMapWidget(urwid.Widget):
+class MapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
-    def __init__(self, render_engine: WorldMapRenderEngine) -> None:
+    def __init__(self, render_engine: MapRenderEngine) -> None:
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
@@ -30,13 +30,21 @@ class WorldMapWidget(urwid.Widget):
         return True
 
     def keypress(self, size, key):
-        if key == 'up':
+        if key == "up":
             self._vertical_offset += 1
-        if key == 'down':
+        if key == "down":
             self._vertical_offset -= 1
-        if key == 'left':
+        if key == "left":
             self._horizontal_offset += 1
-        if key == 'right':
+        if key == "right":
             self._horizontal_offset -= 1
 
         self._invalidate()
+
+
+class WorldMapWidget(MapWidget):
+    pass
+
+
+class TileMapWidget(MapWidget):
+    pass

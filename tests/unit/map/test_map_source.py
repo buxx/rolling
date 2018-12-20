@@ -1,11 +1,11 @@
 # coding: utf-8
 from rolling.map.source import WorldMapSource
-from rolling.map.world import type as world
+from rolling.map.type import world
 
 
 class TestWorldMapSource(object):
     def test_unit__all__ok__nominal_case(self, worldmapsourcea_txt: str):
-        source = WorldMapSource(worldmapsourcea_txt)
+        source = WorldMapSource(None, worldmapsourcea_txt)
 
         # legend
         assert source.legend.get_type_with_str("~") == world.Sea

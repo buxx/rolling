@@ -4,11 +4,13 @@ import typing
 
 import urwid
 
+from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine
-from rolling.gui.map.widget import WorldMapWidget
+from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
+from rolling.map.source import TileMapSource
 from rolling.map.source import WorldMapSource
 
 if typing.TYPE_CHECKING:
@@ -44,7 +46,9 @@ class RootMenu(BaseMenu):
         self._main_view.right_menu_container.original_widget = sub_menu
 
     def world_map_button_callback(self, *args, **kwargs):
-        world_map_render_engine = WorldMapRenderEngine(self._controller.kernel.world_map_source)
+        world_map_render_engine = WorldMapRenderEngine(
+            self._controller.kernel.world_map_source
+        )
         text_widget = WorldMapWidget(world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
 
@@ -68,9 +72,14 @@ class View(urwid.WidgetWrap):
         return self._right_menu_container
 
     def _create_main_content_widget(self):
-        txt = urwid.Text(u"Hello World")
-        fill = urwid.Filler(txt, 'top')
-        return fill
+        with open("tests/src/tilemapa.txt") as tile_map_file:
+            tile_map_source = TileMapSource(
+                self._controller.kernel, tile_map_file.read()
+            )
+
+        tile_map_render_engine = TileMapRenderEngine(tile_map_source)
+        tile_map_widget = TileMapWidget(tile_map_render_engine)
+        return tile_map_widget
 
     def _create_right_menu_widget(self):
         root_menu = RootMenu(self._controller, self)

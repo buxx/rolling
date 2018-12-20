@@ -1,16 +1,12 @@
 # coding: utf-8
 import typing
 
+from rolling.map.type.base import MapTileType
 
-class WorldMapTileType(object):
+
+class WorldMapTileType(MapTileType):
     _list_cache: typing.Dict[str, typing.Type["WorldMapTileType"]] = None
-
-    id = NotImplemented
-    foreground_color = "white"
-    background_color = ""
-    mono = ""
-    foreground_high_color = ""
-    background_high_color = "#000"
+    _full_id_pattern = "WORLD_TILE__{}"
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["WorldMapTileType"]]:
@@ -25,14 +21,6 @@ class WorldMapTileType(object):
             }
 
         return cls._list_cache
-
-    @classmethod
-    def get_for_id(cls, id_: str) -> typing.Type["WorldMapTileType"]:
-        return cls.get_all()[id_]
-
-    @classmethod
-    def get_full_id(cls) -> str:
-        return "WORLD_TILE__{}".format(cls.id)
 
 
 class Sea(WorldMapTileType):
