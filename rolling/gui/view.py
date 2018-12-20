@@ -29,6 +29,7 @@ class RootMenu(BaseMenu):
         return [
             ("Test", self.test_callback),
             ("Test2", self.test2_callback),
+            ("World map", self.world_map_button_callback),
             ("Quit", self.quit_callback),
         ]
 
@@ -40,7 +41,12 @@ class RootMenu(BaseMenu):
     def test2_callback(self, *args, **kwargs):
         sub_menu = SubMenuExample(self._controller, self._main_view, self)
 
-        self._main_view.right_menu_widget.original_widget = sub_menu
+        self._main_view.right_menu_container.original_widget = sub_menu
+
+    def world_map_button_callback(self, *args, **kwargs):
+        world_map_render_engine = WorldMapRenderEngine(self._controller.kernel.world_map_source)
+        text_widget = WorldMap2Widget(world_map_render_engine)
+        self._main_view.main_content_container.original_widget = text_widget
 
     def quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()
@@ -49,37 +55,37 @@ class RootMenu(BaseMenu):
 class View(urwid.WidgetWrap):
     def __init__(self, controller: "Controller") -> None:
         self._controller = controller
-        self._main_content_widget = None
-        self._right_menu_widget = None
+        self._main_content_container = None
+        self._right_menu_container = None
         urwid.WidgetWrap.__init__(self, self._main_window())
 
     @property
-    def main_content_widget(self):
-        return self._main_content_widget
+    def main_content_container(self):
+        return self._main_content_container
 
     @property
-    def right_menu_widget(self):
-        return self._right_menu_widget
+    def right_menu_container(self):
+        return self._right_menu_container
 
     def _create_main_content_widget(self):
-        render_engine = WorldMapRenderEngine(self._controller.kernel.world_map_source)
-        text_widget = WorldMap2Widget(render_engine)
-        return text_widget
+        txt = urwid.Text(u"Hello World")
+        fill = urwid.Filler(txt, 'top')
+        return fill
 
     def _create_right_menu_widget(self):
         root_menu = RootMenu(self._controller, self)
         return urwid.Padding(root_menu, left=0, right=0)
 
     def _main_window(self):
-        self._main_content_widget = self._create_main_content_widget()
-        self._right_menu_widget = self._create_right_menu_widget()
+        self._main_content_container = urwid.Padding(self._create_main_content_widget())
+        self._right_menu_container = urwid.Padding(self._create_right_menu_widget())
 
         vertical_line = urwid.AttrWrap(urwid.SolidFill(u"\u2502"), "line")
         columns = urwid.Columns(
             [
-                ("weight", 2, self._main_content_widget),
+                ("weight", 2, self._main_content_container),
                 ("fixed", 1, vertical_line),
-                ("fixed", 20, self._right_menu_widget),
+                ("fixed", 20, self._right_menu_container),
             ],
             dividechars=1,
             focus_column=2,

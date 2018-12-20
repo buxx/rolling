@@ -44,7 +44,7 @@ class BaseSubMenu(urwid.ListBox):
         super().__init__(urwid.SimpleFocusListWalker(self._items))
 
     def restore_parent_menu(self, *args, **kwargs) -> None:
-        self._main_view.right_menu_widget.original_widget = self._parent_menu
+        self._main_view.right_menu_container.original_widget = self._parent_menu
 
     def _get_menu_buttons(self):
         raise NotImplementedError()
