@@ -14,15 +14,17 @@ if typing.TYPE_CHECKING:
 class MapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
-    def __init__(self, controller: "Controller", render_engine: MapRenderEngine) -> None:
+    def __init__(
+        self, controller: "Controller", render_engine: MapRenderEngine
+    ) -> None:
         self._controller = controller
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
         self._display_objects = [
             DisplayObject(
-                self._render_engine._world_map_source.geography.width//2,
-                self._render_engine._world_map_source.geography.height//2
+                self._render_engine._world_map_source.geography.width // 2,
+                self._render_engine._world_map_source.geography.height // 2,
             )
         ]
 

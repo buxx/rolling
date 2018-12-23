@@ -1,10 +1,10 @@
 # coding: utf-8
-import time
 import typing
 
 from rolling.exception import NoDefaultTileType
 from rolling.exception import TileTypeNotFound
 from rolling.gui.map.object import DisplayObject
+from rolling.gui.map.object import DisplayObjectManager
 from rolling.map.source import MapSource
 
 WORLD_VOID_STR = " "
@@ -17,11 +17,7 @@ class MapRenderEngine(object):
         self._attributes: typing.List[
             typing.List[typing.Tuple[typing.Optional[str], int]]
         ] = None
-        self._display_objects_period: float = 1.0
-        self._display_objects: typing.List[DisplayObject] = []
-        self._display_objects_timing: typing.Dict[DisplayObject, typing.Tuple[bool, float]] = {}
-        self._display_objects_by_position: typing.Dict[
-            typing.Tuple[int, int], typing.List[DisplayObject]] = {}
+        self._display_objects_manager = DisplayObjectManager([])
 
     @property
     def rows(self) -> typing.List[str]:
@@ -33,11 +29,11 @@ class MapRenderEngine(object):
 
     @property
     def display_objects(self):
-        return self._display_objects
+        return self._display_objects_manager.display_objects
 
     @display_objects.setter
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
-        self._display_objects = display_objects
+        self._display_objects_manager.display_objects = display_objects
 
     # TODO BS 2018-12-17: Ugly algorithm ...
     def render(
@@ -49,13 +45,7 @@ class MapRenderEngine(object):
     ) -> None:
         map_width = self._world_map_source.geography.width
         map_height = self._world_map_source.geography.height
-
-        # Display objects positions
-        self._display_objects_by_position = {}
-        for display_object in self._display_objects:
-            display_object_position = (display_object.x, display_object.y)
-            self._display_objects_by_position.setdefault(display_object_position, [])
-            self._display_objects_by_position[display_object_position].append(display_object)
+        self._display_objects_manager.init()
 
         try:
             default_type = self._world_map_source.legend.get_default_type()
@@ -150,10 +140,8 @@ class MapRenderEngine(object):
                     break
 
                 tile_str = self._world_map_source.legend.get_str_with_type(col)
-                final_str = self._get_final_str(
-                    row_i,
-                    col_i,
-                    tile_str,
+                final_str = self._display_objects_manager.get_final_str(
+                    row_i, col_i, tile_str
                 )
                 self._rows[row_i + top_void] += final_str
                 # self._rows[row_i+top_void] += u'a'
@@ -198,34 +186,6 @@ class MapRenderEngine(object):
         # encode
         for row_i, row in enumerate(self._rows):
             self._rows[row_i] = row.encode()
-
-        pass
-        # self._rows = [u'⁙'.encode()*width]*height
-        # self._attributes = [
-        #     [('test', len(u'⁙'.encode()*width))],
-        # ]*height
-
-    def _get_final_str(self, x: int, y: int, default: str) -> str:
-        try:
-            display_objects = self._display_objects_by_position[(x, y)]
-            for display_object in display_objects:
-                try:
-                    displayed, displayed_time = self._display_objects_timing[display_object]
-                    if time.time() - displayed_time >= self._display_objects_period:
-                        self._display_objects_timing[display_object] = (not displayed, time.time())
-
-                    if displayed:
-                        return display_objects[0].char
-                    else:
-                        continue
-
-                except KeyError:
-                    self._display_objects_timing[display_object] = (True, time.time())
-                    return display_objects[0].char
-        except KeyError:
-            pass
-
-        return default
 
 
 class WorldMapRenderEngine(MapRenderEngine):
