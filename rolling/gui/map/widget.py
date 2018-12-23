@@ -1,20 +1,35 @@
 # coding: utf-8
+import typing
+
 import urwid
 from urwid import BOX
 
+from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.render import MapRenderEngine
+
+if typing.TYPE_CHECKING:
+    from rolling.gui.controller import Controller
 
 
 class MapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
-    def __init__(self, render_engine: MapRenderEngine) -> None:
+    def __init__(self, controller: "Controller", render_engine: MapRenderEngine) -> None:
+        self._controller = controller
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
+        self._display_objects = [
+            DisplayObject(
+                self._render_engine._world_map_source.geography.width//2,
+                self._render_engine._world_map_source.geography.height//2
+            )
+        ]
 
     def render(self, size, focus=False):
         x, y = size
+
+        self._render_engine.display_objects = self._display_objects
         self._render_engine.render(
             x,
             y,
@@ -22,6 +37,7 @@ class MapWidget(urwid.Widget):
             offset_vertical=self._vertical_offset,
         )
 
+        self._controller.loop.set_alarm_in(0.25, lambda *_, **__: self._invalidate())
         return urwid.TextCanvas(
             text=self._render_engine.rows, attr=self._render_engine.attributes, maxcol=x
         )

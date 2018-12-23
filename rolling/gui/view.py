@@ -49,7 +49,7 @@ class RootMenu(BaseMenu):
         world_map_render_engine = WorldMapRenderEngine(
             self._controller.kernel.world_map_source
         )
-        text_widget = WorldMapWidget(world_map_render_engine)
+        text_widget = WorldMapWidget(self._controller, world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
 
     def quit_callback(self, *args, **kwargs):
@@ -78,7 +78,7 @@ class View(urwid.WidgetWrap):
             )
 
         tile_map_render_engine = TileMapRenderEngine(tile_map_source)
-        tile_map_widget = TileMapWidget(tile_map_render_engine)
+        tile_map_widget = TileMapWidget(self._controller, tile_map_render_engine)
         return tile_map_widget
 
     def _create_right_menu_widget(self):
