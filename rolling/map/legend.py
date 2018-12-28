@@ -33,7 +33,7 @@ class MapLegend(object):
         except KeyError:
             raise TileTypeNotFound('Tile type not found for str "{}"'.format(key))
 
-    def get_str_with_type(self, key: typing.Type[WorldMapTileType]) -> str:
+    def get_str_with_type(self, key: typing.Type[MapTileType]) -> str:
         try:
             return self._type_to_str[key]
         except KeyError:

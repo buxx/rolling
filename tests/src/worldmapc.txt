@@ -1,0 +1,10 @@
+::LEGEND
+~ SEA
+^ MOUNTAIN
+, BEACH
+. PLAIN
+::GEO
+~~~~~
+~^.,~
+~,,,~
+~~~~~
