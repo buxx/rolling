@@ -164,8 +164,19 @@ class MapRenderEngine(object):
             last_seen_char = None
             self._attributes.append([])
 
-            for char in row:
+            for col_i, char in enumerate(row):
                 if last_seen_char != char:
+                    # First try with objects
+                    try:
+                        # FIXME BS 2018-12-27: Must select currently displayed object
+                        obj = self._display_objects_manager.objects_by_position[(row_i, col_i-left_void)][0]
+                        self._attributes[row_i].append(
+                            (obj.palette_id, len(obj.char.encode()))
+                        )
+                        continue
+                    except KeyError:
+                        pass
+
                     try:
                         # FIXME BS 2018-12-23: it can be display object
                         tile_type = self._world_map_source.legend.get_type_with_str(
@@ -175,7 +186,7 @@ class MapRenderEngine(object):
                             (tile_type.get_full_id(), len(char.encode()))
                         )
                     except TileTypeNotFound:
-                        self._attributes[row_i].append((None, 1))
+                        self._attributes[row_i].append((None, len(char.encode())))
                 else:
                     self._attributes[row_i][-1] = (
                         self._attributes[row_i][-1][0],

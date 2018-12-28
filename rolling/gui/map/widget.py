@@ -4,7 +4,7 @@ import typing
 import urwid
 from urwid import BOX
 
-from rolling.gui.map.object import DisplayObject
+from rolling.gui.map.object import Character
 from rolling.gui.map.render import MapRenderEngine
 
 if typing.TYPE_CHECKING:
@@ -21,10 +21,10 @@ class MapWidget(urwid.Widget):
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
+        # FIXME: BS 2018-12-28: currently hardcoded for test
         self._display_objects = [
-            DisplayObject(
-                self._render_engine._world_map_source.geography.width // 2,
-                self._render_engine._world_map_source.geography.height // 2,
+            Character(
+                8, 8,
             )
         ]
 

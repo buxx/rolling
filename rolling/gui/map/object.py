@@ -2,11 +2,17 @@
 import time
 import typing
 
+from rolling.gui.palette import PALETTE_CHARACTER
+
 
 class DisplayObject(object):
     def __init__(self, x: int, y: int) -> None:
         self._x = x
         self._y = y
+
+    @property
+    def palette_id(self) -> str:
+        raise NotImplementedError()
 
     @property
     def x(self) -> int:
@@ -18,7 +24,17 @@ class DisplayObject(object):
 
     @property
     def char(self) -> str:
-        return "X"
+        raise NotImplementedError()
+
+
+class Character(DisplayObject):
+    @property
+    def palette_id(self) -> str:
+        return PALETTE_CHARACTER
+
+    @property
+    def char(self) -> str:
+        return "ጰ"
 
 
 class DisplayObjectManager(object):
@@ -29,6 +45,12 @@ class DisplayObjectManager(object):
         self._objects_by_position: typing.Dict[
             typing.Tuple[int, int], typing.List[DisplayObject]
         ] = {}
+
+    @property
+    def objects_by_position(self) -> typing.Dict[
+        typing.Tuple[int, int], typing.List[DisplayObject]
+    ]:
+        return self._objects_by_position
 
     @property
     def display_objects(self):
