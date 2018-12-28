@@ -27,8 +27,7 @@ class Controller(object):
 
     def main(self) -> None:
         self._loop = urwid.MainLoop(
-            self._view,
-            palette=self._palette_generator.create_palette(),
+            self._view, palette=self._palette_generator.create_palette()
         )
         self._loop.screen.set_terminal_properties(colors=256)
         self._loop.run()

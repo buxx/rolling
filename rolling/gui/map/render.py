@@ -169,7 +169,9 @@ class MapRenderEngine(object):
                     # First try with objects
                     try:
                         # FIXME BS 2018-12-27: Must select currently displayed object
-                        obj = self._display_objects_manager.objects_by_position[(row_i, col_i-left_void)][0]
+                        obj = self._display_objects_manager.objects_by_position[
+                            (row_i, col_i - left_void)
+                        ][0]
                         self._attributes[row_i].append(
                             (obj.palette_id, len(obj.char.encode()))
                         )

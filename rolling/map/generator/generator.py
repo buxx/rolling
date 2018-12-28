@@ -3,9 +3,9 @@ import typing
 
 from rolling.exception import RollingError
 from rolling.gui.kernel import Kernel
-from rolling.map.source import WorldMapSource, TileMapSource
+from rolling.map.source import TileMapSource
+from rolling.map.source import WorldMapSource
 from rolling.map.type.world import WorldMapTileType
-
 
 if typing.TYPE_CHECKING:
     from rolling.map.generator.filler import TileMapFiller
@@ -15,7 +15,7 @@ class TileMapGenerator(object):
     def __init__(self, kernel: Kernel, filler: "TileMapFiller") -> None:
         self._kernel = kernel
         self._filler = filler
-        self._current_raw_source = ''
+        self._current_raw_source = ""
 
     @property
     def kernel(self) -> Kernel:
@@ -39,12 +39,13 @@ class TileMapGenerator(object):
 
         # Must be odd
         if not width % 2 or not height % 2:
-            raise RollingError("Width and height must be odd: given values are {}x{}".format(
-                width,
-                height,
-            ))
+            raise RollingError(
+                "Width and height must be odd: given values are {}x{}".format(
+                    width, height
+                )
+            )
 
-        self._current_raw_source = '::GEO\n'
+        self._current_raw_source = "::GEO\n"
         part_len = width // 3
         top_void_part = 0, part_len - 1
         bottom_void_part = height - part_len, height - 1
@@ -69,7 +70,7 @@ class TileMapGenerator(object):
                 # Fill with empty
                 # TODO BS 2018-12-28: Idea can be fill other map tiles
                 if col_i <= left_void_part[1] or col_i >= right_void_part[0]:
-                    self._current_raw_source += ' '  # FIXME fom type
+                    self._current_raw_source += " "  # FIXME fom type
                 else:
                     self._current_raw_source += self._filler.get_char(self)
 

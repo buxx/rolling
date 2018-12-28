@@ -26,7 +26,8 @@ class TestTileMapGenerator(object):
         assert 11 == tile_map_source.geography.width
         assert 11 == tile_map_source.geography.height
 
-        assert """::GEO
+        assert (
+            """::GEO
    ⡩⡩⡩⡩⡩   
   ⡩⡩⡩⡩⡩⡩⡩  
  ⡩⡩⡩⡩⡩⡩⡩⡩⡩ 
@@ -38,5 +39,6 @@ class TestTileMapGenerator(object):
  ⡩⡩⡩⡩⡩⡩⡩⡩⡩ 
   ⡩⡩⡩⡩⡩⡩⡩  
    ⡩⡩⡩⡩⡩   
-""" == generator._current_raw_source
-
+"""
+            == generator._current_raw_source
+        )

@@ -3,7 +3,6 @@ import typing
 
 from rolling.gui.kernel import Kernel
 
-
 PALETTE_CHARACTER = "CHARACTER"
 
 
@@ -12,9 +11,7 @@ class PaletteGenerator(object):
         self._kernel = kernel
 
     def create_palette(self) -> typing.List[typing.Tuple[str, str, str, str, str, str]]:
-        palette = [
-            (PALETTE_CHARACTER, '', '', '', 'light blue,bold', ''),
-        ]
+        palette = [(PALETTE_CHARACTER, "", "", "", "light blue,bold", "")]
         source_types = list(
             self._kernel.world_map_source.legend.get_all_types()
         ) + list(self._kernel.tile_map_legend.get_all_types())

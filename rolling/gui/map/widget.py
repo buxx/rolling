@@ -22,11 +22,7 @@ class MapWidget(urwid.Widget):
         self._horizontal_offset = 0
         self._vertical_offset = 0
         # FIXME: BS 2018-12-28: currently hardcoded for test
-        self._display_objects = [
-            Character(
-                8, 8,
-            )
-        ]
+        self._display_objects = [Character(8, 8)]
 
     def render(self, size, focus=False):
         x, y = size

@@ -1,6 +1,6 @@
 # coding: utf-8
-import typing
 import abc
+import typing
 
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.type.tile import TileMapTileType
@@ -17,4 +17,6 @@ class DummyTileMapFiller(TileMapFiller):
         self._tile_type = tile_type
 
     def get_char(self, tile_map_generator: TileMapGenerator) -> str:
-        return tile_map_generator.kernel.tile_map_legend.get_str_with_type(self._tile_type)
+        return tile_map_generator.kernel.tile_map_legend.get_str_with_type(
+            self._tile_type
+        )

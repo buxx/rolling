@@ -47,9 +47,9 @@ class DisplayObjectManager(object):
         ] = {}
 
     @property
-    def objects_by_position(self) -> typing.Dict[
-        typing.Tuple[int, int], typing.List[DisplayObject]
-    ]:
+    def objects_by_position(
+        self
+    ) -> typing.Dict[typing.Tuple[int, int], typing.List[DisplayObject]]:
         return self._objects_by_position
 
     @property
