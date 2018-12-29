@@ -3,10 +3,12 @@ import typing
 
 from rolling.exception import RollingError
 from rolling.gui.kernel import Kernel
+from rolling.map.source import TileMap
 from rolling.map.source import TileMapSource
+from rolling.map.source import WorldMapSource
 
 if typing.TYPE_CHECKING:
-    from rolling.map.generator.filler import TileMapFiller
+    from rolling.map.generator.filler import TileMapFiller, FillerFactory
 
 
 class TileMapGenerator(object):
@@ -23,14 +25,14 @@ class TileMapGenerator(object):
         self,
         width: int,
         height: typing.Optional[int] = None,
-        north_west_map: typing.Optional[TileMapSource]=None,
-        north_map: typing.Optional[TileMapSource]=None,
-        north_est_map: typing.Optional[TileMapSource]=None,
-        west_map: typing.Optional[TileMapSource]=None,
-        est_map: typing.Optional[TileMapSource]=None,
-        south_west_map: typing.Optional[TileMapSource]=None,
-        south_map: typing.Optional[TileMapSource]=None,
-        south_est_map: typing.Optional[TileMapSource]=None,
+        north_west_map: typing.Optional[TileMapSource] = None,
+        north_map: typing.Optional[TileMapSource] = None,
+        north_est_map: typing.Optional[TileMapSource] = None,
+        west_map: typing.Optional[TileMapSource] = None,
+        est_map: typing.Optional[TileMapSource] = None,
+        south_west_map: typing.Optional[TileMapSource] = None,
+        south_map: typing.Optional[TileMapSource] = None,
+        south_est_map: typing.Optional[TileMapSource] = None,
     ) -> TileMapSource:
         height = height or width
 
@@ -77,8 +79,35 @@ class TileMapGenerator(object):
 
 
 class FromWorldMapGenerator(object):
-    def __init__(self, world_map_source: TileMapSource) -> None:
+    def __init__(
+        self,
+        kernel: Kernel,
+        world_map_source: WorldMapSource,
+        filler_factory: "FillerFactory",
+        default_map_width: int,
+        default_map_height: typing.Optional[int] = None,
+    ) -> None:
+        self._kernel = kernel
         self._world_map_source = world_map_source
+        self._filler_factory = filler_factory
+        self._default_map_width = default_map_width
+        self._default_map_height = default_map_height
 
-    def generate_types(self) -> typing.List[TileMapSource]:
-        return []
+    def generate(self) -> typing.List[TileMap]:
+        tile_maps: typing.List[TileMap] = []
+
+        for row_i, row in enumerate(self._world_map_source.geography.rows):
+            for col_i, world_map_tile_type in enumerate(row):
+
+                filler = self._filler_factory.create(
+                    world_map_tile_type, row_i, col_i, self._world_map_source
+                )
+                tile_map_generator = TileMapGenerator(self._kernel, filler)
+                tile_map_source = tile_map_generator.generate(
+                    # TODO BS 2018-12-29: Give around tile map sources
+                    self._default_map_width,
+                    self._default_map_height,
+                )
+                tile_maps.append(TileMap(row_i, col_i, tile_map_source))
+
+        return tile_maps

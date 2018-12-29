@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+import dataclasses
 from rolling.map.geography import TileMapGeography
 from rolling.map.geography import WorldMapGeography
 from rolling.map.legend import TileMapLegend
@@ -100,3 +101,10 @@ class TileMapSource(MapSource):
         return TileMapGeography(
             self.legend, geography_lines, missing_right_tile_str=" "
         )
+
+
+@dataclasses.dataclass(frozen=True)
+class TileMap(object):
+    x: int
+    y: int
+    source: TileMapSource

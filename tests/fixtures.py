@@ -35,8 +35,5 @@ def worldmapc_kernel(worldmapsourcec_txt) -> Kernel:
 
 @pytest.fixture
 def worldmapc_full_sea_tile_map_source(worldmapc_kernel: Kernel) -> TileMapSource:
-    generator = TileMapGenerator(
-        worldmapc_kernel,
-        DummyTileMapFiller(SeaWater),
-    )
+    generator = TileMapGenerator(worldmapc_kernel, DummyTileMapFiller(SeaWater))
     return generator.generate(11)
