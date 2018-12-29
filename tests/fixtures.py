@@ -4,6 +4,10 @@ import os
 import pytest
 
 from rolling.gui.kernel import Kernel
+from rolling.map.generator.filler import DummyTileMapFiller
+from rolling.map.generator.generator import TileMapGenerator
+from rolling.map.source import TileMapSource
+from rolling.map.type.tile import SeaWater
 
 
 @pytest.fixture
@@ -27,3 +31,12 @@ def worldmapsourcec_txt() -> str:
 @pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt) -> Kernel:
     return Kernel(worldmapsourcec_txt)
+
+
+@pytest.fixture
+def worldmapc_full_sea_tile_map_source(worldmapc_kernel: Kernel) -> TileMapSource:
+    generator = TileMapGenerator(
+        worldmapc_kernel,
+        DummyTileMapFiller(SeaWater),
+    )
+    return generator.generate(11)

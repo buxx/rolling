@@ -4,8 +4,6 @@ import typing
 from rolling.exception import RollingError
 from rolling.gui.kernel import Kernel
 from rolling.map.source import TileMapSource
-from rolling.map.source import WorldMapSource
-from rolling.map.type.world import WorldMapTileType
 
 if typing.TYPE_CHECKING:
     from rolling.map.generator.filler import TileMapFiller
@@ -23,17 +21,16 @@ class TileMapGenerator(object):
 
     def generate(
         self,
-        north_west_type: typing.Type[WorldMapTileType],
-        north_type: typing.Type[WorldMapTileType],
-        north_est_type: typing.Type[WorldMapTileType],
-        west_type: typing.Type[WorldMapTileType],
-        est_type: typing.Type[WorldMapTileType],
-        south_west_type: typing.Type[WorldMapTileType],
-        south_type: typing.Type[WorldMapTileType],
-        south_est_type: typing.Type[WorldMapTileType],
-        generate_type: typing.Type[WorldMapTileType],
         width: int,
         height: typing.Optional[int] = None,
+        north_west_map: typing.Optional[TileMapSource]=None,
+        north_map: typing.Optional[TileMapSource]=None,
+        north_est_map: typing.Optional[TileMapSource]=None,
+        west_map: typing.Optional[TileMapSource]=None,
+        est_map: typing.Optional[TileMapSource]=None,
+        south_west_map: typing.Optional[TileMapSource]=None,
+        south_map: typing.Optional[TileMapSource]=None,
+        south_est_map: typing.Optional[TileMapSource]=None,
     ) -> TileMapSource:
         height = height or width
 
@@ -80,7 +77,7 @@ class TileMapGenerator(object):
 
 
 class FromWorldMapGenerator(object):
-    def __init__(self, world_map_source: WorldMapSource) -> None:
+    def __init__(self, world_map_source: TileMapSource) -> None:
         self._world_map_source = world_map_source
 
     def generate_types(self) -> typing.List[TileMapSource]:
