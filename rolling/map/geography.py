@@ -14,7 +14,7 @@ class MapGeography(object):
         raw_lines: typing.List[str],
         missing_right_tile_str: typing.Optional[str] = None,
     ) -> None:
-        self._rows: typing.List[typing.List[WorldMapTileType]] = []
+        self._rows: typing.List[typing.List[typing.Type[WorldMapTileType]]] = []
 
         length = self._get_max_length(raw_lines)
         for raw_line in raw_lines:
@@ -45,7 +45,7 @@ class MapGeography(object):
         return max_length
 
     @property
-    def rows(self) -> typing.List[typing.List[WorldMapTileType]]:
+    def rows(self) -> typing.List[typing.List[typing.Type[WorldMapTileType]]]:
         return self._rows
 
     @property

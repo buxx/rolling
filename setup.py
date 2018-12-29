@@ -17,5 +17,6 @@ setup(
     entry_points={"console_scripts": [
         "rolling=rolling.gui.run:main",
         "rolling-server=rolling.server.run:main",
+        "rolling-generate=rolling.map.generator.run:main",
     ]},
 )

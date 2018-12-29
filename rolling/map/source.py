@@ -105,6 +105,6 @@ class TileMapSource(MapSource):
 
 @dataclasses.dataclass(frozen=True)
 class TileMap(object):
-    x: int
-    y: int
+    row_i: int
+    col_i: int
     source: TileMapSource
