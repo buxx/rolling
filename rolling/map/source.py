@@ -9,7 +9,7 @@ from rolling.map.legend import WorldMapLegend
 from rolling.map.type.world import WorldMapTileType
 
 if typing.TYPE_CHECKING:
-    from rolling.gui.kernel import Kernel
+    from rolling.kernel import Kernel
 
 BLOCK_LEGEND_NAME = "LEGEND"
 BLOCK_GEOGRAPHY_NAME = "GEO"

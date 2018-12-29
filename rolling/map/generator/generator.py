@@ -2,7 +2,7 @@
 import typing
 
 from rolling.exception import RollingError
-from rolling.gui.kernel import Kernel
+from rolling.kernel import Kernel
 from rolling.map.source import TileMap
 from rolling.map.source import TileMapSource
 from rolling.map.source import WorldMapSource

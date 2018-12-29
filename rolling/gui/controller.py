@@ -4,9 +4,9 @@ import typing
 import urwid
 
 from rolling.client.http.client import HttpClient
-from rolling.gui.kernel import Kernel
 from rolling.gui.palette import PaletteGenerator
 from rolling.gui.view import View
+from rolling.kernel import Kernel
 
 
 class Controller(object):

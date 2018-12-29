@@ -1,7 +1,7 @@
 # coding: utf-8
 import typing
 
-from rolling.gui.kernel import Kernel
+from rolling.kernel import Kernel
 
 PALETTE_CHARACTER = "CHARACTER"
 

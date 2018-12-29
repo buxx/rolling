@@ -2,7 +2,7 @@
 import argparse
 import os
 
-from rolling.gui.kernel import Kernel
+from rolling.kernel import Kernel
 from rolling.map.generator.filler import DummyFillerFactory
 from rolling.map.generator.generator import FromWorldMapGenerator
 from rolling.map.source import WorldMapSource
