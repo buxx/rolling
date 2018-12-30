@@ -4,6 +4,7 @@ import ntpath
 import os
 import typing
 
+from rolling.log import kernel_logger
 from rolling.map.legend import TileMapLegend
 from rolling.map.source import TileMap
 from rolling.map.source import TileMapSource
@@ -27,6 +28,8 @@ class Kernel(object):
                 row_i, col_i = map(
                     int, tile_map_source_file_name.replace(".txt", "").split("-")
                 )
+                kernel_logger.debug("Load tile map \"{}\"".format(tile_map_source_file_name))
+
                 with open(tile_map_source_file_path, "r") as f:
                     tile_map_source_raw = f.read()
 
