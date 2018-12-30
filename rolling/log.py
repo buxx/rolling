@@ -13,7 +13,7 @@ kernel_logger = logging.getLogger(KERNEL_LOGGER_NAME)
 
 
 _stdout_handler = logging.StreamHandler(sys.stdout)
-_file_handler = logging.FileHandler('logs.txt')
+_file_handler = logging.FileHandler("logs.txt")
 _formatter = logging.Formatter("%(asctime)s|%(name)s|%(levelname)s: %(message)s")
 _stdout_handler.setFormatter(_formatter)
 _file_handler.setFormatter(_formatter)

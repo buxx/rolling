@@ -5,7 +5,8 @@ import logging
 from rolling.client.http.client import HttpClient
 from rolling.gui.controller import Controller
 from rolling.kernel import Kernel
-from rolling.log import configure_logging, gui_logger
+from rolling.log import configure_logging
+from rolling.log import gui_logger
 
 
 def run(args: argparse.Namespace) -> None:
