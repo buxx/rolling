@@ -1,27 +1,46 @@
 # coding: utf-8
 import argparse
+import logging
 
 from aiohttp import web
 
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
 from rolling.kernel import Kernel
-from rolling.map.source import WorldMapSource
+from rolling.log import configure_logging, server_logger
 from rolling.server.application import get_application
 from rolling.server.extension import hapic
 
 
 def run(args: argparse.Namespace) -> None:
+    # Configure logging
+    if args.debug:
+        configure_logging(logging.DEBUG)
+    else:
+        configure_logging(logging.INFO)
+
+    server_logger.info("Read world map source file \"{}\"".format(
+        args.world_map_source
+    ))
     with open(args.world_map_source, "r") as f:
         world_map_source_raw = f.read()
 
+    server_logger.info("Start kernel with tile maps folder \"{}\"".format(
+        args.tile_maps_folder
+    ))
     kernel = Kernel(world_map_source_raw, tile_maps_folder=args.tile_maps_folder)
+
+    server_logger.info("Create web application")
     app = get_application(kernel)
 
     # Configure hapic
+    server_logger.info("Configure web api")
     hapic.set_processor_class(SerpycoProcessor)
     hapic.set_context(AiohttpContext(app))
 
+    server_logger.info("Start server listening on {}:{}".format(
+        args.host, args.port
+    ))
     web.run_app(app, host=args.host, port=args.port)
 
 
@@ -35,6 +54,7 @@ def main() -> None:
     )
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     args = parser.parse_args()
     run(args)
