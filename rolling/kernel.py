@@ -67,11 +67,11 @@ class Kernel(object):
                 {
                     " ": "NOTHING",
                     "⡩": "SAND",
-                    "⁘": "SHORT GRASS",
-                    "ൖ": "DRY BUSH",
+                    "⁘": "SHORT_GRASS",
+                    "ൖ": "DRY_BUSH",
                     "#": "ROCK",
-                    "⑉": "ROCKY GROUND",
-                    "~": "SEA WATER",
+                    "⑉": "ROCKY_GROUND",
+                    "~": "SEA_WATER",
                 },
                 TileMapTileType,
             )

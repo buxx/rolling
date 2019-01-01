@@ -35,17 +35,17 @@ class Sand(TileMapTileType):
 
 
 class ShortGrass(TileMapTileType):
-    id = "SHORT GRASS"
+    id = "SHORT_GRASS"
     foreground_high_color = "#080"
 
 
 class RockyGround(TileMapTileType):
-    id = "ROCKY GROUND"
+    id = "ROCKY_GROUND"
     foreground_high_color = "g31"
 
 
 class DryBush(TileMapTileType):
-    id = "DRY BUSH"
+    id = "DRY_BUSH"
     foreground_high_color = "#860"
 
 
@@ -55,6 +55,6 @@ class Rock(TileMapTileType):
 
 
 class SeaWater(TileMapTileType):
-    id = "SEA WATER"
+    id = "SEA_WATER"
     foreground_high_color = "#06f"
     background_high_color = "#006"
