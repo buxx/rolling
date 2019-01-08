@@ -4,6 +4,7 @@ import typing
 from rolling.kernel import Kernel
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.tile import TileMapTileType
+from rolling.model.tile import ZoneMapModel
 from rolling.model.tile import ZoneTileTypeModel
 
 
@@ -29,3 +30,8 @@ class TileLib(object):
             )
 
         return tiles
+
+    def get_zone(self, row_i: int, col_i: int) -> ZoneMapModel:
+        return ZoneMapModel(
+            raw_source=self._kernel.get_tile_map(row_i, col_i).source.raw_source
+        )

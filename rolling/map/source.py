@@ -88,7 +88,12 @@ class WorldMapSource(MapSource):
 class TileMapSource(MapSource):
     def __init__(self, kernel: "Kernel", raw_source: str) -> None:
         super().__init__(kernel)
+        self._raw_source = raw_source
         self._geography = self._create_geography(raw_source)
+
+    @property
+    def raw_source(self) -> str:
+        return self._raw_source
 
     @property
     def legend(self) -> TileMapLegend:

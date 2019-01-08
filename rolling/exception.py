@@ -15,3 +15,7 @@ class TileTypeNotFound(RollingError):
 
 class NoDefaultTileType(RollingError):
     pass
+
+
+class NoZoneMapError(RollingError):
+    pass

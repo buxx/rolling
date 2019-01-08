@@ -9,6 +9,7 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 
+from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
 from rolling.log import kernel_logger
 from rolling.map.legend import TileMapLegend
@@ -91,6 +92,12 @@ class Kernel(object):
             raise RollingError("server_db_session is not created yet")
 
         return self._server_db_session
+
+    def get_tile_map(self, row_i: int, col_i: int) -> TileMap:
+        try:
+            return self._tile_maps_by_position[(row_i, col_i)]
+        except KeyError:
+            raise NoZoneMapError("No zone map for {},{} position".format(row_i, col_i))
 
     def init_client_db_session(self) -> None:
         kernel_logger.info('Initialize database connection to "client.db"')
