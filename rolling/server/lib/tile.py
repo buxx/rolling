@@ -11,8 +11,6 @@ class TileLib(object):
     def __init__(self, kernel: Kernel) -> None:
         self._kernel = kernel
 
-    # FIXME BS 2019-01-01: Write simple test to test this function is working (all tile info
-    # up to date, overwise it make errors)
     def get_all_tiles(self) -> typing.List[ZoneTileModel]:
         tiles: typing.List[ZoneTileModel] = []
 
