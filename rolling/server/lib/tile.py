@@ -20,6 +20,11 @@ class TileLib(object):
                     id=tile_id,
                     char=self._kernel.tile_map_legend.get_str_with_type(tile_class),
                     traversable=traversable_properties[tile_class],
+                    foreground_color=tile_class.foreground_color,
+                    background_color=tile_class.background_color,
+                    mono=tile_class.mono,
+                    foreground_high_color=tile_class.foreground_high_color,
+                    background_high_color=tile_class.background_high_color,
                 )
             )
 
