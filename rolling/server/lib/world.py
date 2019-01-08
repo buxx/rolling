@@ -3,7 +3,7 @@ import typing
 
 from rolling.exception import NoDefaultTileType
 from rolling.kernel import Kernel
-from rolling.model.tile import WorldMapTileTypeModel
+from rolling.model.tile import WorldTileTypeModel
 from rolling.model.world import WorldMapLegendModel
 from rolling.model.world import WorldMapModel
 
@@ -17,7 +17,7 @@ class WorldLib(object):
             legend_default_type = (
                 self._kernel.world_map_source.legend.get_default_type()
             )
-            default_type = WorldMapTileTypeModel(
+            default_type = WorldTileTypeModel(
                 id=legend_default_type.id,
                 foreground_color=legend_default_type.foreground_color,
                 background_color=legend_default_type.background_color,
@@ -28,10 +28,10 @@ class WorldLib(object):
         except NoDefaultTileType:
             default_type = None
 
-        all_types: typing.List[WorldMapTileTypeModel] = []
+        all_types: typing.List[WorldTileTypeModel] = []
         for legend_type in self._kernel.world_map_source.legend.get_all_types():
             all_types.append(
-                WorldMapTileTypeModel(
+                WorldTileTypeModel(
                     id=legend_type.id,
                     foreground_color=legend_type.foreground_color,
                     background_color=legend_type.background_color,

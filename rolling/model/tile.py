@@ -16,12 +16,12 @@ class TileTypeModel(object):
 
 
 @dataclasses.dataclass(frozen=True)
-class WorldMapTileTypeModel(TileTypeModel):
+class WorldTileTypeModel(TileTypeModel):
     pass
 
 
 @dataclasses.dataclass(frozen=True)
-class ZoneTileModel(object):
+class ZoneTileTypeModel(object):
     id: str
     char: str
     traversable: typing.Optional[typing.Dict[TransportType, bool]]
