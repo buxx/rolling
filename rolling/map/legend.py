@@ -52,5 +52,5 @@ class WorldMapLegend(MapLegend):
     pass
 
 
-class TileMapLegend(MapLegend):
+class ZoneMapLegend(MapLegend):
     pass

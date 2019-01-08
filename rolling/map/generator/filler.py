@@ -4,11 +4,6 @@ import typing
 
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
-from rolling.map.type.tile import RockyGround
-from rolling.map.type.tile import Sand
-from rolling.map.type.tile import SeaWater
-from rolling.map.type.tile import ShortGrass
-from rolling.map.type.tile import TileMapTileType
 from rolling.map.type.world import Beach
 from rolling.map.type.world import Hill
 from rolling.map.type.world import Jungle
@@ -16,6 +11,11 @@ from rolling.map.type.world import Mountain
 from rolling.map.type.world import Plain
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
+from rolling.map.type.zone import RockyGround
+from rolling.map.type.zone import Sand
+from rolling.map.type.zone import SeaWater
+from rolling.map.type.zone import ShortGrass
+from rolling.map.type.zone import ZoneMapTileType
 
 
 class TileMapFiller(metaclass=abc.ABCMeta):
@@ -25,7 +25,7 @@ class TileMapFiller(metaclass=abc.ABCMeta):
 
 
 class DummyTileMapFiller(TileMapFiller):
-    def __init__(self, tile_type: typing.Type[TileMapTileType]) -> None:
+    def __init__(self, tile_type: typing.Type[ZoneMapTileType]) -> None:
         self._tile_type = tile_type
 
     def get_char(self, tile_map_generator: TileMapGenerator) -> str:

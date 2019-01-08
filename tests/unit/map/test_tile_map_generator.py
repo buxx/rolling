@@ -5,7 +5,7 @@ from rolling.map.generator.filler import DummyTileMapFiller
 from rolling.map.generator.generator import FromWorldMapGenerator
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
-from rolling.map.type.tile import Sand
+from rolling.map.type.zone import Sand
 
 
 class TestTileMapGenerator(object):

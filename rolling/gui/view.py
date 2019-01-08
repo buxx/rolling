@@ -10,8 +10,8 @@ from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
-from rolling.map.source import TileMapSource
 from rolling.map.source import WorldMapSource
+from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -73,7 +73,7 @@ class View(urwid.WidgetWrap):
 
     def _create_main_content_widget(self):
         with open("tests/src/tilemapa.txt") as tile_map_file:
-            tile_map_source = TileMapSource(
+            tile_map_source = ZoneMapSource(
                 self._controller.kernel, tile_map_file.read()
             )
 

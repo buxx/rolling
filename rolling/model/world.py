@@ -4,7 +4,7 @@ import typing
 from serpyco import nested_field
 
 import dataclasses
-from rolling.model.tile import WorldTileTypeModel
+from rolling.model.zone import WorldTileTypeModel
 
 
 @dataclasses.dataclass

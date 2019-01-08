@@ -24,7 +24,6 @@ class WorldTileTypeModel(TileTypeModel):
 
 @dataclasses.dataclass(frozen=True)
 class ZoneTileTypeModel(TileTypeModel):
-    id: str
     char: str
     traversable: typing.Optional[typing.Dict[TransportType, bool]]
 

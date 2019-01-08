@@ -3,19 +3,19 @@ import typing
 
 from rolling.kernel import Kernel
 from rolling.map.type.property.traversable import traversable_properties
-from rolling.map.type.tile import TileMapTileType
-from rolling.model.tile import ZoneMapModel
-from rolling.model.tile import ZoneTileTypeModel
+from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.zone import ZoneMapModel
+from rolling.model.zone import ZoneTileTypeModel
 
 
-class TileLib(object):
+class ZoneLib(object):
     def __init__(self, kernel: Kernel) -> None:
         self._kernel = kernel
 
     def get_all_tiles(self) -> typing.List[ZoneTileTypeModel]:
         tiles: typing.List[ZoneTileTypeModel] = []
 
-        for tile_id, tile_class in TileMapTileType.get_all().items():
+        for tile_id, tile_class in ZoneMapTileType.get_all().items():
             tiles.append(
                 ZoneTileTypeModel(
                     id=tile_id,

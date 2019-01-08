@@ -3,8 +3,8 @@ import typing
 
 from rolling.exception import SourceLoadError
 from rolling.map.legend import MapLegend
-from rolling.map.type.tile import TileMapTileType
 from rolling.map.type.world import WorldMapTileType
+from rolling.map.type.zone import ZoneMapTileType
 
 
 class MapGeography(object):
@@ -61,5 +61,5 @@ class WorldMapGeography(MapGeography):
     pass
 
 
-class TileMapGeography(MapGeography):
+class ZoneMapGeography(MapGeography):
     pass

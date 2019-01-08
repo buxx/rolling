@@ -4,12 +4,12 @@ import typing
 from rolling.map.type.base import MapTileType
 
 
-class TileMapTileType(MapTileType):
-    _list_cache: typing.Dict[str, typing.Type["TileMapTileType"]] = None
+class ZoneMapTileType(MapTileType):
+    _list_cache: typing.Dict[str, typing.Type["ZoneMapTileType"]] = None
     _full_id_pattern = "TILE__{}"
 
     @classmethod
-    def get_all(cls) -> typing.Dict[str, typing.Type["TileMapTileType"]]:
+    def get_all(cls) -> typing.Dict[str, typing.Type["ZoneMapTileType"]]:
         if cls._list_cache is None:
             # TODO BS 2018-12-29: Replace by auto class discover
             cls._list_cache = {
@@ -25,36 +25,36 @@ class TileMapTileType(MapTileType):
         return cls._list_cache
 
 
-class Nothing(TileMapTileType):
+class Nothing(ZoneMapTileType):
     id = "NOTHING"
 
 
-class Sand(TileMapTileType):
+class Sand(ZoneMapTileType):
     id = "SAND"
     foreground_high_color = "#fa0"
 
 
-class ShortGrass(TileMapTileType):
+class ShortGrass(ZoneMapTileType):
     id = "SHORT_GRASS"
     foreground_high_color = "#080"
 
 
-class RockyGround(TileMapTileType):
+class RockyGround(ZoneMapTileType):
     id = "ROCKY_GROUND"
     foreground_high_color = "g31"
 
 
-class DryBush(TileMapTileType):
+class DryBush(ZoneMapTileType):
     id = "DRY_BUSH"
     foreground_high_color = "#860"
 
 
-class Rock(TileMapTileType):
+class Rock(ZoneMapTileType):
     id = "ROCK"
     foreground_high_color = "g35"
 
 
-class SeaWater(TileMapTileType):
+class SeaWater(ZoneMapTileType):
     id = "SEA_WATER"
     foreground_high_color = "#06f"
     background_high_color = "#006"

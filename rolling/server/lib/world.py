@@ -3,9 +3,9 @@ import typing
 
 from rolling.exception import NoDefaultTileType
 from rolling.kernel import Kernel
-from rolling.model.tile import WorldTileTypeModel
 from rolling.model.world import WorldMapLegendModel
 from rolling.model.world import WorldMapModel
+from rolling.model.zone import WorldTileTypeModel
 
 
 class WorldLib(object):

@@ -9,18 +9,18 @@ from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
-from rolling.model.tile import GetZonePathModel
-from rolling.model.tile import ZoneMapModel
-from rolling.model.tile import ZoneTileTypeModel
+from rolling.model.zone import GetZonePathModel
+from rolling.model.zone import ZoneMapModel
+from rolling.model.zone import ZoneTileTypeModel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
-from rolling.server.lib.tile import TileLib
+from rolling.server.lib.zone import ZoneLib
 
 
-class TileController(BaseController):
+class ZoneController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
         super().__init__(kernel)
-        self._tile_lib = TileLib(self._kernel)
+        self._tile_lib = ZoneLib(self._kernel)
 
     @hapic.with_api_doc()
     @hapic.output_body(ZoneTileTypeModel, processor=SerpycoProcessor(many=True))
@@ -39,7 +39,7 @@ class TileController(BaseController):
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
-                web.get("/tiles", self.get_tiles),
-                web.get("/tiles/{row_i}/{col_i}", self.get_zone),
+                web.get("/zone/tiles", self.get_tiles),
+                web.get("/zone/{row_i}/{col_i}", self.get_zone),
             ]
         )

@@ -12,11 +12,11 @@ from sqlalchemy.orm import sessionmaker
 from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
 from rolling.log import kernel_logger
-from rolling.map.legend import TileMapLegend
-from rolling.map.source import TileMap
-from rolling.map.source import TileMapSource
+from rolling.map.legend import ZoneMapLegend
 from rolling.map.source import WorldMapSource
-from rolling.map.type.tile import TileMapTileType
+from rolling.map.source import ZoneMap
+from rolling.map.source import ZoneMapSource
+from rolling.map.type.zone import ZoneMapTileType
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
 
@@ -26,8 +26,8 @@ class Kernel(object):
         self, world_map_str: str, tile_maps_folder: typing.Optional[str] = None
     ) -> None:
         self._world_map_source = WorldMapSource(self, world_map_str)
-        self._tile_map_legend: typing.Optional[TileMapLegend] = None
-        self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], TileMap] = {}
+        self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
+        self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
 
         # Database stuffs
         self._client_db_session: typing.Optional[Session] = None
@@ -52,8 +52,8 @@ class Kernel(object):
                 with open(tile_map_source_file_path, "r") as f:
                     tile_map_source_raw = f.read()
 
-                self._tile_maps_by_position[(row_i, col_i)] = TileMap(
-                    row_i, col_i, TileMapSource(self, tile_map_source_raw)
+                self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
+                    row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
                 )
 
     @property
@@ -61,10 +61,10 @@ class Kernel(object):
         return self._world_map_source
 
     @property
-    def tile_map_legend(self) -> TileMapLegend:
+    def tile_map_legend(self) -> ZoneMapLegend:
         if self._tile_map_legend is None:
             # TODO BS 2018-12-20: Consider it can be an external source
-            self._tile_map_legend = TileMapLegend(
+            self._tile_map_legend = ZoneMapLegend(
                 {
                     " ": "NOTHING",
                     "⡩": "SAND",
@@ -74,7 +74,7 @@ class Kernel(object):
                     "⑉": "ROCKY_GROUND",
                     "~": "SEA_WATER",
                 },
-                TileMapTileType,
+                ZoneMapTileType,
             )
 
         return self._tile_map_legend
@@ -93,7 +93,7 @@ class Kernel(object):
 
         return self._server_db_session
 
-    def get_tile_map(self, row_i: int, col_i: int) -> TileMap:
+    def get_tile_map(self, row_i: int, col_i: int) -> ZoneMap:
         try:
             return self._tile_maps_by_position[(row_i, col_i)]
         except KeyError:

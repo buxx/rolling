@@ -3,9 +3,9 @@ import typing
 
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
-from rolling.map.source import TileMap
-from rolling.map.source import TileMapSource
 from rolling.map.source import WorldMapSource
+from rolling.map.source import ZoneMap
+from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.map.generator.filler import TileMapFiller, FillerFactory
@@ -25,15 +25,15 @@ class TileMapGenerator(object):
         self,
         width: int,
         height: typing.Optional[int] = None,
-        north_west_map: typing.Optional[TileMapSource] = None,
-        north_map: typing.Optional[TileMapSource] = None,
-        north_est_map: typing.Optional[TileMapSource] = None,
-        west_map: typing.Optional[TileMapSource] = None,
-        est_map: typing.Optional[TileMapSource] = None,
-        south_west_map: typing.Optional[TileMapSource] = None,
-        south_map: typing.Optional[TileMapSource] = None,
-        south_est_map: typing.Optional[TileMapSource] = None,
-    ) -> TileMapSource:
+        north_west_map: typing.Optional[ZoneMapSource] = None,
+        north_map: typing.Optional[ZoneMapSource] = None,
+        north_est_map: typing.Optional[ZoneMapSource] = None,
+        west_map: typing.Optional[ZoneMapSource] = None,
+        est_map: typing.Optional[ZoneMapSource] = None,
+        south_west_map: typing.Optional[ZoneMapSource] = None,
+        south_map: typing.Optional[ZoneMapSource] = None,
+        south_est_map: typing.Optional[ZoneMapSource] = None,
+    ) -> ZoneMapSource:
         height = height or width
 
         # Must be odd
@@ -75,7 +75,7 @@ class TileMapGenerator(object):
 
             self._current_raw_source += "\n"
 
-        return TileMapSource(self._kernel, self._current_raw_source)
+        return ZoneMapSource(self._kernel, self._current_raw_source)
 
 
 class FromWorldMapGenerator(object):
@@ -93,8 +93,8 @@ class FromWorldMapGenerator(object):
         self._default_map_width = default_map_width
         self._default_map_height = default_map_height
 
-    def generate(self) -> typing.List[TileMap]:
-        tile_maps: typing.List[TileMap] = []
+    def generate(self) -> typing.List[ZoneMap]:
+        tile_maps: typing.List[ZoneMap] = []
 
         for row_i, row in enumerate(self._world_map_source.geography.rows):
             for col_i, world_map_tile_type in enumerate(row):
@@ -108,6 +108,6 @@ class FromWorldMapGenerator(object):
                     self._default_map_width,
                     self._default_map_height,
                 )
-                tile_maps.append(TileMap(row_i, col_i, tile_map_source))
+                tile_maps.append(ZoneMap(row_i, col_i, tile_map_source))
 
         return tile_maps

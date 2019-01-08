@@ -2,10 +2,10 @@
 import typing
 
 import dataclasses
-from rolling.map.geography import TileMapGeography
 from rolling.map.geography import WorldMapGeography
-from rolling.map.legend import TileMapLegend
+from rolling.map.geography import ZoneMapGeography
 from rolling.map.legend import WorldMapLegend
+from rolling.map.legend import ZoneMapLegend
 from rolling.map.type.world import WorldMapTileType
 
 if typing.TYPE_CHECKING:
@@ -85,7 +85,7 @@ class WorldMapSource(MapSource):
         return WorldMapGeography(self._legend, geography_lines)
 
 
-class TileMapSource(MapSource):
+class ZoneMapSource(MapSource):
     def __init__(self, kernel: "Kernel", raw_source: str) -> None:
         super().__init__(kernel)
         self._raw_source = raw_source
@@ -96,25 +96,25 @@ class TileMapSource(MapSource):
         return self._raw_source
 
     @property
-    def legend(self) -> TileMapLegend:
+    def legend(self) -> ZoneMapLegend:
         return self._kernel.tile_map_legend
 
     @property
-    def geography(self) -> TileMapGeography:
+    def geography(self) -> ZoneMapGeography:
         return self._geography
 
-    def _create_geography(self, raw_source: str) -> TileMapGeography:
+    def _create_geography(self, raw_source: str) -> ZoneMapGeography:
         # TODO BS 2018-11-03: raise if not found
         geography_lines = self._get_blocks(
             raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False
         )[0]
-        return TileMapGeography(
+        return ZoneMapGeography(
             self.legend, geography_lines, missing_right_tile_str=" "
         )
 
 
 @dataclasses.dataclass(frozen=True)
-class TileMap(object):
+class ZoneMap(object):
     row_i: int
     col_i: int
-    source: TileMapSource
+    source: ZoneMapSource
