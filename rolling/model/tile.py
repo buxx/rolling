@@ -1,7 +1,7 @@
 # coding: utf-8
-import dataclasses
 import typing
 
+import dataclasses
 from rolling.model.meta import TransportType
 
 

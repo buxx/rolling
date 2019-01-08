@@ -4,8 +4,8 @@ import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
-from hapic.processor.serpyco import SerpycoProcessor
 
+from hapic.processor.serpyco import SerpycoProcessor
 from rolling.kernel import Kernel
 from rolling.model.tile import ZoneTileModel
 from rolling.server.controller.base import BaseController
@@ -24,6 +24,4 @@ class TileController(BaseController):
         return self._tile_lib.get_all_tiles()
 
     def bind(self, app: Application) -> None:
-        app.add_routes(
-            [web.get("/tiles", self.get_tiles)]
-        )
+        app.add_routes([web.get("/tiles", self.get_tiles)])

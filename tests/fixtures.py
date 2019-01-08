@@ -29,6 +29,11 @@ def worldmapsourcec_txt() -> str:
 
 
 @pytest.fixture
+def worldmapa_kernel(worldmapsourcea_txt) -> Kernel:
+    return Kernel(worldmapsourcea_txt)
+
+
+@pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt) -> Kernel:
     return Kernel(worldmapsourcec_txt)
 
