@@ -5,7 +5,7 @@ import dataclasses
 from rolling.model.meta import TransportType
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class TileTypeModel(object):
     id: str
     foreground_color: str
@@ -15,12 +15,12 @@ class TileTypeModel(object):
     background_high_color: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class WorldMapTileTypeModel(TileTypeModel):
     pass
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ZoneTileModel(object):
     id: str
     char: str

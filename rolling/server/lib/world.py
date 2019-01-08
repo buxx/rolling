@@ -5,6 +5,7 @@ from rolling.exception import NoDefaultTileType
 from rolling.kernel import Kernel
 from rolling.model.tile import WorldMapTileTypeModel
 from rolling.model.world import WorldMapLegendModel
+from rolling.model.world import WorldMapModel
 
 
 class WorldLib(object):
@@ -42,3 +43,6 @@ class WorldLib(object):
 
         legend = WorldMapLegendModel(default_type=default_type, all_types=all_types)
         return legend
+
+    def get_world(self) -> WorldMapModel:
+        return WorldMapModel(raw_source=self._kernel.world_map_source.raw_source)
