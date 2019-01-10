@@ -12,5 +12,5 @@ class CharacterDocument(Document):
     name = Column(String(255))
     world_col_i = Column(Integer, nullable=True)
     world_row_i = Column(Integer, nullable=True)
-    tile_col_i = Column(Integer, nullable=True)
-    tile_row_i = Column(Integer, nullable=True)
+    zone_col_i = Column(Integer, nullable=True)
+    zone_row_i = Column(Integer, nullable=True)

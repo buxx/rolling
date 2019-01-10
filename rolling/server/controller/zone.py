@@ -39,7 +39,7 @@ class ZoneController(BaseController):
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
-                web.get("/zone/tiles", self.get_tiles),
-                web.get("/zone/{row_i}/{col_i}", self.get_zone),
+                web.get("/zones/tiles", self.get_tiles),
+                web.get("/zones/{row_i}/{col_i}", self.get_zone),
             ]
         )

@@ -19,3 +19,7 @@ class NoDefaultTileType(RollingError):
 
 class NoZoneMapError(RollingError):
     pass
+
+
+class NotConnectedToServer(RollingError):
+    pass

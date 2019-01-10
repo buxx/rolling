@@ -6,21 +6,21 @@ from rolling.gui.palette import PALETTE_CHARACTER
 
 
 class DisplayObject(object):
-    def __init__(self, x: int, y: int) -> None:
-        self._x = x
-        self._y = y
+    def __init__(self, row_i: int, col_i: int) -> None:
+        self._row_i = row_i
+        self._col_i = col_i
 
     @property
     def palette_id(self) -> str:
         raise NotImplementedError()
 
     @property
-    def x(self) -> int:
-        return self._x
+    def row_i(self) -> int:
+        return self._row_i
 
     @property
-    def y(self) -> int:
-        return self._y
+    def col_i(self) -> int:
+        return self._col_i
 
     @property
     def char(self) -> str:
@@ -63,7 +63,7 @@ class DisplayObjectManager(object):
     def init(self):
         self._objects_by_position = {}
         for display_object in self._objects:
-            display_object_position = (display_object.x, display_object.y)
+            display_object_position = (display_object.row_i, display_object.col_i)
             self._objects_by_position.setdefault(display_object_position, [])
             self._objects_by_position[display_object_position].append(display_object)
 

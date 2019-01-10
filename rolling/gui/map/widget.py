@@ -5,6 +5,7 @@ import urwid
 from urwid import BOX
 
 from rolling.gui.map.object import Character
+from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.render import MapRenderEngine
 
 if typing.TYPE_CHECKING:
@@ -15,14 +16,16 @@ class MapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
     def __init__(
-        self, controller: "Controller", render_engine: MapRenderEngine
+        self,
+        controller: "Controller",
+        render_engine: MapRenderEngine,
+        display_objects: typing.List[DisplayObject] = None,
     ) -> None:
         self._controller = controller
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
-        # FIXME: BS 2018-12-28: currently hardcoded for test
-        self._display_objects = [Character(8, 8)]
+        self._display_objects = display_objects or []
 
     def render(self, size, focus=False):
         x, y = size

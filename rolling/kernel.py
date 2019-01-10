@@ -110,3 +110,13 @@ class Kernel(object):
         self._server_db_engine = create_engine("sqlite:///server.db")
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
+
+    def get_start_world_coordinates(self) -> typing.Tuple[int, int]:
+        # FIXME BS 2019-01-10: hardcoded
+        return 2, 1
+
+    def get_start_zone_coordinates(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.Tuple[int, int]:
+        # FIXME BS 2019-01-10: hardcoded
+        return 29, 29
