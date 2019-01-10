@@ -103,7 +103,7 @@ class Kernel(object):
         kernel_logger.info('Initialize database connection to "client.db"')
         self._client_db_engine = create_engine("sqlite:///client.db")
         self._client_db_session = sessionmaker(bind=self._client_db_engine)()
-        ClientSideDocument.metadata.create_all(self._server_db_engine)
+        ClientSideDocument.metadata.create_all(self._client_db_engine)
 
     def init_server_db_session(self) -> None:
         kernel_logger.info('Initialize database connection to "server.db"')

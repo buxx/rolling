@@ -10,6 +10,7 @@ from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
+from rolling.gui.play.server import ChooseServerMenu
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 
@@ -29,14 +30,22 @@ class RootMenu(BaseMenu):
 
     def _get_menu_buttons(self):
         return [
+            ("Play", self.play_callback),
             ("Test", self.test_callback),
             ("Test2", self.test2_callback),
             ("World map", self.world_map_button_callback),
             ("Quit", self.quit_callback),
         ]
 
+    def play_callback(self, *args, **kwargs):
+        self._main_view.main_content_container.original_widget = ChooseServerMenu(
+            self._controller, self._main_view
+        )
+
     def test_callback(self, *args, **kwargs):
-        self._main_view.main_content_widget.original_widget.set_text(str(time.time()))
+        self._main_view.main_content_container.original_widget.set_text(
+            str(time.time())
+        )
 
         self._controller.loop.set_alarm_in(1.0, self.test_callback)
 
