@@ -7,10 +7,11 @@ from sqlalchemy.orm.exc import NoResultFound
 import urwid
 
 from rolling.client.http.client import HttpClient
+from rolling.client.http.zone import ZoneWebSocketClient
 from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
-from rolling.exception import NotConnectedToServer
+from rolling.exception import NotConnectedToServer, ZoneWebsocketJobFinished
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
@@ -19,6 +20,7 @@ from rolling.gui.palette import PaletteGenerator
 from rolling.gui.play.character import CreateCharacterBox
 from rolling.gui.view import View
 from rolling.kernel import Kernel
+from rolling.log import gui_logger
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -38,7 +40,9 @@ class Controller(object):
         self._zone_lib: typing.Optional[ZoneLib] = None
         self._server_address: typing.Optional[str] = None
         self._player_character: typing.Optional[CharacterModel] = None
-        self._zone_queue = Queue()
+        self._received_zone_queue = Queue()
+        self._to_send_zone_queue = Queue()
+        self._zone_websocket_event = asyncio.Event()
         self._display_objects_manager = DisplayObjectManager([])
 
         self._kernel.init_client_db_session()
@@ -69,11 +73,47 @@ class Controller(object):
         )
         self._loop.screen.set_terminal_properties(colors=256)
 
-        self._asyncio_loop.create_task(self._zone_websocket_job())
+        self._asyncio_loop.create_task(self._get_zone_websocket_jobs())
         self._loop.run()
 
-    async def _zone_websocket_job(self):
-        await asyncio.sleep(1)
+    async def _get_zone_websocket_jobs(self):
+        zone_websocket_client = ZoneWebSocketClient(
+            self,
+            zone_lib=self._zone_lib,
+            client=self._client,
+            received_zone_queue=self._received_zone_queue,
+        )
+
+        def capture_errors(decorated_function):
+            async def wrapper(*args, **kwargs):
+                try:
+                    return await decorated_function(*args, **kwargs)
+                except Exception as exc:
+                    gui_logger.exception(str(exc))
+                    # TODO: stop application
+
+            return wrapper
+
+        @capture_errors
+        async def read():
+            while True:
+                await self._zone_websocket_event.wait()
+                gui_logger.info("Starting zonewebsocket listening")
+                await zone_websocket_client.make_connection()
+                await zone_websocket_client.listen()
+                gui_logger.info("Zone websocket job finished")
+
+        @capture_errors
+        async def write():
+            while True:
+                # FIXME BS 2019-01-14: this is blocking, see https://stackoverflow.com/questions/26413613/asyncio-is-it-possible-to-cancel-a-future-been-run-by-an-executor
+                # to make it unblocking
+                event = await self._asyncio_loop.run_in_executor(
+                    None, self._to_send_zone_queue.get
+                )
+                await zone_websocket_client.send_event(event)
+
+        return await asyncio.gather(read(), write())
 
     def _choose_server(self, server_address: str) -> None:
         # FIXME BS 2019-01-09: https must be available

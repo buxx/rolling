@@ -1,4 +1,5 @@
 # coding: utf-8
+import asyncio
 import time
 import typing
 
@@ -57,12 +58,17 @@ class RootMenu(BaseMenu):
 
     def world_map_button_callback(self, *args, **kwargs):
         world_map_render_engine = WorldMapRenderEngine(
-            self._controller.kernel.world_map_source
+            self._controller.kernel.world_map_source,
+            display_objects_manager=DisplayObjectManager([]),
         )
         text_widget = WorldMapWidget(self._controller, world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
 
     def quit_callback(self, *args, **kwargs):
+        # for task in asyncio.Task.all_tasks():
+        #     if not task.cancelled():
+        #         task.cancel()
+
         raise urwid.ExitMainLoop()
 
 

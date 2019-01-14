@@ -23,3 +23,7 @@ class NoZoneMapError(RollingError):
 
 class NotConnectedToServer(RollingError):
     pass
+
+
+class ZoneWebsocketJobFinished(RollingError):
+    pass
