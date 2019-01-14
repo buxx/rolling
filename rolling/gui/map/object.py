@@ -3,6 +3,7 @@ import time
 import typing
 
 from rolling.gui.palette import PALETTE_CHARACTER
+from rolling.model.character import CharacterModel
 
 
 class DisplayObject(object):
@@ -18,16 +19,32 @@ class DisplayObject(object):
     def row_i(self) -> int:
         return self._row_i
 
+    @row_i.setter
+    def row_i(self, value: int) -> None:
+        self._row_i = value
+
     @property
     def col_i(self) -> int:
         return self._col_i
+
+    @col_i.setter
+    def col_i(self, value: int) -> None:
+        self._col_i = value
 
     @property
     def char(self) -> str:
         raise NotImplementedError()
 
+    @property
+    def id(self) -> str:
+        raise NotImplementedError()
+
 
 class Character(DisplayObject):
+    def __init__(self, row_i: int, col_i: int, character: CharacterModel) -> None:
+        super().__init__(row_i, col_i)
+        self._character = character
+
     @property
     def palette_id(self) -> str:
         return PALETTE_CHARACTER
@@ -36,15 +53,27 @@ class Character(DisplayObject):
     def char(self) -> str:
         return "ጰ"
 
+    @property
+    def id(self) -> str:
+        return self._character.id
+
+
+class CurrentPlayer(Character):
+    def move_with_offset(self, new_offset: typing.Tuple[int, int]) -> None:
+        self._row_i -= new_offset[0]
+        self._col_i -= new_offset[1]
+
 
 class DisplayObjectManager(object):
-    def __init__(self, objects: typing.List[DisplayObject], period: float = 1.0):
+    def __init__(self, objects: typing.List[DisplayObject], period: float = 0.50):
         self._period: float = period
         self._objects: typing.List[DisplayObject] = objects
         self._timings: typing.Dict[DisplayObject, typing.Tuple[bool, float]] = {}
         self._objects_by_position: typing.Dict[
             typing.Tuple[int, int], typing.List[DisplayObject]
         ] = {}
+        self._objects_by_ids: typing.Dict[str, DisplayObject] = {}
+        self._current_player: CurrentPlayer = None
 
     @property
     def objects_by_position(
@@ -53,12 +82,20 @@ class DisplayObjectManager(object):
         return self._objects_by_position
 
     @property
-    def display_objects(self):
+    def objects_by_ids(self) -> typing.Dict[str, DisplayObject]:
+        return self._objects_by_ids
+
+    @property
+    def display_objects(self) -> typing.List[DisplayObject]:
         return self._objects
 
     @display_objects.setter
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._objects = display_objects
+
+    @property
+    def current_player(self) -> CurrentPlayer:
+        return self._current_player
 
     def initialize(self) -> None:
         self._objects = []
@@ -66,10 +103,16 @@ class DisplayObjectManager(object):
 
     def refresh_indexes(self):
         self._objects_by_position = {}
+        self._objects_by_ids = {}
+
         for display_object in self._objects:
             display_object_position = (display_object.row_i, display_object.col_i)
             self._objects_by_position.setdefault(display_object_position, [])
             self._objects_by_position[display_object_position].append(display_object)
+            self._objects_by_ids[display_object.id] = display_object
+
+            if isinstance(display_object, CurrentPlayer):
+                self._current_player = display_object
 
     def add_object(self, display_object: DisplayObject) -> None:
         self._objects.append(display_object)

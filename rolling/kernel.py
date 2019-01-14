@@ -1,4 +1,5 @@
 # coding: utf-8
+from asyncio import AbstractEventLoop
 import glob
 import ntpath
 import os
@@ -19,11 +20,15 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
+from rolling.server.zone.websocket import ZoneEventsManager
 
 
 class Kernel(object):
     def __init__(
-        self, world_map_str: str, tile_maps_folder: typing.Optional[str] = None
+        self,
+        world_map_str: str,
+        loop: AbstractEventLoop,
+        tile_maps_folder: typing.Optional[str] = None,
     ) -> None:
         self._world_map_source = WorldMapSource(self, world_map_str)
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
@@ -35,6 +40,9 @@ class Kernel(object):
 
         self._server_db_session: typing.Optional[Session] = None
         self._server_db_engine: typing.Optional[Engine] = None
+
+        # Zone websocket
+        self._server_zone_events_manager = ZoneEventsManager(self, loop=loop)
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
@@ -55,6 +63,10 @@ class Kernel(object):
                 self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
                     row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
                 )
+
+    @property
+    def server_zone_events_manager(self) -> ZoneEventsManager:
+        return self._server_zone_events_manager
 
     @property
     def world_map_source(self) -> WorldMapSource:

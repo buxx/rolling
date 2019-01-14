@@ -30,7 +30,11 @@ class MapRenderEngine(object):
         return self._attributes
 
     @property
-    def display_objects(self):
+    def display_objects_manager(self) -> DisplayObjectManager:
+        return self._display_objects_manager
+
+    @property
+    def display_objects(self) -> typing.List[DisplayObject]:
         return self._display_objects_manager.display_objects
 
     @display_objects.setter

@@ -1,5 +1,6 @@
 # coding: utf-8
 import argparse
+import asyncio
 import logging
 
 from rolling.client.http.client import HttpClient
@@ -18,10 +19,12 @@ def run(args: argparse.Namespace) -> None:
 
     client = HttpClient(server_address=args.server_address)
 
-    with open("tests/src/worldmapa.txt") as world_map_file:
+    # FIXME BS 2019-01-23: kernel world map must be optional (gui load with server)
+    with open("/home/bux/Projets/rolling/tests/src/worldmapa.txt") as world_map_file:
         world_map_str = world_map_file.read()
 
-    kernel = Kernel(world_map_str)
+    loop = asyncio.get_event_loop()
+    kernel = Kernel(world_map_str, loop=loop)
     controller = Controller(client=client, kernel=kernel)
 
     gui_logger.info("Start gui")
