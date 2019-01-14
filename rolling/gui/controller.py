@@ -25,6 +25,7 @@ from rolling.model.character import CreateCharacterModel
 class Controller(object):
     def __init__(self, client: HttpClient, kernel: Kernel) -> None:
         self._client = client
+        self._asyncio_loop: asyncio.AbstractEventLoop = None
         self._loop = None
         self._kernel = kernel
         self._view = View(self)
@@ -56,11 +57,19 @@ class Controller(object):
         return self._player_character
 
     def main(self) -> None:
+        self._asyncio_loop = asyncio.get_event_loop()
         self._loop = urwid.MainLoop(
-            self._view, palette=self._palette_generator.create_palette()
+            self._view,
+            palette=self._palette_generator.create_palette(),
+            event_loop=urwid.AsyncioEventLoop(loop=self._asyncio_loop),
         )
         self._loop.screen.set_terminal_properties(colors=256)
+
+        self._asyncio_loop.create_task(self._zone_websocket_job())
         self._loop.run()
+
+    async def _zone_websocket_job(self):
+        await asyncio.sleep(1)
 
     def _choose_server(self, server_address: str) -> None:
         # FIXME BS 2019-01-09: https must be available
