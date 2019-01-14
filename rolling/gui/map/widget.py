@@ -30,7 +30,7 @@ class MapWidget(urwid.Widget):
     def render(self, size, focus=False):
         x, y = size
 
-        self._render_engine.display_objects = self._display_objects
+        # self._render_engine.display_objects = self._display_objects
         self._render_engine.render(
             x,
             y,

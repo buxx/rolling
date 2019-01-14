@@ -11,13 +11,15 @@ WORLD_VOID_STR = " "
 
 
 class MapRenderEngine(object):
-    def __init__(self, world_map_source: MapSource) -> None:
+    def __init__(
+        self, world_map_source: MapSource, display_objects_manager: DisplayObjectManager
+    ) -> None:
         self._world_map_source = world_map_source
         self._rows: typing.List[str] = None
         self._attributes: typing.List[
             typing.List[typing.Tuple[typing.Optional[str], int]]
         ] = None
-        self._display_objects_manager = DisplayObjectManager([])
+        self._display_objects_manager = display_objects_manager
 
     @property
     def rows(self) -> typing.List[str]:

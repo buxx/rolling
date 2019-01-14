@@ -4,6 +4,7 @@ import typing
 
 import urwid
 
+from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
@@ -86,7 +87,9 @@ class View(urwid.WidgetWrap):
                 self._controller.kernel, tile_map_file.read()
             )
 
-        tile_map_render_engine = TileMapRenderEngine(tile_map_source)
+        tile_map_render_engine = TileMapRenderEngine(
+            tile_map_source, display_objects_manager=DisplayObjectManager([])
+        )
         tile_map_widget = TileMapWidget(self._controller, tile_map_render_engine)
         return tile_map_widget
 

@@ -1,5 +1,6 @@
 # coding: utf-8
 import asyncio
+from queue import Queue
 import typing
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -11,6 +12,7 @@ from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
 from rolling.exception import NotConnectedToServer
 from rolling.gui.map.object import Character
+from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.palette import PaletteGenerator
@@ -36,6 +38,7 @@ class Controller(object):
         self._zone_lib: typing.Optional[ZoneLib] = None
         self._server_address: typing.Optional[str] = None
         self._player_character: typing.Optional[CharacterModel] = None
+        self._zone_queue = Queue()
 
         self._kernel.init_client_db_session()
 
@@ -97,17 +100,17 @@ class Controller(object):
         zone_map = self._zone_lib.get_zone(
             self._player_character.world_row_i, self._player_character.world_col_i
         )
-        zone_map_source = ZoneMapSource(self._kernel, raw_source=zone_map.raw_source)
-
-        tile_map_render_engine = TileMapRenderEngine(zone_map_source)
-        tile_map_widget = TileMapWidget(
-            self,
-            tile_map_render_engine,
-            display_objects=[
+        display_objects_manager = DisplayObjectManager(
+            [
                 Character(
                     self._player_character.zone_row_i, self._player_character.zone_col_i
                 )
-            ],
+            ]
         )
+        zone_map_source = ZoneMapSource(self._kernel, raw_source=zone_map.raw_source)
+        tile_map_render_engine = TileMapRenderEngine(
+            zone_map_source, display_objects_manager=display_objects_manager
+        )
+        tile_map_widget = TileMapWidget(self, tile_map_render_engine)
 
         self._view.main_content_container.original_widget = tile_map_widget
