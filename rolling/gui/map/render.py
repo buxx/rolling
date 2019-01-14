@@ -47,7 +47,6 @@ class MapRenderEngine(object):
     ) -> None:
         map_width = self._world_map_source.geography.width
         map_height = self._world_map_source.geography.height
-        self._display_objects_manager.init()
 
         try:
             default_type = self._world_map_source.legend.get_default_type()

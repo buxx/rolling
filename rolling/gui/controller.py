@@ -39,6 +39,7 @@ class Controller(object):
         self._server_address: typing.Optional[str] = None
         self._player_character: typing.Optional[CharacterModel] = None
         self._zone_queue = Queue()
+        self._display_objects_manager = DisplayObjectManager([])
 
         self._kernel.init_client_db_session()
 
@@ -96,21 +97,25 @@ class Controller(object):
         self._choose_character(character_model.id)
 
     def _choose_character(self, character_id: str) -> None:
+        # Prepare display objects
         self._player_character = self._character_lib.get_player_character(character_id)
+        self._display_objects_manager.initialize()
+        self._display_objects_manager.add_object(
+            Character(
+                self._player_character.zone_row_i, self._player_character.zone_col_i
+            )
+        )
+        self._display_objects_manager.refresh_indexes()
+
+        # Prepare map
         zone_map = self._zone_lib.get_zone(
             self._player_character.world_row_i, self._player_character.world_col_i
         )
-        display_objects_manager = DisplayObjectManager(
-            [
-                Character(
-                    self._player_character.zone_row_i, self._player_character.zone_col_i
-                )
-            ]
-        )
         zone_map_source = ZoneMapSource(self._kernel, raw_source=zone_map.raw_source)
         tile_map_render_engine = TileMapRenderEngine(
-            zone_map_source, display_objects_manager=display_objects_manager
+            zone_map_source, display_objects_manager=self._display_objects_manager
         )
         tile_map_widget = TileMapWidget(self, tile_map_render_engine)
 
+        # Setup main widget as zone map
         self._view.main_content_container.original_widget = tile_map_widget

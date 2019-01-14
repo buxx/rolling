@@ -60,12 +60,19 @@ class DisplayObjectManager(object):
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._objects = display_objects
 
-    def init(self):
+    def initialize(self) -> None:
+        self._objects = []
+        self._objects_by_position = {}
+
+    def refresh_indexes(self):
         self._objects_by_position = {}
         for display_object in self._objects:
             display_object_position = (display_object.row_i, display_object.col_i)
             self._objects_by_position.setdefault(display_object_position, [])
             self._objects_by_position[display_object_position].append(display_object)
+
+    def add_object(self, display_object: DisplayObject) -> None:
+        self._objects.append(display_object)
 
     def get_final_str(self, x: int, y: int, default: str) -> str:
         try:
