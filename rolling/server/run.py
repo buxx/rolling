@@ -1,5 +1,6 @@
 # coding: utf-8
 import argparse
+import asyncio
 import logging
 
 from aiohttp import web
@@ -27,7 +28,10 @@ def run(args: argparse.Namespace) -> None:
     server_logger.info(
         'Start kernel with tile maps folder "{}"'.format(args.tile_maps_folder)
     )
-    kernel = Kernel(world_map_source_raw, tile_maps_folder=args.tile_maps_folder)
+    loop = asyncio.get_event_loop()
+    kernel = Kernel(
+        world_map_source_raw, loop=loop, tile_maps_folder=args.tile_maps_folder
+    )
     kernel.init_server_db_session()
 
     server_logger.info("Create web application")

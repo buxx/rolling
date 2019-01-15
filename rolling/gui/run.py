@@ -1,5 +1,6 @@
 # coding: utf-8
 import argparse
+import asyncio
 import logging
 
 from rolling.client.http.client import HttpClient
@@ -21,7 +22,8 @@ def run(args: argparse.Namespace) -> None:
     with open("tests/src/worldmapa.txt") as world_map_file:
         world_map_str = world_map_file.read()
 
-    kernel = Kernel(world_map_str)
+    loop = asyncio.get_event_loop()
+    kernel = Kernel(world_map_str, loop=loop)
     controller = Controller(client=client, kernel=kernel)
 
     gui_logger.info("Start gui")

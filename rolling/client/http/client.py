@@ -38,3 +38,6 @@ class HttpClient(object):
         )
         response_json = response.json()
         return self._zone_serializer.load(response_json)
+
+    def get_zone_events_url(self, row_i: int, col_i: int) -> str:
+        return f"{self._server_address}/zones/{row_i}/{col_i}/events"

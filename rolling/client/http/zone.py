@@ -19,19 +19,19 @@ class ZoneWebSocketClient(object):
         self,
         controller: "Controller",
         zone_lib: ZoneLib,
-        client: HttpClient,
+        client_getter: typing.Callable[[], HttpClient],
         received_zone_queue: Queue,
     ) -> None:
         self._controller = controller
         self._zone_lib = zone_lib
-        self._client = client
+        self._client_getter = client_getter
         self._ws: typing.Optional[_WSRequestContextManager] = None
         self._received_zone_queue = received_zone_queue
 
-    async def make_connection(self) -> None:
+    async def make_connection(self, row_i: int, col_i: int) -> None:
         session = aiohttp.ClientSession()
-        websocket_url = self._client.get_zone_websocket_url()
-        gui_logger.debug(f"Connect websocket to \"{websocket_url}\"")
+        websocket_url = self._client_getter().get_zone_events_url(row_i, col_i)
+        gui_logger.debug(f'Connect websocket to "{websocket_url}"')
         self._ws = await session.ws_connect(websocket_url)
 
     async def listen(self) -> None:
@@ -49,7 +49,7 @@ class ZoneWebSocketClient(object):
                 break
 
     def _proceed_received_package(self, data: str) -> None:
-        gui_logger.debug(f"Received package: \"{data}\"")
+        gui_logger.debug(f'Received package: "{data}"')
         # fill self._received_zone_queue with ZoneEvent objects
 
     async def send_event(self, event: ZoneEvent) -> None:

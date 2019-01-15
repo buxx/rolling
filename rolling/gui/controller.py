@@ -80,7 +80,7 @@ class Controller(object):
         zone_websocket_client = ZoneWebSocketClient(
             self,
             zone_lib=self._zone_lib,
-            client=self._client,
+            client_getter=lambda: self._client,
             received_zone_queue=self._received_zone_queue,
         )
 
@@ -97,15 +97,20 @@ class Controller(object):
         @capture_errors
         async def read():
             while True:
+                gui_logger.info("Waiting for open a zone websocket connection")
                 await self._zone_websocket_event.wait()
-                gui_logger.info("Starting zonewebsocket listening")
-                await zone_websocket_client.make_connection()
+                gui_logger.info("Starting zone websocket listening")
+                await zone_websocket_client.make_connection(
+                    self._player_character.world_row_i,
+                    self._player_character.world_col_i,
+                )
                 await zone_websocket_client.listen()
                 gui_logger.info("Zone websocket job finished")
 
         @capture_errors
         async def write():
             while True:
+                gui_logger.info("Waiting for an object to send to zone websocket")
                 # FIXME BS 2019-01-14: this is blocking, see https://stackoverflow.com/questions/26413613/asyncio-is-it-possible-to-cancel-a-future-been-run-by-an-executor
                 # to make it unblocking
                 event = await self._asyncio_loop.run_in_executor(
@@ -156,6 +161,9 @@ class Controller(object):
             zone_map_source, display_objects_manager=self._display_objects_manager
         )
         tile_map_widget = TileMapWidget(self, tile_map_render_engine)
+
+        # Establish web socket connection
+        self._zone_websocket_event.set()
 
         # Setup main widget as zone map
         self._view.main_content_container.original_widget = tile_map_widget

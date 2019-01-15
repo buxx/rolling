@@ -1,6 +1,7 @@
 #  coding: utf-8
 import typing
 
+import aiohttp
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -9,6 +10,7 @@ from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
+from rolling.log import server_logger
 from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
@@ -36,10 +38,18 @@ class ZoneController(BaseController):
             row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i
         )
 
+    async def events(self, request: Request):
+        return await self._kernel.server_zone_events_manager.get_new_socket(
+            request,
+            row_i=request.match_info["row_i"],
+            col_i=request.match_info["col_i"],
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
                 web.get("/zones/tiles", self.get_tiles),
                 web.get("/zones/{row_i}/{col_i}", self.get_zone),
+                web.get("/zones/{row_i}/{col_i}/events", self.events),
             ]
         )
