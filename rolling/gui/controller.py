@@ -12,8 +12,6 @@ from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
 from rolling.exception import NotConnectedToServer
-from rolling.exception import ZoneWebsocketJobFinished
-from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
@@ -26,6 +24,7 @@ from rolling.log import gui_logger
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.event import ZoneEvent
 
 
 class Controller(object):
@@ -65,6 +64,10 @@ class Controller(object):
             )
 
         return self._player_character
+
+    @property
+    def to_send_zone_queue(self) -> Queue:
+        return self._to_send_zone_queue
 
     def main(self) -> None:
         self._asyncio_loop = asyncio.get_event_loop()
