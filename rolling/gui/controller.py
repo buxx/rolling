@@ -11,8 +11,10 @@ from rolling.client.http.zone import ZoneWebSocketClient
 from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
-from rolling.exception import NotConnectedToServer, ZoneWebsocketJobFinished
+from rolling.exception import NotConnectedToServer
+from rolling.exception import ZoneWebsocketJobFinished
 from rolling.gui.map.object import Character
+from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
@@ -146,7 +148,7 @@ class Controller(object):
         self._player_character = self._character_lib.get_player_character(character_id)
         self._display_objects_manager.initialize()
         self._display_objects_manager.add_object(
-            Character(
+            CurrentPlayer(
                 self._player_character.zone_row_i, self._player_character.zone_col_i
             )
         )

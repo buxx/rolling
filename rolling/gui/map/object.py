@@ -37,6 +37,12 @@ class Character(DisplayObject):
         return "ጰ"
 
 
+class CurrentPlayer(Character):
+    def move_with_offset(self, new_offset: typing.Tuple[int, int]) -> None:
+        self._row_i -= new_offset[0]
+        self._col_i -= new_offset[1]
+
+
 class DisplayObjectManager(object):
     def __init__(self, objects: typing.List[DisplayObject], period: float = 1.0):
         self._period: float = period
@@ -45,6 +51,7 @@ class DisplayObjectManager(object):
         self._objects_by_position: typing.Dict[
             typing.Tuple[int, int], typing.List[DisplayObject]
         ] = {}
+        self._current_player: CurrentPlayer = None
 
     @property
     def objects_by_position(
@@ -53,12 +60,16 @@ class DisplayObjectManager(object):
         return self._objects_by_position
 
     @property
-    def display_objects(self):
+    def display_objects(self) -> typing.List[DisplayObject]:
         return self._objects
 
     @display_objects.setter
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._objects = display_objects
+
+    @property
+    def current_player(self) -> CurrentPlayer:
+        return self._current_player
 
     def initialize(self) -> None:
         self._objects = []
@@ -70,6 +81,9 @@ class DisplayObjectManager(object):
             display_object_position = (display_object.row_i, display_object.col_i)
             self._objects_by_position.setdefault(display_object_position, [])
             self._objects_by_position[display_object_position].append(display_object)
+
+            if isinstance(display_object, CurrentPlayer):
+                self._current_player = display_object
 
     def add_object(self, display_object: DisplayObject) -> None:
         self._objects.append(display_object)

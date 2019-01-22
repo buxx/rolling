@@ -1,9 +1,9 @@
 # coding: utf-8
+from asyncio import AbstractEventLoop
 import glob
 import ntpath
 import os
 import typing
-from asyncio import AbstractEventLoop
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine

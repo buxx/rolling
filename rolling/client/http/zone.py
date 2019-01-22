@@ -1,6 +1,6 @@
 # coding: utf-8
-import typing
 from queue import Queue
+import typing
 
 import aiohttp
 from aiohttp.client import _WSRequestContextManager
