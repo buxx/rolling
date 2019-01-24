@@ -19,7 +19,8 @@ def run(args: argparse.Namespace) -> None:
 
     client = HttpClient(server_address=args.server_address)
 
-    with open("tests/src/worldmapa.txt") as world_map_file:
+    # FIXME BS 2019-01-23: kernel world map must be optional (gui load with server)
+    with open("/home/bux/Projets/rolling/tests/src/worldmapa.txt") as world_map_file:
         world_map_str = world_map_file.read()
 
     loop = asyncio.get_event_loop()

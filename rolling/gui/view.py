@@ -88,7 +88,8 @@ class View(urwid.WidgetWrap):
         return self._right_menu_container
 
     def _create_main_content_widget(self):
-        with open("tests/src/tilemapa.txt") as tile_map_file:
+        # FIXME BS 2019-01-23: Remove this and replace by hello text
+        with open("/home/bux/Projets/rolling/tests/src/tilemapa.txt") as tile_map_file:
             tile_map_source = ZoneMapSource(
                 self._controller.kernel, tile_map_file.read()
             )

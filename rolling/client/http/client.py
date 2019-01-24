@@ -1,4 +1,6 @@
 # coding: utf-8
+import typing
+
 import aiohttp
 import requests
 import serpyco
@@ -13,6 +15,7 @@ class HttpClient(object):
         self._server_address = server_address
         self._create_character_serializer = serpyco.Serializer(CreateCharacterModel)
         self._character_serializer = serpyco.Serializer(CharacterModel)
+        self._characters_serializer = serpyco.Serializer(CharacterModel, many=True)
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
 
     def create_character(
@@ -41,3 +44,14 @@ class HttpClient(object):
 
     def get_zone_events_url(self, row_i: int, col_i: int) -> str:
         return f"{self._server_address}/zones/{row_i}/{col_i}/events"
+
+    def get_zone_characters(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[CharacterModel]:
+        response = requests.get(
+            "{}/zones/{}/{}/characters".format(
+                self._server_address, world_row_i, world_col_i
+            )
+        )
+        response_json = response.json()
+        return self._characters_serializer.load(response_json)

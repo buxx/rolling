@@ -1,4 +1,5 @@
 # coding: utf-8
+import json
 from queue import Queue
 import typing
 
@@ -9,8 +10,10 @@ import serpyco
 
 from rolling.client.http.client import HttpClient
 from rolling.client.lib.zone import ZoneLib
+from rolling.gui.event import EventProcessorFactory
 from rolling.log import gui_logger
 from rolling.model.event import ZoneEvent
+from rolling.model.event import ZoneEventType
 from rolling.model.event import zone_event_data_types
 
 if typing.TYPE_CHECKING:
@@ -30,6 +33,9 @@ class ZoneWebSocketClient(object):
         self._client_getter = client_getter
         self._ws: typing.Optional[_WSRequestContextManager] = None
         self._received_zone_queue = received_zone_queue
+        self._event_processor_factory = EventProcessorFactory(
+            self._controller.kernel, controller
+        )
 
     async def make_connection(self, row_i: int, col_i: int) -> None:
         session = aiohttp.ClientSession()
@@ -42,7 +48,7 @@ class ZoneWebSocketClient(object):
             msg: WSMessage = await self._ws.receive()
 
             if msg.type == aiohttp.WSMsgType.text:
-                self._proceed_received_package(msg.data)
+                await self._proceed_received_package(msg.data)
 
             elif msg.type == aiohttp.WSMsgType.closed:
                 gui_logger.info(f"Websocket closed by server")
@@ -51,9 +57,18 @@ class ZoneWebSocketClient(object):
                 gui_logger.info(f"Websocket closed by server with error")
                 break
 
-    def _proceed_received_package(self, data: str) -> None:
-        gui_logger.debug(f'Received package: "{data}"')
-        # fill self._received_zone_queue with ZoneEvent objects
+    async def _proceed_received_package(self, msg_data: str) -> None:
+        gui_logger.debug(f'Received package: "{msg_data}"')
+
+        event_dict = json.loads(msg_data)
+        # TODO BS 2019-01-22: Prepare all these serializer to improve performances
+        data_type = zone_event_data_types[ZoneEventType(event_dict["type"])]
+        serializer = serpyco.Serializer(ZoneEvent[data_type])
+
+        event = serializer.load(event_dict)
+
+        processor = self._event_processor_factory.get_processor(event.type)
+        await processor.process(event)
 
     async def send_event(self, event: ZoneEvent) -> None:
         # TODO BS 2019-01-22: Prepare all these serializer to improve performances

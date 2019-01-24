@@ -41,8 +41,9 @@ class CharacterLib(object):
             .one()
         )
 
-    def get(self, id_: str) -> CharacterModel:
-        character_document = self._get_document(id_)
+    def _document_to_model(
+        self, character_document: CharacterDocument
+    ) -> CharacterModel:
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
@@ -52,6 +53,10 @@ class CharacterLib(object):
             zone_row_i=character_document.zone_row_i,
         )
 
+    def get(self, id_: str) -> CharacterModel:
+        character_document = self._get_document(id_)
+        return self._document_to_model(character_document)
+
     def move_on_zone(
         self, character: CharacterModel, to_row_i: int, to_col_i: int
     ) -> None:
@@ -60,3 +65,16 @@ class CharacterLib(object):
         character_document.zone_col_i = to_col_i
         self._kernel.server_db_session.add(character_document)
         self._kernel.server_db_session.commit()
+
+    def get_zone_players(self, row_i: int, col_i: int) -> typing.List[CharacterModel]:
+        character_documents = (
+            self._kernel.server_db_session.query(CharacterDocument)
+            .filter(CharacterDocument.world_row_i == row_i)
+            .filter(CharacterDocument.world_col_i == col_i)
+            .all()
+        )
+
+        return [
+            self._document_to_model(character_document)
+            for character_document in character_documents
+        ]

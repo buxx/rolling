@@ -60,7 +60,11 @@ class PlayerMoveProcessor(EventProcessor):
 
             event_str = serializer.dump_json(event)
             server_logger.debug(f"Send event on socket: {event_str}")
-            await socket.send_str(event_str)
+
+            try:
+                await socket.send_str(event_str)
+            except Exception as exc:
+                server_logger.exception(str(exc))
 
 
 class EventProcessorFactory(object):

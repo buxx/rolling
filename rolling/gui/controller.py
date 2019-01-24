@@ -12,6 +12,7 @@ from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
 from rolling.exception import NotConnectedToServer
+from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
@@ -82,6 +83,9 @@ class Controller(object):
         self._loop.run()
 
     async def _get_zone_websocket_jobs(self):
+        # FIXME BS 2019-01-23: If exception bellow: urwid completelly crash without info !
+        # Simulate crash and setup error logging
+
         zone_websocket_client = ZoneWebSocketClient(
             self,
             zone_lib=self._zone_lib,
@@ -152,9 +156,24 @@ class Controller(object):
         self._display_objects_manager.initialize()
         self._display_objects_manager.add_object(
             CurrentPlayer(
-                self._player_character.zone_row_i, self._player_character.zone_col_i
+                self._player_character.zone_row_i,
+                self._player_character.zone_col_i,
+                self._player_character,
             )
         )
+
+        # Add other players
+        for zone_character in self._character_lib.get_zone_characters(
+            self._player_character.world_row_i,
+            self._player_character.world_col_i,
+            excluded_character_ids=[self.player_character.id],
+        ):
+            self._display_objects_manager.add_object(
+                Character(
+                    zone_character.zone_row_i, zone_character.zone_col_i, zone_character
+                )
+            )
+
         self._display_objects_manager.refresh_indexes()
 
         # Prepare map
