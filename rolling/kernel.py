@@ -42,7 +42,7 @@ class Kernel(object):
         self._server_db_engine: typing.Optional[Engine] = None
 
         # Zone websocket
-        self._server_zone_events_manager = ZoneEventsManager(loop=loop)
+        self._server_zone_events_manager = ZoneEventsManager(self, loop=loop)
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:

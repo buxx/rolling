@@ -39,6 +39,7 @@ class ZoneController(BaseController):
         )
 
     async def events(self, request: Request):
+        # TODO BS 2019-01-23: Establish zone websocket must require character in zone
         return await self._kernel.server_zone_events_manager.get_new_socket(
             request,
             row_i=request.match_info["row_i"],
@@ -51,5 +52,6 @@ class ZoneController(BaseController):
                 web.get("/zones/tiles", self.get_tiles),
                 web.get("/zones/{row_i}/{col_i}", self.get_zone),
                 web.get("/zones/{row_i}/{col_i}/events", self.events),
+                # TODO BS 2019-01-23: put /zones/{row_i}/{col_i}/enter to ask entering in zone
             ]
         )
