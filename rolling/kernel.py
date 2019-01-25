@@ -27,7 +27,7 @@ class Kernel(object):
     def __init__(
         self,
         world_map_str: str,
-        loop: AbstractEventLoop,
+        loop: AbstractEventLoop = None,
         tile_maps_folder: typing.Optional[str] = None,
     ) -> None:
         self._world_map_source = WorldMapSource(self, world_map_str)

@@ -6,13 +6,11 @@ import typing
 import aiohttp
 from aiohttp import web
 from aiohttp.web_request import Request
-import serpyco
 
 from rolling.exception import UnableToProcessEvent
 from rolling.log import server_logger
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
-from rolling.model.event import zone_event_data_types
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.zone.event import EventProcessorFactory
 
@@ -27,7 +25,7 @@ class ZoneEventsManager(object):
         ] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
-        self._loop = loop
+        self._loop = loop or asyncio.get_event_loop()
         self._kernel = kernel
 
     async def get_new_socket(
