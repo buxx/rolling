@@ -38,3 +38,7 @@ class UnableToProcessEvent(RollingError):
     @property
     def event(self) -> ZoneEvent:
         return self._event
+
+
+class KernelComponentNotPrepared(RollingError):
+    pass

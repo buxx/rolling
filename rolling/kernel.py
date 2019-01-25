@@ -10,6 +10,7 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 
+from rolling.exception import KernelComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
 from rolling.log import kernel_logger
@@ -26,13 +27,17 @@ from rolling.server.zone.websocket import ZoneEventsManager
 class Kernel(object):
     def __init__(
         self,
-        world_map_str: str,
+        world_map_str: str = None,
         loop: AbstractEventLoop = None,
         tile_maps_folder: typing.Optional[str] = None,
     ) -> None:
-        self._world_map_source = WorldMapSource(self, world_map_str)
+        self._world_map_source: typing.Optional[WorldMapSource] = WorldMapSource(
+            self, world_map_str
+        ) if world_map_str else None
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
-        self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
+        self._tile_maps_by_position: typing.Optional[
+            typing.Dict[typing.Tuple[int, int], ZoneMap]
+        ] = None
 
         # Database stuffs
         self._client_db_session: typing.Optional[Session] = None
@@ -46,6 +51,8 @@ class Kernel(object):
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
+            self._tile_maps_by_position = {}
+
             for tile_map_source_file_path in glob.glob(
                 os.path.join(tile_maps_folder, "*.txt")
             ):
@@ -66,11 +73,30 @@ class Kernel(object):
 
     @property
     def server_zone_events_manager(self) -> ZoneEventsManager:
+        if self._server_zone_events_manager is None:
+            raise KernelComponentNotPrepared(
+                "self._server_zone_events_manager must be prepared before usage"
+            )
+
         return self._server_zone_events_manager
 
     @property
     def world_map_source(self) -> WorldMapSource:
+        if self._world_map_source is None:
+            raise KernelComponentNotPrepared(
+                "self._world_map_source must be prepared before usage"
+            )
+
         return self._world_map_source
+
+    @property
+    def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
+        if self._world_map_source is None:
+            raise KernelComponentNotPrepared(
+                "self._tile_maps_by_position must be prepared before usage"
+            )
+
+        return self._tile_maps_by_position
 
     @property
     def tile_map_legend(self) -> ZoneMapLegend:
@@ -94,20 +120,20 @@ class Kernel(object):
     @property
     def client_db_session(self) -> Session:
         if self._client_db_session is None:
-            raise RollingError("client_db_session is not created yet")
+            raise KernelComponentNotPrepared("client_db_session is not created yet")
 
         return self._client_db_session
 
     @property
     def server_db_session(self) -> Session:
         if self._server_db_session is None:
-            raise RollingError("server_db_session is not created yet")
+            raise KernelComponentNotPrepared("server_db_session is not created yet")
 
         return self._server_db_session
 
     def get_tile_map(self, row_i: int, col_i: int) -> ZoneMap:
         try:
-            return self._tile_maps_by_position[(row_i, col_i)]
+            return self.tile_maps_by_position[(row_i, col_i)]
         except KeyError:
             raise NoZoneMapError("No zone map for {},{} position".format(row_i, col_i))
 
