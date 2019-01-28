@@ -41,8 +41,8 @@ def run(args: argparse.Namespace) -> None:
     server_logger.info("Configure web api")
     context = AiohttpContext(app, debug=args.debug)
     context.handle_exception(Exception, http_code=500)
-    hapic.set_context(context)
     hapic.set_processor_class(SerpycoProcessor)
+    hapic.set_context(context)
 
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
     web.run_app(app, host=args.host, port=args.port)
