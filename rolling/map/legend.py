@@ -9,7 +9,10 @@ from rolling.map.type.world import WorldMapTileType
 
 class MapLegend(object):
     def __init__(
-        self, raw_legend: typing.Dict[str, str], map_tile_type: typing.Type[MapTileType]
+        self,
+        raw_legend: typing.Dict[str, str],
+        map_tile_type: typing.Type[MapTileType],
+        default_type: typing.Optional[typing.Type[MapTileType]] = None,
     ) -> None:
         self._str_to_type: typing.Dict[str, typing.Type[MapTileType]] = {}
         self._type_to_str: typing.Dict[typing.Type[MapTileType, str]] = {}
@@ -26,6 +29,9 @@ class MapLegend(object):
             type_ = map_tile_type.get_for_id(clean_value)
             self._str_to_type[key] = type_
             self._type_to_str[type_] = key
+
+        if default_type:
+            self._default_type = default_type
 
     def get_type_with_str(self, key: str) -> typing.Type[MapTileType]:
         try:

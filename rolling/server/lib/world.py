@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+from rolling.client.http.client import HttpClient
 from rolling.exception import NoDefaultTileType
 from rolling.kernel import Kernel
 from rolling.model.world import WorldMapLegendModel
@@ -43,6 +44,3 @@ class WorldLib(object):
 
         legend = WorldMapLegendModel(default_type=default_type, all_types=all_types)
         return legend
-
-    def get_world(self) -> WorldMapModel:
-        return WorldMapModel(raw_source=self._kernel.world_map_source.raw_source)

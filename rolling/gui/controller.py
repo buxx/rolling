@@ -7,6 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import urwid
 
 from rolling.client.http.client import HttpClient
+from rolling.client.http.world import WorldLib
 from rolling.client.http.zone import ZoneWebSocketClient
 from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
@@ -22,10 +23,10 @@ from rolling.gui.play.character import CreateCharacterBox
 from rolling.gui.view import View
 from rolling.kernel import Kernel
 from rolling.log import gui_logger
+from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
-from rolling.model.event import ZoneEvent
 
 
 class Controller(object):
@@ -40,6 +41,7 @@ class Controller(object):
         self._server_lib: typing.Optional[ServerLib] = None
         self._character_lib: typing.Optional[CharacterLib] = None
         self._zone_lib: typing.Optional[ZoneLib] = None
+        self._world_lib: typing.Optional[WorldLib] = None
         self._server_address: typing.Optional[str] = None
         self._player_character: typing.Optional[CharacterModel] = None
         self._received_zone_queue = Queue()
@@ -176,7 +178,17 @@ class Controller(object):
 
         self._display_objects_manager.refresh_indexes()
 
-        # Prepare map
+        # Prepare world map
+        self._world_lib = WorldLib(self._kernel, self._client)
+        world_map_raw_source = self._world_lib.get_world_source()
+        self._kernel.world_map_source = WorldMapSource(
+            self._kernel, raw_source=world_map_raw_source
+        )
+
+        self.display_zone()
+
+    def display_zone(self) -> None:
+        # Prepare zone map
         zone_map = self._zone_lib.get_zone(
             self._player_character.world_row_i, self._player_character.world_col_i
         )
@@ -191,3 +203,13 @@ class Controller(object):
 
         # Setup main widget as zone map
         self._view.main_content_container.original_widget = tile_map_widget
+        self._view.display_zone_menu_widget()
+
+    def disconnect(self) -> None:
+        self._player_character = None
+        self._display_objects_manager.initialize()
+        self._world_lib = None
+        self._kernel.world_map_source = None
+        self._zone_websocket_event.clear()
+        self._view.display_root_content()
+        self._view.display_root_menu_widget()

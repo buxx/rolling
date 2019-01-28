@@ -19,12 +19,8 @@ def run(args: argparse.Namespace) -> None:
 
     client = HttpClient(server_address=args.server_address)
 
-    # FIXME BS 2019-01-23: kernel world map must be optional (gui load with server)
-    with open("/home/bux/Projets/rolling/tests/src/worldmapa.txt") as world_map_file:
-        world_map_str = world_map_file.read()
-
     loop = asyncio.get_event_loop()
-    kernel = Kernel(world_map_str, loop=loop)
+    kernel = Kernel(loop=loop)
     controller = Controller(client=client, kernel=kernel)
 
     gui_logger.info("Start gui")

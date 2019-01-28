@@ -5,6 +5,7 @@ import aiohttp
 import requests
 import serpyco
 
+from rolling.map.source import WorldMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.zone import ZoneMapModel
@@ -55,3 +56,7 @@ class HttpClient(object):
         )
         response_json = response.json()
         return self._characters_serializer.load(response_json)
+
+    def get_world_source(self) -> str:
+        response = requests.get("{}/world/source".format(self._server_address))
+        return response.text

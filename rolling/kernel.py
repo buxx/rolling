@@ -14,10 +14,13 @@ from rolling.exception import KernelComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
 from rolling.log import kernel_logger
+from rolling.map.legend import WorldMapLegend
 from rolling.map.legend import ZoneMapLegend
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMap
 from rolling.map.source import ZoneMapSource
+from rolling.map.type.world import Sea
+from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
@@ -31,10 +34,11 @@ class Kernel(object):
         loop: AbstractEventLoop = None,
         tile_maps_folder: typing.Optional[str] = None,
     ) -> None:
+        self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
+        self._world_map_legend: typing.Optional[WorldMapLegend] = None
         self._world_map_source: typing.Optional[WorldMapSource] = WorldMapSource(
             self, world_map_str
         ) if world_map_str else None
-        self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._tile_maps_by_position: typing.Optional[
             typing.Dict[typing.Tuple[int, int], ZoneMap]
         ] = None
@@ -51,7 +55,9 @@ class Kernel(object):
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
-            self._tile_maps_by_position = {}
+            self._tile_maps_by_position: typing.Dict[
+                typing.Tuple[int, int], ZoneMap
+            ] = {}
 
             for tile_map_source_file_path in glob.glob(
                 os.path.join(tile_maps_folder, "*.txt")
@@ -89,6 +95,10 @@ class Kernel(object):
 
         return self._world_map_source
 
+    @world_map_source.setter
+    def world_map_source(self, value: WorldMapSource) -> None:
+        self._world_map_source = value
+
     @property
     def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
         if self._world_map_source is None:
@@ -97,6 +107,25 @@ class Kernel(object):
             )
 
         return self._tile_maps_by_position
+
+    @property
+    def world_map_legend(self) -> WorldMapLegend:
+        if self._world_map_legend is None:
+            # TODO BS 2018-12-20: Consider it can be an external source
+            self._world_map_legend = WorldMapLegend(
+                {
+                    "~": "SEA",
+                    "^": "MOUNTAIN",
+                    "ፆ": "JUNGLE",
+                    "∩": "HILL",
+                    "⡩": "BEACH",
+                    "⠃": "PLAIN",
+                },
+                WorldMapTileType,
+                default_type=Sea,
+            )
+
+        return self._world_map_legend
 
     @property
     def tile_map_legend(self) -> ZoneMapLegend:

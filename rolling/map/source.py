@@ -69,8 +69,13 @@ class WorldMapSource(MapSource):
         return self._geography
 
     def _create_legend(self, raw_source: str) -> WorldMapLegend:
-        # TODO BS 2018-11-03: raise if not found
-        legend_lines = self._get_blocks(raw_source, BLOCK_LEGEND_NAME)[0]
+        # FIXME NOW BS: 2019-01-28: Get it from kernel if no legend in file
+        try:
+            legend_lines = self._get_blocks(raw_source, BLOCK_LEGEND_NAME)[0]
+            # TODO BS 2019-01-28: Use appropriate exception
+        except IndexError:
+            return self._kernel.world_map_legend
+
         raw_legend = {}
 
         for legend_line in legend_lines:

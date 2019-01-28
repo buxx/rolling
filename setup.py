@@ -14,9 +14,11 @@ setup(
     packages=["rolling"],
     install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy"],
     extras_require={"dev": dev_require, "test": test_require},
-    entry_points={"console_scripts": [
-        "rolling=rolling.gui.run:main",
-        "rolling-server=rolling.server.run:main",
-        "rolling-generate=rolling.map.generator.run:main",
-    ]},
+    entry_points={
+        "console_scripts": [
+            "rolling=rolling.gui.run:main",
+            "rolling-server=rolling.server.run:main",
+            "rolling-generate=rolling.map.generator.run:main",
+        ]
+    },
 )

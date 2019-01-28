@@ -20,55 +20,51 @@ if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
 
 
-class SubMenuExample(BaseSubMenu):
-    title = "TestSubMenu"
-
+class WorldMapSubMenu(BaseSubMenu):
     def _get_menu_buttons(self):
         return []
 
+    def restore_parent_menu(self, *args, **kwargs) -> None:
+        self._controller.display_zone()
+        super().restore_parent_menu()
 
-class RootMenu(BaseMenu):
-    title = "MainMenu"
+
+class ZoneMenu(BaseMenu):
+    title = "Movement"
 
     def _get_menu_buttons(self):
         return [
-            ("Play", self.play_callback),
-            ("Test", self.test_callback),
-            ("Test2", self.test2_callback),
-            ("World map", self.world_map_button_callback),
-            ("Quit", self.quit_callback),
+            ("World map", self._display_world_map_callback),
+            ("Disconnect", self._go_back_root_callback),
         ]
 
-    def play_callback(self, *args, **kwargs):
-        self._main_view.main_content_container.original_widget = ChooseServerMenu(
-            self._controller, self._main_view
-        )
-
-    def test_callback(self, *args, **kwargs):
-        self._main_view.main_content_container.original_widget.set_text(
-            str(time.time())
-        )
-
-        self._controller.loop.set_alarm_in(1.0, self.test_callback)
-
-    def test2_callback(self, *args, **kwargs):
-        sub_menu = SubMenuExample(self._controller, self._main_view, self)
-
-        self._main_view.right_menu_container.original_widget = sub_menu
-
-    def world_map_button_callback(self, *args, **kwargs):
+    def _display_world_map_callback(self, *args, **kwargs):
         world_map_render_engine = WorldMapRenderEngine(
             self._controller.kernel.world_map_source,
             display_objects_manager=DisplayObjectManager([]),
         )
         text_widget = WorldMapWidget(self._controller, world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
+        self._main_view.right_menu_container.original_widget = WorldMapSubMenu(
+            self._controller, self._main_view, self
+        )
 
-    def quit_callback(self, *args, **kwargs):
-        # for task in asyncio.Task.all_tasks():
-        #     if not task.cancelled():
-        #         task.cancel()
+    def _go_back_root_callback(self, *args, **kwargs):
+        self._controller.disconnect()
 
+
+class RootMenu(BaseMenu):
+    title = "Welcome"
+
+    def _get_menu_buttons(self):
+        return [("Play", self._play_callback), ("Quit", self._quit_callback)]
+
+    def _play_callback(self, *args, **kwargs):
+        self._main_view.main_content_container.original_widget = ChooseServerMenu(
+            self._controller, self._main_view
+        )
+
+    def _quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()
 
 
@@ -88,25 +84,24 @@ class View(urwid.WidgetWrap):
         return self._right_menu_container
 
     def _create_main_content_widget(self):
-        # FIXME BS 2019-01-23: Remove this and replace by hello text
-        with open("/home/bux/Projets/rolling/tests/src/tilemapa.txt") as tile_map_file:
-            tile_map_source = ZoneMapSource(
-                self._controller.kernel, tile_map_file.read()
-            )
+        txt = urwid.Text(u"Welcome to rolling")
+        fill = urwid.Filler(txt, "top")
+        return fill
 
-        tile_map_render_engine = TileMapRenderEngine(
-            tile_map_source, display_objects_manager=DisplayObjectManager([])
+    def display_root_menu_widget(self):
+        self._right_menu_container.original_widget = RootMenu(self._controller, self)
+
+    def display_zone_menu_widget(self):
+        self._right_menu_container.original_widget = ZoneMenu(self._controller, self)
+
+    def display_root_content(self):
+        self._main_content_container.original_widget = (
+            self._create_main_content_widget()
         )
-        tile_map_widget = TileMapWidget(self._controller, tile_map_render_engine)
-        return tile_map_widget
-
-    def _create_right_menu_widget(self):
-        root_menu = RootMenu(self._controller, self)
-        return urwid.Padding(root_menu, left=0, right=0)
 
     def _main_window(self):
         self._main_content_container = urwid.Padding(self._create_main_content_widget())
-        self._right_menu_container = urwid.Padding(self._create_right_menu_widget())
+        self._right_menu_container = urwid.Padding(RootMenu(self._controller, self))
 
         vertical_line = urwid.AttrWrap(urwid.SolidFill(u"\u2502"), "line")
         columns = urwid.Columns(
