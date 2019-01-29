@@ -34,11 +34,9 @@ class MapWidget(urwid.Widget):
 
     def render(self, size, focus=False):
         self._current_col_size, self._current_row_size = size
+        return self._render(size, focus)
 
-        if self._first_display:
-            self._first_display = False
-            self._offset_change((0, 0))  # to compute offset with player position
-
+    def _render(self, size, focus=False):
         self._render_engine.render(
             self._current_col_size,
             self._current_row_size,
@@ -74,6 +72,25 @@ class MapWidget(urwid.Widget):
         self._invalidate()
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
+        pass
+
+
+class WorldMapWidget(MapWidget):
+    pass
+
+
+# TODO BS 2019-01-22: Rename into ZoneMapWidget
+class TileMapWidget(MapWidget):
+    def __init__(
+        self, controller: "Controller", render_engine: MapRenderEngine
+    ) -> None:
+        super().__init__(controller, render_engine)
+        self._connector = ZoneMapConnector(self, self._controller)
+
+    def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
+        # move player
+        self._connector.player_move(new_offset)
+
         # compute center of the map
         map_center_col = self._render_engine._world_map_source.geography.width // 2
         map_center_row = self._render_engine._world_map_source.geography.height // 2
@@ -110,19 +127,9 @@ class MapWidget(urwid.Widget):
         self._horizontal_offset = player_center_col
         self._vertical_offset = player_center_row
 
+    def _render(self, size, focus=False):
+        if self._first_display:
+            self._first_display = False
+            self._offset_change((0, 0))  # to compute offset with player position
 
-class WorldMapWidget(MapWidget):
-    pass
-
-
-# TODO BS 2019-01-22: Rename into ZoneMapWidget
-class TileMapWidget(MapWidget):
-    def __init__(
-        self, controller: "Controller", render_engine: MapRenderEngine
-    ) -> None:
-        super().__init__(controller, render_engine)
-        self._connector = ZoneMapConnector(self, self._controller)
-
-    def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
-        super()._offset_change(new_offset)
-        self._connector.player_move(new_offset)
+        return super()._render(size, focus)
