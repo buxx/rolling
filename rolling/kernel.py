@@ -10,7 +10,7 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 
-from rolling.exception import KernelComponentNotPrepared
+from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
 from rolling.log import kernel_logger
@@ -80,7 +80,7 @@ class Kernel(object):
     @property
     def server_zone_events_manager(self) -> ZoneEventsManager:
         if self._server_zone_events_manager is None:
-            raise KernelComponentNotPrepared(
+            raise ComponentNotPrepared(
                 "self._server_zone_events_manager must be prepared before usage"
             )
 
@@ -89,7 +89,7 @@ class Kernel(object):
     @property
     def world_map_source(self) -> WorldMapSource:
         if self._world_map_source is None:
-            raise KernelComponentNotPrepared(
+            raise ComponentNotPrepared(
                 "self._world_map_source must be prepared before usage"
             )
 
@@ -102,7 +102,7 @@ class Kernel(object):
     @property
     def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
         if self._world_map_source is None:
-            raise KernelComponentNotPrepared(
+            raise ComponentNotPrepared(
                 "self._tile_maps_by_position must be prepared before usage"
             )
 
@@ -149,14 +149,14 @@ class Kernel(object):
     @property
     def client_db_session(self) -> Session:
         if self._client_db_session is None:
-            raise KernelComponentNotPrepared("client_db_session is not created yet")
+            raise ComponentNotPrepared("client_db_session is not created yet")
 
         return self._client_db_session
 
     @property
     def server_db_session(self) -> Session:
         if self._server_db_session is None:
-            raise KernelComponentNotPrepared("server_db_session is not created yet")
+            raise ComponentNotPrepared("server_db_session is not created yet")
 
         return self._server_db_session
 

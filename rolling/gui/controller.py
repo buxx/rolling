@@ -12,6 +12,7 @@ from rolling.client.http.zone import ZoneWebSocketClient
 from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
+from rolling.exception import ComponentNotPrepared
 from rolling.exception import NotConnectedToServer
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
@@ -71,6 +72,13 @@ class Controller(object):
     @property
     def to_send_zone_queue(self) -> Queue:
         return self._to_send_zone_queue
+
+    @property
+    def display_objects_manager(self) -> DisplayObjectManager:
+        if self._display_objects_manager is None:
+            raise ComponentNotPrepared("self._display_objects_manager not prepared")
+
+        return self._display_objects_manager
 
     def main(self) -> None:
         self._asyncio_loop = asyncio.get_event_loop()

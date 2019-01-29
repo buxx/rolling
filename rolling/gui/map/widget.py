@@ -24,24 +24,33 @@ class MapWidget(urwid.Widget):
         self._render_engine = render_engine
         self._horizontal_offset = 0
         self._vertical_offset = 0
+        self._current_row_size = 0
+        self._current_col_size = 0
+        self._first_display = True
 
     @property
     def render_engine(self) -> MapRenderEngine:
         return self._render_engine
 
     def render(self, size, focus=False):
-        x, y = size
+        self._current_col_size, self._current_row_size = size
+
+        if self._first_display:
+            self._first_display = False
+            self._offset_change((0, 0))  # to compute offset with player position
 
         self._render_engine.render(
-            x,
-            y,
+            self._current_col_size,
+            self._current_row_size,
             offset_horizontal=self._horizontal_offset,
             offset_vertical=self._vertical_offset,
         )
 
         self._controller.loop.set_alarm_in(0.25, lambda *_, **__: self._invalidate())
         return urwid.TextCanvas(
-            text=self._render_engine.rows, attr=self._render_engine.attributes, maxcol=x
+            text=self._render_engine.rows,
+            attr=self._render_engine.attributes,
+            maxcol=self._current_col_size,
         )
 
     def selectable(self):
@@ -51,16 +60,12 @@ class MapWidget(urwid.Widget):
         new_offset = None
 
         if key == "up":
-            self._vertical_offset += 1
             new_offset = (1, 0)
         if key == "down":
-            self._vertical_offset -= 1
             new_offset = (-1, 0)
         if key == "left":
-            self._horizontal_offset += 1
             new_offset = (0, 1)
         if key == "right":
-            self._horizontal_offset -= 1
             new_offset = (0, -1)
 
         if new_offset is not None:
@@ -69,7 +74,41 @@ class MapWidget(urwid.Widget):
         self._invalidate()
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
-        pass
+        # compute center of the map
+        map_center_col = self._render_engine._world_map_source.geography.width // 2
+        map_center_row = self._render_engine._world_map_source.geography.height // 2
+
+        # compute void around the map
+        left_void = (
+            self._current_col_size
+            - self._render_engine._world_map_source.geography.width
+        ) // 2
+        top_void = (
+            self._current_row_size
+            - self._render_engine._world_map_source.geography.height
+        ) // 2
+        left_void = left_void if left_void > 0 else 0
+        top_void = top_void if top_void > 0 else 0
+
+        # compute center of the map including voids
+        display_center_col = (self._current_col_size // 2) - (
+            map_center_col + left_void
+        )
+        display_center_row = (self._current_row_size // 2) - (map_center_row + top_void)
+
+        # apply player position offsets
+        player_center_col = display_center_col + (
+            map_center_col
+            - self._controller.display_objects_manager.current_player.col_i
+        )
+        player_center_row = display_center_row + (
+            map_center_row
+            - self._controller.display_objects_manager.current_player.row_i
+        )
+
+        # Set center of display on it
+        self._horizontal_offset = player_center_col
+        self._vertical_offset = player_center_row
 
 
 class WorldMapWidget(MapWidget):
@@ -85,4 +124,5 @@ class TileMapWidget(MapWidget):
         self._connector = ZoneMapConnector(self, self._controller)
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
+        super()._offset_change(new_offset)
         self._connector.player_move(new_offset)

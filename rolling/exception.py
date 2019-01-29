@@ -40,5 +40,5 @@ class UnableToProcessEvent(RollingError):
         return self._event
 
 
-class KernelComponentNotPrepared(RollingError):
+class ComponentNotPrepared(RollingError):
     pass
