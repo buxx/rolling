@@ -95,6 +95,7 @@ def worldmapb_render_engine(
         display_objects_manager=display_object_manager__empty,
     )
 
+
 @pytest.fixture
 def worldmapb2_render_engine(
     worldmapsourceb2_txt: str,
