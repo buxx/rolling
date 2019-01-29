@@ -86,6 +86,9 @@ class MapRenderEngine(object):
         elif height_difference == 1:
             top_void = 1 + offset_vertical
             bottom_void = 0 - offset_vertical
+        elif height_difference < 0:
+            top_void = offset_vertical
+            bottom_void = 0
         else:
             top_void = 0 + offset_vertical
             bottom_void = 0 - offset_vertical
@@ -115,10 +118,6 @@ class MapRenderEngine(object):
 
             if (row_i + top_void) < 0:
                 continue
-
-            # do not fill outside screen
-            if row_i == height:
-                break
 
             # do not fill outside screen
             if row_i + top_void + 1 > height:

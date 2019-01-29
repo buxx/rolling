@@ -26,6 +26,12 @@ def worldmapsourceb_txt() -> str:
 
 
 @pytest.fixture
+def worldmapsourceb2_txt() -> str:
+    with open(os.path.join("tests", "src", "worldmapb2.txt")) as f:
+        return f.read()
+
+
+@pytest.fixture
 def worldmapsourcec_txt() -> str:
     with open(os.path.join("tests", "src", "worldmapc.txt")) as f:
         return f.read()
@@ -37,8 +43,13 @@ def worldmapa_kernel(worldmapsourcea_txt) -> Kernel:
 
 
 @pytest.fixture
-def worldmapb_kernel(worldmapsourceb_txt) -> Kernel:
-    return Kernel(worldmapsourceb_txt)
+def worldmapb_kernel(worldmapsourceb2_txt) -> Kernel:
+    return Kernel(worldmapsourceb2_txt)
+
+
+@pytest.fixture
+def worldmapb2_kernel(worldmapsourceb2_txt) -> Kernel:
+    return Kernel(worldmapsourceb2_txt)
 
 
 @pytest.fixture
@@ -80,6 +91,19 @@ def worldmapb_render_engine(
     return WorldMapRenderEngine(
         world_map_source=WorldMapSource(
             kernel=worldmapb_kernel, raw_source=worldmapsourceb_txt
+        ),
+        display_objects_manager=display_object_manager__empty,
+    )
+
+@pytest.fixture
+def worldmapb2_render_engine(
+    worldmapsourceb2_txt: str,
+    display_object_manager__empty: DisplayObjectManager,
+    worldmapb2_kernel: Kernel,
+) -> WorldMapRenderEngine:
+    return WorldMapRenderEngine(
+        world_map_source=WorldMapSource(
+            kernel=worldmapb2_kernel, raw_source=worldmapsourceb2_txt
         ),
         display_objects_manager=display_object_manager__empty,
     )

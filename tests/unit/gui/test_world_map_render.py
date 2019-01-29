@@ -260,7 +260,7 @@ class TestWorldMapRender(object):
         engine = worldmapb_render_engine
         engine.render(width=8, height=2, offset_vertical=-1)
 
-        assert [b"  ~^^~  ", b"        "] == engine.rows
+        assert [b"  ~^^~  ", b"  ~~~~  "] == engine.rows
 
     # FIXME
     def test_unit__render__ok__vertical_decal_and_cut_0(
@@ -294,7 +294,7 @@ class TestWorldMapRender(object):
         engine = worldmapb_render_engine
         engine.render(width=8, height=2, offset_vertical=-2)
 
-        assert [b"        ", b"        "] == engine.rows
+        assert [b"  ~~~~  ", b"        "] == engine.rows
 
     def test_unit__render__ok__large_width_less_height_vertical_huge_neg_offset(
         self, worldmapb_render_engine: WorldMapRenderEngine
@@ -366,4 +366,18 @@ class TestWorldMapRender(object):
             b"        ",
             b"        ",
             b"        ",
+        ] == engine.rows
+
+    def test_unit__tiny_render_with__ok__vertical_offset(
+        self, worldmapb2_render_engine: WorldMapRenderEngine
+    ):
+        engine = worldmapb2_render_engine
+        engine.render(width=8, height=5, offset_vertical=-1)
+
+        assert [
+            b"  ~^^~  ",
+            b"  ~~~~  ",
+            b"  ~~~~  ",
+            b"  ~~~~  ",
+            b"  ~~~~  ",
         ] == engine.rows
