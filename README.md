@@ -8,7 +8,7 @@ A role game engine
 
 On debian-like OS, need following debian packages:
 
-    libncurses-dev
+    libncurses-dev libsqlite3-dev
 
 ## Python environment require
 
