@@ -48,6 +48,7 @@ class Controller(object):
         self._received_zone_queue = Queue()
         self._to_send_zone_queue = Queue()
         self._zone_websocket_event = asyncio.Event()
+        self._zone_websocket_connected_event = asyncio.Event()
         self._display_objects_manager = DisplayObjectManager([])
 
         self._kernel.init_client_db_session()
@@ -123,13 +124,16 @@ class Controller(object):
                     self._player_character.world_row_i,
                     self._player_character.world_col_i,
                 )
+                self._zone_websocket_connected_event.set()
                 await zone_websocket_client.listen()
+                self._zone_websocket_connected_event.clear()
                 gui_logger.info("Zone websocket job finished")
 
         @capture_errors
         async def write():
             while True:
                 gui_logger.info("Waiting for an object to send to zone websocket")
+                await self._zone_websocket_connected_event.wait()
                 # FIXME BS 2019-01-14: this is blocking, see https://stackoverflow.com/questions/26413613/asyncio-is-it-possible-to-cancel-a-future-been-run-by-an-executor
                 # to make it unblocking
                 event = await self._asyncio_loop.run_in_executor(
