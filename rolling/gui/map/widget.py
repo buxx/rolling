@@ -4,11 +4,13 @@ import typing
 import urwid
 from urwid import BOX
 
+from rolling.exception import MoveToOtherZoneError
 from rolling.gui.connector import ZoneMapConnector
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import MapRenderEngine
+from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -82,12 +84,24 @@ class WorldMapWidget(MapWidget):
 # TODO BS 2019-01-22: Rename into ZoneMapWidget
 class TileMapWidget(MapWidget):
     def __init__(
-        self, controller: "Controller", render_engine: MapRenderEngine
+        self,
+        controller: "Controller",
+        render_engine: MapRenderEngine,
+        zone_map_source: ZoneMapSource,
     ) -> None:
         super().__init__(controller, render_engine)
-        self._connector = ZoneMapConnector(self, self._controller)
+        self._connector = ZoneMapConnector(
+            self, self._controller, zone_map_source=zone_map_source
+        )
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
+        try:
+            if not self._connector.move_is_possible(new_offset):
+                return
+        except MoveToOtherZoneError:
+            # FIXME BS 2019-03-06: Manage (try) change zone case
+            return
+
         # move player
         self._connector.player_move(new_offset)
 

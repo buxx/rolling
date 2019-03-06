@@ -42,3 +42,7 @@ class UnableToProcessEvent(RollingError):
 
 class ComponentNotPrepared(RollingError):
     pass
+
+
+class MoveToOtherZoneError(RollingError):
+    pass

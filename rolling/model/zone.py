@@ -25,7 +25,10 @@ class WorldTileTypeModel(TileTypeModel):
 @dataclasses.dataclass(frozen=True)
 class ZoneTileTypeModel(TileTypeModel):
     char: str
-    traversable: typing.Optional[typing.Dict[TransportType, bool]]
+    # FIXME BS 2019-03-06: Serpyco bug when use enum as dict key, see
+    # https://gitlab.com/sgrignard/serpyco/issues/21
+    # traversable: typing.Optional[typing.Dict[TransportType, bool]]
+    traversable: typing.Optional[typing.Dict[str, bool]]
 
 
 @dataclasses.dataclass(frozen=True)

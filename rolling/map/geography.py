@@ -3,8 +3,8 @@ import typing
 
 from rolling.exception import SourceLoadError
 from rolling.map.legend import MapLegend
+from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
-from rolling.map.type.zone import ZoneMapTileType
 
 
 class MapGeography(object):
@@ -45,7 +45,7 @@ class MapGeography(object):
         return max_length
 
     @property
-    def rows(self) -> typing.List[typing.List[typing.Type[WorldMapTileType]]]:
+    def rows(self) -> typing.List[typing.List[typing.Type[MapTileType]]]:
         return self._rows
 
     @property

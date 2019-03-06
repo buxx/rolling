@@ -62,6 +62,14 @@ class Controller(object):
         return self._loop
 
     @property
+    def zone_lib(self) -> ZoneLib:
+        if self._zone_lib is None:
+            raise NotConnectedToServer(
+                "You try to use property set when connected to a server"
+            )
+        return self._zone_lib
+
+    @property
     def player_character(self) -> CharacterModel:
         if self._player_character is None:
             raise NotConnectedToServer(
@@ -208,7 +216,9 @@ class Controller(object):
         tile_map_render_engine = TileMapRenderEngine(
             zone_map_source, display_objects_manager=self._display_objects_manager
         )
-        tile_map_widget = TileMapWidget(self, tile_map_render_engine)
+        tile_map_widget = TileMapWidget(
+            self, tile_map_render_engine, zone_map_source=zone_map_source
+        )
 
         # Establish web socket connection
         self._zone_websocket_event.set()

@@ -9,6 +9,7 @@ from rolling.map.source import WorldMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.zone import ZoneMapModel
+from rolling.model.zone import ZoneTileTypeModel
 
 
 class HttpClient(object):
@@ -18,6 +19,7 @@ class HttpClient(object):
         self._character_serializer = serpyco.Serializer(CharacterModel)
         self._characters_serializer = serpyco.Serializer(CharacterModel, many=True)
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
+        self._tiles_serializer = serpyco.Serializer(ZoneTileTypeModel, many=True)
 
     def create_character(
         self, create_character_model: CreateCharacterModel
@@ -60,3 +62,7 @@ class HttpClient(object):
     def get_world_source(self) -> str:
         response = requests.get("{}/world/source".format(self._server_address))
         return response.text
+
+    def get_tile_types(self) -> typing.List[ZoneTileTypeModel]:
+        response = requests.get(f"{self._server_address}/zones/tiles")
+        return self._tiles_serializer.load(response.json())
