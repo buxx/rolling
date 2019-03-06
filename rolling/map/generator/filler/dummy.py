@@ -1,7 +1,8 @@
 # coding: utf-8
 import typing
 
-from rolling.map.generator.filler.base import TileMapFiller, FillerFactory
+from rolling.map.generator.filler.base import FillerFactory
+from rolling.map.generator.filler.base import TileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
 from rolling.map.type.world import Beach
