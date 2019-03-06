@@ -3,7 +3,7 @@ import argparse
 import os
 
 from rolling.kernel import Kernel
-from rolling.map.generator.filler import DummyFillerFactory
+from rolling.map.generator.filler.simple import SimpleFillerFactory
 from rolling.map.generator.generator import FromWorldMapGenerator
 from rolling.map.source import WorldMapSource
 
@@ -20,7 +20,7 @@ def run(args: argparse.Namespace) -> None:
         kernel,
         default_map_width=args.map_widths,
         default_map_height=args.map_heights,
-        filler_factory=DummyFillerFactory(),
+        filler_factory=SimpleFillerFactory(),
         world_map_source=world_map_source,
     )
 

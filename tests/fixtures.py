@@ -6,7 +6,7 @@ import pytest
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.kernel import Kernel
-from rolling.map.generator.filler import DummyTileMapFiller
+from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource

@@ -1,7 +1,7 @@
 # coding: utf-8
 from rolling.kernel import Kernel
-from rolling.map.generator.filler import DummyFillerFactory
-from rolling.map.generator.filler import DummyTileMapFiller
+from rolling.map.generator.filler.dummy import DummyFillerFactory
+from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import FromWorldMapGenerator
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
