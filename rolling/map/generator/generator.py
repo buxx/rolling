@@ -1,6 +1,6 @@
 # coding: utf-8
-import typing
 from enum import Enum
+import typing
 
 from pip._internal.utils.misc import enum
 

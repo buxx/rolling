@@ -2,7 +2,8 @@
 import abc
 import typing
 
-from rolling.map.generator.generator import TileMapGenerator, Border
+from rolling.map.generator.generator import Border
+from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
 from rolling.map.type.world import WorldMapTileType
 

@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+from rolling.exception import MoveToOtherZoneError
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.meta import TransportType
@@ -22,7 +23,13 @@ class Physics(object):
     ) -> bool:
         row_i = position[0]
         col_i = position[1]
-        tile_type = self._zone_map_source.geography.rows[col_i][row_i]
+
+        try:
+            tile_type = self._zone_map_source.geography.rows[col_i][row_i]
+        except IndexError:
+            # IndexError means outside map
+            raise MoveToOtherZoneError()
+
         tile_model = self._controller.zone_lib.get_zone_tile_type_model(tile_type)
 
         # TODO BS 2019-03-06: Currently WALKING is hardcoded

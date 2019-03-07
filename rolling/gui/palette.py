@@ -4,6 +4,7 @@ import typing
 from rolling.kernel import Kernel
 
 PALETTE_CHARACTER = "CHARACTER"
+PALETTE_POSITION = "PALETTE_POSITION"
 
 
 class PaletteGenerator(object):

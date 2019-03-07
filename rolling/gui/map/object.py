@@ -3,6 +3,7 @@ import time
 import typing
 
 from rolling.gui.palette import PALETTE_CHARACTER
+from rolling.gui.palette import PALETTE_POSITION
 from rolling.model.character import CharacterModel
 
 
@@ -62,6 +63,20 @@ class CurrentPlayer(Character):
     def move_with_offset(self, new_offset: typing.Tuple[int, int]) -> None:
         self._row_i -= new_offset[0]
         self._col_i -= new_offset[1]
+
+
+class CurrentPosition(DisplayObject):
+    @property
+    def palette_id(self) -> str:
+        return PALETTE_POSITION
+
+    @property
+    def char(self) -> str:
+        return "x"
+
+    @property
+    def id(self) -> str:
+        return "__current_position__"
 
 
 class DisplayObjectManager(object):

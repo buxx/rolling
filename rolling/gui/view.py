@@ -5,6 +5,7 @@ import typing
 
 import urwid
 
+from rolling.gui.map.object import CurrentPosition
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine
@@ -39,9 +40,18 @@ class ZoneMenu(BaseMenu):
         ]
 
     def _display_world_map_callback(self, *args, **kwargs):
+        display_objects_manager = DisplayObjectManager(
+            [
+                CurrentPosition(
+                    col_i=self._controller.player_character.world_col_i,
+                    row_i=self._controller.player_character.world_row_i,
+                )
+            ]
+        )
+        display_objects_manager.refresh_indexes()
         world_map_render_engine = WorldMapRenderEngine(
             self._controller.kernel.world_map_source,
-            display_objects_manager=DisplayObjectManager([]),
+            display_objects_manager=display_objects_manager,
         )
         text_widget = WorldMapWidget(self._controller, world_map_render_engine)
         self._main_view.main_content_container.original_widget = text_widget
