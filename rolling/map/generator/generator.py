@@ -1,5 +1,8 @@
 # coding: utf-8
 import typing
+from enum import Enum
+
+from pip._internal.utils.misc import enum
 
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
@@ -9,6 +12,17 @@ from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.map.generator.filler import TileMapFiller, FillerFactory
+
+
+class Border(Enum):
+    top_left = "top_left"
+    top = "top"
+    top_right = "top_right"
+    right = "right"
+    bottom_right = "bottom_right"
+    bottom = "bottom"
+    bottom_left = "bottom_left"
+    left = "left"
 
 
 class TileMapGenerator(object):
@@ -71,7 +85,18 @@ class TileMapGenerator(object):
                 if col_i <= left_void_part[1] or col_i >= right_void_part[0]:
                     self._current_raw_source += " "  # FIXME fom type
                 else:
-                    self._current_raw_source += self._filler.get_char(self)
+                    is_border = False
+                    distance_from_border = 0
+                    border = None
+
+                    # TODO BS 2019-03-07: give info about border
+
+                    self._current_raw_source += self._filler.get_char(
+                        self,
+                        is_border=is_border,
+                        distance_from_border=distance_from_border,
+                        border=border,
+                    )
 
             self._current_raw_source += "\n"
 

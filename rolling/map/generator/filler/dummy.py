@@ -3,7 +3,7 @@ import typing
 
 from rolling.map.generator.filler.base import FillerFactory
 from rolling.map.generator.filler.base import TileMapFiller
-from rolling.map.generator.generator import TileMapGenerator
+from rolling.map.generator.generator import TileMapGenerator, Border
 from rolling.map.source import WorldMapSource
 from rolling.map.type.world import Beach
 from rolling.map.type.world import Hill
@@ -23,7 +23,13 @@ class DummyTileMapFiller(TileMapFiller):
     def __init__(self, tile_type: typing.Type[ZoneMapTileType]) -> None:
         self._tile_type = tile_type
 
-    def get_char(self, tile_map_generator: TileMapGenerator) -> str:
+    def get_char(
+        self,
+        tile_map_generator: TileMapGenerator,
+        is_border: bool,
+        distance_from_border: typing.Optional[int],
+        border: typing.Optional[Border] = None,
+    ) -> str:
         return tile_map_generator.kernel.tile_map_legend.get_str_with_type(
             self._tile_type
         )
