@@ -2,6 +2,7 @@
 import typing
 
 from rolling.exception import MoveToOtherZoneError
+from rolling.exception import SameZoneError
 from rolling.map.source import ZoneMapSource
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import ZoneEvent
@@ -39,7 +40,7 @@ class ZoneMapConnector(object):
             or new_row_i < 0
             or new_row_i > self._zone_map_source.geography.height
         ):
-            raise MoveToOtherZoneError()
+            raise MoveToOtherZoneError(new_row_i, new_col_i)
 
         return self._physics.player_can_move_at(current_player, (new_row_i, new_col_i))
 
@@ -48,6 +49,8 @@ class ZoneMapConnector(object):
         current_player = (
             self._widget.render_engine.display_objects_manager.current_player
         )
+        # FIXME BS 2019-03-08: We update data of player in display_objects_manager, warning ! There
+        # is another instance of it in controller ! (player_character). This must only one.
         current_player.move_with_offset(new_offset)
         self._widget.render_engine.display_objects_manager.refresh_indexes()
 
@@ -62,3 +65,25 @@ class ZoneMapConnector(object):
                 ),
             )
         )
+
+    def get_zone_coordinates(self, row_i: int, col_i: int) -> typing.Tuple[int, int]:
+        player = self._controller.player_character
+
+        # top
+        if row_i < 0:
+            return player.world_row_i - 1, player.world_col_i
+
+        # left
+        if col_i < 0:
+            return player.world_row_i, player.world_col_i - 1
+
+        # right
+        if col_i >= self._zone_map_source.geography.width:
+            return player.world_row_i, player.world_col_i + 1
+
+        # bottom
+        if row_i >= self._zone_map_source.geography.height:
+            return player.world_row_i + 1, player.world_col_i
+
+        # FIXME BS 2019-03-08: Must manage top left, top right, bottom right, bottom left
+        raise SameZoneError()

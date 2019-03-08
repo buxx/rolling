@@ -28,7 +28,7 @@ class Physics(object):
             tile_type = self._zone_map_source.geography.rows[col_i][row_i]
         except IndexError:
             # IndexError means outside map
-            raise MoveToOtherZoneError()
+            raise MoveToOtherZoneError(row_i, col_i)
 
         tile_model = self._controller.zone_lib.get_zone_tile_type_model(tile_type)
 

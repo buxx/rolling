@@ -45,4 +45,18 @@ class ComponentNotPrepared(RollingError):
 
 
 class MoveToOtherZoneError(RollingError):
+    def __init__(self, row_i: int, col_i: int) -> None:
+        self._row_i = row_i
+        self._col_i = col_i
+
+    @property
+    def row_i(self) -> int:
+        return self._row_i
+
+    @property
+    def col_i(self) -> int:
+        return self._col_i
+
+
+class SameZoneError(RollingError):
     pass

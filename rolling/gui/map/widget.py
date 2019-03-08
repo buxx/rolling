@@ -10,6 +10,7 @@ from rolling.gui.map.object import Character
 from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import MapRenderEngine
+from rolling.gui.play.zone import ChangeZoneDialog
 from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
@@ -98,8 +99,9 @@ class TileMapWidget(MapWidget):
         try:
             if not self._connector.move_is_possible(new_offset):
                 return
-        except MoveToOtherZoneError:
+        except MoveToOtherZoneError as exc:
             # FIXME BS 2019-03-06: Manage (try) change zone case
+            self._change_zone_dialog(exc.row_i, exc.col_i)
             return
 
         # move player
@@ -147,3 +149,17 @@ class TileMapWidget(MapWidget):
             self._offset_change((0, 0))  # to compute offset with player position
 
         return super()._render(size, focus)
+
+    def _change_zone_dialog(self, row_i: int, col_i: int) -> None:
+        zone_map_widget = self._controller._view.main_content_container.original_widget
+        world_row_i, world_col_i = self._connector.get_zone_coordinates(row_i, col_i)
+
+        self._controller._view.main_content_container.original_widget = ChangeZoneDialog(
+            kernel=self._controller.kernel,
+            controller=self._controller,
+            original_widget=zone_map_widget,
+            title="Move to an other zone",
+            text="You are trying to move on other zone, continue ?",
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )
