@@ -257,25 +257,3 @@ class Controller(object):
             world_col_i=world_col_i,
         )
         self.display_zone()
-
-        # FIXME BS 2019-03-08: There is another player character in display_manager of widget !
-        # So we must update it to to display it at right zone coordinates
-        # Move this code into change_character_zone when current_player access is stabilized
-
-        # Replace character on zone
-        to_zone_source = ZoneMapSource(self._kernel, to_zone.raw_source)
-        disp_char = (
-            self._view._main_content_container._original_widget._render_engine._display_objects_manager._current_player
-        )
-        # bottom to top
-        if disp_char.row_i == to_zone_source.geography.height - 1:
-            disp_char.row_i = 0
-        # top to bottom
-        elif disp_char.row_i == 0:
-            disp_char.row_i = to_zone_source.geography.height - 1
-        # left to right
-        elif disp_char.col_i == to_zone_source.geography.width - 1:
-            disp_char.col_i = 0
-        # right to left
-        elif disp_char.col_i == 0:
-            disp_char.col_i = to_zone_source.geography.width - 1

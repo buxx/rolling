@@ -60,6 +60,10 @@ class Character(DisplayObject):
 
 
 class CurrentPlayer(Character):
+    def __init__(self, row_i: int, col_i: int, character: CharacterModel) -> None:
+        super().__init__(row_i, col_i, character)
+        character.associate_display_object(self)
+
     def move_with_offset(self, new_offset: typing.Tuple[int, int]) -> None:
         self._row_i -= new_offset[0]
         self._col_i -= new_offset[1]
@@ -126,6 +130,7 @@ class DisplayObjectManager(object):
             self._objects_by_position[display_object_position].append(display_object)
             self._objects_by_ids[display_object.id] = display_object
 
+            # TODO BS 2019-03-08: more elegant way to give CurrentPlayer
             if isinstance(display_object, CurrentPlayer):
                 self._current_player = display_object
 

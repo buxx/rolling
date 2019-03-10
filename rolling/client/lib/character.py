@@ -39,3 +39,20 @@ class CharacterLib(object):
         # FIXME BS 2019-03-08 code client request (server side to)
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i
+
+        # Replace character on zone
+        to_zone_source = ZoneMapSource(self._kernel, to_zone.raw_source)
+        disp_char = character.display_object
+
+        # bottom to top
+        if disp_char.row_i == to_zone_source.geography.height - 1:
+            disp_char.row_i = 0
+        # top to bottom
+        elif disp_char.row_i == 0:
+            disp_char.row_i = to_zone_source.geography.height - 1
+        # left to right
+        elif disp_char.col_i == to_zone_source.geography.width - 1:
+            disp_char.col_i = 0
+        # right to left
+        elif disp_char.col_i == 0:
+            disp_char.col_i = to_zone_source.geography.width - 1
