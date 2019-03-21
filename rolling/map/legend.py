@@ -5,6 +5,7 @@ from rolling.exception import NoDefaultTileType
 from rolling.exception import TileTypeNotFound
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
+from rolling.map.type.zone import Nothing
 
 
 class MapLegend(object):
@@ -15,7 +16,8 @@ class MapLegend(object):
         default_type: typing.Optional[typing.Type[MapTileType]] = None,
     ) -> None:
         self._str_to_type: typing.Dict[str, typing.Type[MapTileType]] = {}
-        self._type_to_str: typing.Dict[typing.Type[MapTileType, str]] = {}
+        # FIXME BS 2019-03-21: Nothing char can be non hardcoded no ?
+        self._type_to_str: typing.Dict[typing.Type[MapTileType, str]] = {Nothing: " "}
         self._default_type: typing.Optional[typing.Type[MapTileType]] = None
 
         for key, raw_value in raw_legend.items():

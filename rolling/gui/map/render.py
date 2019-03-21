@@ -6,6 +6,7 @@ from rolling.exception import TileTypeNotFound
 from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.map.source import MapSource
+from rolling.map.type.zone import Nothing
 
 WORLD_VOID_STR = " "
 
@@ -41,7 +42,6 @@ class MapRenderEngine(object):
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._display_objects_manager.display_objects = display_objects
 
-    # TODO BS 2018-12-17: Ugly algorithm ...
     def render(
         self,
         width: int,
@@ -49,6 +49,66 @@ class MapRenderEngine(object):
         offset_horizontal: int = 0,
         offset_vertical: int = 0,
     ) -> None:
+        map_width = self._world_map_source.geography.width
+        map_height = self._world_map_source.geography.height
+        map_rows = self._world_map_source.geography.rows
+        map_legend = self._world_map_source.legend
+
+        # Build map tile coordinates
+        matrix: typing.List[typing.List[typing.Tuple[int, int]]] = [
+            [(None, None) for i in range(width)] for ii in range(height)
+        ]
+        for screen_row_i in range(height):
+            for screen_col_i in range(width):
+                map_row_i = screen_row_i - offset_vertical
+                map_col_i = screen_col_i - offset_horizontal
+
+                matrix[screen_row_i][screen_col_i] = map_row_i, map_col_i
+
+        # Build maps chars
+        screen_chars: typing.List[str] = ["" for i in range(height)]
+        for screen_row_i, row in enumerate(matrix):
+            for map_row_i, map_col_i in row:
+                # If it is outside map, use empty tile
+                if map_row_i < 0 or map_row_i > (map_height - 1) or map_col_i < 0 or map_col_i > (map_width - 1):
+                    tile_type = Nothing
+                else:
+                    tile_type = map_rows[map_row_i][map_col_i]
+
+                tile_chars = map_legend.get_str_with_type(tile_type)
+                screen_chars[screen_row_i] += tile_chars
+
+        # Build attributes
+        self._attributes = [None] * height
+        for screen_row_i, row in enumerate(screen_chars):
+            last_seen_char = None
+            self._attributes[screen_row_i] = []
+
+            for screen_col_i, char in enumerate(row):
+                if last_seen_char != char:
+                    try:
+                        tile_type = map_legend.get_type_with_str(char)
+                        self._attributes[screen_row_i].append(
+                            (tile_type.get_full_id(), len(char.encode()))
+                        )
+                    except TileTypeNotFound:
+                        self._attributes[screen_row_i].append((None, len(char.encode())))
+                else:
+                    self._attributes[screen_row_i][-1] = (
+                        self._attributes[screen_row_i][-1][0],
+                        self._attributes[screen_row_i][-1][1] + len(char.encode()),
+                    )
+                last_seen_char = char
+
+        # Encore each rows
+        self._rows = [None] * height
+        for screen_row_i, row in enumerate(screen_chars):
+            self._rows[screen_row_i] = row.encode()
+
+        return
+
+
+
         map_width = self._world_map_source.geography.width
         map_height = self._world_map_source.geography.height
 
