@@ -2,6 +2,7 @@
 import time
 import typing
 
+from rolling.exception import NoDisplayObjectAtThisPosition
 from rolling.gui.palette import PALETTE_CHARACTER
 from rolling.gui.palette import PALETTE_POSITION
 from rolling.model.character import CharacterModel
@@ -136,6 +137,12 @@ class DisplayObjectManager(object):
 
     def add_object(self, display_object: DisplayObject) -> None:
         self._objects.append(display_object)
+
+    def get_objects_for_position(self, x: int, y: int) -> typing.List[DisplayObject]:
+        try:
+            return self._objects_by_position[(x, y)]
+        except KeyError:
+            raise NoDisplayObjectAtThisPosition()
 
     def get_final_str(self, x: int, y: int, default: str) -> str:
         try:
