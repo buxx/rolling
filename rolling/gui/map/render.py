@@ -1,7 +1,8 @@
 # coding: utf-8
 import typing
 
-from rolling.exception import NoDefaultTileType, NoDisplayObjectAtThisPosition
+from rolling.exception import NoDefaultTileType
+from rolling.exception import NoDisplayObjectAtThisPosition
 from rolling.exception import TileTypeNotFound
 from rolling.gui.map.object import DisplayObject
 from rolling.gui.map.object import DisplayObjectManager
@@ -53,7 +54,9 @@ class MapRenderEngine(object):
         map_height = self._world_map_source.geography.height
         map_rows = self._world_map_source.geography.rows
         map_legend = self._world_map_source.legend
-        display_objects_by_position: typing.Dict[typing.Tuple[int, int], DisplayObject] = {}
+        display_objects_by_position: typing.Dict[
+            typing.Tuple[int, int], DisplayObject
+        ] = {}
 
         # Build map tile coordinates
         matrix: typing.List[typing.List[typing.Tuple[int, int]]] = [
@@ -71,13 +74,20 @@ class MapRenderEngine(object):
         for screen_row_i, row in enumerate(matrix):
             for map_row_i, map_col_i in row:
                 # If it is outside map, use empty tile
-                if map_row_i < 0 or map_row_i > (map_height - 1) or map_col_i < 0 or map_col_i > (map_width - 1):
+                if (
+                    map_row_i < 0
+                    or map_row_i > (map_height - 1)
+                    or map_col_i < 0
+                    or map_col_i > (map_width - 1)
+                ):
                     tile_type = Nothing
                 else:
                     tile_type = map_rows[map_row_i][map_col_i]
 
                 tile_chars = map_legend.get_str_with_type(tile_type)
-                final_chars = self._display_objects_manager.get_final_str(map_row_i, map_col_i, tile_chars)
+                final_chars = self._display_objects_manager.get_final_str(
+                    map_row_i, map_col_i, tile_chars
+                )
                 screen_chars[screen_row_i] += final_chars
 
         # Build attributes
@@ -94,7 +104,9 @@ class MapRenderEngine(object):
                             (tile_type.get_full_id(), len(char.encode()))
                         )
                     except TileTypeNotFound:
-                        self._attributes[screen_row_i].append((None, len(char.encode())))
+                        self._attributes[screen_row_i].append(
+                            (None, len(char.encode()))
+                        )
                 else:
                     self._attributes[screen_row_i][-1] = (
                         self._attributes[screen_row_i][-1][0],

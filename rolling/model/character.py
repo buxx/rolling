@@ -1,7 +1,7 @@
 # coding: utf-8
-import dataclasses
 import typing
 
+import dataclasses
 from rolling.exception import RollingError
 
 if typing.TYPE_CHECKING:
