@@ -50,6 +50,7 @@ class MapRenderEngine(object):
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._display_objects_manager.display_objects = display_objects
 
+    # TODO BS 2019-03-24: size depend of memory capacity
     @lru_cache(maxsize=128)
     def _get_matrix(
         self,
@@ -101,34 +102,45 @@ class MapRenderEngine(object):
                 )
                 screen_chars[screen_row_i] += final_chars
 
-        # Build attributes
-        self._attributes = [None] * height
-        for screen_row_i, row in enumerate(screen_chars):
-            last_seen_char = None
-            self._attributes[screen_row_i] = []
-
-            for screen_col_i, char in enumerate(row):
-                if last_seen_char != char:
-                    try:
-                        tile_type = self._map_legend.get_type_with_str(char)
-                        self._attributes[screen_row_i].append(
-                            (tile_type.get_full_id(), len(char.encode()))
-                        )
-                    except TileTypeNotFound:
-                        self._attributes[screen_row_i].append(
-                            (None, len(char.encode()))
-                        )
-                else:
-                    self._attributes[screen_row_i][-1] = (
-                        self._attributes[screen_row_i][-1][0],
-                        self._attributes[screen_row_i][-1][1] + len(char.encode()),
-                    )
-                last_seen_char = char
+        self._attributes = self._build_attributes(tuple(screen_chars), height)
 
         # Encore each rows
         self._rows = [None] * height
         for screen_row_i, row in enumerate(screen_chars):
             self._rows[screen_row_i] = row.encode()
+
+    # TODO BS 2019-03-24: size depend of memory capacity
+    @lru_cache(maxsize=128)
+    def _build_attributes(self, screen_chars: typing.Tuple[str], height: int) -> typing.List[
+            typing.List[typing.Tuple[typing.Optional[str], int]]
+    ]:
+        attributes: typing.List[
+            typing.List[typing.Tuple[typing.Optional[str], int]]
+        ] = [None] * height
+
+        for screen_row_i, row in enumerate(screen_chars):
+            last_seen_char = None
+            attributes[screen_row_i] = []
+
+            for screen_col_i, char in enumerate(row):
+                if last_seen_char != char:
+                    try:
+                        tile_type = self._map_legend.get_type_with_str(char)
+                        attributes[screen_row_i].append(
+                            (tile_type.get_full_id(), len(char.encode()))
+                        )
+                    except TileTypeNotFound:
+                        attributes[screen_row_i].append(
+                            (None, len(char.encode()))
+                        )
+                else:
+                    attributes[screen_row_i][-1] = (
+                        attributes[screen_row_i][-1][0],
+                        attributes[screen_row_i][-1][1] + len(char.encode()),
+                    )
+                last_seen_char = char
+
+        return attributes
 
 
 class WorldMapRenderEngine(MapRenderEngine):
