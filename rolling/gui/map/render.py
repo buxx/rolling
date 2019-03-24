@@ -54,9 +54,6 @@ class MapRenderEngine(object):
         map_height = self._world_map_source.geography.height
         map_rows = self._world_map_source.geography.rows
         map_legend = self._world_map_source.legend
-        display_objects_by_position: typing.Dict[
-            typing.Tuple[int, int], DisplayObject
-        ] = {}
 
         # Build map tile coordinates
         matrix: typing.List[typing.List[typing.Tuple[int, int]]] = [
