@@ -1,5 +1,6 @@
 # coding: utf-8
 import typing
+from functools import lru_cache
 
 from rolling.exception import NoDefaultTileType
 from rolling.exception import NoDisplayObjectAtThisPosition
@@ -23,6 +24,12 @@ class MapRenderEngine(object):
         ] = None
         self._display_objects_manager = display_objects_manager
 
+        # Shortcuts
+        self._map_width = self._world_map_source.geography.width
+        self._map_height = self._world_map_source.geography.height
+        self._map_rows = self._world_map_source.geography.rows
+        self._map_legend = self._world_map_source.legend
+
     @property
     def rows(self) -> typing.List[str]:
         return self._rows
@@ -43,18 +50,14 @@ class MapRenderEngine(object):
     def display_objects(self, display_objects: typing.List[DisplayObject]) -> None:
         self._display_objects_manager.display_objects = display_objects
 
-    def render(
+    @lru_cache(maxsize=128)
+    def _get_matrix(
         self,
         width: int,
         height: int,
         offset_horizontal: int = 0,
         offset_vertical: int = 0,
-    ) -> None:
-        map_width = self._world_map_source.geography.width
-        map_height = self._world_map_source.geography.height
-        map_rows = self._world_map_source.geography.rows
-        map_legend = self._world_map_source.legend
-
+    ) -> typing.List[typing.List[typing.Tuple[int, int]]]:
         # Build map tile coordinates
         matrix: typing.List[typing.List[typing.Tuple[int, int]]] = [
             [(None, None) for i in range(width)] for ii in range(height)
@@ -66,6 +69,17 @@ class MapRenderEngine(object):
 
                 matrix[screen_row_i][screen_col_i] = map_row_i, map_col_i
 
+        return matrix
+
+    def render(
+        self,
+        width: int,
+        height: int,
+        offset_horizontal: int = 0,
+        offset_vertical: int = 0,
+    ) -> None:
+        matrix = self._get_matrix(width, height, offset_horizontal, offset_vertical)
+
         # Build maps chars
         screen_chars: typing.List[str] = ["" for i in range(height)]
         for screen_row_i, row in enumerate(matrix):
@@ -73,15 +87,15 @@ class MapRenderEngine(object):
                 # If it is outside map, use empty tile
                 if (
                     map_row_i < 0
-                    or map_row_i > (map_height - 1)
+                    or map_row_i > (self._map_height - 1)
                     or map_col_i < 0
-                    or map_col_i > (map_width - 1)
+                    or map_col_i > (self._map_width - 1)
                 ):
                     tile_type = Nothing
                 else:
-                    tile_type = map_rows[map_row_i][map_col_i]
+                    tile_type = self._map_rows[map_row_i][map_col_i]
 
-                tile_chars = map_legend.get_str_with_type(tile_type)
+                tile_chars = self._map_legend.get_str_with_type(tile_type)
                 final_chars = self._display_objects_manager.get_final_str(
                     map_row_i, map_col_i, tile_chars
                 )
@@ -96,7 +110,7 @@ class MapRenderEngine(object):
             for screen_col_i, char in enumerate(row):
                 if last_seen_char != char:
                     try:
-                        tile_type = map_legend.get_type_with_str(char)
+                        tile_type = self._map_legend.get_type_with_str(char)
                         self._attributes[screen_row_i].append(
                             (tile_type.get_full_id(), len(char.encode()))
                         )
