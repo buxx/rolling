@@ -107,41 +107,12 @@ class TileMapWidget(MapWidget):
         # move player
         self._connector.player_move(new_offset)
 
-        # compute center of the map
-        map_center_col = self._render_engine._world_map_source.geography.width // 2
-        map_center_row = self._render_engine._world_map_source.geography.height // 2
+        character_col_i = self._controller.display_objects_manager.current_player.col_i
+        character_row_i = self._controller.display_objects_manager.current_player.row_i
 
-        # compute void around the map
-        left_void = (
-            self._current_col_size
-            - self._render_engine._world_map_source.geography.width
-        ) // 2
-        top_void = (
-            self._current_row_size
-            - self._render_engine._world_map_source.geography.height
-        ) // 2
-        left_void = left_void if left_void > 0 else 0
-        top_void = top_void if top_void > 0 else 0
-
-        # compute center of the map including voids
-        display_center_col = (self._current_col_size // 2) - (
-            map_center_col + left_void
-        )
-        display_center_row = (self._current_row_size // 2) - (map_center_row + top_void)
-
-        # apply player position offsets
-        player_center_col = display_center_col + (
-            map_center_col
-            - self._controller.display_objects_manager.current_player.col_i
-        )
-        player_center_row = display_center_row + (
-            map_center_row
-            - self._controller.display_objects_manager.current_player.row_i
-        )
-
-        # Set center of display on it
-        self._horizontal_offset = player_center_col
-        self._vertical_offset = player_center_row
+        # center on player
+        self._horizontal_offset = self._current_col_size // 2 - character_col_i
+        self._vertical_offset = self._current_row_size // 2 - character_row_i
 
     def _render(self, size, focus=False):
         if self._first_display:

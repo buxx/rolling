@@ -1,6 +1,6 @@
 # coding: utf-8
-import typing
 from functools import lru_cache
+import typing
 
 from rolling.exception import NoDefaultTileType
 from rolling.exception import NoDisplayObjectAtThisPosition
@@ -111,9 +111,9 @@ class MapRenderEngine(object):
 
     # TODO BS 2019-03-24: size depend of memory capacity
     @lru_cache(maxsize=128)
-    def _build_attributes(self, screen_chars: typing.Tuple[str], height: int) -> typing.List[
-            typing.List[typing.Tuple[typing.Optional[str], int]]
-    ]:
+    def _build_attributes(
+        self, screen_chars: typing.Tuple[str], height: int
+    ) -> typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]]:
         attributes: typing.List[
             typing.List[typing.Tuple[typing.Optional[str], int]]
         ] = [None] * height
@@ -130,9 +130,7 @@ class MapRenderEngine(object):
                             (tile_type.get_full_id(), len(char.encode()))
                         )
                     except TileTypeNotFound:
-                        attributes[screen_row_i].append(
-                            (None, len(char.encode()))
-                        )
+                        attributes[screen_row_i].append((None, len(char.encode())))
                 else:
                     attributes[screen_row_i][-1] = (
                         attributes[screen_row_i][-1][0],

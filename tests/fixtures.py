@@ -4,6 +4,7 @@ import os
 import pytest
 
 from rolling.gui.map.object import DisplayObjectManager
+from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.kernel import Kernel
 from rolling.map.generator.filler.dummy import DummyTileMapFiller
@@ -16,6 +17,12 @@ from rolling.map.type.zone import SeaWater
 @pytest.fixture
 def worldmapsourcea_txt() -> str:
     with open(os.path.join("tests", "src", "worldmapa.txt")) as f:
+        return f.read()
+
+
+@pytest.fixture
+def tilemapsourcea_txt() -> str:
+    with open(os.path.join("tests", "src", "tilemapa.txt")) as f:
         return f.read()
 
 
@@ -77,6 +84,20 @@ def worldmapa_render_engine(
     return WorldMapRenderEngine(
         world_map_source=WorldMapSource(
             kernel=worldmapa_kernel, raw_source=worldmapsourceb_txt
+        ),
+        display_objects_manager=display_object_manager__empty,
+    )
+
+
+@pytest.fixture
+def tilemapa_render_engine(
+    tilemapsourcea_txt: str,
+    display_object_manager__empty: DisplayObjectManager,
+    worldmapb_kernel: Kernel,
+) -> TileMapRenderEngine:
+    return TileMapRenderEngine(
+        world_map_source=ZoneMapSource(
+            kernel=worldmapb_kernel, raw_source=tilemapsourcea_txt
         ),
         display_objects_manager=display_object_manager__empty,
     )

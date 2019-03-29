@@ -32,7 +32,12 @@ from rolling.model.zone import ZoneMapModel
 
 
 class Controller(object):
-    def __init__(self, client: HttpClient, kernel: Kernel) -> None:
+    def __init__(
+        self,
+        client: HttpClient,
+        kernel: Kernel,
+        display_object_manager: DisplayObjectManager = None,
+    ) -> None:
         self._client = client
         self._asyncio_loop: asyncio.AbstractEventLoop = None
         self._loop = None
@@ -50,7 +55,9 @@ class Controller(object):
         self._to_send_zone_queue = Queue()
         self._zone_websocket_event = asyncio.Event()
         self._zone_websocket_connected_event = asyncio.Event()
-        self._display_objects_manager = DisplayObjectManager([])
+        self._display_objects_manager = display_object_manager or DisplayObjectManager(
+            []
+        )
 
         self._kernel.init_client_db_session()
 
