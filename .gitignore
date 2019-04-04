@@ -106,3 +106,8 @@ venv.bak/
 /venv*
 .idea
 *~
+cliend.db
+logs.txt
+server.db
+t.py
+test/

@@ -1,7 +1,7 @@
 # coding: utf-8
 from setuptools import setup
 
-test_require = ["pytest"]
+test_require = ["pytest", "aioresponses"]
 dev_require = ["black", "isort", "pip-utils", "mypy"] + test_require
 
 setup(
