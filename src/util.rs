@@ -2,6 +2,7 @@ use std::io;
 use std::fs;
 use std::io::Read;
 use crate::RollingError;
+use std::path::Path;
 
 
 pub const BLOCK_GEO: &str = "GEO";
@@ -30,7 +31,7 @@ pub fn extract_block_from_source(block_name: &str, source: &String) -> Result<St
   Err(RollingError::new(format!("Block \"{}\" not found", block_name)))
 }
 
-pub fn get_file_content(file_path: &str) -> Result<String, io::Error> {
+pub fn get_file_content(file_path: &Path) -> Result<String, io::Error> {
   let mut file = fs::File::open(file_path)?;
   let mut file_content = String::new();
   file.read_to_string(&mut file_content)?;
