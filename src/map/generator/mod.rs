@@ -5,6 +5,7 @@ use crate::map::world::World;
 use crate::tile::world::types as world_types;
 use crate::tile::zone::types as zone_types;
 use crate::RollingError;
+use crossbeam::thread;
 use std::path::Path;
 
 pub struct Generator<'a> {
@@ -30,25 +31,32 @@ impl<'a> Generator<'a> {
             width,
             height
         );
-        for (row_i, row) in self.world.rows.iter().enumerate() {
-            for (col_i, world_tile) in row.iter().enumerate() {
-                // TODO BS 2019-04-09: These char are visible only when line is end
-                print!("{}", self.world.geo_chars[row_i][col_i]);
-                let target_path = Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
-                let zone_generator = self.get_zone_generator(&world_tile);
 
-                match zone_generator.generate(target_path.as_path(), width, height) {
-                    Err(e) => {
-                        return Err(RollingError::new(format!(
-                            "Error during generation of {}-{}.txt: {}",
-                            row_i, col_i, e
-                        )));
-                    }
-                    Ok(_) => {}
+        thread::scope(|scope| {
+            for (row_i, row) in self.world.rows.iter().enumerate() {
+                for (col_i, world_tile) in row.iter().enumerate() {
+                    scope.spawn(move |_| {
+                        // TODO BS 2019-04-09: These char are visible only when line is end
+                        print!("{}", self.world.geo_chars[row_i][col_i]);
+                        let target_path =
+                            Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
+                        let zone_generator = self.get_zone_generator(&world_tile);
+
+                        match zone_generator.generate(target_path.as_path(), width, height) {
+                            Err(e) => {
+                                return Err(RollingError::new(format!(
+                                    "Error during generation of {}-{}.txt: {}",
+                                    row_i, col_i, e
+                                )));
+                            }
+                            Ok(_) => Ok(()),
+                        }
+                    });
                 }
+                println!();
             }
-            println!();
-        }
+        })
+        .unwrap();
 
         Ok(())
     }
