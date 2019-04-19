@@ -19,6 +19,37 @@ impl<'a> Generator<'a> {
     }
 }
 
+fn create_empty_progress(world: &World) -> String {
+    let mut progress: String = String::new();
+    for row in world.rows.iter() {
+        for _ in row.iter() {
+            progress.push_str(" ");
+        }
+        progress.push_str("\n");
+    }
+    progress
+}
+
+fn create_updated_progress(
+    progress: &String,
+    done_row_i: usize,
+    done_col_i: usize,
+    world: &World,
+) -> String {
+    let mut progress_vec: Vec<&str> = progress.split("\n").collect();
+    let change_row = progress_vec[done_row_i];
+    let mut new_row = String::new();
+    for (current_str_i, current_str) in change_row.chars().enumerate() {
+        if current_str_i == done_col_i {
+            new_row.push_str(&world.geo_chars[done_row_i][done_col_i].to_string());
+        } else {
+            new_row.push_str(&current_str.to_string());
+        }
+    }
+    progress_vec[done_row_i] = new_row.as_str();
+    progress_vec.join("\n")
+}
+
 impl<'a> Generator<'a> {
     pub fn generate(
         &self,
@@ -34,13 +65,7 @@ impl<'a> Generator<'a> {
         );
 
         // Prepare progress string
-        let mut progress: String = String::new();
-        for row in self.world.rows.iter() {
-            for _ in row.iter() {
-                progress.push_str(" ");
-            }
-            progress.push_str("\n");
-        }
+        let mut progress = create_empty_progress(self.world);
 
         println!("{}", progress);
         let (sender, receiver) = unbounded();
@@ -75,19 +100,7 @@ impl<'a> Generator<'a> {
             drop(sender);
 
             for (done_row_i, done_col_i) in receiver {
-                let mut progress_vec: Vec<&str> = progress.split("\n").collect();
-                let mut change_row = progress_vec[done_row_i];
-                let mut new_row = String::new();
-                for (current_str_i, current_str) in change_row.chars().enumerate() {
-                    if current_str_i == done_col_i {
-                        new_row.push_str(&self.world.geo_chars[done_row_i][done_col_i].to_string());
-                    } else {
-                        new_row.push_str(&current_str.to_string());
-                    }
-                }
-                progress_vec[done_row_i] = new_row.as_str();
-                progress = progress_vec.join("\n");
-
+                progress = create_updated_progress(&progress, done_row_i, done_col_i, self.world);
                 println!("{}", progress);
             }
         })
