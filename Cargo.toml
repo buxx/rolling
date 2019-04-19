@@ -1,0 +1,9 @@
+[package]
+name = "rolling"
+version = "0.1.0"
+authors = ["Bastien Sevajol <sevajol.bastien@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+structopt = "0.2"
+crossbeam = "0.7.1"
