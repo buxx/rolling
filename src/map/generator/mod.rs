@@ -5,6 +5,7 @@ use crate::map::world::World;
 use crate::tile::world::types as world_types;
 use crate::tile::zone::types as zone_types;
 use crate::RollingError;
+use crossbeam::channel::unbounded;
 use crossbeam::thread;
 use std::path::Path;
 
@@ -32,9 +33,22 @@ impl<'a> Generator<'a> {
             height
         );
 
+        // Prepare progress string
+        let mut progress: String = String::new();
+        for row in self.world.rows.iter() {
+            for _ in row.iter() {
+                progress.push_str(" ");
+            }
+            progress.push_str("\n");
+        }
+
+        println!("{}", progress);
+        let (sender, receiver) = unbounded();
+
         thread::scope(|scope| {
             for (row_i, row) in self.world.rows.iter().enumerate() {
                 for (col_i, world_tile) in row.iter().enumerate() {
+                    let thread_s = sender.clone();
                     scope.spawn(move |_| {
                         // TODO BS 2019-04-09: These char are visible only when line is end
                         print!("{}", self.world.geo_chars[row_i][col_i]);
@@ -49,11 +63,32 @@ impl<'a> Generator<'a> {
                                     row_i, col_i, e
                                 )));
                             }
-                            Ok(_) => Ok(()),
+                            Ok(_) => {
+                                thread_s.send((row_i, col_i)).unwrap();
+                                Ok(())
+                            }
                         }
                     });
                 }
                 println!();
+            }
+            drop(sender);
+
+            for (done_row_i, done_col_i) in receiver {
+                let mut progress_vec: Vec<&str> = progress.split("\n").collect();
+                let mut change_row = progress_vec[done_row_i];
+                let mut new_row = String::new();
+                for (current_str_i, current_str) in change_row.chars().enumerate() {
+                    if current_str_i == done_col_i {
+                        new_row.push_str(&self.world.geo_chars[done_row_i][done_col_i].to_string());
+                    } else {
+                        new_row.push_str(&current_str.to_string());
+                    }
+                }
+                progress_vec[done_row_i] = new_row.as_str();
+                progress = progress_vec.join("\n");
+
+                println!("{}", progress);
             }
         })
         .unwrap();
