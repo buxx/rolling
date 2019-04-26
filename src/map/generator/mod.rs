@@ -1,13 +1,17 @@
 pub mod zone;
 
+extern crate num_cpus;
 use crate::map::generator::zone::ZoneGenerator;
 use crate::map::world::World;
 use crate::tile::world::types as world_types;
+use crate::tile::world::types::WorldTile;
 use crate::tile::zone::types as zone_types;
 use crate::RollingError;
 use crossbeam::channel::unbounded;
-use crossbeam::thread;
+use rayon::prelude::*;
+use std::mem;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 pub struct Generator<'a> {
     world: &'a World<'a>,
@@ -64,47 +68,106 @@ impl<'a> Generator<'a> {
             height
         );
 
-        // Prepare progress string
-        let mut progress = create_empty_progress(self.world);
+        let mut progress = Arc::new(Mutex::new(create_empty_progress(self.world)));
+        let cpu_count: usize = num_cpus::get();
+        println!("cpus: {}", cpu_count);
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(cpu_count)
+            .build()
+            .unwrap();
+        let mut tile_positions: Vec<(usize, usize, &WorldTile)> = Vec::new();
+        let current_job_pool_start = Arc::new(Mutex::new(0));
+        for (row_i, row) in self.world.rows.iter().enumerate() {
+            for (col_i, world_tile) in row.iter().enumerate() {
+                tile_positions.push((row_i, col_i, &world_tile));
+            }
+        }
+        let job_count = tile_positions.len();
 
-        println!("{}", progress);
-        let (sender, receiver) = unbounded();
+        pool.install(|| {
+            let current_job_pool_start = Arc::clone(&current_job_pool_start);
+            (0..job_count / cpu_count).into_par_iter().for_each(|_i| {
+                let (sender, receiver) = unbounded();
+                let mut current_job_pool_start_ = current_job_pool_start.lock().unwrap();
 
-        thread::scope(|scope| {
-            for (row_i, row) in self.world.rows.iter().enumerate() {
-                for (col_i, world_tile) in row.iter().enumerate() {
-                    let thread_s = sender.clone();
-                    scope.spawn(move |_| {
-                        // TODO BS 2019-04-09: These char are visible only when line is end
-                        print!("{}", self.world.geo_chars[row_i][col_i]);
-                        let target_path =
-                            Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
-                        let zone_generator = self.get_zone_generator(&world_tile);
+                (0..cpu_count).into_par_iter().for_each(|j| {
+                    let thread_sender = sender.clone();
 
-                        match zone_generator.generate(target_path.as_path(), width, height) {
-                            Err(e) => {
-                                return Err(RollingError::new(format!(
-                                    "Error during generation of {}-{}.txt: {}",
-                                    row_i, col_i, e
-                                )));
-                            }
-                            Ok(_) => {
-                                thread_s.send((row_i, col_i)).unwrap();
-                                Ok(())
-                            }
+                    let current_job_index = *current_job_pool_start_ + j;
+                    let (row_i, col_i, world_tile) = tile_positions[current_job_index];
+                    let target_path =
+                        Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
+                    let zone_generator = self.get_zone_generator(&world_tile);
+
+                    match zone_generator.generate(target_path.as_path(), width, height) {
+                        Err(_) => {
+                            // FIXME
+                            //                            return Err(RollingError::new(format!(
+                            //                                "Error during generation of {}-{}.txt: {}",
+                            //                                row_i, col_i, e
+                            //                            )));
                         }
-                    });
-                }
-                println!();
-            }
-            drop(sender);
+                        Ok(_) => {
+                            thread_sender.send((row_i, col_i)).unwrap();
+                        }
+                    }
+                });
+                drop(sender);
 
-            for (done_row_i, done_col_i) in receiver {
-                progress = create_updated_progress(&progress, done_row_i, done_col_i, self.world);
-                println!("{}", progress);
-            }
-        })
-        .unwrap();
+                for (done_row_i, done_col_i) in receiver {
+                    let progress_ = Arc::clone(&progress);
+                    let mut current_progress = progress_.lock().unwrap();
+                    let new_progress = create_updated_progress(
+                        &current_progress,
+                        done_row_i,
+                        done_col_i,
+                        self.world,
+                    );
+                    //                    current_progress = String::from(new_progress);
+                    *current_progress = new_progress;
+                    println!("{}", current_progress);
+                }
+                *current_job_pool_start_ += cpu_count;
+                //  FIXME : release ? seems blocked some times
+                println!()
+            });
+        });
+
+        //        thread::scope(|scope| {
+        //            for (row_i, row) in self.world.rows.iter().enumerate() {
+        //                for (col_i, world_tile) in row.iter().enumerate() {
+        //                    let thread_s = sender.clone();
+        //                    scope.spawn(move |_| {
+        //                        // TODO BS 2019-04-09: These char are visible only when line is end
+        //                        print!("{}", self.world.geo_chars[row_i][col_i]);
+        //                        let target_path =
+        //                            Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
+        //                        let zone_generator = self.get_zone_generator(&world_tile);
+        //
+        //                        match zone_generator.generate(target_path.as_path(), width, height) {
+        //                            Err(e) => {
+        //                                return Err(RollingError::new(format!(
+        //                                    "Error during generation of {}-{}.txt: {}",
+        //                                    row_i, col_i, e
+        //                                )));
+        //                            }
+        //                            Ok(_) => {
+        //                                thread_s.send((row_i, col_i)).unwrap();
+        //                                Ok(())
+        //                            }
+        //                        }
+        //                    });
+        //                }
+        //                println!();
+        //            }
+        //            drop(sender);
+        //
+        //            for (done_row_i, done_col_i) in receiver {
+        //                progress = create_updated_progress(&progress, done_row_i, done_col_i, self.world);
+        //                println!("{}", progress);
+        //            }
+        //        })
+        //        .unwrap();
 
         Ok(())
     }
