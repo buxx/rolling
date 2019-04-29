@@ -46,38 +46,30 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
 
-    // TODO BS 2019-04-07: from cli args
-    let source = match util::get_file_content(&opt.world_map_file_path) {
-        Ok(file_content) => file_content,
-        Err(e) => panic!("Unable to retrieve world map content: {}", e),
-    };
+    let source = util::get_file_content(&opt.world_map_file_path).unwrap_or_else(|e| {
+        eprintln!("Unable to retrieve world map content: {}", e);
+        exit(1);
+    });
 
-    let legend = match tile::world::legend::WorldMapLegend::new(&source) {
-        Ok(legend) => legend,
-        Err(e) => {
-            println!("{}", e.message);
-            exit(1)
-        }
-    };
-    let world = match map::world::World::new(&source, &legend) {
-        Ok(world) => world,
-        Err(e) => {
-            println!("{}", e.message);
-            exit(1)
-        }
-    };
+    let legend = tile::world::legend::WorldMapLegend::new(&source).unwrap_or_else(|e| {
+        eprintln!("{}", e.message);
+        exit(1)
+    });
+    let world = map::world::World::new(&source, &legend).unwrap_or_else(|e| {
+        eprintln!("{}", e.message);
+        exit(1);
+    });
     let zone_generator = map::generator::Generator::new(&world);
 
     fs::create_dir_all(&opt.output).unwrap();
     let target_path = Path::new(&opt.output);
 
-    match zone_generator.generate(&target_path, opt.width, opt.height) {
-        Err(e) => {
-            println!("{}", e.message);
-            exit(1)
-        }
-        Ok(_) => {}
-    }
+    zone_generator
+        .generate(&target_path, opt.width, opt.height)
+        .unwrap_or_else(|e| {
+            eprintln!("{}", e.message);
+            exit(1);
+        });
 
     println!(
         "foo: {}",
