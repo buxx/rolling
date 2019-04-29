@@ -1,12 +1,12 @@
 use super::super::world;
 use crate::tile::zone::types;
+use std::error::Error;
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use std::path::Path;
 
 pub trait ZoneGenerator<'a> {
-    fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), io::Error>;
+    fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>>;
 }
 
 pub struct DefaultGenerator<'a> {
@@ -15,7 +15,7 @@ pub struct DefaultGenerator<'a> {
 }
 
 impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
-    fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), io::Error> {
+    fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>> {
         let mut final_string = String::new();
         for _row_i in 0..height {
             let mut row_string = String::new();
