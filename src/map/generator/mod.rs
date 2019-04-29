@@ -1,5 +1,6 @@
 pub mod zone;
 
+extern crate num_cpus;
 use crate::map::generator::zone::ZoneGenerator;
 use crate::map::world::World;
 use crate::tile::world::types as world_types;
@@ -8,6 +9,9 @@ use crate::RollingError;
 use crossbeam::channel::unbounded;
 use crossbeam::thread;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+use std::thread::sleep;
+use std::time;
 
 pub struct Generator<'a> {
     world: &'a World<'a>,
@@ -50,6 +54,27 @@ fn create_updated_progress(
     progress_vec.join("\n")
 }
 
+fn wait_or_run(max: usize, counter: &Arc<Mutex<usize>>) {
+    let sleep_time = time::Duration::from_millis(250);
+    loop {
+        let mut counter_value = counter.lock().unwrap();
+        if counter_value.lt(&max) {
+            *counter_value += 1;
+            drop(counter_value);
+            break;
+        } else {
+            drop(counter_value);
+            sleep(sleep_time);
+        }
+    }
+}
+
+fn decrease_counter(counter: &Arc<Mutex<usize>>) {
+    let mut counter_value = counter.lock().unwrap();
+    *counter_value -= 1;
+    drop(counter_value);
+}
+
 impl<'a> Generator<'a> {
     pub fn generate(
         &self,
@@ -66,6 +91,8 @@ impl<'a> Generator<'a> {
 
         // Prepare progress string
         let mut progress = create_empty_progress(self.world);
+        let max_concurrent_thread_count = num_cpus::get();
+        let concurrent_thread_count = Arc::new(Mutex::new(0));
 
         println!("{}", progress);
         let (sender, receiver) = unbounded();
@@ -74,21 +101,24 @@ impl<'a> Generator<'a> {
             for (row_i, row) in self.world.rows.iter().enumerate() {
                 for (col_i, world_tile) in row.iter().enumerate() {
                     let thread_s = sender.clone();
+                    let thread_counter_mutex = Arc::clone(&concurrent_thread_count);
+
                     scope.spawn(move |_| {
-                        // TODO BS 2019-04-09: These char are visible only when line is end
-                        print!("{}", self.world.geo_chars[row_i][col_i]);
+                        wait_or_run(max_concurrent_thread_count, &thread_counter_mutex);
                         let target_path =
                             Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
                         let zone_generator = self.get_zone_generator(&world_tile);
 
                         match zone_generator.generate(target_path.as_path(), width, height) {
                             Err(e) => {
+                                decrease_counter(&thread_counter_mutex);
                                 return Err(RollingError::new(format!(
                                     "Error during generation of {}-{}.txt: {}",
                                     row_i, col_i, e
                                 )));
                             }
                             Ok(_) => {
+                                decrease_counter(&thread_counter_mutex);
                                 thread_s.send((row_i, col_i)).unwrap();
                                 Ok(())
                             }

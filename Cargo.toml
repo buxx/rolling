@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 structopt = "0.2"
 crossbeam = "0.7.1"
+num_cpus = "1.10.0"
