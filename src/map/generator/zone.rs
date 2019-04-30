@@ -3,7 +3,6 @@ use crate::tile::zone::types;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
-use std::num::Wrapping;
 use std::path::Path;
 
 pub trait ZoneGenerator<'a> {
@@ -15,7 +14,7 @@ pub struct DefaultGenerator<'a> {
     pub default_tile: &'a types::ZoneTile,
 }
 
-fn is_out_zone(width: u32, height: u32, tested_row_i: u32, tested_col_i: u32) -> bool {
+fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) -> bool {
     let row_part_len = (width - 1) / 4;
     let col_part_len = (height - 1) / 4;
 
@@ -26,25 +25,24 @@ fn is_out_zone(width: u32, height: u32, tested_row_i: u32, tested_col_i: u32) ->
 
     // case of top
     if tested_row_i < height / 2 {
-        let end_left = Wrapping(row_part_len) - Wrapping(tested_row_i);
-        let start_right = Wrapping(width) - Wrapping(row_part_len) + Wrapping(tested_row_i);
+        let end_left = row_part_len - tested_row_i;
+        let start_right = width - row_part_len + tested_row_i;
 
-        if Wrapping(tested_col_i) < end_left {
+        if tested_col_i < end_left {
             return true;
         }
-        if Wrapping(tested_col_i) >= start_right {
+        if tested_col_i >= start_right {
             return true;
         }
     // case of bottom
     } else {
-        let end_left = Wrapping(row_part_len) - (Wrapping(height) - Wrapping(tested_row_i + 1));
-        let start_right = Wrapping(width) - Wrapping(row_part_len)
-            + (Wrapping(height) - Wrapping(tested_row_i + 1));
+        let end_left = row_part_len - (height - (tested_row_i + 1));
+        let start_right = width - row_part_len + height - (tested_row_i + 1);
 
-        if Wrapping(tested_col_i) < end_left {
+        if tested_col_i < end_left {
             return true;
         }
-        if Wrapping(tested_col_i) >= start_right {
+        if tested_col_i >= start_right {
             return true;
         }
     }
@@ -58,7 +56,7 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
         for row_i in 0..height {
             let mut row_string = String::new();
             for col_i in 0..width {
-                if is_out_zone(width, height, row_i, col_i) {
+                if is_out_zone(width as i32, height as i32, row_i as i32, col_i as i32) {
                     row_string.push(' ');
                 } else {
                     let tile_char = types::get_char_for_tile(self.default_tile);
