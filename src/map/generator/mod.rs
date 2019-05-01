@@ -144,26 +144,32 @@ impl<'a> Generator<'a> {
             world_types::WorldTile::Beach => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::Sand,
+                random: Some(vec![(10, &zone_types::ZoneTile::DryBush)]),
             },
             world_types::WorldTile::Sea => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::SaltedWater,
+                random: None,
             },
             world_types::WorldTile::Mountain => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::RockyGround,
+                random: None,
             },
             world_types::WorldTile::Plain => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
+                random: None,
             },
             world_types::WorldTile::Jungle => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::Dirt,
+                random: None,
             },
             world_types::WorldTile::Hill => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
+                random: None,
             },
         }
     }

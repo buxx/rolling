@@ -1,5 +1,7 @@
 use super::super::world;
 use crate::tile::zone::types;
+use rand::distributions::WeightedIndex;
+use rand::prelude::*;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
@@ -12,6 +14,7 @@ pub trait ZoneGenerator<'a> {
 pub struct DefaultGenerator<'a> {
     pub world: &'a world::World<'a>,
     pub default_tile: &'a types::ZoneTile,
+    pub random: Option<Vec<(u32, &'a types::ZoneTile)>>,
 }
 
 fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) -> bool {
@@ -53,13 +56,28 @@ fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) ->
 impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
     fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>> {
         let mut final_string = String::new();
+        let mut weights = vec![100];
+        let mut choices = vec![self.default_tile];
+        let mut rng = thread_rng();
+
+        if self.random.is_some() {
+            for random_ in self.random.as_ref().unwrap().into_iter() {
+                let (random_weight, random_tile) = random_;
+                weights.push(*random_weight);
+                choices.push(random_tile);
+            }
+        }
+
+        let distributions = WeightedIndex::new(&weights).unwrap();
+
         for row_i in 0..height {
             let mut row_string = String::new();
             for col_i in 0..width {
                 if is_out_zone(width as i32, height as i32, row_i as i32, col_i as i32) {
                     row_string.push(' ');
                 } else {
-                    let tile_char = types::get_char_for_tile(self.default_tile);
+                    let tile = choices[distributions.sample(&mut rng)];
+                    let tile_char = types::get_char_for_tile(tile);
                     row_string.push(tile_char);
                 }
             }
