@@ -5,6 +5,7 @@ pub enum ZoneTile {
     RockyGround,
     DryBush,
     ShortGrass,
+    Dirt,
 }
 
 pub fn get_char_for_tile(tile: &ZoneTile) -> char {
@@ -15,5 +16,6 @@ pub fn get_char_for_tile(tile: &ZoneTile) -> char {
         ZoneTile::DryBush => 'ൖ',
         ZoneTile::RockyGround => '⑉',
         ZoneTile::ShortGrass => '⁘',
+        ZoneTile::Dirt => '.',
     }
 }

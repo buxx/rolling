@@ -6,6 +6,8 @@ pub enum WorldTile {
     Mountain,
     Beach,
     Plain,
+    Jungle,
+    Hill,
 }
 
 pub fn get_type(search_id: &str) -> Result<WorldTile, RollingError> {
@@ -14,6 +16,8 @@ pub fn get_type(search_id: &str) -> Result<WorldTile, RollingError> {
         "MOUNTAIN" => Ok(WorldTile::Mountain),
         "BEACH" => Ok(WorldTile::Beach),
         "PLAIN" => Ok(WorldTile::Plain),
+        "JUNGLE" => Ok(WorldTile::Jungle),
+        "HILL" => Ok(WorldTile::Hill),
         _ => Err(RollingError::new(format!(
             "No world tile found for id \"{}\"",
             search_id

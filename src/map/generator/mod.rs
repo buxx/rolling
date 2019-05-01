@@ -157,6 +157,14 @@ impl<'a> Generator<'a> {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
             },
+            world_types::WorldTile::Jungle => zone::DefaultGenerator {
+                world: self.world,
+                default_tile: &zone_types::ZoneTile::Dirt,
+            },
+            world_types::WorldTile::Hill => zone::DefaultGenerator {
+                world: self.world,
+                default_tile: &zone_types::ZoneTile::ShortGrass,
+            },
         }
     }
 }

@@ -9,7 +9,7 @@ fn get_tile_type_from_raw(raw_line: &str) -> Result<(char, types::WorldTile), Ro
     assert_eq!(2, tile_info.len());
 
     let tile_char = tile_info[0].chars().next().unwrap();
-    let tile_type_id = tile_info[1];
+    let tile_type_id = &tile_info[1].replace("*", "");
     let tile_type = match types::get_type(tile_type_id) {
         Ok(tile_type) => tile_type,
         Err(_e) => return Err(RollingError::new(format!("Unknown tile {}", tile_type_id))),
