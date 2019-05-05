@@ -144,32 +144,58 @@ impl<'a> Generator<'a> {
             world_types::WorldTile::Beach => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::Sand,
-                random: Some(vec![(10, &zone_types::ZoneTile::DryBush)]),
+                random: Some(vec![
+                    (5.0, &zone_types::ZoneTile::DryBush),
+                    (1.0, &zone_types::ZoneTile::Rock),
+                ]),
+                random_near: None,
             },
             world_types::WorldTile::Sea => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::SaltedWater,
                 random: None,
+                random_near: None,
             },
             world_types::WorldTile::Mountain => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::RockyGround,
-                random: None,
+                random: Some(vec![
+                    (30.0, &zone_types::ZoneTile::Rock),
+                    (0.1, &zone_types::ZoneTile::FreshWater),
+                ]),
+                random_near: None,
             },
             world_types::WorldTile::Plain => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
-                random: None,
+                random: Some(vec![
+                    (1.0, &zone_types::ZoneTile::Rock),
+                    (30.0, &zone_types::ZoneTile::HightGrass),
+                    (2.0, &zone_types::ZoneTile::DeadTree),
+                    (0.1, &zone_types::ZoneTile::FreshWater),
+                ]),
+                random_near: Some(vec![zone::RandomNear {
+                    near: &zone_types::ZoneTile::FreshWater,
+                    tile: &zone_types::ZoneTile::FreshWater,
+                    probability: 25,
+                }]),
             },
             world_types::WorldTile::Jungle => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::Dirt,
-                random: None,
+                random: Some(vec![
+                    (30.0, &zone_types::ZoneTile::TropicalTree),
+                    (7.0, &zone_types::ZoneTile::LeafTree),
+                    (30.0, &zone_types::ZoneTile::HightGrass),
+                    (0.5, &zone_types::ZoneTile::FreshWater),
+                ]),
+                random_near: None,
             },
             world_types::WorldTile::Hill => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
-                random: None,
+                random: Some(vec![(60.0, &zone_types::ZoneTile::HightGrass)]),
+                random_near: None,
             },
         }
     }

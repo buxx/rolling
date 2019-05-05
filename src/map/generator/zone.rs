@@ -11,10 +11,17 @@ pub trait ZoneGenerator<'a> {
     fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>>;
 }
 
+pub struct RandomNear<'a> {
+    pub near: &'a types::ZoneTile,
+    pub tile: &'a types::ZoneTile,
+    pub probability: u32,
+}
+
 pub struct DefaultGenerator<'a> {
     pub world: &'a world::World<'a>,
     pub default_tile: &'a types::ZoneTile,
-    pub random: Option<Vec<(u32, &'a types::ZoneTile)>>,
+    pub random: Option<Vec<(f64, &'a types::ZoneTile)>>,
+    pub random_near: Option<Vec<RandomNear<'a>>>,
 }
 
 fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) -> bool {
@@ -53,10 +60,31 @@ fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) ->
     false
 }
 
+fn is_there_around(searched_char: char, complete_string: &String) -> bool {
+    // Considering called on currently wrote line
+    if complete_string.is_empty() {
+      return false
+    }
+
+    // left char
+    if complete_string.chars().last().unwrap() == searched_char {
+        return true;
+    }
+
+    if complete_string.rfind('\n').is_some() {
+        let lines: Vec<&str> = complete_string.lines().rev().collect();
+        let previous_line: &str = lines[1];
+
+        // TODO Test chars top left, top and top right;
+    }
+
+    false
+}
+
 impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
     fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>> {
         let mut final_string = String::new();
-        let mut weights = vec![100];
+        let mut weights = vec![100.0];
         let mut choices = vec![self.default_tile];
         let mut rng = thread_rng();
 
@@ -71,18 +99,36 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
         let distributions = WeightedIndex::new(&weights).unwrap();
 
         for row_i in 0..height {
-            let mut row_string = String::new();
             for col_i in 0..width {
                 if is_out_zone(width as i32, height as i32, row_i as i32, col_i as i32) {
-                    row_string.push(' ');
+                    final_string.push(' ');
                 } else {
-                    let tile = choices[distributions.sample(&mut rng)];
-                    let tile_char = types::get_char_for_tile(tile);
-                    row_string.push(tile_char);
+                    let mut push_with_random = true;
+
+                    if self.random_near.is_some() {
+                        for random_near in self.random_near.as_ref().unwrap().into_iter() {
+                            let searched_char = types::get_char_for_tile(random_near.near);
+                            if is_there_around(searched_char, &final_string) {
+                              let random: f64 = rng.gen();
+                              let probability: f64 = random_near.probability as f64 / 100.0;
+                                if random <= probability {
+                                    let tile_char = types::get_char_for_tile(random_near.tile);
+                                    final_string.push(tile_char);
+                                    push_with_random = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if push_with_random {
+                        let tile = choices[distributions.sample(&mut rng)];
+                        let tile_char = types::get_char_for_tile(tile);
+                        final_string.push(tile_char);
+                    }
                 }
             }
-            row_string.push_str("\n");
-            final_string.extend(row_string.chars());
+            final_string.push_str("\n");
         }
 
         let mut zone_file = File::create(&target)?;
