@@ -1,5 +1,6 @@
 use super::super::world;
 use crate::tile::zone::types;
+use crate::util;
 use rand::distributions::WeightedIndex;
 use rand::prelude::*;
 use std::error::Error;
@@ -60,22 +61,9 @@ fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) ->
     false
 }
 
-fn is_there_around(searched_char: char, complete_string: &String) -> bool {
-    // Considering called on currently wrote line
-    if complete_string.is_empty() {
-      return false
-    }
-
-    // left char
-    if complete_string.chars().last().unwrap() == searched_char {
+fn is_there_around(searched_char: char, chars: &Vec<Vec<char>>) -> bool {
+    if util::last_char_is(searched_char, chars) || util::top_chars_contains(searched_char, chars) {
         return true;
-    }
-
-    if complete_string.rfind('\n').is_some() {
-        let lines: Vec<&str> = complete_string.lines().rev().collect();
-        let previous_line: &str = lines[1];
-
-        // TODO Test chars top left, top and top right;
     }
 
     false
@@ -83,7 +71,7 @@ fn is_there_around(searched_char: char, complete_string: &String) -> bool {
 
 impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
     fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>> {
-        let mut final_string = String::new();
+        let mut chars: Vec<Vec<char>> = Vec::new();
         let mut weights = vec![100.0];
         let mut choices = vec![self.default_tile];
         let mut rng = thread_rng();
@@ -99,21 +87,24 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
         let distributions = WeightedIndex::new(&weights).unwrap();
 
         for row_i in 0..height {
+            let row_chars: Vec<char> = Vec::new();
+            chars.push(row_chars);
+
             for col_i in 0..width {
                 if is_out_zone(width as i32, height as i32, row_i as i32, col_i as i32) {
-                    final_string.push(' ');
+                    chars.last_mut().unwrap().push(' ');
                 } else {
                     let mut push_with_random = true;
 
                     if self.random_near.is_some() {
                         for random_near in self.random_near.as_ref().unwrap().into_iter() {
                             let searched_char = types::get_char_for_tile(random_near.near);
-                            if is_there_around(searched_char, &final_string) {
-                              let random: f64 = rng.gen();
-                              let probability: f64 = random_near.probability as f64 / 100.0;
+                            if is_there_around(searched_char, &chars) {
+                                let random: f64 = rng.gen();
+                                let probability: f64 = random_near.probability as f64 / 100.0;
                                 if random <= probability {
                                     let tile_char = types::get_char_for_tile(random_near.tile);
-                                    final_string.push(tile_char);
+                                    chars.last_mut().unwrap().push(tile_char);
                                     push_with_random = false;
                                     break;
                                 }
@@ -124,12 +115,18 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
                     if push_with_random {
                         let tile = choices[distributions.sample(&mut rng)];
                         let tile_char = types::get_char_for_tile(tile);
-                        final_string.push(tile_char);
+                        chars.last_mut().unwrap().push(tile_char);
                     }
                 }
             }
-            final_string.push_str("\n");
         }
+
+        let mut row_strings: Vec<String> = Vec::new();
+        for row_chars in chars.iter() {
+            let row_string: String = row_chars.into_iter().collect();
+            row_strings.push(row_string);
+        }
+        let final_string = row_strings.join("\n");
 
         let mut zone_file = File::create(&target)?;
         zone_file.write_all(final_string.as_bytes())?;

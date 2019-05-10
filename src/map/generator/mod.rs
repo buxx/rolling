@@ -160,10 +160,14 @@ impl<'a> Generator<'a> {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::RockyGround,
                 random: Some(vec![
-                    (30.0, &zone_types::ZoneTile::Rock),
-                    (0.1, &zone_types::ZoneTile::FreshWater),
+                    (10.0, &zone_types::ZoneTile::Rock),
+                    (0.01, &zone_types::ZoneTile::FreshWater),
                 ]),
-                random_near: None,
+                random_near: Some(vec![zone::RandomNear {
+                    near: &zone_types::ZoneTile::Rock,
+                    tile: &zone_types::ZoneTile::Rock,
+                    probability: 35,
+                }]),
             },
             world_types::WorldTile::Plain => zone::DefaultGenerator {
                 world: self.world,
@@ -172,13 +176,20 @@ impl<'a> Generator<'a> {
                     (1.0, &zone_types::ZoneTile::Rock),
                     (30.0, &zone_types::ZoneTile::HightGrass),
                     (2.0, &zone_types::ZoneTile::DeadTree),
-                    (0.1, &zone_types::ZoneTile::FreshWater),
+                    (0.01, &zone_types::ZoneTile::FreshWater),
                 ]),
-                random_near: Some(vec![zone::RandomNear {
-                    near: &zone_types::ZoneTile::FreshWater,
-                    tile: &zone_types::ZoneTile::FreshWater,
-                    probability: 25,
-                }]),
+                random_near: Some(vec![
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::FreshWater,
+                        tile: &zone_types::ZoneTile::FreshWater,
+                        probability: 25,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::HightGrass,
+                        tile: &zone_types::ZoneTile::HightGrass,
+                        probability: 35,
+                    },
+                ]),
             },
             world_types::WorldTile::Jungle => zone::DefaultGenerator {
                 world: self.world,
@@ -187,15 +198,46 @@ impl<'a> Generator<'a> {
                     (30.0, &zone_types::ZoneTile::TropicalTree),
                     (7.0, &zone_types::ZoneTile::LeafTree),
                     (30.0, &zone_types::ZoneTile::HightGrass),
-                    (0.5, &zone_types::ZoneTile::FreshWater),
+                    (0.05, &zone_types::ZoneTile::FreshWater),
                 ]),
-                random_near: None,
+                random_near: Some(vec![
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::FreshWater,
+                        tile: &zone_types::ZoneTile::FreshWater,
+                        probability: 40,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::TropicalTree,
+                        tile: &zone_types::ZoneTile::TropicalTree,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::LeafTree,
+                        tile: &zone_types::ZoneTile::LeafTree,
+                        probability: 5,
+                    },
+                ]),
             },
             world_types::WorldTile::Hill => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::ShortGrass,
-                random: Some(vec![(60.0, &zone_types::ZoneTile::HightGrass)]),
-                random_near: None,
+                random: Some(vec![
+                    (60.0, &zone_types::ZoneTile::HightGrass),
+                    (7.0, &zone_types::ZoneTile::LeafTree),
+                    (0.01, &zone_types::ZoneTile::FreshWater),
+                ]),
+                random_near: Some(vec![
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::LeafTree,
+                        tile: &zone_types::ZoneTile::LeafTree,
+                        probability: 35,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::FreshWater,
+                        tile: &zone_types::ZoneTile::FreshWater,
+                        probability: 35,
+                    },
+                ]),
             },
         }
     }
