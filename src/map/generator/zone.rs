@@ -1,4 +1,5 @@
 use super::super::world;
+use crate::tile::world::types as world_types;
 use crate::tile::zone::types;
 use crate::util;
 use rand::distributions::WeightedIndex;
@@ -18,11 +19,18 @@ pub struct RandomNear<'a> {
     pub probability: u32,
 }
 
+pub struct Overflow {
+    pub world_tile: world_types::WorldTile,
+    pub default_tile: types::ZoneTile,
+    pub depth: u32,
+}
+
 pub struct DefaultGenerator<'a> {
     pub world: &'a world::World<'a>,
     pub default_tile: &'a types::ZoneTile,
     pub random: Option<Vec<(f64, &'a types::ZoneTile)>>,
     pub random_near: Option<Vec<RandomNear<'a>>>,
+    pub allow_overflow: Option<Vec<Overflow>>,
 }
 
 fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) -> bool {

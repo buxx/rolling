@@ -149,12 +149,18 @@ impl<'a> Generator<'a> {
                     (1.0, &zone_types::ZoneTile::Rock),
                 ]),
                 random_near: None,
+                allow_overflow: Some(vec![zone::Overflow {
+                    world_tile: world_types::WorldTile::Sea,
+                    default_tile: zone_types::ZoneTile::SaltedWater,
+                    depth: 3,
+                }]),
             },
             world_types::WorldTile::Sea => zone::DefaultGenerator {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::SaltedWater,
                 random: None,
                 random_near: None,
+                allow_overflow: None,
             },
             world_types::WorldTile::Mountain => zone::DefaultGenerator {
                 world: self.world,
@@ -168,6 +174,7 @@ impl<'a> Generator<'a> {
                     tile: &zone_types::ZoneTile::Rock,
                     probability: 35,
                 }]),
+                allow_overflow: None,
             },
             world_types::WorldTile::Plain => zone::DefaultGenerator {
                 world: self.world,
@@ -190,6 +197,7 @@ impl<'a> Generator<'a> {
                         probability: 35,
                     },
                 ]),
+                allow_overflow: None,
             },
             world_types::WorldTile::Jungle => zone::DefaultGenerator {
                 world: self.world,
@@ -217,6 +225,7 @@ impl<'a> Generator<'a> {
                         probability: 5,
                     },
                 ]),
+                allow_overflow: None,
             },
             world_types::WorldTile::Hill => zone::DefaultGenerator {
                 world: self.world,
@@ -238,6 +247,7 @@ impl<'a> Generator<'a> {
                         probability: 35,
                     },
                 ]),
+                allow_overflow: None,
             },
         }
     }
