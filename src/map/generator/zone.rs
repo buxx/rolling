@@ -69,6 +69,24 @@ fn is_there_around(searched_char: char, chars: &Vec<Vec<char>>) -> bool {
     false
 }
 
+fn fill_with_random_nears(random_nears: &Vec<RandomNear>, chars: &mut Vec<Vec<char>>) -> bool {
+    let mut rng = thread_rng();
+    for random_near in random_nears.into_iter() {
+        let searched_char = types::get_char_for_tile(random_near.near);
+        if is_there_around(searched_char, &chars) {
+            let random: f64 = rng.gen();
+            let probability: f64 = random_near.probability as f64 / 100.0;
+            if random <= probability {
+                let tile_char = types::get_char_for_tile(random_near.tile);
+                chars.last_mut().unwrap().push(tile_char);
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
 impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
     fn generate(&self, target: &'a Path, width: u32, height: u32) -> Result<(), Box<Error>> {
         let mut chars: Vec<Vec<char>> = Vec::new();
@@ -97,19 +115,8 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
                     let mut push_with_random = true;
 
                     if self.random_near.is_some() {
-                        for random_near in self.random_near.as_ref().unwrap().into_iter() {
-                            let searched_char = types::get_char_for_tile(random_near.near);
-                            if is_there_around(searched_char, &chars) {
-                                let random: f64 = rng.gen();
-                                let probability: f64 = random_near.probability as f64 / 100.0;
-                                if random <= probability {
-                                    let tile_char = types::get_char_for_tile(random_near.tile);
-                                    chars.last_mut().unwrap().push(tile_char);
-                                    push_with_random = false;
-                                    break;
-                                }
-                            }
-                        }
+                        push_with_random =
+                            !fill_with_random_nears(self.random_near.as_ref().unwrap(), &mut chars);
                     }
 
                     if push_with_random {
