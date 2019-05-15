@@ -109,7 +109,13 @@ impl<'a> Generator<'a> {
                             Path::new(target_folder).join(format!("{}-{}.txt", row_i, col_i));
                         let zone_generator = self.get_zone_generator(&world_tile);
 
-                        match zone_generator.generate(target_path.as_path(), width, height) {
+                        match zone_generator.generate(
+                            target_path.as_path(),
+                            width,
+                            height,
+                            row_i as u32,
+                            col_i as u32,
+                        ) {
                             Err(e) => {
                                 decrease_counter(&thread_counter_mutex);
                                 return Err(RollingError::new(format!(
