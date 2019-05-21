@@ -1,3 +1,10 @@
+::LEGEND
+~ SEA
+^ MOUNTAIN
+ፆ JUNGLE
+∩ HILL
+⡩ BEACH
+⠃ PLAIN
 ::GEO
 ~~~~~
 ~^⠃⡩~

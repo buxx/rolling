@@ -341,7 +341,9 @@ impl<'a> ZoneGenerator<'a> for DefaultGenerator<'a> {
         let final_string = row_strings.join("\n");
 
         let mut zone_file = File::create(&target)?;
-        zone_file.write_all(final_string.as_bytes())?;
+        let mut final_string_formated = String::from("::GEO\n");
+        final_string_formated.push_str(&final_string);
+        zone_file.write_all(final_string_formated.as_bytes())?;
 
         Ok(())
     }

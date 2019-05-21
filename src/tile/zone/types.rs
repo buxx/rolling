@@ -18,7 +18,7 @@ pub fn get_char_for_tile(tile: &ZoneTile) -> char {
         ZoneTile::SaltedWater => '~',
         ZoneTile::Sand => '⡩',
         ZoneTile::Rock => '#',
-        ZoneTile::DryBush => 'ꖙ',
+        ZoneTile::DryBush => 'ʛ',
         ZoneTile::RockyGround => '፨',
         ZoneTile::ShortGrass => '܄',
         ZoneTile::HightGrass => '؛',

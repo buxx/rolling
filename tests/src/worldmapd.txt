@@ -1,0 +1,9 @@
+::LEGEND
+ፆ JUNGLE
+⠃ PLAIN
+∩ HILL
+^ MOUNTAIN
+~ SEA
+B BEACH
+::GEO
+~Bፆ⠃∩^

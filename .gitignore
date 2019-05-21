@@ -106,9 +106,10 @@ venv.bak/
 /venv*
 .idea
 *~
-cliend.db
+client.db
 logs.txt
 server.db
 t.py
 test/
 /zones/
+DEADJOE

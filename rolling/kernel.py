@@ -135,11 +135,17 @@ class Kernel(object):
                 {
                     " ": "NOTHING",
                     "⡩": "SAND",
-                    "⁘": "SHORT_GRASS",
-                    "ൖ": "DRY_BUSH",
+                    "܄": "SHORT_GRASS",
+                    "ʛ": "DRY_BUSH",
                     "#": "ROCK",
-                    "⑉": "ROCKY_GROUND",
+                    "፨": "ROCKY_GROUND",
+                    "؛": "HIGH_GRASS",
                     "~": "SEA_WATER",
+                    "⁖": "DIRT",
+                    "߉": "LEAF_TREE",
+                    "ፆ": "TROPICAL_TREE",
+                    "آ": "DEAD_TREE",
+                    "ގ": "FRESH_WATER",
                 },
                 ZoneMapTileType,
             )
@@ -180,10 +186,10 @@ class Kernel(object):
 
     def get_start_world_coordinates(self) -> typing.Tuple[int, int]:
         # FIXME BS 2019-01-10: hardcoded
-        return 2, 1
+        return 0, 3
 
     def get_start_zone_coordinates(
         self, world_row_i: int, world_col_i: int
     ) -> typing.Tuple[int, int]:
         # FIXME BS 2019-01-10: hardcoded
-        return 29, 29
+        return 75, 75

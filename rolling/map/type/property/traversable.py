@@ -11,5 +11,11 @@ traversable_properties = {
     zone.Rock: {TransportType.WALKING.value: False},
     zone.RockyGround: {TransportType.WALKING.value: True},
     zone.SeaWater: {TransportType.WALKING.value: False},
+    zone.HighGrass: {TransportType.WALKING.value: True},
+    zone.Dirt: {TransportType.WALKING.value: True},
+    zone.LeafTree: {TransportType.WALKING.value: True},
+    zone.TropicalTree: {TransportType.WALKING.value: True},
+    zone.DeadTree: {TransportType.WALKING.value: True},
+    zone.FreshWater: {TransportType.WALKING.value: True},
     zone.ShortGrass: {TransportType.WALKING.value: True},
 }

@@ -20,6 +20,12 @@ class ZoneMapTileType(MapTileType):
                 SeaWater.id: SeaWater,
                 ShortGrass.id: ShortGrass,
                 RockyGround.id: RockyGround,
+                HighGrass.id: HighGrass,
+                Dirt.id: Dirt,
+                LeafTree.id: LeafTree,
+                TropicalTree.id: TropicalTree,
+                DeadTree.id: DeadTree,
+                FreshWater.id: FreshWater,
             }
 
         return cls._list_cache
@@ -37,6 +43,11 @@ class Sand(ZoneMapTileType):
 class ShortGrass(ZoneMapTileType):
     id = "SHORT_GRASS"
     foreground_high_color = "#080"
+
+
+class HighGrass(ZoneMapTileType):
+    id = "HIGH_GRASS"
+    foreground_high_color = "#060"
 
 
 class RockyGround(ZoneMapTileType):
@@ -58,3 +69,28 @@ class SeaWater(ZoneMapTileType):
     id = "SEA_WATER"
     foreground_high_color = "#06f"
     background_high_color = "#006"
+
+
+class Dirt(ZoneMapTileType):
+    id = "DIRT"
+    foreground_high_color = "#fd8"
+
+
+class LeafTree(ZoneMapTileType):
+    id = "LEAF_TREE"
+    foreground_high_color = "#8a6"
+
+
+class TropicalTree(ZoneMapTileType):
+    id = "TROPICAL_TREE"
+    foreground_high_color = "#686"
+
+
+class DeadTree(ZoneMapTileType):
+    id = "DEAD_TREE"
+    foreground_high_color = "#666"
+
+
+class FreshWater(ZoneMapTileType):
+    id = "FRESH_WATER"
+    foreground_high_color = "#08f"

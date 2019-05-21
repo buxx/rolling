@@ -172,13 +172,13 @@ impl<'a> Generator<'a> {
                 world: self.world,
                 default_tile: &zone_types::ZoneTile::RockyGround,
                 random: Some(vec![
-                    (10.0, &zone_types::ZoneTile::Rock),
+                    (3.0, &zone_types::ZoneTile::Rock),
                     (0.01, &zone_types::ZoneTile::FreshWater),
                 ]),
                 random_near: Some(vec![zone::RandomNear {
                     near: &zone_types::ZoneTile::Rock,
                     tile: &zone_types::ZoneTile::Rock,
-                    probability: 35,
+                    probability: 40,
                 }]),
                 allow_overflow: None,
             },

@@ -25,7 +25,7 @@ class Physics(object):
         col_i = position[1]
 
         try:
-            tile_type = self._zone_map_source.geography.rows[col_i][row_i]
+            tile_type = self._zone_map_source.geography.rows[row_i][col_i]
         except IndexError:
             # IndexError means outside map
             raise MoveToOtherZoneError(row_i, col_i)
