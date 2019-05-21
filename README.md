@@ -20,3 +20,5 @@ A python3.7+ required. To install required packages:
 Then install dev packages:
 
     pip install -e ".[dev]"
+
+Test
