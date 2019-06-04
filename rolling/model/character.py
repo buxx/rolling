@@ -1,7 +1,9 @@
 # coding: utf-8
+import dataclasses
 import typing
 
-import dataclasses
+import serpyco
+
 from rolling.exception import RollingError
 
 if typing.TYPE_CHECKING:
@@ -16,6 +18,12 @@ class CreateCharacterModel:
 @dataclasses.dataclass
 class GetCharacterPathModel:
     id: str
+
+
+@dataclasses.dataclass
+class MoveCharacterQueryModel:
+    to_world_row: int = serpyco.number_field(cast_on_load=True)
+    to_world_col: int = serpyco.number_field(cast_on_load=True)
 
 
 @dataclasses.dataclass

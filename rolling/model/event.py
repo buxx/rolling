@@ -1,9 +1,8 @@
 # coding: utf-8
 import abc
+import dataclasses
 from enum import Enum
 import typing
-
-import dataclasses
 
 
 class ZoneEventType(Enum):

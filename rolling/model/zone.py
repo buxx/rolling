@@ -1,9 +1,9 @@
 # coding: utf-8
+import dataclasses
 import typing
 
 from serpyco import number_field
 
-import dataclasses
 from rolling.model.meta import TransportType
 
 

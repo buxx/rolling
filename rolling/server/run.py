@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from aiohttp import web
+from aiohttp.web_exceptions import HTTPNotFound
 
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
@@ -40,12 +41,13 @@ def run(args: argparse.Namespace) -> None:
     # Configure hapic
     server_logger.info("Configure web api")
     context = AiohttpContext(app, debug=args.debug)
+    context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)
     hapic.set_processor_class(SerpycoProcessor)
     hapic.set_context(context)
 
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
-    web.run_app(app, host=args.host, port=args.port)
+    web.run_app(app, host=args.host, port=args.port, access_log=server_logger)
 
 
 def main() -> None:

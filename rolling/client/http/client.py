@@ -3,8 +3,10 @@ import typing
 
 import aiohttp
 import requests
+from requests import Response
 import serpyco
 
+from rolling.exception import ClientServerExchangeError
 from rolling.map.source import WorldMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -20,6 +22,12 @@ class HttpClient:
         self._characters_serializer = serpyco.Serializer(CharacterModel, many=True)
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
         self._tiles_serializer = serpyco.Serializer(ZoneTileTypeModel, many=True)
+
+    def _check_response(self, response: Response) -> None:
+        if response.status_code not in (200, 204):
+            raise ClientServerExchangeError(
+                f"Server response is {response.status_code},{response.json()}"
+            )
 
     def create_character(
         self, create_character_model: CreateCharacterModel
@@ -66,3 +74,13 @@ class HttpClient:
     def get_tile_types(self) -> typing.List[ZoneTileTypeModel]:
         response = requests.get(f"{self._server_address}/zones/tiles")
         return self._tiles_serializer.load(response.json())
+
+    def move_character(
+        self, character_id: str, to_world_row: int, to_world_col: int
+    ) -> None:
+        self._check_response(
+            requests.put(
+                f"{self._server_address}/character/{character_id}/move"
+                f"?to_world_row={to_world_row}&to_world_col={to_world_col}"
+            )
+        )

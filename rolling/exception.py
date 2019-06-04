@@ -64,3 +64,15 @@ class SameZoneError(RollingError):
 
 class NoDisplayObjectAtThisPosition(RollingError):
     pass
+
+
+class GamePlayError(RollingError):
+    pass
+
+
+class CantMoveCharacter(GamePlayError):
+    pass
+
+
+class ClientServerExchangeError(RollingError):
+    pass

@@ -78,3 +78,13 @@ class CharacterLib:
             self._document_to_model(character_document)
             for character_document in character_documents
         ]
+
+    def move(
+        self, character: CharacterModel, to_world_row: int, to_world_col: int
+    ) -> None:
+        # TODO BS 2019-06-04: Check if move is possible
+        # TODO BS 2019-06-04: Compute how many action point and consume
+        character_document = self._get_document(character.id)
+        character_document.world_row_i = to_world_row
+        character_document.world_col_i = to_world_col
+        self._kernel.server_db_session.commit()

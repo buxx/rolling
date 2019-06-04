@@ -1,9 +1,9 @@
 # coding: utf-8
+import dataclasses
 import typing
 
 from serpyco import nested_field
 
-import dataclasses
 from rolling.model.zone import WorldTileTypeModel
 
 

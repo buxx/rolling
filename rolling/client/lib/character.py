@@ -36,7 +36,9 @@ class CharacterLib:
         world_row_i: int,
         world_col_i: int,
     ) -> None:
-        # FIXME BS 2019-03-08 code client request (server side to)
+        self._client.move_character(
+            character.id, to_world_row=world_row_i, to_world_col=world_col_i
+        )
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i
 

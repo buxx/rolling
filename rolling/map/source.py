@@ -1,7 +1,7 @@
 # coding: utf-8
+import dataclasses
 import typing
 
-import dataclasses
 from rolling.map.geography import WorldMapGeography
 from rolling.map.geography import ZoneMapGeography
 from rolling.map.legend import WorldMapLegend
