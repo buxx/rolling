@@ -10,7 +10,7 @@ def tile_lib(worldmapa_kernel: Kernel) -> WorldLib:
     return WorldLib(worldmapa_kernel)
 
 
-class TestWorldLib(object):
+class TestWorldLib:
     def test_unit__get_legend__ok(self, tile_lib: WorldLib):
         # Just test no error raised
         tile_lib.get_legend()

@@ -6,7 +6,7 @@ from rolling.client.http.client import HttpClient
 from rolling.kernel import Kernel
 
 
-class ServerLib(object):
+class ServerLib:
     def __init__(self, kernel: Kernel, client: HttpClient) -> None:
         self._kernel = kernel
         self._client = client

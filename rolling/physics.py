@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
 
 
-class Physics(object):
+class Physics:
     def __init__(
         self, controller: "Controller", zone_map_source: ZoneMapSource
     ) -> None:

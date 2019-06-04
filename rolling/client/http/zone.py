@@ -21,7 +21,7 @@ if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
 
 
-class ZoneWebSocketClient(object):
+class ZoneWebSocketClient:
     def __init__(
         self,
         controller: "Controller",

@@ -25,7 +25,7 @@ class Border(Enum):
     left = "left"
 
 
-class TileMapGenerator(object):
+class TileMapGenerator:
     def __init__(self, kernel: Kernel, filler: "TileMapFiller") -> None:
         self._kernel = kernel
         self._filler = filler
@@ -103,7 +103,7 @@ class TileMapGenerator(object):
         return ZoneMapSource(self._kernel, self._current_raw_source)
 
 
-class FromWorldMapGenerator(object):
+class FromWorldMapGenerator:
     def __init__(
         self,
         kernel: Kernel,

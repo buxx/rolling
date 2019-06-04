@@ -8,7 +8,7 @@ from rolling.model.event import ZoneEventType
 from rolling.model.event import zone_event_data_types
 
 
-class ZoneEventSerializerFactory(object):
+class ZoneEventSerializerFactory:
     serializers: typing.Dict[ZoneEventType, serpyco.Serializer] = {}
     for zone_event_type, zone_event_data_type in zone_event_data_types.items():
         serializers[zone_event_type] = serpyco.Serializer(

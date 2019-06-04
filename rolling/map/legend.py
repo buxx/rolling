@@ -8,7 +8,7 @@ from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import Nothing
 
 
-class MapLegend(object):
+class MapLegend:
     def __init__(
         self,
         raw_legend: typing.Dict[str, str],

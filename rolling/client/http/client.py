@@ -12,7 +12,7 @@ from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 
 
-class HttpClient(object):
+class HttpClient:
     def __init__(self, server_address: str) -> None:
         self._server_address = server_address
         self._create_character_serializer = serpyco.Serializer(CreateCharacterModel)

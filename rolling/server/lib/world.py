@@ -9,7 +9,7 @@ from rolling.model.world import WorldMapModel
 from rolling.model.zone import WorldTileTypeModel
 
 
-class WorldLib(object):
+class WorldLib:
     def __init__(self, kernel: Kernel) -> None:
         self._kernel = kernel
 

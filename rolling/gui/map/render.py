@@ -13,7 +13,7 @@ from rolling.map.type.zone import Nothing
 WORLD_VOID_STR = " "
 
 
-class MapRenderEngine(object):
+class MapRenderEngine:
     def __init__(
         self, world_map_source: MapSource, display_objects_manager: DisplayObjectManager
     ) -> None:

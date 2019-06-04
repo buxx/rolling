@@ -8,7 +8,7 @@ from rolling.map.source import WorldMapSource
 from rolling.map.type.zone import Sand
 
 
-class TestTileMapGenerator(object):
+class TestTileMapGenerator:
     def test_dummy_generation(self, worldmapc_kernel: Kernel):
         generator = TileMapGenerator(worldmapc_kernel, filler=DummyTileMapFiller(Sand))
         tile_map_source = generator.generate(width=11, height=11)
@@ -34,7 +34,7 @@ class TestTileMapGenerator(object):
         )
 
 
-class TestFromWorldMapGenerator(object):
+class TestFromWorldMapGenerator:
     def test_dummy_generation(self, worldmapc_kernel: Kernel, worldmapsourcec_txt: str):
         world_map_source = WorldMapSource(worldmapc_kernel, worldmapsourcec_txt)
         generator = FromWorldMapGenerator(

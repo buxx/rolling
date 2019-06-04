@@ -13,7 +13,7 @@ from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 
 
-class ZoneLib(object):
+class ZoneLib:
     def __init__(self, kernel: Kernel, client: HttpClient) -> None:
         self._kernel = kernel
         self._client = client

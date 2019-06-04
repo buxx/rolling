@@ -7,7 +7,7 @@ from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
 
 
-class MapGeography(object):
+class MapGeography:
     def __init__(
         self,
         legend: MapLegend,

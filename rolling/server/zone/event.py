@@ -68,7 +68,7 @@ class PlayerMoveProcessor(EventProcessor):
                 server_logger.exception()
 
 
-class EventProcessorFactory(object):
+class EventProcessorFactory:
     def __init__(
         self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
     ) -> None:

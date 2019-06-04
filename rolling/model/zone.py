@@ -8,7 +8,7 @@ from rolling.model.meta import TransportType
 
 
 @dataclasses.dataclass(frozen=True)
-class TileTypeModel(object):
+class TileTypeModel:
     id: str
     foreground_color: str
     background_color: str
@@ -32,11 +32,11 @@ class ZoneTileTypeModel(TileTypeModel):
 
 
 @dataclasses.dataclass(frozen=True)
-class GetZonePathModel(object):
+class GetZonePathModel:
     row_i: int = number_field(cast_on_load=True)
     col_i: int = number_field(cast_on_load=True)
 
 
 @dataclasses.dataclass
-class ZoneMapModel(object):
+class ZoneMapModel:
     raw_source: str

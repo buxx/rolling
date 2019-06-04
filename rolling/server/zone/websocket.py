@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
-class ZoneEventsManager(object):
+class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
         self._sockets: typing.Dict[
             typing.Tuple[int, int], typing.List[web.WebSocketResponse]

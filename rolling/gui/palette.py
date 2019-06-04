@@ -7,7 +7,7 @@ PALETTE_CHARACTER = "CHARACTER"
 PALETTE_POSITION = "PALETTE_POSITION"
 
 
-class PaletteGenerator(object):
+class PaletteGenerator:
     def __init__(self, kernel: Kernel) -> None:
         self._kernel = kernel
 

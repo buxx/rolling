@@ -15,7 +15,7 @@ BLOCK_LEGEND_NAME = "LEGEND"
 BLOCK_GEOGRAPHY_NAME = "GEO"
 
 
-class MapSource(object):
+class MapSource:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
@@ -119,7 +119,7 @@ class ZoneMapSource(MapSource):
 
 
 @dataclasses.dataclass(frozen=True)
-class ZoneMap(object):
+class ZoneMap:
     row_i: int
     col_i: int
     source: ZoneMapSource

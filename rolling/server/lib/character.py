@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
-class CharacterLib(object):
+class CharacterLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 

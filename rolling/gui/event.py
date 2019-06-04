@@ -52,7 +52,7 @@ class PlayerMoveProcessor(EventProcessor):
             pass
 
 
-class EventProcessorFactory(object):
+class EventProcessorFactory:
     def __init__(self, kernel: "Kernel", controller: "Controller") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 

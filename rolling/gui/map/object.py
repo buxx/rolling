@@ -8,7 +8,7 @@ from rolling.gui.palette import PALETTE_POSITION
 from rolling.model.character import CharacterModel
 
 
-class DisplayObject(object):
+class DisplayObject:
     def __init__(self, row_i: int, col_i: int) -> None:
         self._row_i = row_i
         self._col_i = col_i
@@ -84,7 +84,7 @@ class CurrentPosition(DisplayObject):
         return "__current_position__"
 
 
-class DisplayObjectManager(object):
+class DisplayObjectManager:
     def __init__(self, objects: typing.List[DisplayObject], period: float = 0.50):
         self._period: float = period
         self._objects: typing.List[DisplayObject] = objects

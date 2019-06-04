@@ -9,17 +9,17 @@ if typing.TYPE_CHECKING:
 
 
 @dataclasses.dataclass
-class CreateCharacterModel(object):
+class CreateCharacterModel:
     name: str
 
 
 @dataclasses.dataclass
-class GetCharacterPathModel(object):
+class GetCharacterPathModel:
     id: str
 
 
 @dataclasses.dataclass
-class CharacterModel(object):
+class CharacterModel:
     id: str
     name: str
     world_col_i: int = None

@@ -27,7 +27,7 @@ from rolling.server.extension import ServerSideDocument
 from rolling.server.zone.websocket import ZoneEventsManager
 
 
-class Kernel(object):
+class Kernel:
     def __init__(
         self,
         world_map_str: str = None,

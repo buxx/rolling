@@ -4,7 +4,7 @@ from rolling.map.source import WorldMapSource
 from rolling.map.type import world
 
 
-class TestWorldMapRender(object):
+class TestWorldMapRender:
     def test_unit__render__ok__just_space(
         self, worldmapb_render_engine: WorldMapRenderEngine
     ):

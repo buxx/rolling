@@ -31,7 +31,7 @@ from rolling.model.character import CreateCharacterModel
 from rolling.model.zone import ZoneMapModel
 
 
-class Controller(object):
+class Controller:
     def __init__(
         self,
         client: HttpClient,

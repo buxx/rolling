@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
     from rolling.gui.map.widget import TileMapWidget
 
 
-class ZoneMapConnector(object):
+class ZoneMapConnector:
     def __init__(
         self,
         widget: "TileMapWidget",
