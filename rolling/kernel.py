@@ -33,6 +33,8 @@ class Kernel:
         world_map_str: str = None,
         loop: AbstractEventLoop = None,
         tile_maps_folder: typing.Optional[str] = None,
+        client_db_path: str = "client.db",
+        server_db_path: str = "server.db",
     ) -> None:
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
@@ -44,6 +46,9 @@ class Kernel:
         ] = None
 
         # Database stuffs
+        self._client_db_path = client_db_path
+        self._server_db_path = server_db_path
+
         self._client_db_session: typing.Optional[Session] = None
         self._client_db_engine: typing.Optional[Engine] = None
 
@@ -174,13 +179,13 @@ class Kernel:
 
     def init_client_db_session(self) -> None:
         kernel_logger.info('Initialize database connection to "client.db"')
-        self._client_db_engine = create_engine("sqlite:///client.db")
+        self._client_db_engine = create_engine(f"sqlite:///{self._client_db_path}")
         self._client_db_session = sessionmaker(bind=self._client_db_engine)()
         ClientSideDocument.metadata.create_all(self._client_db_engine)
 
     def init_server_db_session(self) -> None:
         kernel_logger.info('Initialize database connection to "server.db"')
-        self._server_db_engine = create_engine("sqlite:///server.db")
+        self._server_db_engine = create_engine(f"sqlite:///{self._server_db_path}")
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
 

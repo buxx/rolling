@@ -5,13 +5,14 @@ import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
-
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
+
 from rolling.kernel import Kernel
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
+from rolling.server.base import get_kernel
 from rolling.server.extension import hapic
 
 
@@ -22,19 +23,7 @@ def run(args: argparse.Namespace) -> None:
     else:
         configure_logging(logging.INFO)
 
-    server_logger.info('Read world map source file "{}"'.format(args.world_map_source))
-    with open(args.world_map_source, "r") as f:
-        world_map_source_raw = f.read()
-
-    server_logger.info(
-        'Start kernel with tile maps folder "{}"'.format(args.tile_maps_folder)
-    )
-    loop = asyncio.get_event_loop()
-    kernel = Kernel(
-        world_map_source_raw, loop=loop, tile_maps_folder=args.tile_maps_folder
-    )
-    kernel.init_server_db_session()
-
+    kernel = get_kernel(args.world_map_source, args.tile_maps_folder)
     server_logger.info("Create web application")
     app = get_application(kernel)
 

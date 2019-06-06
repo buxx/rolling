@@ -34,7 +34,7 @@ class CharacterLib:
         self._kernel.server_db_session.commit()
         return character.id
 
-    def _get_document(self, id_: str) -> CharacterDocument:
+    def get_document(self, id_: str) -> CharacterDocument:
         return (
             self._kernel.server_db_session.query(CharacterDocument)
             .filter(CharacterDocument.id == id_)
@@ -54,13 +54,13 @@ class CharacterLib:
         )
 
     def get(self, id_: str) -> CharacterModel:
-        character_document = self._get_document(id_)
+        character_document = self.get_document(id_)
         return self._document_to_model(character_document)
 
     def move_on_zone(
         self, character: CharacterModel, to_row_i: int, to_col_i: int
     ) -> None:
-        character_document = self._get_document(character.id)
+        character_document = self.get_document(character.id)
         character_document.zone_row_i = to_row_i
         character_document.zone_col_i = to_col_i
         self._kernel.server_db_session.add(character_document)
@@ -84,7 +84,21 @@ class CharacterLib:
     ) -> None:
         # TODO BS 2019-06-04: Check if move is possible
         # TODO BS 2019-06-04: Compute how many action point and consume
-        character_document = self._get_document(character.id)
+        character_document = self.get_document(character.id)
         character_document.world_row_i = to_world_row
         character_document.world_col_i = to_world_col
-        self._kernel.server_db_session.commit()
+        self.update(character_document)
+
+    def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
+        self._kernel.server_db_session.add(character_document)
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def get_all_character_count(self) -> int:
+        return self._kernel.server_db_session.query(CharacterDocument.id).count()
+
+    def get_all_character_ids(self) -> typing.Iterable[str]:
+        return (
+            row[0]
+            for row in self._kernel.server_db_session.query(CharacterDocument.id).all()
+        )

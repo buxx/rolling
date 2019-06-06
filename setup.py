@@ -16,8 +16,9 @@ setup(
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={
         "console_scripts": [
-            "rolling=rolling.gui.run:main",
+            "rolling-gui=rolling.gui.run:main",
             "rolling-server=rolling.server.run:main",
+            "rolling-server-turn=rolling.server.turn:main",
             "rolling-generate=rolling.map.generator.run:main",
         ]
     },

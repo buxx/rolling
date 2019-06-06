@@ -12,6 +12,7 @@ from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import SeaWater
+from rolling.server.lib.character import CharacterLib
 
 
 @pytest.fixture
@@ -62,6 +63,23 @@ def worldmapb2_kernel(worldmapsourceb2_txt) -> Kernel:
 @pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt) -> Kernel:
     return Kernel(worldmapsourcec_txt)
+
+
+@pytest.fixture
+def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
+    server_db_path = tmp_path / "server.db"
+    kernel = Kernel(
+        worldmapsourcec_txt,
+        tile_maps_folder="tests/src/worldmapc_zones",
+        server_db_path=server_db_path,
+    )
+    kernel.init_server_db_session()
+    return kernel
+
+
+@pytest.fixture
+def worldmapc_with_zones_server_character_lib(worldmapc_with_zones_kernel: Kernel) -> CharacterLib:
+    return CharacterLib(worldmapc_with_zones_kernel)
 
 
 @pytest.fixture

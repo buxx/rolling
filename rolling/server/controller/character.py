@@ -3,9 +3,9 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
-from hapic import HapicData
 from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
