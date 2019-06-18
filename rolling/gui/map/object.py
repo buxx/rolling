@@ -5,7 +5,9 @@ import typing
 from rolling.exception import NoDisplayObjectAtThisPosition
 from rolling.gui.palette import PALETTE_CHARACTER
 from rolling.gui.palette import PALETTE_POSITION
+from rolling.gui.palette import PALETTE_STUFF
 from rolling.model.character import CharacterModel
+from rolling.model.stuff import StuffModel
 
 
 class DisplayObject:
@@ -82,6 +84,24 @@ class CurrentPosition(DisplayObject):
     @property
     def id(self) -> str:
         return "__current_position__"
+
+
+class StuffDisplay(DisplayObject):
+    def __init__(self, row_i: int, col_i: int, stuff: StuffModel) -> None:
+        super().__init__(row_i, col_i)
+        self._stuff = stuff
+
+    @property
+    def palette_id(self) -> str:
+        return PALETTE_STUFF
+
+    @property
+    def char(self) -> str:
+        return "i"
+
+    @property
+    def id(self) -> str:
+        return str(self._stuff.id)
 
 
 class DisplayObjectManager:

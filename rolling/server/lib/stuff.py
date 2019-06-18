@@ -1,6 +1,10 @@
 # coding: utf-8
 import typing
 
+import sqlalchemy
+
+from rolling.model.stuff import StuffModel
+from rolling.model.stuff import Unit
 from rolling.server.document.stuff import StuffDocument
 
 if typing.TYPE_CHECKING:
@@ -42,3 +46,33 @@ class StuffLib:
         self._kernel.server_db_session.add(doc)
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_zone_stuffs(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[StuffModel]:
+        stuff_docs = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(
+                sqlalchemy.and_(
+                    StuffDocument.world_row_i == world_row_i,
+                    StuffDocument.world_col_i == world_col_i,
+                )
+            )
+            .all()
+        )
+        return [self._stuff_model_from_doc(doc) for doc in stuff_docs]
+
+    def _stuff_model_from_doc(self, doc: StuffDocument) -> StuffModel:
+        stuff_name = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            doc.stuff_id
+        ).name
+        return StuffModel(
+            id=doc.id,
+            name=stuff_name,
+            zone_col_i=doc.zone_col_i,
+            zone_row_i=doc.zone_row_i,
+            filled_at=float(doc.filled_at),
+            filled_unity=Unit(doc.filled_unity),
+            weight=float(doc.weight),
+            clutter=float(doc.clutter),
+        )

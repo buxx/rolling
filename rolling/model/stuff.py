@@ -21,6 +21,20 @@ class StuffProperties:
 
 
 @dataclasses.dataclass
+class StuffModel:
+    """existing stuff (on zone or carried)"""
+
+    id: int
+    name: str
+    zone_col_i: int
+    zone_row_i: int
+    filled_at: float = None
+    filled_unity: Unit = None
+    weight: float = None
+    clutter: float = None
+
+
+@dataclasses.dataclass
 class ZoneGenerationStuff:
     stuff: StuffProperties
     probability: float

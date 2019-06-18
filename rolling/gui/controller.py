@@ -18,6 +18,7 @@ from rolling.gui.guilang import Generator as GuilangGenerator
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
+from rolling.gui.map.object import StuffDisplay
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.palette import PaletteGenerator
@@ -231,6 +232,13 @@ class Controller:
                 Character(
                     zone_character.zone_row_i, zone_character.zone_col_i, zone_character
                 )
+            )
+
+        for stuff in self._client.get_zone_stuffs(
+            self._player_character.world_row_i, self._player_character.world_col_i
+        ):
+            self._display_objects_manager.add_object(
+                StuffDisplay(stuff.zone_row_i, stuff.zone_col_i, stuff)
             )
 
         self._display_objects_manager.refresh_indexes()
