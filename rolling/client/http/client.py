@@ -88,6 +88,13 @@ class HttpClient:
         )
 
     def get_create_character_description(self) -> Description:
-        response = requests.get(f"{self._server_address}/_describe/create_character")
+        response = requests.get(f"{self._server_address}/_describe/character/create")
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())
+
+    def get_character_card_description(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/card"
+        )
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())

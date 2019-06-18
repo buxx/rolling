@@ -75,8 +75,8 @@ class Generator:
     def generate_widget(
         self,
         description: Description,
-        success_callback: typing.Callable[[object], None],
-        success_serializer: serpyco.Serializer,
+        success_callback: typing.Optional[typing.Callable[[object], None]] = None,
+        success_serializer: typing.Optional[serpyco.Serializer] = None,
     ) -> urwid.Widget:
         fields = Fields()
         widgets = []
@@ -87,18 +87,23 @@ class Generator:
         def generate_for_items(items: typing.List[Part]):
             widgets_ = []
             for item in items:
-                if item.text:
-                    widgets_.append(urwid.Text(item.text))
-                if item.type_:
+                if item.text and item.label and not item.type_:
+                    widgets_.append(urwid.Text(f"{item.label}: {item.text}"))
+                elif item.type_:
                     if item.type_ in (Type.STRING, Type.TEXT, Type.NUMBER):
                         widget = urwid.Edit(item.label + ": ")
                         widgets_.append(widget)
                         fields.add(item.name, widget, item.type_)
-                elif item.label:
-                    widgets_.append(urwid.Text(item.label))
+
                 if item.items:
                     widgets_.extend(generate_for_items(item.items))
+
                 if item.is_form:
+                    if success_callback is None or success_serializer is None:
+                        raise RollingError(
+                            "success_callback and success_serializer must be set for forms"
+                        )
+
                     widgets_.append(
                         urwid.Button(
                             "Validate",

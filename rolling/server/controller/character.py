@@ -46,6 +46,27 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_character_card(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._character_lib.get(hapic_data.path.id)
+        return Description(
+            title="Character card",
+            items=[
+                Part(text="This is your character card"),
+                Part(label="Name", text=character.name),
+                Part(label="Max life", text=str(character.max_life_comp)),
+                Part(
+                    label="Hunting and collecting",
+                    text=str(character.hunting_and_collecting_comp),
+                ),
+                Part(label="Find water", text=str(character.find_water_comp)),
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -76,7 +97,10 @@ class CharacterController(BaseController):
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
-                web.get("/_describe/create_character", self._describe_create_character),
+                web.get("/_describe/character/create", self._describe_create_character),
+                web.get(
+                    "/_describe/character/{id}/card", self._describe_character_card
+                ),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.get("/character/{id}", self.get),
                 web.put("/character/{id}/move", self.move),

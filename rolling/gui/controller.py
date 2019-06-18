@@ -65,6 +65,10 @@ class Controller:
         return self._kernel
 
     @property
+    def client(self) -> HttpClient:
+        return self._client
+
+    @property
     def loop(self):
         return self._loop
 
@@ -79,6 +83,14 @@ class Controller:
                 "You try to use property set when connected to a server"
             )
         return self._zone_lib
+
+    @property
+    def guilang(self) -> GuilangGenerator:
+        if self._guilang is None:
+            raise NotConnectedToServer(
+                "You try to use property set when connected to a server"
+            )
+        return self._guilang
 
     @property
     def player_character(self) -> CharacterModel:

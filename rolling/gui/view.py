@@ -1,21 +1,15 @@
 # coding: utf-8
-import asyncio
-import time
 import typing
 
 import urwid
 
 from rolling.gui.map.object import CurrentPosition
 from rolling.gui.map.object import DisplayObjectManager
-from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine
-from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.map.widget import WorldMapWidget
 from rolling.gui.menu import BaseMenu
 from rolling.gui.menu import BaseSubMenu
 from rolling.gui.play.server import ChooseServerMenu
-from rolling.map.source import WorldMapSource
-from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -30,14 +24,36 @@ class WorldMapSubMenu(BaseSubMenu):
         super().restore_parent_menu()
 
 
+class CharacterCardSubMenu(BaseSubMenu):
+    def _get_menu_buttons(self):
+        return []
+
+    def restore_parent_menu(self, *args, **kwargs) -> None:
+        self._controller.display_zone()
+        super().restore_parent_menu()
+
+
 class ZoneMenu(BaseMenu):
     title = "Movement"
 
     def _get_menu_buttons(self):
         return [
             ("World map", self._display_world_map_callback),
+            ("Character card", self._display_character_card),
             ("Disconnect", self._go_back_root_callback),
         ]
+
+    def _display_character_card(self, *args, **kwargs):
+        widget = self._controller.guilang.generate_widget(
+            self._controller.client.get_character_card_description(
+                self._controller.player_character.id
+            )
+        )
+
+        self._main_view.main_content_container.original_widget = widget
+        self._main_view.right_menu_container.original_widget = CharacterCardSubMenu(
+            self._controller, self._main_view, self
+        )
 
     def _display_world_map_callback(self, *args, **kwargs):
         display_objects_manager = DisplayObjectManager(
