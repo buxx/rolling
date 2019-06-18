@@ -14,21 +14,19 @@ from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NotConnectedToServer
+from rolling.gui.guilang import Generator as GuilangGenerator
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.palette import PaletteGenerator
-from rolling.gui.play.character import CreateCharacterBox
 from rolling.gui.view import View
 from rolling.kernel import Kernel
 from rolling.log import gui_logger
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
-from rolling.model.character import CreateCharacterModel
-from rolling.model.zone import ZoneMapModel
 
 
 class Controller:
@@ -58,6 +56,7 @@ class Controller:
         self._display_objects_manager = display_object_manager or DisplayObjectManager(
             []
         )
+        self._guilang: typing.Optional[GuilangGenerator] = None
 
         self._kernel.init_client_db_session()
 
@@ -166,6 +165,7 @@ class Controller:
     def _choose_server(self, server_address: str) -> None:
         # FIXME BS 2019-01-09: https must be available
         self._client = HttpClient("http://{}".format(server_address))
+        self._guilang = GuilangGenerator(self._kernel, self._client, self)
         self._server_lib = ServerLib(self._kernel, self._client)
         self._character_lib = CharacterLib(self.kernel, self._client)
         self._zone_lib = ZoneLib(self._kernel, self._client)
@@ -175,12 +175,14 @@ class Controller:
             character_id = self._server_lib.get_current_character_id(server_address)
             self._choose_character(character_id)
         except NoResultFound:
-            self._view.main_content_container.original_widget = CreateCharacterBox(
-                callback=self._create_character
+            create_character_widget = self._guilang.generate_widget(
+                self._client.get_create_character_description(),
+                success_callback=self._created_character,
+                success_serializer=self._client.character_serializer,
             )
+            self._view.main_content_container.original_widget = create_character_widget
 
-    def _create_character(self, create_character_model: CreateCharacterModel) -> None:
-        character_model = self._client.create_character(create_character_model)
+    def _created_character(self, character_model: CharacterModel) -> None:
         self._server_lib.save_character_id(self._server_address, character_model.id)
         self._choose_character(character_model.id)
 

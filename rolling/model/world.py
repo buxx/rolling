@@ -5,6 +5,7 @@ import typing
 from serpyco import nested_field
 
 from rolling.model.zone import WorldTileTypeModel
+from rolling.model.zone import ZoneProperties
 
 
 @dataclasses.dataclass
@@ -16,3 +17,8 @@ class WorldMapLegendModel:
 @dataclasses.dataclass
 class WorldMapModel:
     raw_source: str
+
+
+@dataclasses.dataclass
+class World:
+    zones_properties: typing.List[ZoneProperties]

@@ -6,20 +6,29 @@ import pytest
 from rolling.kernel import Kernel
 from rolling.server.document.character import CharacterDocument
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.turn import TurnLib
 
 
 @pytest.fixture
-def turn_lib(worldmapc_with_zones_kernel: Kernel, worldmapc_with_zones_server_character_lib: CharacterLib) -> TurnLib:
-    return TurnLib(worldmapc_with_zones_kernel, character_lib=worldmapc_with_zones_server_character_lib, logger=logging.getLogger('tests'))
+def turn_lib(
+    worldmapc_with_zones_kernel: Kernel,
+    worldmapc_with_zones_server_character_lib: CharacterLib,
+    worldmapc_with_zones_stuff_lib: StuffLib,
+) -> TurnLib:
+    return TurnLib(
+        worldmapc_with_zones_kernel,
+        character_lib=worldmapc_with_zones_server_character_lib,
+        stuff_lib=worldmapc_with_zones_stuff_lib,
+        logger=logging.getLogger("tests"),
+    )
 
 
 @pytest.fixture
-def xena(worldmapc_with_zones_kernel: Kernel) -> CharacterDocument:
-    xena = CharacterDocument(
-        id="xena",
-        name="xena",
-    )
+def xena(
+    worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
+    xena = CharacterDocument(id="xena", name="xena", **default_character_competences)
 
     session = worldmapc_with_zones_kernel.server_db_session
     session.add(xena)
@@ -29,10 +38,11 @@ def xena(worldmapc_with_zones_kernel: Kernel) -> CharacterDocument:
 
 
 @pytest.fixture
-def arthur(worldmapc_with_zones_kernel: Kernel) -> CharacterDocument:
+def arthur(
+    worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
     arthur = CharacterDocument(
-        id="arthur",
-        name="arthur",
+        id="arthur", name="arthur", **default_character_competences
     )
 
     session = worldmapc_with_zones_kernel.server_db_session

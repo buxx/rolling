@@ -12,7 +12,17 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class CreateCharacterModel:
-    name: str
+    name: str = serpyco.string_field(
+        metadata={"label": "Name"}, min_length=2, max_length=32
+    )
+    background_story: str = serpyco.field(
+        metadata={"label": "Background story", "is_text": True}
+    )
+    max_life_comp: float = serpyco.field(metadata={"label": "Max life points"})
+    hunting_and_collecting_comp: float = serpyco.field(
+        metadata={"label": "Hunt and collect ability"}
+    )
+    find_water_comp: float = serpyco.field(metadata={"label": "Find water ability"})
 
 
 @dataclasses.dataclass
@@ -30,10 +40,17 @@ class MoveCharacterQueryModel:
 class CharacterModel:
     id: str
     name: str
+
+    background_story: str
+    max_life_comp: float
+    hunting_and_collecting_comp: float
+    find_water_comp: float
+
     world_col_i: int = None
     world_row_i: int = None
     zone_col_i: int = None
     zone_row_i: int = None
+
     _display_object = None
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
@@ -42,6 +59,6 @@ class CharacterModel:
     @property
     def display_object(self) -> "DisplayObject":
         if self._display_object is None:
-            raise RollingError("You are trying to use property who si not set")
+            raise RollingError("You are trying to use property which is not set")
 
         return self._display_object

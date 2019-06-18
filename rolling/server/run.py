@@ -5,9 +5,9 @@ import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.kernel import Kernel
 from rolling.log import configure_logging
 from rolling.log import server_logger
@@ -23,7 +23,9 @@ def run(args: argparse.Namespace) -> None:
     else:
         configure_logging(logging.INFO)
 
-    kernel = get_kernel(args.world_map_source, args.tile_maps_folder)
+    kernel = get_kernel(
+        args.world_map_source, args.tile_maps_folder, args.game_config_folder
+    )
     server_logger.info("Create web application")
     app = get_application(kernel)
 
@@ -46,6 +48,9 @@ def main() -> None:
     )
     parser.add_argument(
         "tile_maps_folder", type=str, help="Tile maps sources files folder path"
+    )
+    parser.add_argument(
+        "game_config_folder", type=str, help="Directory path with game configs"
     )
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")

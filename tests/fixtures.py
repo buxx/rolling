@@ -13,6 +13,7 @@ from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import SeaWater
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.stuff import StuffLib
 
 
 @pytest.fixture
@@ -71,6 +72,7 @@ def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
     kernel = Kernel(
         worldmapsourcec_txt,
         tile_maps_folder="tests/src/worldmapc_zones",
+        game_config_folder="tests/src/game1",
         server_db_path=server_db_path,
     )
     kernel.init_server_db_session()
@@ -78,7 +80,9 @@ def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
 
 
 @pytest.fixture
-def worldmapc_with_zones_server_character_lib(worldmapc_with_zones_kernel: Kernel) -> CharacterLib:
+def worldmapc_with_zones_server_character_lib(
+    worldmapc_with_zones_kernel: Kernel
+) -> CharacterLib:
     return CharacterLib(worldmapc_with_zones_kernel)
 
 
@@ -147,3 +151,18 @@ def worldmapb2_render_engine(
         ),
         display_objects_manager=display_object_manager__empty,
     )
+
+
+@pytest.fixture
+def worldmapc_with_zones_stuff_lib(worldmapc_with_zones_kernel: Kernel) -> StuffLib:
+    return StuffLib(worldmapc_with_zones_kernel)
+
+
+@pytest.fixture
+def default_character_competences() -> dict:
+    return {
+        "background_story": "",
+        "max_life_comp": 5.0,
+        "hunting_and_collecting_comp": 2.0,
+        "find_water_comp": 1.0,
+    }

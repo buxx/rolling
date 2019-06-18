@@ -4,7 +4,9 @@ import typing
 
 from serpyco import number_field
 
+from rolling.map.type.base import MapTileType
 from rolling.model.meta import TransportType
+from rolling.model.stuff import ZoneGenerationStuff
 
 
 @dataclasses.dataclass(frozen=True)
@@ -40,3 +42,15 @@ class GetZonePathModel:
 @dataclasses.dataclass
 class ZoneMapModel:
     raw_source: str
+
+
+@dataclasses.dataclass
+class GenerationInfo:
+    count: int
+    stuffs: typing.List[ZoneGenerationStuff]
+
+
+@dataclasses.dataclass
+class ZoneProperties:
+    zone_type: typing.Type[MapTileType]
+    generation_info: GenerationInfo

@@ -3,9 +3,11 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
+from guilang.description import Description
+from guilang.description import Part
+from hapic import HapicData
 from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
@@ -17,11 +19,31 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.util import EmptyModel
 
+POST_CHARACTER_URL = "/character"
+
 
 class CharacterController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
         super().__init__(kernel)
         self._character_lib = CharacterLib(self._kernel)
+
+    @hapic.with_api_doc()
+    @hapic.output_body(Description)
+    async def _describe_create_character(self, request: Request) -> Description:
+        return Description(
+            title="Create your character",
+            items=[
+                Part(
+                    text="It's your character who play this game. "
+                    "Prepare a beautiful story for him"
+                ),
+                Part(
+                    is_form=True,
+                    form_action=POST_CHARACTER_URL,
+                    items=[*Part.from_dataclass_fields(CreateCharacterModel)],
+                ),
+            ],
+        )
 
     @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
@@ -54,7 +76,8 @@ class CharacterController(BaseController):
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
-                web.post("/character", self.create),
+                web.get("/_describe/create_character", self._describe_create_character),
+                web.post(POST_CHARACTER_URL, self.create),
                 web.get("/character/{id}", self.get),
                 web.put("/character/{id}/move", self.move),
             ]

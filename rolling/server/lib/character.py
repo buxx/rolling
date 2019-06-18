@@ -18,6 +18,12 @@ class CharacterLib:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = create_character_model.name
+        character.background_story = create_character_model.background_story
+        character.hunting_and_collecting_comp = (
+            create_character_model.hunting_and_collecting_comp
+        )
+        character.find_water_comp = create_character_model.find_water_comp
+        character.max_life_comp = create_character_model.max_life_comp
 
         # Place on zone
         world_row_i, world_col_i = self._kernel.get_start_world_coordinates()
@@ -51,6 +57,12 @@ class CharacterLib:
             world_row_i=character_document.world_row_i,
             zone_col_i=character_document.zone_col_i,
             zone_row_i=character_document.zone_row_i,
+            background_story=character_document.background_story,
+            max_life_comp=float(character_document.max_life_comp),
+            hunting_and_collecting_comp=float(
+                character_document.hunting_and_collecting_comp
+            ),
+            find_water_comp=float(character_document.find_water_comp),
         )
 
     def get(self, id_: str) -> CharacterModel:
@@ -89,7 +101,9 @@ class CharacterLib:
         character_document.world_col_i = to_world_col
         self.update(character_document)
 
-    def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
+    def update(
+        self, character_document: CharacterDocument, commit: bool = True
+    ) -> None:
         self._kernel.server_db_session.add(character_document)
         if commit:
             self._kernel.server_db_session.commit()

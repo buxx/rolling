@@ -76,3 +76,11 @@ class CantMoveCharacter(GamePlayError):
 
 class ClientServerExchangeError(RollingError):
     pass
+
+
+class ConfigurationError(RollingError):
+    pass
+
+
+class UnknownStuffError(ConfigurationError):
+    pass

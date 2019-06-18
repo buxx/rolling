@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.exception import RollingError
+from rolling.game.base import Game
 from rolling.log import kernel_logger
 from rolling.map.legend import WorldMapLegend
 from rolling.map.legend import ZoneMapLegend
@@ -33,6 +34,7 @@ class Kernel:
         world_map_str: str = None,
         loop: AbstractEventLoop = None,
         tile_maps_folder: typing.Optional[str] = None,
+        game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
         server_db_path: str = "server.db",
     ) -> None:
@@ -44,6 +46,7 @@ class Kernel:
         self._tile_maps_by_position: typing.Optional[
             typing.Dict[typing.Tuple[int, int], ZoneMap]
         ] = None
+        self._game: typing.Optional[Game] = None
 
         # Database stuffs
         self._client_db_path = client_db_path
@@ -81,6 +84,18 @@ class Kernel:
                 self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
                     row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
                 )
+
+        # Generate game info if config given
+        if game_config_folder is not None:
+            self._game = Game(self, game_config_folder)
+
+    @property
+    def game(self) -> Game:
+        if self._game is None:
+            raise ComponentNotPrepared(
+                "self._game must be prepared before usage: provide game config folder parameter"
+            )
+        return self._game
 
     @property
     def server_zone_events_manager(self) -> ZoneEventsManager:

@@ -22,6 +22,10 @@ class WorldMapTileType(MapTileType):
 
         return cls._list_cache
 
+    @classmethod
+    def get_for_id(cls, id_: str) -> typing.Type["WorldMapTileType"]:
+        return cls.get_all()[id_]
+
 
 class Sea(WorldMapTileType):
     id = "SEA"
