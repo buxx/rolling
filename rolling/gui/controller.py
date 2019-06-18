@@ -209,7 +209,18 @@ class Controller:
                 self._player_character,
             )
         )
+        self._display_objects_manager.refresh_indexes()
 
+        # Prepare world map
+        self._world_lib = WorldLib(self._kernel, self._client)
+        world_map_raw_source = self._world_lib.get_world_source()
+        self._kernel.world_map_source = WorldMapSource(
+            self._kernel, raw_source=world_map_raw_source
+        )
+
+        self.display_zone()
+
+    def display_zone(self) -> None:
         # Add other players
         for zone_character in self._character_lib.get_zone_characters(
             self._player_character.world_row_i,
@@ -224,16 +235,6 @@ class Controller:
 
         self._display_objects_manager.refresh_indexes()
 
-        # Prepare world map
-        self._world_lib = WorldLib(self._kernel, self._client)
-        world_map_raw_source = self._world_lib.get_world_source()
-        self._kernel.world_map_source = WorldMapSource(
-            self._kernel, raw_source=world_map_raw_source
-        )
-
-        self.display_zone()
-
-    def display_zone(self) -> None:
         # Prepare zone map
         zone_map = self._zone_lib.get_zone(
             self._player_character.world_row_i, self._player_character.world_col_i

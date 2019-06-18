@@ -6,9 +6,6 @@ from urwid import BOX
 
 from rolling.exception import MoveToOtherZoneError
 from rolling.gui.connector import ZoneMapConnector
-from rolling.gui.map.object import Character
-from rolling.gui.map.object import DisplayObject
-from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog
 from rolling.map.source import ZoneMapSource
