@@ -33,6 +33,24 @@ class CharacterCardSubMenu(BaseSubMenu):
         super().restore_parent_menu()
 
 
+class InventorySubMenu(BaseSubMenu):
+    def _get_menu_buttons(self):
+        return []
+
+    def restore_parent_menu(self, *args, **kwargs) -> None:
+        self._controller.display_zone()
+        super().restore_parent_menu()
+
+
+class GoBackSubMenu(BaseSubMenu):
+    def _get_menu_buttons(self):
+        return []
+
+    def restore_parent_menu(self, *args, **kwargs) -> None:
+        self._controller.display_zone()
+        super().restore_parent_menu()
+
+
 class ZoneMenu(BaseMenu):
     title = "Movement"
 
@@ -40,6 +58,7 @@ class ZoneMenu(BaseMenu):
         return [
             ("World map", self._display_world_map_callback),
             ("Character card", self._display_character_card),
+            ("Inventory", self._display_inventory),
             ("Disconnect", self._go_back_root_callback),
         ]
 
@@ -52,6 +71,18 @@ class ZoneMenu(BaseMenu):
 
         self._main_view.main_content_container.original_widget = widget
         self._main_view.right_menu_container.original_widget = CharacterCardSubMenu(
+            self._controller, self._main_view, self
+        )
+
+    def _display_inventory(self, *args, **kwargs):
+        widget = self._controller.guilang.generate_widget(
+            self._controller.client.get_character_inventory(
+                self._controller.player_character.id
+            )
+        )
+
+        self._main_view.main_content_container.original_widget = widget
+        self._main_view.right_menu_container.original_widget = InventorySubMenu(
             self._controller, self._main_view, self
         )
 

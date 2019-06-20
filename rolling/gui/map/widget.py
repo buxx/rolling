@@ -55,21 +55,7 @@ class MapWidget(urwid.Widget):
         return True
 
     def keypress(self, size, key):
-        new_offset = None
-
-        if key == "up":
-            new_offset = (1, 0)
-        if key == "down":
-            new_offset = (-1, 0)
-        if key == "left":
-            new_offset = (0, 1)
-        if key == "right":
-            new_offset = (0, -1)
-
-        if new_offset is not None:
-            self._offset_change(new_offset)
-
-        self._invalidate()
+        pass
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
         pass
@@ -130,4 +116,39 @@ class TileMapWidget(MapWidget):
             text="You are trying to move on other zone, continue ?",
             world_row_i=world_row_i,
             world_col_i=world_col_i,
+        )
+
+    def keypress(self, size, key):
+        new_offset = None
+
+        if key == "up":
+            new_offset = (1, 0)
+        if key == "down":
+            new_offset = (-1, 0)
+        if key == "left":
+            new_offset = (0, 1)
+        if key == "right":
+            new_offset = (0, -1)
+        if key == "enter":
+            self._character_action_on_place()
+
+        if new_offset is not None:
+            self._offset_change(new_offset)
+
+        self._invalidate()
+
+    def _character_action_on_place(self) -> None:
+        # TODO BS 2019-06-20: cyclic import
+        from rolling.gui.view import GoBackSubMenu
+
+        actions_widget = self._controller.guilang.generate_widget(
+            self._controller.client.get_character_on_place_actions(
+                self._controller.player_character.id
+            )
+        )
+        self._controller.view.main_content_container.original_widget = actions_widget
+        self._controller.view.right_menu_container.original_widget = GoBackSubMenu(
+            self._controller,
+            self._controller.view,
+            self._controller.view.right_menu_container.original_widget,
         )

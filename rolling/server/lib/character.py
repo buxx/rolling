@@ -4,15 +4,22 @@ import uuid
 
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.stuff import CharacterInventoryModel
+from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
+from rolling.server.lib.action import CharacterAction
+from rolling.server.lib.stuff import StuffLib
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
 class CharacterLib:
-    def __init__(self, kernel: "Kernel") -> None:
+    def __init__(
+        self, kernel: "Kernel", stuff_lib: typing.Optional[StuffLib] = None
+    ) -> None:
         self._kernel = kernel
+        self._stuff_lib: StuffLib = stuff_lib or StuffLib(kernel)
 
     def create(self, create_character_model: CreateCharacterModel) -> str:
         character = CharacterDocument()
@@ -116,3 +123,37 @@ class CharacterLib:
             row[0]
             for row in self._kernel.server_db_session.query(CharacterDocument.id).all()
         )
+
+    def get_inventory(self, character_id: str) -> CharacterInventoryModel:
+        carried_stuff = self._stuff_lib.get_carried_by(character_id)
+        total_weight = sum([stuff.weight for stuff in carried_stuff])
+        total_clutter = sum([stuff.clutter for stuff in carried_stuff])
+        return CharacterInventoryModel(
+            stuff=carried_stuff, weight=total_weight, clutter=total_clutter
+        )
+
+    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterAction]:
+        character_doc = self.get_document(character_id)
+        character_actions: typing.List[CharacterAction] = []
+
+        # First, search action with near items
+        on_same_position_items = self._stuff_lib.get_zone_stuffs(
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            zone_row_i=character_doc.zone_row_i,
+            zone_col_i=character_doc.zone_col_i,
+        )
+        for item in on_same_position_items:
+            character_actions.append(
+                CharacterAction(
+                    name=f"Take {item.get_name_and_light_description()}",
+                    link=TAKE_STUFF_URL.format(
+                        character_id=character_id, stuff_id=item.id
+                    ),
+                )
+            )
+
+        return character_actions
+
+    def take_stuff(self, character_id: str, stuff_id: int) -> None:
+        self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)

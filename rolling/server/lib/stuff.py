@@ -48,16 +48,29 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def get_zone_stuffs(
-        self, world_row_i: int, world_col_i: int
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
     ) -> typing.List[StuffModel]:
+        filters = [
+            StuffDocument.carried_by_id == None,
+            StuffDocument.world_row_i == world_row_i,
+            StuffDocument.world_col_i == world_col_i,
+        ]
+
+        if zone_row_i and zone_col_i:
+            filters.extend(
+                [
+                    StuffDocument.zone_row_i == zone_row_i,
+                    StuffDocument.zone_col_i == zone_col_i,
+                ]
+            )
+
         stuff_docs = (
             self._kernel.server_db_session.query(StuffDocument)
-            .filter(
-                sqlalchemy.and_(
-                    StuffDocument.world_row_i == world_row_i,
-                    StuffDocument.world_col_i == world_col_i,
-                )
-            )
+            .filter(sqlalchemy.and_(*filters))
             .all()
         )
         return [self._stuff_model_from_doc(doc) for doc in stuff_docs]
@@ -71,8 +84,31 @@ class StuffLib:
             name=stuff_name,
             zone_col_i=doc.zone_col_i,
             zone_row_i=doc.zone_row_i,
-            filled_at=float(doc.filled_at),
-            filled_unity=Unit(doc.filled_unity),
-            weight=float(doc.weight),
-            clutter=float(doc.clutter),
+            filled_at=float(doc.filled_at) if doc.filled_at else None,
+            filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
+            weight=float(doc.weight) if doc.weight else None,
+            clutter=float(doc.clutter) if doc.clutter else None,
         )
+
+    def get_carried_by(self, character_id: str) -> typing.List[StuffModel]:
+        carried = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.carried_by_id == character_id)
+            .all()
+        )
+        return [self._stuff_model_from_doc(doc) for doc in carried]
+
+    def get_stuff_doc(self, stuff_id: int) -> StuffDocument:
+        return (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
+
+    def set_carried_by(
+        self, stuff_id: int, character_id: str, commit: bool = True
+    ) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        stuff_doc.carried_by_id = character_id
+        if commit:
+            self._kernel.server_db_session.commit()

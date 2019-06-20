@@ -35,7 +35,8 @@ class HttpClient:
                 f"Server response is {response.status_code},{response.json()}"
             )
 
-    def request_post(self, path: str, data: dict) -> Response:
+    def request_post(self, path: str, data: dict = None) -> Response:
+        data = data or {}
         return requests.post(f"{self._server_address}/{path.lstrip('/')}", json=data)
 
     def get_character(self, character_id: str) -> CharacterModel:
@@ -97,6 +98,20 @@ class HttpClient:
     def get_character_card_description(self, character_id: str) -> Description:
         response = requests.get(
             f"{self._server_address}/_describe/character/{character_id}/card"
+        )
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())
+
+    def get_character_inventory(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/inventory"
+        )
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())
+
+    def get_character_on_place_actions(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/on_place_actions"
         )
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())

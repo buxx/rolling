@@ -1,25 +1,29 @@
 #  coding: utf-8
+import typing
+
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
 from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import MoveCharacterQueryModel
+from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
+from rolling.server.controller.url import POST_CHARACTER_URL
+from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.util import EmptyModel
-
-POST_CHARACTER_URL = "/character"
 
 
 class CharacterController(BaseController):
@@ -51,7 +55,7 @@ class CharacterController(BaseController):
     async def _describe_character_card(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        character = self._character_lib.get(hapic_data.path.id)
+        character = self._character_lib.get(hapic_data.path.character_id)
         return Description(
             title="Character card",
             items=[
@@ -67,6 +71,53 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+        stuff_items: typing.List[Part] = []
+
+        for stuff in inventory.stuff:
+            name = stuff.name
+            descriptions: typing.List[str] = stuff.get_full_description()
+
+            description = ""
+            if descriptions:
+                description = " (" + ", ".join(descriptions) + ")"
+
+            stuff_items.append(Part(text=f"{name}{description}"))
+
+        return Description(
+            title="Inventory",
+            items=[
+                Part(text=f"total weight: {inventory.weight}g"),
+                Part(text=f"total clutter: {inventory.clutter}"),
+                Part(text="Items:"),
+                *stuff_items,
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_on_place_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character_actions = self._character_lib.get_on_place_actions(
+            hapic_data.path.character_id
+        )
+
+        return Description(
+            title="Here, you can:",
+            items=[
+                Part(text=action.name, form_action=action.link, is_link=True)
+                for action in character_actions
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -78,7 +129,16 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterModel)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
-        return self._character_lib.get(hapic_data.path.id)
+        return self._character_lib.get(hapic_data.path.character_id)
+
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoResultFound, http_code=404)
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(CharacterInventoryModel)
+    async def get_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> CharacterInventoryModel:
+        return self._character_lib.get_inventory(hapic_data.path.character_id)
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -86,11 +146,20 @@ class CharacterController(BaseController):
     @hapic.handle_exception(CantMoveCharacter)
     @hapic.output_body(EmptyModel)
     async def move(self, request: Request, hapic_data: HapicData) -> Response:
-        character = self._character_lib.get(hapic_data.path.id)
+        character = self._character_lib.get(hapic_data.path.character_id)
         self._character_lib.move(
             character,
             to_world_row=hapic_data.query.to_world_row,
             to_world_col=hapic_data.query.to_world_col,
+        )
+        return Response(status=204)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(PostTakeStuffModelModel)
+    @hapic.output_body(EmptyModel, default_http_code=204)
+    async def take_stuff(self, request: Request, hapic_data: HapicData) -> Response:
+        self._character_lib.take_stuff(
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Response(status=204)
 
@@ -99,10 +168,21 @@ class CharacterController(BaseController):
             [
                 web.get("/_describe/character/create", self._describe_create_character),
                 web.get(
-                    "/_describe/character/{id}/card", self._describe_character_card
+                    "/_describe/character/{character_id}/card",
+                    self._describe_character_card,
+                ),
+                web.get(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
+                web.get(
+                    "/_describe/character/{character_id}/on_place_actions",
+                    self._describe_on_place_actions,
                 ),
                 web.post(POST_CHARACTER_URL, self.create),
-                web.get("/character/{id}", self.get),
-                web.put("/character/{id}/move", self.move),
+                web.get("/character/{character_id}", self.get),
+                web.get("/character/{character_id}/inventory", self.get_inventory),
+                web.put("/character/{character_id}/move", self.move),
+                web.post(TAKE_STUFF_URL, self.take_stuff),
             ]
         )

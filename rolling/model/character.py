@@ -27,7 +27,13 @@ class CreateCharacterModel:
 
 @dataclasses.dataclass
 class GetCharacterPathModel:
-    id: str
+    character_id: str
+
+
+@dataclasses.dataclass
+class PostTakeStuffModelModel:
+    character_id: str
+    stuff_id: int = serpyco.number_field(cast_on_load=True)
 
 
 @dataclasses.dataclass

@@ -4,3 +4,7 @@
   filled_unity = "L"
   weight = 0.1
   clutter = 1.0
+[STONE]
+  name = "Stone"
+  weight = 2000.0
+  clutter = 1.0

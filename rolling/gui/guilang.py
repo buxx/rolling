@@ -89,6 +89,17 @@ class Generator:
             for item in items:
                 if item.text and item.label and not item.type_:
                     widgets_.append(urwid.Text(f"{item.label}: {item.text}"))
+                if item.text and not item.label and not item.type_ and not item.is_link:
+                    widgets_.append(urwid.Text(item.text))
+                if item.text and item.is_link:
+                    widgets_.append(
+                        urwid.Button(
+                            item.text,
+                            on_press=lambda *_, **__: self.follow_link(
+                                item.form_action
+                            ),
+                        )
+                    )
                 elif item.type_:
                     if item.type_ in (Type.STRING, Type.TEXT, Type.NUMBER):
                         widget = urwid.Edit(item.label + ": ")
@@ -138,6 +149,21 @@ class Generator:
             )
         elif response.status_code == 200:
             success_callback(success_serializer.load(response.json()))
+        else:
+            error_message = response.json().get("message")
+            gui_logger.error(error_message)
+            raise ClientServerExchangeError(
+                f"Error when communicate with server: {error_message}"
+            )
+
+    def follow_link(self, url: str) -> None:
+        response = self._http_client.request_post(url)
+        if response.status_code in (200, 204):
+            self._controller.display_zone()
+        elif response.status_code == 400:
+            raise NotImplementedError(
+                "TODO: test with maximum clutter or weight reached"
+            )
         else:
             error_message = response.json().get("message")
             gui_logger.error(error_message)
