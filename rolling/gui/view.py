@@ -3,6 +3,7 @@ import typing
 
 import urwid
 
+from rolling.gui.image.widget import ImageWidget
 from rolling.gui.map.object import CurrentPosition
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import WorldMapRenderEngine
@@ -114,12 +115,19 @@ class RootMenu(BaseMenu):
     title = "Welcome"
 
     def _get_menu_buttons(self):
-        return [("Play", self._play_callback), ("Quit", self._quit_callback)]
+        return [
+            ("Play", self._play_callback),
+            ("Test image", self._test_image),
+            ("Quit", self._quit_callback),
+        ]
 
     def _play_callback(self, *args, **kwargs):
         self._main_view.main_content_container.original_widget = ChooseServerMenu(
             self._controller, self._main_view
         )
+
+    def _test_image(self, *args, **kwargs):
+        self._main_view.main_content_container.original_widget = ImageWidget("test.jpg")
 
     def _quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()
