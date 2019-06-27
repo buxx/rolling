@@ -5,9 +5,9 @@ import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.kernel import Kernel
 from rolling.log import configure_logging
 from rolling.log import server_logger

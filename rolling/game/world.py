@@ -3,7 +3,10 @@ import typing
 
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
+from rolling.model.stuff import StuffMaterialType
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.model.world import Resource
+from rolling.model.world import ResourceType
 from rolling.model.world import World
 from rolling.model.zone import ZoneProperties
 
@@ -34,3 +37,24 @@ class WorldManager:
         self
     ) -> typing.Dict[typing.Type[MapTileType], ZoneProperties]:
         return dict(((zp.zone_type, zp) for zp in self._world.zones_properties))
+
+    def get_resource_on_or_around(
+        self,
+        world_row_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        material_type: StuffMaterialType,
+    ) -> typing.List[Resource]:
+        # FIXME BS 2019-07-02: code it for real !
+        # TODO BS 2019-07-02: factory for types
+        if material_type == StuffMaterialType.LIQUID:
+            return [
+                Resource(
+                    type_=ResourceType.WATER,
+                    material_type=StuffMaterialType.LIQUID,
+                    name="Fresh water",
+                )
+            ]
+
+        return []

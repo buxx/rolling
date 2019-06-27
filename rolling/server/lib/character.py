@@ -5,6 +5,7 @@ import uuid
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
 from rolling.server.lib.action import CharacterAction
@@ -54,6 +55,13 @@ class CharacterLib:
             .one()
         )
 
+    def get_document_by_name(self, name: str) -> CharacterDocument:
+        return (
+            self._kernel.server_db_session.query(CharacterDocument)
+            .filter(CharacterDocument.name == name)
+            .one()
+        )
+
     def _document_to_model(
         self, character_document: CharacterDocument
     ) -> CharacterModel:
@@ -74,6 +82,10 @@ class CharacterLib:
 
     def get(self, id_: str) -> CharacterModel:
         character_document = self.get_document(id_)
+        return self._document_to_model(character_document)
+
+    def get_by_name(self, name: str) -> CharacterModel:
+        character_document = self.get_document_by_name(name)
         return self._document_to_model(character_document)
 
     def move_on_zone(
@@ -146,11 +158,34 @@ class CharacterLib:
         for item in on_same_position_items:
             character_actions.append(
                 CharacterAction(
-                    name=f"Take {item.get_name_and_light_description()}",
-                    link=TAKE_STUFF_URL.format(
+                    name=f"Take a look on {item.name}",
+                    link=DESCRIBE_LOOT_AT_STUFF_URL.format(
                         character_id=character_id, stuff_id=item.id
                     ),
                 )
+            )
+
+        return character_actions
+
+    def get_on_stuff_actions(
+        self, character_id: str, stuff_id: int
+    ) -> typing.List[CharacterAction]:
+        stuff = self._stuff_lib.get_stuff(stuff_id)
+        character = self.get(character_id)
+        character_actions: typing.List[CharacterAction] = []
+
+        if stuff.carried_by is None:
+            character_actions.append(
+                CharacterAction(
+                    name=f"Take {stuff.get_name_and_light_description()}",
+                    link=TAKE_STUFF_URL.format(
+                        character_id=character_id, stuff_id=stuff.id
+                    ),
+                )
+            )
+        elif stuff.carried_by == character_id:
+            character_actions.extend(
+                self._stuff_lib.get_carrying_actions(character, stuff)
             )
 
         return character_actions

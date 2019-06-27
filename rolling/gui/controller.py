@@ -36,11 +36,14 @@ class Controller:
         client: HttpClient,
         kernel: Kernel,
         display_object_manager: DisplayObjectManager = None,
+        # TODO BS: enum
+        root_menu_mode: str = "normal",
     ) -> None:
         self._client = client
         self._asyncio_loop: asyncio.AbstractEventLoop = None
         self._loop = None
         self._kernel = kernel
+        self._root_menu_mode = root_menu_mode
         self._view = View(self)
         self._palette_generator = PaletteGenerator(self._kernel)
         self._client: typing.Optional[HttpClient] = None
@@ -112,6 +115,10 @@ class Controller:
             raise ComponentNotPrepared("self._display_objects_manager not prepared")
 
         return self._display_objects_manager
+
+    @property
+    def root_menu_mode(self) -> str:
+        return self._root_menu_mode
 
     def main(self) -> None:
         self._asyncio_loop = asyncio.get_event_loop()

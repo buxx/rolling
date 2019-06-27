@@ -6,6 +6,7 @@ from rolling.kernel import Kernel
 PALETTE_CHARACTER = "PALETTE_CHARACTER"
 PALETTE_STUFF = "PALETTE_STUFF"
 PALETTE_POSITION = "PALETTE_POSITION"
+PALETTE_BG_COLOR = "BG_COLOR_H{}"
 
 
 class PaletteGenerator:
@@ -31,5 +32,8 @@ class PaletteGenerator:
                     tile_type.background_high_color,
                 )
             )
+
+        for i in range(256):
+            palette.append((PALETTE_BG_COLOR.format(i), "white", "", "", "", f"h{i}"))
 
         return palette

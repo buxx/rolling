@@ -7,6 +7,9 @@ import toml
 from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
+from rolling.model.action import ActionProperties
+from rolling.model.action import ActionType
+from rolling.model.stuff import StuffMaterialType
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
@@ -38,6 +41,18 @@ class Game:
         for stuff_id, stuff_info in raw_stuffs.items():
             full_info = dict(stuff_info)
             full_info.update({"id": stuff_id})
+            full_info["material_type"] = full_info.get("material_type", None)
+
+            full_info["actions"] = [
+                ActionProperties(
+                    type_=ActionType(a["type"]),
+                    fill_acceptable_types=[
+                        StuffMaterialType(t) for t in a.get("fill_acceptable_types", [])
+                    ],
+                )
+                for a in full_info.get("actions", [])
+            ]
+
             items.append(StuffProperties(**full_info))
 
         return StuffManager(self._kernel, items)

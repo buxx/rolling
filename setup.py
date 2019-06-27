@@ -12,14 +12,17 @@ setup(
     author_email="sevajol.bastien@gmail.com",
     url="https://github.com/buxx/rolling",
     packages=["rolling"],
-    install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests"],
+    install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
+                      'click'],
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={
         "console_scripts": [
             "rolling-gui=rolling.gui.run:main",
             "rolling-server=rolling.server.run:main",
             "rolling-server-turn=rolling.server.turn:main",
+            "rolling-server-manage=rolling.server.manage:main",
             "rolling-generate=rolling.map.generator.run:main",
+            "view256=rolling.gui.view256:main",
         ]
     },
 )
