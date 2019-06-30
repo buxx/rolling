@@ -50,3 +50,4 @@ class Part:
 class Description:
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
+    image: typing.Optional[str] = None

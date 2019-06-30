@@ -12,7 +12,7 @@ setup(
     author_email="sevajol.bastien@gmail.com",
     url="https://github.com/buxx/rolling",
     packages=["rolling"],
-    install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests"],
+    install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow"],
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={
         "console_scripts": [

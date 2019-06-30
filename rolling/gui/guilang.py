@@ -1,4 +1,5 @@
 # coding: utf-8
+import json
 import typing
 
 import serpyco
@@ -10,6 +11,7 @@ from guilang.description import Type
 from rolling.client.http.client import HttpClient
 from rolling.exception import ClientServerExchangeError
 from rolling.exception import RollingError
+from rolling.gui.image.widget import ImageWidget
 from rolling.kernel import Kernel
 from rolling.log import gui_logger
 
@@ -71,6 +73,7 @@ class Generator:
         self._kernel = kernel
         self._http_client = http_client
         self._controller = controller
+        self._serializer = serpyco.Serializer(Description)
 
     def generate_widget(
         self,
@@ -79,10 +82,6 @@ class Generator:
         success_serializer: typing.Optional[serpyco.Serializer] = None,
     ) -> urwid.Widget:
         fields = Fields()
-        widgets = []
-
-        if description.title:
-            widgets.append(urwid.Text(description.title))
 
         def generate_for_items(items: typing.List[Part]):
             widgets_ = []
@@ -126,8 +125,22 @@ class Generator:
                     fields.post_to = item.form_action
             return widgets_
 
+        widgets = []
+
+        if description.title:
+            widgets.append(urwid.Text(description.title))
         widgets.extend(generate_for_items(description.items))
-        return DescriptionWidget(widgets)
+
+        description_widget = DescriptionWidget(widgets)
+
+        if description.image:
+            def callback():
+                self._controller.view.main_content_container.original_widget = description_widget
+
+            # TODO BS 2019-06-30: Manage download media from server
+            return ImageWidget("game/media/"+description.image, callback=callback)
+
+        return description_widget
 
     def validate_form(
         self,
@@ -159,7 +172,18 @@ class Generator:
     def follow_link(self, url: str) -> None:
         response = self._http_client.request_post(url)
         if response.status_code in (200, 204):
-            self._controller.display_zone()
+
+            try:
+                response_json = response.json()
+            # TODO BS 2019-06-30: Ensure always a json response (except 204)
+            except json.decoder.JSONDecodeError:
+                self._controller.display_zone()
+                return
+
+            description = self._serializer.load(response_json)
+            new_main_widget = self.generate_widget(description)
+            self._controller.view.main_content_container.original_widget = new_main_widget
+
         elif response.status_code == 400:
             raise NotImplementedError(
                 "TODO: test with maximum clutter or weight reached"

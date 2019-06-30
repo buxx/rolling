@@ -127,7 +127,7 @@ class RootMenu(BaseMenu):
         )
 
     def _test_image(self, *args, **kwargs):
-        self._main_view.main_content_container.original_widget = ImageWidget("test.jpg")
+        self._main_view.main_content_container.original_widget = ImageWidget("rock.jpeg", callback=lambda: True)
 
     def _quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()

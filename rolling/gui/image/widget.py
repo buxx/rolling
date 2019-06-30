@@ -8,8 +8,9 @@ from rolling.gui.palette import PALETTE_BG_COLOR
 class ImageWidget(urwid.Widget):
     _sizing = frozenset([urwid.BOX])
 
-    def __init__(self, image_path: str):
+    def __init__(self, image_path: str, callback):
         self._image_path = image_path
+        self._callback = callback
 
     def render(self, size, focus=False):
         width, height = size
@@ -73,3 +74,9 @@ class ImageWidget(urwid.Widget):
 
         # FIXME BS 2019-06-27: screen seems broken when terminal is too small (and to big image ?)
         return urwid.TextCanvas(text=rows, attr=attributes, maxcol=width)
+
+    def selectable(self):
+        self._callback()
+
+    def keypress(self, size, key):
+        pass

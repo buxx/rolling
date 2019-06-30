@@ -5,6 +5,7 @@ import uuid
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
 from rolling.server.lib.action import CharacterAction
@@ -146,12 +147,23 @@ class CharacterLib:
         for item in on_same_position_items:
             character_actions.append(
                 CharacterAction(
-                    name=f"Take {item.get_name_and_light_description()}",
-                    link=TAKE_STUFF_URL.format(
+                    name=f"Take a look on {item.name}",
+                    link=DESCRIBE_LOOT_AT_STUFF_URL.format(
                         character_id=character_id, stuff_id=item.id
                     ),
                 )
             )
+
+        return character_actions
+
+    def get_on_stuff_actions(self, character_id: str, stuff_id: int) -> typing.List[CharacterAction]:
+        stuff = self._stuff_lib.get_stuff(stuff_id)
+        character_actions: typing.List[CharacterAction] = [CharacterAction(
+            name=f"Take {stuff.get_name_and_light_description()}",
+            link=TAKE_STUFF_URL.format(
+                character_id=character_id, stuff_id=stuff.id
+            ),
+        )]
 
         return character_actions
 

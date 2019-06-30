@@ -40,6 +40,8 @@ class StuffLib:
             or stuff_generation_properties.stuff.weight,
             clutter=stuff_generation_properties.meta.get("clutter")
             or stuff_generation_properties.stuff.clutter,
+            # FIXME BS 2019-06-30: forgott to add new filed, refacto
+            image=stuff_generation_properties.stuff.image,
         )
 
     def add_stuff(self, doc: StuffDocument, commit: bool = True) -> None:
@@ -75,6 +77,10 @@ class StuffLib:
         )
         return [self._stuff_model_from_doc(doc) for doc in stuff_docs]
 
+    def get_stuff(self, stuff_id: int) -> StuffModel:
+        doc = self.get_stuff_doc(stuff_id)
+        return self._stuff_model_from_doc(doc)
+
     def _stuff_model_from_doc(self, doc: StuffDocument) -> StuffModel:
         stuff_name = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             doc.stuff_id
@@ -88,6 +94,7 @@ class StuffLib:
             filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
+            image=doc.image if doc.image else None,
         )
 
     def get_carried_by(self, character_id: str) -> typing.List[StuffModel]:

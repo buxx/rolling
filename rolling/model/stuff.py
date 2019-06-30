@@ -12,10 +12,11 @@ class Unit(enum.Enum):
 class StuffProperties:
     id: str
     name: str
-    filled_at: float = None
+    filled_at: typing.Optional[float] = None
     filled_unity: Unit = None
-    weight: float = None
-    clutter: float = None
+    weight: typing.Optional[float] = None
+    clutter: typing.Optional[float] = None
+    image: typing.Optional[str] = None
     # TODO BS 2019-06-07: Add list of "capacity" who are object can be used in action
     #  like "Drink", etc
 
@@ -32,6 +33,7 @@ class StuffModel:
     filled_unity: typing.Optional[Unit] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
+    image: typing.Optional[str] = None
 
     def get_full_description(self) -> typing.List[str]:
         descriptions: typing.List[str] = []

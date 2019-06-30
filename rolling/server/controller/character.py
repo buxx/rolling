@@ -17,12 +17,15 @@ from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import GetLookStuffModelModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.stuff import StuffLib
 from rolling.util import EmptyModel
 
 
@@ -30,6 +33,7 @@ class CharacterController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
         super().__init__(kernel)
         self._character_lib = CharacterLib(self._kernel)
+        self._stuff_lib = StuffLib(self._kernel)
 
     @hapic.with_api_doc()
     @hapic.output_body(Description)
@@ -118,6 +122,26 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetLookStuffModelModel)
+    @hapic.output_body(Description)
+    async def _describe_look_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+        actions = self._character_lib.get_on_stuff_actions(
+            character_id=hapic_data.path.character_id,
+            stuff_id=hapic_data.path.stuff_id,
+        )
+        return Description(
+            title=stuff.get_name_and_light_description(),
+            image=stuff.image,
+            items=[
+                Part(text=action.name, form_action=action.link, is_link=True)
+                for action in actions
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -184,5 +208,6 @@ class CharacterController(BaseController):
                 web.get("/character/{character_id}/inventory", self.get_inventory),
                 web.put("/character/{character_id}/move", self.move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
+                web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
             ]
         )
