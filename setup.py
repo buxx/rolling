@@ -20,6 +20,7 @@ setup(
             "rolling-server=rolling.server.run:main",
             "rolling-server-turn=rolling.server.turn:main",
             "rolling-generate=rolling.map.generator.run:main",
+            "view256=rolling.gui.view256:main",
         ]
     },
 )

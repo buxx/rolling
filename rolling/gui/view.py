@@ -114,7 +114,18 @@ class ZoneMenu(BaseMenu):
 class RootMenu(BaseMenu):
     title = "Welcome"
 
+    def __init__(
+        self, controller: "Controller", main_view: "View", mode: str = "normal"
+    ) -> None:
+        self._mode = mode
+        super().__init__(controller, main_view)
+
     def _get_menu_buttons(self):
+        if self._mode == "exit_only":
+            return [
+                ("Quit", self._quit_callback),
+            ]
+
         return [
             ("Play", self._play_callback),
             ("Test image", self._test_image),
@@ -166,7 +177,7 @@ class View(urwid.WidgetWrap):
 
     def _main_window(self):
         self._main_content_container = urwid.Padding(self._create_main_content_widget())
-        self._right_menu_container = urwid.Padding(RootMenu(self._controller, self))
+        self._right_menu_container = urwid.Padding(RootMenu(self._controller, self, mode=self._controller.root_menu_mode))
 
         vertical_line = urwid.AttrWrap(urwid.SolidFill(u"\u2502"), "line")
         columns = urwid.Columns(
