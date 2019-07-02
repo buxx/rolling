@@ -3,9 +3,22 @@ import dataclasses
 import enum
 import typing
 
+import serpyco
+
+from rolling.model.action import ActionProperties
+
 
 class Unit(enum.Enum):
     LITTER = "L"
+
+
+class StuffMaterialType(enum.Enum):
+    LIQUID = "LIQUID"
+    SANDY = "SANDY"
+    PASTY = "PASTY"
+    GAS = "GAS"
+    SOLID = "SOLID"
+    OBJECT = "OBJECT"
 
 
 @dataclasses.dataclass
@@ -17,8 +30,8 @@ class StuffProperties:
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
-    # TODO BS 2019-06-07: Add list of "capacity" who are object can be used in action
-    #  like "Drink", etc
+    actions: typing.List[ActionProperties] = serpyco.field(default_factory=list)
+    material_type: typing.Optional[StuffMaterialType] = None
 
 
 @dataclasses.dataclass
@@ -26,6 +39,7 @@ class StuffModel:
     """existing stuff (on zone or carried)"""
 
     id: int
+    stuff_id: str
     name: str
     zone_col_i: int
     zone_row_i: int
@@ -34,6 +48,7 @@ class StuffModel:
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
+    carried_by: typing.Optional[str] = None
 
     def get_full_description(self) -> typing.List[str]:
         descriptions: typing.List[str] = []

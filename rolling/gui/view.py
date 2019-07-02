@@ -122,9 +122,7 @@ class RootMenu(BaseMenu):
 
     def _get_menu_buttons(self):
         if self._mode == "exit_only":
-            return [
-                ("Quit", self._quit_callback),
-            ]
+            return [("Quit", self._quit_callback)]
 
         return [
             ("Play", self._play_callback),
@@ -138,7 +136,9 @@ class RootMenu(BaseMenu):
         )
 
     def _test_image(self, *args, **kwargs):
-        self._main_view.main_content_container.original_widget = ImageWidget("rock.jpeg", callback=lambda: True)
+        self._main_view.main_content_container.original_widget = ImageWidget(
+            "rock.jpeg", callback=lambda: True
+        )
 
     def _quit_callback(self, *args, **kwargs):
         raise urwid.ExitMainLoop()
@@ -177,7 +177,9 @@ class View(urwid.WidgetWrap):
 
     def _main_window(self):
         self._main_content_container = urwid.Padding(self._create_main_content_widget())
-        self._right_menu_container = urwid.Padding(RootMenu(self._controller, self, mode=self._controller.root_menu_mode))
+        self._right_menu_container = urwid.Padding(
+            RootMenu(self._controller, self, mode=self._controller.root_menu_mode)
+        )
 
         vertical_line = urwid.AttrWrap(urwid.SolidFill(u"\u2502"), "line")
         columns = urwid.Columns(

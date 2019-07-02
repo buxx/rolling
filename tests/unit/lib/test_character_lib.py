@@ -16,8 +16,7 @@ def character_lib(
     worldmapc_with_zones_stuff_lib: StuffLib,
 ) -> CharacterLib:
     return CharacterLib(
-        worldmapc_with_zones_kernel,
-        stuff_lib=worldmapc_with_zones_stuff_lib,
+        worldmapc_with_zones_kernel, stuff_lib=worldmapc_with_zones_stuff_lib
     )
 
 
@@ -25,9 +24,7 @@ def character_lib(
 def jose(
     worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
 ) -> CharacterDocument:
-    arthur = CharacterDocument(
-        id="jose", name="jose", **default_character_competences
-    )
+    arthur = CharacterDocument(id="jose", name="jose", **default_character_competences)
 
     session = worldmapc_with_zones_kernel.server_db_session
     session.add(arthur)

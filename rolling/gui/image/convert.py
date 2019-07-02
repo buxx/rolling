@@ -1,6 +1,8 @@
 # coding: utf-8
 from PIL import Image
+
 from rolling.gui.image.colortrans import rgb2short
+
 
 """
 THIS CODE HAVE BEEN COPIED FROM https://github.com/hit9/img2txt/blob/gh-pages/LICENSE THEN HAVE
@@ -34,6 +36,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+
 
 def get_pixel(pixels, x, y):
     return " ", pixels[x, y]

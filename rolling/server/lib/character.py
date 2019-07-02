@@ -156,14 +156,24 @@ class CharacterLib:
 
         return character_actions
 
-    def get_on_stuff_actions(self, character_id: str, stuff_id: int) -> typing.List[CharacterAction]:
+    def get_on_stuff_actions(
+        self, character_id: str, stuff_id: int
+    ) -> typing.List[CharacterAction]:
         stuff = self._stuff_lib.get_stuff(stuff_id)
-        character_actions: typing.List[CharacterAction] = [CharacterAction(
-            name=f"Take {stuff.get_name_and_light_description()}",
-            link=TAKE_STUFF_URL.format(
-                character_id=character_id, stuff_id=stuff.id
-            ),
-        )]
+        character = self.get(character_id)
+        character_actions: typing.List[CharacterAction] = []
+
+        if stuff.carried_by is None:
+            character_actions.append(
+                CharacterAction(
+                    name=f"Take {stuff.get_name_and_light_description()}",
+                    link=TAKE_STUFF_URL.format(
+                        character_id=character_id, stuff_id=stuff.id
+                    ),
+                )
+            )
+        elif stuff.carried_by == character_id:
+            character_actions.extend(self._stuff_lib.get_carrying_actions(character, stuff))
 
         return character_actions
 

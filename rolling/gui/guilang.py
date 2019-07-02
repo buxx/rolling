@@ -134,11 +134,14 @@ class Generator:
         description_widget = DescriptionWidget(widgets)
 
         if description.image:
+
             def callback():
-                self._controller.view.main_content_container.original_widget = description_widget
+                self._controller.view.main_content_container.original_widget = (
+                    description_widget
+                )
 
             # TODO BS 2019-06-30: Manage download media from server
-            return ImageWidget("game/media/"+description.image, callback=callback)
+            return ImageWidget("game/media/" + description.image, callback=callback)
 
         return description_widget
 
@@ -182,7 +185,9 @@ class Generator:
 
             description = self._serializer.load(response_json)
             new_main_widget = self.generate_widget(description)
-            self._controller.view.main_content_container.original_widget = new_main_widget
+            self._controller.view.main_content_container.original_widget = (
+                new_main_widget
+            )
 
         elif response.status_code == 400:
             raise NotImplementedError(

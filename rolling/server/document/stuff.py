@@ -29,4 +29,4 @@ class StuffDocument(Document):
     image = Column(String(255), nullable=True)
 
     # relations
-    carried_by_id = Column(Integer, ForeignKey("character.id"), nullable=True)
+    carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)

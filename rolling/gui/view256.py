@@ -11,7 +11,6 @@ from rolling.kernel import Kernel
 
 
 def run(args: argparse.Namespace) -> None:
-
     def exit_(*args, **kwargs):
         raise urwid.ExitMainLoop()
 
@@ -28,9 +27,7 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="View image in 256 term colors")
-    parser.add_argument(
-        "image", type=str, help="image path"
-    )
+    parser.add_argument("image", type=str, help="image path")
     args = parser.parse_args()
     run(args)
 

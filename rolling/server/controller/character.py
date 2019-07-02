@@ -5,24 +5,25 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
+from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
-from rolling.model.character import GetLookStuffModelModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
+from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
+from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
-from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
@@ -91,7 +92,16 @@ class CharacterController(BaseController):
             if descriptions:
                 description = " (" + ", ".join(descriptions) + ")"
 
-            stuff_items.append(Part(text=f"{name}{description}"))
+            stuff_items.append(
+                Part(
+                    text=f"{name}{description}",
+                    is_link=True,
+                    form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                        character_id=hapic_data.path.character_id,
+                        stuff_id=stuff.id,
+                    ),
+                )
+            )
 
         return Description(
             title="Inventory",
@@ -129,12 +139,29 @@ class CharacterController(BaseController):
     ) -> Description:
         stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
         actions = self._character_lib.get_on_stuff_actions(
-            character_id=hapic_data.path.character_id,
-            stuff_id=hapic_data.path.stuff_id,
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Description(
             title=stuff.get_name_and_light_description(),
             image=stuff.image,
+            items=[
+                Part(text=action.name, form_action=action.link, is_link=True)
+                for action in actions
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetLookStuffModelModel)
+    @hapic.output_body(Description)
+    async def _describe_inventory_look_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+        actions = self._character_lib.get_on_stuff_actions(
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
+        )
+        return Description(
+            title=stuff.get_name_and_light_description(),
             items=[
                 Part(text=action.name, form_action=action.link, is_link=True)
                 for action in actions
@@ -205,9 +232,15 @@ class CharacterController(BaseController):
                 ),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.get("/character/{character_id}", self.get),
-                web.get("/character/{character_id}/inventory", self.get_inventory),
+                web.get(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
                 web.put("/character/{character_id}/move", self.move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
+                web.post(
+                    DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
+                ),
             ]
         )

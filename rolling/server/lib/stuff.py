@@ -3,9 +3,12 @@ import typing
 
 import sqlalchemy
 
+from rolling.model.action import ActionType
+from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.model.stuff import Unit
 from rolling.server.document.stuff import StuffDocument
+from rolling.server.lib.action import CharacterAction
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -95,6 +98,8 @@ class StuffLib:
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
             image=doc.image if doc.image else None,
+            carried_by=doc.carried_by_id,
+            stuff_id=doc.stuff_id,
         )
 
     def get_carried_by(self, character_id: str) -> typing.List[StuffModel]:
@@ -119,3 +124,28 @@ class StuffLib:
         stuff_doc.carried_by_id = character_id
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_carrying_actions(self, character: CharacterModel, stuff: StuffModel) -> typing.List[CharacterAction]:
+        actions: typing.List[CharacterAction] = []
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff.stuff_id
+        )
+
+        for action in stuff_properties.actions:
+            # TODO BS 2019-07-02: Write a factory
+            if action == ActionType.FILL:
+                for fill_acceptable_type in action.fill_acceptable_types:
+                    for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+                        world_row_row_i=character.world_col_i,
+                        world_col_i=character.world_col_i,
+                        zone_row_i=character.zone_row_i,
+                        zone_col_i=character.zone_col_i,
+                        material_type=fill_acceptable_type,
+                    ):
+                        actions.append(CharacterAction(
+                            name=f"Fill {stuff.name} with {resource.name}",
+                            # FIXME BS 2019-07-02: code it
+                            link="FIXME: TODO"
+                        ))
+
+        return actions
