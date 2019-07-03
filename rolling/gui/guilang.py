@@ -191,11 +191,12 @@ class Generator:
 
         elif response.status_code == 400:
             raise NotImplementedError(
-                "TODO: test with maximum clutter or weight reached"
+                "TODO: test with maximum clutter or weight reached (take stuff)"
             )
         else:
             error_message = response.json().get("message")
+            error_detail = response.json()["details"]["traceback"]
             gui_logger.error(error_message)
             raise ClientServerExchangeError(
-                f"Error when communicate with server: {error_message}"
+                f"Error when communicate with server: {error_message} ({error_detail})"
             )

@@ -12,13 +12,15 @@ class Unit(enum.Enum):
     LITTER = "L"
 
 
+# FIXME BS 2019-07-03: move to MaterialType
 class StuffMaterialType(enum.Enum):
     LIQUID = "LIQUID"
     SANDY = "SANDY"
     PASTY = "PASTY"
     GAS = "GAS"
     SOLID = "SOLID"
-    OBJECT = "OBJECT"
+    LITTLE_OBJECT = "LITTLE_OBJECT"
+    SMALL_PIECE = "SMALL_PIECE"
 
 
 @dataclasses.dataclass

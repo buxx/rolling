@@ -165,7 +165,7 @@ class StuffLib:
                     for (
                         resource
                     ) in self._kernel.game.world_manager.get_resource_on_or_around(
-                        world_row_row_i=character.world_col_i,
+                        world_row_i=character.world_row_i,
                         world_col_i=character.world_col_i,
                         zone_row_i=character.zone_row_i,
                         zone_col_i=character.zone_col_i,
