@@ -6,21 +6,12 @@ import typing
 import serpyco
 
 from rolling.model.action import ActionProperties
+from rolling.model.material import MaterialType
+from rolling.model.resource import ResourceType
 
 
 class Unit(enum.Enum):
     LITTER = "L"
-
-
-# FIXME BS 2019-07-03: move to MaterialType
-class StuffMaterialType(enum.Enum):
-    LIQUID = "LIQUID"
-    SANDY = "SANDY"
-    PASTY = "PASTY"
-    GAS = "GAS"
-    SOLID = "SOLID"
-    LITTLE_OBJECT = "LITTLE_OBJECT"
-    SMALL_PIECE = "SMALL_PIECE"
 
 
 @dataclasses.dataclass
@@ -28,12 +19,14 @@ class StuffProperties:
     id: str
     name: str
     filled_at: typing.Optional[float] = None
-    filled_unity: Unit = None
+    filled_with_resource: typing.Optional[ResourceType] = None
+    filled_unity: typing.Optional[Unit] = None
+    filled_capacity: typing.Optional[float] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
     actions: typing.List[ActionProperties] = serpyco.field(default_factory=list)
-    material_type: typing.Optional[StuffMaterialType] = None
+    material_type: typing.Optional[MaterialType] = None
 
 
 @dataclasses.dataclass
@@ -47,6 +40,7 @@ class StuffModel:
     zone_row_i: int
     filled_at: typing.Optional[float] = None
     filled_unity: typing.Optional[Unit] = None
+    filled_with_resource: typing.Optional[ResourceType] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
@@ -61,6 +55,10 @@ class StuffModel:
         if self.filled_at is not None:
             descriptions.append(f"{self.filled_at}%")
 
+        if self.filled_with_resource is not None:
+            # TODO BS 2019-07-04: translation
+            descriptions.append(f"{self.filled_with_resource.value}")
+
         return descriptions
 
     def get_light_description(self) -> typing.List[str]:
@@ -68,6 +66,10 @@ class StuffModel:
 
         if self.filled_at is not None:
             descriptions.append(f"{self.filled_at}%")
+
+        if self.filled_with_resource is not None:
+            # TODO BS 2019-07-04: translation
+            descriptions.append(f"{self.filled_with_resource.value}")
 
         return descriptions
 

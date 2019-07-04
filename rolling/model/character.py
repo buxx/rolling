@@ -5,6 +5,7 @@ import typing
 import serpyco
 
 from rolling.exception import RollingError
+from rolling.model.resource import ResourceType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
@@ -38,6 +39,19 @@ class PostTakeStuffModelModel:
 
 @dataclasses.dataclass
 class GetLookStuffModelModel:
+    character_id: str
+    stuff_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class FillStuffWithModel:
+    character_id: str
+    stuff_id: int = serpyco.number_field(cast_on_load=True)
+    resource_type: ResourceType = serpyco.field()
+
+
+@dataclasses.dataclass
+class EmptyStuffModel:
     character_id: str
     stuff_id: int = serpyco.number_field(cast_on_load=True)
 

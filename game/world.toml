@@ -7,6 +7,7 @@
         [ZONE_PROPERTIES.BEACH.GENERATION.STUFF.PLASTIC_BOTTLE_1L]
           probability = 100.0
           filled_at = 0.0
+          # TODO BS 2019-07-04: add filled_with_resource, and change structure to permit multipler same stuff id
   [ZONE_PROPERTIES.PLAIN]
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 15

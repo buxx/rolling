@@ -84,3 +84,11 @@ class ConfigurationError(RollingError):
 
 class UnknownStuffError(ConfigurationError):
     pass
+
+
+class CantFill(GamePlayError):
+    pass
+
+
+class CantEmpty(GamePlayError):
+    pass

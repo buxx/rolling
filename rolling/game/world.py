@@ -4,12 +4,12 @@ import typing
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.stuff import StuffMaterialType
+from rolling.model.material import MaterialType
+from rolling.model.resource import ResourceType
+from rolling.model.resource import resource_type_materials
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import Resource
-from rolling.model.world import ResourceType
 from rolling.model.world import World
-from rolling.model.world import resource_type_materials
 from rolling.model.zone import ZoneProperties
 from rolling.util import get_on_and_around_coordinates
 
@@ -47,7 +47,7 @@ class WorldManager:
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
-        material_type: StuffMaterialType,
+        material_type: MaterialType,
     ) -> typing.List[Resource]:
         # TODO BS 2019-07-02: factory for types
         inspect_zone_positions = get_on_and_around_coordinates(zone_row_i, zone_col_i)

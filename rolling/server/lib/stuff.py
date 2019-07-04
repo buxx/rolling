@@ -3,11 +3,17 @@ import typing
 
 import sqlalchemy
 
+from rolling.exception import CantEmpty
+from rolling.exception import CantFill
 from rolling.model.action import ActionType
 from rolling.model.character import CharacterModel
+from rolling.model.resource import ResourceType
+from rolling.model.resource import resource_type_gram_per_unit
 from rolling.model.stuff import StuffModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import Unit
+from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
+from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.action import CharacterAction
 
@@ -39,9 +45,14 @@ class StuffLib:
             # properties
             filled_at=stuff_generation_properties.meta.get("filled_at")
             or stuff_generation_properties.stuff.filled_at,
+            filled_with_resource=stuff_generation_properties.meta.get(
+                "filled_with_resource"
+            )
+            or stuff_generation_properties.stuff.filled_with_resource,
             filled_unity=stuff_generation_properties.stuff.filled_unity,
             weight=stuff_generation_properties.meta.get("weight")
             or stuff_generation_properties.stuff.weight,
+            filled_capacity=stuff_generation_properties.stuff.filled_capacity,
             clutter=stuff_generation_properties.meta.get("clutter")
             or stuff_generation_properties.stuff.clutter,
             # FIXME BS 2019-06-30: forgott to add new filed, refacto
@@ -66,6 +77,8 @@ class StuffLib:
             # properties
             filled_at=properties.filled_at,
             filled_unity=properties.filled_unity,
+            filled_with_resource=properties.filled_with_resource,
+            filled_capacity=properties.filled_capacity,
             clutter=properties.clutter,
             weight=properties.weight,
             # FIXME BS 2019-06-30: forgott to add new filed, refacto
@@ -120,6 +133,9 @@ class StuffLib:
             zone_row_i=doc.zone_row_i,
             filled_at=float(doc.filled_at) if doc.filled_at else None,
             filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
+            filled_with_resource=ResourceType(doc.filled_with_resource)
+            if doc.filled_with_resource
+            else None,
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
             image=doc.image if doc.image else None,
@@ -174,9 +190,58 @@ class StuffLib:
                         actions.append(
                             CharacterAction(
                                 name=f"Fill {stuff.name} with {resource.name}",
-                                # FIXME BS 2019-07-02: code it
-                                link="FIXME: TODO",
+                                link=DESCRIBE_STUFF_FILL_WITH_RESOURCE.format(
+                                    character_id=character.id,
+                                    stuff_id=stuff.id,
+                                    resource_type=resource.type_.value,
+                                ),
                             )
                         )
+            if action.type_ == ActionType.EMPTY:
+                actions.append(
+                    CharacterAction(
+                        name=f"Empty {stuff.name}",
+                        link=DESCRIBE_EMPTY_STUFF.format(
+                            character_id=character.id, stuff_id=stuff.id
+                        ),
+                    )
+                )
 
         return actions
+
+    def fill_stuff_with_resource(
+        self, stuff: StuffModel, resource_type: ResourceType
+    ) -> None:
+        doc = self.get_stuff_doc(stuff.id)
+
+        if (
+            doc.filled_with_resource is not None
+            and doc.filled_with_resource != resource_type.value
+        ):
+            raise CantFill("Cant fill with (yet) with two different resources")
+
+        if doc.filled_at == 100.0:
+            raise CantFill("Already full")
+
+        doc.filled_with_resource = resource_type.value
+        doc.filled_at = 100.0
+        doc.weight = resource_type_gram_per_unit[resource_type] * float(
+            doc.filled_capacity
+        )
+        self._kernel.server_db_session.add(doc)
+        self._kernel.server_db_session.commit()
+
+    def empty_stuff(self, stuff: StuffModel) -> None:
+        doc = self.get_stuff_doc(stuff.id)
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff.stuff_id
+        )
+
+        if doc.filled_at == 0.0:
+            raise CantEmpty("Already empty")
+
+        doc.filled_with_resource = None
+        doc.filled_at = None
+        doc.weight = stuff_properties.weight
+        self._kernel.server_db_session.add(doc)
+        self._kernel.server_db_session.commit()

@@ -88,15 +88,23 @@ class Generator:
             for item in items:
                 if item.text and item.label and not item.type_:
                     widgets_.append(urwid.Text(f"{item.label}: {item.text}"))
-                if item.text and not item.label and not item.type_ and not item.is_link:
+                elif (
+                    item.text and not item.label and not item.type_ and not item.is_link
+                ):
                     widgets_.append(urwid.Text(item.text))
-                if item.text and item.is_link:
+                elif item.text and item.is_link:
                     widgets_.append(
                         urwid.Button(
                             item.text,
-                            on_press=lambda *_, **__: self.follow_link(
-                                item.form_action
-                            ),
+                            on_press=lambda button, url: self.follow_link(url),
+                            user_data=item.form_action,
+                        )
+                    )
+                elif item.label and item.go_back_zone:
+                    widgets_.append(
+                        urwid.Button(
+                            item.label,
+                            on_press=lambda *_, **__: self._controller.display_zone(),
                         )
                     )
                 elif item.type_:
@@ -117,6 +125,8 @@ class Generator:
                     widgets_.append(
                         urwid.Button(
                             "Validate",
+                            # TODO BS 2019-07-04: manage one form at once
+                            # (see user_data usage previously)
                             on_press=lambda *_, **__: self.validate_form(
                                 widgets, fields, success_callback, success_serializer
                             ),
@@ -189,13 +199,9 @@ class Generator:
                 new_main_widget
             )
 
-        elif response.status_code == 400:
-            raise NotImplementedError(
-                "TODO: test with maximum clutter or weight reached (take stuff)"
-            )
         else:
             error_message = response.json().get("message")
-            error_detail = response.json()["details"]["traceback"]
+            error_detail = response.json()["details"].get("traceback")
             gui_logger.error(error_message)
             raise ClientServerExchangeError(
                 f"Error when communicate with server: {error_message} ({error_detail})"

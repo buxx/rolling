@@ -6,6 +6,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
 
+from rolling.model.resource import ResourceType
 from rolling.model.stuff import Unit
 from rolling.server.extension import ServerSideDocument as Document
 
@@ -22,6 +23,10 @@ class StuffDocument(Document):
     # properties
     filled_at = Column(Numeric(10, 2), nullable=True)
     filled_unity = Column(Enum(*[u.value for u in Unit]), nullable=True)
+    filled_with_resource = Column(
+        Enum(*[rt.value for rt in ResourceType]), nullable=True
+    )
+    filled_capacity = Column(Numeric(10, 2), nullable=True)
     weight = Column(Numeric(10, 2), nullable=True)  # grams
     clutter = Column(Numeric(10, 2), nullable=True)
 

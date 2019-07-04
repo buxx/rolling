@@ -2,11 +2,13 @@
   name = "Plastic bottle"
   filled_at = 0.0
   filled_unity = "L"
+  filled_capacity = 1.0
   weight = 0.1
   clutter = 1.0
   image = "bottle.jpg"
   actions = [
-    {type = "FILL", fill_acceptable_types = ["LIQUID", "SANDY", "PASTY", "GAS"]}
+    {type = "FILL", fill_acceptable_types = ["LIQUID", "SANDY", "PASTY", "GAS"]},
+    {type = "EMPTY"}
   ]
   material_type = "OBJECT"
 [STONE]

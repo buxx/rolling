@@ -2,7 +2,7 @@
 import typing
 
 from rolling.map.type.base import MapTileType
-from rolling.model.world import ResourceType
+from rolling.model.resource import ResourceType
 
 
 class ZoneMapTileType(MapTileType):

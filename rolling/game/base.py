@@ -9,7 +9,7 @@ from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
 from rolling.model.action import ActionProperties
 from rolling.model.action import ActionType
-from rolling.model.stuff import StuffMaterialType
+from rolling.model.material import MaterialType
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
@@ -47,7 +47,7 @@ class Game:
                 ActionProperties(
                     type_=ActionType(a["type"]),
                     fill_acceptable_types=[
-                        StuffMaterialType(t) for t in a.get("fill_acceptable_types", [])
+                        MaterialType(t) for t in a.get("fill_acceptable_types", [])
                     ],
                 )
                 for a in full_info.get("actions", [])

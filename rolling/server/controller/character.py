@@ -5,23 +5,29 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
+from rolling.exception import CantEmpty
+from rolling.exception import CantFill
 from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.character import EmptyStuffModel
+from rolling.model.character import FillStuffWithModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
+from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
+from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.extension import hapic
@@ -168,6 +174,51 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(FillStuffWithModel)
+    @hapic.output_body(Description)
+    async def _describe_fill_stuff_with(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
+        # TODO BS 2019-07-04: Check filling is possible
+        # (see rolling.game.world.WorldManager#get_resource_on_or_around)
+        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+        resource_type = hapic_data.path.resource_type
+
+        try:
+            self._stuff_lib.fill_stuff_with_resource(stuff, resource_type)
+        except CantFill as exc:
+            return Description(
+                title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
+            )
+
+        return Description(
+            title=f"{stuff.name} filled with {resource_type.value}",
+            items=[Part(label="Continue", go_back_zone=True)],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(EmptyStuffModel)
+    @hapic.output_body(Description)
+    async def _describe_empty_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
+        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+
+        try:
+            self._stuff_lib.empty_stuff(stuff)
+        except CantEmpty as exc:
+            return Description(
+                title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
+            )
+
+        return Description(
+            title=f"Emptied {stuff.name}",
+            items=[Part(label="Continue", go_back_zone=True)],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -241,5 +292,9 @@ class CharacterController(BaseController):
                 web.post(
                     DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
                 ),
+                web.post(
+                    DESCRIBE_STUFF_FILL_WITH_RESOURCE, self._describe_fill_stuff_with
+                ),
+                web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
             ]
         )
