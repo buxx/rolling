@@ -30,6 +30,7 @@ class Part:
     label: typing.Optional[str] = None
     name: typing.Optional[str] = None
     is_link: bool = False
+    go_back_zone: bool = False
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:

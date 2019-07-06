@@ -1,4 +1,5 @@
 # coding: utf-8
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
@@ -25,6 +26,10 @@ class CharacterDocument(Document):
     max_life_comp = Column(Numeric(10, 2), nullable=False)
     hunting_and_collecting_comp = Column(Numeric(10, 2), nullable=False)
     find_water_comp = Column(Numeric(10, 2), nullable=False)
+
+    # role game play
+    feel_thirsty = Column(Boolean, default=True)
+    dehydrated = Column(Boolean, default=False)
 
     # transport
     shipped_stuff = relationship(StuffDocument)

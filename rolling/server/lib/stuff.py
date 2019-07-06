@@ -176,8 +176,9 @@ class StuffLib:
 
         for action in stuff_properties.actions:
             # TODO BS 2019-07-02: Write a factory
+            # FIXME BS 2019-07-06: Use Action class (FillAction)
             if action.type_ == ActionType.FILL:
-                for fill_acceptable_type in action.fill_acceptable_types:
+                for fill_acceptable_type in action.acceptable_material_types:
                     for (
                         resource
                     ) in self._kernel.game.world_manager.get_resource_on_or_around(

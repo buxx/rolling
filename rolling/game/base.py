@@ -46,8 +46,8 @@ class Game:
             full_info["actions"] = [
                 ActionProperties(
                     type_=ActionType(a["type"]),
-                    fill_acceptable_types=[
-                        MaterialType(t) for t in a.get("fill_acceptable_types", [])
+                    acceptable_material_types=[
+                        MaterialType(t) for t in a.get("acceptable_material_types", [])
                     ],
                 )
                 for a in full_info.get("actions", [])

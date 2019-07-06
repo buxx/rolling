@@ -7,7 +7,7 @@
   clutter = 1.0
   image = "bottle.jpg"
   actions = [
-    {type = "FILL", fill_acceptable_types = ["LIQUID", "SANDY", "PASTY", "GAS"]},
+    {type = "FILL", acceptable_material_types = ["LIQUID", "SANDY", "PASTY", "GAS"]},
     {type = "EMPTY"}
   ]
   material_type = "OBJECT"

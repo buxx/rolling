@@ -16,6 +16,7 @@ from rolling.exception import CantMoveCharacter
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.character import DrinkMaterialModel
 from rolling.model.character import EmptyStuffModel
 from rolling.model.character import FillStuffWithModel
 from rolling.model.character import GetCharacterPathModel
@@ -24,6 +25,7 @@ from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
+from rolling.server.controller.url import DESCRIBE_DRINK_RESOURCE
 from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
@@ -71,6 +73,7 @@ class CharacterController(BaseController):
             title="Character card",
             items=[
                 Part(text="This is your character card"),
+                Part(text="------------"),
                 Part(label="Name", text=character.name),
                 Part(label="Max life", text=str(character.max_life_comp)),
                 Part(
@@ -78,6 +81,10 @@ class CharacterController(BaseController):
                     text=str(character.hunting_and_collecting_comp),
                 ),
                 Part(label="Find water", text=str(character.find_water_comp)),
+                Part(
+                    label="Feeling thirsty",
+                    text="yes" if character.feel_thirsty else "no",
+                ),
             ],
         )
 
@@ -219,6 +226,21 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(DrinkMaterialModel)
+    @hapic.output_body(Description)
+    async def _describe_drink_material(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        # TODO BS 2019-07-04: Check if material is available
+        message = self._character_lib.drink_material(
+            hapic_data.path.character_id, hapic_data.path.resource_type
+        )
+
+        return Description(
+            title=message, items=[Part(label="Continue", go_back_zone=True)]
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -296,5 +318,6 @@ class CharacterController(BaseController):
                     DESCRIBE_STUFF_FILL_WITH_RESOURCE, self._describe_fill_stuff_with
                 ),
                 web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
+                web.post(DESCRIBE_DRINK_RESOURCE, self._describe_drink_material),
             ]
         )

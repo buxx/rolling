@@ -5,10 +5,14 @@ import typing
 import serpyco
 
 from rolling.exception import RollingError
+from rolling.model.action import Action
+from rolling.model.action import DrinkAction
+from rolling.model.material import MaterialType
 from rolling.model.resource import ResourceType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
+    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass
@@ -57,6 +61,12 @@ class EmptyStuffModel:
 
 
 @dataclasses.dataclass
+class DrinkMaterialModel:
+    character_id: str
+    resource_type: ResourceType
+
+
+@dataclasses.dataclass
 class MoveCharacterQueryModel:
     to_world_row: int = serpyco.number_field(cast_on_load=True)
     to_world_col: int = serpyco.number_field(cast_on_load=True)
@@ -77,6 +87,9 @@ class CharacterModel:
     zone_col_i: int = None
     zone_row_i: int = None
 
+    feel_thirsty: bool = True
+    dehydrated: bool = False
+
     _display_object = None
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
@@ -88,3 +101,10 @@ class CharacterModel:
             raise RollingError("You are trying to use property which is not set")
 
         return self._display_object
+
+
+character_actions: typing.List[typing.Callable[["Kernel", CharacterModel], Action]] = [
+    lambda k, c: DrinkAction(
+        kernel=k, character=c, acceptable_material_types=[MaterialType.LIQUID]
+    )
+]

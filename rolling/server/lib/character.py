@@ -4,6 +4,9 @@ import uuid
 
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.character import character_actions
+from rolling.model.material import MaterialType
+from rolling.model.resource import ResourceType
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
@@ -78,6 +81,8 @@ class CharacterLib:
                 character_document.hunting_and_collecting_comp
             ),
             find_water_comp=float(character_document.find_water_comp),
+            feel_thirsty=character_document.feel_thirsty,
+            dehydrated=character_document.dehydrated,
         )
 
     def get(self, id_: str) -> CharacterModel:
@@ -145,18 +150,18 @@ class CharacterLib:
         )
 
     def get_on_place_actions(self, character_id: str) -> typing.List[CharacterAction]:
-        character_doc = self.get_document(character_id)
-        character_actions: typing.List[CharacterAction] = []
+        character = self.get(character_id)
+        character_actions_: typing.List[CharacterAction] = []
 
-        # First, search action with near items
+        # Actions with near items
         on_same_position_items = self._stuff_lib.get_zone_stuffs(
-            world_row_i=character_doc.world_row_i,
-            world_col_i=character_doc.world_col_i,
-            zone_row_i=character_doc.zone_row_i,
-            zone_col_i=character_doc.zone_col_i,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=character.zone_row_i,
+            zone_col_i=character.zone_col_i,
         )
         for item in on_same_position_items:
-            character_actions.append(
+            character_actions_.append(
                 CharacterAction(
                     name=f"Take a look on {item.name}",
                     link=DESCRIBE_LOOT_AT_STUFF_URL.format(
@@ -165,7 +170,12 @@ class CharacterLib:
                 )
             )
 
-        return character_actions
+        # Actions with available character actions
+        for character_action_factory in character_actions:
+            character_action = character_action_factory(self._kernel, character)
+            character_actions_.extend(character_action.get_available_actions())
+
+        return character_actions_
 
     def get_on_stuff_actions(
         self, character_id: str, stuff_id: int
@@ -192,3 +202,21 @@ class CharacterLib:
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)
+
+    def drink_material(self, character_id: str, resource_type: ResourceType) -> str:
+        character_doc = self.get_document(character_id)
+
+        if not character_doc.feel_thirsty:
+            return "You are not thirsty"
+
+        if resource_type == ResourceType.FRESH_WATER:
+            character_doc.dehydrated = False
+            character_doc.feel_thirsty = False
+            self._kernel.server_db_session.add(character_doc)
+            self._kernel.server_db_session.commit()
+            return "You're no longer thirsty"
+        elif resource_type == ResourceType.SALTED_WATER:
+            return "It's unbearable"
+
+        # TODO BS 2019-07-06: Move logic otherwise to be able to describe effect in game config ?
+        return "It's not a good idea"
