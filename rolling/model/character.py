@@ -6,9 +6,9 @@ import serpyco
 
 from rolling.exception import RollingError
 from rolling.model.action import Action
-from rolling.model.action import DrinkAction
-from rolling.model.material import MaterialType
+from rolling.model.action import DrinkResourceAction
 from rolling.model.resource import ResourceType
+from rolling.model.types import MaterialType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
@@ -101,10 +101,3 @@ class CharacterModel:
             raise RollingError("You are trying to use property which is not set")
 
         return self._display_object
-
-
-character_actions: typing.List[typing.Callable[["Kernel", CharacterModel], Action]] = [
-    lambda k, c: DrinkAction(
-        kernel=k, character=c, acceptable_material_types=[MaterialType.LIQUID]
-    )
-]

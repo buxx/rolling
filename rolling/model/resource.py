@@ -2,7 +2,7 @@
 import enum
 import typing
 
-from rolling.model.material import MaterialType
+from rolling.model.types import MaterialType
 
 
 class ResourceType(enum.Enum):

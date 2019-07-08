@@ -4,8 +4,8 @@ import typing
 
 from serpyco import nested_field
 
-from rolling.model.material import MaterialType
 from rolling.model.resource import ResourceType
+from rolling.model.types import MaterialType
 from rolling.model.zone import WorldTileTypeModel
 from rolling.model.zone import ZoneProperties
 

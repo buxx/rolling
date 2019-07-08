@@ -1,7 +1,6 @@
 # coding: utf-8
 import typing
 
-from rolling.model.action import CharacterAction
 from rolling.model.action import DrinkResourceAction
 from rolling.model.action import EmptyStuffAction
 from rolling.model.action import FillStuffAction
@@ -11,6 +10,7 @@ from rolling.types import ActionType
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.action import ActionProperties
+    from rolling.model.action import CharacterAction
 
 
 class ActionFactory:
@@ -40,8 +40,8 @@ class ActionFactory:
             self._kernel, action_properties
         )
 
-    def get_all_character_actions(self) -> typing.List[CharacterAction]:
-        actions: typing.List[CharacterAction] = []
+    def get_all_character_actions(self) -> typing.List["CharacterAction"]:
+        actions: typing.List["CharacterAction"] = []
 
         for action_class in self._character_actions.values():
             actions.append(action_class(self._kernel))

@@ -4,10 +4,10 @@ import typing
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.material import MaterialType
 from rolling.model.resource import ResourceType
 from rolling.model.resource import resource_type_materials
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.model.types import MaterialType
 from rolling.model.world import Resource
 from rolling.model.world import World
 from rolling.model.zone import ZoneProperties

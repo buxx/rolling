@@ -1,25 +1,21 @@
 # coding: utf-8
 import abc
 import dataclasses
-import enum
 import typing
 
 import serpyco
 
+from rolling.model.types import MaterialType
 from rolling.server.controller.url import DESCRIBE_DRINK_RESOURCE
-from rolling.server.lib.action import CharacterAction
+from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
+from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
+from rolling.server.link import CharacterActionLink
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
-    from rolling.model.material import MaterialType
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
-
-
-class ActionType(enum.Enum):
-    FILL = "FILL"
-    EMPTY = "EMPTY"
-    ATTACK_WITH = "ATTACK_WITH"
-    DRINK = "DRINK"
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -31,41 +27,106 @@ class ActionProperties:
 
 
 class Action(abc.ABC):
+    pass
+
+
+class OnStuffAction(Action):
+    def __init__(self, kernel: "Kernel", action_properties: ActionProperties) -> None:
+        self._kernel = kernel
+        self._properties = action_properties
+
     @abc.abstractmethod
-    def get_available_actions(self) -> typing.List[CharacterAction]:
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
         pass
 
 
-class DrinkAction(Action):
-    def __init__(
-        self,
-        kernel: "Kernel",
-        character: "CharacterModel",
-        acceptable_material_types: typing.List["MaterialType"],
-    ) -> None:
+class CharacterAction(Action):
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
-        self._character = character
-        self._acceptable_material_types = acceptable_material_types
 
-    def get_available_actions(self) -> typing.List[CharacterAction]:
-        character_actions: typing.List[CharacterAction] = []
+    @abc.abstractmethod
+    def get_character_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        pass
 
-        for acceptable_material_type in self._acceptable_material_types:
+
+class FillStuffAction(OnStuffAction):
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        actions: typing.List[CharacterActionLink] = []
+
+        for fill_acceptable_type in self._properties.acceptable_material_types:
             for resource in self._kernel.game.world_manager.get_resource_on_or_around(
-                world_row_i=self._character.world_row_i,
-                world_col_i=self._character.world_col_i,
-                zone_row_i=self._character.zone_row_i,
-                zone_col_i=self._character.zone_col_i,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=character.zone_row_i,
+                zone_col_i=character.zone_col_i,
+                material_type=fill_acceptable_type,
+            ):
+                actions.append(
+                    CharacterActionLink(
+                        name=f"Fill {stuff.name} with {resource.name}",
+                        link=DESCRIBE_STUFF_FILL_WITH_RESOURCE.format(
+                            character_id=character.id,
+                            stuff_id=stuff.id,
+                            resource_type=resource.type_.value,
+                        ),
+                    )
+                )
+
+        return actions
+
+
+class EmptyStuffAction(OnStuffAction):
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        actions: typing.List[CharacterActionLink] = [
+            CharacterActionLink(
+                name=f"Empty {stuff.name}",
+                link=DESCRIBE_EMPTY_STUFF.format(
+                    character_id=character.id, stuff_id=stuff.id
+                ),
+            )
+        ]
+
+        return actions
+
+
+class DrinkResourceAction(CharacterAction):
+    acceptable_material_types: typing.List[MaterialType] = [MaterialType.LIQUID]
+
+    def get_character_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        character_actions: typing.List[CharacterActionLink] = []
+
+        for acceptable_material_type in self.acceptable_material_types:
+            for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=character.zone_row_i,
+                zone_col_i=character.zone_col_i,
                 material_type=acceptable_material_type,
             ):
                 character_actions.append(
-                    CharacterAction(
+                    CharacterActionLink(
                         name=f"Drink {resource.name}",
                         link=DESCRIBE_DRINK_RESOURCE.format(
-                            character_id=self._character.id,
+                            character_id=character.id,
                             resource_type=resource.type_.value,
                         ),
                     )
                 )
 
         return character_actions
+
+
+@dataclasses.dataclass
+class CharacterActionLink:
+    name: str
+    link: str

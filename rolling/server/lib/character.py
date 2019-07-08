@@ -4,15 +4,14 @@ import uuid
 
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
-from rolling.model.character import character_actions
-from rolling.model.material import MaterialType
 from rolling.model.resource import ResourceType
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
-from rolling.server.lib.action import CharacterAction
+from rolling.server.lib.action import ActionFactory
 from rolling.server.lib.stuff import StuffLib
+from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -24,6 +23,7 @@ class CharacterLib:
     ) -> None:
         self._kernel = kernel
         self._stuff_lib: StuffLib = stuff_lib or StuffLib(kernel)
+        self._action_factory = ActionFactory(kernel)
 
     def create(self, create_character_model: CreateCharacterModel) -> str:
         character = CharacterDocument()
@@ -149,9 +149,11 @@ class CharacterLib:
             stuff=carried_stuff, weight=total_weight, clutter=total_clutter
         )
 
-    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterAction]:
+    def get_on_place_actions(
+        self, character_id: str
+    ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
-        character_actions_: typing.List[CharacterAction] = []
+        character_actions_: typing.List[CharacterActionLink] = []
 
         # Actions with near items
         on_same_position_items = self._stuff_lib.get_zone_stuffs(
@@ -162,7 +164,7 @@ class CharacterLib:
         )
         for item in on_same_position_items:
             character_actions_.append(
-                CharacterAction(
+                CharacterActionLink(
                     name=f"Take a look on {item.name}",
                     link=DESCRIBE_LOOT_AT_STUFF_URL.format(
                         character_id=character_id, stuff_id=item.id
@@ -171,22 +173,21 @@ class CharacterLib:
             )
 
         # Actions with available character actions
-        for character_action_factory in character_actions:
-            character_action = character_action_factory(self._kernel, character)
-            character_actions_.extend(character_action.get_available_actions())
+        for action in self._action_factory.get_all_character_actions():
+            character_actions_.extend(action.get_character_actions(character))
 
         return character_actions_
 
     def get_on_stuff_actions(
         self, character_id: str, stuff_id: int
-    ) -> typing.List[CharacterAction]:
+    ) -> typing.List[CharacterActionLink]:
         stuff = self._stuff_lib.get_stuff(stuff_id)
         character = self.get(character_id)
-        character_actions: typing.List[CharacterAction] = []
+        character_actions: typing.List[CharacterActionLink] = []
 
         if stuff.carried_by is None:
             character_actions.append(
-                CharacterAction(
+                CharacterActionLink(
                     name=f"Take {stuff.get_name_and_light_description()}",
                     link=TAKE_STUFF_URL.format(
                         character_id=character_id, stuff_id=stuff.id

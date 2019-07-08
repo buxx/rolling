@@ -1,0 +1,11 @@
+# coding: utf-8
+import enum
+
+
+class ActionType(enum.Enum):
+    FILL_STUFF = "FILL_STUFF"
+    EMPTY_STUFF = "EMPTY_STUFF"
+    ATTACK_CHARACTER_WITH = "ATTACK_CHARACTER_WITH"
+    DRINK_RESOURCE = "DRINK_RESOURCE"
+    # FIXME BS 2019-07-07: implement it NOW
+    DRINK_STUFF = "DRINK_STUFF"

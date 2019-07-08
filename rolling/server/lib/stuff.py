@@ -5,17 +5,16 @@ import sqlalchemy
 
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
-from rolling.model.action import ActionType
 from rolling.model.character import CharacterModel
 from rolling.model.resource import ResourceType
 from rolling.model.resource import resource_type_gram_per_unit
 from rolling.model.stuff import StuffModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import Unit
-from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
-from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
 from rolling.server.document.stuff import StuffDocument
-from rolling.server.lib.action import CharacterAction
+from rolling.server.lib.action import ActionFactory
+from rolling.server.link import CharacterActionLink
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -25,6 +24,7 @@ if typing.TYPE_CHECKING:
 class StuffLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
+        self._action_factory = ActionFactory(kernel)
 
     @classmethod
     def create_document_from_generation_properties(
@@ -168,45 +168,15 @@ class StuffLib:
 
     def get_carrying_actions(
         self, character: CharacterModel, stuff: StuffModel
-    ) -> typing.List[CharacterAction]:
-        actions: typing.List[CharacterAction] = []
+    ) -> typing.List[CharacterActionLink]:
+        actions: typing.List[CharacterActionLink] = []
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             stuff.stuff_id
         )
 
-        for action in stuff_properties.actions:
-            # TODO BS 2019-07-02: Write a factory
-            # FIXME BS 2019-07-06: Use Action class (FillAction)
-            if action.type_ == ActionType.FILL:
-                for fill_acceptable_type in action.acceptable_material_types:
-                    for (
-                        resource
-                    ) in self._kernel.game.world_manager.get_resource_on_or_around(
-                        world_row_i=character.world_row_i,
-                        world_col_i=character.world_col_i,
-                        zone_row_i=character.zone_row_i,
-                        zone_col_i=character.zone_col_i,
-                        material_type=fill_acceptable_type,
-                    ):
-                        actions.append(
-                            CharacterAction(
-                                name=f"Fill {stuff.name} with {resource.name}",
-                                link=DESCRIBE_STUFF_FILL_WITH_RESOURCE.format(
-                                    character_id=character.id,
-                                    stuff_id=stuff.id,
-                                    resource_type=resource.type_.value,
-                                ),
-                            )
-                        )
-            if action.type_ == ActionType.EMPTY:
-                actions.append(
-                    CharacterAction(
-                        name=f"Empty {stuff.name}",
-                        link=DESCRIBE_EMPTY_STUFF.format(
-                            character_id=character.id, stuff_id=stuff.id
-                        ),
-                    )
-                )
+        for action_properties in stuff_properties.action_properties:
+            action = self._action_factory.get_with_stuff_action(action_properties)
+            actions.extend(action.get_character_actions(character, stuff))
 
         return actions
 

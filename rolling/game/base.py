@@ -8,13 +8,13 @@ from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
 from rolling.model.action import ActionProperties
-from rolling.model.action import ActionType
-from rolling.model.material import MaterialType
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.model.types import MaterialType
 from rolling.model.world import World
 from rolling.model.zone import GenerationInfo
 from rolling.model.zone import ZoneProperties
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -43,14 +43,14 @@ class Game:
             full_info.update({"id": stuff_id})
             full_info["material_type"] = full_info.get("material_type", None)
 
-            full_info["actions"] = [
+            full_info["action_properties"] = [
                 ActionProperties(
                     type_=ActionType(a["type"]),
                     acceptable_material_types=[
                         MaterialType(t) for t in a.get("acceptable_material_types", [])
                     ],
                 )
-                for a in full_info.get("actions", [])
+                for a in full_info.get("action_properties", [])
             ]
 
             items.append(StuffProperties(**full_info))

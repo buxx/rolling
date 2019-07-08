@@ -6,9 +6,9 @@
   weight = 0.1
   clutter = 1.0
   image = "bottle.jpg"
-  actions = [
-    {type = "FILL", acceptable_material_types = ["LIQUID", "SANDY", "PASTY", "GAS"]},
-    {type = "EMPTY"}
+  action_properties = [
+    {type = "FILL_STUFF", acceptable_material_types = ["LIQUID", "SANDY", "PASTY", "GAS"]},
+    {type = "EMPTY_STUFF"}
   ]
   material_type = "OBJECT"
 [STONE]
@@ -16,7 +16,7 @@
   weight = 2000.0
   clutter = 1.0
   image = "stone.jpg"
-  actions = [
-    {type = "ATTACK_WITH"}
+  action_properties = [
+    {type = "ATTACK_CHARACTER_WITH"}
   ]
   material_type = "SOLID"
