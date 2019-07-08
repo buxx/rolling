@@ -143,7 +143,7 @@ class CharacterLib:
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(character_id)
-        total_weight = sum([stuff.weight for stuff in carried_stuff])
+        total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_clutter = sum([stuff.clutter for stuff in carried_stuff])
         return CharacterInventoryModel(
             stuff=carried_stuff, weight=total_weight, clutter=total_clutter
