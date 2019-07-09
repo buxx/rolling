@@ -12,3 +12,4 @@ DESCRIBE_EMPTY_STUFF = "/_describe/character/{character_id}/stuff/{stuff_id}/emp
 DESCRIBE_DRINK_RESOURCE = (
     "/_describe/character/{character_id}/drink_resource/{resource_type}"
 )
+DESCRIBE_DRINK_STUFF = "/_describe/character/{character_id}/drink_stuff/{stuff_id}"

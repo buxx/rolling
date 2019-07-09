@@ -184,21 +184,8 @@ class StuffLib:
         self, stuff: StuffModel, resource_type: ResourceType
     ) -> None:
         doc = self.get_stuff_doc(stuff.id)
+        doc.fill(resource_type, at=100.0)
 
-        if (
-            doc.filled_with_resource is not None
-            and doc.filled_with_resource != resource_type.value
-        ):
-            raise CantFill("Cant fill with (yet) with two different resources")
-
-        if doc.filled_at == 100.0:
-            raise CantFill("Already full")
-
-        doc.filled_with_resource = resource_type.value
-        doc.filled_at = 100.0
-        doc.weight = resource_type_gram_per_unit[resource_type] * float(
-            doc.filled_capacity
-        )
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()
 
@@ -207,12 +194,7 @@ class StuffLib:
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             stuff.stuff_id
         )
+        doc.empty(stuff_properties)
 
-        if doc.filled_at == 0.0:
-            raise CantEmpty("Already empty")
-
-        doc.filled_with_resource = None
-        doc.filled_at = None
-        doc.weight = stuff_properties.weight
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()

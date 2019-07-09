@@ -221,3 +221,26 @@ class CharacterLib:
 
         # TODO BS 2019-07-06: Move logic otherwise to be able to describe effect in game config ?
         return "It's not a good idea"
+
+    def drink_stuff(self, character_id: str, stuff_id: int) -> str:
+        character_doc = self.get_document(character_id)
+        stuff_doc = self._stuff_lib.get_stuff_doc(stuff_id)
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff_doc.stuff_id
+        )
+
+        if not character_doc.feel_thirsty:
+            return "You are not thirsty"
+
+        # TODO BS 2019-07-09: manage case where not 100% filled
+        if stuff_doc.filled_at == 100.0:
+            stuff_doc.empty(stuff_properties)
+            self._kernel.server_db_session.add(stuff_doc)
+
+            character_doc.feel_thirsty = False
+            character_doc.dehydrated = False
+
+            self._kernel.server_db_session.commit()
+            return "You're no longer thirsty"
+
+        return "Woops, it is not yest implemented"

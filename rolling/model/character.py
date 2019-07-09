@@ -67,6 +67,12 @@ class DrinkMaterialModel:
 
 
 @dataclasses.dataclass
+class DrinkStuffModel:
+    character_id: str
+    stuff_id: int = serpyco.field(cast_on_load=True)
+
+
+@dataclasses.dataclass
 class MoveCharacterQueryModel:
     to_world_row: int = serpyco.number_field(cast_on_load=True)
     to_world_col: int = serpyco.number_field(cast_on_load=True)

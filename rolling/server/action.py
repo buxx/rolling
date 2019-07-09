@@ -21,6 +21,7 @@ class ActionFactory:
         ] = {
             ActionType.FILL_STUFF: FillStuffAction,
             ActionType.EMPTY_STUFF: EmptyStuffAction,
+            ActionType.DRINK_STUFF: DrinkStuffAction,
         }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]

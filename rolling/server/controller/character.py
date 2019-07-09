@@ -17,6 +17,7 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import DrinkMaterialModel
+from rolling.model.character import DrinkStuffModel
 from rolling.model.character import EmptyStuffModel
 from rolling.model.character import FillStuffWithModel
 from rolling.model.character import GetCharacterPathModel
@@ -26,6 +27,7 @@ from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import DESCRIBE_DRINK_RESOURCE
+from rolling.server.controller.url import DESCRIBE_DRINK_STUFF
 from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
@@ -241,6 +243,21 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(DrinkStuffModel)
+    @hapic.output_body(Description)
+    async def _describe_drink_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        # TODO BS 2019-07-04: Check if stuff is owned
+        message = self._character_lib.drink_stuff(
+            hapic_data.path.character_id, hapic_data.path.stuff_id
+        )
+
+        return Description(
+            title=message, items=[Part(label="Continue", go_back_zone=True)]
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -319,5 +336,6 @@ class CharacterController(BaseController):
                 ),
                 web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
                 web.post(DESCRIBE_DRINK_RESOURCE, self._describe_drink_material),
+                web.post(DESCRIBE_DRINK_STUFF, self._describe_drink_stuff),
             ]
         )

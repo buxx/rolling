@@ -5,8 +5,10 @@ import typing
 
 import serpyco
 
+from rolling.model.resource import resource_type_materials
 from rolling.model.types import MaterialType
 from rolling.server.controller.url import DESCRIBE_DRINK_RESOURCE
+from rolling.server.controller.url import DESCRIBE_DRINK_STUFF
 from rolling.server.controller.url import DESCRIBE_EMPTY_STUFF
 from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
 from rolling.server.link import CharacterActionLink
@@ -124,6 +126,29 @@ class DrinkResourceAction(CharacterAction):
                 )
 
         return character_actions
+
+
+class DrinkStuffAction(OnStuffAction):
+    acceptable_material_types: typing.List[MaterialType] = [MaterialType.LIQUID]
+
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        if stuff.filled_with_resource is not None:
+            if (
+                resource_type_materials[stuff.filled_with_resource]
+                in self.acceptable_material_types
+            ):
+                return [
+                    CharacterActionLink(
+                        name=f"Drink {stuff.filled_with_resource.value}",
+                        link=DESCRIBE_DRINK_STUFF.format(
+                            character_id=character.id, stuff_id=stuff.id
+                        ),
+                    )
+                ]
+
+        return []
 
 
 @dataclasses.dataclass

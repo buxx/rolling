@@ -3,6 +3,7 @@ import typing
 
 from rolling.model.action import CharacterAction
 from rolling.model.action import DrinkResourceAction
+from rolling.model.action import DrinkStuffAction
 from rolling.model.action import EmptyStuffAction
 from rolling.model.action import FillStuffAction
 from rolling.model.action import OnStuffAction
@@ -21,6 +22,7 @@ class ActionFactory:
         ] = {
             ActionType.FILL_STUFF: FillStuffAction,
             ActionType.EMPTY_STUFF: EmptyStuffAction,
+            ActionType.DRINK_STUFF: DrinkStuffAction,
         }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]
