@@ -27,6 +27,7 @@ class TurnLib:
 
     def execute_turn(self) -> None:
         self._generate_stuff()
+        self._provide_for_natural_needs()
         self._increment_age()
 
     def _generate_stuff(self) -> None:
@@ -98,6 +99,25 @@ class TurnLib:
                     self._stuff_lib.add_stuff(stuff_doc, commit=False)
         self._kernel.server_db_session.commit()
 
+    def _provide_for_natural_needs(self) -> None:
+        for character_id in self._character_lib.get_all_character_ids():
+            character_document = self._character_lib.get_document(character_id)
+            if not character_document.is_alive:
+                continue
+
+            # FIXME BS 2019-07-09: if stuff with fresh water (and thirsty): drink
+            # FIXME BS 2019-07-09: if resource with fresh water accessible (find path)
+            #  (and thirsty): drink
+
+            if character_document.feel_thirsty and not character_document.dehydrated:
+                character_document.dehydrated = True
+            elif character_document.feel_thirsty and character_document.dehydrated:
+                character_document.life_points -= 1
+            elif not character_document.feel_thirsty:
+                character_document.feel_thirsty = True
+
+            self._character_lib.update(character_document)
+
     def _increment_age(self) -> None:
         # In future, increment role play age
         character_count = self._character_lib.get_all_character_count()
@@ -105,6 +125,9 @@ class TurnLib:
 
         for character_id in self._character_lib.get_all_character_ids():
             character_document = self._character_lib.get_document(character_id)
+            if not character_document.is_alive:
+                continue
+
             self._logger.debug(
                 f'Compute age of "{character_document.name}" ({character_document.id})'
             )

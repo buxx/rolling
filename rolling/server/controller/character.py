@@ -77,6 +77,7 @@ class CharacterController(BaseController):
                 Part(text="This is your character card"),
                 Part(text="------------"),
                 Part(label="Name", text=character.name),
+                Part(label="Life", text=str(character.life_points)),
                 Part(label="Max life", text=str(character.max_life_comp)),
                 Part(
                     label="Hunting and collecting",

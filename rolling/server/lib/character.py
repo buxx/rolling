@@ -35,6 +35,7 @@ class CharacterLib:
         )
         character.find_water_comp = create_character_model.find_water_comp
         character.max_life_comp = create_character_model.max_life_comp
+        character.life_points = character.max_life_comp
 
         # Place on zone
         world_row_i, world_col_i = self._kernel.get_start_world_coordinates()
@@ -76,6 +77,7 @@ class CharacterLib:
             zone_col_i=character_document.zone_col_i,
             zone_row_i=character_document.zone_row_i,
             background_story=character_document.background_story,
+            life_points=float(character_document.life_points),
             max_life_comp=float(character_document.max_life_comp),
             hunting_and_collecting_comp=float(
                 character_document.hunting_and_collecting_comp

@@ -28,8 +28,13 @@ class CharacterDocument(Document):
     find_water_comp = Column(Numeric(10, 2), nullable=False)
 
     # role game play
+    life_points = Column(Numeric(10, 2), default=1.0)
     feel_thirsty = Column(Boolean, default=True)
     dehydrated = Column(Boolean, default=False)
 
     # transport
     shipped_stuff = relationship(StuffDocument)
+
+    @property
+    def is_alive(self) -> bool:
+        return self.life_points > 0
