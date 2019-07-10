@@ -231,7 +231,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(DrinkMaterialModel)
     @hapic.output_body(Description)
-    async def _describe_drink_material(
+    async def _describe_drink_resource(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         # TODO BS 2019-07-04: Check if material is available
@@ -336,7 +336,7 @@ class CharacterController(BaseController):
                     DESCRIBE_STUFF_FILL_WITH_RESOURCE, self._describe_fill_stuff_with
                 ),
                 web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
-                web.post(DESCRIBE_DRINK_RESOURCE, self._describe_drink_material),
+                web.post(DESCRIBE_DRINK_RESOURCE, self._describe_drink_resource),
                 web.post(DESCRIBE_DRINK_STUFF, self._describe_drink_stuff),
             ]
         )
