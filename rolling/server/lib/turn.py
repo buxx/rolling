@@ -7,9 +7,13 @@ import typing
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
+from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.resource import ResourceType
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.util import get_stuffs_filled_with_resource_type
+from rolling.util import is_there_resource_type_in_zone
 
 
 class TurnLib:
@@ -100,22 +104,68 @@ class TurnLib:
         self._kernel.server_db_session.commit()
 
     def _provide_for_natural_needs(self) -> None:
-        for character_id in self._character_lib.get_all_character_ids():
+        character_ids = list(self._character_lib.get_all_character_ids())
+        self._logger.info(f"Provide natural needs of {len(character_ids)} characters")
+
+        for character_id in character_ids:
             character_document = self._character_lib.get_document(character_id)
             if not character_document.is_alive:
                 continue
 
-            # FIXME BS 2019-07-09: if stuff with fresh water (and thirsty): drink
+            self._logger.info(f"Provide natural needs of {character_document.name}")
+
             # FIXME BS 2019-07-09: if resource with fresh water accessible (find path)
             #  (and thirsty): drink
+            zone_source = self._kernel.tile_maps_by_position[
+                (character_document.world_row_i, character_document.world_col_i)
+            ].source
+            zone_contains_fresh_water = is_there_resource_type_in_zone(
+                ResourceType.FRESH_WATER, zone_source
+            )
+            stuff_with_fresh_water = None
+            try:
+                stuff_with_fresh_water = next(
+                    get_stuffs_filled_with_resource_type(
+                        self._kernel, character_id, ResourceType.FRESH_WATER
+                    )
+                )
+            except StopIteration:
+                pass
 
-            if character_document.feel_thirsty and not character_document.dehydrated:
-                character_document.dehydrated = True
-            elif character_document.feel_thirsty and character_document.dehydrated:
+            # Need drink
+            if character_document.feel_thirsty or character_document.dehydrated:
+                # Fresh water in zone
+                if zone_contains_fresh_water:
+                    self._logger.info(
+                        f"{character_document.name} need to drink: fresh water in zone"
+                    )
+                    character_document.dehydrated = False
+                # Fresh water in carried stuff
+                elif stuff_with_fresh_water is not None:
+                    self._logger.info(
+                        f"{character_document.name} need to drink: fresh water in stuff {stuff_doc.id}"
+                    )
+                    stuff_doc = self._stuff_lib.get_stuff_doc(stuff_with_fresh_water.id)
+                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        stuff_doc.stuff_id
+                    )
+                    stuff_doc.empty(stuff_properties)
+                    character_document.dehydrated = False
+
+            # Dehydrated !
+            if character_document.dehydrated:
                 character_document.life_points -= 1
-            elif not character_document.feel_thirsty:
-                character_document.feel_thirsty = True
+                self._logger.info(
+                    f"{character_document.name} need to drink but no water ! let {character_document.life_points} life points"
+                )
+            # Only thirsty
+            elif character_document.feel_thirsty:
+                self._logger.info(
+                    f"{character_document.name} need to drink but no water, now dehydrated"
+                )
+                character_document.dehydrated = True
 
+            character_document.feel_thirsty = True  # Always need to drink after turn
             self._character_lib.update(character_document)
 
     def _increment_age(self) -> None:
