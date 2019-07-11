@@ -127,3 +127,10 @@ class HttpClient:
         self._check_response(response)
         response_json = response.json()
         return self._stuffs_serializer.load(response_json)
+
+    def get_character_events(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/events"
+        )
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())

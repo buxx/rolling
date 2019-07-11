@@ -1,7 +1,6 @@
 # coding: utf-8
-from sqlalchemy.ext.declarative import declarative_base
-
 from hapic import Hapic
+from sqlalchemy.ext.declarative import declarative_base
 
 hapic = Hapic(async_=True)
 ServerSideDocument = declarative_base()

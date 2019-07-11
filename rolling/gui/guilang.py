@@ -135,6 +135,9 @@ class Generator:
                     fields.post_to = item.form_action
             return widgets_
 
+        if description.is_long_text:
+            for part in 
+
         widgets = []
 
         if description.title:
