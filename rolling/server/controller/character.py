@@ -5,11 +5,11 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
 from rolling.exception import CantMoveCharacter
@@ -143,6 +143,27 @@ class CharacterController(BaseController):
             items=[
                 Part(text=action.name, form_action=action.link, is_link=True)
                 for action in character_actions
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_events(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character_events = self._character_lib.get_last_events(
+            hapic_data.path.character_id, count=100
+        )
+
+        return Description(
+            title="Events:",
+            is_long_text=True,
+            items=[
+                Part(
+                    text=event.datetime.strftime(f"%d %b %Y at %H:%M:%S : {event.text}")
+                )
+                for event in character_events
             ],
         )
 
@@ -319,6 +340,9 @@ class CharacterController(BaseController):
                 web.get(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
+                ),
+                web.get(
+                    "/_describe/character/{character_id}/events", self._describe_events
                 ),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.get("/character/{character_id}", self.get),

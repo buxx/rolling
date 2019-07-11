@@ -58,7 +58,8 @@ class ZoneMenu(BaseMenu):
     def _get_menu_buttons(self):
         return [
             ("World map", self._display_world_map_callback),
-            ("Actions", self.display_zone_actions_on_place),
+            ("Events", self._display_events),
+            ("Actions", self._display_actions_on_place),
             ("Character card", self._display_character_card),
             ("Inventory", self._display_inventory),
             ("Disconnect", self._go_back_root_callback),
@@ -108,8 +109,24 @@ class ZoneMenu(BaseMenu):
             self._controller, self._main_view, self
         )
 
+    def _display_actions_on_place(self, *args, **kwargs) -> None:
+        self._controller.display_zone_actions_on_place()
+
     def _go_back_root_callback(self, *args, **kwargs):
         self._controller.disconnect()
+
+    def _display_events(self, *args, **kwargs) -> None:
+        actions_widget = self._controller.guilang.generate_widget(
+            self._controller.client.get_character_events(
+                self._controller.player_character.id
+            )
+        )
+        self._controller.view.main_content_container.original_widget = actions_widget
+        self._controller.view.right_menu_container.original_widget = GoBackSubMenu(
+            self._controller,
+            self._controller.view,
+            self._controller.view.right_menu_container.original_widget,
+        )
 
 
 class RootMenu(BaseMenu):

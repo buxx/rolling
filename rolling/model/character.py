@@ -1,14 +1,12 @@
 # coding: utf-8
 import dataclasses
+import datetime as datetime_
 import typing
 
 import serpyco
 
 from rolling.exception import RollingError
-from rolling.model.action import Action
-from rolling.model.action import DrinkResourceAction
 from rolling.model.resource import ResourceType
-from rolling.model.types import MaterialType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
@@ -108,3 +106,9 @@ class CharacterModel:
             raise RollingError("You are trying to use property which is not set")
 
         return self._display_object
+
+
+@dataclasses.dataclass
+class CharacterEventModel:
+    datetime: datetime_.datetime
+    text: str

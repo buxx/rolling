@@ -60,10 +60,14 @@ class Fields:
 
 
 class DescriptionWidget(urwid.WidgetWrap):
-    def __init__(self, widgets):
+    def __init__(self, widgets, as_list: bool = False):
         pile = urwid.Pile(widgets)
-        fill = urwid.Filler(pile)
-        super().__init__(urwid.AttrWrap(fill, ""))
+
+        if as_list:
+            widget = urwid.ListBox(widgets)
+        else:
+            widget = urwid.Filler(pile)
+        super().__init__(urwid.AttrWrap(widget, ""))
 
 
 class Generator:
@@ -136,6 +140,12 @@ class Generator:
             return widgets_
 
         widgets = []
+
+        if description.is_long_text:
+            widgets.append(urwid.Text(description.title))
+            for part in description.items:
+                widgets.append(urwid.Text(part.text))
+            return DescriptionWidget(widgets, as_list=True)
 
         if description.title:
             widgets.append(urwid.Text(description.title))

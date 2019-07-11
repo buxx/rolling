@@ -2,6 +2,7 @@
 import typing
 import uuid
 
+from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.resource import ResourceType
@@ -9,6 +10,7 @@ from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.event import EventDocument
 from rolling.server.lib.action import ActionFactory
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
@@ -50,6 +52,11 @@ class CharacterLib:
 
         self._kernel.server_db_session.add(character)
         self._kernel.server_db_session.commit()
+
+        # FIXME BS 2019-07-11: grab this into game config
+        self.add_event(character.id, "You wake up on a beach")
+        self.add_event(character.id, "You feel thirsty ...")
+
         return character.id
 
     def get_document(self, id_: str) -> CharacterDocument:
@@ -245,4 +252,22 @@ class CharacterLib:
             self._kernel.server_db_session.commit()
             return "You're no longer thirsty"
 
+        # TODO BS 2019-07-11: to code
         return "Woops, it is not yest implemented"
+
+    def get_last_events(
+        self, character_id: str, count: int
+    ) -> typing.Iterator[CharacterEventModel]:
+        for event_doc in (
+            self._kernel.server_db_session.query(EventDocument)
+            .filter(EventDocument.character_id == character_id)
+            .order_by(EventDocument.datetime.desc())
+            .limit(count)
+        ):
+            yield CharacterEventModel(datetime=event_doc.datetime, text=event_doc.text)
+
+    def add_event(self, character_id: str, text: str) -> None:
+        self._kernel.server_db_session.add(
+            EventDocument(character_id=character_id, text=text)
+        )
+        self._kernel.server_db_session.commit()
