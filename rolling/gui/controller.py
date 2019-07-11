@@ -22,6 +22,7 @@ from rolling.gui.map.object import StuffDisplay
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.widget import TileMapWidget
 from rolling.gui.palette import PaletteGenerator
+from rolling.gui.view import GoBackSubMenu
 from rolling.gui.view import View
 from rolling.kernel import Kernel
 from rolling.log import gui_logger
@@ -294,3 +295,12 @@ class Controller:
             world_col_i=world_col_i,
         )
         self.display_zone()
+
+    def display_zone_actions_on_place(self, *args, **kwargs) -> None:
+        actions_widget = self.guilang.generate_widget(
+            self.client.get_character_on_place_actions(self.player_character.id)
+        )
+        self.view.main_content_container.original_widget = actions_widget
+        self.view.right_menu_container.original_widget = GoBackSubMenu(
+            self, self.view, self.view.right_menu_container.original_widget
+        )

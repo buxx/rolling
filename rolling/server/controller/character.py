@@ -5,11 +5,11 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
 from rolling.exception import CantMoveCharacter

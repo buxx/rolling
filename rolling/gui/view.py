@@ -58,6 +58,7 @@ class ZoneMenu(BaseMenu):
     def _get_menu_buttons(self):
         return [
             ("World map", self._display_world_map_callback),
+            ("Actions", self.display_zone_actions_on_place),
             ("Character card", self._display_character_card),
             ("Inventory", self._display_inventory),
             ("Disconnect", self._go_back_root_callback),
