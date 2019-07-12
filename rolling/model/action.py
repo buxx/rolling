@@ -29,13 +29,17 @@ class ActionProperties:
 
 
 class Action(abc.ABC):
-    pass
+    DEFAULT_COST = 0.0
 
 
 class OnStuffAction(Action):
     def __init__(self, kernel: "Kernel", action_properties: ActionProperties) -> None:
         self._kernel = kernel
         self._properties = action_properties
+
+    @abc.abstractmethod
+    def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
+        pass
 
     @abc.abstractmethod
     def get_character_actions(
@@ -47,6 +51,10 @@ class OnStuffAction(Action):
 class CharacterAction(Action):
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
+
+    @abc.abstractmethod
+    def get_cost(self, character: "CharacterModel") -> float:
+        pass
 
     @abc.abstractmethod
     def get_character_actions(
@@ -77,10 +85,14 @@ class FillStuffAction(OnStuffAction):
                             stuff_id=stuff.id,
                             resource_type=resource.type_.value,
                         ),
+                        cost=self.get_cost(character, stuff),
                     )
                 )
 
         return actions
+
+    def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
+        return self.DEFAULT_COST
 
 
 class EmptyStuffAction(OnStuffAction):
@@ -93,10 +105,14 @@ class EmptyStuffAction(OnStuffAction):
                 link=DESCRIBE_EMPTY_STUFF.format(
                     character_id=character.id, stuff_id=stuff.id
                 ),
+                cost=self.get_cost(character, stuff),
             )
         ]
 
         return actions
+
+    def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
+        return self.DEFAULT_COST
 
 
 class DrinkResourceAction(CharacterAction):
@@ -122,10 +138,14 @@ class DrinkResourceAction(CharacterAction):
                             character_id=character.id,
                             resource_type=resource.type_.value,
                         ),
+                        cost=self.get_cost(character),
                     )
                 )
 
         return character_actions
+
+    def get_cost(self, character: "CharacterModel") -> float:
+        return self.DEFAULT_COST
 
 
 class DrinkStuffAction(OnStuffAction):
@@ -145,13 +165,11 @@ class DrinkStuffAction(OnStuffAction):
                         link=DESCRIBE_DRINK_STUFF.format(
                             character_id=character.id, stuff_id=stuff.id
                         ),
+                        cost=self.get_cost(character, stuff),
                     )
                 ]
 
         return []
 
-
-@dataclasses.dataclass
-class CharacterActionLink:
-    name: str
-    link: str
+    def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
+        return self.DEFAULT_COST

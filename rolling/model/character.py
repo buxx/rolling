@@ -86,6 +86,7 @@ class CharacterModel:
     hunting_and_collecting_comp: float
     find_water_comp: float
     life_points: float
+    action_points: float
 
     world_col_i: int = None
     world_row_i: int = None

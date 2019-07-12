@@ -88,6 +88,10 @@ class CharacterController(BaseController):
                     label="Feeling thirsty",
                     text="yes" if character.feel_thirsty else "no",
                 ),
+                Part(
+                    label="Find waterRemaining action points",
+                    text=str(character.action_points),
+                ),
             ],
         )
 
@@ -141,7 +145,7 @@ class CharacterController(BaseController):
         return Description(
             title="Here, you can:",
             items=[
-                Part(text=action.name, form_action=action.link, is_link=True)
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
                 for action in character_actions
             ],
         )
@@ -181,7 +185,7 @@ class CharacterController(BaseController):
             title=stuff.get_name_and_light_description(),
             image=stuff.image,
             items=[
-                Part(text=action.name, form_action=action.link, is_link=True)
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
                 for action in actions
             ],
         )
@@ -199,7 +203,7 @@ class CharacterController(BaseController):
         return Description(
             title=stuff.get_name_and_light_description(),
             items=[
-                Part(text=action.name, form_action=action.link, is_link=True)
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
                 for action in actions
             ],
         )

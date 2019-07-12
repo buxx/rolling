@@ -38,6 +38,7 @@ class CharacterLib:
         character.find_water_comp = create_character_model.find_water_comp
         character.max_life_comp = create_character_model.max_life_comp
         character.life_points = character.max_life_comp
+        character.action_points = self._kernel.game.config.action_points_per_turn
 
         # Place on zone
         world_row_i, world_col_i = self._kernel.get_start_world_coordinates()
@@ -53,9 +54,8 @@ class CharacterLib:
         self._kernel.server_db_session.add(character)
         self._kernel.server_db_session.commit()
 
-        # FIXME BS 2019-07-11: grab this into game config
-        self.add_event(character.id, "You wake up on a beach")
-        self.add_event(character.id, "You feel thirsty ...")
+        for message in self._kernel.game.config.create_character_messages:
+            self.add_event(character.id, message)
 
         return character.id
 
@@ -92,6 +92,7 @@ class CharacterLib:
             find_water_comp=float(character_document.find_water_comp),
             feel_thirsty=character_document.feel_thirsty,
             dehydrated=character_document.dehydrated,
+            action_points=float(character_document.action_points),
         )
 
     def get(self, id_: str) -> CharacterModel:

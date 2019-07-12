@@ -20,11 +20,24 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
+class GameConfig:
+    def __init__(self, config_dict: dict) -> None:
+        self.action_points_per_turn: int = config_dict["action_points_per_turn"]
+        self.create_character_messages: typing.List[str] = config_dict[
+            "create_character_messages"
+        ]
+
+
 class Game:
     def __init__(self, kernel: "Kernel", config_folder: str) -> None:
         self._kernel = kernel
         self._stuff = self._create_stuff_manager(path.join(config_folder, "stuff.toml"))
         self._world = self._create_world_manager(path.join(config_folder, "world.toml"))
+        self._config = GameConfig(toml.load(path.join(config_folder, "game.toml")))
+
+    @property
+    def config(self) -> GameConfig:
+        return self._config
 
     @property
     def stuff_manager(self) -> StuffManager:
