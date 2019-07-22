@@ -1,2 +1,114 @@
 action_points_per_turn = 24
 create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
+
+[materials]
+  [materials.LIQUID]
+    name = "Liquide"
+
+  [materials.SANDY]
+    name = "Sableu"
+
+  [materials.LITTLE_OBJECT]
+    name = "Petit objets"
+
+  [materials.SMALL_PIECE]
+    name = "Petit morceau"
+
+  [materials.MIDDLE_PIECE]
+    name = "Moyen morceau"
+
+  [materials.GAS]
+    name = "Gazeu"
+
+
+[resources]
+  [resources.FRESH_WATER]
+    name = "Eau potable"
+    weight=1000.0
+    material="LIQUID"
+
+  [resources.SALTED_WATER]
+    name = "Eau salée"
+    weight=1000.0
+    material="LIQUID"
+
+  [resources.BEACH_SAND]
+    name = "Sable de plage"
+    weight=1600.0
+    material="SANDY"
+
+  [resources.DIRT]
+    name = "Terre"
+    weight=1400.0
+    material="SANDY"
+
+  [resources.PEBBLES]
+    name = "Galets"
+    weight=2000.0
+    material="LITTLE_OBJECT"
+
+  # FIXME BS NOW: replace by wood ?
+  # FIXME BS NOW: Add "hand" to character to be filled with resources
+  [resources.TWIGS]
+    name = "Brindilles"
+    weight=300.0
+    material="SMALL_PIECE"
+
+  [resources.HAY]
+    name = "Foin"
+    weight=200.0
+    material="SMALL_PIECE"
+
+  [resources.AIR]
+    name = "Air"
+    weight=0.0
+    material="GAS"
+
+  [resources.WOOD]
+    name = "Bois"
+    weight=2000.0
+    material="MIDDLE_PIECE"
+
+[extractions]
+  [extractions.FRESH_WATER]
+    tile="FRESH_WATER"
+    resources=[{resource_id="FRESH_WATER"}]
+    
+  [extractions.DIRT]
+    tile="DIRT"
+    resources=[{resource_id="DIRT"}]
+    
+  [extractions.SEA_WATER]
+    tile="SEA_WATER"
+    resources=[{resource_id="SALTED_WATER"}]
+    
+  [extractions.DRY_BUSH]
+    tile="DRY_BUSH"
+    resources=[{resource_id="TWIGS"}]
+    
+  [extractions.ROCKY_GROUND]
+    tile="ROCKY_GROUND"
+    resources=[{resource_id="PEBBLES"}]
+    
+  [extractions.HIGH_GRASS]
+    tile="HIGH_GRASS"
+    resources=[{resource_id="DIRT"}, {resource_id="HAY"}]
+    
+  [extractions.SHORT_GRASS]
+    tile="SHORT_GRASS"
+    resources=[{resource_id="DIRT"}, {resource_id="HAY"}]
+    
+  [extractions.SAND]
+    tile="SAND"
+    resources=[{resource_id="BEACH_SAND"}]
+
+# FIXME BS 2019-07-13: on load, check by finding actions and check required infos are given
+[ACTIONS]
+  [ACTIONS.DRINK_FRESH_WATER]
+    actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
+    accept_resources = ["FRESH_WATER"]
+
+  [ACTIONS.CRAFT_CAMPFIRE]
+    actions = ["CRAFT_FROM_RESOURCES"]
+    required_resources = [{resource="WOOD", required=5.0}, {resource="TWIGS", required=20.0}]
+    craft_on_zone = "CAMP_FIRE"

@@ -7,7 +7,12 @@ import toml
 from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
+from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.action import ActionProperties
+from rolling.model.extraction import ExtractableDescriptionModel
+from rolling.model.extraction import ExtractableResourceDescriptionModel
+from rolling.model.material import MaterialDescriptionModel
+from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.types import MaterialType
@@ -26,6 +31,77 @@ class GameConfig:
         self.create_character_messages: typing.List[str] = config_dict[
             "create_character_messages"
         ]
+
+        self._materials: typing.Dict[
+            str, MaterialDescriptionModel
+        ] = self._create_materials(config_dict)
+        self._resources: typing.Dict[
+            str, ResourceDescriptionModel
+        ] = self._create_resources(config_dict)
+        self._extractions: typing.Dict[
+            typing.Type[ZoneMapTileType], ExtractableDescriptionModel
+        ] = self._create_extractions(config_dict)
+
+    @property
+    def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
+        return self._materials
+
+    @property
+    def resources(self) -> typing.Dict[str, ResourceDescriptionModel]:
+        return self._resources
+
+    def _create_materials(
+        self, config_dict: dict
+    ) -> typing.Dict[str, MaterialDescriptionModel]:
+        materials: typing.Dict[str, MaterialDescriptionModel] = {}
+
+        for material_id, material_raw in config_dict.get("materials", {}).items():
+            materials[material_id] = MaterialDescriptionModel(
+                id=material_id, name=material_raw["name"]
+            )
+
+        return materials
+
+    def _create_resources(
+        self, config_dict: dict
+    ) -> typing.Dict[str, ResourceDescriptionModel]:
+        resources: typing.Dict[str, ResourceDescriptionModel] = {}
+
+        for resource_id, resource_raw in config_dict.get("resources", {}).items():
+            resources[resource_id] = ResourceDescriptionModel(
+                id=resource_id,
+                weight=resource_raw["weight"],
+                name=resource_raw["name"],
+                material_id=resource_raw["material"],
+            )
+
+        return resources
+
+    def _create_extractions(
+        self, config_dict: dict
+    ) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
+        extractions: typing.Dict[
+            typing.Type[ZoneMapTileType], ExtractableDescriptionModel
+        ] = {}
+        zone_tile_types = ZoneMapTileType.get_all()
+
+        for extraction_raw in config_dict.get("extractions", {}).values():
+            resource_extractions: typing.Dict[
+                str, ExtractableResourceDescriptionModel
+            ] = {}
+            for resource_extraction_raw in extraction_raw["resources"]:
+                resource_extractions[
+                    resource_extraction_raw["resource_id"]
+                ] = ExtractableResourceDescriptionModel(
+                    resource_id=resource_extraction_raw["resource_id"]
+                )
+
+            extractions[extraction_raw["tile"]] = ExtractableDescriptionModel(
+                zone_tile_type=zone_tile_types[extraction_raw["tile"]],
+                resources=resource_extractions,
+            )
+
+        return extractions
 
 
 class Game:
