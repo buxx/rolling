@@ -2,6 +2,7 @@
 import enum
 
 
+# FIXME BS NOW: remove and use from config
 class MaterialType(enum.Enum):
     LIQUID = "LIQUID"
     SANDY = "SANDY"

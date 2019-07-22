@@ -6,7 +6,6 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.resource import ResourceType
 from rolling.model.stuff import StuffModel
-from rolling.server.lib.stuff import StuffLib
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -48,6 +47,8 @@ def is_there_resource_type_in_zone(
 def get_stuffs_filled_with_resource_type(
     kernel: "Kernel", character_id: str, resource_type: ResourceType
 ) -> typing.Iterator[StuffModel]:
+    from rolling.server.lib.stuff import StuffLib
+
     stuff_lib = StuffLib(kernel=kernel)
     character_stuffs = stuff_lib.get_carried_by(character_id)
     for stuff in character_stuffs:

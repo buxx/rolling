@@ -2,11 +2,8 @@
 import typing
 
 from rolling.map.type.base import MapTileType
-from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.resource import ResourceType
 from rolling.model.resource import resource_type_materials
-from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.types import MaterialType
 from rolling.model.world import Resource
 from rolling.model.world import World
@@ -15,6 +12,7 @@ from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+    from rolling.model.stuff import ZoneGenerationStuff
 
 
 class WorldManager:
@@ -28,7 +26,7 @@ class WorldManager:
 
     def get_generation_stuff_by_zone_type(
         self
-    ) -> typing.Dict[typing.Type[MapTileType], typing.List[ZoneGenerationStuff]]:
+    ) -> typing.Dict[typing.Type[MapTileType], typing.List["ZoneGenerationStuff"]]:
         generation_stuff_by_zone_type = {}
         for zone_property in self.world.zones_properties:
             generation_stuff_by_zone_type[

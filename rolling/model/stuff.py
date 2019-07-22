@@ -5,7 +5,7 @@ import typing
 
 import serpyco
 
-from rolling.model.action import ActionProperties
+from rolling.action.base import ActionDescriptionModel
 from rolling.model.resource import ResourceType
 from rolling.model.types import MaterialType
 
@@ -25,7 +25,7 @@ class StuffProperties:
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
-    action_properties: typing.List[ActionProperties] = serpyco.field(
+    descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
         default_factory=list
     )
     material_type: typing.Optional[MaterialType] = None

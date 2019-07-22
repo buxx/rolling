@@ -7,11 +7,11 @@ from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.resource import ResourceType
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
-from rolling.server.lib.action import ActionFactory
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 
@@ -184,7 +184,7 @@ class CharacterLib:
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
-            character_actions_.extend(action.get_character_actions(character))
+            character_actions_.extend(action.get_character_action_links(character))
 
         return character_actions_
 

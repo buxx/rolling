@@ -1,4 +1,6 @@
 # coding: utf-8
+import typing
+
 from sqlalchemy import Column
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
@@ -10,9 +12,11 @@ from rolling.exception import CantEmpty
 from rolling.exception import CantFill
 from rolling.model.resource import ResourceType
 from rolling.model.resource import resource_type_gram_per_unit
-from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import Unit
 from rolling.server.extension import ServerSideDocument as Document
+
+if typing.TYPE_CHECKING:
+    from rolling.model.stuff import StuffProperties
 
 
 class StuffDocument(Document):
@@ -56,7 +60,7 @@ class StuffDocument(Document):
             self.filled_capacity
         )
 
-    def empty(self, stuff_properties: StuffProperties) -> None:
+    def empty(self, stuff_properties: "StuffProperties") -> None:
         if self.filled_at == 0.0:
             raise CantEmpty("Already empty")
 

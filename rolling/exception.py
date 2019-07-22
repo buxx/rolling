@@ -92,3 +92,7 @@ class CantFill(GamePlayError):
 
 class CantEmpty(GamePlayError):
     pass
+
+
+class ImpossibleAction(GamePlayError):
+    pass
