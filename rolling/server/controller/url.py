@@ -13,3 +13,6 @@ DESCRIBE_DRINK_RESOURCE = (
     "/_describe/character/{character_id}/drink_resource/{resource_type}"
 )
 DESCRIBE_DRINK_STUFF = "/_describe/character/{character_id}/drink_stuff/{stuff_id}"
+
+CHARACTER_ACTION = "/character/{character_id}/action/{action_type}/{action_description_id}"
+WITH_STUFF_ACTION = "/character/{character_id}/action/{action_type}/with-stuff/{stuff_id}"

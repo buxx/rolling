@@ -23,8 +23,11 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
+from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.stuff import StuffLib
 from rolling.server.zone.websocket import ZoneEventsManager
 
 
@@ -88,6 +91,29 @@ class Kernel:
         # Generate game info if config given
         if game_config_folder is not None:
             self._game = Game(self, game_config_folder)
+
+        # FIXME BS 2019-07-28: use these everywhere
+        self._stuff_lib: typing.Optional["StuffLib"] = None
+        self._character_lib: typing.Optional["CharacterLib"] = None
+        self._effect_manager: typing.Optional["EffectManager"] = None
+
+    @property
+    def stuff_lib(self) -> StuffLib:
+        if self._stuff_lib is None:
+            self._stuff_lib = StuffLib(self)
+        return self._stuff_lib
+
+    @property
+    def character_lib(self) -> CharacterLib:
+        if self._character_lib is None:
+            self._character_lib = CharacterLib(self, stuff_lib=self.stuff_lib)
+        return self._character_lib
+
+    @property
+    def effect_manager(self) -> EffectManager:
+        if self._effect_manager is None:
+            self._effect_manager = EffectManager(self)
+        return self._effect_manager
 
     @property
     def game(self) -> Game:

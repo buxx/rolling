@@ -20,6 +20,12 @@ create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
   [materials.GAS]
     name = "Gazeu"
 
+[character_effects]
+  [character_effects.THIRSTY_SATISFIED]
+    attributes_to_false = ["dehydrated", "feel_thirsty"]
+
+  [character_effects.DRUNK]
+    factors = [{"attribute"="bravery", "factor"=1.1}]
 
 [resources]
   [resources.FRESH_WATER]
@@ -29,6 +35,16 @@ create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
 
   [resources.SALTED_WATER]
     name = "Eau salée"
+    weight=1000.0
+    material="LIQUID"
+
+  [resources.RED_WINE]
+    name = "Vin rouge"
+    weight=1000.0
+    material="LIQUID"
+
+  [resources.WHITE_WINE]
+    name = "Vin blanc"
     weight=1000.0
     material="LIQUID"
 
@@ -102,13 +118,29 @@ create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
     tile="SAND"
     resources=[{resource_id="BEACH_SAND"}]
 
-# FIXME BS 2019-07-13: on load, check by finding actions and check required infos are given
 [ACTIONS]
   [ACTIONS.DRINK_FRESH_WATER]
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
     accept_resources = ["FRESH_WATER"]
+    character_effects = ["THIRSTY_SATISFIED"]
+    cost = 0.0
 
-  [ACTIONS.CRAFT_CAMPFIRE]
-    actions = ["CRAFT_FROM_RESOURCES"]
-    required_resources = [{resource="WOOD", required=5.0}, {resource="TWIGS", required=20.0}]
-    craft_on_zone = "CAMP_FIRE"
+  [ACTIONS.DRINK_WINE]
+    actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
+    accept_resources = ["RED_WINE", "WHITE_WINE"]
+    character_effects = ["DRUNK"]
+    cost = 0.0
+
+  [ACTIONS.FILL_STUFF]
+    actions = ["FILL_STUFF"]
+    cost = 0.0
+
+  [ACTIONS.EMPTY_STUFF]
+    actions = ["EMPTY_STUFF"]
+    cost = 0.0
+
+#  [ACTIONS.CRAFT_CAMPFIRE]
+#    actions = ["CRAFT_FROM_RESOURCES"]
+#    required_resources = [{resource="WOOD", required=5.0}, {resource="TWIGS", required=20.0}]
+#    craft_on_zone = "CAMP_FIRE"
+#    cost = 2.0

@@ -7,10 +7,10 @@ import serpyco
 
 from rolling.exception import RollingError
 from rolling.model.resource import ResourceType
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
-    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass
@@ -46,9 +46,7 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
-class FillStuffWithModel:
-    character_id: str
-    stuff_id: int = serpyco.number_field(cast_on_load=True)
+class FillStuffWithResourceModel:
     resource_type: ResourceType = serpyco.field()
 
 
@@ -59,15 +57,10 @@ class EmptyStuffModel:
 
 
 @dataclasses.dataclass
-class DrinkMaterialModel:
+class CharacterActionModel:
     character_id: str
-    resource_type: ResourceType
-
-
-@dataclasses.dataclass
-class DrinkStuffModel:
-    character_id: str
-    stuff_id: int = serpyco.field(cast_on_load=True)
+    action_description_id: str
+    action_type: ActionType
 
 
 @dataclasses.dataclass

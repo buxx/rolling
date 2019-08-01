@@ -1,4 +1,6 @@
 # coding: utf-8
+import typing
+
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -32,6 +34,7 @@ class CharacterDocument(Document):
     life_points = Column(Numeric(10, 2), default=1.0)
     feel_thirsty = Column(Boolean, default=True)
     dehydrated = Column(Boolean, default=False)
+    _effect_ids = Column(Text, default="")
 
     # transport
     shipped_stuff = relationship(StuffDocument)
@@ -39,3 +42,11 @@ class CharacterDocument(Document):
     @property
     def is_alive(self) -> bool:
         return self.life_points > 0
+
+    @property
+    def effect_ids(self) -> typing.List[str]:
+        return self._effect_ids.split(",")
+
+    @effect_ids.setter
+    def effect_ids(self, value: typing.List[str]) -> None:
+        self._effect_ids = ",".join(value)

@@ -184,7 +184,7 @@ class CharacterLib:
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
-            character_actions_.extend(action.get_character_actions(character))
+            character_actions_.extend(action.get_character_action_links(character))
 
         return character_actions_
 

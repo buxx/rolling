@@ -174,8 +174,8 @@ class StuffLib:
             stuff.stuff_id
         )
 
-        for action_properties in stuff_properties.action_properties:
-            action = self._action_factory.get_with_stuff_action(action_properties)
+        for description in stuff_properties.descriptions:
+            action = self._action_factory.get_with_stuff_action(description)
             actions.extend(action.get_character_actions(character, stuff))
 
         return actions

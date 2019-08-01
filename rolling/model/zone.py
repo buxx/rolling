@@ -5,7 +5,6 @@ import typing
 from serpyco import number_field
 
 from rolling.map.type.base import MapTileType
-from rolling.model.meta import TransportType
 from rolling.model.stuff import ZoneGenerationStuff
 
 
