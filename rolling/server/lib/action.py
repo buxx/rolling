@@ -32,8 +32,7 @@ class ActionFactory:
         self, action_description: "ActionDescriptionModel"
     ) -> WithStuffAction:
         return self._with_stuff_actions[action_description.action_type](
-            self._kernel,
-            description=action_description,
+            self._kernel, description=action_description
         )
 
     def get_character_action(
@@ -49,12 +48,7 @@ class ActionFactory:
         for action_type, action_class in self._character_actions.items():
             for action_description in self._kernel.game.config.actions[action_type]:
                 actions.append(
-                    action_class(
-                        kernel=self._kernel,
-                        description=action_description,
-                        character_lib=self._kernel.character_lib,
-                        effect_manager=self._kernel.effect_manager,
-                    )
+                    action_class(kernel=self._kernel, description=action_description)
                 )
 
         return actions

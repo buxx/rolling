@@ -140,7 +140,9 @@ class GameConfig:
     ) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
         actions: typing.Dict[ActionType, typing.List[ActionDescriptionModel]] = {}
 
-        for action_description_id, action_description_raw in config_raw.get("ACTIONS", {}).items():
+        for action_description_id, action_description_raw in config_raw.get(
+            "ACTIONS", {}
+        ).items():
             for action_raw in action_description_raw["actions"]:
                 action_type = ActionType(action_raw)
                 action_class = ActionFactory.actions[action_type]
@@ -162,7 +164,9 @@ class Game:
     def __init__(self, kernel: "Kernel", config_folder: str) -> None:
         self._kernel = kernel
         self._config = GameConfig(toml.load(path.join(config_folder, "game.toml")))
-        self._stuff = self._create_stuff_manager(path.join(config_folder, "stuff.toml"), config=self._config)
+        self._stuff = self._create_stuff_manager(
+            path.join(config_folder, "stuff.toml"), config=self._config
+        )
         self._world = self._create_world_manager(path.join(config_folder, "world.toml"))
 
     @property
@@ -177,7 +181,9 @@ class Game:
     def world_manager(self) -> WorldManager:
         return self._world
 
-    def _create_stuff_manager(self, stuff_file_path: str, config: GameConfig) -> StuffManager:
+    def _create_stuff_manager(
+        self, stuff_file_path: str, config: GameConfig
+    ) -> StuffManager:
         items: typing.List[StuffProperties] = []
         raw_stuffs = toml.load(stuff_file_path)
 

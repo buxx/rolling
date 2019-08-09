@@ -1,17 +1,20 @@
 #  coding: utf-8
 import typing
 
-import serpyco
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
+import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
-from rolling.action.drink import DrinkResourceAction, DrinkResourceModel
+from rolling.action.base import CharacterAction
+from rolling.action.base import WithStuffAction
+from rolling.action.drink import DrinkResourceAction
+from rolling.action.drink import DrinkResourceModel
 from rolling.action.drink import DrinkStuffModel
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
@@ -21,12 +24,12 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
-from rolling.model.character import EmptyStuffModel
 from rolling.model.character import FillStuffWithResourceModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import WithStuffActionModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
@@ -37,6 +40,7 @@ from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import DESCRIBE_STUFF_FILL_WITH_RESOURCE
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
@@ -215,74 +219,76 @@ class CharacterController(BaseController):
             ],
         )
 
-    @hapic.with_api_doc()
-    @hapic.input_path(FillStuffWithResourceModel)
-    @hapic.output_body(Description)
-    async def _describe_fill_stuff_with(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
-        # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
-        # TODO BS 2019-07-04: Check filling is possible
-        # (see rolling.game.world.WorldManager#get_resource_on_or_around)
-        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
-        resource_type = hapic_data.path.resource_type
-
-        try:
-            self._stuff_lib.fill_stuff_with_resource(stuff, resource_type)
-        except CantFill as exc:
-            return Description(
-                title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
-            )
-
-        return Description(
-            title=f"{stuff.name} filled with {resource_type.value}",
-            items=[Part(label="Continue", go_back_zone=True)],
-        )
-
-    @hapic.with_api_doc()
-    @hapic.input_path(EmptyStuffModel)
-    @hapic.output_body(Description)
-    async def _describe_empty_stuff(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
-        # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
-        stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
-
-        try:
-            self._stuff_lib.empty_stuff(stuff)
-        except CantEmpty as exc:
-            return Description(
-                title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
-            )
-
-        return Description(
-            title=f"Emptied {stuff.name}",
-            items=[Part(label="Continue", go_back_zone=True)],
-        )
-
-    @hapic.with_api_doc()
-    @hapic.input_path(DrinkResourceModel)
-    @hapic.output_body(Description)
-    async def _describe_drink_resource(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
-        # TODO BS 2019-07-04: Check if material is available
-        character = self._character_lib.get(hapic_data.path.character_id)
-        for action_description in self._kernel.game.config.actions[
-            ActionType.DRINK_RESOURCE
-        ]:
-            action = DrinkResourceAction(
-                kernel=self._kernel,
-                character_lib=self._character_lib,
-                effect_manager=self._effect_manager,
-                description=action_description,
-            )
-            if action.is_possible(character):
-                return action.perform(character=character, input_=hapic_data.path)
-
-        return Description(
-            title="Action impossible", items=[Part(text="Continue", go_back_zone=True)]
-        )
+    #
+    # # FIXME BS NOX: delete this
+    # @hapic.with_api_doc()
+    # @hapic.input_path(FillStuffWithResourceModel)
+    # @hapic.output_body(Description)
+    # async def _describe_fill_stuff_with(
+    #     self, request: Request, hapic_data: HapicData
+    # ) -> Description:
+    #     # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
+    #     # TODO BS 2019-07-04: Check filling is possible
+    #     # (see rolling.game.world.WorldManager#get_resource_on_or_around)
+    #     stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+    #     resource_type = hapic_data.path.resource_type
+    #
+    #     try:
+    #         self._stuff_lib.fill_stuff_with_resource(stuff, resource_type)
+    #     except CantFill as exc:
+    #         return Description(
+    #             title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
+    #         )
+    #
+    #     return Description(
+    #         title=f"{stuff.name} filled with {resource_type.value}",
+    #         items=[Part(label="Continue", go_back_zone=True)],
+    #     )
+    #
+    # @hapic.with_api_doc()
+    # @hapic.input_path(EmptyStuffModel)
+    # @hapic.output_body(Description)
+    # async def _describe_empty_stuff(
+    #     self, request: Request, hapic_data: HapicData
+    # ) -> Description:
+    #     # TODO BS 2019-07-04: Check stuff is carried (or have capacity to)
+    #     stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
+    #
+    #     try:
+    #         self._stuff_lib.empty_stuff(stuff)
+    #     except CantEmpty as exc:
+    #         return Description(
+    #             title=str(exc), items=[Part(label="Go back", go_back_zone=True)]
+    #         )
+    #
+    #     return Description(
+    #         title=f"Emptied {stuff.name}",
+    #         items=[Part(label="Continue", go_back_zone=True)],
+    #     )
+    #
+    # @hapic.with_api_doc()
+    # @hapic.input_path(DrinkResourceModel)
+    # @hapic.output_body(Description)
+    # async def _describe_drink_resource(
+    #     self, request: Request, hapic_data: HapicData
+    # ) -> Description:
+    #     # TODO BS 2019-07-04: Check if material is available
+    #     character = self._character_lib.get(hapic_data.path.character_id)
+    #     for action_description in self._kernel.game.config.actions[
+    #         ActionType.DRINK_RESOURCE
+    #     ]:
+    #         action = DrinkResourceAction(
+    #             kernel=self._kernel,
+    #             character_lib=self._character_lib,
+    #             effect_manager=self._effect_manager,
+    #             description=action_description,
+    #         )
+    #         if action.is_possible(character):
+    #             return action.perform(character=character, input_=hapic_data.path)
+    #
+    #     return Description(
+    #         title="Action impossible", items=[Part(text="Continue", go_back_zone=True)]
+    #     )
 
     @hapic.with_api_doc()
     @hapic.input_path(CharacterActionModel)
@@ -290,13 +296,15 @@ class CharacterController(BaseController):
     async def character_action(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        # TODO BS 2019-07-04: Check character owning ...
         action_type = hapic_data.path.action_type
         action_description_id = hapic_data.path.action_description_id
-        action = typing.cast(DrinkResourceAction, self._action_factory.create_action(
-            action_type, action_description_id
-        ))
-        input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
+        action = typing.cast(
+            CharacterAction,
+            self._action_factory.create_action(action_type, action_description_id),
+        )
+        input_ = serpyco.Serializer(action.input_model).load(
+            dict(request.query)
+        )  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
         try:
@@ -308,6 +316,36 @@ class CharacterController(BaseController):
             )
 
         return action.perform(character_model, input_)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(WithStuffActionModel)
+    @hapic.output_body(Description)
+    async def with_stuff_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        action_type = hapic_data.path.action_type
+        action = typing.cast(
+            WithStuffAction,
+            self._action_factory.create_action(action_type, action_description_id=None),
+        )
+        input_ = serpyco.Serializer(action.input_model).load(
+            dict(request.query)
+        )  # TODO perf
+        character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
+        # TODO BS 2019-07-04: Check character owning ...
+        stuff = self._kernel.stuff_lib.get_stuff(hapic_data.path.stuff_id)
+
+        try:
+            action.check_request_is_possible(
+                character=character_model, stuff=stuff, input_=input_
+            )
+        except ImpossibleAction as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+            )
+
+        return action.perform(character=character_model, stuff=stuff, input_=input_)
 
     @hapic.with_api_doc()
     @hapic.input_path(DrinkStuffModel)
@@ -401,12 +439,13 @@ class CharacterController(BaseController):
                 web.post(
                     DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
                 ),
-                web.post(
-                    DESCRIBE_STUFF_FILL_WITH_RESOURCE, self._describe_fill_stuff_with
-                ),
-                web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
+                # web.post(
+                #     DESCRIBE_STUFF_FILL_WITH_RESOURCE, self._describe_fill_stuff_with
+                # ),
+                # web.post(DESCRIBE_EMPTY_STUFF, self._describe_empty_stuff),
                 # web.post(DESCRIBE_DRINK_RESOURCE, self._describe_drink_resource),
                 # web.post(DESCRIBE_DRINK_STUFF, self._describe_drink_stuff),
                 web.post(CHARACTER_ACTION, self.character_action),
+                web.post(WITH_STUFF_ACTION, self.with_stuff_action),
             ]
         )

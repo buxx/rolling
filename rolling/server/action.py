@@ -51,15 +51,22 @@ class ActionFactory:
             self._kernel, description=action_description
         )
 
-    def create_action(self, action_type: ActionType, action_description_id: str) -> Action:
-        if action_type in self._with_stuff_actions or action_type in self._character_actions:
+    def create_action(
+        self,
+        action_type: ActionType,
+        action_description_id: typing.Optional[str] = None,
+    ) -> Action:
+        if (
+            action_type in self._with_stuff_actions
+            or action_type in self._character_actions
+        ):
             for action_description in self._kernel.game.config.actions[action_type]:
-                if action_description.id == action_description_id:
+                if (
+                    action_description_id is None
+                    or action_description.id == action_description_id
+                ):
                     return self.actions[action_type](
-                        self._kernel,
-                        description=action_description,
-                        character_lib=self._kernel.character_lib,
-                        effect_manager=self._kernel.effect_manager,
+                        self._kernel, description=action_description
                     )
 
         raise NotImplementedError(f"Unknown {action_description_id}:{action_type}")

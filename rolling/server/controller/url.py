@@ -14,5 +14,9 @@ DESCRIBE_DRINK_RESOURCE = (
 )
 DESCRIBE_DRINK_STUFF = "/_describe/character/{character_id}/drink_stuff/{stuff_id}"
 
-CHARACTER_ACTION = "/character/{character_id}/action/{action_type}/{action_description_id}"
-WITH_STUFF_ACTION = "/character/{character_id}/action/{action_type}/with-stuff/{stuff_id}"
+CHARACTER_ACTION = (
+    "/character/{character_id}/action/{action_type}/{action_description_id}"
+)
+WITH_STUFF_ACTION = (
+    "/character/{character_id}/with-stuff-action/{action_type}/{stuff_id}"
+)

@@ -9,6 +9,7 @@ from guilang.description import Part
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
+from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.resource import ResourceType
@@ -173,18 +174,15 @@ class DrinkStuffAction(WithStuffAction):
         ):
             return
 
-        raise ImpossibleAction(
-            f"Il n'y a pas de quoi boire la dedans"
-        )
+        raise ImpossibleAction(f"Il n'y a pas de quoi boire la dedans")
 
     def check_request_is_possible(
-        self, character: "CharacterModel", input_: DrinkStuffModel
+        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-07-31: check is owned stuff
         accept_resources_ids = [
             rd.id for rd in self._description.properties["accept_resources"]
         ]
-        stuff = self._kernel.stuff_lib.get_stuff(input_.stuff_id)
 
         if (
             stuff.filled_with_resource is not None
@@ -192,9 +190,7 @@ class DrinkStuffAction(WithStuffAction):
         ):
             return
 
-        raise ImpossibleAction(
-            f"Il n'y a pas de quoi boire la dedans"
-        )
+        raise ImpossibleAction(f"Il n'y a pas de quoi boire la dedans")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -210,11 +206,23 @@ class DrinkStuffAction(WithStuffAction):
             return [
                 CharacterActionLink(
                     name=f"Drink {stuff.filled_with_resource.value}",
-                    link=get_character_action_url(
-                        character.id, ActionType.DRINK_STUFF, query_params=query_params
+                    link=get_with_stuff_action_url(
+                        character.id,
+                        ActionType.DRINK_STUFF,
+                        query_params=query_params,
+                        stuff_id=stuff.id,
                     ),
                     cost=self.get_cost(character, stuff),
                 )
             ]
 
         return []
+
+    def perform(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+    ) -> Description:
+        message = self._kernel.character_lib.drink_stuff(character.id, stuff.id)
+
+        return Description(
+            title=message, items=[Part(label="Continuer", go_back_zone=True)]
+        )

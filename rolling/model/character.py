@@ -51,15 +51,16 @@ class FillStuffWithResourceModel:
 
 
 @dataclasses.dataclass
-class EmptyStuffModel:
-    character_id: str
-    stuff_id: int = serpyco.number_field(cast_on_load=True)
-
-
-@dataclasses.dataclass
 class CharacterActionModel:
     character_id: str
     action_description_id: str
+    action_type: ActionType
+
+
+@dataclasses.dataclass
+class WithStuffActionModel:
+    character_id: str
+    stuff_id: str
     action_type: ActionType
 
 

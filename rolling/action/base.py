@@ -4,8 +4,6 @@ import dataclasses
 import typing
 from urllib.parse import urlencode
 
-import serpyco
-
 from guilang.description import Description
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
@@ -13,17 +11,17 @@ from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
-    from rolling.model.types import MaterialType
     from rolling.kernel import Kernel
     from rolling.game.base import GameConfig
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
-    from rolling.server.effect import EffectManager
-    from rolling.server.lib.character import CharacterLib
 
 
 def get_character_action_url(
-    character_id: str, action_type: ActionType, action_description_id: str, query_params: dict
+    character_id: str,
+    action_type: ActionType,
+    action_description_id: str,
+    query_params: dict,
 ) -> str:
     base_url = CHARACTER_ACTION.format(
         character_id=character_id,
@@ -37,9 +35,7 @@ def get_with_stuff_action_url(
     character_id: str, action_type: ActionType, stuff_id: int, query_params: dict
 ) -> str:
     base_url = WITH_STUFF_ACTION.format(
-        character_id=character_id,
-        action_type=action_type.value,
-        stuff_id=str(stuff_id),
+        character_id=character_id, action_type=action_type.value, stuff_id=str(stuff_id)
     )
     return f"{base_url}?{urlencode(query_params)}"
 
@@ -62,13 +58,13 @@ class ActionDescriptionModel:
 
 
 class Action(abc.ABC):
-    def __init__(
-        self, kernel: "Kernel", description: ActionDescriptionModel
-    ) -> None:
+    def __init__(self, kernel: "Kernel", description: ActionDescriptionModel) -> None:
         self._kernel = kernel
         self._description = description
+        self._character_lib = kernel.character_lib
+        self._effect_manager = kernel.effect_manager
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def get_properties_from_config(
         cls, game_config: "GameConfig", action_config_raw: dict
     ) -> dict:
@@ -76,6 +72,8 @@ class Action(abc.ABC):
 
 
 class WithStuffAction(Action):
+    input_model: typing.Any
+
     @abc.abstractmethod
     def check_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -84,7 +82,7 @@ class WithStuffAction(Action):
 
     @abc.abstractmethod
     def check_request_is_possible(
-        self, character: "CharacterModel",  stuff: "StuffModel", input_: typing.Any
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> None:
         pass
 
@@ -97,23 +95,24 @@ class WithStuffAction(Action):
     def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
         return self._description.base_cost
 
+    @abc.abstractmethod
+    def perform(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+    ) -> Description:
+        pass
+
 
 class CharacterAction(Action):
     input_model: typing.Any
 
-    def __init__(
-        self,
-        kernel: "Kernel",
-        description: ActionDescriptionModel,
-        character_lib: "CharacterLib",
-        effect_manager: "EffectManager",
-    ) -> None:
-        super().__init__(kernel, description)
-        self._character_lib = character_lib
-        self._effect_manager = effect_manager
-
     @abc.abstractmethod
     def check_is_possible(self, character: "CharacterModel") -> None:
+        pass
+
+    @abc.abstractmethod
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> None:
         pass
 
     @abc.abstractmethod
