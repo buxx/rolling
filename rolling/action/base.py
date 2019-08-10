@@ -64,6 +64,7 @@ class Action(abc.ABC):
         self._character_lib = kernel.character_lib
         self._effect_manager = kernel.effect_manager
 
+    @classmethod
     @abc.abstractmethod
     def get_properties_from_config(
         cls, game_config: "GameConfig", action_config_raw: dict
