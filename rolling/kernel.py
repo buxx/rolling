@@ -46,6 +46,7 @@ class Kernel:
         self._world_map_source: typing.Optional[WorldMapSource] = WorldMapSource(
             self, world_map_str
         ) if world_map_str else None
+        # TODO: rename in zone
         self._tile_maps_by_position: typing.Optional[
             typing.Dict[typing.Tuple[int, int], ZoneMap]
         ] = None
@@ -229,13 +230,3 @@ class Kernel:
         self._server_db_engine = create_engine(f"sqlite:///{self._server_db_path}")
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
-
-    def get_start_world_coordinates(self) -> typing.Tuple[int, int]:
-        # FIXME BS 2019-01-10: hardcoded
-        return 0, 3
-
-    def get_start_zone_coordinates(
-        self, world_row_i: int, world_col_i: int
-    ) -> typing.Tuple[int, int]:
-        # FIXME BS 2019-01-10: hardcoded
-        return 75, 75

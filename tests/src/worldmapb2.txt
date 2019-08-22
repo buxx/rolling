@@ -1,6 +1,8 @@
 ::LEGEND
 ~ SEA
 ^ MOUNTAIN
+::META
+SPAWN:RANDOM:BEACH,
 ::GEO
 ~~~~
 ~^^~

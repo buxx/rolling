@@ -91,8 +91,7 @@ class CharacterController(BaseController):
                     text="yes" if character.feel_thirsty else "no",
                 ),
                 Part(
-                    label="Find waterRemaining action points",
-                    text=str(character.action_points),
+                    label="Remaining action points", text=str(character.action_points)
                 ),
             ],
         )

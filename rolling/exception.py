@@ -96,3 +96,7 @@ class CantEmpty(GamePlayError):
 
 class ImpossibleAction(GamePlayError):
     pass
+
+
+class NoMetaLine(SourceLoadError):
+    pass

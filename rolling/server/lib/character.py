@@ -41,8 +41,13 @@ class CharacterLib:
         character.action_points = self._kernel.game.config.action_points_per_turn
 
         # Place on zone
-        world_row_i, world_col_i = self._kernel.get_start_world_coordinates()
-        zone_row_i, zone_col_i = self._kernel.get_start_zone_coordinates(
+        world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
+            self._kernel.world_map_source
+        )
+        start_zone_source = self._kernel.tile_maps_by_position[
+            world_row_i, world_col_i
+        ].source
+        zone_row_i, zone_col_i = start_zone_source.get_start_zone_coordinates(
             world_row_i, world_col_i
         )
 

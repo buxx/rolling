@@ -5,6 +5,8 @@
 ∩ HILL
 ⡩ BEACH
 ⠃ PLAIN
+::META
+SPAWN:RANDOM:BEACH,
 ::GEO
 ~~~~~
 ~^⠃⡩~

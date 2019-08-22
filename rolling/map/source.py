@@ -1,11 +1,15 @@
 # coding: utf-8
 import dataclasses
+import random
 import typing
 
+from rolling.exception import RollingError
 from rolling.map.geography import WorldMapGeography
 from rolling.map.geography import ZoneMapGeography
 from rolling.map.legend import WorldMapLegend
 from rolling.map.legend import ZoneMapLegend
+from rolling.map.meta import WorldMapMeta
+from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import WorldMapTileType
 
 if typing.TYPE_CHECKING:
@@ -13,6 +17,7 @@ if typing.TYPE_CHECKING:
 
 BLOCK_LEGEND_NAME = "LEGEND"
 BLOCK_GEOGRAPHY_NAME = "GEO"
+BLOCK_META_NAME = "META"
 
 
 class MapSource:
@@ -53,6 +58,7 @@ class WorldMapSource(MapSource):
         self._raw_source = raw_source
         self._legend = self._create_legend(raw_source)
         self._geography = self._create_geography(raw_source)
+        self._meta = self._create_meta(raw_source)
         # self._river = self._create_river(raw_source)
         # self._others = self._create_others(raw_source)
 
@@ -63,6 +69,10 @@ class WorldMapSource(MapSource):
     @property
     def legend(self) -> WorldMapLegend:
         return self._legend
+
+    @property
+    def meta(self) -> WorldMapMeta:
+        return self._meta
 
     @property
     def geography(self) -> WorldMapGeography:
@@ -88,6 +98,13 @@ class WorldMapSource(MapSource):
         # TODO BS 2018-11-03: raise if not found
         geography_lines = self._get_blocks(raw_source, BLOCK_GEOGRAPHY_NAME)[0]
         return WorldMapGeography(self._legend, geography_lines)
+
+    def _create_meta(self, raw_source: str) -> WorldMapMeta:
+        try:
+            lines = self._get_blocks(raw_source, BLOCK_META_NAME)[0]
+        except IndexError:
+            lines = []
+        return WorldMapMeta(self._kernel, lines)
 
 
 class ZoneMapSource(MapSource):
@@ -116,6 +133,23 @@ class ZoneMapSource(MapSource):
         return ZoneMapGeography(
             self.legend, geography_lines, missing_right_tile_str=" "
         )
+
+    def get_start_zone_coordinates(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.Tuple[int, int]:
+        available_coordinates: typing.List[typing.Tuple[int, int]] = []
+
+        for row_i, row in enumerate(self.geography.rows):
+            for col_i, map_tile_type in enumerate(row):
+                if traversable_properties[map_tile_type]:
+                    available_coordinates.append((row_i, col_i))
+
+        if not available_coordinates:
+            raise RollingError(
+                f"No traversable coordinate in zone {world_row_i},{world_col_i}"
+            )
+
+        return random.choice(available_coordinates)
 
 
 @dataclasses.dataclass(frozen=True)
