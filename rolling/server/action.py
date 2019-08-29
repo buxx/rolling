@@ -3,6 +3,7 @@ import typing
 
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
+from rolling.action.collect import CollectResourceAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.empty import EmptyStuffAction
@@ -22,6 +23,7 @@ class ActionFactory:
         ActionType.EMPTY_STUFF: EmptyStuffAction,
         ActionType.DRINK_STUFF: DrinkStuffAction,
         ActionType.DRINK_RESOURCE: DrinkResourceAction,
+        ActionType.COLLECT_RESOURCE: CollectResourceAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -35,7 +37,10 @@ class ActionFactory:
         }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]
-        ] = {ActionType.DRINK_RESOURCE: DrinkResourceAction}
+        ] = {
+            ActionType.DRINK_RESOURCE: DrinkResourceAction,
+            ActionType.COLLECT_RESOURCE: CollectResourceAction,
+        }
 
     def get_with_stuff_action(
         self, action_description: "ActionDescriptionModel"

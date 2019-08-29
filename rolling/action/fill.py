@@ -1,6 +1,8 @@
 # coding: utf-8
 import typing
 
+import serpyco
+
 from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
@@ -8,7 +10,6 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantFill
 from rolling.exception import ImpossibleAction
 from rolling.model.character import FillStuffWithResourceModel
-from rolling.model.types import MaterialType
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
@@ -19,7 +20,8 @@ if typing.TYPE_CHECKING:
 
 
 class FillStuffAction(WithStuffAction):
-    input_model = FillStuffWithResourceModel
+    input_model = typing.Type[FillStuffWithResourceModel]
+    input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
     def get_properties_from_config(
@@ -30,8 +32,8 @@ class FillStuffAction(WithStuffAction):
     def check_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel"
     ) -> None:
-        # FIXME BS 2019-08-02: material type en fonction de stuff fill_unity
-        for fill_acceptable_type in [MaterialType.LIQUID, MaterialType.SANDY]:
+        # FIXME BS NOW: from config !!
+        for fill_acceptable_type in ["LIQUID", "SANDY"]:
             for resource in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
@@ -54,8 +56,8 @@ class FillStuffAction(WithStuffAction):
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
 
-        # FIXME BS 2019-08-02: material type en fonction de stuff fill_unity
-        for fill_acceptable_type in [MaterialType.LIQUID, MaterialType.SANDY]:
+        # FIXME BS NOW: from config !!
+        for fill_acceptable_type in ["LIQUID", "SANDY"]:
             for resource in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
@@ -63,7 +65,7 @@ class FillStuffAction(WithStuffAction):
                 zone_col_i=character.zone_col_i,
                 material_type=fill_acceptable_type,
             ):
-                query_params = dict(resource_type=resource.type_.value)
+                query_params = self.input_model(resource_type=resource.type_.value)
                 actions.append(
                     CharacterActionLink(
                         name=f"Fill {stuff.name} with {resource.name}",
@@ -71,7 +73,7 @@ class FillStuffAction(WithStuffAction):
                             character_id=character.id,
                             action_type=ActionType.FILL_STUFF,
                             stuff_id=stuff.id,
-                            query_params=query_params,
+                            query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=self.get_cost(character, stuff),
                     )

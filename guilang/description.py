@@ -25,6 +25,7 @@ class Part:
     text: typing.Optional[str] = None
     is_form: bool = False
     form_action: typing.Optional[str] = None
+    form_values_in_query: bool = False
     items: typing.List["Part"] = dataclasses.field(default_factory=list)
     type_: typing.Optional[Type] = None
     label: typing.Optional[str] = None

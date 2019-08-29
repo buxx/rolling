@@ -5,6 +5,7 @@ import typing
 
 class MapTileType(metaclass=abc.ABCMeta):
     id = NotImplemented
+    name = None
     foreground_color = "white"
     background_color = ""
     mono = ""
@@ -25,3 +26,9 @@ class MapTileType(metaclass=abc.ABCMeta):
     @classmethod
     def get_full_id(cls) -> str:
         return cls._full_id_pattern.format(cls.id)
+
+    @classmethod
+    def get_name(cls) -> str:
+        if cls.name is not None:
+            return cls.name
+        return cls.id

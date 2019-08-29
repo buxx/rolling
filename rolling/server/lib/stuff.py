@@ -3,18 +3,13 @@ import typing
 
 import sqlalchemy
 
-from rolling.exception import CantEmpty
-from rolling.exception import CantFill
 from rolling.model.character import CharacterModel
-from rolling.model.resource import ResourceType
-from rolling.model.resource import resource_type_gram_per_unit
+from rolling.model.measure import Unit
 from rolling.model.stuff import StuffModel
 from rolling.model.stuff import StuffProperties
-from rolling.model.stuff import Unit
 from rolling.server.action import ActionFactory
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -133,7 +128,7 @@ class StuffLib:
             zone_row_i=doc.zone_row_i,
             filled_at=float(doc.filled_at) if doc.filled_at else None,
             filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
-            filled_with_resource=ResourceType(doc.filled_with_resource)
+            filled_with_resource=doc.filled_with_resource
             if doc.filled_with_resource
             else None,
             weight=float(doc.weight) if doc.weight else None,
@@ -180,9 +175,7 @@ class StuffLib:
 
         return actions
 
-    def fill_stuff_with_resource(
-        self, stuff: StuffModel, resource_type: ResourceType
-    ) -> None:
+    def fill_stuff_with_resource(self, stuff: StuffModel, resource_type: str) -> None:
         doc = self.get_stuff_doc(stuff.id)
         doc.fill(resource_type, at=100.0)
 

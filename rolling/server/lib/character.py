@@ -5,7 +5,6 @@ import uuid
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
-from rolling.model.resource import ResourceType
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
@@ -219,19 +218,22 @@ class CharacterLib:
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)
 
-    def drink_material(self, character_id: str, resource_type: ResourceType) -> str:
+    def drink_material(self, character_id: str, resource_type: str) -> str:
         character_doc = self.get_document(character_id)
 
         if not character_doc.feel_thirsty:
             return "You are not thirsty"
 
-        if resource_type == ResourceType.FRESH_WATER:
+        # FIXME BS NOW: from config !!
+        if resource_type == "FRESH_WATER":
             character_doc.dehydrated = False
             character_doc.feel_thirsty = False
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
             return "You're no longer thirsty"
-        elif resource_type == ResourceType.SALTED_WATER:
+
+        # FIXME BS NOW: from config !!
+        elif resource_type == "SALTED_WATER":
             return "It's unbearable"
 
         # TODO BS 2019-07-06: Move logic otherwise to be able to describe effect in game config ?

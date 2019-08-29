@@ -2,7 +2,7 @@
 import pytest
 
 from rolling.kernel import Kernel
-from rolling.model.stuff import Unit
+from rolling.model.measure import Unit
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib

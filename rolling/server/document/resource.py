@@ -17,18 +17,18 @@ if typing.TYPE_CHECKING:
     from rolling.model.stuff import StuffProperties
 
 
-class StuffDocument(Document):
-    __tablename__ = "stuff"
+class ResourceDocument(Document):
+    __tablename__ = "resource"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    stuff_id = Column(String(255), nullable=False)
+    resource_id = Column(String(255), nullable=False)
     world_col_i = Column(Integer, nullable=True)
     world_row_i = Column(Integer, nullable=True)
     zone_col_i = Column(Integer, nullable=True)
     zone_row_i = Column(Integer, nullable=True)
 
     # properties
-    filled_at = Column(Numeric(10, 2), nullable=True)
-    filled_unity = Column(Enum(*[u.value for u in Unit]), nullable=True)
+    unity = Column(Enum(*[u.value for u in Unit]), nullable=True)
+
     filled_with_resource = Column(String(255), nullable=True)
     filled_capacity = Column(Numeric(10, 2), nullable=True)
     weight = Column(Numeric(10, 2), nullable=True)  # grams

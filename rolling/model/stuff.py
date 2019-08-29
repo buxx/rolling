@@ -1,17 +1,11 @@
 # coding: utf-8
 import dataclasses
-import enum
 import typing
 
 import serpyco
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.model.resource import ResourceType
-from rolling.model.types import MaterialType
-
-
-class Unit(enum.Enum):
-    LITTER = "L"
+from rolling.model.measure import Unit
 
 
 @dataclasses.dataclass
@@ -19,7 +13,7 @@ class StuffProperties:
     id: str
     name: str
     filled_at: typing.Optional[float] = None
-    filled_with_resource: typing.Optional[ResourceType] = None
+    filled_with_resource: typing.Optional[str] = None
     filled_unity: typing.Optional[Unit] = None
     filled_capacity: typing.Optional[float] = None
     weight: typing.Optional[float] = None
@@ -28,7 +22,7 @@ class StuffProperties:
     descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
         default_factory=list
     )
-    material_type: typing.Optional[MaterialType] = None
+    material_type: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -42,7 +36,7 @@ class StuffModel:
     zone_row_i: int
     filled_at: typing.Optional[float] = None
     filled_unity: typing.Optional[Unit] = None
-    filled_with_resource: typing.Optional[ResourceType] = None
+    filled_with_resource: typing.Optional[str] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None

@@ -1,0 +1,158 @@
+# coding: utf-8
+import dataclasses
+import typing
+
+import serpyco
+
+from guilang.description import Description, Type
+from guilang.description import Part
+from rolling.action.base import CharacterAction
+from rolling.action.base import get_character_action_url
+from rolling.exception import ImpossibleAction
+from rolling.model.extraction import ExtractableResourceDescriptionModel
+from rolling.model.resource import ResourceDescriptionModel
+from rolling.server.link import CharacterActionLink
+from rolling.types import ActionType
+from rolling.util import get_on_and_around_coordinates
+
+if typing.TYPE_CHECKING:
+    from rolling.model.character import CharacterModel
+    from rolling.game.base import GameConfig
+
+
+@dataclasses.dataclass
+class CollectResourceModel:
+    resource_id: str
+    row_i: int = serpyco.number_field(cast_on_load=True)
+    col_i: int = serpyco.number_field(cast_on_load=True)
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+# FIXME BS 2019-08-29: Permit collect only some material (like no liquid)
+class CollectResourceAction(CharacterAction):
+    input_model = typing.Type[CollectResourceModel]
+    input_model_serializer = serpyco.Serializer(input_model)
+
+    @classmethod
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        return {}
+
+    def check_is_possible(self, character: "CharacterModel") -> None:
+        for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=character.zone_row_i,
+            zone_col_i=character.zone_col_i,
+        ):
+            return
+
+        raise ImpossibleAction("Il n'y a rien à collecter ici")
+
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: input_model
+    ) -> None:
+        # FIXME BS 2019-08-27: check input_.row_i and input_.col_i are near
+        # FIXME BS 2019-08-29: check if quantity is possible (cost)
+        resources = self._kernel.game.world_manager.get_resources_at(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
+        )
+        resource_ids = [resource.id for resource in resources]
+
+        if input_.resource_id in resource_ids:
+            return
+
+        raise ImpossibleAction(f"Il n'y a pas de '{input_.resource_id}' à cet endroit")
+
+    def get_character_action_links(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        inspect_zone_positions = get_on_and_around_coordinates(
+            character.zone_row_i, character.zone_col_i
+        )
+        character_actions: typing.List[CharacterActionLink] = []
+
+        for row_i, col_i in inspect_zone_positions:
+            for resource in self._kernel.game.world_manager.get_resources_at(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
+            ):
+                tile_type = self._kernel.tile_maps_by_position[
+                    (character.world_row_i, character.world_col_i)
+                ].source.geography.rows[row_i][col_i]
+                query_params = self.input_model(resource_id=resource.id, row_i=row_i, col_i=col_i)
+                character_actions.append(
+                    CharacterActionLink(
+                        name=f"Récupérer {resource.name} sur {tile_type.name}",
+                        link=get_character_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.COLLECT_RESOURCE,
+                            action_description_id=self._description.id,
+                            query_params=self.input_model_serializer.dump(query_params),
+                        ),
+                        cost=self.get_cost(character),
+                    )
+                )
+
+        return character_actions
+
+    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
+        # TODO BS 2019-08-27: warning if not enough place (weight, encombrement)
+        tile_type = self._kernel.tile_maps_by_position[
+            (character.world_row_i, character.world_col_i)
+        ].source.geography.rows[input_.row_i][input_.col_i]
+        extractable_resources: typing.Dict[
+            str, ExtractableResourceDescriptionModel
+        ] = self._kernel.game.config.extractions[tile_type.id].resources
+        resource_extraction_description: ExtractableResourceDescriptionModel = extractable_resources[
+            input_.resource_id
+        ]
+        resource: ResourceDescriptionModel = self._kernel.game.config.resources[
+            input_.resource_id
+        ]
+        character_doc = self._character_lib.get_document(character.id)
+
+        if input_.quantity is None:
+            unit_name = self._kernel.translation.get(resource.unit)
+            # TODO BS 2019-08-29: cost per unit modified by competence / stuff
+            cost_per_unit = resource_extraction_description.cost_per_unit
+
+            return Description(
+                title=f"Récupérer du {resource.name}",
+                items=[
+                    Part(is_form=True, items=[
+                        Part(
+                            label=f"Quantité (coût: {cost_per_unit} par {unit_name}) ?",
+                            type_=Type.NUMBER,
+                            form_action=get_character_action_url(
+                                character_id=character.id,
+                                action_type=ActionType.COLLECT_RESOURCE,
+                                action_description_id=self._description.id,
+                                query_params=self.input_model_serializer.dump(input_),
+                            ),
+                            name="quantity",
+                            form_values_in_query=True,
+                        )
+                    ]),
+                ],
+            )
+
+        # if input_.resource_type.value in accept_resources_ids:
+        #     effects: typing.List[
+        #         CharacterEffectDescriptionModel
+        #     ] = self._description.properties["effects"]
+        #
+        #     for effect in effects:
+        #         self._effect_manager.enable_effect(character_doc, effect)
+        #         self._kernel.server_db_session.add(character_doc)
+        #         self._kernel.server_db_session.commit()
+        #
+        # return Description(
+        #     title="Action effectué", items=[Part(label="Continue", go_back_zone=True)]
+        # )

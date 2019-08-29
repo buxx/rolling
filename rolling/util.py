@@ -4,7 +4,6 @@ import typing
 
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.resource import ResourceType
 from rolling.model.stuff import StuffModel
 
 if typing.TYPE_CHECKING:
@@ -33,19 +32,20 @@ def get_on_and_around_coordinates(
 
 
 def is_there_resource_type_in_zone(
-    resource_type: ResourceType, zone_source: ZoneMapSource
+    resource_type: str, zone_source: ZoneMapSource
 ) -> bool:
     for row in zone_source.geography.rows:
         for zone_tile_type in row:
             zone_tile_type = typing.cast(ZoneMapTileType, zone_tile_type)
+            # FIXME BS NOW: refact extractable
             for resource_type in zone_tile_type.extractable():
-                if resource_type == ResourceType.FRESH_WATER:
+                if resource_type == resource_type:
                     return True
     return False
 
 
 def get_stuffs_filled_with_resource_type(
-    kernel: "Kernel", character_id: str, resource_type: ResourceType
+    kernel: "Kernel", character_id: str, resource_type: str
 ) -> typing.Iterator[StuffModel]:
     from rolling.server.lib.stuff import StuffLib
 

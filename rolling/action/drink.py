@@ -12,8 +12,6 @@ from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.effect import CharacterEffectDescriptionModel
-from rolling.model.resource import ResourceType
-from rolling.model.types import MaterialType
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
@@ -25,7 +23,7 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class DrinkResourceModel:
-    resource_type: ResourceType
+    resource_type: str
 
 
 @dataclasses.dataclass
@@ -34,7 +32,8 @@ class DrinkStuffModel:
 
 
 class DrinkResourceAction(CharacterAction):
-    input_model = DrinkResourceModel
+    input_model = typing.Type[DrinkResourceModel]
+    input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
     def get_properties_from_config(
@@ -59,7 +58,8 @@ class DrinkResourceAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=MaterialType.LIQUID,
+            # FIXME BS NOW: from config !!!
+            material_type="LIQUID",
         ):
             if resource.type_.value in accept_resources_ids:
                 return
@@ -77,7 +77,8 @@ class DrinkResourceAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=MaterialType.LIQUID,
+            # FIXME BS NOW: from config !!!
+            material_type="LIQUID",
         ):
             if (
                 resource.type_ == input_.resource_type
@@ -102,10 +103,11 @@ class DrinkResourceAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=MaterialType.LIQUID,
+            # FIXME BS NOW: from config !!!
+            material_type="LIQUID",
         ):
             if resource.type_.value in accept_resources_ids:
-                query_params = dict(resource_type=resource.type_.value)
+                query_params = self.input_model(resource_type=resource.type_.value)
                 character_actions.append(
                     CharacterActionLink(
                         name=f"Drink {resource.name}",
@@ -113,7 +115,7 @@ class DrinkResourceAction(CharacterAction):
                             character_id=character.id,
                             action_type=ActionType.DRINK_RESOURCE,
                             action_description_id=self._description.id,
-                            query_params=query_params,
+                            query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=self.get_cost(character),
                     )
@@ -122,7 +124,7 @@ class DrinkResourceAction(CharacterAction):
         return character_actions
 
     def perform(
-        self, character: "CharacterModel", input_: "DrinkResourceModel"
+        self, character: "CharacterModel", input_: input_model
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
         accept_resources_ids = [
@@ -145,7 +147,7 @@ class DrinkResourceAction(CharacterAction):
 
 
 class DrinkStuffAction(WithStuffAction):
-    input_model = DrinkStuffModel
+    input_model = typing.Type[DrinkStuffModel]
 
     @classmethod
     def get_properties_from_config(
@@ -202,14 +204,14 @@ class DrinkStuffAction(WithStuffAction):
             stuff.filled_with_resource is not None
             and stuff.filled_with_resource.value in accept_resources_ids
         ):
-            query_params = dict(stuff_id=stuff.id)
+            query_params = self.input_model(stuff_id=stuff.id)
             return [
                 CharacterActionLink(
                     name=f"Drink {stuff.filled_with_resource.value}",
                     link=get_with_stuff_action_url(
                         character.id,
                         ActionType.DRINK_STUFF,
-                        query_params=query_params,
+                        query_params=self.input_model_serializer.dump(query_params),
                         stuff_id=stuff.id,
                     ),
                     cost=self.get_cost(character, stuff),

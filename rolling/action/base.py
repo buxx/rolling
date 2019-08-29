@@ -4,6 +4,8 @@ import dataclasses
 import typing
 from urllib.parse import urlencode
 
+import serpyco
+
 from guilang.description import Description
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
@@ -48,16 +50,10 @@ class ActionDescriptionModel:
     properties: dict
 
 
-# @dataclasses.dataclass
-# class WithStuffActionProperties:
-#     type_: ActionType
-#     base_cost: float
-#     acceptable_material_types: typing.List["MaterialType"] = serpyco.field(
-#         default_factory=list
-#     )
-
-
 class Action(abc.ABC):
+    input_model: typing.Type[object]
+    input_model_serializer: serpyco.Serializer
+
     def __init__(self, kernel: "Kernel", description: ActionDescriptionModel) -> None:
         self._kernel = kernel
         self._description = description
@@ -73,8 +69,6 @@ class Action(abc.ABC):
 
 
 class WithStuffAction(Action):
-    input_model: typing.Any
-
     @abc.abstractmethod
     def check_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -104,8 +98,6 @@ class WithStuffAction(Action):
 
 
 class CharacterAction(Action):
-    input_model: typing.Any
-
     @abc.abstractmethod
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass

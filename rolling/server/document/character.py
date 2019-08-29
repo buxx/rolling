@@ -38,6 +38,7 @@ class CharacterDocument(Document):
 
     # transport
     shipped_stuff = relationship(StuffDocument)
+    # shipped_resource = relationship(ResourceDocument)
 
     @property
     def is_alive(self) -> bool:
