@@ -1,17 +1,12 @@
 # coding: utf-8
 import dataclasses
-import enum
 import typing
 
 import serpyco
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.model.resource import ResourceType
-from rolling.model.types import MaterialType
-
-
-class Unit(enum.Enum):
-    LITTER = "L"
+from rolling.model.measure import Unit
+from rolling.model.resource import CarriedResourceDescriptionModel
 
 
 @dataclasses.dataclass
@@ -19,7 +14,7 @@ class StuffProperties:
     id: str
     name: str
     filled_at: typing.Optional[float] = None
-    filled_with_resource: typing.Optional[ResourceType] = None
+    filled_with_resource: typing.Optional[str] = None
     filled_unity: typing.Optional[Unit] = None
     filled_capacity: typing.Optional[float] = None
     weight: typing.Optional[float] = None
@@ -28,7 +23,7 @@ class StuffProperties:
     descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
         default_factory=list
     )
-    material_type: typing.Optional[MaterialType] = None
+    material_type: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -42,7 +37,7 @@ class StuffModel:
     zone_row_i: int
     filled_at: typing.Optional[float] = None
     filled_unity: typing.Optional[Unit] = None
-    filled_with_resource: typing.Optional[ResourceType] = None
+    filled_with_resource: typing.Optional[str] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
     image: typing.Optional[str] = None
@@ -59,7 +54,7 @@ class StuffModel:
 
         if self.filled_with_resource is not None:
             # TODO BS 2019-07-04: translation
-            descriptions.append(f"{self.filled_with_resource.value}")
+            descriptions.append(f"{self.filled_with_resource}")
 
         return descriptions
 
@@ -71,7 +66,7 @@ class StuffModel:
 
         if self.filled_with_resource is not None:
             # TODO BS 2019-07-04: translation
-            descriptions.append(f"{self.filled_with_resource.value}")
+            descriptions.append(f"{self.filled_with_resource}")
 
         return descriptions
 
@@ -95,5 +90,6 @@ class ZoneGenerationStuff:
 @dataclasses.dataclass
 class CharacterInventoryModel:
     stuff: typing.List[StuffModel]
+    resource: typing.List[CarriedResourceDescriptionModel]
     weight: float = 0.0
     clutter: float = 0.0

@@ -13,6 +13,7 @@ from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.material import MaterialDescriptionModel
+from rolling.model.measure import Unit
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
@@ -31,6 +32,11 @@ class GameConfig:
         self.action_points_per_turn: int = config_dict["action_points_per_turn"]
         self.create_character_messages: typing.List[str] = config_dict[
             "create_character_messages"
+        ]
+        self.fresh_water_resource_id: str = config_dict["fresh_water_resource_id"]
+        self.liquid_material_id: str = config_dict["liquid_material_id"]
+        self.fill_with_material_ids: typing.List[str] = config_dict[
+            "fill_with_material_ids"
         ]
 
         self._character_effects: typing.Dict[
@@ -60,6 +66,12 @@ class GameConfig:
     @property
     def resources(self) -> typing.Dict[str, ResourceDescriptionModel]:
         return self._resources
+
+    @property
+    def extractions(
+        self
+    ) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
+        return self._extractions
 
     @property
     def actions(self) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
@@ -102,7 +114,9 @@ class GameConfig:
                 id=resource_id,
                 weight=resource_raw["weight"],
                 name=resource_raw["name"],
-                material_id=resource_raw["material"],
+                material_type=resource_raw["material"],
+                unit=Unit(resource_raw["unit"]),
+                clutter=resource_raw["clutter"],
             )
 
         return resources
@@ -123,7 +137,9 @@ class GameConfig:
                 resource_extractions[
                     resource_extraction_raw["resource_id"]
                 ] = ExtractableResourceDescriptionModel(
-                    resource_id=resource_extraction_raw["resource_id"]
+                    resource_id=resource_extraction_raw["resource_id"],
+                    cost_per_unit=resource_extraction_raw["cost_per_unit"],
+                    default_quantity=resource_extraction_raw["default_quantity"],
                 )
 
             extractions[extraction_raw["tile"]] = ExtractableDescriptionModel(

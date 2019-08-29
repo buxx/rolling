@@ -27,8 +27,10 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.zone.websocket import ZoneEventsManager
+from rolling.trad import GlobalTranslation
 
 
 class Kernel:
@@ -95,14 +97,26 @@ class Kernel:
 
         # FIXME BS 2019-07-28: use these everywhere
         self._stuff_lib: typing.Optional["StuffLib"] = None
+        self._resource_lib: typing.Optional["ResourceLib"] = None
         self._character_lib: typing.Optional["CharacterLib"] = None
         self._effect_manager: typing.Optional["EffectManager"] = None
+        self._translation = GlobalTranslation()
 
     @property
     def stuff_lib(self) -> StuffLib:
         if self._stuff_lib is None:
             self._stuff_lib = StuffLib(self)
         return self._stuff_lib
+
+    @property
+    def resource_lib(self) -> ResourceLib:
+        if self._resource_lib is None:
+            self._resource_lib = ResourceLib(self)
+        return self._resource_lib
+
+    @property
+    def translation(self) -> GlobalTranslation:
+        return self._translation
 
     @property
     def character_lib(self) -> CharacterLib:

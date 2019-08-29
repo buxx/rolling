@@ -4,8 +4,6 @@ import typing
 
 from serpyco import nested_field
 
-from rolling.model.resource import ResourceType
-from rolling.model.types import MaterialType
 from rolling.model.zone import WorldTileTypeModel
 from rolling.model.zone import ZoneProperties
 
@@ -28,9 +26,10 @@ class World:
 
 @dataclasses.dataclass
 class Resource:
-    type_: ResourceType
-    material_type: MaterialType
+    id: str
+    material_type: str
     name: str
+    weight: float
 
     def __hash__(self) -> int:
-        return hash(str(self.type_) + str(self.material_type))
+        return hash(self.id + self.material_type)

@@ -6,7 +6,6 @@ import typing
 import serpyco
 
 from rolling.exception import RollingError
-from rolling.model.resource import ResourceType
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -47,7 +46,7 @@ class GetLookStuffModelModel:
 
 @dataclasses.dataclass
 class FillStuffWithResourceModel:
-    resource_type: ResourceType = serpyco.field()
+    resource_id: str = serpyco.field()
 
 
 @dataclasses.dataclass

@@ -1,19 +1,34 @@
 # coding: utf-8
 import argparse
-import asyncio
 import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
 
+from hapic.error.serpyco import DefaultErrorSchema
+from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
+from hapic.processor.main import ProcessValidationError
 from hapic.processor.serpyco import SerpycoProcessor
-from rolling.kernel import Kernel
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
 from rolling.server.base import get_kernel
 from rolling.server.extension import hapic
+
+
+class ErrorBuilder(SerpycoDefaultErrorBuilder):
+    def build_from_exception(
+        self, exception: Exception, include_traceback: bool = False
+    ) -> DefaultErrorSchema:
+        server_logger.exception(exception)
+        return super().build_from_exception(exception, include_traceback)
+
+    def build_from_validation_error(
+        self, error: ProcessValidationError
+    ) -> DefaultErrorSchema:
+        server_logger.debug(str(error))
+        return super().build_from_validation_error(error)
 
 
 def run(args: argparse.Namespace) -> None:
@@ -31,7 +46,9 @@ def run(args: argparse.Namespace) -> None:
 
     # Configure hapic
     server_logger.info("Configure web api")
-    context = AiohttpContext(app, debug=args.debug)
+    context = AiohttpContext(
+        app, debug=args.debug, default_error_builder=ErrorBuilder()
+    )
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)
     hapic.set_processor_class(SerpycoProcessor)

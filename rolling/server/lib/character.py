@@ -5,7 +5,6 @@ import uuid
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
-from rolling.model.resource import ResourceType
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
@@ -158,10 +157,19 @@ class CharacterLib:
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(character_id)
+        carried_resources = self._kernel.resource_lib.get_carried_by(character_id)
+
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
+        total_weight += sum([r.weight for r in carried_resources if r.weight])
+
         total_clutter = sum([stuff.clutter for stuff in carried_stuff])
+        total_clutter += sum([r.clutter for r in carried_resources])
+
         return CharacterInventoryModel(
-            stuff=carried_stuff, weight=total_weight, clutter=total_clutter
+            stuff=carried_stuff,
+            resource=carried_resources,
+            weight=total_weight,
+            clutter=total_clutter,
         )
 
     def get_on_place_actions(
@@ -219,23 +227,21 @@ class CharacterLib:
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)
 
-    def drink_material(self, character_id: str, resource_type: ResourceType) -> str:
+    def drink_material(self, character_id: str, resource_id: str) -> str:
         character_doc = self.get_document(character_id)
 
         if not character_doc.feel_thirsty:
-            return "You are not thirsty"
+            return "Vous n'avez pas soif"
 
-        if resource_type == ResourceType.FRESH_WATER:
+        if resource_id == self._kernel.game.config.fresh_water_resource_id:
             character_doc.dehydrated = False
             character_doc.feel_thirsty = False
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
-            return "You're no longer thirsty"
-        elif resource_type == ResourceType.SALTED_WATER:
-            return "It's unbearable"
+            return "Vous n'avez plus soif"
 
-        # TODO BS 2019-07-06: Move logic otherwise to be able to describe effect in game config ?
-        return "It's not a good idea"
+        # TODO BS 2019-09-02: drink wine etc ?
+        return "Vous ne pouvez pas boire ça"
 
     def drink_stuff(self, character_id: str, stuff_id: int) -> str:
         character_doc = self.get_document(character_id)

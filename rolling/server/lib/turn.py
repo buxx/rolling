@@ -1,5 +1,4 @@
 # coding: utf-8
-import logging
 from logging import Logger
 import random
 import typing
@@ -7,13 +6,11 @@ import typing
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
-from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.resource import ResourceType
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import get_stuffs_filled_with_resource_type
-from rolling.util import is_there_resource_type_in_zone
+from rolling.util import get_stuffs_filled_with_resource_id
+from rolling.util import is_there_resource_id_in_zone
 
 
 class TurnLib:
@@ -119,14 +116,18 @@ class TurnLib:
             zone_source = self._kernel.tile_maps_by_position[
                 (character_document.world_row_i, character_document.world_col_i)
             ].source
-            zone_contains_fresh_water = is_there_resource_type_in_zone(
-                ResourceType.FRESH_WATER, zone_source
+            zone_contains_fresh_water = is_there_resource_id_in_zone(
+                self._kernel,
+                self._kernel.game.config.fresh_water_resource_id,
+                zone_source,
             )
             stuff_with_fresh_water = None
             try:
                 stuff_with_fresh_water = next(
-                    get_stuffs_filled_with_resource_type(
-                        self._kernel, character_id, ResourceType.FRESH_WATER
+                    get_stuffs_filled_with_resource_id(
+                        self._kernel,
+                        character_id,
+                        self._kernel.game.config.fresh_water_resource_id,
                     )
                 )
             except StopIteration:
@@ -143,7 +144,7 @@ class TurnLib:
                 # Fresh water in carried stuff
                 elif stuff_with_fresh_water is not None:
                     self._logger.info(
-                        f"{character_document.name} need to drink: fresh water in stuff {stuff_doc.id}"
+                        f"{character_document.name} need to drink: fresh water in stuff {stuff_with_fresh_water.id}"
                     )
                     stuff_doc = self._stuff_lib.get_stuff_doc(stuff_with_fresh_water.id)
                     stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(

@@ -104,6 +104,7 @@ class CharacterController(BaseController):
     ) -> Description:
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
         stuff_items: typing.List[Part] = []
+        resource_items: typing.List[Part] = []
 
         for stuff in inventory.stuff:
             name = stuff.name
@@ -123,6 +124,18 @@ class CharacterController(BaseController):
                 )
             )
 
+        for resource in inventory.resource:
+            resource_items.append(
+                Part(
+                    text=f"{resource.get_full_description(self._kernel)}",
+                    # TODO BS 2019-09-02: actions
+                    # is_link=True,
+                    # form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                    #     character_id=hapic_data.path.character_id, stuff_id=stuff.id
+                    # ),
+                )
+            )
+
         return Description(
             title="Inventory",
             items=[
@@ -130,6 +143,8 @@ class CharacterController(BaseController):
                 Part(text=f"total clutter: {inventory.clutter}"),
                 Part(text="Items:"),
                 *stuff_items,
+                Part(text="Resources:"),
+                *resource_items,
             ],
         )
 
@@ -268,7 +283,7 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
-    @hapic.output_body(CharacterModel)
+    @hapic.output_body(CharacterModel, default_http_code=201)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
         character_id = self._character_lib.create(hapic_data.body)
         return self._character_lib.get(character_id)

@@ -9,6 +9,7 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 
+from rolling.server.document.resource import ResourceDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.extension import ServerSideDocument as Document
 
@@ -38,6 +39,7 @@ class CharacterDocument(Document):
 
     # transport
     shipped_stuff = relationship(StuffDocument)
+    shipped_resource = relationship(ResourceDocument)
 
     @property
     def is_alive(self) -> bool:

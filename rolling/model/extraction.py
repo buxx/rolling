@@ -8,7 +8,8 @@ from rolling.map.type.zone import ZoneMapTileType
 @dataclasses.dataclass
 class ExtractableResourceDescriptionModel:
     resource_id: str
-    # FIXME BS NOW: extraction modality
+    cost_per_unit: float
+    default_quantity: float
 
 
 @dataclasses.dataclass
