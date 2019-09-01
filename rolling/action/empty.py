@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
 
 
 class EmptyStuffAction(WithStuffAction):
-    input_model = typing.Type[EmptyModel]
+    input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(input_model)
 
     def check_is_possible(

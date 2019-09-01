@@ -1,6 +1,7 @@
 # coding: utf-8
 import json
 import typing
+from urllib.parse import urlencode
 
 import serpyco
 import urwid
@@ -121,10 +122,13 @@ class Generator:
                     widgets_.extend(generate_for_items(item.items))
 
                 if item.is_form:
-                    if success_callback is None or success_serializer is None:
-                        raise RollingError(
-                            "success_callback and success_serializer must be set for forms"
-                        )
+                    if (
+                        not item.form_values_in_query
+                        and success_callback is None
+                        and success_serializer is None
+                    ):
+                        # FIXME BS NOW: must continue following description ...
+                        raise "FOOO"
 
                     widgets_.append(
                         urwid.Button(
@@ -132,7 +136,11 @@ class Generator:
                             # TODO BS 2019-07-04: manage one form at once
                             # (see user_data usage previously)
                             on_press=lambda *_, **__: self.validate_form(
-                                widgets, fields, success_callback, success_serializer
+                                widgets,
+                                fields,
+                                success_callback,
+                                success_serializer,
+                                form_values_in_query=item.form_values_in_query,
                             ),
                         )
                     )
@@ -171,9 +179,17 @@ class Generator:
         fields: Fields,
         success_callback: typing.Callable[[object], None],
         success_serializer: serpyco.Serializer,
+        form_values_in_query: bool = False,
     ) -> None:
         data = fields.get_as_dict()
-        response = self._http_client.request_post(fields.post_to, data)
+        post_to = fields.post_to
+        if form_values_in_query:
+            data_in_query = urlencode(data)
+            if "?" in post_to:
+                post_to = f"{post_to}&{data_in_query}"
+            else:
+                post_to = f"{post_to}?{data_in_query}"
+        response = self._http_client.request_post(post_to, data)
         if response.status_code == 400:
             error_message = "!! " + response.json().get("message")
 
@@ -184,6 +200,10 @@ class Generator:
                 widgets
             )
         elif response.status_code == 200:
+            description = self._serializer.load(response.json())
+            widgets = self.generate_widget(description)
+            self._controller.view.main_content_container.original_widget = widgets
+        elif response.status_code == 201:
             success_callback(success_serializer.load(response.json()))
         else:
             error_message = response.json().get("message")

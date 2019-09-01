@@ -268,7 +268,7 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
-    @hapic.output_body(CharacterModel)
+    @hapic.output_body(CharacterModel, default_http_code=201)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
         character_id = self._character_lib.create(hapic_data.body)
         return self._character_lib.get(character_id)

@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
 
 
 class FillStuffAction(WithStuffAction):
-    input_model = typing.Type[FillStuffWithResourceModel]
+    input_model: typing.Type[FillStuffWithResourceModel] = FillStuffWithResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod

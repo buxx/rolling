@@ -32,7 +32,7 @@ class DrinkStuffModel:
 
 
 class DrinkResourceAction(CharacterAction):
-    input_model = typing.Type[DrinkResourceModel]
+    input_model: typing.Type[DrinkResourceModel] = DrinkResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
@@ -123,9 +123,7 @@ class DrinkResourceAction(CharacterAction):
 
         return character_actions
 
-    def perform(
-        self, character: "CharacterModel", input_: input_model
-    ) -> Description:
+    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
         character_doc = self._character_lib.get_document(character.id)
         accept_resources_ids = [
             rd.id for rd in self._description.properties["accept_resources"]

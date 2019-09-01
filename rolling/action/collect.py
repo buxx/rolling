@@ -4,8 +4,9 @@ import typing
 
 import serpyco
 
-from guilang.description import Description, Type
+from guilang.description import Description
 from guilang.description import Part
+from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.exception import ImpossibleAction
@@ -25,12 +26,14 @@ class CollectResourceModel:
     resource_id: str
     row_i: int = serpyco.number_field(cast_on_load=True)
     col_i: int = serpyco.number_field(cast_on_load=True)
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 # FIXME BS 2019-08-29: Permit collect only some material (like no liquid)
 class CollectResourceAction(CharacterAction):
-    input_model = typing.Type[CollectResourceModel]
+    input_model: typing.Type[CollectResourceModel] = CollectResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
@@ -86,7 +89,9 @@ class CollectResourceAction(CharacterAction):
                 tile_type = self._kernel.tile_maps_by_position[
                     (character.world_row_i, character.world_col_i)
                 ].source.geography.rows[row_i][col_i]
-                query_params = self.input_model(resource_id=resource.id, row_i=row_i, col_i=col_i)
+                query_params = self.input_model(
+                    resource_id=resource.id, row_i=row_i, col_i=col_i
+                )
                 character_actions.append(
                     CharacterActionLink(
                         name=f"Récupérer {resource.name} sur {tile_type.name}",
@@ -126,20 +131,23 @@ class CollectResourceAction(CharacterAction):
             return Description(
                 title=f"Récupérer du {resource.name}",
                 items=[
-                    Part(is_form=True, items=[
-                        Part(
-                            label=f"Quantité (coût: {cost_per_unit} par {unit_name}) ?",
-                            type_=Type.NUMBER,
-                            form_action=get_character_action_url(
-                                character_id=character.id,
-                                action_type=ActionType.COLLECT_RESOURCE,
-                                action_description_id=self._description.id,
-                                query_params=self.input_model_serializer.dump(input_),
-                            ),
-                            name="quantity",
-                            form_values_in_query=True,
-                        )
-                    ]),
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=get_character_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.COLLECT_RESOURCE,
+                            action_description_id=self._description.id,
+                            query_params=self.input_model_serializer.dump(input_),
+                        ),
+                        items=[
+                            Part(
+                                label=f"Quantité (coût: {cost_per_unit} par {unit_name}) ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                            )
+                        ],
+                    )
                 ],
             )
 
