@@ -1,7 +1,7 @@
 # coding: utf-8
 import typing
 
-from rolling.exception import MoveToOtherZoneError
+from rolling.exception import MoveToOtherZoneError, CantMoveBecauseSurcharge
 from rolling.exception import SameZoneError
 from rolling.map.source import ZoneMapSource
 from rolling.model.event import PlayerMoveData
@@ -27,6 +27,9 @@ class ZoneMapConnector:
         self._zone_map_source = zone_map_source
 
     def move_is_possible(self, new_offset: typing.Tuple[int, int]) -> bool:
+        if self._controller.player_character.weight_overcharge or self._controller.player_character.clutter_overcharge:
+            raise CantMoveBecauseSurcharge()
+
         current_player = (
             self._widget.render_engine.display_objects_manager.current_player
         )

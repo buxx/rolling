@@ -49,6 +49,7 @@ class PlayerMoveProcessor(EventProcessor):
     ) -> None:
         # TODO BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
         # TODO BS 2019-01-23: Check given character id is authenticated used (security)
+        # TODO BS 2019-09-05: Check if not in surcharge
 
         character = self._character_lib.get(event.data.character_id)
         self._character_lib.move_on_zone(

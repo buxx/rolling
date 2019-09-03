@@ -38,8 +38,15 @@ class CharacterDocument(Document):
     _effect_ids = Column(Text, default="")
 
     # transport
-    shipped_stuff = relationship(StuffDocument)
-    shipped_resource = relationship(ResourceDocument)
+    shipped_stuff = relationship(
+        StuffDocument, foreign_keys=[StuffDocument.carried_by_id], uselist=True
+    )
+    used_as_bag = relationship(
+        StuffDocument, foreign_keys=[StuffDocument.used_as_bag_by_id], uselist=True
+    )
+    shipped_resource = relationship(
+        ResourceDocument, foreign_keys=[ResourceDocument.carried_by_id], uselist=True
+    )
 
     @property
     def is_alive(self) -> bool:

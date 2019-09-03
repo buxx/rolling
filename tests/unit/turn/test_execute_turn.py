@@ -2,7 +2,6 @@
 import logging
 
 import pytest
-
 from rolling.kernel import Kernel
 from rolling.server.document.character import CharacterDocument
 from rolling.server.lib.character import CharacterLib

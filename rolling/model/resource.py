@@ -21,6 +21,7 @@ class ResourceDescriptionModel:
 @dataclasses.dataclass
 class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     quantity: float
+    stored_in: typing.Optional[int] = None
 
     def get_full_description(self, kernel: "Kernel") -> str:
         return (

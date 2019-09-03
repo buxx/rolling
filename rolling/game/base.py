@@ -38,6 +38,8 @@ class GameConfig:
         self.fill_with_material_ids: typing.List[str] = config_dict[
             "fill_with_material_ids"
         ]
+        self.default_weight_capacity: float = config_dict["default_weight_capacity"]
+        self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel

@@ -53,3 +53,9 @@ class GenerationInfo:
 class ZoneProperties:
     zone_type: typing.Type[MapTileType]
     generation_info: GenerationInfo
+
+
+@dataclasses.dataclass
+class ZoneRequiredPlayerData:
+    weight_overcharge: bool
+    clutter_overcharge: bool

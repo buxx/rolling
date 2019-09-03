@@ -6,6 +6,7 @@ from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.stuff import StuffModel
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
@@ -97,6 +98,10 @@ class CharacterLib:
             feel_thirsty=character_document.feel_thirsty,
             dehydrated=character_document.dehydrated,
             action_points=float(character_document.action_points),
+            bags=[
+                self._stuff_lib.stuff_model_from_doc(bag_doc)
+                for bag_doc in character_document.used_as_bag
+            ]
         )
 
     def get(self, id_: str) -> CharacterModel:
@@ -162,8 +167,8 @@ class CharacterLib:
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
 
-        total_clutter = sum([stuff.clutter for stuff in carried_stuff])
-        total_clutter += sum([r.clutter for r in carried_resources])
+        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter])
+        total_clutter += sum([r.clutter for r in carried_resources if r.clutter])
 
         return CharacterInventoryModel(
             stuff=carried_stuff,
@@ -283,3 +288,6 @@ class CharacterLib:
             EventDocument(character_id=character_id, text=text)
         )
         self._kernel.server_db_session.commit()
+
+    def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
+        return self._stuff_lib.get_carried_and_used_bags(character_id)

@@ -5,12 +5,12 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
 from rolling.exception import CantMoveCharacter
@@ -25,6 +25,7 @@ from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import CHARACTER_ACTION
@@ -102,9 +103,12 @@ class CharacterController(BaseController):
     async def _describe_inventory(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
+        bags = self._character_lib.get_used_bags(hapic_data.path.character_id)
+        bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
 
         for stuff in inventory.stuff:
             name = stuff.name
@@ -136,11 +140,24 @@ class CharacterController(BaseController):
                 )
             )
 
+        max_weight = character.get_weight_capacity(self._kernel)
+        max_clutter = character.get_clutter_capacity(self._kernel)
+
+        weight_overcharge = ""
+        clutter_overcharge = ""
+
+        if inventory.weight > character.get_weight_capacity(self._kernel):
+            weight_overcharge = " !surcharge!"
+
+        if inventory.clutter > character.get_clutter_capacity(self._kernel):
+            clutter_overcharge = " !surcharge!"
+
         return Description(
             title="Inventory",
             items=[
-                Part(text=f"total weight: {inventory.weight}g"),
-                Part(text=f"total clutter: {inventory.clutter}"),
+                Part(text=f"Poids transporté: {inventory.weight}g ({max_weight} max{weight_overcharge})"),
+                Part(text=f"Encombrement: {inventory.clutter} ({max_clutter} max{clutter_overcharge})"),
+                Part(text=f"Sac(s): {bags_string}"),
                 Part(text="Items:"),
                 *stuff_items,
                 Part(text="Resources:"),
@@ -327,6 +344,18 @@ class CharacterController(BaseController):
         )
         return Response(status=204)
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(ZoneRequiredPlayerData)
+    async def get_zone_data(self, request: Request, hapic_data: HapicData) -> ZoneRequiredPlayerData:
+        character = self._character_lib.get(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+
+        return ZoneRequiredPlayerData(
+            weight_overcharge=inventory.weight > character.get_weight_capacity(self._kernel),
+            clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -360,5 +389,6 @@ class CharacterController(BaseController):
                 ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
+                web.get("/character/{character_id}/zone_data", self.get_zone_data)
             ]
         )

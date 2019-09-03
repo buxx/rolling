@@ -29,6 +29,7 @@ from rolling.log import gui_logger
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
+from rolling.model.zone import ZoneRequiredPlayerData
 
 
 class Controller:
@@ -250,6 +251,8 @@ class Controller:
             )
 
         self._display_objects_manager.refresh_indexes()
+        # FIXME BS NOW: Prevent move and display screen about surcharge when try to move
+        self._update_player_with_zone_required_data(self.player_character)
 
         # Prepare zone map
         zone_map = self._zone_lib.get_zone(
@@ -309,3 +312,20 @@ class Controller:
 
     def _continue_zone_action(self, form_values: dict) -> None:
         pass
+
+    def _update_player_with_zone_required_data(self, player_character: CharacterModel) -> None:
+        data: ZoneRequiredPlayerData = self._character_lib.get_zone_required_character_data(player_character.id)
+        self.player_character.weight_overcharge = data.weight_overcharge
+        self.player_character.clutter_overcharge = data.clutter_overcharge
+
+    def display_cant_move_because_surcharge(self) -> None:
+        txt = urwid.Text(
+            u"Vous ne pouvez pas vous déplacer: vous êtes en surcharge, "
+            u"vérifiez votre inventaire"
+        )
+        fill = urwid.Filler(txt, "top")
+
+        self.view.main_content_container.original_widget = fill
+        self.view.right_menu_container.original_widget = GoBackSubMenu(
+            self, self.view, self.view.right_menu_container.original_widget
+        )

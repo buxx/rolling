@@ -6,12 +6,20 @@
   weight = 0.1
   clutter = 1.0
   image = "bottle.jpg"
-  actions = ["FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
+  actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
 [STONE]
   name = "Stone"
   weight = 2000.0
   clutter = 1.0
   image = "stone.jpg"
-  actions = []
+  actions = ["DROP_STUFF"]
   material_type = "SOLID"
+[LITTLE_SKIN_BAG]
+  name = "Petit sac en peau"
+  weight = 1200.0
+  clutter = 0.0
+  clutter_capacity = 5.0
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
+  material_type = "OBJECT"
+  is_bag = true

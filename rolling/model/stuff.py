@@ -13,12 +13,14 @@ from rolling.model.resource import CarriedResourceDescriptionModel
 class StuffProperties:
     id: str
     name: str
+    is_bag: bool = False
     filled_at: typing.Optional[float] = None
     filled_with_resource: typing.Optional[str] = None
     filled_unity: typing.Optional[Unit] = None
     filled_capacity: typing.Optional[float] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
+    clutter_capacity: typing.Optional[float] = None
     image: typing.Optional[str] = None
     descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
         default_factory=list
@@ -33,15 +35,18 @@ class StuffModel:
     id: int
     stuff_id: str
     name: str
-    zone_col_i: int
-    zone_row_i: int
+    zone_col_i: typing.Optional[int] = None
+    zone_row_i: typing.Optional[int] = None
+    is_bag: bool = False
     filled_at: typing.Optional[float] = None
     filled_unity: typing.Optional[Unit] = None
     filled_with_resource: typing.Optional[str] = None
     weight: typing.Optional[float] = None
     clutter: typing.Optional[float] = None
+    clutter_capacity: typing.Optional[float] = None
     image: typing.Optional[str] = None
     carried_by: typing.Optional[str] = None
+    stored_in: typing.Optional[int] = None
 
     def get_full_description(self) -> typing.List[str]:
         descriptions: typing.List[str] = []

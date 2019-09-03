@@ -111,19 +111,20 @@ class StuffLib:
             .filter(sqlalchemy.and_(*filters))
             .all()
         )
-        return [self._stuff_model_from_doc(doc) for doc in stuff_docs]
+        return [self.stuff_model_from_doc(doc) for doc in stuff_docs]
 
     def get_stuff(self, stuff_id: int) -> StuffModel:
         doc = self.get_stuff_doc(stuff_id)
-        return self._stuff_model_from_doc(doc)
+        return self.stuff_model_from_doc(doc)
 
-    def _stuff_model_from_doc(self, doc: StuffDocument) -> StuffModel:
-        stuff_name = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+    def stuff_model_from_doc(self, doc: StuffDocument) -> StuffModel:
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             doc.stuff_id
-        ).name
+        )
         return StuffModel(
             id=doc.id,
-            name=stuff_name,
+            name=stuff_properties.name,
+            is_bag=stuff_properties.is_bag,
             zone_col_i=doc.zone_col_i,
             zone_row_i=doc.zone_row_i,
             filled_at=float(doc.filled_at) if doc.filled_at else None,
@@ -133,6 +134,7 @@ class StuffLib:
             else None,
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
+            clutter_capacity=float(stuff_properties.clutter_capacity) if stuff_properties.is_bag else None,
             image=doc.image if doc.image else None,
             carried_by=doc.carried_by_id,
             stuff_id=doc.stuff_id,
@@ -144,7 +146,7 @@ class StuffLib:
             .filter(StuffDocument.carried_by_id == character_id)
             .all()
         )
-        return [self._stuff_model_from_doc(doc) for doc in carried]
+        return [self.stuff_model_from_doc(doc) for doc in carried]
 
     def get_stuff_doc(self, stuff_id: int) -> StuffDocument:
         return (
@@ -191,3 +193,52 @@ class StuffLib:
 
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()
+
+    def get_carried_and_used_bags(self, character_id: str) -> typing.List[StuffModel]:
+        docs = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(
+                sqlalchemy.and_(
+                    StuffDocument.carried_by_id == character_id,
+                    StuffDocument.used_as_bag_by_id == character_id,
+                )
+            )
+            .all()
+        )
+        return [self.stuff_model_from_doc(doc) for doc in docs]
+
+    def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(StuffDocument.id == stuff_id).one()
+        stuff_doc.used_as_bag_by_id = character_id
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def unset_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(StuffDocument.id == stuff_id).one()
+        stuff_doc.used_as_bag_by_id = None
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def drop(
+        self,
+        stuff_id: int,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        commit: bool = True,
+    ) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        stuff_doc.carried_by_id = None
+        stuff_doc.world_row_i = world_row_i
+        stuff_doc.world_col_i = world_col_i
+        stuff_doc.zone_row_i = zone_row_i
+        stuff_doc.zone_col_i = zone_col_i
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()

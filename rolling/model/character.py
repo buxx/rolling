@@ -6,10 +6,12 @@ import typing
 import serpyco
 
 from rolling.exception import RollingError
+from rolling.model.stuff import StuffModel
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
+    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass
@@ -91,6 +93,11 @@ class CharacterModel:
 
     _display_object = None
 
+    bags: typing.List[StuffModel] = serpyco.field(default_factory=list)
+
+    weight_overcharge: bool = False
+    clutter_overcharge: bool = False
+
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
 
@@ -100,6 +107,12 @@ class CharacterModel:
             raise RollingError("You are trying to use property which is not set")
 
         return self._display_object
+
+    def get_weight_capacity(self, kernel: "Kernel") -> float:
+        return kernel.game.config.default_weight_capacity
+
+    def get_clutter_capacity(self, kernel: "Kernel") -> float:
+        return kernel.game.config.default_clutter_capacity + sum([bag.clutter_capacity for bag in self.bags])
 
 
 @dataclasses.dataclass

@@ -4,7 +4,7 @@ import typing
 import urwid
 from urwid import BOX
 
-from rolling.exception import MoveToOtherZoneError
+from rolling.exception import MoveToOtherZoneError, CantMoveBecauseSurcharge
 from rolling.gui.connector import ZoneMapConnector
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog
@@ -86,6 +86,10 @@ class TileMapWidget(MapWidget):
             # FIXME BS 2019-03-06: Manage (try) change zone case
             self._change_zone_dialog(exc.row_i, exc.col_i)
             return
+        except CantMoveBecauseSurcharge:
+            if not self._first_display:
+                self._controller.display_cant_move_because_surcharge()
+                return
 
         # move player
         self._connector.player_move(new_offset)
@@ -99,8 +103,8 @@ class TileMapWidget(MapWidget):
 
     def _render(self, size, focus=False):
         if self._first_display:
-            self._first_display = False
             self._offset_change((0, 0))  # to compute offset with player position
+            self._first_display = False
 
         return super()._render(size, focus)
 

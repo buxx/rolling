@@ -3,6 +3,8 @@ create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
 fresh_water_resource_id = "FRESH_WATER"
 liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]
+default_weight_capacity = 20000.0
+default_clutter_capacity = 5.0
 
 [materials]
   [materials.LIQUID]
@@ -125,9 +127,20 @@ fill_with_material_ids = ["LIQUID", "SANDY"]
     actions = ["EMPTY_STUFF"]
     cost = 0.0
 
+  [ACTIONS.USE_AS_BAG]
+    actions = ["USE_AS_BAG"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_BAG]
+    actions = ["NOT_USE_AS_BAG"]
+    cost = 0.0
+
   [ACTIONS.COLLECT_RESOURCE]
     actions = ["COLLECT_RESOURCE"]
-    # FIXME BS 2019-08-27: cost per resource + tile type
+    cost = 0.0
+
+  [ACTIONS.DROP_STUFF]
+    actions = ["DROP_STUFF"]
     cost = 0.0
 
 #  [ACTIONS.CRAFT_CAMPFIRE]

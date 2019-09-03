@@ -74,6 +74,10 @@ class CantMoveCharacter(GamePlayError):
     pass
 
 
+class CantMoveBecauseSurcharge(CantMoveCharacter):
+    pass
+
+
 class ClientServerExchangeError(RollingError):
     pass
 

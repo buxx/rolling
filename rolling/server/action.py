@@ -1,11 +1,13 @@
 # coding: utf-8
 import typing
 
+from rolling.action.bag import UseAsBagAction, NotUseAsBagAction
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
+from rolling.action.drop import DropStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
 from rolling.types import ActionType
@@ -24,6 +26,9 @@ class ActionFactory:
         ActionType.DRINK_STUFF: DrinkStuffAction,
         ActionType.DRINK_RESOURCE: DrinkResourceAction,
         ActionType.COLLECT_RESOURCE: CollectResourceAction,
+        ActionType.USE_AS_BAG: UseAsBagAction,
+        ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
+        ActionType.DROP_STUFF: DropStuffAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -34,6 +39,9 @@ class ActionFactory:
             ActionType.FILL_STUFF: FillStuffAction,
             ActionType.EMPTY_STUFF: EmptyStuffAction,
             ActionType.DRINK_STUFF: DrinkStuffAction,
+            ActionType.USE_AS_BAG: UseAsBagAction,
+            ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
+            ActionType.DROP_STUFF: DropStuffAction,
         }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]
