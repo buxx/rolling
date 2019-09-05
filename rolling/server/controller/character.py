@@ -16,7 +16,7 @@ from rolling.action.base import WithStuffAction
 from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
-from rolling.model.character import CharacterActionModel
+from rolling.model.character import CharacterActionModel, GetLookResourceModelModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
@@ -28,7 +28,7 @@ from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
-from rolling.server.controller.url import CHARACTER_ACTION
+from rolling.server.controller.url import CHARACTER_ACTION, DESCRIBE_INVENTORY_RESOURCE_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
@@ -242,6 +242,24 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetLookResourceModelModel)
+    @hapic.output_body(Description)
+    async def _describe_inventory_look_resource(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        resource_description = self._kernel.game.config.resources[hapic_data.path.resource_id]
+        actions = self._character_lib.get_on_resource_actions(
+            character_id=hapic_data.path.character_id, resource_id=hapic_data.path.resource_id
+        )
+        return Description(
+            title=resource_description.name,  # TODO BS 2019-09-05: (add quantity)
+            items=[
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                for action in actions
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_path(CharacterActionModel)
     @hapic.output_body(Description)
     async def character_action(
@@ -386,6 +404,9 @@ class CharacterController(BaseController):
                 web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
                 web.post(
                     DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
+                ),
+                web.post(
+                    DESCRIBE_INVENTORY_RESOURCE_ACTION, self._describe_inventory_look_resource
                 ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),

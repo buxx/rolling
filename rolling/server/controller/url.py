@@ -5,6 +5,9 @@ DESCRIBE_LOOT_AT_STUFF_URL = "/_describe/character/{character_id}/look/{stuff_id
 DESCRIBE_INVENTORY_STUFF_ACTION = (
     "/_describe/character/{character_id}/inventory_look/{stuff_id}"
 )
+DESCRIBE_INVENTORY_RESOURCE_ACTION = (
+    "/_describe/character/{character_id}/resource_look/{resource_id}"
+)
 DESCRIBE_STUFF_FILL_WITH_RESOURCE = (
     "/_describe/character/{character_id}/stuff/{stuff_id}/fill/{resource_id}"
 )

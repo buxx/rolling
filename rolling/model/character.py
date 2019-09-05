@@ -47,6 +47,12 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
+class GetLookResourceModelModel:
+    character_id: str
+    resource_id: str
+
+
+@dataclasses.dataclass
 class FillStuffWithResourceModel:
     resource_id: str = serpyco.field()
 
