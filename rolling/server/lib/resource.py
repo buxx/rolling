@@ -66,6 +66,16 @@ class ResourceLib:
         )
         return [self._carried_resource_model_from_doc(doc) for doc in carried]
 
+    def get_one_carried_by(
+        self, character_id: str, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
+        doc = (
+            self._kernel.server_db_session.query(ResourceDocument)
+            .filter(and_(ResourceDocument.carried_by_id == character_id, ResourceDocument.resource_id == resource_id))
+            .one()
+        )
+        return self._carried_resource_model_from_doc(doc)
+
     def _carried_resource_model_from_doc(
         self, doc: ResourceDocument
     ) -> CarriedResourceDescriptionModel:
