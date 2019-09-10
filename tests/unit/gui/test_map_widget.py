@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import aioresponses as aioresponses
 import pytest
+
 from rolling.client.http.client import HttpClient
 from rolling.client.lib.zone import ZoneLib as ClientZoneLib
 from rolling.gui.controller import Controller

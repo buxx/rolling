@@ -2,6 +2,7 @@
 import os
 
 import pytest
+
 from rolling.gui.map.object import DisplayObjectManager
 from rolling.gui.map.render import TileMapRenderEngine
 from rolling.gui.map.render import WorldMapRenderEngine

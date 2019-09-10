@@ -134,7 +134,9 @@ class StuffLib:
             else None,
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
-            clutter_capacity=float(stuff_properties.clutter_capacity) if stuff_properties.is_bag else None,
+            clutter_capacity=float(stuff_properties.clutter_capacity)
+            if stuff_properties.is_bag
+            else None,
             image=doc.image if doc.image else None,
             carried_by=doc.carried_by_id,
             stuff_id=doc.stuff_id,
@@ -207,16 +209,24 @@ class StuffLib:
         )
         return [self.stuff_model_from_doc(doc) for doc in docs]
 
-    def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(StuffDocument.id == stuff_id).one()
+    def set_as_used_as_bag(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(
+            StuffDocument
+        ).filter(StuffDocument.id == stuff_id).one()
         stuff_doc.used_as_bag_by_id = character_id
         self._kernel.server_db_session.add(stuff_doc)
 
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(StuffDocument.id == stuff_id).one()
+    def unset_as_used_as_bag(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(
+            StuffDocument
+        ).filter(StuffDocument.id == stuff_id).one()
         stuff_doc.used_as_bag_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 

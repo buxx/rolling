@@ -5,13 +5,14 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.action.base import CharacterAction
+from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
@@ -20,19 +21,23 @@ from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
+from rolling.model.character import GetLookResourceModelModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import CHARACTER_ACTION
+from rolling.server.controller.url import DESCRIBE_INVENTORY_RESOURCE_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
@@ -132,11 +137,11 @@ class CharacterController(BaseController):
             resource_items.append(
                 Part(
                     text=f"{resource.get_full_description(self._kernel)}",
-                    # TODO BS 2019-09-02: actions
-                    # is_link=True,
-                    # form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                    #     character_id=hapic_data.path.character_id, stuff_id=stuff.id
-                    # ),
+                    is_link=True,
+                    form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
+                        character_id=hapic_data.path.character_id,
+                        resource_id=resource.id,
+                    ),
                 )
             )
 
@@ -155,8 +160,12 @@ class CharacterController(BaseController):
         return Description(
             title="Inventory",
             items=[
-                Part(text=f"Poids transporté: {inventory.weight}g ({max_weight} max{weight_overcharge})"),
-                Part(text=f"Encombrement: {inventory.clutter} ({max_clutter} max{clutter_overcharge})"),
+                Part(
+                    text=f"Poids transporté: {inventory.weight}g ({max_weight} max{weight_overcharge})"
+                ),
+                Part(
+                    text=f"Encombrement: {inventory.clutter} ({max_clutter} max{clutter_overcharge})"
+                ),
                 Part(text=f"Sac(s): {bags_string}"),
                 Part(text="Items:"),
                 *stuff_items,
@@ -242,6 +251,27 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetLookResourceModelModel)
+    @hapic.output_body(Description)
+    async def _describe_inventory_look_resource(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        resource_description = self._kernel.game.config.resources[
+            hapic_data.path.resource_id
+        ]
+        actions = self._character_lib.get_on_resource_actions(
+            character_id=hapic_data.path.character_id,
+            resource_id=hapic_data.path.resource_id,
+        )
+        return Description(
+            title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
+            items=[
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                for action in actions
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_path(CharacterActionModel)
     @hapic.output_body(Description)
     async def character_action(
@@ -299,6 +329,38 @@ class CharacterController(BaseController):
         return action.perform(character=character_model, stuff=stuff, input_=input_)
 
     @hapic.with_api_doc()
+    @hapic.input_path(WithResourceActionModel)
+    @hapic.output_body(Description)
+    async def with_resource_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        action_type = hapic_data.path.action_type
+        action = typing.cast(
+            WithResourceAction,
+            self._action_factory.create_action(action_type, action_description_id=None),
+        )
+        input_ = action.input_model_serializer.load(dict(request.query))
+        character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
+
+        try:
+            action.check_request_is_possible(
+                character=character_model,
+                resource_id=hapic_data.path.resource_id,
+                input_=input_,
+            )
+        except ImpossibleAction as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+            )
+
+        return action.perform(
+            character=character_model,
+            resource_id=hapic_data.path.resource_id,
+            input_=input_,
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(CharacterModel, default_http_code=201)
     async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
@@ -347,13 +409,17 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ZoneRequiredPlayerData)
-    async def get_zone_data(self, request: Request, hapic_data: HapicData) -> ZoneRequiredPlayerData:
+    async def get_zone_data(
+        self, request: Request, hapic_data: HapicData
+    ) -> ZoneRequiredPlayerData:
         character = self._character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
 
         return ZoneRequiredPlayerData(
-            weight_overcharge=inventory.weight > character.get_weight_capacity(self._kernel),
-            clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
+            weight_overcharge=inventory.weight
+            > character.get_weight_capacity(self._kernel),
+            clutter_overcharge=inventory.clutter
+            > character.get_clutter_capacity(self._kernel),
         )
 
     def bind(self, app: Application) -> None:
@@ -387,8 +453,13 @@ class CharacterController(BaseController):
                 web.post(
                     DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
                 ),
+                web.post(
+                    DESCRIBE_INVENTORY_RESOURCE_ACTION,
+                    self._describe_inventory_look_resource,
+                ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
-                web.get("/character/{character_id}/zone_data", self.get_zone_data)
+                web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
+                web.get("/character/{character_id}/zone_data", self.get_zone_data),
             ]
         )

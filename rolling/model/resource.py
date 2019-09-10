@@ -2,6 +2,7 @@
 import dataclasses
 import typing
 
+from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit
 
 if typing.TYPE_CHECKING:
@@ -16,6 +17,7 @@ class ResourceDescriptionModel:
     material_type: str
     unit: Unit
     clutter: float
+    descriptions: typing.List[ActionDescriptionModel]
 
 
 @dataclasses.dataclass

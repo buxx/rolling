@@ -4,7 +4,8 @@ import typing
 import urwid
 from urwid import BOX
 
-from rolling.exception import MoveToOtherZoneError, CantMoveBecauseSurcharge
+from rolling.exception import CantMoveBecauseSurcharge
+from rolling.exception import MoveToOtherZoneError
 from rolling.gui.connector import ZoneMapConnector
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog

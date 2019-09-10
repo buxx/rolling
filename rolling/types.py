@@ -12,3 +12,4 @@ class ActionType(enum.Enum):
     USE_AS_BAG = "USE_AS_BAG"
     NOT_USE_AS_BAG = "NOT_USE_AS_BAG"
     DROP_STUFF = "DROP_STUFF"
+    DROP_RESOURCE = "DROP_RESOURCE"

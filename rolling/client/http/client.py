@@ -10,7 +10,8 @@ from rolling.exception import ClientServerExchangeError
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import StuffModel
-from rolling.model.zone import ZoneMapModel, ZoneRequiredPlayerData
+from rolling.model.zone import ZoneMapModel
+from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.model.zone import ZoneTileTypeModel
 
 
@@ -24,7 +25,9 @@ class HttpClient:
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
         self._tiles_serializer = serpyco.Serializer(ZoneTileTypeModel, many=True)
         self._gui_description_serializer = serpyco.Serializer(Description)
-        self._zone_required_character_data_serializer = serpyco.Serializer(ZoneRequiredPlayerData)
+        self._zone_required_character_data_serializer = serpyco.Serializer(
+            ZoneRequiredPlayerData
+        )
 
     @property
     def character_serializer(self) -> serpyco.Serializer:
@@ -136,7 +139,9 @@ class HttpClient:
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
-    def get_zone_required_character_data(self, character_id: str) -> ZoneRequiredPlayerData:
+    def get_zone_required_character_data(
+        self, character_id: str
+    ) -> ZoneRequiredPlayerData:
         response = requests.get(
             f"{self._server_address}/character/{character_id}/zone_data"
         )

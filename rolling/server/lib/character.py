@@ -101,7 +101,7 @@ class CharacterLib:
             bags=[
                 self._stuff_lib.stuff_model_from_doc(bag_doc)
                 for bag_doc in character_document.used_as_bag
-            ]
+            ],
         )
 
     def get(self, id_: str) -> CharacterModel:
@@ -228,6 +228,12 @@ class CharacterLib:
             )
 
         return character_actions
+
+    def get_on_resource_actions(
+        self, character_id: str, resource_id: str
+    ) -> typing.List[CharacterActionLink]:
+        character = self.get(character_id)
+        return self._kernel.resource_lib.get_carrying_actions(character, resource_id)
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)

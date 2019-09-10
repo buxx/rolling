@@ -8,6 +8,7 @@ import serpyco
 
 from guilang.description import Description
 from rolling.server.controller.url import CHARACTER_ACTION
+from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
@@ -38,6 +39,17 @@ def get_with_stuff_action_url(
 ) -> str:
     base_url = WITH_STUFF_ACTION.format(
         character_id=character_id, action_type=action_type.value, stuff_id=str(stuff_id)
+    )
+    return f"{base_url}?{urlencode(query_params)}"
+
+
+def get_with_resource_action_url(
+    character_id: str, action_type: ActionType, resource_id: str, query_params: dict
+) -> str:
+    base_url = WITH_RESOURCE_ACTION.format(
+        character_id=character_id,
+        action_type=action_type.value,
+        resource_id=resource_id,
     )
     return f"{base_url}?{urlencode(query_params)}"
 
@@ -93,6 +105,33 @@ class WithStuffAction(Action):
     @abc.abstractmethod
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+    ) -> Description:
+        pass
+
+
+class WithResourceAction(Action):
+    @abc.abstractmethod
+    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+        pass
+
+    @abc.abstractmethod
+    def check_request_is_possible(
+        self, character: "CharacterModel", resource_id: str, input_: typing.Any
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    def get_character_actions(
+        self, character: "CharacterModel", resource_id: str
+    ) -> typing.List[CharacterActionLink]:
+        pass
+
+    def get_cost(self, character: "CharacterModel", resource_id: str) -> float:
+        return self._description.base_cost
+
+    @abc.abstractmethod
+    def perform(
+        self, character: "CharacterModel", resource_id: str, input_: typing.Any
     ) -> Description:
         pass
 

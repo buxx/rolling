@@ -56,6 +56,7 @@ class GameConfig:
         self._action_descriptions: typing.Dict[
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
+        self._fill_resource_actions(config_dict)
 
     @property
     def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
@@ -119,6 +120,7 @@ class GameConfig:
                 material_type=resource_raw["material"],
                 unit=Unit(resource_raw["unit"]),
                 clutter=resource_raw["clutter"],
+                descriptions=[],  # filled after
             )
 
         return resources
@@ -174,6 +176,15 @@ class GameConfig:
                 )
 
         return actions
+
+    def _fill_resource_actions(self, config_raw: dict) -> None:
+        for resource_description in self.resources.values():
+            for action_type_id in config_raw["resources"][resource_description.id][
+                "actions"
+            ]:
+                resource_description.descriptions.extend(
+                    self.actions[ActionType(action_type_id)]
+                )
 
 
 class Game:

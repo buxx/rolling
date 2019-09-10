@@ -1,5 +1,6 @@
 # coding: utf-8
 import pytest
+
 from rolling.kernel import Kernel
 from rolling.model.measure import Unit
 from rolling.server.document.character import CharacterDocument

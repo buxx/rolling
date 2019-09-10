@@ -39,6 +39,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.SALTED_WATER]
     name = "Eau salée"
@@ -46,6 +47,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.RED_WINE]
     name = "Vin rouge"
@@ -53,6 +55,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.WHITE_WINE]
     name = "Vin blanc"
@@ -60,6 +63,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.BEACH_SAND]
     name = "Sable de plage"
@@ -67,6 +71,7 @@ default_clutter_capacity = 5.0
     material="SANDY"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.PEBBLES]
     name = "Galets"
@@ -74,6 +79,7 @@ default_clutter_capacity = 5.0
     material="LITTLE_OBJECT"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.AIR]
     name = "Air"
@@ -81,6 +87,23 @@ default_clutter_capacity = 5.0
     material="GAS"
     unit = "L"
     clutter = 1.0
+    actions = ["DROP_RESOURCE"]
+
+  [resources.DIRT]
+    name = "Terre"
+    weight=1500.0
+    material="SANDY"
+    unit = "L"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE"]
+
+  [resources.WET_DIRT]
+    name = "Terre mouillé"
+    weight=1500.0
+    material="SANDY"
+    unit = "L"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
   [resources.BRANCHES]
     name = "Petit bois"
@@ -88,6 +111,14 @@ default_clutter_capacity = 5.0
     material="MIDDLE_PIECE"
     unit = "M3"
     clutter = 1000.0
+    actions = ["DROP_RESOURCE"]
+
+[resource_mix]
+  [resource_mix.MUD]
+    require = [["FRESH_WATER", "DIRT"], ["SALTED_WATER", "DIRT"]]
+    produce = "WET_DIRT"
+    # TODO BS 2019-09-06: currently, all are L, but if not ? how to do ?
+    coeff = 0.5
 
 [extractions]
   [extractions.FRESH_WATER]
@@ -137,6 +168,10 @@ default_clutter_capacity = 5.0
 
   [ACTIONS.COLLECT_RESOURCE]
     actions = ["COLLECT_RESOURCE"]
+    cost = 0.0
+
+  [ACTIONS.DROP_RESOURCE]
+    actions = ["DROP_RESOURCE"]
     cost = 0.0
 
   [ACTIONS.DROP_STUFF]

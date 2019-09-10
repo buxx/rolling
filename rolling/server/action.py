@@ -1,12 +1,15 @@
 # coding: utf-8
 import typing
 
-from rolling.action.bag import UseAsBagAction, NotUseAsBagAction
+from rolling.action.bag import NotUseAsBagAction
+from rolling.action.bag import UseAsBagAction
 from rolling.action.base import CharacterAction
+from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
+from rolling.action.drop import DropResourceAction
 from rolling.action.drop import DropStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
@@ -29,6 +32,7 @@ class ActionFactory:
         ActionType.USE_AS_BAG: UseAsBagAction,
         ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
         ActionType.DROP_STUFF: DropStuffAction,
+        ActionType.DROP_RESOURCE: DropResourceAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -43,6 +47,9 @@ class ActionFactory:
             ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
             ActionType.DROP_STUFF: DropStuffAction,
         }
+        self._with_resource_actions: typing.Dict[
+            ActionType, typing.Type[WithResourceAction]
+        ] = {ActionType.DROP_RESOURCE: DropResourceAction}
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]
         ] = {
@@ -54,6 +61,13 @@ class ActionFactory:
         self, action_description: "ActionDescriptionModel"
     ) -> WithStuffAction:
         return self._with_stuff_actions[action_description.action_type](
+            self._kernel, description=action_description
+        )
+
+    def get_with_resource_action(
+        self, action_description: "ActionDescriptionModel"
+    ) -> WithResourceAction:
+        return self._with_resource_actions[action_description.action_type](
             self._kernel, description=action_description
         )
 
@@ -82,6 +96,7 @@ class ActionFactory:
     ) -> typing.Union[CharacterAction, WithStuffAction]:
         if (
             action_type in self._with_stuff_actions
+            or action_type in self._with_resource_actions
             or action_type in self._character_actions
         ):
             for action_description in self._kernel.game.config.actions[action_type]:

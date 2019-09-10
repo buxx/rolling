@@ -313,8 +313,12 @@ class Controller:
     def _continue_zone_action(self, form_values: dict) -> None:
         pass
 
-    def _update_player_with_zone_required_data(self, player_character: CharacterModel) -> None:
-        data: ZoneRequiredPlayerData = self._character_lib.get_zone_required_character_data(player_character.id)
+    def _update_player_with_zone_required_data(
+        self, player_character: CharacterModel
+    ) -> None:
+        data: ZoneRequiredPlayerData = self._character_lib.get_zone_required_character_data(
+            player_character.id
+        )
         self.player_character.weight_overcharge = data.weight_overcharge
         self.player_character.clutter_overcharge = data.clutter_overcharge
 

@@ -5,7 +5,8 @@ from rolling.client.http.client import HttpClient
 from rolling.kernel import Kernel
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
-from rolling.model.zone import ZoneMapModel, ZoneRequiredPlayerData
+from rolling.model.zone import ZoneMapModel
+from rolling.model.zone import ZoneRequiredPlayerData
 
 
 class CharacterLib:
@@ -59,5 +60,7 @@ class CharacterLib:
         elif disp_char.col_i == 0:
             disp_char.col_i = to_zone_source.geography.width - 1
 
-    def get_zone_required_character_data(self, character_id: str) -> ZoneRequiredPlayerData:
+    def get_zone_required_character_data(
+        self, character_id: str
+    ) -> ZoneRequiredPlayerData:
         return self._client.get_zone_required_character_data(character_id)

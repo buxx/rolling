@@ -47,6 +47,12 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
+class GetLookResourceModelModel:
+    character_id: str
+    resource_id: str
+
+
+@dataclasses.dataclass
 class FillStuffWithResourceModel:
     resource_id: str = serpyco.field()
 
@@ -61,7 +67,15 @@ class CharacterActionModel:
 @dataclasses.dataclass
 class WithStuffActionModel:
     character_id: str
+    # FIXME BS 2019-09-09: should be int no ?
     stuff_id: str
+    action_type: ActionType
+
+
+@dataclasses.dataclass
+class WithResourceActionModel:
+    character_id: str
+    resource_id: str
     action_type: ActionType
 
 
@@ -112,7 +126,9 @@ class CharacterModel:
         return kernel.game.config.default_weight_capacity
 
     def get_clutter_capacity(self, kernel: "Kernel") -> float:
-        return kernel.game.config.default_clutter_capacity + sum([bag.clutter_capacity for bag in self.bags])
+        return kernel.game.config.default_clutter_capacity + sum(
+            [bag.clutter_capacity for bag in self.bags]
+        )
 
 
 @dataclasses.dataclass
