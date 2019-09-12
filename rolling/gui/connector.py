@@ -40,12 +40,12 @@ class ZoneMapConnector:
         new_row_i = current_player.row_i - new_offset[0]
         new_col_i = current_player.col_i - new_offset[1]
 
-        # FIXME BS 2019-03-06: Move must be changed into change zone on corner to
         if (
             new_col_i < 0
             or new_col_i > self._zone_map_source.geography.width
             or new_row_i < 0
             or new_row_i > self._zone_map_source.geography.height
+            or (new_col_i >= right_col_i and new_row_i < self._zone_map_source.geography.height // 2)
         ):
             raise MoveToOtherZoneError(new_row_i, new_col_i)
 
