@@ -13,6 +13,7 @@ from rolling.action.drop import DropResourceAction
 from rolling.action.drop import DropStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
+from rolling.action.mix import MixResourcesAction
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -33,6 +34,7 @@ class ActionFactory:
         ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
         ActionType.DROP_STUFF: DropStuffAction,
         ActionType.DROP_RESOURCE: DropResourceAction,
+        ActionType.MIX_RESOURCES: MixResourcesAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -49,7 +51,10 @@ class ActionFactory:
         }
         self._with_resource_actions: typing.Dict[
             ActionType, typing.Type[WithResourceAction]
-        ] = {ActionType.DROP_RESOURCE: DropResourceAction}
+        ] = {
+            ActionType.DROP_RESOURCE: DropResourceAction,
+            ActionType.MIX_RESOURCES: MixResourcesAction,
+        }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]
         ] = {

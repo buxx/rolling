@@ -14,6 +14,8 @@ from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.material import MaterialDescriptionModel
 from rolling.model.measure import Unit
+from rolling.model.mix import RequiredResourceForMix
+from rolling.model.mix import ResourceMixDescription
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
@@ -56,6 +58,9 @@ class GameConfig:
         self._action_descriptions: typing.Dict[
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
+        self._resource_mixs: typing.Dict[
+            str, ResourceMixDescription
+        ] = self._create_resource_mixs(config_dict)
         self._fill_resource_actions(config_dict)
 
     @property
@@ -69,6 +74,10 @@ class GameConfig:
     @property
     def resources(self) -> typing.Dict[str, ResourceDescriptionModel]:
         return self._resources
+
+    @property
+    def resource_mixs(self) -> typing.Dict[str, ResourceMixDescription]:
+        return self._resource_mixs
 
     @property
     def extractions(
@@ -124,6 +133,30 @@ class GameConfig:
             )
 
         return resources
+
+    def _create_resource_mixs(
+        self, config_dict: dict
+    ) -> typing.Dict[str, ResourceMixDescription]:
+        resource_mixs: typing.Dict[str, ResourceMixDescription] = {}
+
+        for mix_id, mix_raw in config_dict.get("resource_mix", {}).items():
+            required_resources: typing.List[RequiredResourceForMix] = []
+            for required_resource_raw in mix_raw["require"]:
+                required_resources.append(
+                    RequiredResourceForMix(
+                        resource=self.resources[required_resource_raw["resource_id"]],
+                        coeff=required_resource_raw["coeff"],
+                    )
+                )
+
+            resource_mixs[mix_id] = ResourceMixDescription(
+                id=mix_id,
+                required_resources=required_resources,
+                produce_resource=self.resources[mix_raw["produce"]],
+                cost=mix_raw["cost"],
+            )
+
+        return resource_mixs
 
     def _create_extractions(
         self, config_dict: dict
@@ -185,6 +218,26 @@ class GameConfig:
                 resource_description.descriptions.extend(
                     self.actions[ActionType(action_type_id)]
                 )
+
+    def get_resource_mixs_with(
+        self, required_resource_ids: typing.List[str]
+    ) -> typing.List[ResourceMixDescription]:
+        resource_mixs: typing.List[ResourceMixDescription] = []
+
+        for resource_mix_description in self.resource_mixs.values():
+            all_in = True
+
+            for required_resource_id in required_resource_ids:
+                if (
+                    required_resource_id
+                    not in resource_mix_description.required_resources_ids
+                ):
+                    all_in = False
+
+            if all_in:
+                resource_mixs.append(resource_mix_description)
+
+        return resource_mixs
 
 
 class Game:

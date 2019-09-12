@@ -39,7 +39,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.SALTED_WATER]
     name = "Eau salée"
@@ -47,7 +47,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.RED_WINE]
     name = "Vin rouge"
@@ -55,7 +55,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.WHITE_WINE]
     name = "Vin blanc"
@@ -63,7 +63,7 @@ default_clutter_capacity = 5.0
     material="LIQUID"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.BEACH_SAND]
     name = "Sable de plage"
@@ -71,7 +71,7 @@ default_clutter_capacity = 5.0
     material="SANDY"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.PEBBLES]
     name = "Galets"
@@ -79,7 +79,7 @@ default_clutter_capacity = 5.0
     material="LITTLE_OBJECT"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.AIR]
     name = "Air"
@@ -87,7 +87,7 @@ default_clutter_capacity = 5.0
     material="GAS"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.DIRT]
     name = "Terre"
@@ -95,15 +95,15 @@ default_clutter_capacity = 5.0
     material="SANDY"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.WET_DIRT]
     name = "Terre mouillé"
-    weight=1500.0
+    weight=2000.0
     material="SANDY"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
   [resources.BRANCHES]
     name = "Petit bois"
@@ -111,14 +111,19 @@ default_clutter_capacity = 5.0
     material="MIDDLE_PIECE"
     unit = "M3"
     clutter = 1000.0
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
 [resource_mix]
-  [resource_mix.MUD]
-    require = [["FRESH_WATER", "DIRT"], ["SALTED_WATER", "DIRT"]]
+  [resource_mix.WET_DIRT_WITH_FRESH_WATER]
+    require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
     produce = "WET_DIRT"
     # TODO BS 2019-09-06: currently, all are L, but if not ? how to do ?
-    coeff = 0.5
+    cost = 0.05
+  [resource_mix.WET_DIRT_WITH_SALTED_WATER]
+    require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
+    produce = "WET_DIRT"
+    # TODO BS 2019-09-06: currently, all are L, but if not ? how to do ?
+    cost = 0.05
 
 [extractions]
   [extractions.FRESH_WATER]
@@ -136,6 +141,18 @@ default_clutter_capacity = 5.0
   [extractions.DEAD_TREE]
     tile="DEAD_TREE"
     resources=[{resource_id="BRANCHES", cost_per_unit=2.0, default_quantity=0.04}]
+
+  [extractions.DIRT]
+    tile="DIRT"
+    resources=[{resource_id="DIRT", cost_per_unit=0.1, default_quantity=1.0}]
+
+  [extractions.HIGH_GRASS]
+    tile="HIGH_GRASS"
+    resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
+
+  [extractions.SHORT_GRASS]
+    tile="SHORT_GRASS"
+    resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
 
 [ACTIONS]
   [ACTIONS.DRINK_FRESH_WATER]
@@ -171,7 +188,7 @@ default_clutter_capacity = 5.0
     cost = 0.0
 
   [ACTIONS.DROP_RESOURCE]
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
     cost = 0.0
 
   [ACTIONS.DROP_STUFF]

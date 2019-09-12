@@ -152,7 +152,7 @@ class CollectResourceAction(CharacterAction):
             )
 
         self._kernel.resource_lib.add_resource_to_character(
-            character_doc, input_.resource_id, input_.quantity
+            character_doc.id, input_.resource_id, input_.quantity
         )
 
         return Description(

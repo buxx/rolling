@@ -8,7 +8,6 @@ from rolling.model.character import CharacterModel
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.action import ActionFactory
-from rolling.server.document.character import CharacterDocument
 from rolling.server.document.resource import ResourceDocument
 from rolling.server.link import CharacterActionLink
 
@@ -23,11 +22,11 @@ class ResourceLib:
 
     def add_resource_to_character(
         self,
-        character_doc: CharacterDocument,
+        character_id: str,
         resource_id: str,
         quantity: float,
         commit: bool = True,
-    ) -> None:
+    ) -> CarriedResourceDescriptionModel:
         resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
             resource_id
         ]
@@ -36,7 +35,7 @@ class ResourceLib:
                 self._kernel.server_db_session.query(ResourceDocument)
                 .filter(
                     and_(
-                        ResourceDocument.carried_by_id == character_doc.id,
+                        ResourceDocument.carried_by_id == character_id,
                         ResourceDocument.resource_id == resource_id,
                     )
                 )
@@ -45,7 +44,7 @@ class ResourceLib:
         except NoResultFound:
             resource = ResourceDocument(
                 resource_id=resource_id,
-                carried_by_id=character_doc.id,
+                carried_by_id=character_id,
                 quantity=0.0,
                 unit=resource_description.unit.value,
             )
@@ -56,6 +55,8 @@ class ResourceLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+        return self._carried_resource_model_from_doc(resource)
+
     def get_carried_by(
         self, character_id: str
     ) -> typing.List[CarriedResourceDescriptionModel]:
@@ -65,6 +66,16 @@ class ResourceLib:
             .all()
         )
         return [self._carried_resource_model_from_doc(doc) for doc in carried]
+
+    def get_one_carried_by(
+        self, character_id: str, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
+        doc = (
+            self._kernel.server_db_session.query(ResourceDocument)
+            .filter(and_(ResourceDocument.carried_by_id == character_id, ResourceDocument.resource_id == resource_id))
+            .one()
+        )
+        return self._carried_resource_model_from_doc(doc)
 
     def _carried_resource_model_from_doc(
         self, doc: ResourceDocument
@@ -106,18 +117,13 @@ class ResourceLib:
 
         return True
 
-    def drop(
+    def reduce(
         self,
         character_id: str,
         resource_id: str,
         quantity: float,
-        world_row_i: int,
-        world_col_i: int,
-        zone_row_i: int,
-        zone_col_i: int,
         commit: bool = True,
     ) -> None:
-        # TODO BS 2019-09-09: add resource on the ground
         resource_doc = (
             self._kernel.server_db_session.query(ResourceDocument)
             .filter(
@@ -137,6 +143,20 @@ class ResourceLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def drop(
+        self,
+        character_id: str,
+        resource_id: str,
+        quantity: float,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        commit: bool = True,
+    ) -> None:
+        self.reduce(character_id, resource_id, quantity, commit=commit)
+        # TODO BS 2019-09-09: add resource on the ground
 
     def get_carrying_actions(
         self, character: CharacterModel, resource_id: str
