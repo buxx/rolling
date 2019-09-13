@@ -5,6 +5,7 @@ from rolling.exception import MoveToOtherZoneError
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
 from rolling.model.meta import TransportType
+from rolling.util import get_corner
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -28,7 +29,13 @@ class Physics:
             tile_type = self._zone_map_source.geography.rows[row_i][col_i]
         except IndexError:
             # IndexError means outside map
-            raise MoveToOtherZoneError(row_i, col_i)
+            corner = get_corner(
+                self._zone_map_source.geography.width,
+                self._zone_map_source.geography.height,
+                new_row_i=row_i,
+                new_col_i=col_i,
+            )
+            raise MoveToOtherZoneError(corner)
 
         tile_model = self._controller.zone_lib.get_zone_tile_type_model(tile_type)
 

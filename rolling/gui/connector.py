@@ -9,6 +9,7 @@ from rolling.model.event import PlayerMoveData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.physics import Physics
+from rolling.util import get_corner, CornerEnum
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -40,14 +41,21 @@ class ZoneMapConnector:
         new_row_i = current_player.row_i - new_offset[0]
         new_col_i = current_player.col_i - new_offset[1]
 
-        # FIXME BS 2019-03-06: Move must be changed into change zone on corner to
-        if (
-            new_col_i < 0
-            or new_col_i > self._zone_map_source.geography.width
-            or new_row_i < 0
-            or new_row_i > self._zone_map_source.geography.height
-        ):
-            raise MoveToOtherZoneError(new_row_i, new_col_i)
+        # TODO BS 2019-09-13: Ther eis a strange bug, there is 1 col decal
+        if new_col_i > self._zone_map_source.geography.width // 2:
+            op = -1
+        else:
+            op = +1
+
+        corner = get_corner(
+            self._zone_map_source.geography.width,
+            self._zone_map_source.geography.height,
+            new_row_i=new_row_i,
+            new_col_i=new_col_i + op,
+        )
+
+        if corner:
+            raise MoveToOtherZoneError(corner)
 
         return self._physics.player_can_move_at(current_player, (new_row_i, new_col_i))
 
@@ -73,24 +81,31 @@ class ZoneMapConnector:
             )
         )
 
-    def get_zone_coordinates(self, row_i: int, col_i: int) -> typing.Tuple[int, int]:
+    def get_zone_coordinates(self, corner: CornerEnum) -> typing.Tuple[int, int]:
         player = self._controller.player_character
 
-        # top
-        if row_i < 0:
+        if corner.TOP_LEFT:
+            return player.world_row_i - 1, player.world_col_i - 1
+
+        if corner.TOP:
             return player.world_row_i - 1, player.world_col_i
 
-        # left
-        if col_i < 0:
-            return player.world_row_i, player.world_col_i - 1
+        if corner.TOP_RIGHT:
+            return player.world_row_i - 1, player.world_col_i + 1
 
-        # right
-        if col_i >= self._zone_map_source.geography.width:
+        if corner.RIGHT:
             return player.world_row_i, player.world_col_i + 1
 
-        # bottom
-        if row_i >= self._zone_map_source.geography.height:
+        if corner.BOTTOM_RIGHT:
+            return player.world_row_i + 1, player.world_col_i - 1
+
+        if corner.BOTTOM:
             return player.world_row_i + 1, player.world_col_i
 
-        # FIXME BS 2019-03-08: Must manage top left, top right, bottom right, bottom left
-        raise SameZoneError()
+        if corner.BOTTOM_LEFT:
+            return player.world_row_i + 1, player.world_col_i - 1
+
+        if corner.LEFT:
+            return player.world_row_i, player.world_col_i - 1
+
+        raise NotImplementedError("should not be here :s")

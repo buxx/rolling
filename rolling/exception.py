@@ -1,5 +1,10 @@
 # coding: utf-8
+import typing
+
 from rolling.model.event import ZoneEvent
+
+if typing.TYPE_CHECKING:
+    from rolling.util import CornerEnum
 
 
 class RollingError(Exception):
@@ -45,17 +50,12 @@ class ComponentNotPrepared(RollingError):
 
 
 class MoveToOtherZoneError(RollingError):
-    def __init__(self, row_i: int, col_i: int) -> None:
-        self._row_i = row_i
-        self._col_i = col_i
+    def __init__(self, corner: "CornerEnum") -> None:
+        self._corner = corner
 
     @property
-    def row_i(self) -> int:
-        return self._row_i
-
-    @property
-    def col_i(self) -> int:
-        return self._col_i
+    def corner(self) -> "CornerEnum":
+        return self._corner
 
 
 class SameZoneError(RollingError):

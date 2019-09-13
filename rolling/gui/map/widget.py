@@ -10,6 +10,7 @@ from rolling.gui.connector import ZoneMapConnector
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog
 from rolling.map.source import ZoneMapSource
+from rolling.util import CornerEnum
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller
@@ -85,7 +86,7 @@ class TileMapWidget(MapWidget):
                 return
         except MoveToOtherZoneError as exc:
             # FIXME BS 2019-03-06: Manage (try) change zone case
-            self._change_zone_dialog(exc.row_i, exc.col_i)
+            self._change_zone_dialog(exc.corner)
             return
         except CantMoveBecauseSurcharge:
             if not self._first_display:
@@ -109,9 +110,11 @@ class TileMapWidget(MapWidget):
 
         return super()._render(size, focus)
 
-    def _change_zone_dialog(self, row_i: int, col_i: int) -> None:
+    def _change_zone_dialog(self, corner: CornerEnum) -> None:
         zone_map_widget = self._controller._view.main_content_container.original_widget
-        world_row_i, world_col_i = self._connector.get_zone_coordinates(row_i, col_i)
+        world_row_i, world_col_i = self._connector.get_zone_coordinates(corner)
+
+        # FIXME BS 2019-09-13: Simply say not possible if not existing zone ...
 
         self._controller._view.main_content_container.original_widget = ChangeZoneDialog(
             kernel=self._controller.kernel,
