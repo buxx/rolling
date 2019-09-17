@@ -208,7 +208,8 @@ class Generator:
             error_message = response.json().get("message")
             gui_logger.error(error_message)
             raise ClientServerExchangeError(
-                f"Error when communicate with server: {error_message}"
+                f"Error when communicate with server: {error_message}",
+                response=response,
             )
 
     def follow_link(self, url: str) -> None:
@@ -233,5 +234,6 @@ class Generator:
             error_detail = response.json()["details"].get("traceback")
             gui_logger.error(error_message)
             raise ClientServerExchangeError(
-                f"Error when communicate with server: {error_message} ({error_detail})"
+                f"Error when communicate with server: {error_message} ({error_detail})",
+                response=response,
             )

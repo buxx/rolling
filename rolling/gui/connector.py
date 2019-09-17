@@ -42,17 +42,11 @@ class ZoneMapConnector:
         new_row_i = current_player.row_i - new_offset[0]
         new_col_i = current_player.col_i - new_offset[1]
 
-        # TODO BS 2019-09-13: Ther eis a strange bug, there is 1 col decal
-        if new_col_i > self._zone_map_source.geography.width // 2:
-            op = -1
-        else:
-            op = +1
-
         corner = get_corner(
             self._zone_map_source.geography.width,
             self._zone_map_source.geography.height,
             new_row_i=new_row_i,
-            new_col_i=new_col_i + op,
+            new_col_i=new_col_i,
         )
 
         if corner:
@@ -85,28 +79,28 @@ class ZoneMapConnector:
     def get_zone_coordinates(self, corner: CornerEnum) -> typing.Tuple[int, int]:
         player = self._controller.player_character
 
-        if corner.TOP_LEFT:
+        if corner == corner.TOP_LEFT:
             return player.world_row_i - 1, player.world_col_i - 1
 
-        if corner.TOP:
+        if corner == corner.TOP:
             return player.world_row_i - 1, player.world_col_i
 
-        if corner.TOP_RIGHT:
+        if corner == corner.TOP_RIGHT:
             return player.world_row_i - 1, player.world_col_i + 1
 
-        if corner.RIGHT:
+        if corner == corner.RIGHT:
             return player.world_row_i, player.world_col_i + 1
 
-        if corner.BOTTOM_RIGHT:
+        if corner == corner.BOTTOM_RIGHT:
             return player.world_row_i + 1, player.world_col_i - 1
 
-        if corner.BOTTOM:
+        if corner == corner.BOTTOM:
             return player.world_row_i + 1, player.world_col_i
 
-        if corner.BOTTOM_LEFT:
+        if corner == corner.BOTTOM_LEFT:
             return player.world_row_i + 1, player.world_col_i - 1
 
-        if corner.LEFT:
+        if corner == corner.LEFT:
             return player.world_row_i, player.world_col_i - 1
 
         raise NotImplementedError("should not be here :s")

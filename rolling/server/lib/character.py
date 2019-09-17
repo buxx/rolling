@@ -304,7 +304,7 @@ class CharacterLib:
         self, character_id: str, cost: float, commit: bool = True
     ) -> None:
         character_doc = self.get_document(character_id)
-        character_doc = float(character_doc.action_points) - cost
+        character_doc.action_points = float(character_doc.action_points) - cost
         self._kernel.server_db_session.add(character_doc)
 
         if commit:
