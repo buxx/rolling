@@ -53,7 +53,7 @@ class GoBackSubMenu(BaseSubMenu):
 
 
 class ZoneMenu(BaseMenu):
-    title = "Movement"
+    title = "Mouvements libres"
 
     def _get_texts(self) -> typing.List[str]:
         return self._controller.client.get_zone_resume_texts(
@@ -62,12 +62,12 @@ class ZoneMenu(BaseMenu):
 
     def _get_menu_buttons(self):
         return [
-            ("World map", self._display_world_map_callback),
-            ("Events", self._display_events),
+            ("Carte du monde", self._display_world_map_callback),
+            ("Événements", self._display_events),
             ("Actions", self._display_actions_on_place),
-            ("Character card", self._display_character_card),
-            ("Inventory", self._display_inventory),
-            ("Disconnect", self._go_back_root_callback),
+            ("Fiche", self._display_character_card),
+            ("Inventairey", self._display_inventory),
+            ("Se déconnecter", self._go_back_root_callback),
         ]
 
     def _display_character_card(self, *args, **kwargs):
