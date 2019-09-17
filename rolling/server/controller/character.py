@@ -393,10 +393,29 @@ class CharacterController(BaseController):
     @hapic.output_body(EmptyModel)
     async def move(self, request: Request, hapic_data: HapicData) -> Response:
         character = self._character_lib.get(hapic_data.path.character_id)
+        to_world_row = hapic_data.query.to_world_row
+        to_world_col = hapic_data.query.to_world_col
+        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][
+            to_world_col
+        ]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(
+            move_to_zone_type
+        )
+
+        if zone_properties.move_cost > character.action_points:
+            message = (
+                f"Ce déplacement coute {zone_properties.move_cost} points d'action mais "
+                f"{character.name} n'en possède que {character.action_points}"
+            )
+            return web.json_response({"message": message}, status=400)
+
         self._character_lib.move(
             character,
             to_world_row=hapic_data.query.to_world_row,
             to_world_col=hapic_data.query.to_world_col,
+        )
+        self._character_lib.reduce_action_points(
+            character.id, zone_properties.move_cost
         )
         return Response(status=204)
 

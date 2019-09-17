@@ -1,6 +1,8 @@
 # coding: utf-8
 import typing
 
+from requests import Response
+
 from rolling.model.event import ZoneEvent
 
 if typing.TYPE_CHECKING:
@@ -79,7 +81,9 @@ class CantMoveBecauseSurcharge(CantMoveCharacter):
 
 
 class ClientServerExchangeError(RollingError):
-    pass
+    def __init__(self, message: str, response: Response) -> None:
+        super().__init__(message)
+        self.response = response
 
 
 class ConfigurationError(RollingError):
@@ -103,4 +107,8 @@ class ImpossibleAction(GamePlayError):
 
 
 class NoMetaLine(SourceLoadError):
+    pass
+
+
+class CantChangeZone(RollingError):
     pass

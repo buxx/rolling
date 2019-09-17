@@ -1,10 +1,10 @@
 # coding: utf-8
 import typing
 
+from rolling.exception import RollingError
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.extraction import ExtractableDescriptionModel
-from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.world import Resource
 from rolling.model.world import World
 from rolling.model.zone import ZoneProperties
@@ -23,6 +23,12 @@ class WorldManager:
     @property
     def world(self) -> World:
         return self._world
+
+    def get_zone_properties(self, zone_type: ZoneMapTileType) -> ZoneProperties:
+        for zone_properties in self.world.zones_properties:
+            if zone_properties.zone_type == zone_type:
+                return zone_properties
+        raise RollingError(f"No zone properties for zone {zone_type}")
 
     def get_generation_stuff_by_zone_type(
         self

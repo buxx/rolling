@@ -6,6 +6,7 @@ from requests import Response
 import serpyco
 
 from guilang.description import Description
+from rolling.exception import CantChangeZone
 from rolling.exception import ClientServerExchangeError
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -36,7 +37,8 @@ class HttpClient:
     def _check_response(self, response: Response) -> None:
         if response.status_code not in (200, 204):
             raise ClientServerExchangeError(
-                f"Server response is {response.status_code},{response.json()}"
+                f"Server response is {response.status_code},{response.json()}",
+                response=response,
             )
 
     def request_post(self, path: str, data: dict = None) -> Response:
@@ -87,12 +89,18 @@ class HttpClient:
     def move_character(
         self, character_id: str, to_world_row: int, to_world_col: int
     ) -> None:
-        self._check_response(
-            requests.put(
-                f"{self._server_address}/character/{character_id}/move"
-                f"?to_world_row={to_world_row}&to_world_col={to_world_col}"
+        try:
+            self._check_response(
+                requests.put(
+                    f"{self._server_address}/character/{character_id}/move"
+                    f"?to_world_row={to_world_row}&to_world_col={to_world_col}"
+                )
             )
-        )
+        except ClientServerExchangeError as exc:
+            if exc.response.status_code == 400:
+                response_json = exc.response.json()
+                raise CantChangeZone(response_json["message"])
+            raise exc
 
     def get_create_character_description(self) -> Description:
         response = requests.get(f"{self._server_address}/_describe/character/create")

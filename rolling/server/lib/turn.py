@@ -31,6 +31,7 @@ class TurnLib:
         self._generate_stuff()
         self._provide_for_natural_needs()
         self._increment_age()
+        self._reset_action_points()
 
     def _generate_stuff(self) -> None:
         self._logger.info("Generate stuff")
@@ -209,3 +210,14 @@ class TurnLib:
             )
             character_document.alive_since += 1
             self._character_lib.update(character_document)
+
+    def _reset_action_points(self) -> None:
+        character_ids = list(self._character_lib.get_all_character_ids())
+        self._logger.info(f"Reset action points of {len(character_ids)} characters")
+
+        for character_id in character_ids:
+            character_doc = self._kernel.character_lib.get_document(character_id)
+            character_doc.action_points = 24.0
+            self._kernel.server_db_session.add(character_doc)
+
+        self._kernel.server_db_session.commit()

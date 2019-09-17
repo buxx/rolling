@@ -287,33 +287,36 @@ class Game:
         zones_properties: typing.List[ZoneProperties] = []
 
         for zone_type_str, zone_data in raw_world.get("ZONE_PROPERTIES", {}).items():
+            move_cost: float = zone_data["move_cost"]
+            generation_info = self._get_generation_info(zone_data)
 
-            # Stuff generation part
-            generation_data = zone_data["GENERATION"]
-            count: int = generation_data["count"]
-
-            stuffs: typing.List[ZoneGenerationStuff] = []
-            for stuff_id, stuff_generation_info in generation_data.get(
-                "STUFF", {}
-            ).items():
-                probability = stuff_generation_info["probability"]
-                meta = dict(
-                    [
-                        item
-                        for item in stuff_generation_info.items()
-                        if item[0] not in ["probability"]
-                    ]
-                )
-                stuff = self._stuff.get_stuff_properties_by_id(stuff_id)
-                stuffs.append(
-                    ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta)
-                )
-
-            generation_info = GenerationInfo(count=count, stuffs=stuffs)
             zones_properties.append(
                 ZoneProperties(
-                    WorldMapTileType.get_for_id(zone_type_str), generation_info
+                    WorldMapTileType.get_for_id(zone_type_str),
+                    generation_info=generation_info,
+                    move_cost=move_cost,
                 )
             )
 
         return WorldManager(self._kernel, World(zones_properties=zones_properties))
+
+    def _get_generation_info(self, zone_data: dict) -> GenerationInfo:
+        generation_data = zone_data["GENERATION"]
+        count: int = generation_data["count"]
+
+        stuffs: typing.List[ZoneGenerationStuff] = []
+        for stuff_id, stuff_generation_info in generation_data.get("STUFF", {}).items():
+            probability = stuff_generation_info["probability"]
+            meta = dict(
+                [
+                    item
+                    for item in stuff_generation_info.items()
+                    if item[0] not in ["probability"]
+                ]
+            )
+            stuff = self._stuff.get_stuff_properties_by_id(stuff_id)
+            stuffs.append(
+                ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta)
+            )
+
+        return GenerationInfo(count=count, stuffs=stuffs)

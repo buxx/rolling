@@ -1,5 +1,7 @@
 [ZONE_PROPERTIES]
   [ZONE_PROPERTIES.BEACH]
+    move_cost = 4.0
+
     [ZONE_PROPERTIES.BEACH.GENERATION]
       count = 15
 
@@ -8,10 +10,37 @@
           probability = 100.0
           filled_at = 0.0
           # TODO BS 2019-07-04: add filled_with_resource, and change structure to permit multipler same stuff id
+
   [ZONE_PROPERTIES.PLAIN]
+    move_cost = 4.0
+
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 15
 
       [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF]
         [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF.STONE]
           probability = 100.0
+
+  [ZONE_PROPERTIES.SEA]
+    move_cost = 6.0
+
+    [ZONE_PROPERTIES.SEA.GENERATION]
+      count = 0
+
+  [ZONE_PROPERTIES.MOUNTAIN]
+    move_cost = 8.0
+
+    [ZONE_PROPERTIES.MOUNTAIN.GENERATION]
+      count = 0
+
+  [ZONE_PROPERTIES.JUNGLE]
+    move_cost = 8.0
+
+    [ZONE_PROPERTIES.JUNGLE.GENERATION]
+      count = 0
+
+  [ZONE_PROPERTIES.HILL]
+    move_cost = 5.0
+
+    [ZONE_PROPERTIES.HILL.GENERATION]
+      count = 0

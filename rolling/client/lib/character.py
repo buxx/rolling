@@ -2,6 +2,8 @@
 import typing
 
 from rolling.client.http.client import HttpClient
+from rolling.exception import CantChangeZone
+from rolling.exception import ClientServerExchangeError
 from rolling.kernel import Kernel
 from rolling.map.source import ZoneMapSource
 from rolling.model.character import CharacterModel
@@ -40,6 +42,7 @@ class CharacterLib:
         self._client.move_character(
             character.id, to_world_row=world_row_i, to_world_col=world_col_i
         )
+
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i
 

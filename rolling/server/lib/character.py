@@ -299,3 +299,13 @@ class CharacterLib:
 
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
+
+    def reduce_action_points(
+        self, character_id: str, cost: float, commit: bool = True
+    ) -> None:
+        character_doc = self.get_document(character_id)
+        character_doc = float(character_doc.action_points) - cost
+        self._kernel.server_db_session.add(character_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()

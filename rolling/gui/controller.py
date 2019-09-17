@@ -12,8 +12,10 @@ from rolling.client.http.zone import ZoneWebSocketClient
 from rolling.client.lib.character import CharacterLib
 from rolling.client.lib.server import ServerLib
 from rolling.client.lib.zone import ZoneLib
+from rolling.exception import CantChangeZone
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NotConnectedToServer
+from rolling.gui.dialog import SimpleDialog
 from rolling.gui.guilang import Generator as GuilangGenerator
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
@@ -290,14 +292,17 @@ class Controller:
             self._player_character.world_row_i, self.player_character.world_col_i
         )
 
-        self._character_lib.change_character_zone(
-            from_zone=from_zone,
-            to_zone=to_zone,
-            character=self._player_character,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-        )
-        self.display_zone()
+        try:
+            self._character_lib.change_character_zone(
+                from_zone=from_zone,
+                to_zone=to_zone,
+                character=self._player_character,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+            )
+            self.display_zone()
+        except CantChangeZone as exc:
+            self.display_simple_message(str(exc))
 
     def display_zone_actions_on_place(self, *args, **kwargs) -> None:
         actions_widget = self.guilang.generate_widget(
@@ -332,4 +337,15 @@ class Controller:
         self.view.main_content_container.original_widget = fill
         self.view.right_menu_container.original_widget = GoBackSubMenu(
             self, self.view, self.view.right_menu_container.original_widget
+        )
+
+    def display_simple_message(
+        self, title: str, message: typing.Optional[str] = None
+    ) -> None:
+        self._view.main_content_container.original_widget = SimpleDialog(
+            kernel=self.kernel,
+            controller=self,
+            original_widget=self._view.main_content_container.original_widget,
+            title=title,
+            text=message,
         )

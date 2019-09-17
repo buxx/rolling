@@ -53,6 +53,7 @@ class GenerationInfo:
 class ZoneProperties:
     zone_type: typing.Type[MapTileType]
     generation_info: GenerationInfo
+    move_cost: float
 
 
 @dataclasses.dataclass
