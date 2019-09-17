@@ -55,6 +55,11 @@ class GoBackSubMenu(BaseSubMenu):
 class ZoneMenu(BaseMenu):
     title = "Movement"
 
+    def _get_texts(self) -> typing.List[str]:
+        return self._controller.client.get_zone_resume_texts(
+            self._controller.player_character.id
+        )
+
     def _get_menu_buttons(self):
         return [
             ("World map", self._display_world_map_callback),

@@ -137,3 +137,8 @@ class CharacterModel:
 class CharacterEventModel:
     datetime: datetime_.datetime
     text: str
+
+
+@dataclasses.dataclass
+class ListOfStrModel:
+    items: typing.List[str]

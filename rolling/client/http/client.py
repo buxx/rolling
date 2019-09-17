@@ -155,3 +155,10 @@ class HttpClient:
         )
         self._check_response(response)
         return self._zone_required_character_data_serializer.load(response.json())
+
+    def get_zone_resume_texts(self, character_id: str) -> typing.List[str]:
+        response = requests.get(
+            f"{self._server_address}/character/{character_id}/resume_texts"
+        )
+        self._check_response(response)
+        return response.json()["items"]

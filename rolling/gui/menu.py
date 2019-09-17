@@ -20,8 +20,19 @@ class BaseMenu(urwid.ListBox):
     def _get_menu_buttons(self):
         raise NotImplementedError()
 
+    def _get_texts(self) -> typing.List[str]:
+        return []
+
     def _build_items(self):
         menu_items = [urwid.Text(self.title), urwid.Divider()]
+
+        texts = self._get_texts()
+        for text in texts:
+            text_widget = urwid.Text(text)
+            menu_items.append(text_widget)
+
+        if texts:
+            menu_items.append(urwid.Text(""))
 
         button_data = self._get_menu_buttons()
         for button_name, button_callback in button_data:

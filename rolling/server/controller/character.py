@@ -23,6 +23,7 @@ from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookResourceModelModel
 from rolling.model.character import GetLookStuffModelModel
+from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import WithResourceActionModel
@@ -444,6 +445,20 @@ class CharacterController(BaseController):
             > character.get_clutter_capacity(self._kernel),
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(ListOfStrModel)
+    async def get_resume_texts(
+        self, request: Request, hapic_data: HapicData
+    ) -> ListOfStrModel:
+        character = self._character_lib.get(hapic_data.path.character_id)
+
+        hungry = "oui" if character.feel_hungry else "non"
+        thirsty = "oui" if character.feel_thirsty else "non"
+        return ListOfStrModel(
+            [f"PA: {character.action_points}", f"Faim: {hungry}", f"Soif: {thirsty}"]
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -483,5 +498,8 @@ class CharacterController(BaseController):
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
+                web.get(
+                    "/character/{character_id}/resume_texts", self.get_resume_texts
+                ),
             ]
         )
