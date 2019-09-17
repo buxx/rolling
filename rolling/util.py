@@ -6,6 +6,7 @@ import typing
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.stuff import StuffModel
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -38,11 +39,17 @@ def is_there_resource_id_in_zone(
     for row in zone_source.geography.rows:
         for zone_tile_type in row:
             zone_tile_type = typing.cast(typing.Type[ZoneMapTileType], zone_tile_type)
-            for tile_resource_id in list(
-                kernel.game.config.extractions[zone_tile_type].resources.keys()
-            ):
-                if tile_resource_id == resource_id:
-                    return True
+
+            try:
+                for tile_resource_id in list(
+                    # FIXME BS 2019-09-14: Only for zero cost !
+                    kernel.game.config.extractions[zone_tile_type].resources.keys()
+                ):
+                    if tile_resource_id == resource_id:
+                        return True
+            except KeyError:
+                pass
+
     return False
 
 
@@ -63,8 +70,12 @@ def get_stuffs_eatable(
     kernel: "Kernel", character_id: str
 ) -> typing.Iterator[StuffModel]:
     for stuff in kernel.stuff_lib.get_carried_by(character_id):
-        # FIXME NOW Test if EAT action
-        yield stuff
+        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff.stuff_id
+        )
+        for description in stuff_properties.descriptions:
+            if description.action_type == ActionType.EAT_STUFF:
+                yield stuff
 
 
 class CornerEnum(enum.Enum):

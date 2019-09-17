@@ -9,6 +9,7 @@ from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.util import get_stuffs_eatable
 from rolling.util import get_stuffs_filled_with_resource_id
 from rolling.util import is_there_resource_id_in_zone
 
@@ -166,13 +167,31 @@ class TurnLib:
                 )
                 character_document.dehydrated = True
 
-            stuff_eatable = None
-            try:
-                stuff_eatable = next(get_stuffs_eatable(self._kernel, character_id))
-            except StopIteration:
-                pass
+            # Need drink
+            if character_document.feel_hungry or character_document.starved:
+                stuff_eatable = None
+                try:
+                    stuff_eatable = next(get_stuffs_eatable(self._kernel, character_id))
+                except StopIteration:
+                    pass
+
+                if stuff_eatable:
+                    character_document.starved = False
+                    self._kernel.stuff_lib.destroy(stuff_eatable.id, commit=False)
+                elif character_document.starved:
+                    character_document.life_points -= 1
+                    self._logger.info(
+                        f"{character_document.name} need to eat but no eatable ! "
+                        f"let {character_document.life_points} life points"
+                    )
+                else:
+                    self._logger.info(
+                        f"{character_document.name} need to eat but no eatable stuff, now starved"
+                    )
+                    character_document.starved = True
 
             character_document.feel_thirsty = True  # Always need to drink after turn
+            character_document.feel_hungry = True  # Always need to eat after turn
             self._character_lib.update(character_document)
 
     def _increment_age(self) -> None:
