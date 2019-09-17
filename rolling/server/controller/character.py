@@ -80,25 +80,28 @@ class CharacterController(BaseController):
     ) -> Description:
         character = self._character_lib.get(hapic_data.path.character_id)
         return Description(
-            title="Character card",
+            title="Fiche de personnage",
             items=[
-                Part(text="This is your character card"),
+                Part(text="Personnage"),
                 Part(text="------------"),
-                Part(label="Name", text=character.name),
-                Part(label="Life", text=str(character.life_points)),
-                Part(label="Max life", text=str(character.max_life_comp)),
+                Part(label="Nom", text=character.name),
                 Part(
-                    label="Hunting and collecting",
+                    label="Points d'actions restants",
+                    text=f"{str(character.action_points)}/24.0",
+                ),
+                Part(
+                    label="Points de vie",
+                    text=f"{str(character.life_points)}/{str(character.max_life_comp)}",
+                ),
+                Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
+                Part(label="Faim", text="oui" if character.feel_hungry else "non"),
+                Part(text="Compétences"),
+                Part(text="------------"),
+                Part(
+                    label="Chasse et ceuillete",
                     text=str(character.hunting_and_collecting_comp),
                 ),
-                Part(label="Find water", text=str(character.find_water_comp)),
-                Part(
-                    label="Feeling thirsty",
-                    text="yes" if character.feel_thirsty else "no",
-                ),
-                Part(
-                    label="Remaining action points", text=str(character.action_points)
-                ),
+                Part(label="Trouver de l'eau", text=str(character.find_water_comp)),
             ],
         )
 

@@ -21,6 +21,11 @@ def stuff():
     pass
 
 
+@character.group()
+def resource():
+    pass
+
+
 @stuff.command()
 @click.argument("game-config-dir")
 @click.argument("character-name")
@@ -42,6 +47,25 @@ def create(game_config_dir: str, character_name: str, stuff_id: str) -> None:
     click.echo("Commit changes")
     kernel.server_db_session.add(stuff_doc)
     kernel.server_db_session.commit()
+
+
+@resource.command()
+@click.argument("game-config-dir")
+@click.argument("character-name")
+@click.argument("resource-id")
+@click.argument("quantity", type=float)
+def create(
+    game_config_dir: str, character_name: str, resource_id: str, quantity: float
+) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(game_config_folder=game_config_dir)
+    click.echo("Search character by name")
+    character_ = kernel.character_lib.get_by_name(character_name)
+
+    click.echo("Add resource")
+    kernel.resource_lib.add_resource_to_character(
+        character_.id, resource_id, quantity=quantity
+    )
 
 
 if __name__ == "__main__":

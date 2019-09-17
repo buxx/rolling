@@ -51,13 +51,14 @@ class MixResourcesAction(WithResourceAction):
         self.check_is_possible(character, resource_id)
 
         if input_.quantity is not None:
-            resource_mix = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
+            resource_mix = self._kernel.game.config.resource_mixs[
+                input_.resource_mix_id
+            ]
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
 
             for required_resource in resource_mix.required_resources:
                 carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                    character_id=character.id,
-                    resource_id=required_resource.resource.id,
+                    character_id=character.id, resource_id=required_resource.resource.id
                 )
                 required_quantity = required_resource.coeff * input_.quantity
                 if carried_resource.quantity < required_quantity:
@@ -115,15 +116,21 @@ class MixResourcesAction(WithResourceAction):
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
-        resource_mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
-        unit_name = self._kernel.translation.get(resource_mix_description.produce_resource.unit)
+        resource_mix_description = self._kernel.game.config.resource_mixs[
+            input_.resource_mix_id
+        ]
+        unit_name = self._kernel.translation.get(
+            resource_mix_description.produce_resource.unit
+        )
 
         if input_.quantity is None:
             cost_per_unit = resource_mix_description.cost
-            required = ", ".join([
-                f"{round(r.coeff * 100)}% {r.resource.name}"
-                for r in resource_mix_description.required_resources
-            ])
+            required = ", ".join(
+                [
+                    f"{round(r.coeff * 100)}% {r.resource.name}"
+                    for r in resource_mix_description.required_resources
+                ]
+            )
             return Description(
                 title=f"Faire {resource_mix_description.produce_resource.name}",
                 items=[

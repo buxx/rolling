@@ -28,4 +28,9 @@ class ResourceMixDescription:
         return tuple([d.resource.id for d in self.required_resources])
 
     def __hash__(self):
-        return hash((tuple([d.resource.id for d in self.required_resources]), self.produce_resource.id))
+        return hash(
+            (
+                tuple([d.resource.id for d in self.required_resources]),
+                self.produce_resource.id,
+            )
+        )

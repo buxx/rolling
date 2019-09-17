@@ -96,7 +96,9 @@ class CharacterLib:
             ),
             find_water_comp=float(character_document.find_water_comp),
             feel_thirsty=character_document.feel_thirsty,
+            feel_hungry=character_document.feel_hungry,
             dehydrated=character_document.dehydrated,
+            starved=character_document.starved,
             action_points=float(character_document.action_points),
             bags=[
                 self._stuff_lib.stuff_model_from_doc(bag_doc)
@@ -202,7 +204,7 @@ class CharacterLib:
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
-            character_actions_.extend(action.get_character_action_links(character))
+            character_actions_.extend(action.get_character_actions(character))
 
         return character_actions_
 

@@ -36,6 +36,8 @@ class CharacterDocument(Document):
     feel_thirsty = Column(Boolean, default=True)
     dehydrated = Column(Boolean, default=False)
     _effect_ids = Column(Text, default="")
+    feel_hungry = Column(Boolean, default=True)
+    starved = Column(Boolean, default=False)
 
     # transport
     shipped_stuff = relationship(

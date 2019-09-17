@@ -5,6 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.elements import and_
 
 from rolling.model.character import CharacterModel
+from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.action import ActionFactory
@@ -21,11 +22,7 @@ class ResourceLib:
         self._action_factory = ActionFactory(kernel)
 
     def add_resource_to_character(
-        self,
-        character_id: str,
-        resource_id: str,
-        quantity: float,
-        commit: bool = True,
+        self, character_id: str, resource_id: str, quantity: float, commit: bool = True
     ) -> CarriedResourceDescriptionModel:
         resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
             resource_id
@@ -72,7 +69,12 @@ class ResourceLib:
     ) -> CarriedResourceDescriptionModel:
         doc = (
             self._kernel.server_db_session.query(ResourceDocument)
-            .filter(and_(ResourceDocument.carried_by_id == character_id, ResourceDocument.resource_id == resource_id))
+            .filter(
+                and_(
+                    ResourceDocument.carried_by_id == character_id,
+                    ResourceDocument.resource_id == resource_id,
+                )
+            )
             .one()
         )
         return self._carried_resource_model_from_doc(doc)
@@ -118,11 +120,7 @@ class ResourceLib:
         return True
 
     def reduce(
-        self,
-        character_id: str,
-        resource_id: str,
-        quantity: float,
-        commit: bool = True,
+        self, character_id: str, resource_id: str, quantity: float, commit: bool = True
     ) -> None:
         resource_doc = (
             self._kernel.server_db_session.query(ResourceDocument)

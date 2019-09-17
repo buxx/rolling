@@ -148,7 +148,7 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def get_character_action_links(
+    def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         pass

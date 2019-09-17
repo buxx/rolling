@@ -9,7 +9,8 @@ from rolling.model.event import PlayerMoveData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.physics import Physics
-from rolling.util import get_corner, CornerEnum
+from rolling.util import CornerEnum
+from rolling.util import get_corner
 
 if typing.TYPE_CHECKING:
     from rolling.gui.controller import Controller

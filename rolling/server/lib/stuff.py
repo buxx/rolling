@@ -252,3 +252,10 @@ class StuffLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def destroy(self, stuff_id: int, commit: bool = True) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        self._kernel.server_db_session.delete(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()

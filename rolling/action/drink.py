@@ -86,7 +86,7 @@ class DrinkResourceAction(CharacterAction):
 
         raise ImpossibleAction(f"Il n'y a pas de {input_.resource_id} à proximité")
 
-    def get_character_action_links(
+    def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         character_actions: typing.List[CharacterActionLink] = []

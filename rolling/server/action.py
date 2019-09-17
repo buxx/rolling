@@ -11,6 +11,8 @@ from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.drop import DropResourceAction
 from rolling.action.drop import DropStuffAction
+from rolling.action.eat import EatResourceAction
+from rolling.action.eat import EatStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
 from rolling.action.mix import MixResourcesAction
@@ -35,6 +37,8 @@ class ActionFactory:
         ActionType.DROP_STUFF: DropStuffAction,
         ActionType.DROP_RESOURCE: DropResourceAction,
         ActionType.MIX_RESOURCES: MixResourcesAction,
+        ActionType.EAT_STUFF: EatStuffAction,
+        ActionType.EAT_RESOURCE: EatResourceAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -48,12 +52,14 @@ class ActionFactory:
             ActionType.USE_AS_BAG: UseAsBagAction,
             ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
             ActionType.DROP_STUFF: DropStuffAction,
+            ActionType.EAT_STUFF: EatStuffAction,
         }
         self._with_resource_actions: typing.Dict[
             ActionType, typing.Type[WithResourceAction]
         ] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
             ActionType.MIX_RESOURCES: MixResourcesAction,
+            ActionType.EAT_RESOURCE: EatResourceAction,
         }
         self._character_actions: typing.Dict[
             ActionType, typing.Type[CharacterAction]

@@ -71,7 +71,7 @@ class CollectResourceAction(CharacterAction):
 
         raise ImpossibleAction(f"Il n'y a pas de '{input_.resource_id}' à cet endroit")
 
-    def get_character_action_links(
+    def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         inspect_zone_positions = get_on_and_around_coordinates(

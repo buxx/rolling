@@ -29,6 +29,9 @@ default_clutter_capacity = 5.0
   [character_effects.THIRSTY_SATISFIED]
     attributes_to_false = ["dehydrated", "feel_thirsty"]
 
+  [character_effects.HUNGRY_SATISFIED]
+    attributes_to_false = ["starved", "feel_hungry"]
+
   [character_effects.DRUNK]
     factors = [{"attribute"="bravery", "factor"=1.1}]
 
@@ -113,6 +116,14 @@ default_clutter_capacity = 5.0
     clutter = 1000.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
+  [resources.WILD_RASPBERRIES]
+    name = "Framboises sauvages"
+    weight=1000000.0
+    material="MIDDLE_PIECE"
+    unit = "M3"
+    clutter = 1000.0
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
+
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
@@ -159,6 +170,19 @@ default_clutter_capacity = 5.0
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
     accept_resources = ["FRESH_WATER"]
     character_effects = ["THIRSTY_SATISFIED"]
+    cost = 0.0
+
+  [ACTIONS.EAT_BERRIES]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["WILD_RASPBERRIES"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 0.001
+    cost = 0.0
+
+  [ACTIONS.EAT_ENTIRE_MEAL]
+    actions = ["EAT_STUFF"]
+    accept_stuffs = ["ROASTED_CHICKEN"]
+    character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
 
   [ACTIONS.DRINK_WINE]

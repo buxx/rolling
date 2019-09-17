@@ -166,6 +166,12 @@ class TurnLib:
                 )
                 character_document.dehydrated = True
 
+            stuff_eatable = None
+            try:
+                stuff_eatable = next(get_stuffs_eatable(self._kernel, character_id))
+            except StopIteration:
+                pass
+
             character_document.feel_thirsty = True  # Always need to drink after turn
             self._character_lib.update(character_document)
 

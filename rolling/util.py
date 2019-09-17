@@ -1,7 +1,7 @@
 # coding: utf-8
 import dataclasses
-import typing
 import enum
+import typing
 
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
@@ -59,6 +59,14 @@ def get_stuffs_filled_with_resource_id(
             yield stuff
 
 
+def get_stuffs_eatable(
+    kernel: "Kernel", character_id: str
+) -> typing.Iterator[StuffModel]:
+    for stuff in kernel.stuff_lib.get_carried_by(character_id):
+        # FIXME NOW Test if EAT action
+        yield stuff
+
+
 class CornerEnum(enum.Enum):
     TOP = "TOP"
     TOP_RIGHT = "TOP_RIGHT"
@@ -71,14 +79,14 @@ class CornerEnum(enum.Enum):
 
 
 def get_corner(
-    width: int, height: int, new_row_i: int, new_col_i: int,
+    width: int, height: int, new_row_i: int, new_col_i: int
 ) -> typing.Optional[CornerEnum]:
     left_col_i_end = width // 3
     right_col_i_start = (width // 3) * 2
     top_row_i_end = height // 3
     bottom_row_i_start = (height // 3) * 2
 
-    more = (new_row_i if new_row_i >= 0 else 0)
+    more = new_row_i if new_row_i >= 0 else 0
 
     if new_row_i < top_row_i_end:
         right_col_i = right_col_i_start + more

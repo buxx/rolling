@@ -104,6 +104,8 @@ class CharacterModel:
 
     feel_thirsty: bool = True
     dehydrated: bool = False
+    feel_hungry: bool = True
+    starved: bool = False
 
     _display_object = None
 
