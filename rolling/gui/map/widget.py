@@ -7,6 +7,7 @@ from urwid import BOX
 from rolling.exception import CantMoveBecauseSurcharge
 from rolling.exception import MoveToOtherZoneError
 from rolling.gui.connector import ZoneMapConnector
+from rolling.gui.dialog import SimpleDialog
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog
 from rolling.map.source import ZoneMapSource
@@ -114,17 +115,25 @@ class TileMapWidget(MapWidget):
         zone_map_widget = self._controller._view.main_content_container.original_widget
         world_row_i, world_col_i = self._connector.get_zone_coordinates(corner)
 
-        # FIXME BS 2019-09-13: Simply say not possible if not existing zone ...
-
-        self._controller._view.main_content_container.original_widget = ChangeZoneDialog(
-            kernel=self._controller.kernel,
-            controller=self._controller,
-            original_widget=zone_map_widget,
-            title="Move to an other zone",
-            text="You are trying to move on other zone, continue ?",
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-        )
+        zones = self._controller.kernel.world_map_source.geography.rows
+        if world_row_i in zones and world_col_i in zones[world_row_i]:
+            self._controller._view.main_content_container.original_widget = ChangeZoneDialog(
+                kernel=self._controller.kernel,
+                controller=self._controller,
+                original_widget=zone_map_widget,
+                title="Move to an other zone",
+                text="You are trying to move on other zone, continue ?",
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+            )
+        else:
+            self._controller._view.main_content_container.original_widget = SimpleDialog(
+                kernel=self._controller.kernel,
+                controller=self._controller,
+                original_widget=self._controller.view.main_content_container.original_widget,
+                title="Vous êtes au bord du monde ! Vous ne pouvez pas aller au delà.",
+                go_back=True,
+            )
 
     def keypress(self, size, key):
         new_offset = None
