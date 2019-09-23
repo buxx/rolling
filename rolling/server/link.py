@@ -10,6 +10,6 @@ class CharacterActionLink:
     cost: typing.Optional[float] = None
 
     def get_as_str(self) -> str:
-        if self.cost is None:
+        if not self.cost:
             return self.name
-        return f"{self.name} ({self.cost} action points)"
+        return f"{self.name} ({self.cost} points d'actions')"
