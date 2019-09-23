@@ -9,6 +9,7 @@ class GlobalTranslation:
         self._translation: typing.Dict[typing.Any, str] = {
             Unit.LITTER: "litre",
             Unit.CUBIC: "mètre cube",
+            Unit.GRAM: "gramme",
         }
 
     def get(self, key: typing.Any) -> str:

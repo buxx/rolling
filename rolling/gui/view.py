@@ -66,7 +66,7 @@ class ZoneMenu(BaseMenu):
             ("Événements", self._display_events),
             ("Actions", self._display_actions_on_place),
             ("Fiche", self._display_character_card),
-            ("Inventairey", self._display_inventory),
+            ("Inventaire", self._display_inventory),
             ("Se déconnecter", self._go_back_root_callback),
         ]
 

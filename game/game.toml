@@ -118,10 +118,10 @@ default_clutter_capacity = 5.0
 
   [resources.WILD_RASPBERRIES]
     name = "Framboises sauvages"
-    weight=1000000.0
+    weight=1.0
     material="MIDDLE_PIECE"
-    unit = "M3"
-    clutter = 1000.0
+    unit = "G"
+    clutter = 0.001
     actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
 
 [resource_mix]
@@ -176,7 +176,7 @@ default_clutter_capacity = 5.0
     actions = ["EAT_RESOURCE"]
     accept_resources = ["WILD_RASPBERRIES"]
     character_effects = ["HUNGRY_SATISFIED"]
-    require = 0.001
+    require = 500.0
     cost = 0.0
 
   [ACTIONS.EAT_ENTIRE_MEAL]
