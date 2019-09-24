@@ -5,12 +5,12 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction

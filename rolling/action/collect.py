@@ -9,7 +9,8 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
-from rolling.exception import ImpossibleAction, RollingError
+from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.link import CharacterActionLink

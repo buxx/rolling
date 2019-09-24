@@ -4,9 +4,9 @@ import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
-
 from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
+
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
