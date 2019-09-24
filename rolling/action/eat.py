@@ -110,7 +110,7 @@ class EatResourceAction(WithResourceAction):
                         resource_id=resource_id,
                         query_params={},
                     ),
-                    cost=self.get_cost(character, resource_id),
+                    cost=None,
                 )
             ]
 

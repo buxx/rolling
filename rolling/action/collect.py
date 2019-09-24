@@ -9,7 +9,7 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, RollingError
 from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.link import CharacterActionLink
@@ -18,6 +18,7 @@ from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
+    from rolling.server.document.character import CharacterDocument
     from rolling.game.base import GameConfig
 
 
@@ -101,14 +102,17 @@ class CollectResourceAction(CharacterAction):
                             action_description_id=self._description.id,
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
-                        cost=self.get_cost(character),
+                        cost=None,
                     )
                 )
 
         return character_actions
 
-    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
-        # TODO BS 2019-08-27: warning if not enough place (weight, encombrement)
+    def _get_resource_and_cost(
+        self, character: "CharacterDocument", input_: input_model
+    ) -> typing.Tuple[
+        ResourceDescriptionModel, ExtractableResourceDescriptionModel, float
+    ]:
         tile_type = self._kernel.tile_maps_by_position[
             (character.world_row_i, character.world_col_i)
         ].source.geography.rows[input_.row_i][input_.col_i]
@@ -121,9 +125,26 @@ class CollectResourceAction(CharacterAction):
         resource: ResourceDescriptionModel = self._kernel.game.config.resources[
             input_.resource_id
         ]
-        character_doc = self._character_lib.get_document(character.id)
         # TODO BS 2019-08-29: cost per unit modified by competence / stuff
         cost_per_unit = resource_extraction_description.cost_per_unit
+
+        return resource, resource_extraction_description, cost_per_unit
+
+    def get_cost(
+        self, character: "CharacterModel", input_: input_model
+    ) -> typing.Optional[float]:
+        if input_.quantity is not None:
+            character_doc = self._character_lib.get_document(character.id)
+            resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
+                character_doc, input_
+            )
+            return input_.quantity * resource_extraction_description.cost_per_unit
+
+    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
+        character_doc = self._character_lib.get_document(character.id)
+        resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
+            character_doc, input_
+        )
 
         if input_.quantity is None:
             unit_name = self._kernel.translation.get(resource.unit)
@@ -152,8 +173,17 @@ class CollectResourceAction(CharacterAction):
             )
 
         self._kernel.resource_lib.add_resource_to_character(
-            character_doc.id, input_.resource_id, input_.quantity
+            character_doc.id, input_.resource_id, input_.quantity, commit=False
         )
+
+        cost = self.get_cost(character, input_=input_)
+        if cost is None:
+            raise RollingError("Cost compute should not be None !")
+
+        self._kernel.character_lib.reduce_action_points(
+            character.id, cost, commit=False
+        )
+        self._kernel.server_db_session.commit()
 
         return Description(
             title=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré",

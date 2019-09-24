@@ -99,7 +99,9 @@ class WithStuffAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
-    def get_cost(self, character: "CharacterModel", stuff: "StuffModel") -> float:
+    def get_cost(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+    ) -> typing.Optional[float]:
         return self._description.base_cost
 
     @abc.abstractmethod
@@ -126,7 +128,9 @@ class WithResourceAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
-    def get_cost(self, character: "CharacterModel", resource_id: str) -> float:
+    def get_cost(
+        self, character: "CharacterModel", resource_id: str, input_: typing.Any
+    ) -> typing.Optional[float]:
         return self._description.base_cost
 
     @abc.abstractmethod
@@ -157,5 +161,7 @@ class CharacterAction(Action):
     def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
         pass
 
-    def get_cost(self, character: "CharacterModel") -> float:
+    def get_cost(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> typing.Optional[float]:
         return self._description.base_cost

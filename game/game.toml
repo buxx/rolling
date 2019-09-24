@@ -140,11 +140,11 @@ default_clutter_capacity = 5.0
   [extractions.FRESH_WATER]
     tile="FRESH_WATER"
     resources=[{resource_id="FRESH_WATER", cost_per_unit=0.1, default_quantity=1.0}]
-    
+
   [extractions.SEA_WATER]
     tile="SEA_WATER"
     resources=[{resource_id="SALTED_WATER", cost_per_unit=0.1, default_quantity=1.0}]
-    
+
   [extractions.SAND]
     tile="SAND"
     resources=[{resource_id="BEACH_SAND", cost_per_unit=0.1, default_quantity=1.0}]

@@ -49,6 +49,4 @@ class SimpleDialog(FullContentDialog):
                 self._original_widget
             )
 
-        return [
-            urwid.Button("Fermer", on_press=cancel),
-        ]
+        return [urwid.Button("Fermer", on_press=cancel)]

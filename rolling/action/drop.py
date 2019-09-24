@@ -123,7 +123,7 @@ class DropResourceAction(WithResourceAction):
                     resource_id=carried_resource.id,
                     query_params={},
                 ),
-                cost=self.get_cost(character, resource_id),
+                cost=None,
             )
         ]
 

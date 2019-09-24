@@ -107,11 +107,20 @@ class MixResourcesAction(WithResourceAction):
                             resource_id=carried_resource.id,
                             query_params=query_params,
                         ),
-                        cost=self.get_cost(character, resource_id),
+                        cost=None,
                     )
                 )
 
         return actions
+
+    def get_cost(
+        self, character: "CharacterModel", resource_id: str, input_: input_model
+    ) -> typing.Optional[float]:
+        if input_.quantity is not None:
+            resource_mix_description = self._kernel.game.config.resource_mixs[
+                input_.resource_mix_id
+            ]
+            return resource_mix_description.cost * input_.quantity
 
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
