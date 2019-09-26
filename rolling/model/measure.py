@@ -6,3 +6,4 @@ class Unit(enum.Enum):
     LITTER = "L"
     CUBIC = "M3"
     GRAM = "G"
+    UNIT = "U"

@@ -10,6 +10,7 @@ class GlobalTranslation:
             Unit.LITTER: "litre",
             Unit.CUBIC: "mètre cube",
             Unit.GRAM: "gramme",
+            Unit.UNIT: "unité",
         }
 
     def get(self, key: typing.Any) -> str:

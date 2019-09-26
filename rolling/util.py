@@ -6,6 +6,7 @@ import typing
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.stuff import StuffModel
+from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -134,3 +135,20 @@ def get_corner(
 
     if new_col_i < 0 and top_row_i_end <= new_row_i < bottom_row_i_start:
         return CornerEnum.LEFT
+
+
+def filter_action_links(
+    links: typing.List[CharacterActionLink]
+) -> typing.List[CharacterActionLink]:
+    new_links: typing.List[CharacterActionLink] = []
+    found_merge_type: typing.List[typing.Any] = []
+
+    for link in links:
+        if link.merge_by is None:
+            new_links.append(link)
+        else:
+            if link.merge_by not in found_merge_type:
+                new_links.append(link)
+                found_merge_type.append(link.merge_by)
+
+    return new_links

@@ -124,6 +124,22 @@ default_clutter_capacity = 5.0
     clutter = 0.001
     actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
 
+  [resources.PAGUROIDEA]
+    name = "Bernard-l'hermite"
+    weight=0.1
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 0.25
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
+
+  [resources.MYTILIDA]
+    name = "Moule"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 2.0
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
+
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
@@ -176,7 +192,21 @@ default_clutter_capacity = 5.0
     actions = ["EAT_RESOURCE"]
     accept_resources = ["WILD_RASPBERRIES"]
     character_effects = ["HUNGRY_SATISFIED"]
-    require = 500.0
+    require = 500.0  # g
+    cost = 0.0
+
+  [ACTIONS.EAT_MIDDLE_CRUSTACEAN]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["PAGUROIDEA"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 5.0  # unit
+    cost = 0.0
+
+  [ACTIONS.EAT_LITTLE_CRUSTACEAN]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["MYTILIDA"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 1000.0  # g
     cost = 0.0
 
   [ACTIONS.EAT_ENTIRE_MEAL]
@@ -218,6 +248,19 @@ default_clutter_capacity = 5.0
   [ACTIONS.DROP_STUFF]
     actions = ["DROP_STUFF"]
     cost = 0.0
+
+  [ACTIONS.HUNT_CRUSTACEANS]
+    name = "Chercher des crustacés"
+    actions = ["SEARCH_FOOD"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    produce = [
+      {resource="PAGUROIDEA", quantity=6.0, probability=100.0},  # bernard l'hermite, u
+      {resource="MYTILIDA", quantity=1000.0, probability=100.0}  # moule, g
+    ]
+    cost = 6.0
 
 #  [ACTIONS.CRAFT_CAMPFIRE]
 #    actions = ["CRAFT_FROM_RESOURCES"]

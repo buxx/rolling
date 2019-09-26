@@ -14,6 +14,8 @@ from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
+from rolling.types import ActionType
+from rolling.util import filter_action_links
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -206,7 +208,7 @@ class CharacterLib:
         for action in self._action_factory.get_all_character_actions():
             character_actions_.extend(action.get_character_actions(character))
 
-        return character_actions_
+        return filter_action_links(character_actions_)
 
     def get_on_stuff_actions(
         self, character_id: str, stuff_id: int
@@ -229,13 +231,16 @@ class CharacterLib:
                 self._stuff_lib.get_carrying_actions(character, stuff)
             )
 
-        return character_actions
+        return filter_action_links(character_actions)
 
     def get_on_resource_actions(
         self, character_id: str, resource_id: str
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
-        return self._kernel.resource_lib.get_carrying_actions(character, resource_id)
+        character_actions = self._kernel.resource_lib.get_carrying_actions(
+            character, resource_id
+        )
+        return filter_action_links(character_actions)
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)

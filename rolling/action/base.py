@@ -60,6 +60,7 @@ class ActionDescriptionModel:
     action_type: ActionType
     base_cost: float
     properties: dict
+    name: typing.Optional[str] = None
 
 
 class Action(abc.ABC):
@@ -100,7 +101,7 @@ class WithStuffAction(Action):
         pass
 
     def get_cost(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Optional[typing.Any] = None
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
@@ -129,7 +130,7 @@ class WithResourceAction(Action):
         pass
 
     def get_cost(
-        self, character: "CharacterModel", resource_id: str, input_: typing.Any
+        self, character: "CharacterModel", resource_id: str, input_: typing.Optional[typing.Any] = None
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
@@ -162,6 +163,6 @@ class CharacterAction(Action):
         pass
 
     def get_cost(
-        self, character: "CharacterModel", input_: typing.Any
+        self, character: "CharacterModel", input_: typing.Optional[typing.Any] = None
     ) -> typing.Optional[float]:
         return self._description.base_cost

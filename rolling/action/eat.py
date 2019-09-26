@@ -6,10 +6,8 @@ import serpyco
 
 from guilang.description import Description
 from guilang.description import Part
-from rolling.action.base import CharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction

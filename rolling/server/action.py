@@ -15,6 +15,7 @@ from rolling.action.eat import EatResourceAction
 from rolling.action.eat import EatStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
+from rolling.action.hunt import SearchFoodAction
 from rolling.action.mix import MixResourcesAction
 from rolling.types import ActionType
 
@@ -39,6 +40,7 @@ class ActionFactory:
         ActionType.MIX_RESOURCES: MixResourcesAction,
         ActionType.EAT_STUFF: EatStuffAction,
         ActionType.EAT_RESOURCE: EatResourceAction,
+        ActionType.SEARCH_FOOD: SearchFoodAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -66,6 +68,7 @@ class ActionFactory:
         ] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
             ActionType.COLLECT_RESOURCE: CollectResourceAction,
+            ActionType.SEARCH_FOOD: SearchFoodAction,
         }
 
     def get_with_stuff_action(

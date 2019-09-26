@@ -114,7 +114,7 @@ class MixResourcesAction(WithResourceAction):
         return actions
 
     def get_cost(
-        self, character: "CharacterModel", resource_id: str, input_: input_model
+        self, character: "CharacterModel", resource_id: str, input_: typing.Optional[input_model] = None
     ) -> typing.Optional[float]:
         if input_.quantity is not None:
             resource_mix_description = self._kernel.game.config.resource_mixs[
