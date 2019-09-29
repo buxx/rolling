@@ -6,6 +6,7 @@ from sqlalchemy.sql.elements import and_
 
 from rolling.model.character import CharacterModel
 from rolling.model.effect import CharacterEffectDescriptionModel
+from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.action import ActionFactory
@@ -83,13 +84,22 @@ class ResourceLib:
         self, doc: ResourceDocument
     ) -> CarriedResourceDescriptionModel:
         resource_description = self._kernel.game.config.resources[doc.resource_id]
+        clutter = float(doc.quantity) * resource_description.clutter
+
+        if resource_description.unit in (Unit.UNIT, Unit.CUBIC, Unit.LITTER):
+            weight = float(doc.quantity) * resource_description.weight
+        elif resource_description.unit in (Unit.GRAM, ):
+            weight = float(doc.quantity)
+        else:
+            raise NotImplementedError()
+
         return CarriedResourceDescriptionModel(
             id=doc.resource_id,
             name=resource_description.name,
-            weight=float(doc.quantity) * resource_description.weight,
+            weight=weight,
             material_type=resource_description.material_type,
             unit=resource_description.unit,
-            clutter=float(doc.quantity) * resource_description.clutter,
+            clutter=clutter,
             quantity=float(doc.quantity),
             descriptions=resource_description.descriptions,
         )

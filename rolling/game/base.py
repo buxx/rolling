@@ -22,6 +22,7 @@ from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
 from rolling.model.zone import GenerationInfo
 from rolling.model.zone import ZoneProperties
+from rolling.model.zone import ZoneResource
 from rolling.server.action import ActionFactory
 from rolling.types import ActionType
 
@@ -205,6 +206,7 @@ class GameConfig:
                         properties=action_class.get_properties_from_config(
                             game_config=self, action_config_raw=action_description_raw
                         ),
+                        name=action_description_raw.get("name"),
                     )
                 )
 
@@ -289,12 +291,15 @@ class Game:
         for zone_type_str, zone_data in raw_world.get("ZONE_PROPERTIES", {}).items():
             move_cost: float = zone_data["move_cost"]
             generation_info = self._get_generation_info(zone_data)
+            resources = list(self._get_zone_resources(zone_data))
 
             zones_properties.append(
                 ZoneProperties(
                     WorldMapTileType.get_for_id(zone_type_str),
                     generation_info=generation_info,
                     move_cost=move_cost,
+                    resources=resources,
+                    stuffs=[],  # TODO
                 )
             )
 
@@ -320,3 +325,12 @@ class Game:
             )
 
         return GenerationInfo(count=count, stuffs=stuffs)
+
+    def _get_zone_resources(self, zone_data: dict) -> typing.Iterator[ZoneResource]:
+        for resource_id, resource_raw in zone_data.get("RESOURCES", {}).items():
+            yield ZoneResource(
+                resource_id=resource_id,
+                probability=resource_raw["probability"],
+                maximum=resource_raw["maximum"],
+                regeneration=resource_raw["regeneration"],
+            )

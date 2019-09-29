@@ -4,6 +4,7 @@ import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit
+from rolling.util import display_g_or_kg, quantity_to_str
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -26,7 +27,12 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     stored_in: typing.Optional[int] = None
 
     def get_full_description(self, kernel: "Kernel") -> str:
+        weight = display_g_or_kg(self.weight)
+        quantity_str = quantity_to_str(self.quantity, self.unit)
+        of = " "
+        if self.unit != Unit.UNIT:
+            of = " de "
         return (
-            f"{self.quantity} {kernel.translation.get(self.unit)} de {self.name} "
-            f"({self.weight/1000} Kg et {self.clutter} d'encombrement)"
+            f"{quantity_str}{of}{self.name} "
+            f"({weight} Kg et {self.clutter} d'encombrement)"
         )

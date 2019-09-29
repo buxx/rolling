@@ -4,12 +4,12 @@ import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application

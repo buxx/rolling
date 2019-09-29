@@ -50,10 +50,38 @@ class GenerationInfo:
 
 
 @dataclasses.dataclass
+class ZoneResource:
+    resource_id: str
+    probability: float
+    maximum: float
+    regeneration: float
+
+
+@dataclasses.dataclass
+class ZoneStuff:
+    stuff_id: str
+    probability: float
+    maximum: float
+    regeneration: float
+
+
+@dataclasses.dataclass
 class ZoneProperties:
     zone_type: typing.Type[MapTileType]
     generation_info: GenerationInfo
     move_cost: float
+    resources: typing.List[ZoneResource]
+    stuffs: typing.List[ZoneStuff]
+
+    @property
+    def resource_ids(self) -> typing.Iterator[str]:
+        for zone_resource in self.resources:
+            yield zone_resource.resource_id
+
+    @property
+    def stuff_ids(self) -> typing.Iterator[str]:
+        for zone_stuff in self.stuffs:
+            yield zone_stuff.stuff_id
 
 
 @dataclasses.dataclass

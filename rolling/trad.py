@@ -7,9 +7,10 @@ from rolling.model.measure import Unit
 class GlobalTranslation:
     def __init__(self) -> None:
         self._translation: typing.Dict[typing.Any, str] = {
-            Unit.LITTER: "litre",
-            Unit.CUBIC: "mètre cube",
-            Unit.GRAM: "gramme",
+            Unit.LITTER: "litres",
+            Unit.CUBIC: "mètre cubes",
+            Unit.GRAM: "grammes",
+            Unit.UNIT: "unités",
         }
 
     def get(self, key: typing.Any) -> str:

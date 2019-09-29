@@ -6,10 +6,8 @@ import serpyco
 
 from guilang.description import Description
 from guilang.description import Part
-from rolling.action.base import CharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
@@ -59,7 +57,7 @@ class EatResourceAction(WithResourceAction):
         if resource_id in accept_resources_ids:
             return
 
-        raise ImpossibleAction("Ne peut etre consommé")
+        raise ImpossibleAction("Non consommable")
 
     def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
@@ -102,6 +100,10 @@ class EatResourceAction(WithResourceAction):
 
         if carried_resource.id in accept_resources_ids:
             return [
+                # FIXME BS NOW: il semblerait que que comme on ne donne pas le description_id,
+                # lorsque on veux consommer la resource, l'action factory prend la première, et donc
+                # pas la bonne. Revoir ça, je pense qu'il faut systématiquement donner un
+                # description_id. Voir les conséquences.
                 CharacterActionLink(
                     name=f"Manger {carried_resource.name}",
                     link=get_with_resource_action_url(

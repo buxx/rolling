@@ -5,11 +5,13 @@ import typing
 
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.stuff import StuffModel
+from rolling.model.measure import Unit
+from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -55,7 +57,7 @@ def is_there_resource_id_in_zone(
 
 def get_stuffs_filled_with_resource_id(
     kernel: "Kernel", character_id: str, resource_id: str
-) -> typing.Iterator[StuffModel]:
+) -> typing.Iterator["StuffModel"]:
     from rolling.server.lib.stuff import StuffLib
 
     stuff_lib = StuffLib(kernel=kernel)
@@ -68,7 +70,7 @@ def get_stuffs_filled_with_resource_id(
 
 def get_stuffs_eatable(
     kernel: "Kernel", character_id: str
-) -> typing.Iterator[StuffModel]:
+) -> typing.Iterator["StuffModel"]:
     for stuff in kernel.stuff_lib.get_carried_by(character_id):
         stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
             stuff.stuff_id
@@ -134,3 +136,32 @@ def get_corner(
 
     if new_col_i < 0 and top_row_i_end <= new_row_i < bottom_row_i_start:
         return CornerEnum.LEFT
+
+
+def filter_action_links(
+    links: typing.List[CharacterActionLink]
+) -> typing.List[CharacterActionLink]:
+    new_links: typing.List[CharacterActionLink] = []
+    found_merge_type: typing.List[typing.Any] = []
+
+    for link in links:
+        if link.merge_by is None:
+            new_links.append(link)
+        else:
+            if link.merge_by not in found_merge_type:
+                new_links.append(link)
+                found_merge_type.append(link.merge_by)
+
+    return new_links
+
+
+def display_g_or_kg(grams: float) -> str:
+    if grams < 1000:
+        return f"{grams} g"
+    return f"{round(grams/1000, 3)} kg"
+
+
+def quantity_to_str(quantity: float, unit: Unit) -> str:
+    if unit == Unit.GRAM:
+        return display_g_or_kg(quantity)
+    return str(quantity)

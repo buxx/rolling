@@ -7,6 +7,7 @@ import serpyco
 from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
+from rolling.util import display_g_or_kg
 
 
 @dataclasses.dataclass
@@ -52,7 +53,7 @@ class StuffModel:
         descriptions: typing.List[str] = []
 
         if self.weight:
-            descriptions.append(f"{self.weight}g")
+            descriptions.append(display_g_or_kg(self.weight))
 
         if self.filled_at is not None:
             descriptions.append(f"{self.filled_at}%")
@@ -60,6 +61,9 @@ class StuffModel:
         if self.filled_with_resource is not None:
             # TODO BS 2019-07-04: translation
             descriptions.append(f"{self.filled_with_resource}")
+
+        if self.clutter:
+            descriptions.append(f"{self.clutter} d'encombrement")
 
         return descriptions
 

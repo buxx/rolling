@@ -104,6 +104,7 @@ class CollectResourceAction(CharacterAction):
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=None,
+                        merge_by=(ActionType.COLLECT_RESOURCE, tile_type)
                     )
                 )
 
@@ -132,7 +133,7 @@ class CollectResourceAction(CharacterAction):
         return resource, resource_extraction_description, cost_per_unit
 
     def get_cost(
-        self, character: "CharacterModel", input_: input_model
+        self, character: "CharacterModel", input_: typing.Optional[input_model] = None
     ) -> typing.Optional[float]:
         if input_.quantity is not None:
             character_doc = self._character_lib.get_document(character.id)

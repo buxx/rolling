@@ -5,12 +5,12 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
@@ -44,7 +44,7 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel
+from rolling.util import EmptyModel, display_g_or_kg
 
 
 class CharacterController(BaseController):
@@ -156,23 +156,27 @@ class CharacterController(BaseController):
         clutter_overcharge = ""
 
         if inventory.weight > character.get_weight_capacity(self._kernel):
-            weight_overcharge = " !surcharge!"
+            weight_overcharge = " surcharge!"
 
         if inventory.clutter > character.get_clutter_capacity(self._kernel):
-            clutter_overcharge = " !surcharge!"
+            clutter_overcharge = " surcharge!"
 
+        weight_str = display_g_or_kg(inventory.weight)
+        max_weight_str = display_g_or_kg(max_weight)
         return Description(
             title="Inventory",
             items=[
                 Part(
-                    text=f"Poids transporté: {inventory.weight}g ({max_weight} max{weight_overcharge})"
+                    text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
                 ),
                 Part(
                     text=f"Encombrement: {inventory.clutter} ({max_clutter} max{clutter_overcharge})"
                 ),
                 Part(text=f"Sac(s): {bags_string}"),
+                Part(text=" "),
                 Part(text="Items:"),
                 *stuff_items,
+                Part(text=" "),
                 Part(text="Resources:"),
                 *resource_items,
             ],

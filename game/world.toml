@@ -11,6 +11,16 @@
           filled_at = 0.0
           # TODO BS 2019-07-04: add filled_with_resource, and change structure to permit multipler same stuff id
 
+    [ZONE_PROPERTIES.BEACH.RESOURCES]
+      [ZONE_PROPERTIES.BEACH.RESOURCES.PAGUROIDEA]  # bernard l'hermite, u
+        probability = 100.0  # probability to be available on x,y zone at world init
+        maximum = 500.0  # maximum quatity on x,y zone
+        regeneration = 50.0  # quatity generation per turn
+      [ZONE_PROPERTIES.BEACH.RESOURCES.MYTILIDA]  # moule, g
+        probability = 100.0
+        maximum = 100000.0
+        regeneration = 5000.0
+
   [ZONE_PROPERTIES.PLAIN]
     move_cost = 4.0
 
