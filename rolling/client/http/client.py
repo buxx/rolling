@@ -128,6 +128,13 @@ class HttpClient:
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
+    def get_build_on_place_actions(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/build_actions"
+        )
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())
+
     def get_zone_stuffs(
         self, world_row_i: int, world_col_i: int
     ) -> typing.List[StuffModel]:

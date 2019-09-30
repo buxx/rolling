@@ -210,6 +210,15 @@ class CharacterLib:
 
         return filter_action_links(character_actions_)
 
+    def get_build_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
+        character = self.get(character_id)
+        character_actions_: typing.List[CharacterActionLink] = []
+
+        for action in self._action_factory.get_all_build_actions():
+            character_actions_.extend(action.get_character_actions(character))
+
+        return filter_action_links(character_actions_)
+
     def get_on_stuff_actions(
         self, character_id: str, stuff_id: int
     ) -> typing.List[CharacterActionLink]:

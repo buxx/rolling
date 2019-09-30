@@ -104,7 +104,7 @@ class CollectResourceAction(CharacterAction):
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=None,
-                        merge_by=(ActionType.COLLECT_RESOURCE, tile_type)
+                        merge_by=(ActionType.COLLECT_RESOURCE, tile_type),
                     )
                 )
 

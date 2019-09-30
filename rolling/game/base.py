@@ -9,6 +9,10 @@ from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.ability import AbilityDescription
+from rolling.model.build import BuildDescription, BuildBuildRequireResourceDescription
+from rolling.model.build import BuildPowerOnRequireResourceDescription
+from rolling.model.build import BuildTurnRequireResourceDescription
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.extraction import ExtractableResourceDescriptionModel
@@ -63,6 +67,12 @@ class GameConfig:
             str, ResourceMixDescription
         ] = self._create_resource_mixs(config_dict)
         self._fill_resource_actions(config_dict)
+        self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(
+            config_dict
+        )
+        self._builds: typing.Dict[str, BuildDescription] = self._create_builds(
+            config_dict
+        )
 
     @property
     def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
@@ -89,6 +99,14 @@ class GameConfig:
     @property
     def actions(self) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
         return self._action_descriptions
+
+    @property
+    def abilities(self) -> typing.Dict[str, AbilityDescription]:
+        return self._abilities
+
+    @property
+    def builds(self) -> typing.Dict[str, BuildDescription]:
+        return self._builds
 
     def _create_character_effects(
         self, config_raw: dict
@@ -240,6 +258,51 @@ class GameConfig:
                 resource_mixs.append(resource_mix_description)
 
         return resource_mixs
+
+    def _create_ablilities(
+        self, config_dict: dict
+    ) -> typing.Dict[str, AbilityDescription]:
+        ablilities: typing.Dict[str, AbilityDescription] = {}
+
+        for ability_id, ability_raw in config_dict.get("ability", {}).items():
+            ablilities[ability_id] = AbilityDescription(
+                id=ability_id, name=ability_raw["name"]
+            )
+
+        return ablilities
+
+    def _create_builds(self, config_dict: dict) -> typing.Dict[str, BuildDescription]:
+        builts: typing.Dict[str, BuildDescription] = {}
+
+        for built_id, built_raw in config_dict.get("built", {}).items():
+            builts[built_id] = BuildDescription(
+                id=built_id,
+                name=built_raw["name"],
+                char=built_raw["char"],
+                cost=built_raw["cost"],
+                building_char=built_raw["building_char"],
+                ability_ids=built_raw.get("abilities", []),
+                build_require_resources=[
+                    BuildBuildRequireResourceDescription(
+                        resource_id=r["resource"], quantity=r["quantity"]
+                    )
+                    for r in built_raw.get("build_require_resources", [])
+                ],
+                turn_require_resources=[
+                    BuildTurnRequireResourceDescription(
+                        resource_id=r["resource"], quantity=r["quantity"]
+                    )
+                    for r in built_raw.get("turn_require_resources", [])
+                ],
+                power_on_require_resources=[
+                    BuildPowerOnRequireResourceDescription(
+                        resource_id=r["resource"], quantity=r["quantity"]
+                    )
+                    for r in built_raw.get("power_on_require_resources", [])
+                ],
+            )
+
+        return builts
 
 
 class Game:

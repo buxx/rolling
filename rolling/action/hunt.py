@@ -4,9 +4,12 @@ import typing
 
 import serpyco
 
-from guilang.description import Description, Part
-from rolling.action.base import CharacterAction, get_character_action_url
-from rolling.exception import ImpossibleAction, RollingError
+from guilang.description import Description
+from guilang.description import Part
+from rolling.action.base import CharacterAction
+from rolling.action.base import get_character_action_url
+from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.model.measure import Unit
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
@@ -38,30 +41,46 @@ class SearchFoodAction(CharacterAction):
         }
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        character_stuff_ids = [s.id for s in self._kernel.stuff_lib.get_carried_by(character.id)]
+        character_stuff_ids = [
+            s.id for s in self._kernel.stuff_lib.get_carried_by(character.id)
+        ]
         character_skill_ids = []  # TODO BS 2019-09-26: code it
         one_of_required_stuff_found = False
         one_of_required_skill_found = False
 
-        for required_one_of_stuff_id in self._description.properties["required_one_of_stuff_ids"]:
+        for required_one_of_stuff_id in self._description.properties[
+            "required_one_of_stuff_ids"
+        ]:
             if required_one_of_stuff_id in character_stuff_ids:
                 one_of_required_stuff_found = True
 
-        for required_one_of_skill_id in self._description.properties["required_one_of_skill_ids"]:
+        for required_one_of_skill_id in self._description.properties[
+            "required_one_of_skill_ids"
+        ]:
             if required_one_of_skill_id in character_skill_ids:
                 one_of_required_skill_found = True
 
-        if self._description.properties["required_one_of_stuff_ids"] and not one_of_required_stuff_found:
+        if (
+            self._description.properties["required_one_of_stuff_ids"]
+            and not one_of_required_stuff_found
+        ):
             raise ImpossibleAction("Manque de matériel")
 
-        if self._description.properties["required_one_of_skill_ids"] and not one_of_required_skill_found:
+        if (
+            self._description.properties["required_one_of_skill_ids"]
+            and not one_of_required_skill_found
+        ):
             raise ImpossibleAction("Manque de compétence")
 
-        for required_all_stuff_id in self._description.properties["required_all_stuff_ids"]:
+        for required_all_stuff_id in self._description.properties[
+            "required_all_stuff_ids"
+        ]:
             if required_all_stuff_id not in character_stuff_ids:
                 raise ImpossibleAction("Manque de matériels")
 
-        for required_all_skill_id in self._description.properties["required_all_skill_ids"]:
+        for required_all_skill_id in self._description.properties[
+            "required_all_skill_ids"
+        ]:
             if required_all_skill_id not in character_skill_ids:
                 raise ImpossibleAction("Manque de compétences")
 
@@ -83,7 +102,7 @@ class SearchFoodAction(CharacterAction):
                     query_params={},
                 ),
                 cost=self.get_cost(character),
-            ),
+            )
         ]
 
     def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
@@ -138,7 +157,10 @@ class SearchFoodAction(CharacterAction):
             # TODO BS 2019-09-26: Modify here quantity found with skills, competences, stuffs ...
             resource_description = self._kernel.game.config.resources[resource_id]
             quantity_found_coeff = random.randint(0, 100) / 100
-            quantity_found = production_per_resource_ids[resource_id]["quantity"] * quantity_found_coeff
+            quantity_found = (
+                production_per_resource_ids[resource_id]["quantity"]
+                * quantity_found_coeff
+            )
             if resource_description.unit == Unit.UNIT:
                 quantity_found = round(quantity_found)
 
@@ -146,7 +168,9 @@ class SearchFoodAction(CharacterAction):
                 continue
 
             unit_str = self._kernel.translation.get(resource_description.unit)
-            result_resource_strs.append(f"{quantity_found} {unit_str} de {resource_description.name} ")
+            result_resource_strs.append(
+                f"{quantity_found} {unit_str} de {resource_description.name} "
+            )
             self._kernel.resource_lib.add_resource_to_character(
                 character.id,
                 resource_id=resource_id,
@@ -165,7 +189,9 @@ class SearchFoodAction(CharacterAction):
             for i in range(quantity_found):
                 raise NotImplementedError("TODO")
 
-        self._kernel.character_lib.reduce_action_points(character.id, cost=self.get_cost(character, input_))
+        self._kernel.character_lib.reduce_action_points(
+            character.id, cost=self.get_cost(character, input_)
+        )
         self._kernel.server_db_session.commit()
 
         parts = []

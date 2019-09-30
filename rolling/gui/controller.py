@@ -315,6 +315,17 @@ class Controller:
             self, self.view, self.view.right_menu_container.original_widget
         )
 
+    def display_zone_build_on_place(self, *args, **kwargs) -> None:
+        actions_widget = self.guilang.generate_widget(
+            self.client.get_build_on_place_actions(self.player_character.id),
+            success_callback=self._continue_zone_action,
+            success_serializer=None,
+        )
+        self.view.main_content_container.original_widget = actions_widget
+        self.view.right_menu_container.original_widget = GoBackSubMenu(
+            self, self.view, self.view.right_menu_container.original_widget
+        )
+
     def _continue_zone_action(self, form_values: dict) -> None:
         pass
 

@@ -161,7 +161,8 @@ def display_g_or_kg(grams: float) -> str:
     return f"{round(grams/1000, 3)} kg"
 
 
-def quantity_to_str(quantity: float, unit: Unit) -> str:
+def quantity_to_str(quantity: float, unit: Unit, kernel: "Kernel") -> str:
     if unit == Unit.GRAM:
         return display_g_or_kg(quantity)
-    return str(quantity)
+    unit_str = kernel.translation.get(unit)
+    return f"{str(quantity)} {unit_str}"

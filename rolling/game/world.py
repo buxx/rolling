@@ -16,7 +16,13 @@ if typing.TYPE_CHECKING:
 
 
 class ZoneState:
-    def __init__(self, kernel: "Kernel", world_row_i: int, world_col_i: int, properties: ZoneProperties) -> None:
+    def __init__(
+        self,
+        kernel: "Kernel",
+        world_row_i: int,
+        world_col_i: int,
+        properties: ZoneProperties,
+    ) -> None:
         self._kernel = kernel
         self._world_row_i = world_row_i
         self._world_col_i = world_col_i
@@ -123,15 +129,26 @@ class WorldManager:
         return list(set(resources))
 
     def get_zone_state(self, world_row_i: int, world_col_i: int) -> ZoneState:
-        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][
+            world_col_i
+        ]
         zone_type = typing.cast(ZoneMapTileType, zone_type)
         zone_properties = self.get_zone_properties(zone_type)
-        return ZoneState(self._kernel, world_row_i=world_row_i, world_col_i=world_col_i, properties=zone_properties)
+        return ZoneState(
+            self._kernel,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            properties=zone_properties,
+        )
 
-    def is_there_stuff_in_zone(self, world_row_i: int, world_col_i: int, stuff_id: str) -> bool:
+    def is_there_stuff_in_zone(
+        self, world_row_i: int, world_col_i: int, stuff_id: str
+    ) -> bool:
         zone_state = self.get_zone_state(world_row_i, world_col_i)
         return zone_state.is_there_stuff(stuff_id)
 
-    def is_there_resource_in_zone(self, world_row_i: int, world_col_i: int, resource_id: str) -> bool:
+    def is_there_resource_in_zone(
+        self, world_row_i: int, world_col_i: int, resource_id: str
+    ) -> bool:
         zone_state = self.get_zone_state(world_row_i, world_col_i)
         return zone_state.is_there_resource(resource_id)

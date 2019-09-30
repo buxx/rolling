@@ -44,7 +44,8 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel, display_g_or_kg
+from rolling.util import EmptyModel
+from rolling.util import display_g_or_kg
 
 
 class CharacterController(BaseController):
@@ -193,10 +194,28 @@ class CharacterController(BaseController):
         )
 
         return Description(
-            title="Here, you can:",
+            title="Ici, vous pouvez:",
             items=[
                 Part(text=action.get_as_str(), form_action=action.link, is_link=True)
                 for action in character_actions
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_build_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        build_actions = self._character_lib.get_build_actions(
+            hapic_data.path.character_id
+        )
+
+        return Description(
+            title="Ici pouvez démarrer la construction de:",
+            items=[
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                for action in build_actions
             ],
         )
 
@@ -211,7 +230,7 @@ class CharacterController(BaseController):
         )
 
         return Description(
-            title="Events:",
+            title="Evenements:",
             is_long_text=True,
             items=[
                 Part(
@@ -519,6 +538,10 @@ class CharacterController(BaseController):
                 web.get(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
+                ),
+                web.get(
+                    "/_describe/character/{character_id}/build_actions",
+                    self._describe_build_actions,
                 ),
                 web.get(
                     "/_describe/character/{character_id}/events", self._describe_events

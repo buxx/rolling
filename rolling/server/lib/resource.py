@@ -88,7 +88,7 @@ class ResourceLib:
 
         if resource_description.unit in (Unit.UNIT, Unit.CUBIC, Unit.LITTER):
             weight = float(doc.quantity) * resource_description.weight
-        elif resource_description.unit in (Unit.GRAM, ):
+        elif resource_description.unit in (Unit.GRAM,):
             weight = float(doc.quantity)
         else:
             raise NotImplementedError()
@@ -177,3 +177,11 @@ class ResourceLib:
             actions.extend(action.get_character_actions(character, resource_id))
 
         return actions
+
+    def get_stored_in_build(self, build_id: int) -> typing.List[CarriedResourceDescriptionModel]:
+        carried = (
+            self._kernel.server_db_session.query(ResourceDocument)
+                .filter(ResourceDocument.in_built_id == build_id)
+                .all()
+        )
+        return [self._carried_resource_model_from_doc(doc) for doc in carried]

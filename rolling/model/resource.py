@@ -4,7 +4,8 @@ import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit
-from rolling.util import display_g_or_kg, quantity_to_str
+from rolling.util import display_g_or_kg
+from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -21,6 +22,7 @@ class ResourceDescriptionModel:
     descriptions: typing.List[ActionDescriptionModel]
 
 
+# FIXME BS: rename (can be in build)
 @dataclasses.dataclass
 class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     quantity: float
@@ -28,7 +30,7 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
 
     def get_full_description(self, kernel: "Kernel") -> str:
         weight = display_g_or_kg(self.weight)
-        quantity_str = quantity_to_str(self.quantity, self.unit)
+        quantity_str = quantity_to_str(self.quantity, self.unit, kernel=kernel)
         of = " "
         if self.unit != Unit.UNIT:
             of = " de "

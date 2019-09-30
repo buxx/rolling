@@ -25,6 +25,10 @@ default_clutter_capacity = 5.0
   [materials.GAS]
     name = "Gazeu"
 
+[ability]
+[ability.HEAT_UP_LOW_TEMP]
+  name = "Cuisson"
+
 [character_effects]
   [character_effects.THIRSTY_SATISFIED]
     attributes_to_false = ["dehydrated", "feel_thirsty"]
@@ -249,6 +253,15 @@ default_clutter_capacity = 5.0
     actions = ["DROP_STUFF"]
     cost = 0.0
 
+  [ACTIONS.BRING_RESOURCE_ON_BUILD]  # required by system !
+    actions = ["BRING_RESOURCE_ON_BUILD"]
+    cost = 0.0
+
+  [ACTIONS.BUILD_CAMP_FIRE]
+    actions = ["BUILD"]
+    build = "CAMP_FIRE"
+    cost = 0.1  # start build cost
+
   [ACTIONS.HUNT_CRUSTACEANS]
     name = "Chercher des crustacés"
     actions = ["SEARCH_FOOD"]
@@ -262,8 +275,13 @@ default_clutter_capacity = 5.0
     ]
     cost = 6.0
 
-#  [ACTIONS.CRAFT_CAMPFIRE]
-#    actions = ["CRAFT_FROM_RESOURCES"]
-#    required_resources = [{resource="WOOD", required=5.0}, {resource="TWIGS", required=20.0}]
-#    craft_on_zone = "CAMP_FIRE"
-#    cost = 2.0
+[built]
+[built.CAMP_FIRE]
+  name = "Feux de camp"
+  char = "⍟"
+  building_char = "x"
+  build_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  abilities = ["HEAT_UP_LOW_TEMP"]
+  cost = 2.0
