@@ -5,12 +5,15 @@ import typing
 from rolling.exception import NoDisplayObjectAtThisPosition
 from rolling.gui.palette import PALETTE_CHARACTER
 from rolling.gui.palette import PALETTE_POSITION
+from rolling.gui.palette import PALETTE_STD_BUILD
 from rolling.gui.palette import PALETTE_STUFF
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 
 
 class DisplayObject:
+    permanent: bool = False
+
     def __init__(self, row_i: int, col_i: int) -> None:
         self._row_i = row_i
         self._col_i = col_i
@@ -104,6 +107,37 @@ class StuffDisplay(DisplayObject):
         return str(self._stuff.id)
 
 
+class BuildDisplay(DisplayObject):
+    permanent: bool = True
+
+    def __init__(
+        self,
+        row_i: int,
+        col_i: int,
+        id_: int,
+        char: str,
+        palette_id: str = PALETTE_STD_BUILD,
+    ) -> None:
+        self._row_i = row_i
+        self._col_i = col_i
+        self._char = char
+        self._palette_id = palette_id
+        self._id = str(id_)
+
+    @property
+    def palette_id(self) -> str:
+        # TODO BS 2019-10-02: generate palette at startup from server
+        return self._palette_id
+
+    @property
+    def char(self) -> str:
+        return self._char
+
+    @property
+    def id(self) -> str:
+        return self._id
+
+
 class DisplayObjectManager:
     def __init__(self, objects: typing.List[DisplayObject], period: float = 0.50):
         self._period: float = period
@@ -168,6 +202,10 @@ class DisplayObjectManager:
         try:
             display_objects = self._objects_by_position[(x, y)]
             for display_object in display_objects:
+                # if permanent, bypass timing
+                if display_object.permanent:
+                    return display_object.char
+
                 try:
                     displayed, displayed_time = self._timings[display_object]
                     if time.time() - displayed_time >= self._period:

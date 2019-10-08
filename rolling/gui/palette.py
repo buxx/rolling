@@ -7,6 +7,7 @@ PALETTE_CHARACTER = "PALETTE_CHARACTER"
 PALETTE_STUFF = "PALETTE_STUFF"
 PALETTE_POSITION = "PALETTE_POSITION"
 PALETTE_BG_COLOR = "BG_COLOR_H{}"
+PALETTE_STD_BUILD = "STD_BUILD"
 
 
 class PaletteGenerator:
@@ -35,5 +36,8 @@ class PaletteGenerator:
 
         for i in range(256):
             palette.append((PALETTE_BG_COLOR.format(i), "white", "", "", "", f"h{i}"))
+
+        # Hardcoded palette
+        palette.append((PALETTE_STD_BUILD, "", "", "", "white,bold", ""))
 
         return palette

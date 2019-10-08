@@ -156,6 +156,7 @@ class Generator:
 
         if description.title:
             widgets.append(urwid.Text(description.title))
+            widgets.append(urwid.Text(" "))
         widgets.extend(generate_for_items(description.items))
 
         description_widget = DescriptionWidget(widgets)

@@ -65,6 +65,7 @@ class ZoneMenu(BaseMenu):
             ("Carte du monde", self._display_world_map_callback),
             ("Événements", self._display_events),
             ("Actions", self._display_actions_on_place),
+            ("Construire", self._display_build_on_place),
             ("Fiche", self._display_character_card),
             ("Inventaire", self._display_inventory),
             ("Se déconnecter", self._go_back_root_callback),
@@ -116,6 +117,9 @@ class ZoneMenu(BaseMenu):
 
     def _display_actions_on_place(self, *args, **kwargs) -> None:
         self._controller.display_zone_actions_on_place()
+
+    def _display_build_on_place(self, *args, **kwargs) -> None:
+        self._controller.display_zone_build_on_place()
 
     def _go_back_root_callback(self, *args, **kwargs):
         self._controller.disconnect()

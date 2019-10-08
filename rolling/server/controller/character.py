@@ -5,16 +5,17 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
-from hapic import HapicData
 from rolling.action.base import CharacterAction
+from rolling.action.base import WithBuildAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.exception import CantMoveCharacter
+from rolling.exception import CantMoveCharacter, NotEnoughActionPoints
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
@@ -26,6 +27,7 @@ from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.stuff import CharacterInventoryModel
@@ -38,13 +40,15 @@ from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel, display_g_or_kg
+from rolling.util import EmptyModel, get_description_for_not_enough_ap
+from rolling.util import display_g_or_kg
 
 
 class CharacterController(BaseController):
@@ -193,10 +197,28 @@ class CharacterController(BaseController):
         )
 
         return Description(
-            title="Here, you can:",
+            title="Ici, vous pouvez:",
             items=[
                 Part(text=action.get_as_str(), form_action=action.link, is_link=True)
                 for action in character_actions
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_build_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        build_actions = self._character_lib.get_build_actions(
+            hapic_data.path.character_id
+        )
+
+        return Description(
+            title="Ici pouvez démarrer la construction de:",
+            items=[
+                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                for action in build_actions
             ],
         )
 
@@ -211,7 +233,7 @@ class CharacterController(BaseController):
         )
 
         return Description(
-            title="Events:",
+            title="Evenements:",
             is_long_text=True,
             items=[
                 Part(
@@ -361,6 +383,55 @@ class CharacterController(BaseController):
             )
 
         return action.perform(character=character_model, stuff=stuff, input_=input_)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(WithBuildActionModel)
+    @hapic.output_body(Description)
+    async def with_build_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        action_type = hapic_data.path.action_type
+        action = typing.cast(
+            WithBuildAction,
+            self._action_factory.create_action(
+                action_type, action_description_id=hapic_data.path.action_description_id
+            ),
+        )
+        input_ = action.input_model_serializer.load(dict(request.query))
+        character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
+        # TODO BS 2019-07-04: Check character can action on build...
+
+        cost = action.get_cost(character_model, hapic_data.path.build_id, input_=input_)
+        if cost is not None and character_model.action_points < cost:
+            return get_description_for_not_enough_ap(character_model, cost)
+
+        try:
+            action.check_request_is_possible(
+                character=character_model,
+                build_id=hapic_data.path.build_id,
+                input_=input_,
+            )
+        except NotEnoughActionPoints as exc:
+            return get_description_for_not_enough_ap(character_model, exc.cost)
+        except ImpossibleAction as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+            )
+
+        # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
+        #  in perform like in this action !
+        try:
+            return action.perform(
+                character=character_model,
+                build_id=hapic_data.path.build_id,
+                input_=input_,
+            )
+        except ImpossibleAction as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+            )
 
     @hapic.with_api_doc()
     @hapic.input_path(WithResourceActionModel)
@@ -521,6 +592,10 @@ class CharacterController(BaseController):
                     self._describe_on_place_actions,
                 ),
                 web.get(
+                    "/_describe/character/{character_id}/build_actions",
+                    self._describe_build_actions,
+                ),
+                web.get(
                     "/_describe/character/{character_id}/events", self._describe_events
                 ),
                 web.post(POST_CHARACTER_URL, self.create),
@@ -541,6 +616,7 @@ class CharacterController(BaseController):
                 ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
+                web.post(WITH_BUILD_ACTION, self.with_build_action),
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
                 web.get(

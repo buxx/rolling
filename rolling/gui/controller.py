@@ -17,6 +17,7 @@ from rolling.exception import ComponentNotPrepared
 from rolling.exception import NotConnectedToServer
 from rolling.gui.dialog import SimpleDialog
 from rolling.gui.guilang import Generator as GuilangGenerator
+from rolling.gui.map.object import BuildDisplay
 from rolling.gui.map.object import Character
 from rolling.gui.map.object import CurrentPlayer
 from rolling.gui.map.object import DisplayObjectManager
@@ -245,6 +246,18 @@ class Controller:
                 )
             )
 
+        for zone_build in self._client.get_zone_builds(
+            self._player_character.world_row_i, self._player_character.world_col_i
+        ):
+            self._display_objects_manager.add_object(
+                BuildDisplay(
+                    zone_build.row_i,
+                    zone_build.col_i,
+                    id_=zone_build.id,
+                    char=zone_build.char,
+                )
+            )
+
         for stuff in self._client.get_zone_stuffs(
             self._player_character.world_row_i, self._player_character.world_col_i
         ):
@@ -307,6 +320,17 @@ class Controller:
     def display_zone_actions_on_place(self, *args, **kwargs) -> None:
         actions_widget = self.guilang.generate_widget(
             self.client.get_character_on_place_actions(self.player_character.id),
+            success_callback=self._continue_zone_action,
+            success_serializer=None,
+        )
+        self.view.main_content_container.original_widget = actions_widget
+        self.view.right_menu_container.original_widget = GoBackSubMenu(
+            self, self.view, self.view.right_menu_container.original_widget
+        )
+
+    def display_zone_build_on_place(self, *args, **kwargs) -> None:
+        actions_widget = self.guilang.generate_widget(
+            self.client.get_build_on_place_actions(self.player_character.id),
             success_callback=self._continue_zone_action,
             success_serializer=None,
         )

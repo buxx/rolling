@@ -126,7 +126,7 @@ class EatResourceAction(WithResourceAction):
             CharacterEffectDescriptionModel
         ] = self._description.properties["effects"]
 
-        self._kernel.resource_lib.reduce(
+        self._kernel.resource_lib.reduce_carried_by(
             character.id,
             resource_id,
             quantity=self._description.properties["require"],

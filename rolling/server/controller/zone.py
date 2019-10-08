@@ -1,14 +1,17 @@
 #  coding: utf-8
+from collections import namedtuple
 import typing
 
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
-
 from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
+
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
+from rolling.model.build import ZoneBuildModel
+from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import GetZonePathModel
@@ -78,6 +81,24 @@ class ZoneController(BaseController):
             world_col_i=request.match_info["col_i"],
         )
 
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoZoneMapError, http_code=404)
+    @hapic.input_path(GetZonePathModel)
+    @hapic.output_body(ZoneBuildModel, processor=SerpycoProcessor(many=True))
+    async def get_builds(
+        self, request: Request, hapic_data: HapicData
+    ) -> typing.List[ZoneBuildModel]:
+        build_docs = self._kernel.build_lib.get_zone_build(
+            world_row_i=hapic_data.path.row_i, world_col_i=hapic_data.path.col_i
+        )
+        zone_builds = [None] * len(build_docs)  # performances (possible lot of builds)
+        for i, build_doc in enumerate(build_docs):
+            zone_builds[i] = ZoneBuildModelContainer(
+                doc=build_doc, desc=self._kernel.game.config.builds[build_doc.build_id]
+            )
+        zone_builds = typing.cast(typing.List[ZoneBuildModel], zone_builds)
+        return zone_builds
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -87,5 +108,6 @@ class ZoneController(BaseController):
                 # TODO BS 2019-01-23: put /zones/{row_i}/{col_i}/enter to ask entering in zone
                 web.get("/zones/{row_i}/{col_i}/characters", self.get_characters),
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
+                web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
             ]
         )

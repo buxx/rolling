@@ -12,7 +12,6 @@ from sqlalchemy.orm import sessionmaker
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
-from rolling.exception import RollingError
 from rolling.game.base import Game
 from rolling.log import kernel_logger
 from rolling.map.legend import WorldMapLegend
@@ -23,9 +22,11 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.server.action import ActionFactory
 from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
+from rolling.server.lib.build import BuildLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
@@ -99,7 +100,9 @@ class Kernel:
         self._stuff_lib: typing.Optional["StuffLib"] = None
         self._resource_lib: typing.Optional["ResourceLib"] = None
         self._character_lib: typing.Optional["CharacterLib"] = None
+        self._build_lib: typing.Optional["BuildLib"] = None
         self._effect_manager: typing.Optional["EffectManager"] = None
+        self._action_factory: typing.Optional[ActionFactory] = None
         self._translation = GlobalTranslation()
 
     @property
@@ -123,6 +126,18 @@ class Kernel:
         if self._character_lib is None:
             self._character_lib = CharacterLib(self, stuff_lib=self.stuff_lib)
         return self._character_lib
+
+    @property
+    def build_lib(self) -> BuildLib:
+        if self._build_lib is None:
+            self._build_lib = BuildLib(self)
+        return self._build_lib
+
+    @property
+    def action_factory(self) -> ActionFactory:
+        if self._action_factory is None:
+            self._action_factory = ActionFactory(self)
+        return self._action_factory
 
     @property
     def effect_manager(self) -> EffectManager:

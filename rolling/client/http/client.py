@@ -8,6 +8,7 @@ import serpyco
 from guilang.description import Description
 from rolling.exception import CantChangeZone
 from rolling.exception import ClientServerExchangeError
+from rolling.model.build import ZoneBuildModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import StuffModel
@@ -29,6 +30,7 @@ class HttpClient:
         self._zone_required_character_data_serializer = serpyco.Serializer(
             ZoneRequiredPlayerData
         )
+        self._zone_build_serializers = serpyco.Serializer(ZoneBuildModel, many=True)
 
     @property
     def character_serializer(self) -> serpyco.Serializer:
@@ -128,6 +130,13 @@ class HttpClient:
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
+    def get_build_on_place_actions(self, character_id: str) -> Description:
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/build_actions"
+        )
+        self._check_response(response)
+        return self._gui_description_serializer.load(response.json())
+
     def get_zone_stuffs(
         self, world_row_i: int, world_col_i: int
     ) -> typing.List[StuffModel]:
@@ -139,6 +148,18 @@ class HttpClient:
         self._check_response(response)
         response_json = response.json()
         return self._stuffs_serializer.load(response_json)
+
+    def get_zone_builds(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[ZoneBuildModel]:
+        response = requests.get(
+            "{}/zones/{}/{}/builds".format(
+                self._server_address, world_row_i, world_col_i
+            )
+        )
+        self._check_response(response)
+        response_json = response.json()
+        return self._zone_build_serializers.load(response_json)
 
     def get_character_events(self, character_id: str) -> Description:
         response = requests.get(

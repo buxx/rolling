@@ -106,6 +106,24 @@ class ImpossibleAction(GamePlayError):
     pass
 
 
+class NoCarriedResource(GamePlayError):
+    pass
+
+
+class NotEnoughResource(GamePlayError):
+    pass
+
+
+class MissingResource(GamePlayError):
+    pass
+
+
+class NotEnoughActionPoints(GamePlayError):
+    def __init__(self, cost: float, msg: typing.Optional[str] = None):
+        super().__init__(str)
+        self.cost = cost
+
+
 class NoMetaLine(SourceLoadError):
     pass
 

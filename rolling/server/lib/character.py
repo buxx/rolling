@@ -8,6 +8,7 @@ from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
 from rolling.server.action import ActionFactory
+from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.character import CharacterDocument
@@ -16,6 +17,7 @@ from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import filter_action_links
+from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -185,6 +187,9 @@ class CharacterLib:
         self, character_id: str
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
         character_actions_: typing.List[CharacterActionLink] = []
 
         # Actions with near items
@@ -197,15 +202,43 @@ class CharacterLib:
         for item in on_same_position_items:
             character_actions_.append(
                 CharacterActionLink(
-                    name=f"Take a look on {item.name}",
+                    name=f"Jeter un coup d'oeil sur {item.name}",
                     link=DESCRIBE_LOOT_AT_STUFF_URL.format(
                         character_id=character_id, stuff_id=item.id
                     ),
                 )
             )
 
+        # Actions with near items
+        for around_row_i, around_col_i in around_character:
+            on_same_position_builds = self._kernel.build_lib.get_zone_build(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=around_row_i,
+                zone_col_i=around_col_i,
+            )
+            for build in on_same_position_builds:
+                build_description = self._kernel.game.config.builds[build.build_id]
+                character_actions_.append(
+                    CharacterActionLink(
+                        name=f"Jeter un coup d'oeil sur {build_description.name}",
+                        link=DESCRIBE_BUILD.format(
+                            character_id=character_id, build_id=build.id
+                        ),
+                    )
+                )
+
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
+            character_actions_.extend(action.get_character_actions(character))
+
+        return filter_action_links(character_actions_)
+
+    def get_build_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
+        character = self.get(character_id)
+        character_actions_: typing.List[CharacterActionLink] = []
+
+        for action in self._action_factory.get_all_build_actions():
             character_actions_.extend(action.get_character_actions(character))
 
         return filter_action_links(character_actions_)

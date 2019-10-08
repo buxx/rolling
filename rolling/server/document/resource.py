@@ -21,7 +21,8 @@ class ResourceDocument(Document):
 
     # properties
     unit = Column(Enum(*[u.value for u in Unit]), nullable=True)
-    quantity = Column(Numeric(10, 4), nullable=False)
+    quantity = Column(Numeric(12, 6), nullable=False)
 
     # relations
-    carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=False)
+    carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
+    in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)

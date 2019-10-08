@@ -73,6 +73,14 @@ class WithStuffActionModel:
 
 
 @dataclasses.dataclass
+class WithBuildActionModel:
+    character_id: str
+    action_type: ActionType
+    action_description_id: str
+    build_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
 class WithResourceActionModel:
     character_id: str
     resource_id: str

@@ -8,10 +8,12 @@ from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
+from guilang.description import Description, Part
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.stuff import StuffModel
+    from rolling.model.character import CharacterModel
 
 
 @dataclasses.dataclass
@@ -161,7 +163,21 @@ def display_g_or_kg(grams: float) -> str:
     return f"{round(grams/1000, 3)} kg"
 
 
-def quantity_to_str(quantity: float, unit: Unit) -> str:
+def quantity_to_str(quantity: float, unit: Unit, kernel: "Kernel") -> str:
     if unit == Unit.GRAM:
         return display_g_or_kg(quantity)
-    return str(quantity)
+    unit_str = kernel.translation.get(unit)
+    return f"{str(quantity)} {unit_str}"
+
+
+def get_description_for_not_enough_ap(character: "CharacterModel", cost: float) -> Description:
+    return Description(
+        title="Action impossible",
+        items=[
+            Part(
+                text=f"{character.name} ne possède plus assez de points d'actions "
+                f"({character.action_points} restant et {cost} nécessaires)"
+            ),
+            Part(label="Continue", go_back_zone=True),
+        ],
+    )

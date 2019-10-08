@@ -4,8 +4,12 @@ import typing
 from rolling.action.bag import NotUseAsBagAction
 from rolling.action.bag import UseAsBagAction
 from rolling.action.base import CharacterAction
+from rolling.action.base import WithBuildAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
+from rolling.action.build import BeginBuildAction
+from rolling.action.build import BringResourcesOnBuild
+from rolling.action.build import ConstructBuild
 from rolling.action.collect import CollectResourceAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
@@ -41,6 +45,9 @@ class ActionFactory:
         ActionType.EAT_STUFF: EatStuffAction,
         ActionType.EAT_RESOURCE: EatResourceAction,
         ActionType.SEARCH_FOOD: SearchFoodAction,
+        ActionType.BEGIN_BUILD: BeginBuildAction,
+        ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
+        ActionType.CONSTRUCT_BUILD: ConstructBuild,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -70,6 +77,15 @@ class ActionFactory:
             ActionType.COLLECT_RESOURCE: CollectResourceAction,
             ActionType.SEARCH_FOOD: SearchFoodAction,
         }
+        self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
+            ActionType.BEGIN_BUILD: BeginBuildAction
+        }
+        self._with_build_actions: typing.Dict[
+            ActionType, typing.Type[WithBuildAction]
+        ] = {
+            ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
+            ActionType.CONSTRUCT_BUILD: ConstructBuild,
+        }
 
     def get_with_stuff_action(
         self, action_description: "ActionDescriptionModel"
@@ -92,10 +108,46 @@ class ActionFactory:
             self._kernel, description=action_description
         )
 
+    def get_build_action(
+        self, action_description: "ActionDescriptionModel"
+    ) -> CharacterAction:
+        return self._build_actions[action_description.action_type](
+            self._kernel, description=action_description
+        )
+
+    def get_with_build_action(
+        self, action_description: "ActionDescriptionModel"
+    ) -> WithBuildAction:
+        return self._with_build_actions[action_description.action_type](
+            self._kernel, description=action_description
+        )
+
     def get_all_character_actions(self) -> typing.List[CharacterAction]:
         actions: typing.List[CharacterAction] = []
 
         for action_type, action_class in self._character_actions.items():
+            for action_description in self._kernel.game.config.actions[action_type]:
+                actions.append(
+                    action_class(kernel=self._kernel, description=action_description)
+                )
+
+        return actions
+
+    def get_all_build_actions(self) -> typing.List[CharacterAction]:
+        actions: typing.List[CharacterAction] = []
+
+        for action_type, action_class in self._build_actions.items():
+            for action_description in self._kernel.game.config.actions[action_type]:
+                actions.append(
+                    action_class(kernel=self._kernel, description=action_description)
+                )
+
+        return actions
+
+    def get_all_with_build_actions(self) -> typing.List[WithBuildAction]:
+        actions: typing.List[WithBuildAction] = []
+
+        for action_type, action_class in self._with_build_actions.items():
             for action_description in self._kernel.game.config.actions[action_type]:
                 actions.append(
                     action_class(kernel=self._kernel, description=action_description)
@@ -112,6 +164,8 @@ class ActionFactory:
             action_type in self._with_stuff_actions
             or action_type in self._with_resource_actions
             or action_type in self._character_actions
+            or action_type in self._build_actions
+            or action_type in self._with_build_actions
         ):
             for action_description in self._kernel.game.config.actions[action_type]:
                 if (

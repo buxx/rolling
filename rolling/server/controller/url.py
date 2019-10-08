@@ -23,6 +23,8 @@ CHARACTER_ACTION = (
 WITH_STUFF_ACTION = (
     "/character/{character_id}/with-stuff-action/{action_type}/{stuff_id}"
 )
+WITH_BUILD_ACTION = "/character/{character_id}/with-build-action/{action_type}/{build_id}/{action_description_id}"
 WITH_RESOURCE_ACTION = (
     "/character/{character_id}/with-resource-action/{action_type}/{resource_id}"
 )
+DESCRIBE_BUILD = "/character/{character_id}/build/{build_id}"
