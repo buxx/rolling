@@ -11,6 +11,7 @@ from rolling.gui.dialog import SimpleDialog
 from rolling.gui.map.render import MapRenderEngine
 from rolling.gui.play.zone import ChangeZoneDialog
 from rolling.map.source import ZoneMapSource
+from rolling.model.zone import MoveZoneInfos
 from rolling.util import CornerEnum
 
 if typing.TYPE_CHECKING:
@@ -115,18 +116,37 @@ class TileMapWidget(MapWidget):
         zone_map_widget = self._controller._view.main_content_container.original_widget
         world_row_i, world_col_i = self._connector.get_zone_coordinates(corner)
 
+        move_zone_infos: MoveZoneInfos = self._controller.client.get_move_zone_infos(
+            character_id=self._controller.player_character.id,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )
+
+        if not move_zone_infos.can_move:
+            self._controller._view.main_content_container.original_widget = SimpleDialog(
+                kernel=self._controller.kernel,
+                controller=self._controller,
+                original_widget=self._controller.view.main_content_container.original_widget,
+                title=f"Vous ne pouvez pas marcher vers là-bas, "
+                f"cela nécessiterait {move_zone_infos.cost} points d'actions",
+                go_back=True,
+            )
+            return
+
         zones = self._controller.kernel.world_map_source.geography.rows
-        if world_row_i in zones and world_col_i in zones[world_row_i]:
+        try:
+            zones[world_row_i][world_col_i]  # test if zone exist
             self._controller._view.main_content_container.original_widget = ChangeZoneDialog(
                 kernel=self._controller.kernel,
                 controller=self._controller,
                 original_widget=zone_map_widget,
-                title="Move to an other zone",
-                text="You are trying to move on other zone, continue ?",
+                title="Marchez vers là bas ?",
+                text=f"Marchez pour arrivez à votre destination "
+                f"vous coutera {move_zone_infos.cost} points d'actions",
                 world_row_i=world_row_i,
                 world_col_i=world_col_i,
             )
-        else:
+        except IndexError:
             self._controller._view.main_content_container.original_widget = SimpleDialog(
                 kernel=self._controller.kernel,
                 controller=self._controller,

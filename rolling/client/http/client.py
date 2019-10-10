@@ -12,6 +12,7 @@ from rolling.model.build import ZoneBuildModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import StuffModel
+from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.model.zone import ZoneTileTypeModel
@@ -27,10 +28,9 @@ class HttpClient:
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
         self._tiles_serializer = serpyco.Serializer(ZoneTileTypeModel, many=True)
         self._gui_description_serializer = serpyco.Serializer(Description)
-        self._zone_required_character_data_serializer = serpyco.Serializer(
-            ZoneRequiredPlayerData
-        )
+        self._zone_required_character_data_serializer = serpyco.Serializer(ZoneRequiredPlayerData)
         self._zone_build_serializers = serpyco.Serializer(ZoneBuildModel, many=True)
+        self._move_zone_infos_serializer = serpyco.Serializer(MoveZoneInfos)
 
     @property
     def character_serializer(self) -> serpyco.Serializer:
@@ -178,8 +178,15 @@ class HttpClient:
         return self._zone_required_character_data_serializer.load(response.json())
 
     def get_zone_resume_texts(self, character_id: str) -> typing.List[str]:
-        response = requests.get(
-            f"{self._server_address}/character/{character_id}/resume_texts"
-        )
+        response = requests.get(f"{self._server_address}/character/{character_id}/resume_texts")
         self._check_response(response)
         return response.json()["items"]
+
+    def get_move_zone_infos(
+        self, character_id: str, world_row_i: int, world_col_i: int
+    ) -> MoveZoneInfos:
+        response = requests.get(
+            f"{self._server_address}/character/{character_id}/move-to-zone/{world_row_i}/{world_col_i}"
+        )
+        self._check_response(response)
+        return self._move_zone_infos_serializer.load(response.json())

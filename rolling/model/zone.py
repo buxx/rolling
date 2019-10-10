@@ -88,3 +88,9 @@ class ZoneProperties:
 class ZoneRequiredPlayerData:
     weight_overcharge: bool
     clutter_overcharge: bool
+
+
+@dataclasses.dataclass
+class MoveZoneInfos:
+    can_move: bool
+    cost: float
