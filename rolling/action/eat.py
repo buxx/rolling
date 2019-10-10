@@ -36,24 +36,19 @@ class EatResourceAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {
             "accept_resources": [
                 game_config.resources[r] for r in action_config_raw["accept_resources"]
             ],
             "effects": [
-                game_config.character_effects[e]
-                for e in action_config_raw["character_effects"]
+                game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
             "require": action_config_raw["require"],
         }
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         if resource_id in accept_resources_ids:
             return
 
@@ -86,9 +81,7 @@ class EatResourceAction(WithResourceAction):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         # TODO BS 2019-09-14: perf
         carried_resource = next(
             (
@@ -122,9 +115,9 @@ class EatResourceAction(WithResourceAction):
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        effects: typing.List[
-            CharacterEffectDescriptionModel
-        ] = self._description.properties["effects"]
+        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
+            "effects"
+        ]
 
         self._kernel.resource_lib.reduce_carried_by(
             character.id,
@@ -148,20 +141,16 @@ class EatStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+        a = 1
         return {
             "accept_stuff_ids": action_config_raw["accept_stuffs"],
             "effects": [
-                game_config.character_effects[e]
-                for e in action_config_raw["character_effects"]
+                game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
         }
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         # TODO BS 2019-07-31: check is owned stuff
         if stuff.stuff_id in self._description.properties["accept_stuff_ids"]:
             return
@@ -181,10 +170,7 @@ class EatStuffAction(WithStuffAction):
                 CharacterActionLink(
                     name=f"Manger {stuff.name}",
                     link=get_with_stuff_action_url(
-                        character.id,
-                        ActionType.EAT_STUFF,
-                        query_params={},
-                        stuff_id=stuff.id,
+                        character.id, ActionType.EAT_STUFF, query_params={}, stuff_id=stuff.id
                     ),
                     cost=self.get_cost(character, stuff),
                 )
@@ -196,9 +182,9 @@ class EatStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        effects: typing.List[
-            CharacterEffectDescriptionModel
-        ] = self._description.properties["effects"]
+        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
+            "effects"
+        ]
 
         self._kernel.stuff_lib.destroy(stuff.id, commit=False)
         for effect in effects:

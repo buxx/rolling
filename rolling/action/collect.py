@@ -28,9 +28,7 @@ class CollectResourceModel:
     resource_id: str
     row_i: int = serpyco.number_field(cast_on_load=True)
     col_i: int = serpyco.number_field(cast_on_load=True)
-    quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 # FIXME BS 2019-08-29: Permit collect only some material (like no liquid)
@@ -39,9 +37,7 @@ class CollectResourceAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel") -> None:
@@ -55,9 +51,7 @@ class CollectResourceAction(CharacterAction):
 
         raise ImpossibleAction("Il n'y a rien à collecter ici")
 
-    def check_request_is_possible(
-        self, character: "CharacterModel", input_: input_model
-    ) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: input_model) -> None:
         # FIXME BS 2019-08-27: check input_.row_i and input_.col_i are near
         # FIXME BS 2019-08-29: check if quantity is possible
         resources = self._kernel.game.world_manager.get_resources_at(
@@ -91,9 +85,7 @@ class CollectResourceAction(CharacterAction):
                 tile_type = self._kernel.tile_maps_by_position[
                     (character.world_row_i, character.world_col_i)
                 ].source.geography.rows[row_i][col_i]
-                query_params = self.input_model(
-                    resource_id=resource.id, row_i=row_i, col_i=col_i
-                )
+                query_params = self.input_model(resource_id=resource.id, row_i=row_i, col_i=col_i)
                 character_actions.append(
                     CharacterActionLink(
                         name=f"Récupérer {resource.name} sur {tile_type.name}",
@@ -112,9 +104,7 @@ class CollectResourceAction(CharacterAction):
 
     def _get_resource_and_cost(
         self, character: "CharacterDocument", input_: input_model
-    ) -> typing.Tuple[
-        ResourceDescriptionModel, ExtractableResourceDescriptionModel, float
-    ]:
+    ) -> typing.Tuple[ResourceDescriptionModel, ExtractableResourceDescriptionModel, float]:
         tile_type = self._kernel.tile_maps_by_position[
             (character.world_row_i, character.world_col_i)
         ].source.geography.rows[input_.row_i][input_.col_i]
@@ -124,9 +114,7 @@ class CollectResourceAction(CharacterAction):
         resource_extraction_description: ExtractableResourceDescriptionModel = extractable_resources[
             input_.resource_id
         ]
-        resource: ResourceDescriptionModel = self._kernel.game.config.resources[
-            input_.resource_id
-        ]
+        resource: ResourceDescriptionModel = self._kernel.game.config.resources[input_.resource_id]
         # TODO BS 2019-08-29: cost per unit modified by competence / stuff
         cost_per_unit = resource_extraction_description.cost_per_unit
 
@@ -182,9 +170,7 @@ class CollectResourceAction(CharacterAction):
         if cost is None:
             raise RollingError("Cost compute should not be None !")
 
-        self._kernel.character_lib.reduce_action_points(
-            character.id, cost, commit=False
-        )
+        self._kernel.character_lib.reduce_action_points(character.id, cost, commit=False)
         self._kernel.server_db_session.commit()
 
         return Description(

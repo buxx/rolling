@@ -10,10 +10,7 @@ if typing.TYPE_CHECKING:
 
 class FullContentDialog(urwid.WidgetWrap):
     def __init__(
-        self,
-        title: str,
-        text: str,
-        get_buttons: typing.Callable[[], typing.List[urwid.Button]],
+        self, title: str, text: str, get_buttons: typing.Callable[[], typing.List[urwid.Button]]
     ):
         title_widget = urwid.Text(title)
         text_widget = urwid.Text(text)
@@ -45,8 +42,6 @@ class SimpleDialog(FullContentDialog):
             return []
 
         def cancel(*args, **kwargs):
-            self._controller.view.main_content_container.original_widget = (
-                self._original_widget
-            )
+            self._controller.view.main_content_container.original_widget = self._original_widget
 
         return [urwid.Button("Fermer", on_press=cancel)]

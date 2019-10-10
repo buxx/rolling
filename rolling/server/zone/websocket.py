@@ -20,9 +20,7 @@ if typing.TYPE_CHECKING:
 
 class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
-        self._sockets: typing.Dict[
-            typing.Tuple[int, int], typing.List[web.WebSocketResponse]
-        ] = {}
+        self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[web.WebSocketResponse]] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
@@ -49,19 +47,13 @@ class ZoneEventsManager:
 
         return socket
 
-    async def _listen(
-        self, socket: web.WebSocketResponse, row_i: int, col_i: int
-    ) -> None:
+    async def _listen(self, socket: web.WebSocketResponse, row_i: int, col_i: int) -> None:
         server_logger.info(f"Listen websocket for zone {row_i},{col_i}")
         async for msg in socket:
-            server_logger.debug(
-                f"Receive message on websocket for zone {row_i},{col_i}: {msg}"
-            )
+            server_logger.debug(f"Receive message on websocket for zone {row_i},{col_i}: {msg}")
 
             if msg.type == aiohttp.WSMsgType.ERROR:
-                server_logger.error(
-                    f"Zone websocket closed with exception {socket.exception()}"
-                )
+                server_logger.error(f"Zone websocket closed with exception {socket.exception()}")
             else:
                 await self._process_msg(row_i, col_i, msg, socket)
 
@@ -72,9 +64,7 @@ class ZoneEventsManager:
     ) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
-        event = self._event_serializer_factory.get_serializer(event_type).load(
-            event_dict
-        )
+        event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
         await self._process_event(row_i, col_i, event, socket)
 
     async def _process_event(

@@ -22,12 +22,14 @@ from rolling.model.measure import Unit
 from rolling.model.mix import RequiredResourceForMix
 from rolling.model.mix import ResourceMixDescription
 from rolling.model.resource import ResourceDescriptionModel
+from rolling.model.stuff import StuffGenerateResourceProperties
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
 from rolling.model.zone import GenerationInfo
 from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneResource
+from rolling.model.zone import ZoneStuff
 from rolling.server.action import ActionFactory
 from rolling.types import ActionType
 
@@ -38,42 +40,34 @@ if typing.TYPE_CHECKING:
 class GameConfig:
     def __init__(self, config_dict: dict) -> None:
         self.action_points_per_turn: int = config_dict["action_points_per_turn"]
-        self.create_character_messages: typing.List[str] = config_dict[
-            "create_character_messages"
-        ]
+        self.create_character_messages: typing.List[str] = config_dict["create_character_messages"]
         self.fresh_water_resource_id: str = config_dict["fresh_water_resource_id"]
         self.liquid_material_id: str = config_dict["liquid_material_id"]
-        self.fill_with_material_ids: typing.List[str] = config_dict[
-            "fill_with_material_ids"
-        ]
+        self.fill_with_material_ids: typing.List[str] = config_dict["fill_with_material_ids"]
         self.default_weight_capacity: float = config_dict["default_weight_capacity"]
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
         ] = self._create_character_effects(config_dict)
-        self._materials: typing.Dict[
-            str, MaterialDescriptionModel
-        ] = self._create_materials(config_dict)
-        self._resources: typing.Dict[
-            str, ResourceDescriptionModel
-        ] = self._create_resources(config_dict)
+        self._materials: typing.Dict[str, MaterialDescriptionModel] = self._create_materials(
+            config_dict
+        )
+        self._resources: typing.Dict[str, ResourceDescriptionModel] = self._create_resources(
+            config_dict
+        )
         self._extractions: typing.Dict[
             typing.Type[ZoneMapTileType], ExtractableDescriptionModel
         ] = self._create_extractions(config_dict)
         self._action_descriptions: typing.Dict[
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
-        self._resource_mixs: typing.Dict[
-            str, ResourceMixDescription
-        ] = self._create_resource_mixs(config_dict)
+        self._resource_mixs: typing.Dict[str, ResourceMixDescription] = self._create_resource_mixs(
+            config_dict
+        )
         self._fill_resource_actions(config_dict)
-        self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(
-            config_dict
-        )
-        self._builds: typing.Dict[str, BuildDescription] = self._create_builds(
-            config_dict
-        )
+        self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(config_dict)
+        self._builds: typing.Dict[str, BuildDescription] = self._create_builds(config_dict)
 
     @property
     def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
@@ -92,9 +86,7 @@ class GameConfig:
         return self._resource_mixs
 
     @property
-    def extractions(
-        self
-    ) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
+    def extractions(self) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
         return self._extractions
 
     @property
@@ -124,9 +116,7 @@ class GameConfig:
 
         return effects
 
-    def _create_materials(
-        self, config_dict: dict
-    ) -> typing.Dict[str, MaterialDescriptionModel]:
+    def _create_materials(self, config_dict: dict) -> typing.Dict[str, MaterialDescriptionModel]:
         materials: typing.Dict[str, MaterialDescriptionModel] = {}
 
         for material_id, material_raw in config_dict.get("materials", {}).items():
@@ -136,9 +126,7 @@ class GameConfig:
 
         return materials
 
-    def _create_resources(
-        self, config_dict: dict
-    ) -> typing.Dict[str, ResourceDescriptionModel]:
+    def _create_resources(self, config_dict: dict) -> typing.Dict[str, ResourceDescriptionModel]:
         resources: typing.Dict[str, ResourceDescriptionModel] = {}
 
         for resource_id, resource_raw in config_dict.get("resources", {}).items():
@@ -154,9 +142,7 @@ class GameConfig:
 
         return resources
 
-    def _create_resource_mixs(
-        self, config_dict: dict
-    ) -> typing.Dict[str, ResourceMixDescription]:
+    def _create_resource_mixs(self, config_dict: dict) -> typing.Dict[str, ResourceMixDescription]:
         resource_mixs: typing.Dict[str, ResourceMixDescription] = {}
 
         for mix_id, mix_raw in config_dict.get("resource_mix", {}).items():
@@ -181,15 +167,11 @@ class GameConfig:
     def _create_extractions(
         self, config_dict: dict
     ) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
-        extractions: typing.Dict[
-            typing.Type[ZoneMapTileType], ExtractableDescriptionModel
-        ] = {}
+        extractions: typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel] = {}
         zone_tile_types = ZoneMapTileType.get_all()
 
         for extraction_raw in config_dict.get("extractions", {}).values():
-            resource_extractions: typing.Dict[
-                str, ExtractableResourceDescriptionModel
-            ] = {}
+            resource_extractions: typing.Dict[str, ExtractableResourceDescriptionModel] = {}
             for resource_extraction_raw in extraction_raw["resources"]:
                 resource_extractions[
                     resource_extraction_raw["resource_id"]
@@ -211,9 +193,7 @@ class GameConfig:
     ) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
         actions: typing.Dict[ActionType, typing.List[ActionDescriptionModel]] = {}
 
-        for action_description_id, action_description_raw in config_raw.get(
-            "ACTIONS", {}
-        ).items():
+        for action_description_id, action_description_raw in config_raw.get("ACTIONS", {}).items():
             for action_raw in action_description_raw["actions"]:
                 action_type = ActionType(action_raw)
                 action_class = ActionFactory.actions[action_type]
@@ -233,12 +213,8 @@ class GameConfig:
 
     def _fill_resource_actions(self, config_raw: dict) -> None:
         for resource_description in self.resources.values():
-            for action_type_id in config_raw["resources"][resource_description.id][
-                "actions"
-            ]:
-                resource_description.descriptions.extend(
-                    self.actions[ActionType(action_type_id)]
-                )
+            for action_type_id in config_raw["resources"][resource_description.id]["actions"]:
+                resource_description.descriptions.extend(self.actions[ActionType(action_type_id)])
 
     def get_resource_mixs_with(
         self, required_resource_ids: typing.List[str]
@@ -249,10 +225,7 @@ class GameConfig:
             all_in = True
 
             for required_resource_id in required_resource_ids:
-                if (
-                    required_resource_id
-                    not in resource_mix_description.required_resources_ids
-                ):
+                if required_resource_id not in resource_mix_description.required_resources_ids:
                     all_in = False
 
             if all_in:
@@ -260,50 +233,46 @@ class GameConfig:
 
         return resource_mixs
 
-    def _create_ablilities(
-        self, config_dict: dict
-    ) -> typing.Dict[str, AbilityDescription]:
+    def _create_ablilities(self, config_dict: dict) -> typing.Dict[str, AbilityDescription]:
         ablilities: typing.Dict[str, AbilityDescription] = {}
 
         for ability_id, ability_raw in config_dict.get("ability", {}).items():
-            ablilities[ability_id] = AbilityDescription(
-                id=ability_id, name=ability_raw["name"]
-            )
+            ablilities[ability_id] = AbilityDescription(id=ability_id, name=ability_raw["name"])
 
         return ablilities
 
     def _create_builds(self, config_dict: dict) -> typing.Dict[str, BuildDescription]:
-        builts: typing.Dict[str, BuildDescription] = {}
+        builds: typing.Dict[str, BuildDescription] = {}
 
-        for built_id, built_raw in config_dict.get("built", {}).items():
-            builts[built_id] = BuildDescription(
-                id=built_id,
-                name=built_raw["name"],
-                char=built_raw["char"],
-                cost=built_raw["cost"],
-                building_char=built_raw["building_char"],
-                ability_ids=built_raw.get("abilities", []),
+        for build_id, build_raw in config_dict.get("build", {}).items():
+            builds[build_id] = BuildDescription(
+                id=build_id,
+                name=build_raw["name"],
+                char=build_raw["char"],
+                cost=build_raw["cost"],
+                building_char=build_raw["building_char"],
+                ability_ids=build_raw.get("abilities", []),
                 build_require_resources=[
                     BuildBuildRequireResourceDescription(
                         resource_id=r["resource"], quantity=r["quantity"]
                     )
-                    for r in built_raw.get("build_require_resources", [])
+                    for r in build_raw.get("build_require_resources", [])
                 ],
                 turn_require_resources=[
                     BuildTurnRequireResourceDescription(
                         resource_id=r["resource"], quantity=r["quantity"]
                     )
-                    for r in built_raw.get("turn_require_resources", [])
+                    for r in build_raw.get("turn_require_resources", [])
                 ],
                 power_on_require_resources=[
                     BuildPowerOnRequireResourceDescription(
                         resource_id=r["resource"], quantity=r["quantity"]
                     )
-                    for r in built_raw.get("power_on_require_resources", [])
+                    for r in build_raw.get("power_on_require_resources", [])
                 ],
             )
 
-        return builts
+        return builds
 
 
 class Game:
@@ -327,9 +296,7 @@ class Game:
     def world_manager(self) -> WorldManager:
         return self._world
 
-    def _create_stuff_manager(
-        self, stuff_file_path: str, config: GameConfig
-    ) -> StuffManager:
+    def _create_stuff_manager(self, stuff_file_path: str, config: GameConfig) -> StuffManager:
         items: typing.List[StuffProperties] = []
         raw_stuffs = toml.load(stuff_file_path)
 
@@ -342,6 +309,19 @@ class Game:
             for action_type_id in full_info.get("actions", []):
                 descriptions = config.actions[ActionType(action_type_id)]
                 full_info["descriptions"].extend(descriptions)
+
+            generate_resources: typing.List[StuffGenerateResourceProperties] = []
+            for generate_resource_raw in full_info.get("generate_resources", []):
+                generate_resources.append(
+                    StuffGenerateResourceProperties(
+                        resource_id=generate_resource_raw["resource_id"],
+                        quantity=generate_resource_raw["quantity"],
+                        require_one_of_ability=generate_resource_raw.get(
+                            "require_one_of_ability", []
+                        ),
+                    )
+                )
+            full_info["generate_resources"] = generate_resources
 
             del full_info["actions"]
             items.append(StuffProperties(**full_info))
@@ -356,6 +336,7 @@ class Game:
             move_cost: float = zone_data["move_cost"]
             generation_info = self._get_generation_info(zone_data)
             resources = list(self._get_zone_resources(zone_data))
+            stuffs = list(self._get_zone_stuffs(zone_data))
 
             zones_properties.append(
                 ZoneProperties(
@@ -363,7 +344,7 @@ class Game:
                     generation_info=generation_info,
                     move_cost=move_cost,
                     resources=resources,
-                    stuffs=[],  # TODO
+                    stuffs=stuffs,
                 )
             )
 
@@ -377,16 +358,10 @@ class Game:
         for stuff_id, stuff_generation_info in generation_data.get("STUFF", {}).items():
             probability = stuff_generation_info["probability"]
             meta = dict(
-                [
-                    item
-                    for item in stuff_generation_info.items()
-                    if item[0] not in ["probability"]
-                ]
+                [item for item in stuff_generation_info.items() if item[0] not in ["probability"]]
             )
             stuff = self._stuff.get_stuff_properties_by_id(stuff_id)
-            stuffs.append(
-                ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta)
-            )
+            stuffs.append(ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta))
 
         return GenerationInfo(count=count, stuffs=stuffs)
 
@@ -394,6 +369,15 @@ class Game:
         for resource_id, resource_raw in zone_data.get("RESOURCES", {}).items():
             yield ZoneResource(
                 resource_id=resource_id,
+                probability=resource_raw["probability"],
+                maximum=resource_raw["maximum"],
+                regeneration=resource_raw["regeneration"],
+            )
+
+    def _get_zone_stuffs(self, zone_data: dict) -> typing.Iterator[ZoneStuff]:
+        for resource_id, resource_raw in zone_data.get("STUFFS", {}).items():
+            yield ZoneStuff(
+                stuff_id=resource_id,
                 probability=resource_raw["probability"],
                 maximum=resource_raw["maximum"],
                 regeneration=resource_raw["regeneration"],

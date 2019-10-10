@@ -23,9 +23,7 @@ class EmptyStuffAction(WithStuffAction):
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(input_model)
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         if not stuff.filled_with_resource:
             raise ImpossibleAction("Ne contient rien")
 
@@ -36,9 +34,7 @@ class EmptyStuffAction(WithStuffAction):
             raise ImpossibleAction("Ne contient rien")
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def get_character_actions(
@@ -65,11 +61,8 @@ class EmptyStuffAction(WithStuffAction):
         try:
             self._kernel.stuff_lib.empty_stuff(stuff)
         except CantEmpty as exc:
-            return Description(
-                title=str(exc), items=[Part(label="Revenir", go_back_zone=True)]
-            )
+            return Description(title=str(exc), items=[Part(label="Revenir", go_back_zone=True)])
 
         return Description(
-            title=f"{stuff.name} vidé(e)",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            title=f"{stuff.name} vidé(e)", items=[Part(label="Continuer", go_back_zone=True)]
         )

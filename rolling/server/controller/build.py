@@ -2,10 +2,10 @@
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
-from hapic import HapicData
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.kernel import Kernel
 from rolling.model.build import DescribeBuildInputPath
 from rolling.server.controller.base import BaseController
@@ -35,22 +35,14 @@ class BuildController(BaseController):
         if build_doc.under_construction:
             on_construction = " (en construction)"
 
-        carried_resources = self._kernel.resource_lib.get_stored_in_build(
-            hapic_data.path.build_id
-        )
+        carried_resources = self._kernel.resource_lib.get_stored_in_build(hapic_data.path.build_id)
         carried_in = []
         for carried_resource in carried_resources:
-            resource_description = self._kernel.game.config.resources[
-                carried_resource.id
-            ]
+            resource_description = self._kernel.game.config.resources[carried_resource.id]
             quantity_str = quantity_to_str(
-                carried_resource.quantity,
-                unit=resource_description.unit,
-                kernel=self._kernel,
+                carried_resource.quantity, unit=resource_description.unit, kernel=self._kernel
             )
-            carried_in.append(
-                Part(text=f"- {resource_description.name} ({quantity_str})")
-            )
+            carried_in.append(Part(text=f"- {resource_description.name} ({quantity_str})"))
         if carried_in:
             carried_in.insert(0, Part(text="Contient des resources:"))
             carried_in.insert(1, Part(text=""))
@@ -64,9 +56,7 @@ class BuildController(BaseController):
             ]
         )
 
-        return Description(
-            title=f"{build_description.name}{on_construction}", items=parts
-        )
+        return Description(title=f"{build_description.name}{on_construction}", items=parts)
 
     def bind(self, app: Application) -> None:
         app.add_routes([web.post(DESCRIBE_BUILD, self._describe)])

@@ -18,9 +18,7 @@ if typing.TYPE_CHECKING:
 
 
 class EventProcessor(metaclass=abc.ABCMeta):
-    def __init__(
-        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
-    ) -> None:
+    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._zone_events_manager = zone_events_manager
         self._kernel = kernel
 
@@ -37,16 +35,12 @@ class EventProcessor(metaclass=abc.ABCMeta):
 
 
 class PlayerMoveProcessor(EventProcessor):
-    def __init__(
-        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
-    ) -> None:
+    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         super().__init__(kernel, zone_events_manager)
         self._character_lib = CharacterLib(self._kernel)
         self._event_serializer_factory = ZoneEventSerializerFactory()
 
-    async def _process(
-        self, row_i: int, col_i: int, event: ZoneEvent[PlayerMoveData]
-    ) -> None:
+    async def _process(self, row_i: int, col_i: int, event: ZoneEvent[PlayerMoveData]) -> None:
         # TODO BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
         # TODO BS 2019-01-23: Check given character id is authenticated used (security)
         # TODO BS 2019-09-05: Check if not in surcharge
@@ -57,9 +51,7 @@ class PlayerMoveProcessor(EventProcessor):
         )
 
         async for socket in self._zone_events_manager.get_sockets(row_i, col_i):
-            event_str = self._event_serializer_factory.get_serializer(
-                event.type
-            ).dump_json(event)
+            event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
             server_logger.debug(f"Send event on socket: {event_str}")
 
             try:
@@ -70,17 +62,11 @@ class PlayerMoveProcessor(EventProcessor):
 
 
 class EventProcessorFactory:
-    def __init__(
-        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
-    ) -> None:
+    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 
-        for zone_event_type, processor_type in [
-            (ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor)
-        ]:
-            self._processors[zone_event_type] = processor_type(
-                kernel, zone_events_manager
-            )
+        for zone_event_type, processor_type in [(ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor)]:
+            self._processors[zone_event_type] = processor_type(kernel, zone_events_manager)
 
     def get_processor(self, zone_event_type: ZoneEventType) -> EventProcessor:
         return self._processors[zone_event_type]

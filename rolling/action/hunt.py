@@ -25,38 +25,31 @@ class SearchFoodAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         for produce in action_config_raw["produce"]:
             if "resource" not in produce and "stuff" not in produce:
                 raise RollingError("Misconfiguration for action SearchFoodAction")
 
         return {
-            "required_one_of_stuff_ids": action_config_raw["required_one_of_stuffs"],
-            "required_all_stuff_ids": action_config_raw["required_all_stuffs"],
-            "required_one_of_skill_ids": action_config_raw["required_one_of_skills"],
-            "required_all_skill_ids": action_config_raw["required_all_skills"],
+            "required_one_of_stuff_ids": action_config_raw.get("required_one_of_stuffs", []),
+            "required_all_stuff_ids": action_config_raw.get("required_all_stuffs", []),
+            "required_one_of_skill_ids": action_config_raw.get("required_one_of_skills", []),
+            "required_all_skill_ids": action_config_raw.get("required_all_skills", []),
+            "required_one_of_ability_ids": action_config_raw.get("required_one_of_ability", []),
             "produce": action_config_raw["produce"],
         }
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        character_stuff_ids = [
-            s.id for s in self._kernel.stuff_lib.get_carried_by(character.id)
-        ]
+        character_stuff_ids = [s.id for s in self._kernel.stuff_lib.get_carried_by(character.id)]
         character_skill_ids = []  # TODO BS 2019-09-26: code it
         one_of_required_stuff_found = False
         one_of_required_skill_found = False
 
-        for required_one_of_stuff_id in self._description.properties[
-            "required_one_of_stuff_ids"
-        ]:
+        for required_one_of_stuff_id in self._description.properties["required_one_of_stuff_ids"]:
             if required_one_of_stuff_id in character_stuff_ids:
                 one_of_required_stuff_found = True
 
-        for required_one_of_skill_id in self._description.properties[
-            "required_one_of_skill_ids"
-        ]:
+        for required_one_of_skill_id in self._description.properties["required_one_of_skill_ids"]:
             if required_one_of_skill_id in character_skill_ids:
                 one_of_required_skill_found = True
 
@@ -72,21 +65,15 @@ class SearchFoodAction(CharacterAction):
         ):
             raise ImpossibleAction("Manque de compétence")
 
-        for required_all_stuff_id in self._description.properties[
-            "required_all_stuff_ids"
-        ]:
+        for required_all_stuff_id in self._description.properties["required_all_stuff_ids"]:
             if required_all_stuff_id not in character_stuff_ids:
                 raise ImpossibleAction("Manque de matériels")
 
-        for required_all_skill_id in self._description.properties[
-            "required_all_skill_ids"
-        ]:
+        for required_all_skill_id in self._description.properties["required_all_skill_ids"]:
             if required_all_skill_id not in character_skill_ids:
                 raise ImpossibleAction("Manque de compétences")
 
-    def check_request_is_possible(
-        self, character: "CharacterModel", input_: typing.Any
-    ) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
         self.check_is_possible(character)
 
     def get_character_actions(
@@ -158,8 +145,7 @@ class SearchFoodAction(CharacterAction):
             resource_description = self._kernel.game.config.resources[resource_id]
             quantity_found_coeff = random.randint(0, 100) / 100
             quantity_found = (
-                production_per_resource_ids[resource_id]["quantity"]
-                * quantity_found_coeff
+                production_per_resource_ids[resource_id]["quantity"] * quantity_found_coeff
             )
             if resource_description.unit == Unit.UNIT:
                 quantity_found = round(quantity_found)
@@ -172,10 +158,7 @@ class SearchFoodAction(CharacterAction):
                 f"{quantity_found} {unit_str} de {resource_description.name} "
             )
             self._kernel.resource_lib.add_resource_to_character(
-                character.id,
-                resource_id=resource_id,
-                quantity=quantity_found,
-                commit=False,
+                character.id, resource_id=resource_id, quantity=quantity_found, commit=False
             )
 
         result_stuff_strs = []

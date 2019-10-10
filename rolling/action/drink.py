@@ -36,23 +36,18 @@ class DrinkResourceAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {
             "accept_resources": [
                 game_config.resources[r] for r in action_config_raw["accept_resources"]
             ],
             "effects": [
-                game_config.character_effects[e]
-                for e in action_config_raw["character_effects"]
+                game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
         }
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         for resource in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
@@ -68,9 +63,7 @@ class DrinkResourceAction(CharacterAction):
     def check_request_is_possible(
         self, character: "CharacterModel", input_: DrinkResourceModel
     ) -> None:
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         for resource in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
@@ -78,10 +71,7 @@ class DrinkResourceAction(CharacterAction):
             zone_col_i=character.zone_col_i,
             material_type=self._kernel.game.config.liquid_material_id,
         ):
-            if (
-                resource.id == input_.resource_id
-                and input_.resource_id in accept_resources_ids
-            ):
+            if resource.id == input_.resource_id and input_.resource_id in accept_resources_ids:
                 return
 
         raise ImpossibleAction(f"Il n'y a pas de {input_.resource_id} à proximité")
@@ -90,9 +80,7 @@ class DrinkResourceAction(CharacterAction):
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         character_actions: typing.List[CharacterActionLink] = []
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
 
         for resource in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
@@ -120,14 +108,12 @@ class DrinkResourceAction(CharacterAction):
 
     def perform(self, character: "CharacterModel", input_: input_model) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
 
         if input_.resource_id in accept_resources_ids:
-            effects: typing.List[
-                CharacterEffectDescriptionModel
-            ] = self._description.properties["effects"]
+            effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
+                "effects"
+            ]
 
             for effect in effects:
                 self._effect_manager.enable_effect(character_doc, effect)
@@ -144,26 +130,19 @@ class DrinkStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {
             "accept_resources": [
                 game_config.resources[r] for r in action_config_raw["accept_resources"]
             ],
             "effects": [
-                game_config.character_effects[e]
-                for e in action_config_raw["character_effects"]
+                game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
         }
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         # TODO BS 2019-07-31: check is owned stuff
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         if (
             stuff.filled_with_resource is not None
             and stuff.filled_with_resource in accept_resources_ids
@@ -176,9 +155,7 @@ class DrinkStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-07-31: check is owned stuff
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
 
         if (
             stuff.filled_with_resource is not None
@@ -191,9 +168,7 @@ class DrinkStuffAction(WithStuffAction):
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
     ) -> typing.List[CharacterActionLink]:
-        accept_resources_ids = [
-            rd.id for rd in self._description.properties["accept_resources"]
-        ]
+        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
         if (
             stuff.filled_with_resource is not None
             and stuff.filled_with_resource in accept_resources_ids
@@ -219,6 +194,4 @@ class DrinkStuffAction(WithStuffAction):
     ) -> Description:
         message = self._kernel.character_lib.drink_stuff(character.id, stuff.id)
 
-        return Description(
-            title=message, items=[Part(label="Continuer", go_back_zone=True)]
-        )
+        return Description(title=message, items=[Part(label="Continuer", go_back_zone=True)])

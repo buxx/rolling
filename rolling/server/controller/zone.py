@@ -5,9 +5,9 @@ import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
+
 from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
 from rolling.model.build import ZoneBuildModel
@@ -46,16 +46,12 @@ class ZoneController(BaseController):
     @hapic.input_path(GetZonePathModel)
     @hapic.output_body(ZoneMapModel)
     async def get_zone(self, request: Request, hapic_data: HapicData) -> ZoneMapModel:
-        return self._tile_lib.get_zone(
-            row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i
-        )
+        return self._tile_lib.get_zone(row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i)
 
     async def events(self, request: Request):
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
         return await self._kernel.server_zone_events_manager.get_new_socket(
-            request,
-            row_i=request.match_info["row_i"],
-            col_i=request.match_info["col_i"],
+            request, row_i=request.match_info["row_i"], col_i=request.match_info["col_i"]
         )
 
     @hapic.with_api_doc()
@@ -73,12 +69,9 @@ class ZoneController(BaseController):
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
     @hapic.output_body(StuffModel, processor=SerpycoProcessor(many=True))
-    async def get_stuff(
-        self, request: Request, hapic_data: HapicData
-    ) -> typing.List[StuffModel]:
+    async def get_stuff(self, request: Request, hapic_data: HapicData) -> typing.List[StuffModel]:
         return self._stuff_lib.get_zone_stuffs(
-            world_row_i=request.match_info["row_i"],
-            world_col_i=request.match_info["col_i"],
+            world_row_i=request.match_info["row_i"], world_col_i=request.match_info["col_i"]
         )
 
     @hapic.with_api_doc()

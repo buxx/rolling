@@ -44,10 +44,7 @@ class StuffDocument(Document):
     in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)
 
     def fill(self, kernel: "Kernel", with_resource: str, at: float) -> None:
-        if (
-            self.filled_with_resource is not None
-            and self.filled_with_resource != with_resource
-        ):
+        if self.filled_with_resource is not None and self.filled_with_resource != with_resource:
             raise CantFill("Cant fill with (yet) with two different resources")
 
         if self.filled_at == at:

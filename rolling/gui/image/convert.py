@@ -100,20 +100,14 @@ def load_and_resize_image(imgname, antialias, max_width, max_height, aspectRatio
     # new_height = int(height_rate * new_height)
 
     if native_width != new_width or native_height != new_height:
-        img = img.resize(
-            (new_width, new_height), Image.ANTIALIAS if antialias else Image.NEAREST
-        )
+        img = img.resize((new_width, new_height), Image.ANTIALIAS if antialias else Image.NEAREST)
 
     return img
 
 
 def convert_img_to_urwid(image_path, max_width, max_height):
     image = load_and_resize_image(
-        image_path,
-        antialias=True,
-        max_width=max_width,
-        max_height=max_height,
-        aspectRatio=0.5,
+        image_path, antialias=True, max_width=max_width, max_height=max_height, aspectRatio=0.5
     )
     pixel = image.load()
     width, height = image.size

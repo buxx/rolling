@@ -45,9 +45,7 @@ class TurnLib:
         for row_i, row in enumerate(self._kernel.world_map_source.geography.rows):
             for col_i, zone_type in enumerate(row):
                 if zone_type not in generation_stuff_by_zone_type:
-                    self._logger.debug(
-                        f"No generation info for {zone_type} at {row_i},{col_i}"
-                    )
+                    self._logger.debug(f"No generation info for {zone_type} at {row_i},{col_i}")
                     continue
 
                 # Choose some stuff
@@ -66,9 +64,7 @@ class TurnLib:
 
                 # TODO BS 2019-06-18: Be able to place stuff near specific tiles types
                 # Choose some positions where place stuff
-                zone_source_geo = self._kernel.tile_maps_by_position[
-                    row_i, col_i
-                ].source.geography
+                zone_source_geo = self._kernel.tile_maps_by_position[row_i, col_i].source.geography
                 chosen_positions: typing.List[typing.Tuple[int, int]] = []
                 for i in range(zone_property.generation_info.count):
                     retry = 0
@@ -119,17 +115,13 @@ class TurnLib:
                 (character_document.world_row_i, character_document.world_col_i)
             ].source
             zone_contains_fresh_water = is_there_resource_id_in_zone(
-                self._kernel,
-                self._kernel.game.config.fresh_water_resource_id,
-                zone_source,
+                self._kernel, self._kernel.game.config.fresh_water_resource_id, zone_source
             )
             stuff_with_fresh_water = None
             try:
                 stuff_with_fresh_water = next(
                     get_stuffs_filled_with_resource_id(
-                        self._kernel,
-                        character_id,
-                        self._kernel.game.config.fresh_water_resource_id,
+                        self._kernel, character_id, self._kernel.game.config.fresh_water_resource_id
                     )
                 )
             except StopIteration:

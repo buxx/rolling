@@ -7,6 +7,7 @@ from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
+from rolling.model.zone import MoveZoneInfos
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
@@ -24,9 +25,7 @@ if typing.TYPE_CHECKING:
 
 
 class CharacterLib:
-    def __init__(
-        self, kernel: "Kernel", stuff_lib: typing.Optional[StuffLib] = None
-    ) -> None:
+    def __init__(self, kernel: "Kernel", stuff_lib: typing.Optional[StuffLib] = None) -> None:
         self._kernel = kernel
         self._stuff_lib: StuffLib = stuff_lib or StuffLib(kernel)
         self._action_factory = ActionFactory(kernel)
@@ -36,9 +35,7 @@ class CharacterLib:
         character.id = uuid.uuid4().hex
         character.name = create_character_model.name
         character.background_story = create_character_model.background_story
-        character.hunting_and_collecting_comp = (
-            create_character_model.hunting_and_collecting_comp
-        )
+        character.hunting_and_collecting_comp = create_character_model.hunting_and_collecting_comp
         character.find_water_comp = create_character_model.find_water_comp
         character.max_life_comp = create_character_model.max_life_comp
         character.life_points = character.max_life_comp
@@ -48,9 +45,7 @@ class CharacterLib:
         world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
             self._kernel.world_map_source
         )
-        start_zone_source = self._kernel.tile_maps_by_position[
-            world_row_i, world_col_i
-        ].source
+        start_zone_source = self._kernel.tile_maps_by_position[world_row_i, world_col_i].source
         zone_row_i, zone_col_i = start_zone_source.get_start_zone_coordinates(
             world_row_i, world_col_i
         )
@@ -82,9 +77,7 @@ class CharacterLib:
             .one()
         )
 
-    def _document_to_model(
-        self, character_document: CharacterDocument
-    ) -> CharacterModel:
+    def _document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
@@ -95,9 +88,7 @@ class CharacterLib:
             background_story=character_document.background_story,
             life_points=float(character_document.life_points),
             max_life_comp=float(character_document.max_life_comp),
-            hunting_and_collecting_comp=float(
-                character_document.hunting_and_collecting_comp
-            ),
+            hunting_and_collecting_comp=float(character_document.hunting_and_collecting_comp),
             find_water_comp=float(character_document.find_water_comp),
             feel_thirsty=character_document.feel_thirsty,
             feel_hungry=character_document.feel_hungry,
@@ -118,9 +109,7 @@ class CharacterLib:
         character_document = self.get_document_by_name(name)
         return self._document_to_model(character_document)
 
-    def move_on_zone(
-        self, character: CharacterModel, to_row_i: int, to_col_i: int
-    ) -> None:
+    def move_on_zone(self, character: CharacterModel, to_row_i: int, to_col_i: int) -> None:
         character_document = self.get_document(character.id)
         character_document.zone_row_i = to_row_i
         character_document.zone_col_i = to_col_i
@@ -140,9 +129,7 @@ class CharacterLib:
             for character_document in character_documents
         ]
 
-    def move(
-        self, character: CharacterModel, to_world_row: int, to_world_col: int
-    ) -> None:
+    def move(self, character: CharacterModel, to_world_row: int, to_world_col: int) -> None:
         # TODO BS 2019-06-04: Check if move is possible
         # TODO BS 2019-06-04: Compute how many action point and consume
         character_document = self.get_document(character.id)
@@ -150,9 +137,7 @@ class CharacterLib:
         character_document.world_col_i = to_world_col
         self.update(character_document)
 
-    def update(
-        self, character_document: CharacterDocument, commit: bool = True
-    ) -> None:
+    def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
         self._kernel.server_db_session.add(character_document)
         if commit:
             self._kernel.server_db_session.commit()
@@ -161,10 +146,7 @@ class CharacterLib:
         return self._kernel.server_db_session.query(CharacterDocument.id).count()
 
     def get_all_character_ids(self) -> typing.Iterable[str]:
-        return (
-            row[0]
-            for row in self._kernel.server_db_session.query(CharacterDocument.id).all()
-        )
+        return (row[0] for row in self._kernel.server_db_session.query(CharacterDocument.id).all())
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(character_id)
@@ -183,9 +165,7 @@ class CharacterLib:
             clutter=total_clutter,
         )
 
-    def get_on_place_actions(
-        self, character_id: str
-    ) -> typing.List[CharacterActionLink]:
+    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
@@ -222,9 +202,7 @@ class CharacterLib:
                 character_actions_.append(
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {build_description.name}",
-                        link=DESCRIBE_BUILD.format(
-                            character_id=character_id, build_id=build.id
-                        ),
+                        link=DESCRIBE_BUILD.format(character_id=character_id, build_id=build.id),
                     )
                 )
 
@@ -254,15 +232,11 @@ class CharacterLib:
             character_actions.append(
                 CharacterActionLink(
                     name=f"Take {stuff.get_name_and_light_description()}",
-                    link=TAKE_STUFF_URL.format(
-                        character_id=character_id, stuff_id=stuff.id
-                    ),
+                    link=TAKE_STUFF_URL.format(character_id=character_id, stuff_id=stuff.id),
                 )
             )
         elif stuff.carried_by == character_id:
-            character_actions.extend(
-                self._stuff_lib.get_carrying_actions(character, stuff)
-            )
+            character_actions.extend(self._stuff_lib.get_carrying_actions(character, stuff))
 
         return filter_action_links(character_actions)
 
@@ -270,9 +244,7 @@ class CharacterLib:
         self, character_id: str, resource_id: str
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
-        character_actions = self._kernel.resource_lib.get_carrying_actions(
-            character, resource_id
-        )
+        character_actions = self._kernel.resource_lib.get_carrying_actions(character, resource_id)
         return filter_action_links(character_actions)
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
@@ -330,20 +302,25 @@ class CharacterLib:
             yield CharacterEventModel(datetime=event_doc.datetime, text=event_doc.text)
 
     def add_event(self, character_id: str, text: str) -> None:
-        self._kernel.server_db_session.add(
-            EventDocument(character_id=character_id, text=text)
-        )
+        self._kernel.server_db_session.add(EventDocument(character_id=character_id, text=text))
         self._kernel.server_db_session.commit()
 
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
 
-    def reduce_action_points(
-        self, character_id: str, cost: float, commit: bool = True
-    ) -> None:
+    def reduce_action_points(self, character_id: str, cost: float, commit: bool = True) -> None:
         character_doc = self.get_document(character_id)
         character_doc.action_points = float(character_doc.action_points) - cost
         self._kernel.server_db_session.add(character_doc)
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_move_to_zone_infos(
+        self, character_id: str, world_row_i: int, world_col_i: int
+    ) -> MoveZoneInfos:
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        move_cost = self._kernel.game.world_manager.get_zone_properties(zone_type).move_cost
+        character = self.get(character_id)
+
+        return MoveZoneInfos(can_move=character.action_points >= move_cost, cost=move_cost)

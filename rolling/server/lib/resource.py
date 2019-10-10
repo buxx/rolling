@@ -90,9 +90,7 @@ class ResourceLib:
 
         return self._carried_resource_model_from_doc(resource)
 
-    def get_carried_by(
-        self, character_id: str
-    ) -> typing.List[CarriedResourceDescriptionModel]:
+    def get_carried_by(self, character_id: str) -> typing.List[CarriedResourceDescriptionModel]:
         carried = (
             self._kernel.server_db_session.query(ResourceDocument)
             .filter(ResourceDocument.carried_by_id == character_id)
@@ -140,10 +138,7 @@ class ResourceLib:
         )
 
     def have_resource(
-        self,
-        character_id: str,
-        resource_id: str,
-        quantity: typing.Optional[float] = None,
+        self, character_id: str, resource_id: str, quantity: typing.Optional[float] = None
     ) -> bool:
         try:
             resource_doc = (
@@ -168,30 +163,23 @@ class ResourceLib:
         self, character_id: str, resource_id: str, quantity: float, commit: bool = True
     ) -> None:
         filter_ = and_(
-                        ResourceDocument.carried_by_id == character_id,
-                        ResourceDocument.resource_id == resource_id,
-                    )
+            ResourceDocument.carried_by_id == character_id,
+            ResourceDocument.resource_id == resource_id,
+        )
         self._reduce(filter_, quantity=quantity, commit=commit)
 
     def reduce_stored_in(
         self, build_id: int, resource_id: str, quantity: float, commit: bool = True
     ) -> None:
         filter_ = and_(
-                        ResourceDocument.in_built_id == build_id,
-                        ResourceDocument.resource_id == resource_id,
-                    )
+            ResourceDocument.in_built_id == build_id, ResourceDocument.resource_id == resource_id
+        )
         self._reduce(filter_, quantity=quantity, commit=commit)
 
-    def _reduce(
-        self, filter_, quantity: float, commit: bool = True
-    ) -> None:
+    def _reduce(self, filter_, quantity: float, commit: bool = True) -> None:
         try:
             resource_doc = (
-                self._kernel.server_db_session.query(ResourceDocument)
-                .filter(filter_
-
-                )
-                .one()
+                self._kernel.server_db_session.query(ResourceDocument).filter(filter_).one()
             )
         except NoResultFound:
             raise NoCarriedResource()
@@ -235,9 +223,7 @@ class ResourceLib:
 
         return actions
 
-    def get_stored_in_build(
-        self, build_id: int
-    ) -> typing.List[CarriedResourceDescriptionModel]:
+    def get_stored_in_build(self, build_id: int) -> typing.List[CarriedResourceDescriptionModel]:
         carried = (
             self._kernel.server_db_session.query(ResourceDocument)
             .filter(ResourceDocument.in_built_id == build_id)

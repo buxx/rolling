@@ -70,20 +70,12 @@ class Kernel:
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
-            self._tile_maps_by_position: typing.Dict[
-                typing.Tuple[int, int], ZoneMap
-            ] = {}
+            self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
 
-            for tile_map_source_file_path in glob.glob(
-                os.path.join(tile_maps_folder, "*.txt")
-            ):
+            for tile_map_source_file_path in glob.glob(os.path.join(tile_maps_folder, "*.txt")):
                 tile_map_source_file_name = ntpath.basename(tile_map_source_file_path)
-                row_i, col_i = map(
-                    int, tile_map_source_file_name.replace(".txt", "").split("-")
-                )
-                kernel_logger.debug(
-                    'Load tile map "{}"'.format(tile_map_source_file_name)
-                )
+                row_i, col_i = map(int, tile_map_source_file_name.replace(".txt", "").split("-"))
+                kernel_logger.debug('Load tile map "{}"'.format(tile_map_source_file_name))
 
                 with open(tile_map_source_file_path, "r") as f:
                     tile_map_source_raw = f.read()
@@ -165,9 +157,7 @@ class Kernel:
     @property
     def world_map_source(self) -> WorldMapSource:
         if self._world_map_source is None:
-            raise ComponentNotPrepared(
-                "self._world_map_source must be prepared before usage"
-            )
+            raise ComponentNotPrepared("self._world_map_source must be prepared before usage")
 
         return self._world_map_source
 
@@ -178,9 +168,7 @@ class Kernel:
     @property
     def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
         if self._world_map_source is None:
-            raise ComponentNotPrepared(
-                "self._tile_maps_by_position must be prepared before usage"
-            )
+            raise ComponentNotPrepared("self._tile_maps_by_position must be prepared before usage")
 
         return self._tile_maps_by_position
 

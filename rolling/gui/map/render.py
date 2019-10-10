@@ -19,9 +19,7 @@ class MapRenderEngine:
     ) -> None:
         self._world_map_source = world_map_source
         self._rows: typing.List[str] = None
-        self._attributes: typing.List[
-            typing.List[typing.Tuple[typing.Optional[str], int]]
-        ] = None
+        self._attributes: typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]] = None
         self._display_objects_manager = display_objects_manager
 
         # Shortcuts
@@ -53,11 +51,7 @@ class MapRenderEngine:
     # TODO BS 2019-03-24: size depend of memory capacity
     @lru_cache(maxsize=128)
     def _get_matrix(
-        self,
-        width: int,
-        height: int,
-        offset_horizontal: int = 0,
-        offset_vertical: int = 0,
+        self, width: int, height: int, offset_horizontal: int = 0, offset_vertical: int = 0
     ) -> typing.List[typing.List[typing.Tuple[int, int]]]:
         # Build map tile coordinates
         matrix: typing.List[typing.List[typing.Tuple[int, int]]] = [
@@ -73,11 +67,7 @@ class MapRenderEngine:
         return matrix
 
     def render(
-        self,
-        width: int,
-        height: int,
-        offset_horizontal: int = 0,
-        offset_vertical: int = 0,
+        self, width: int, height: int, offset_horizontal: int = 0, offset_vertical: int = 0
     ) -> None:
         matrix = self._get_matrix(width, height, offset_horizontal, offset_vertical)
 
@@ -114,9 +104,9 @@ class MapRenderEngine:
     def _build_attributes(
         self, screen_chars: typing.Tuple[str], height: int
     ) -> typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]]:
-        attributes: typing.List[
-            typing.List[typing.Tuple[typing.Optional[str], int]]
-        ] = [None] * height
+        attributes: typing.List[typing.List[typing.Tuple[typing.Optional[str], int]]] = [
+            None
+        ] * height
 
         for screen_row_i, row in enumerate(screen_chars):
             last_seen_char = None

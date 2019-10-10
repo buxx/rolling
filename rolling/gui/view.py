@@ -56,9 +56,7 @@ class ZoneMenu(BaseMenu):
     title = "Mouvements libres"
 
     def _get_texts(self) -> typing.List[str]:
-        return self._controller.client.get_zone_resume_texts(
-            self._controller.player_character.id
-        )
+        return self._controller.client.get_zone_resume_texts(self._controller.player_character.id)
 
     def _get_menu_buttons(self):
         return [
@@ -85,9 +83,7 @@ class ZoneMenu(BaseMenu):
 
     def _display_inventory(self, *args, **kwargs):
         widget = self._controller.guilang.generate_widget(
-            self._controller.client.get_character_inventory(
-                self._controller.player_character.id
-            )
+            self._controller.client.get_character_inventory(self._controller.player_character.id)
         )
 
         self._main_view.main_content_container.original_widget = widget
@@ -126,9 +122,7 @@ class ZoneMenu(BaseMenu):
 
     def _display_events(self, *args, **kwargs) -> None:
         actions_widget = self._controller.guilang.generate_widget(
-            self._controller.client.get_character_events(
-                self._controller.player_character.id
-            )
+            self._controller.client.get_character_events(self._controller.player_character.id)
         )
         self._controller.view.main_content_container.original_widget = actions_widget
         self._controller.view.right_menu_container.original_widget = GoBackSubMenu(
@@ -141,9 +135,7 @@ class ZoneMenu(BaseMenu):
 class RootMenu(BaseMenu):
     title = "Welcome"
 
-    def __init__(
-        self, controller: "Controller", main_view: "View", mode: str = "normal"
-    ) -> None:
+    def __init__(self, controller: "Controller", main_view: "View", mode: str = "normal") -> None:
         self._mode = mode
         super().__init__(controller, main_view)
 
@@ -189,9 +181,7 @@ class View(urwid.WidgetWrap):
         self._right_menu_container.original_widget = ZoneMenu(self._controller, self)
 
     def display_root_content(self):
-        self._main_content_container.original_widget = (
-            self._create_main_content_widget()
-        )
+        self._main_content_container.original_widget = self._create_main_content_widget()
 
     def _main_window(self):
         self._main_content_container = urwid.Padding(self._create_main_content_widget())

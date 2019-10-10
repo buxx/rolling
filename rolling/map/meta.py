@@ -24,15 +24,11 @@ class SpawnType(enum.Enum):
 
 class WorldMapSpawn(abc.ABC):
     @abc.abstractmethod
-    def get_spawn_coordinates(
-        self, world_map_source: "WorldMapSource"
-    ) -> typing.Tuple[int, int]:
+    def get_spawn_coordinates(self, world_map_source: "WorldMapSource") -> typing.Tuple[int, int]:
         pass
 
     @classmethod
-    def create_from_raw_line(
-        cls, kernel: "Kernel", raw_spawn_line: str
-    ) -> "WorldMapSpawn":
+    def create_from_raw_line(cls, kernel: "Kernel", raw_spawn_line: str) -> "WorldMapSpawn":
         """Create new instance of WorldMapSpawn child based on raw_spawn_line.
         raw_spawn_line example: SPAWN:RANDOM:BEACH,PLAIN,"""
         assert raw_spawn_line.startswith(SPAWN_LINE_NAME)
@@ -40,27 +36,19 @@ class WorldMapSpawn(abc.ABC):
         spawn_type, raw_spawn_values = spawn_line_value.split(":")
 
         if spawn_type == SpawnType.RANDOM.value:
-            spawn_raw_values = [
-                v.strip() for v in raw_spawn_values.split(",") if v.strip()
-            ]
+            spawn_raw_values = [v.strip() for v in raw_spawn_values.split(",") if v.strip()]
             spawn_values = [WorldMapTileType.get_for_id(v) for v in spawn_raw_values]
             return RandomWorldMapSpawn(kernel, world_tile_types=spawn_values)
 
 
 class RandomWorldMapSpawn(WorldMapSpawn):
     def __init__(
-        self,
-        kernel: "Kernel",
-        world_tile_types: typing.List[typing.Type["WorldMapTileType"]],
+        self, kernel: "Kernel", world_tile_types: typing.List[typing.Type["WorldMapTileType"]]
     ) -> None:
         self._kernel = kernel
-        self._world_tile_types: typing.List[
-            typing.Type["WorldMapTileType"]
-        ] = world_tile_types
+        self._world_tile_types: typing.List[typing.Type["WorldMapTileType"]] = world_tile_types
 
-    def get_spawn_coordinates(
-        self, world_map_source: "WorldMapSource"
-    ) -> typing.Tuple[int, int]:
+    def get_spawn_coordinates(self, world_map_source: "WorldMapSource") -> typing.Tuple[int, int]:
         available_coordinates: typing.List[typing.Tuple[int, int]] = []
 
         for row_i, rows in enumerate(self._kernel.world_map_source.geography.rows):
@@ -96,8 +84,6 @@ class WorldMapMeta:
     @property
     def spawn(self) -> WorldMapSpawn:
         if self._spawn is None:
-            raise ComponentNotPrepared(
-                "World source map don't contains spawn meta data"
-            )
+            raise ComponentNotPrepared("World source map don't contains spawn meta data")
 
         return self._spawn

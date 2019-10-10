@@ -127,12 +127,8 @@ class ZoneMapSource(MapSource):
 
     def _create_geography(self, raw_source: str) -> ZoneMapGeography:
         # TODO BS 2018-11-03: raise if not found
-        geography_lines = self._get_blocks(
-            raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False
-        )[0]
-        return ZoneMapGeography(
-            self.legend, geography_lines, missing_right_tile_str=" "
-        )
+        geography_lines = self._get_blocks(raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False)[0]
+        return ZoneMapGeography(self.legend, geography_lines, missing_right_tile_str=" ")
 
     def get_start_zone_coordinates(
         self, world_row_i: int, world_col_i: int
@@ -145,9 +141,7 @@ class ZoneMapSource(MapSource):
                     available_coordinates.append((row_i, col_i))
 
         if not available_coordinates:
-            raise RollingError(
-                f"No traversable coordinate in zone {world_row_i},{world_col_i}"
-            )
+            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
 
         return random.choice(available_coordinates)
 

@@ -11,8 +11,10 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_build_action_url
-from rolling.exception import ImpossibleAction, NotEnoughActionPoints, MissingResource
+from rolling.exception import ImpossibleAction
+from rolling.exception import MissingResource
 from rolling.exception import NoCarriedResource
+from rolling.exception import NotEnoughActionPoints
 from rolling.exception import NotEnoughResource
 from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildRequireResourceDescription
@@ -42,15 +44,11 @@ class BeginBuildAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {
             "build_id": action_config_raw["build"],
             "require_resources": [
-                BuildRequireResourceDescription(
-                    resource_id=r["resource"], quantity=r["quantity"]
-                )
+                BuildRequireResourceDescription(resource_id=r["resource"], quantity=r["quantity"])
                 for r in action_config_raw.get("require_resources", [])
             ],
         }
@@ -60,9 +58,7 @@ class BeginBuildAction(CharacterAction):
         # because we want to permit begin construction)
         pass
 
-    def check_request_is_possible(
-        self, character: "CharacterModel", input_: typing.Any
-    ) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
         self.check_is_possible(character)
 
     def get_character_actions(
@@ -118,9 +114,7 @@ class BeginBuildAction(CharacterAction):
 @dataclasses.dataclass
 class BringResourceModel:
     resource_id: str
-    quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 class BringResourcesOnBuild(WithBuildAction):
@@ -128,9 +122,7 @@ class BringResourcesOnBuild(WithBuildAction):
     input_model_serializer = serpyco.Serializer(BringResourceModel)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -151,26 +143,22 @@ class BringResourcesOnBuild(WithBuildAction):
     ) -> typing.Tuple[ResourceDescriptionModel, float, float]:
         build_progress = get_build_progress(build_doc, kernel=kernel)
         stored_resources = kernel.resource_lib.get_stored_in_build(build_doc.id)
-        stored_resources_by_resource_id: typing.Dict[
-            str, CarriedResourceDescriptionModel
-        ] = {
+        stored_resources_by_resource_id: typing.Dict[str, CarriedResourceDescriptionModel] = {
             stored_resource.id: stored_resource for stored_resource in stored_resources
         }
 
-        resource_description = kernel.game.config.resources[
-            required_resource.resource_id
-        ]
+        resource_description = kernel.game.config.resources[required_resource.resource_id]
         try:
-            stored_resource = stored_resources_by_resource_id[
-                required_resource.resource_id
-            ]
+            stored_resource = stored_resources_by_resource_id[required_resource.resource_id]
             stored_resource_quantity = stored_resource.quantity
         except KeyError:
             if raise_if_missing:
                 raise MissingResource(f"Il manque {resource_description.name}")
             stored_resource_quantity = 0.0
 
-        absolute_left = required_resource.quantity - (required_resource.quantity * (build_progress / 100))
+        absolute_left = required_resource.quantity - (
+            required_resource.quantity * (build_progress / 100)
+        )
         with_stored_left = absolute_left - stored_resource_quantity
 
         if with_stored_left < 0.0:
@@ -198,14 +186,10 @@ class BringResourcesOnBuild(WithBuildAction):
             if left <= 0:
                 continue
 
-            left_str = quantity_to_str(
-                left, resource_description.unit, kernel=self._kernel
-            )
+            left_str = quantity_to_str(left, resource_description.unit, kernel=self._kernel)
 
             query_params = BringResourcesOnBuild.input_model_serializer.dump(
-                BringResourcesOnBuild.input_model(
-                    resource_id=required_resource.resource_id
-                )
+                BringResourcesOnBuild.input_model(resource_id=required_resource.resource_id)
             )
             name = (
                 f"Apporter {resource_description.name} pour la construction "
@@ -244,9 +228,7 @@ class BringResourcesOnBuild(WithBuildAction):
             resource_description, left, left_percent = self.get_resource_infos(
                 self._kernel, required_resource, build_doc=build_doc
             )
-            left_str = quantity_to_str(
-                left, resource_description.unit, kernel=self._kernel
-            )
+            left_str = quantity_to_str(left, resource_description.unit, kernel=self._kernel)
             unit_str = self._kernel.translation.get(resource_description.unit)
 
             return Description(
@@ -265,9 +247,7 @@ class BringResourcesOnBuild(WithBuildAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité ({unit_str}) ?",
-                                type_=Type.NUMBER,
-                                name="quantity",
+                                label=f"Quantité ({unit_str}) ?", type_=Type.NUMBER, name="quantity"
                             )
                         ],
                     )
@@ -277,10 +257,7 @@ class BringResourcesOnBuild(WithBuildAction):
         resource_description = self._kernel.game.config.resources[input_.resource_id]
         try:
             self._kernel.resource_lib.reduce_carried_by(
-                character.id,
-                resource_id=input_.resource_id,
-                quantity=input_.quantity,
-                commit=False,
+                character.id, resource_id=input_.resource_id, quantity=input_.quantity, commit=False
             )
         except (NotEnoughResource, NoCarriedResource):
             raise ImpossibleAction(
@@ -288,10 +265,7 @@ class BringResourcesOnBuild(WithBuildAction):
             )
 
         self._kernel.resource_lib.add_resource_to_build(
-            build_doc.id,
-            resource_id=input_.resource_id,
-            quantity=input_.quantity,
-            commit=False,
+            build_doc.id, resource_id=input_.resource_id, quantity=input_.quantity, commit=False
         )
         self._kernel.server_db_session.commit()
 
@@ -308,9 +282,7 @@ class BringResourcesOnBuild(WithBuildAction):
 
 @dataclasses.dataclass
 class ConstructBuildModel:
-    cost_to_spent: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    cost_to_spent: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 class ConstructBuild(WithBuildAction):
@@ -318,9 +290,7 @@ class ConstructBuild(WithBuildAction):
     input_model_serializer = serpyco.Serializer(ConstructBuildModel)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -355,13 +325,18 @@ class ConstructBuild(WithBuildAction):
 
         return []
 
-    def _get_biggest_left_percent(self, build_doc: BuildDocument, raise_if_missing: bool = False) -> float:
+    def _get_biggest_left_percent(
+        self, build_doc: BuildDocument, raise_if_missing: bool = False
+    ) -> float:
         build_description = self._kernel.game.config.builds[build_doc.build_id]
         biggest_left_percent = 0.0
 
         for required_resource in build_description.build_require_resources:
             resource_description, left, left_percent = BringResourcesOnBuild.get_resource_infos(
-                self._kernel, required_resource, build_doc=build_doc, raise_if_missing=raise_if_missing
+                self._kernel,
+                required_resource,
+                build_doc=build_doc,
+                raise_if_missing=raise_if_missing,
             )
             if left_percent > biggest_left_percent:
                 biggest_left_percent = left_percent
@@ -375,7 +350,9 @@ class ConstructBuild(WithBuildAction):
         build_progress = get_build_progress(build_doc, kernel=self._kernel)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
         try:
-            lowest_required_left_percent = self._get_biggest_left_percent(build_doc, raise_if_missing=True)
+            lowest_required_left_percent = self._get_biggest_left_percent(
+                build_doc, raise_if_missing=True
+            )
         except MissingResource as exc:
             raise ImpossibleAction(str(exc))
 
@@ -434,7 +411,9 @@ class ConstructBuild(WithBuildAction):
             consume_resources_percent=consume_resources_percent,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(character.id, cost=input_cost_to_spent, commit=False)
+        self._kernel.character_lib.reduce_action_points(
+            character.id, cost=input_cost_to_spent, commit=False
+        )
         self._kernel.server_db_session.commit()
 
         # FIXME BS NOW: deux erreurs:
@@ -442,6 +421,5 @@ class ConstructBuild(WithBuildAction):
         # * progression faite et reste des resources: mauvais calcul de la progression max possible
 
         return Description(
-            title=f"Travail effectué",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            title=f"Travail effectué", items=[Part(label="Continuer", go_back_zone=True)]
         )

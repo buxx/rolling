@@ -5,9 +5,7 @@ from rolling.map.type import world
 
 
 class TestWorldMapRender:
-    def test_unit__render__ok__just_space(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__just_space(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=4, height=3)
 
@@ -31,11 +29,7 @@ class TestWorldMapRender:
         assert [b"~~~ ", b"^^~ ", b"~~~ "] == engine.rows
         assert [
             [(world.Sea.get_full_id(), 3), (None, 1)],
-            [
-                (world.Mountain.get_full_id(), 2),
-                (world.Sea.get_full_id(), 1),
-                (None, 1),
-            ],
+            [(world.Mountain.get_full_id(), 2), (world.Sea.get_full_id(), 1), (None, 1)],
             [(world.Sea.get_full_id(), 3), (None, 1)],
         ] == engine.attributes
 
@@ -48,11 +42,7 @@ class TestWorldMapRender:
         assert [b" ~~~", b" ~^^", b" ~~~"] == engine.rows
         assert [
             [(None, 1), (world.Sea.get_full_id(), 3)],
-            [
-                (None, 1),
-                (world.Sea.get_full_id(), 1),
-                (world.Mountain.get_full_id(), 2),
-            ],
+            [(None, 1), (world.Sea.get_full_id(), 1), (world.Mountain.get_full_id(), 2)],
             [(None, 1), (world.Sea.get_full_id(), 3)],
         ] == engine.attributes
 
@@ -65,11 +55,7 @@ class TestWorldMapRender:
         assert [b"  ~~", b"  ~^", b"  ~~"] == engine.rows
         assert [
             [(None, 2), (world.Sea.get_full_id(), 2)],
-            [
-                (None, 2),
-                (world.Sea.get_full_id(), 1),
-                (world.Mountain.get_full_id(), 1),
-            ],
+            [(None, 2), (world.Sea.get_full_id(), 1), (world.Mountain.get_full_id(), 1)],
             [(None, 2), (world.Sea.get_full_id(), 2)],
         ] == engine.attributes
 
@@ -82,11 +68,7 @@ class TestWorldMapRender:
         assert [b"~~  ", b"^~  ", b"~~  "] == engine.rows
         assert [
             [(world.Sea.get_full_id(), 2), (None, 2)],
-            [
-                (world.Mountain.get_full_id(), 1),
-                (world.Sea.get_full_id(), 1),
-                (None, 2),
-            ],
+            [(world.Mountain.get_full_id(), 1), (world.Sea.get_full_id(), 1), (None, 2)],
             [(world.Sea.get_full_id(), 2), (None, 2)],
         ] == engine.attributes
 
@@ -131,11 +113,7 @@ class TestWorldMapRender:
         engine.render(width=4, height=3, offset_vertical=-2)
 
         assert [b"~~~~", b"    ", b"    "] == engine.rows
-        assert [
-            [(world.Sea.get_full_id(), 4)],
-            [(None, 4)],
-            [(None, 4)],
-        ] == engine.attributes
+        assert [[(world.Sea.get_full_id(), 4)], [(None, 4)], [(None, 4)]] == engine.attributes
 
     def test_unit__render__ok__just_space_with_vertical_more_2_offset(
         self, worldmapb_render_engine: WorldMapRenderEngine
@@ -144,39 +122,27 @@ class TestWorldMapRender:
         engine.render(width=4, height=3, offset_vertical=2)
 
         assert [b"    ", b"    ", b"~~~~"] == engine.rows
-        assert [
-            [(None, 4)],
-            [(None, 4)],
-            [(world.Sea.get_full_id(), 4)],
-        ] == engine.attributes
+        assert [[(None, 4)], [(None, 4)], [(world.Sea.get_full_id(), 4)]] == engine.attributes
 
-    def test_unit__render__ok__height_more_one(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__height_more_one(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=4, height=4)
 
         assert [b"~~~~", b"~^^~", b"~~~~", b"    "] == engine.rows
 
-    def test_unit__render__ok__height_less_one(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__height_less_one(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=4, height=2)
 
         assert [b"~~~~", b"~^^~"] == engine.rows
 
-    def test_unit__render__ok__height_more_two(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__height_more_two(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=4, height=5)
 
         assert [b"~~~~", b"~^^~", b"~~~~", b"    ", b"    "] == engine.rows
 
-    def test_unit__render__ok__height_less_two(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__height_less_two(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=4, height=1)
 
@@ -190,33 +156,25 @@ class TestWorldMapRender:
 
         assert [b"~~~~", b"~^^~", b"~~~~", b"    ", b"    ", b"    "] == engine.rows
 
-    def test_unit__render__ok__width_more_one(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__width_more_one(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=5, height=3)
 
         assert [b"~~~~ ", b"~^^~ ", b"~~~~ "] == engine.rows
 
-    def test_unit__render__ok__width_less_one(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__width_less_one(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=3, height=3)
 
         assert [b"~~~", b"~^^", b"~~~"] == engine.rows
 
-    def test_unit__render__ok__width_more_two(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__width_more_two(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=6, height=3)
 
         assert [b"~~~~  ", b"~^^~  ", b"~~~~  "] == engine.rows
 
-    def test_unit__render__ok__width_less_two(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__width_less_two(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=2, height=3)
 
@@ -230,9 +188,7 @@ class TestWorldMapRender:
 
         assert [b"~~~~   ", b"~^^~   ", b"~~~~   "] == engine.rows
 
-    def test_unit__render__ok__large(
-        self, worldmapb_render_engine: WorldMapRenderEngine
-    ):
+    def test_unit__render__ok__large(self, worldmapb_render_engine: WorldMapRenderEngine):
         engine = worldmapb_render_engine
         engine.render(width=8, height=7)
 
@@ -318,13 +274,7 @@ class TestWorldMapRender:
         engine = worldmapb_render_engine
         engine.render(width=8, height=5, offset_horizontal=-8)
 
-        assert [
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-        ] == engine.rows
+        assert [b"        ", b"        ", b"        ", b"        ", b"        "] == engine.rows
 
     def test_unit__render__ok__large_width_less_height_horizontal_complete_pos_offset(
         self, worldmapb_render_engine: WorldMapRenderEngine
@@ -332,13 +282,7 @@ class TestWorldMapRender:
         engine = worldmapb_render_engine
         engine.render(width=8, height=5, offset_horizontal=8)
 
-        assert [
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-        ] == engine.rows
+        assert [b"        ", b"        ", b"        ", b"        ", b"        "] == engine.rows
 
     def test_unit__render__ok__large_width_less_height_horizontal_huge_neg_offset(
         self, worldmapb_render_engine: WorldMapRenderEngine
@@ -346,13 +290,7 @@ class TestWorldMapRender:
         engine = worldmapb_render_engine
         engine.render(width=8, height=5, offset_horizontal=-20)
 
-        assert [
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-        ] == engine.rows
+        assert [b"        ", b"        ", b"        ", b"        ", b"        "] == engine.rows
 
     def test_unit__render__ok__large_width_less_height_horizontal_huge_pos_offset(
         self, worldmapb_render_engine: WorldMapRenderEngine
@@ -360,13 +298,7 @@ class TestWorldMapRender:
         engine = worldmapb_render_engine
         engine.render(width=8, height=5, offset_horizontal=20)
 
-        assert [
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-            b"        ",
-        ] == engine.rows
+        assert [b"        ", b"        ", b"        ", b"        ", b"        "] == engine.rows
 
     def test_unit__tiny_render_with__ok__vertical_offset(
         self, worldmapb2_render_engine: WorldMapRenderEngine
@@ -374,10 +306,4 @@ class TestWorldMapRender:
         engine = worldmapb2_render_engine
         engine.render(width=8, height=5, offset_vertical=-1)
 
-        assert [
-            b"~^^~    ",
-            b"~~~~    ",
-            b"~~~~    ",
-            b"~~~~    ",
-            b"~~~~    ",
-        ] == engine.rows
+        assert [b"~^^~    ", b"~~~~    ", b"~~~~    ", b"~~~~    ", b"~~~~    "] == engine.rows

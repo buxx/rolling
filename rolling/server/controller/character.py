@@ -5,18 +5,19 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.exception import CantMoveCharacter, NotEnoughActionPoints
+from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughActionPoints
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
@@ -24,6 +25,7 @@ from rolling.model.character import CreateCharacterModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookResourceModelModel
 from rolling.model.character import GetLookStuffModelModel
+from rolling.model.character import GetMoveZoneInfosModel
 from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
@@ -31,6 +33,7 @@ from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
@@ -47,8 +50,9 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel, get_description_for_not_enough_ap
+from rolling.util import EmptyModel
 from rolling.util import display_g_or_kg
+from rolling.util import get_description_for_not_enough_ap
 
 
 class CharacterController(BaseController):
@@ -91,8 +95,7 @@ class CharacterController(BaseController):
                 Part(text="------------"),
                 Part(label="Nom", text=character.name),
                 Part(
-                    label="Points d'actions restants",
-                    text=f"{str(character.action_points)}/24.0",
+                    label="Points d'actions restants", text=f"{str(character.action_points)}/24.0"
                 ),
                 Part(
                     label="Points de vie",
@@ -102,10 +105,7 @@ class CharacterController(BaseController):
                 Part(label="Faim", text="oui" if character.feel_hungry else "non"),
                 Part(text="Compétences"),
                 Part(text="------------"),
-                Part(
-                    label="Chasse et ceuillete",
-                    text=str(character.hunting_and_collecting_comp),
-                ),
+                Part(label="Chasse et ceuillete", text=str(character.hunting_and_collecting_comp)),
                 Part(label="Trouver de l'eau", text=str(character.find_water_comp)),
             ],
         )
@@ -113,9 +113,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_inventory(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def _describe_inventory(self, request: Request, hapic_data: HapicData) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
         stuff_items: typing.List[Part] = []
@@ -147,8 +145,7 @@ class CharacterController(BaseController):
                     text=f"{resource.get_full_description(self._kernel)}",
                     is_link=True,
                     form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
-                        character_id=hapic_data.path.character_id,
-                        resource_id=resource.id,
+                        character_id=hapic_data.path.character_id, resource_id=resource.id
                     ),
                 )
             )
@@ -192,9 +189,7 @@ class CharacterController(BaseController):
     async def _describe_on_place_actions(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        character_actions = self._character_lib.get_on_place_actions(
-            hapic_data.path.character_id
-        )
+        character_actions = self._character_lib.get_on_place_actions(hapic_data.path.character_id)
 
         return Description(
             title="Ici, vous pouvez:",
@@ -207,12 +202,8 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_build_actions(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
-        build_actions = self._character_lib.get_build_actions(
-            hapic_data.path.character_id
-        )
+    async def _describe_build_actions(self, request: Request, hapic_data: HapicData) -> Description:
+        build_actions = self._character_lib.get_build_actions(hapic_data.path.character_id)
 
         return Description(
             title="Ici pouvez démarrer la construction de:",
@@ -225,9 +216,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_events(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def _describe_events(self, request: Request, hapic_data: HapicData) -> Description:
         character_events = self._character_lib.get_last_events(
             hapic_data.path.character_id, count=100
         )
@@ -236,9 +225,7 @@ class CharacterController(BaseController):
             title="Evenements:",
             is_long_text=True,
             items=[
-                Part(
-                    text=event.datetime.strftime(f"%d %b %Y at %H:%M:%S : {event.text}")
-                )
+                Part(text=event.datetime.strftime(f"%d %b %Y at %H:%M:%S : {event.text}"))
                 for event in character_events
             ],
         )
@@ -246,9 +233,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetLookStuffModelModel)
     @hapic.output_body(Description)
-    async def _describe_look_stuff(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def _describe_look_stuff(self, request: Request, hapic_data: HapicData) -> Description:
         stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
         actions = self._character_lib.get_on_stuff_actions(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
@@ -286,12 +271,9 @@ class CharacterController(BaseController):
     async def _describe_inventory_look_resource(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        resource_description = self._kernel.game.config.resources[
-            hapic_data.path.resource_id
-        ]
+        resource_description = self._kernel.game.config.resources[hapic_data.path.resource_id]
         actions = self._character_lib.get_on_resource_actions(
-            character_id=hapic_data.path.character_id,
-            resource_id=hapic_data.path.resource_id,
+            character_id=hapic_data.path.character_id, resource_id=hapic_data.path.resource_id
         )
         return Description(
             title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
@@ -304,18 +286,13 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(CharacterActionModel)
     @hapic.output_body(Description)
-    async def character_action(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def character_action(self, request: Request, hapic_data: HapicData) -> Description:
         action_type = hapic_data.path.action_type
         action_description_id = hapic_data.path.action_description_id
         action = typing.cast(
-            CharacterAction,
-            self._action_factory.create_action(action_type, action_description_id),
+            CharacterAction, self._action_factory.create_action(action_type, action_description_id)
         )
-        input_ = serpyco.Serializer(action.input_model).load(
-            dict(request.query)
-        )  # TODO perf
+        input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
         cost = action.get_cost(character_model, input_=input_)
@@ -344,17 +321,13 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithStuffActionModel)
     @hapic.output_body(Description)
-    async def with_stuff_action(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def with_stuff_action(self, request: Request, hapic_data: HapicData) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithStuffAction,
             self._action_factory.create_action(action_type, action_description_id=None),
         )
-        input_ = serpyco.Serializer(action.input_model).load(
-            dict(request.query)
-        )  # TODO perf
+        input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         # TODO BS 2019-07-04: Check character owning ...
         stuff = self._kernel.stuff_lib.get_stuff(hapic_data.path.stuff_id)
@@ -373,9 +346,7 @@ class CharacterController(BaseController):
             )
 
         try:
-            action.check_request_is_possible(
-                character=character_model, stuff=stuff, input_=input_
-            )
+            action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
@@ -387,9 +358,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithBuildActionModel)
     @hapic.output_body(Description)
-    async def with_build_action(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def with_build_action(self, request: Request, hapic_data: HapicData) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithBuildAction,
@@ -407,9 +376,7 @@ class CharacterController(BaseController):
 
         try:
             action.check_request_is_possible(
-                character=character_model,
-                build_id=hapic_data.path.build_id,
-                input_=input_,
+                character=character_model, build_id=hapic_data.path.build_id, input_=input_
             )
         except NotEnoughActionPoints as exc:
             return get_description_for_not_enough_ap(character_model, exc.cost)
@@ -423,9 +390,7 @@ class CharacterController(BaseController):
         #  in perform like in this action !
         try:
             return action.perform(
-                character=character_model,
-                build_id=hapic_data.path.build_id,
-                input_=input_,
+                character=character_model, build_id=hapic_data.path.build_id, input_=input_
             )
         except ImpossibleAction as exc:
             return Description(
@@ -436,9 +401,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithResourceActionModel)
     @hapic.output_body(Description)
-    async def with_resource_action(
-        self, request: Request, hapic_data: HapicData
-    ) -> Description:
+    async def with_resource_action(self, request: Request, hapic_data: HapicData) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithResourceAction,
@@ -447,9 +410,7 @@ class CharacterController(BaseController):
         input_ = action.input_model_serializer.load(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
-        cost = action.get_cost(
-            character_model, hapic_data.path.resource_id, input_=input_
-        )
+        cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
         if cost is not None and character_model.action_points < cost:
             return Description(
                 title="Action impossible",
@@ -464,9 +425,7 @@ class CharacterController(BaseController):
 
         try:
             action.check_request_is_possible(
-                character=character_model,
-                resource_id=hapic_data.path.resource_id,
-                input_=input_,
+                character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
             )
         except ImpossibleAction as exc:
             return Description(
@@ -475,9 +434,7 @@ class CharacterController(BaseController):
             )
 
         return action.perform(
-            character=character_model,
-            resource_id=hapic_data.path.resource_id,
-            input_=input_,
+            character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
         )
 
     @hapic.with_api_doc()
@@ -493,6 +450,19 @@ class CharacterController(BaseController):
     @hapic.output_body(CharacterModel)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
         return self._character_lib.get(hapic_data.path.character_id)
+
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoResultFound, http_code=404)
+    @hapic.input_path(GetMoveZoneInfosModel)
+    @hapic.output_body(MoveZoneInfos)
+    async def get_move_to_zone_infos(
+        self, request: Request, hapic_data: HapicData
+    ) -> MoveZoneInfos:
+        return self._character_lib.get_move_to_zone_infos(
+            hapic_data.path.character_id,
+            world_row_i=hapic_data.path.world_row_i,
+            world_col_i=hapic_data.path.world_col_i,
+        )
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
@@ -512,12 +482,8 @@ class CharacterController(BaseController):
         character = self._character_lib.get(hapic_data.path.character_id)
         to_world_row = hapic_data.query.to_world_row
         to_world_col = hapic_data.query.to_world_col
-        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][
-            to_world_col
-        ]
-        zone_properties = self._kernel.game.world_manager.get_zone_properties(
-            move_to_zone_type
-        )
+        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
 
         if zone_properties.move_cost > character.action_points:
             message = (
@@ -531,9 +497,7 @@ class CharacterController(BaseController):
             to_world_row=hapic_data.query.to_world_row,
             to_world_col=hapic_data.query.to_world_col,
         )
-        self._character_lib.reduce_action_points(
-            character.id, zone_properties.move_cost
-        )
+        self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
         return Response(status=204)
 
     @hapic.with_api_doc()
@@ -555,18 +519,14 @@ class CharacterController(BaseController):
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
 
         return ZoneRequiredPlayerData(
-            weight_overcharge=inventory.weight
-            > character.get_weight_capacity(self._kernel),
-            clutter_overcharge=inventory.clutter
-            > character.get_clutter_capacity(self._kernel),
+            weight_overcharge=inventory.weight > character.get_weight_capacity(self._kernel),
+            clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
         )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ListOfStrModel)
-    async def get_resume_texts(
-        self, request: Request, hapic_data: HapicData
-    ) -> ListOfStrModel:
+    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfStrModel:
         character = self._character_lib.get(hapic_data.path.character_id)
 
         hungry = "oui" if character.feel_hungry else "non"
@@ -579,48 +539,36 @@ class CharacterController(BaseController):
         app.add_routes(
             [
                 web.get("/_describe/character/create", self._describe_create_character),
-                web.get(
-                    "/_describe/character/{character_id}/card",
-                    self._describe_character_card,
-                ),
-                web.get(
-                    "/_describe/character/{character_id}/inventory",
-                    self._describe_inventory,
-                ),
+                web.get("/_describe/character/{character_id}/card", self._describe_character_card),
+                web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.get(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
                 ),
                 web.get(
+                    "/character/{character_id}/move-to-zone/{world_row_i}/{world_col_i}",
+                    self.get_move_to_zone_infos,
+                ),
+                web.get(
                     "/_describe/character/{character_id}/build_actions",
                     self._describe_build_actions,
                 ),
-                web.get(
-                    "/_describe/character/{character_id}/events", self._describe_events
-                ),
+                web.get("/_describe/character/{character_id}/events", self._describe_events),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.get("/character/{character_id}", self.get),
-                web.get(
-                    "/_describe/character/{character_id}/inventory",
-                    self._describe_inventory,
-                ),
+                web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.put("/character/{character_id}/move", self.move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
+                web.post(DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff),
                 web.post(
-                    DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
-                ),
-                web.post(
-                    DESCRIBE_INVENTORY_RESOURCE_ACTION,
-                    self._describe_inventory_look_resource,
+                    DESCRIBE_INVENTORY_RESOURCE_ACTION, self._describe_inventory_look_resource
                 ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
                 web.post(WITH_BUILD_ACTION, self.with_build_action),
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
-                web.get(
-                    "/character/{character_id}/resume_texts", self.get_resume_texts
-                ),
+                web.get("/character/{character_id}/resume_texts", self.get_resume_texts),
             ]
         )

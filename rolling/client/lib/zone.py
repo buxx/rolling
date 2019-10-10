@@ -23,9 +23,7 @@ class ZoneLib:
     def get_zone(self, world_row_i: int, world_col_i: int) -> ZoneMapModel:
         return self._client.get_zone(world_row_i, world_col_i)
 
-    def get_zone_tile_type_model(
-        self, tile_type: typing.Type[MapTileType]
-    ) -> ZoneTileTypeModel:
+    def get_zone_tile_type_model(self, tile_type: typing.Type[MapTileType]) -> ZoneTileTypeModel:
         try:
             return self._tile_types_by_ids[tile_type.id]
         except KeyError:

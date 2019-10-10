@@ -14,9 +14,7 @@ class ImageWidget(urwid.Widget):
 
     def render(self, size, focus=False):
         width, height = size
-        colors = convert_img_to_urwid(
-            self._image_path, max_width=width, max_height=height
-        )
+        colors = convert_img_to_urwid(self._image_path, max_width=width, max_height=height)
 
         # TODO BS 2019-06-27: Optimize by prepare lists
         rows = []
@@ -50,9 +48,7 @@ class ImageWidget(urwid.Widget):
         bottom_empty_rows = 0
         if empty_rows:
             top_empty_rows = empty_rows // 2
-            bottom_empty_rows = (
-                empty_rows // 2 if not empty_rows % 2 else empty_rows // 2 + 1
-            )
+            bottom_empty_rows = empty_rows // 2 if not empty_rows % 2 else empty_rows // 2 + 1
 
         for i in range(top_empty_rows):
             attributes.append([(None, width)])
@@ -64,9 +60,7 @@ class ImageWidget(urwid.Widget):
                 image_attributes.append((PALETTE_BG_COLOR.format(colors[i][ii]), 1))
 
             attributes.append(
-                [(None, left_empty_columns)]
-                + image_attributes
-                + [(None, right_empty_columns)]
+                [(None, left_empty_columns)] + image_attributes + [(None, right_empty_columns)]
             )
 
         for i in range(bottom_empty_rows):

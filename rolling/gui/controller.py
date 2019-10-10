@@ -62,9 +62,7 @@ class Controller:
         self._to_send_zone_queue = Queue()
         self._zone_websocket_event = asyncio.Event()
         self._zone_websocket_connected_event = asyncio.Event()
-        self._display_objects_manager = display_object_manager or DisplayObjectManager(
-            []
-        )
+        self._display_objects_manager = display_object_manager or DisplayObjectManager([])
         self._guilang: typing.Optional[GuilangGenerator] = None
 
         self._kernel.init_client_db_session()
@@ -88,25 +86,19 @@ class Controller:
     @property
     def zone_lib(self) -> ZoneLib:
         if self._zone_lib is None:
-            raise NotConnectedToServer(
-                "You try to use property set when connected to a server"
-            )
+            raise NotConnectedToServer("You try to use property set when connected to a server")
         return self._zone_lib
 
     @property
     def guilang(self) -> GuilangGenerator:
         if self._guilang is None:
-            raise NotConnectedToServer(
-                "You try to use property set when connected to a server"
-            )
+            raise NotConnectedToServer("You try to use property set when connected to a server")
         return self._guilang
 
     @property
     def player_character(self) -> CharacterModel:
         if self._player_character is None:
-            raise NotConnectedToServer(
-                "You try to use property set when connected to a server"
-            )
+            raise NotConnectedToServer("You try to use property set when connected to a server")
 
         return self._player_character
 
@@ -165,8 +157,7 @@ class Controller:
                 await self._zone_websocket_event.wait()
                 gui_logger.info("Starting zone websocket listening")
                 await zone_websocket_client.make_connection(
-                    self._player_character.world_row_i,
-                    self._player_character.world_col_i,
+                    self._player_character.world_row_i, self._player_character.world_col_i
                 )
                 self._zone_websocket_connected_event.set()
                 await zone_websocket_client.listen()
@@ -180,9 +171,7 @@ class Controller:
                 await self._zone_websocket_connected_event.wait()
                 # FIXME BS 2019-01-14: this is blocking, see https://stackoverflow.com/questions/26413613/asyncio-is-it-possible-to-cancel-a-future-been-run-by-an-executor
                 # to make it unblocking
-                event = await self._asyncio_loop.run_in_executor(
-                    None, self._to_send_zone_queue.get
-                )
+                event = await self._asyncio_loop.run_in_executor(None, self._to_send_zone_queue.get)
                 await zone_websocket_client.send_event(event)
 
         return await asyncio.gather(read(), write())
@@ -241,9 +230,7 @@ class Controller:
             excluded_character_ids=[self.player_character.id],
         ):
             self._display_objects_manager.add_object(
-                Character(
-                    zone_character.zone_row_i, zone_character.zone_col_i, zone_character
-                )
+                Character(zone_character.zone_row_i, zone_character.zone_col_i, zone_character)
             )
 
         for zone_build in self._client.get_zone_builds(
@@ -251,10 +238,7 @@ class Controller:
         ):
             self._display_objects_manager.add_object(
                 BuildDisplay(
-                    zone_build.row_i,
-                    zone_build.col_i,
-                    id_=zone_build.id,
-                    char=zone_build.char,
+                    zone_build.row_i, zone_build.col_i, id_=zone_build.id, char=zone_build.char
                 )
             )
 
@@ -342,9 +326,7 @@ class Controller:
     def _continue_zone_action(self, form_values: dict) -> None:
         pass
 
-    def _update_player_with_zone_required_data(
-        self, player_character: CharacterModel
-    ) -> None:
+    def _update_player_with_zone_required_data(self, player_character: CharacterModel) -> None:
         data: ZoneRequiredPlayerData = self._character_lib.get_zone_required_character_data(
             player_character.id
         )
@@ -363,9 +345,7 @@ class Controller:
             self, self.view, self.view.right_menu_container.original_widget
         )
 
-    def display_simple_message(
-        self, title: str, message: typing.Optional[str] = None
-    ) -> None:
+    def display_simple_message(self, title: str, message: typing.Optional[str] = None) -> None:
         self._view.main_content_container.original_widget = SimpleDialog(
             kernel=self.kernel,
             controller=self,

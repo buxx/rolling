@@ -41,9 +41,7 @@ def xena(
 def arthur(
     worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
 ) -> CharacterDocument:
-    arthur = CharacterDocument(
-        id="arthur", name="arthur", **default_character_competences
-    )
+    arthur = CharacterDocument(id="arthur", name="arthur", **default_character_competences)
 
     session = worldmapc_with_zones_kernel.server_db_session
     session.add(arthur)

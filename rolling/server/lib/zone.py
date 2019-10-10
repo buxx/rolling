@@ -32,6 +32,4 @@ class ZoneLib:
         return tiles
 
     def get_zone(self, row_i: int, col_i: int) -> ZoneMapModel:
-        return ZoneMapModel(
-            raw_source=self._kernel.get_tile_map(row_i, col_i).source.raw_source
-        )
+        return ZoneMapModel(raw_source=self._kernel.get_tile_map(row_i, col_i).source.raw_source)

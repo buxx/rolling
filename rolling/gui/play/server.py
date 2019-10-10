@@ -25,9 +25,7 @@ class ChooseServerMenu(urwid.ListBox):
         menu_items = [urwid.Text("Choose server"), urwid.Divider()]
 
         for server_address in self.get_servers():
-            button = urwid.Button(
-                server_address, self.choose_server, user_data=server_address
-            )
+            button = urwid.Button(server_address, self.choose_server, user_data=server_address)
             menu_items.append(button)
 
         return menu_items

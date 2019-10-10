@@ -33,9 +33,7 @@ class ChangeZoneDialog(FullContentDialog):
             self._controller.change_zone(self._world_row_i, self.world_col_i)
 
         def cancel(*args, **kwargs):
-            self._controller.view.main_content_container.original_widget = (
-                self._original_widget
-            )
+            self._controller.view.main_content_container.original_widget = self._original_widget
 
         return [
             urwid.Button("No, stay here", on_press=cancel),

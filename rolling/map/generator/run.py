@@ -46,9 +46,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Tile map generator")
     parser.add_argument("source", type=str, help="World source map")
     parser.add_argument("export_folder", type=str, help="Export folder")
-    parser.add_argument(
-        "--map-widths", type=int, default=129, help="Default generated map widths"
-    )
+    parser.add_argument("--map-widths", type=int, default=129, help="Default generated map widths")
     parser.add_argument(
         "--map-heights", type=int, default=129, help="Default generated map heights"
     )

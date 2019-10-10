@@ -29,9 +29,7 @@ def zone_map_widget(
     tilemapa_source: ZoneMapSource,
 ) -> TileMapWidget:
     return TileMapWidget(
-        controller=controller,
-        render_engine=tilemapa_render_engine,
-        zone_map_source=tilemapa_source,
+        controller=controller, render_engine=tilemapa_render_engine, zone_map_source=tilemapa_source
     )
 
 
@@ -60,9 +58,7 @@ def http_client(
 
 
 @pytest.fixture
-def worldmapb_client_zone_lib(
-    worldmapb_kernel: Kernel, http_client: HttpClient
-) -> ClientZoneLib:
+def worldmapb_client_zone_lib(worldmapb_kernel: Kernel, http_client: HttpClient) -> ClientZoneLib:
     return ClientZoneLib(worldmapb_kernel, http_client)
 
 

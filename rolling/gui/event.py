@@ -31,9 +31,7 @@ class EventProcessor(metaclass=abc.ABCMeta):
 
 class PlayerMoveProcessor(EventProcessor):
     async def _process(self, event: ZoneEvent[PlayerMoveData]) -> None:
-        gui_logger.debug(
-            f"Receive {event.type} event for character {event.data.character_id}"
-        )
+        gui_logger.debug(f"Receive {event.type} event for character {event.data.character_id}")
 
         if self._controller.player_character.id == event.data.character_id:
             gui_logger.debug(f"Move event of current player character: ignore")
@@ -56,9 +54,7 @@ class EventProcessorFactory:
     def __init__(self, kernel: "Kernel", controller: "Controller") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 
-        for zone_event_type, processor_type in [
-            (ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor)
-        ]:
+        for zone_event_type, processor_type in [(ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor)]:
             self._processors[zone_event_type] = processor_type(kernel, controller)
 
     def get_processor(self, zone_event_type: ZoneEventType) -> EventProcessor:

@@ -70,17 +70,10 @@ class BuildLib:
 
         if zone_row_i is not None and zone_col_i is not None:
             filters.extend(
-                [
-                    BuildDocument.zone_row_i == zone_row_i,
-                    BuildDocument.zone_col_i == zone_col_i,
-                ]
+                [BuildDocument.zone_row_i == zone_row_i, BuildDocument.zone_col_i == zone_col_i]
             )
 
-        return (
-            self._kernel.server_db_session.query(BuildDocument)
-            .filter(and_(*filters))
-            .all()
-        )
+        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).all()
 
     def progress_build(
         self,
@@ -93,7 +86,7 @@ class BuildLib:
         build_description = self._kernel.game.config.builds[build_doc.build_id]
 
         for required_resource in build_description.build_require_resources:
-            quantity_to_reduce = required_resource.quantity * (consume_resources_percent/100)
+            quantity_to_reduce = required_resource.quantity * (consume_resources_percent / 100)
             self._kernel.resource_lib.reduce_stored_in(
                 build_id,
                 resource_id=required_resource.resource_id,

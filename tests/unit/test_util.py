@@ -29,9 +29,7 @@ def test_get_corner():
         "X": None,
     }
 
-    for row_i, line in enumerate(
-        [line.strip() for line in str_map.splitlines() if line.strip()]
-    ):
+    for row_i, line in enumerate([line.strip() for line in str_map.splitlines() if line.strip()]):
         for col_i, charr in enumerate(line):
             real_row_i = row_i - 1
             real_col_i = col_i - 1

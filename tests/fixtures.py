@@ -80,9 +80,7 @@ def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
 
 
 @pytest.fixture
-def worldmapc_with_zones_server_character_lib(
-    worldmapc_with_zones_kernel: Kernel
-) -> CharacterLib:
+def worldmapc_with_zones_server_character_lib(worldmapc_with_zones_kernel: Kernel) -> CharacterLib:
     return CharacterLib(worldmapc_with_zones_kernel)
 
 
@@ -104,9 +102,7 @@ def worldmapa_render_engine(
     worldmapa_kernel: Kernel,
 ) -> WorldMapRenderEngine:
     return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(
-            kernel=worldmapa_kernel, raw_source=worldmapsourceb_txt
-        ),
+        world_map_source=WorldMapSource(kernel=worldmapa_kernel, raw_source=worldmapsourceb_txt),
         display_objects_manager=display_object_manager__empty,
     )
 
@@ -118,9 +114,7 @@ def tilemapa_render_engine(
     worldmapb_kernel: Kernel,
 ) -> TileMapRenderEngine:
     return TileMapRenderEngine(
-        world_map_source=ZoneMapSource(
-            kernel=worldmapb_kernel, raw_source=tilemapsourcea_txt
-        ),
+        world_map_source=ZoneMapSource(kernel=worldmapb_kernel, raw_source=tilemapsourcea_txt),
         display_objects_manager=display_object_manager__empty,
     )
 
@@ -132,9 +126,7 @@ def worldmapb_render_engine(
     worldmapb_kernel: Kernel,
 ) -> WorldMapRenderEngine:
     return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(
-            kernel=worldmapb_kernel, raw_source=worldmapsourceb_txt
-        ),
+        world_map_source=WorldMapSource(kernel=worldmapb_kernel, raw_source=worldmapsourceb_txt),
         display_objects_manager=display_object_manager__empty,
     )
 
@@ -146,9 +138,7 @@ def worldmapb2_render_engine(
     worldmapb2_kernel: Kernel,
 ) -> WorldMapRenderEngine:
     return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(
-            kernel=worldmapb2_kernel, raw_source=worldmapsourceb2_txt
-        ),
+        world_map_source=WorldMapSource(kernel=worldmapb2_kernel, raw_source=worldmapsourceb2_txt),
         display_objects_manager=display_object_manager__empty,
     )
 

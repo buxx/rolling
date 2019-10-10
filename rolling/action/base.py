@@ -22,10 +22,7 @@ if typing.TYPE_CHECKING:
 
 
 def get_character_action_url(
-    character_id: str,
-    action_type: ActionType,
-    action_description_id: str,
-    query_params: dict,
+    character_id: str, action_type: ActionType, action_description_id: str, query_params: dict
 ) -> str:
     base_url = CHARACTER_ACTION.format(
         character_id=character_id,
@@ -73,9 +70,7 @@ def get_with_resource_action_url(
     character_id: str, action_type: ActionType, resource_id: str, query_params: dict
 ) -> str:
     base_url = WITH_RESOURCE_ACTION.format(
-        character_id=character_id,
-        action_type=action_type.value,
-        resource_id=resource_id,
+        character_id=character_id, action_type=action_type.value, resource_id=resource_id
     )
     return f"{base_url}?{urlencode(query_params)}"
 
@@ -101,17 +96,13 @@ class Action(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         pass
 
 
 class WithStuffAction(Action):
     @abc.abstractmethod
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         pass
 
     @abc.abstractmethod
@@ -159,10 +150,7 @@ class WithBuildAction(Action):
         pass
 
     def get_cost(
-        self,
-        character: "CharacterModel",
-        build_id: int,
-        input_: typing.Optional[typing.Any] = None,
+        self, character: "CharacterModel", build_id: int, input_: typing.Optional[typing.Any] = None
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
@@ -211,9 +199,7 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
-        self, character: "CharacterModel", input_: typing.Any
-    ) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
         pass
 
     @abc.abstractmethod

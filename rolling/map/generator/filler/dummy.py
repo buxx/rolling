@@ -31,9 +31,7 @@ class DummyTileMapFiller(TileMapFiller):
         distance_from_border: typing.Optional[int],
         border: typing.Optional[Border] = None,
     ) -> str:
-        return tile_map_generator.kernel.tile_map_legend.get_str_with_type(
-            self._tile_type
-        )
+        return tile_map_generator.kernel.tile_map_legend.get_str_with_type(self._tile_type)
 
 
 class DummyFillerFactory(FillerFactory):

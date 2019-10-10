@@ -22,14 +22,10 @@ class NotUseAsBagAction(WithStuffAction):
     input_model_serializer: serpyco.Serializer
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         bag_ids = [bag.id for bag in character.bags]
         if stuff.id not in bag_ids:
             raise ImpossibleAction("Vous n'utilisez pas ce sac")
@@ -71,14 +67,10 @@ class UseAsBagAction(WithStuffAction):
     input_model_serializer: serpyco.Serializer
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         # TODO BS 2019-09-03: permit multiple bags ?
         if character.bags:
             raise ImpossibleAction("Vous utilisez déjà un sac")

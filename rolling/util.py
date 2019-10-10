@@ -3,12 +3,13 @@ import dataclasses
 import enum
 import typing
 
+from guilang.description import Description
+from guilang.description import Part
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
-from guilang.description import Description, Part
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -21,9 +22,7 @@ class EmptyModel:
     pass
 
 
-def get_on_and_around_coordinates(
-    x: int, y: int
-) -> typing.List[typing.Tuple[int, int]]:
+def get_on_and_around_coordinates(x: int, y: int) -> typing.List[typing.Tuple[int, int]]:
     return [
         (x, y),
         (x - 1, y - 1),
@@ -70,13 +69,9 @@ def get_stuffs_filled_with_resource_id(
             yield stuff
 
 
-def get_stuffs_eatable(
-    kernel: "Kernel", character_id: str
-) -> typing.Iterator["StuffModel"]:
+def get_stuffs_eatable(kernel: "Kernel", character_id: str) -> typing.Iterator["StuffModel"]:
     for stuff in kernel.stuff_lib.get_carried_by(character_id):
-        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
-            stuff.stuff_id
-        )
+        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(stuff.stuff_id)
         for description in stuff_properties.descriptions:
             if description.action_type == ActionType.EAT_STUFF:
                 yield stuff

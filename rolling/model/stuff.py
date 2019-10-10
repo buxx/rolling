@@ -11,6 +11,13 @@ from rolling.util import display_g_or_kg
 
 
 @dataclasses.dataclass
+class StuffGenerateResourceProperties:
+    resource_id: str
+    quantity: float
+    require_one_of_ability: typing.List[str] = serpyco.field(default_factory=list)
+
+
+@dataclasses.dataclass
 class StuffProperties:
     id: str
     name: str
@@ -23,10 +30,12 @@ class StuffProperties:
     clutter: typing.Optional[float] = None
     clutter_capacity: typing.Optional[float] = None
     image: typing.Optional[str] = None
-    descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
+    descriptions: typing.List[ActionDescriptionModel] = serpyco.field(default_factory=list)
+    material_type: typing.Optional[str] = None
+    abilities: typing.List[str] = serpyco.field(default_factory=list)
+    generate_resources: typing.List[StuffGenerateResourceProperties] = serpyco.field(
         default_factory=list
     )
-    material_type: typing.Optional[str] = None
 
 
 @dataclasses.dataclass

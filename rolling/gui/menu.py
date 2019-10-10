@@ -45,9 +45,7 @@ class BaseMenu(urwid.ListBox):
 class BaseSubMenu(urwid.ListBox):
     title = "SubMenu"
 
-    def __init__(
-        self, controller: "Controller", main_view: "View", parent_menu: BaseMenu
-    ) -> None:
+    def __init__(self, controller: "Controller", main_view: "View", parent_menu: BaseMenu) -> None:
         self._controller = controller
         self._main_view = main_view
         self._parent_menu = parent_menu

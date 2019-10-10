@@ -4,12 +4,12 @@ import logging
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
 from hapic.processor.serpyco import SerpycoProcessor
-
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
@@ -25,9 +25,7 @@ class ErrorBuilder(SerpycoDefaultErrorBuilder):
         server_logger.exception(exception)
         return super().build_from_exception(exception, include_traceback)
 
-    def build_from_validation_error(
-        self, error: ProcessValidationError
-    ) -> DefaultErrorSchema:
+    def build_from_validation_error(self, error: ProcessValidationError) -> DefaultErrorSchema:
         server_logger.debug(str(error))
         return super().build_from_validation_error(error)
 
@@ -39,17 +37,13 @@ def run(args: argparse.Namespace) -> None:
     else:
         configure_logging(logging.INFO)
 
-    kernel = get_kernel(
-        args.world_map_source, args.tile_maps_folder, args.game_config_folder
-    )
+    kernel = get_kernel(args.world_map_source, args.tile_maps_folder, args.game_config_folder)
     server_logger.info("Create web application")
     app = get_application(kernel)
 
     # Configure hapic
     server_logger.info("Configure web api")
-    context = AiohttpContext(
-        app, debug=args.debug, default_error_builder=ErrorBuilder()
-    )
+    context = AiohttpContext(app, debug=args.debug, default_error_builder=ErrorBuilder())
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)
     hapic.set_processor_class(SerpycoProcessor)
@@ -64,15 +58,9 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
-    parser.add_argument(
-        "world_map_source", type=str, help="Raw world source map file path"
-    )
-    parser.add_argument(
-        "tile_maps_folder", type=str, help="Tile maps sources files folder path"
-    )
-    parser.add_argument(
-        "game_config_folder", type=str, help="Directory path with game configs"
-    )
+    parser.add_argument("world_map_source", type=str, help="Raw world source map file path")
+    parser.add_argument("tile_maps_folder", type=str, help="Tile maps sources files folder path")
+    parser.add_argument("game_config_folder", type=str, help="Directory path with game configs")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")

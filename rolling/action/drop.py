@@ -25,18 +25,14 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class DropResourceModel:
-    quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 class DropStuffAction(WithStuffAction):
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(input_model)
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         if stuff.carried_by != character.id:
             raise ImpossibleAction("Vous ne possedez pas cet objet")
 
@@ -46,9 +42,7 @@ class DropStuffAction(WithStuffAction):
         self.check_is_possible(character, stuff)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def get_character_actions(
@@ -80,8 +74,7 @@ class DropStuffAction(WithStuffAction):
             zone_col_i=character.zone_col_i,
         )
         return Description(
-            title=f"{stuff.name} laissé ici",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            title=f"{stuff.name} laissé ici", items=[Part(label="Continuer", go_back_zone=True)]
         )
 
 
@@ -102,9 +95,7 @@ class DropResourceAction(WithResourceAction):
             raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def get_character_actions(

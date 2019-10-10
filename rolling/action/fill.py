@@ -24,14 +24,10 @@ class FillStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         for fill_acceptable_type in self._kernel.game.config.fill_with_material_ids:
             for resource in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
@@ -85,9 +81,7 @@ class FillStuffAction(WithStuffAction):
         try:
             self._kernel.stuff_lib.fill_stuff_with_resource(stuff, input_.resource_id)
         except CantFill as exc:
-            return Description(
-                title=str(exc), items=[Part(label="Revenir", go_back_zone=True)]
-            )
+            return Description(title=str(exc), items=[Part(label="Revenir", go_back_zone=True)])
 
         return Description(
             title=f"{stuff.name} rempli(e) avec {input_.resource_id}",

@@ -16,12 +16,8 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class CreateCharacterModel:
-    name: str = serpyco.string_field(
-        metadata={"label": "Name"}, min_length=2, max_length=32
-    )
-    background_story: str = serpyco.field(
-        metadata={"label": "Background story", "is_text": True}
-    )
+    name: str = serpyco.string_field(metadata={"label": "Name"}, min_length=2, max_length=32)
+    background_story: str = serpyco.field(metadata={"label": "Background story", "is_text": True})
     max_life_comp: float = serpyco.field(metadata={"label": "Max life points"})
     hunting_and_collecting_comp: float = serpyco.field(
         metadata={"label": "Hunt and collect ability"}
@@ -32,6 +28,13 @@ class CreateCharacterModel:
 @dataclasses.dataclass
 class GetCharacterPathModel:
     character_id: str
+
+
+@dataclasses.dataclass
+class GetMoveZoneInfosModel:
+    character_id: str
+    world_row_i: int = serpyco.number_field(cast_on_load=True)
+    world_col_i: int = serpyco.number_field(cast_on_load=True)
 
 
 @dataclasses.dataclass

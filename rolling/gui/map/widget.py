@@ -21,9 +21,7 @@ if typing.TYPE_CHECKING:
 class MapWidget(urwid.Widget):
     _sizing = frozenset([BOX])
 
-    def __init__(
-        self, controller: "Controller", render_engine: MapRenderEngine
-    ) -> None:
+    def __init__(self, controller: "Controller", render_engine: MapRenderEngine) -> None:
         self._controller = controller
         self._render_engine = render_engine
         self._horizontal_offset = 0
@@ -78,9 +76,7 @@ class TileMapWidget(MapWidget):
         zone_map_source: ZoneMapSource,
     ) -> None:
         super().__init__(controller, render_engine)
-        self._connector = ZoneMapConnector(
-            self, self._controller, zone_map_source=zone_map_source
-        )
+        self._connector = ZoneMapConnector(self, self._controller, zone_map_source=zone_map_source)
 
     def _offset_change(self, new_offset: typing.Tuple[int, int]) -> None:
         try:

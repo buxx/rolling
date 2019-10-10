@@ -19,10 +19,7 @@ if typing.TYPE_CHECKING:
 
 class ZoneMapConnector:
     def __init__(
-        self,
-        widget: "TileMapWidget",
-        controller: "Controller",
-        zone_map_source: ZoneMapSource,
+        self, widget: "TileMapWidget", controller: "Controller", zone_map_source: ZoneMapSource
     ) -> None:
         self._widget = widget
         self._controller = controller
@@ -36,9 +33,7 @@ class ZoneMapConnector:
         ):
             raise CantMoveBecauseSurcharge()
 
-        current_player = (
-            self._widget.render_engine.display_objects_manager.current_player
-        )
+        current_player = self._widget.render_engine.display_objects_manager.current_player
         new_row_i = current_player.row_i - new_offset[0]
         new_col_i = current_player.col_i - new_offset[1]
 
@@ -56,9 +51,7 @@ class ZoneMapConnector:
 
     def player_move(self, new_offset: typing.Tuple[int, int]) -> None:
         # Apply move on player
-        current_player = (
-            self._widget.render_engine.display_objects_manager.current_player
-        )
+        current_player = self._widget.render_engine.display_objects_manager.current_player
         # FIXME BS 2019-03-08: We update data of player in display_objects_manager, warning ! There
         # is another instance of it in controller ! (player_character). This must only one.
         current_player.move_with_offset(new_offset)

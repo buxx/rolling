@@ -72,9 +72,7 @@ class DescriptionWidget(urwid.WidgetWrap):
 
 
 class Generator:
-    def __init__(
-        self, kernel: Kernel, http_client: HttpClient, controller: "Controller"
-    ) -> None:
+    def __init__(self, kernel: Kernel, http_client: HttpClient, controller: "Controller") -> None:
         self._kernel = kernel
         self._http_client = http_client
         self._controller = controller
@@ -93,9 +91,7 @@ class Generator:
             for item in items:
                 if item.text and item.label and not item.type_:
                     widgets_.append(urwid.Text(f"{item.label}: {item.text}"))
-                elif (
-                    item.text and not item.label and not item.type_ and not item.is_link
-                ):
+                elif item.text and not item.label and not item.type_ and not item.is_link:
                     widgets_.append(urwid.Text(item.text))
                 elif item.text and item.is_link:
                     widgets_.append(
@@ -108,8 +104,7 @@ class Generator:
                 elif item.label and item.go_back_zone:
                     widgets_.append(
                         urwid.Button(
-                            item.label,
-                            on_press=lambda *_, **__: self._controller.display_zone(),
+                            item.label, on_press=lambda *_, **__: self._controller.display_zone()
                         )
                     )
                 elif item.type_:
@@ -164,9 +159,7 @@ class Generator:
         if description.image:
 
             def callback():
-                self._controller.view.main_content_container.original_widget = (
-                    description_widget
-                )
+                self._controller.view.main_content_container.original_widget = description_widget
 
             # TODO BS 2019-06-30: Manage download media from server
             return ImageWidget("game/media/" + description.image, callback=callback)
@@ -209,8 +202,7 @@ class Generator:
             error_message = response.json().get("message")
             gui_logger.error(error_message)
             raise ClientServerExchangeError(
-                f"Error when communicate with server: {error_message}",
-                response=response,
+                f"Error when communicate with server: {error_message}", response=response
             )
 
     def follow_link(self, url: str) -> None:
@@ -226,9 +218,7 @@ class Generator:
 
             description = self._serializer.load(response_json)
             new_main_widget = self.generate_widget(description)
-            self._controller.view.main_content_container.original_widget = (
-                new_main_widget
-            )
+            self._controller.view.main_content_container.original_widget = new_main_widget
 
         else:
             error_message = response.json().get("message")

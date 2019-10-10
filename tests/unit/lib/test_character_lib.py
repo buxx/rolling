@@ -15,9 +15,7 @@ def character_lib(
     worldmapc_with_zones_server_character_lib: CharacterLib,
     worldmapc_with_zones_stuff_lib: StuffLib,
 ) -> CharacterLib:
-    return CharacterLib(
-        worldmapc_with_zones_kernel, stuff_lib=worldmapc_with_zones_stuff_lib
-    )
+    return CharacterLib(worldmapc_with_zones_kernel, stuff_lib=worldmapc_with_zones_stuff_lib)
 
 
 @pytest.fixture

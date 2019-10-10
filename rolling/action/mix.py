@@ -21,9 +21,7 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class MixResourceModel:
     resource_mix_id: str
-    quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 class MixResourcesAction(WithResourceAction):
@@ -36,9 +34,7 @@ class MixResourcesAction(WithResourceAction):
 
         # TODO BS 2019-09-10: manage more than two resource mix
         for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
-            for (
-                resource_mix_description
-            ) in self._kernel.game.config.get_resource_mixs_with(
+            for resource_mix_description in self._kernel.game.config.get_resource_mixs_with(
                 [resource_id, carried_resource.id]
             ):
                 return
@@ -51,9 +47,7 @@ class MixResourcesAction(WithResourceAction):
         self.check_is_possible(character, resource_id)
 
         if input_.quantity is not None:
-            resource_mix = self._kernel.game.config.resource_mixs[
-                input_.resource_mix_id
-            ]
+            resource_mix = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
 
             for required_resource in resource_mix.required_resources:
@@ -69,9 +63,7 @@ class MixResourcesAction(WithResourceAction):
                     )
 
     @classmethod
-    def get_properties_from_config(
-        cls, game_config: "GameConfig", action_config_raw: dict
-    ) -> dict:
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def get_character_actions(
@@ -83,9 +75,7 @@ class MixResourcesAction(WithResourceAction):
             if carried_resource.id == resource_id:
                 continue
 
-            for (
-                resource_mix_description
-            ) in self._kernel.game.config.get_resource_mixs_with(
+            for resource_mix_description in self._kernel.game.config.get_resource_mixs_with(
                 [resource_id, carried_resource.id]
             ):
                 with_str = ", ".join(
@@ -128,12 +118,8 @@ class MixResourcesAction(WithResourceAction):
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
-        resource_mix_description = self._kernel.game.config.resource_mixs[
-            input_.resource_mix_id
-        ]
-        unit_name = self._kernel.translation.get(
-            resource_mix_description.produce_resource.unit
-        )
+        resource_mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
+        unit_name = self._kernel.translation.get(resource_mix_description.produce_resource.unit)
 
         if input_.quantity is None:
             cost_per_unit = resource_mix_description.cost
@@ -174,9 +160,7 @@ class MixResourcesAction(WithResourceAction):
             )
 
         resource_model = self._kernel.resource_lib.add_resource_to_character(
-            character.id,
-            resource_mix_description.produce_resource.id,
-            quantity=input_.quantity,
+            character.id, resource_mix_description.produce_resource.id, quantity=input_.quantity
         )
 
         return Description(

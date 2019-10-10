@@ -12,9 +12,7 @@ class EffectManager:
         self._kernel = kernel
 
     def enable_effect(
-        self,
-        character_doc: "CharacterDocument",
-        effect: "CharacterEffectDescriptionModel",
+        self, character_doc: "CharacterDocument", effect: "CharacterEffectDescriptionModel"
     ) -> None:
         for attr_name in effect.attributes_to_false:
             setattr(character_doc, attr_name, False)

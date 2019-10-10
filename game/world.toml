@@ -14,7 +14,7 @@
     [ZONE_PROPERTIES.BEACH.RESOURCES]
       [ZONE_PROPERTIES.BEACH.RESOURCES.PAGUROIDEA]  # bernard l'hermite, u
         probability = 100.0  # probability to be available on x,y zone at world init
-        maximum = 500.0  # maximum quatity on x,y zone
+        maximum = 500.0  # maximum quantity on x,y zone
         regeneration = 50.0  # quatity generation per turn
       [ZONE_PROPERTIES.BEACH.RESOURCES.MYTILIDA]  # moule, g
         probability = 100.0
@@ -23,6 +23,12 @@
 
   [ZONE_PROPERTIES.PLAIN]
     move_cost = 4.0
+
+    [ZONE_PROPERTIES.PLAIN.STUFFS]
+      [ZONE_PROPERTIES.PLAIN.STUFFS.HARE]  # bernard l'hermite, u
+        probability = 80.0  # probability to be available on x,y zone at world init
+        maximum = 100.0  # maximum quantity on x,y zone (u)
+        regeneration = 5.0  # quatity generation per turn
 
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 15

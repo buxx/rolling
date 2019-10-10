@@ -54,18 +54,14 @@ def create(game_config_dir: str, character_name: str, stuff_id: str) -> None:
 @click.argument("character-name")
 @click.argument("resource-id")
 @click.argument("quantity", type=float)
-def create(
-    game_config_dir: str, character_name: str, resource_id: str, quantity: float
-) -> None:
+def create(game_config_dir: str, character_name: str, resource_id: str, quantity: float) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(game_config_folder=game_config_dir)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
 
     click.echo("Add resource")
-    kernel.resource_lib.add_resource_to_character(
-        character_.id, resource_id, quantity=quantity
-    )
+    kernel.resource_lib.add_resource_to_character(character_.id, resource_id, quantity=quantity)
 
 
 if __name__ == "__main__":

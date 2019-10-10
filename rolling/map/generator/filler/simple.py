@@ -33,9 +33,7 @@ class SimpleTileMapFiller(TileMapFiller):
         self._row_i = row_i
         self._col_i = col_i
         self._world_map_source = world_map_source
-        self._tiles: typing.List[typing.Type[ZoneMapTileType]] = [
-            td[1] for td in distribution
-        ]
+        self._tiles: typing.List[typing.Type[ZoneMapTileType]] = [td[1] for td in distribution]
         self._probabilities: typing.List[float] = [td[0] for td in distribution]
 
     def get_char(
@@ -50,62 +48,40 @@ class SimpleTileMapFiller(TileMapFiller):
 
 
 class SeaTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
         super().__init__(row_i, col_i, world_map_source, distribution=[(1.0, SeaWater)])
 
 
 class MountainTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
-        super().__init__(
-            row_i, col_i, world_map_source, distribution=[(1.0, RockyGround)]
-        )
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
+        super().__init__(row_i, col_i, world_map_source, distribution=[(1.0, RockyGround)])
 
 
 class JungleTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
-        super().__init__(
-            row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)]
-        )
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
+        super().__init__(row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)])
 
 
 class HillTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
-        super().__init__(
-            row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)]
-        )
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
+        super().__init__(row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)])
 
 
 class BeachTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
         super().__init__(
             row_i, col_i, world_map_source, distribution=[(1.0, Sand), (0.05, DryBush)]
         )
 
 
 class PlainTileMapFiller(SimpleTileMapFiller):
-    def __init__(
-        self, row_i: int, col_i: int, world_map_source: WorldMapSource
-    ) -> None:
-        super().__init__(
-            row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)]
-        )
+    def __init__(self, row_i: int, col_i: int, world_map_source: WorldMapSource) -> None:
+        super().__init__(row_i, col_i, world_map_source, distribution=[(1.0, ShortGrass)])
 
 
 class SimpleFillerFactory(FillerFactory):
     def __init__(self) -> None:
-        self._matches: typing.Dict[
-            WorldMapTileType, typing.Type[SimpleTileMapFiller]
-        ] = {
+        self._matches: typing.Dict[WorldMapTileType, typing.Type[SimpleTileMapFiller]] = {
             Sea: SeaTileMapFiller,
             Mountain: MountainTileMapFiller,
             Jungle: JungleTileMapFiller,

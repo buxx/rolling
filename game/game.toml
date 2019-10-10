@@ -28,6 +28,10 @@ default_clutter_capacity = 5.0
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
   name = "Cuisson"
+[ability.FIGHT]
+  name = "Se battre"
+[ability.HUNT_SMALL_GAME]
+  name = "Chasse de petit gibier"
 
 [character_effects]
   [character_effects.THIRSTY_SATISFIED]
@@ -38,6 +42,9 @@ default_clutter_capacity = 5.0
 
   [character_effects.DRUNK]
     factors = [{"attribute"="bravery", "factor"=1.1}]
+
+  [character_effects.DIE]
+    factors = [{"attribute"="life_points", "factor"=0.0}]
 
 [resources]
   [resources.FRESH_WATER]
@@ -144,6 +151,14 @@ default_clutter_capacity = 5.0
     clutter = 0.002
     actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
 
+  [resources.COOKED_MEAT]
+    name = "Viande cuite"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.0005
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
+
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
@@ -213,9 +228,17 @@ default_clutter_capacity = 5.0
     require = 1000.0  # g
     cost = 0.0
 
-  [ACTIONS.EAT_ENTIRE_MEAL]
+  [ACTIONS.EAT_RAW_MEAT]
     actions = ["EAT_STUFF"]
-    accept_stuffs = ["ROASTED_CHICKEN"]
+    accept_stuffs = ["COOKED_MEAT"]  # g !
+    required_quantity = 500.0
+    character_effects = ["HUNGRY_SATISFIED"]
+    cost = 0.0
+
+  [ACTIONS.EAT_COOKED_MEAT]
+    actions = ["EAT_STUFF"]
+    accept_stuffs = ["RAW_MEAT"]
+    required_quantity = 400.0
     character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
 
@@ -279,8 +302,23 @@ default_clutter_capacity = 5.0
     ]
     cost = 6.0
 
-[built]
-[built.CAMP_FIRE]
+  [ACTIONS.HUNT_SMALL_GAME]
+    name = "Cheasser du petit gibier"
+    actions = ["SEARCH_FOOD"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    required_one_of_ability = ["HUNT_SMALL_GAME"]
+    # FIXME BS 2019-10-10: renames charchter_effects to effects
+    effects_on_stuffs = ["DIE"]
+    produce = [
+      {stuff="HARE", quantity=4.0, probability=50.0},  # lièvre, u
+    ]
+    cost = 6.0
+
+[build]
+[build.CAMP_FIRE]
   name = "Feux de camp"
   char = "⍟"
   building_char = "x"

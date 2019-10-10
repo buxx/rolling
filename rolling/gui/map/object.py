@@ -111,12 +111,7 @@ class BuildDisplay(DisplayObject):
     permanent: bool = True
 
     def __init__(
-        self,
-        row_i: int,
-        col_i: int,
-        id_: int,
-        char: str,
-        palette_id: str = PALETTE_STD_BUILD,
+        self, row_i: int, col_i: int, id_: int, char: str, palette_id: str = PALETTE_STD_BUILD
     ) -> None:
         self._row_i = row_i
         self._col_i = col_i
