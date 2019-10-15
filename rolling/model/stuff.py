@@ -14,6 +14,7 @@ from rolling.util import display_g_or_kg
 class StuffGenerateResourceProperties:
     resource_id: str
     quantity: float
+    cost: float
     require_one_of_ability: typing.List[str] = serpyco.field(default_factory=list)
 
 

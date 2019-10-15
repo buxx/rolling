@@ -53,6 +53,28 @@ class StuffLib:
         )
 
     @classmethod
+    def create_document_from_properties(
+        cls,
+        properties: "StuffProperties",
+        stuff_id: str,
+        world_col_i: int,
+        world_row_i: int,
+        zone_col_i: int,
+        zone_row_i: int,
+    ) -> StuffDocument:
+        return StuffDocument(
+            stuff_id=stuff_id,
+            world_col_i=world_col_i,
+            world_row_i=world_row_i,
+            zone_col_i=zone_col_i,
+            zone_row_i=zone_row_i,
+            # properties
+            weight=properties.weight,
+            clutter=properties.clutter,
+            image=properties.image,
+        )
+
+    @classmethod
     def create_document_from_stuff_properties(
         cls,
         properties: StuffProperties,

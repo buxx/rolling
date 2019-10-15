@@ -114,7 +114,7 @@ class SearchFoodAction(CharacterAction):
                 if self._kernel.game.world_manager.is_there_stuff_in_zone(
                     world_row_i=character.world_row_i,
                     world_col_i=character.world_col_i,
-                    resource_id=stuff_id,
+                    stuff_id=stuff_id,
                 ):
                     zone_available_production_stuff_ids.append(stuff_id)
                     production_per_stuff_ids[stuff_id] = production
@@ -164,13 +164,24 @@ class SearchFoodAction(CharacterAction):
         result_stuff_strs = []
         for stuff_id in found_stuff_ids:
             # TODO BS 2019-09-26: Modify here quantity found with skills, competences, stuffs ...
+            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
             quantity_found_coeff = random.randint(0, 100) / 100
             quantity_found = round(
                 production_per_stuff_ids[stuff_id]["quantity"] * quantity_found_coeff
             )
-            result_stuff_strs.append(f"{quantity_found} de TODO ")
+            result_stuff_strs.append(f"{quantity_found} de {stuff_properties.name} ")
             for i in range(quantity_found):
-                raise NotImplementedError("TODO")
+                stuff_doc = self._kernel.stuff_lib.create_document_from_properties(
+                    stuff_properties,
+                    stuff_id=stuff_properties.id,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_col_i=character.zone_row_i,
+                    zone_row_i=character.zone_col_i,
+                )
+                stuff_doc.carried_by_id = character.id
+
+                self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
 
         self._kernel.character_lib.reduce_action_points(
             character.id, cost=self.get_cost(character, input_)
@@ -180,5 +191,10 @@ class SearchFoodAction(CharacterAction):
         parts = []
         for result_resource_str in result_resource_strs:
             parts.append(Part(text=result_resource_str))
+        parts = []
+
+        for result_stuff_str in result_stuff_strs:
+            parts.append(Part(text=result_stuff_str))
+
         parts.append(Part(label="Continuer", go_back_zone=True))
         return Description(title="Vous avez trouvé", items=parts)

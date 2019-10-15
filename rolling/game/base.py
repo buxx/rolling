@@ -319,6 +319,7 @@ class Game:
                         require_one_of_ability=generate_resource_raw.get(
                             "require_one_of_ability", []
                         ),
+                        cost=generate_resource_raw["cost"],
                     )
                 )
             full_info["generate_resources"] = generate_resources

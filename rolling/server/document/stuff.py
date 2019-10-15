@@ -1,4 +1,5 @@
 # coding: utf-8
+import json
 import typing
 
 from sqlalchemy import Column
@@ -7,6 +8,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
+from sqlalchemy import Text
 
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill

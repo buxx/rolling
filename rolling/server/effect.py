@@ -5,6 +5,7 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.effect import CharacterEffectDescriptionModel
     from rolling.server.document.character import CharacterDocument
+    from rolling.server.document.stuff import StuffDocument
 
 
 class EffectManager:
@@ -12,7 +13,9 @@ class EffectManager:
         self._kernel = kernel
 
     def enable_effect(
-        self, character_doc: "CharacterDocument", effect: "CharacterEffectDescriptionModel"
+        self,
+        character_doc: typing.Tuple["CharacterDocument", "StuffDocument"],
+        effect: "CharacterEffectDescriptionModel",
     ) -> None:
         for attr_name in effect.attributes_to_false:
             setattr(character_doc, attr_name, False)

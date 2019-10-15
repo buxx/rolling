@@ -107,6 +107,8 @@ class CharacterModel:
     find_water_comp: float
     life_points: float
     action_points: float
+    # FIXME BS 2019-10-14: base code of that
+    ability_ids: typing.List[str] = serpyco.field(default_factory=list)
 
     world_col_i: int = None
     world_row_i: int = None
@@ -142,6 +144,12 @@ class CharacterModel:
         return kernel.game.config.default_clutter_capacity + sum(
             [bag.clutter_capacity for bag in self.bags]
         )
+
+    def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
+        for ability in abilities:
+            if ability in self.ability_ids:
+                return True
+        return False
 
 
 @dataclasses.dataclass

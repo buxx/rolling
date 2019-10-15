@@ -64,5 +64,36 @@ def create(game_config_dir: str, character_name: str, resource_id: str, quantity
     kernel.resource_lib.add_resource_to_character(character_.id, resource_id, quantity=quantity)
 
 
+@character.command()
+@click.argument("game-config-dir")
+@click.argument("character-name")
+@click.argument("world_row_i", type=int)
+@click.argument("world_col_i", type=int)
+def move(game_config_dir: str, character_name: str, world_row_i: int, world_col_i: int) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(game_config_folder=game_config_dir)
+    click.echo("Search character by name")
+    character_ = kernel.character_lib.get_by_name(character_name)
+
+    click.echo("Move")
+    kernel.character_lib.move(character_, world_row_i, world_col_i)
+
+
+@character.command()
+@click.argument("game-config-dir")
+@click.argument("character-name")
+@click.argument("action_points", type=int)
+def ap(game_config_dir: str, character_name: str, action_points: int) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(game_config_folder=game_config_dir)
+    click.echo("Search character by name")
+    character_ = kernel.character_lib.get_by_name(character_name)
+    character_doc = kernel.character_lib.get_document(character_.id)
+    click.echo("Set ap")
+    character_doc.action_points = action_points
+    kernel.server_db_session.add(character_doc)
+    kernel.server_db_session.commit()
+
+
 if __name__ == "__main__":
     main()

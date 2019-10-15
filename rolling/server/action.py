@@ -21,6 +21,7 @@ from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.mix import MixResourcesAction
+from rolling.action.transform import TransformStuffIntoResourcesAction
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -48,6 +49,7 @@ class ActionFactory:
         ActionType.BEGIN_BUILD: BeginBuildAction,
         ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
         ActionType.CONSTRUCT_BUILD: ConstructBuild,
+        ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -60,6 +62,7 @@ class ActionFactory:
             ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
             ActionType.DROP_STUFF: DropStuffAction,
             ActionType.EAT_STUFF: EatStuffAction,
+            ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
         }
         self._with_resource_actions: typing.Dict[ActionType, typing.Type[WithResourceAction]] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
