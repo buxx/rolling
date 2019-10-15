@@ -52,6 +52,10 @@ class TurnLib:
                 zone_property = zone_properties_by_zone_type[zone_type]
                 generation_stuffs = generation_stuff_by_zone_type[zone_type]
                 weights = [s.probability for s in generation_stuffs]
+
+                if not generation_stuffs:
+                    continue
+
                 chosen_stuff = random.choices(
                     population=generation_stuffs,
                     weights=weights,

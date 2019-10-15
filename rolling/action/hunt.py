@@ -191,7 +191,6 @@ class SearchFoodAction(CharacterAction):
         parts = []
         for result_resource_str in result_resource_strs:
             parts.append(Part(text=result_resource_str))
-        parts = []
 
         for result_stuff_str in result_stuff_strs:
             parts.append(Part(text=result_stuff_str))
