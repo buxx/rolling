@@ -167,6 +167,14 @@ default_clutter_capacity = 5.0
     clutter = 0.0005
     actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
 
+  [resources.LITTLE_ANIMAL_SKIN]
+    name = "Petite peau"
+    weight=200.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 0.1
+    actions = []
+
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
@@ -288,9 +296,25 @@ default_clutter_capacity = 5.0
     actions = ["BRING_RESOURCE_ON_BUILD"]
     cost = 0.0
 
-  [ACTIONS.TRANSFORM_STUFF_TO_RESOURCES]  # required by system !
+  [ACTIONS.COOK_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    cost = 0.0
+    require_one_of_ability=["HEAT_UP_LOW_TEMP"]
+    require_stuff=["HARE"]
+    produce = [
+      {resource="COOKED_MEAT", quantity=1200.0},
+      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+    ]
+    cost = 1.0
+
+  [ACTIONS.BUTCHER_LITTLE_GAME]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    require_one_of_ability=[]
+    require_stuff=["HARE"]
+    produce = [
+      {resource="RAW_MEAT", quantity=1400.0},
+      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+    ]
+    cost = 1.0
 
   [ACTIONS.CONSTRUCT_BUILD]  # required by system !
     actions = ["CONSTRUCT_BUILD"]

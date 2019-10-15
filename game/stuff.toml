@@ -35,8 +35,3 @@
   weight = 3500.0
   clutter = 1.0
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-  # FIXME BS 2019-10-15: move to action (produce both RAW_MEAT + skin; COOKED_MEAT + skin, etc)
-  generate_resources = [
-    {require_one_of_ability=["HEAT_UP_LOW_TEMP"], resource_id="COOKED_MEAT", quantity=1200.0, cost=0.5},
-    {require_one_of_ability=[], resource_id="RAW_MEAT", quantity=1300.0, cost=0.4},
-  ]

@@ -22,7 +22,6 @@ from rolling.model.measure import Unit
 from rolling.model.mix import RequiredResourceForMix
 from rolling.model.mix import ResourceMixDescription
 from rolling.model.resource import ResourceDescriptionModel
-from rolling.model.stuff import StuffGenerateResourceProperties
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
@@ -309,20 +308,6 @@ class Game:
             for action_type_id in full_info.get("actions", []):
                 descriptions = config.actions[ActionType(action_type_id)]
                 full_info["descriptions"].extend(descriptions)
-
-            generate_resources: typing.List[StuffGenerateResourceProperties] = []
-            for generate_resource_raw in full_info.get("generate_resources", []):
-                generate_resources.append(
-                    StuffGenerateResourceProperties(
-                        resource_id=generate_resource_raw["resource_id"],
-                        quantity=generate_resource_raw["quantity"],
-                        require_one_of_ability=generate_resource_raw.get(
-                            "require_one_of_ability", []
-                        ),
-                        cost=generate_resource_raw["cost"],
-                    )
-                )
-            full_info["generate_resources"] = generate_resources
 
             del full_info["actions"]
             items.append(StuffProperties(**full_info))
