@@ -29,6 +29,10 @@ def xena(
     worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
 ) -> CharacterDocument:
     xena = CharacterDocument(id="xena", name="xena", **default_character_competences)
+    xena.world_row_i = 1
+    xena.world_col_i = 1
+    xena.zone_row_i = 10
+    xena.zone_col_i = 10
 
     session = worldmapc_with_zones_kernel.server_db_session
     session.add(xena)
@@ -42,6 +46,10 @@ def arthur(
     worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
 ) -> CharacterDocument:
     arthur = CharacterDocument(id="arthur", name="arthur", **default_character_competences)
+    arthur.world_row_i = 1
+    arthur.world_col_i = 1
+    arthur.zone_row_i = 10
+    arthur.zone_col_i = 10
 
     session = worldmapc_with_zones_kernel.server_db_session
     session.add(arthur)

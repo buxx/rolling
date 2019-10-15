@@ -153,6 +153,8 @@ def default_character_competences() -> dict:
     return {
         "background_story": "",
         "max_life_comp": 5.0,
+        "life_points": 5.0,
         "hunting_and_collecting_comp": 2.0,
         "find_water_comp": 1.0,
+        "action_points": 24.0,
     }

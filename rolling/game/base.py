@@ -309,7 +309,8 @@ class Game:
                 descriptions = config.actions[ActionType(action_type_id)]
                 full_info["descriptions"].extend(descriptions)
 
-            del full_info["actions"]
+            if "actions" in full_info:
+                del full_info["actions"]
             items.append(StuffProperties(**full_info))
 
         return StuffManager(self._kernel, items)

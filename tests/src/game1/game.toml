@@ -1,0 +1,23 @@
+action_points_per_turn = 24
+create_character_messages = ["Go go"]
+fresh_water_resource_id = "FRESH_WATER"
+liquid_material_id = "LIQUID"
+fill_with_material_ids = ["LIQUID", "SANDY"]
+default_weight_capacity = 20000.0
+default_clutter_capacity = 5.0
+
+[materials]
+
+[ability]
+
+[character_effects]
+
+[resources]
+
+[resource_mix]
+
+[extractions]
+
+[ACTIONS]
+
+[build]
