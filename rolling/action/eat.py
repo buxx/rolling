@@ -104,6 +104,7 @@ class EatResourceAction(WithResourceAction):
                         action_type=ActionType.EAT_RESOURCE,
                         resource_id=resource_id,
                         query_params={},
+                        action_description_id=self._description.id,
                     ),
                     cost=None,
                 )
@@ -170,7 +171,11 @@ class EatStuffAction(WithStuffAction):
                 CharacterActionLink(
                     name=f"Manger {stuff.name}",
                     link=get_with_stuff_action_url(
-                        character.id, ActionType.EAT_STUFF, query_params={}, stuff_id=stuff.id
+                        character.id,
+                        ActionType.EAT_STUFF,
+                        query_params={},
+                        stuff_id=stuff.id,
+                        action_description_id=self._description.id,
                     ),
                     cost=self.get_cost(character, stuff),
                 )

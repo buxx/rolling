@@ -49,28 +49,33 @@ def get_with_build_action_url(
 
 
 def get_with_stuff_action_url(
-    character_id: str, action_type: ActionType, stuff_id: int, query_params: dict
+    character_id: str,
+    action_type: ActionType,
+    stuff_id: int,
+    query_params: dict,
+    action_description_id: str,
 ) -> str:
     base_url = WITH_STUFF_ACTION.format(
-        character_id=character_id, action_type=action_type.value, stuff_id=str(stuff_id)
-    )
-    return f"{base_url}?{urlencode(query_params)}"
-
-
-def get_build_action_url(
-    character_id: str, action_type: ActionType, stuff_id: int, query_params: dict
-) -> str:
-    base_url = WITH_STUFF_ACTION.format(
-        character_id=character_id, action_type=action_type.value, stuff_id=str(stuff_id)
+        character_id=character_id,
+        action_type=action_type.value,
+        stuff_id=str(stuff_id),
+        action_description_id=action_description_id,
     )
     return f"{base_url}?{urlencode(query_params)}"
 
 
 def get_with_resource_action_url(
-    character_id: str, action_type: ActionType, resource_id: str, query_params: dict
+    character_id: str,
+    action_type: ActionType,
+    resource_id: str,
+    query_params: dict,
+    action_description_id: str,
 ) -> str:
     base_url = WITH_RESOURCE_ACTION.format(
-        character_id=character_id, action_type=action_type.value, resource_id=resource_id
+        character_id=character_id,
+        action_type=action_type.value,
+        resource_id=resource_id,
+        action_description_id=action_description_id,
     )
     return f"{base_url}?{urlencode(query_params)}"
 

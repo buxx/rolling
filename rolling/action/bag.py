@@ -46,6 +46,7 @@ class NotUseAsBagAction(WithStuffAction):
                     action_type=ActionType.NOT_USE_AS_BAG,
                     stuff_id=stuff.id,
                     query_params={},
+                    action_description_id=self._description.id,
                 ),
                 cost=self.get_cost(character, stuff),
             )
@@ -93,6 +94,7 @@ class UseAsBagAction(WithStuffAction):
                     action_type=ActionType.USE_AS_BAG,
                     stuff_id=stuff.id,
                     query_params={},
+                    action_description_id=self._description.id,
                 ),
                 cost=self.get_cost(character, stuff),
             )

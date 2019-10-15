@@ -71,8 +71,9 @@ class CharacterActionModel:
 class WithStuffActionModel:
     character_id: str
     # FIXME BS 2019-09-09: should be int no ?
-    stuff_id: str
     action_type: ActionType
+    action_description_id: str
+    stuff_id: int = serpyco.field(cast_on_load=True)
 
 
 @dataclasses.dataclass
@@ -88,6 +89,7 @@ class WithResourceActionModel:
     character_id: str
     resource_id: str
     action_type: ActionType
+    action_description_id: str
 
 
 @dataclasses.dataclass

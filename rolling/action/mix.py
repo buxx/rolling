@@ -96,6 +96,7 @@ class MixResourcesAction(WithResourceAction):
                             action_type=ActionType.MIX_RESOURCES,
                             resource_id=carried_resource.id,
                             query_params=query_params,
+                            action_description_id=self._description.id,
                         ),
                         cost=None,
                     )
@@ -140,6 +141,7 @@ class MixResourcesAction(WithResourceAction):
                             action_type=ActionType.MIX_RESOURCES,
                             resource_id=resource_id,
                             query_params=self.input_model_serializer.dump(input_),
+                            action_description_id=self._description.id,
                         ),
                         items=[
                             Part(

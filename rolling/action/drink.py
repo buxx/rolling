@@ -108,17 +108,14 @@ class DrinkResourceAction(CharacterAction):
 
     def perform(self, character: "CharacterModel", input_: input_model) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
+        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
+            "effects"
+        ]
 
-        if input_.resource_id in accept_resources_ids:
-            effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
-                "effects"
-            ]
-
-            for effect in effects:
-                self._effect_manager.enable_effect(character_doc, effect)
-                self._kernel.server_db_session.add(character_doc)
-                self._kernel.server_db_session.commit()
+        for effect in effects:
+            self._effect_manager.enable_effect(character_doc, effect)
+            self._kernel.server_db_session.add(character_doc)
+            self._kernel.server_db_session.commit()
 
         return Description(
             title="Action effectué", items=[Part(label="Continue", go_back_zone=True)]
@@ -182,6 +179,7 @@ class DrinkStuffAction(WithStuffAction):
                         ActionType.DRINK_STUFF,
                         query_params=self.input_model_serializer.dump(query_params),
                         stuff_id=stuff.id,
+                        action_description_id=self._description.id,
                     ),
                     cost=self.get_cost(character, stuff),
                 )
@@ -192,6 +190,18 @@ class DrinkStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
-        message = self._kernel.character_lib.drink_stuff(character.id, stuff.id)
+        character_doc = self._character_lib.get_document(character.id)
+        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
+            "effects"
+        ]
 
-        return Description(title=message, items=[Part(label="Continuer", go_back_zone=True)])
+        for effect in effects:
+            self._effect_manager.enable_effect(character_doc, effect)
+            self._kernel.server_db_session.add(character_doc)
+
+        self._kernel.character_lib.drink_stuff(character.id, stuff.id)
+        self._kernel.server_db_session.commit()
+
+        return Description(
+            title="Vous avez bu ça", items=[Part(label="Continuer", go_back_zone=True)]
+        )

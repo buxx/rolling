@@ -56,6 +56,7 @@ class DropStuffAction(WithStuffAction):
                     action_type=ActionType.DROP_STUFF,
                     stuff_id=stuff.id,
                     query_params={},
+                    action_description_id=self._description.id,
                 ),
                 cost=self.get_cost(character, stuff),
             )
@@ -113,6 +114,7 @@ class DropResourceAction(WithResourceAction):
                     action_type=ActionType.DROP_RESOURCE,
                     resource_id=carried_resource.id,
                     query_params={},
+                    action_description_id=self._description.id,
                 ),
                 cost=None,
             )
@@ -140,6 +142,7 @@ class DropResourceAction(WithResourceAction):
                             action_type=ActionType.DROP_RESOURCE,
                             resource_id=resource_id,
                             query_params={},
+                            action_description_id=self._description.id,
                         ),
                         items=[
                             Part(

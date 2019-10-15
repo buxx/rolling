@@ -68,6 +68,7 @@ class FillStuffAction(WithStuffAction):
                             action_type=ActionType.FILL_STUFF,
                             stuff_id=stuff.id,
                             query_params=self.input_model_serializer.dump(query_params),
+                            action_description_id=self._description.id,
                         ),
                         cost=self.get_cost(character, stuff),
                     )

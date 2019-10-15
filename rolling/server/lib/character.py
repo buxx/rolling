@@ -2,6 +2,7 @@
 import typing
 import uuid
 
+from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -266,29 +267,25 @@ class CharacterLib:
         # TODO BS 2019-09-02: drink wine etc ?
         return "Vous ne pouvez pas boire ça"
 
-    def drink_stuff(self, character_id: str, stuff_id: int) -> str:
+    def drink_stuff(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         character_doc = self.get_document(character_id)
         stuff_doc = self._stuff_lib.get_stuff_doc(stuff_id)
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             stuff_doc.stuff_id
         )
 
-        if not character_doc.feel_thirsty:
-            return "You are not thirsty"
-
         # TODO BS 2019-07-09: manage case where not 100% filled
-        if stuff_doc.filled_at == 100.0:
+        if float(stuff_doc.filled_at) == 100.0:
             stuff_doc.empty(stuff_properties)
             self._kernel.server_db_session.add(stuff_doc)
 
             character_doc.feel_thirsty = False
             character_doc.dehydrated = False
 
-            self._kernel.server_db_session.commit()
-            return "You're no longer thirsty"
+            if commit:
+                self._kernel.server_db_session.commit()
 
-        # TODO BS 2019-07-11: to code
-        return "Woops, it is not yest implemented"
+        raise ImpossibleAction("pas encore codé")
 
     def get_last_events(
         self, character_id: str, count: int

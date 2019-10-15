@@ -5,10 +5,12 @@ import typing
 import serpyco
 
 from guilang.description import Description
-from rolling.action.base import WithStuffAction, get_with_stuff_action_url
-from rolling.exception import ImpossibleAction, NotEnoughActionPoints
-from rolling.server.link import CharacterActionLink
+from rolling.action.base import WithStuffAction
+from rolling.action.base import get_with_stuff_action_url
+from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughActionPoints
 from rolling.model.stuff import StuffGenerateResourceProperties
+from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import quantity_to_str
 
@@ -57,7 +59,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         raise ImpossibleAction("Aucune tranformation possible")
 
     def _get_generate_resource_property(
-        self, character: "CharacterModel", stuff: "StuffModel", resource_id: str,
+        self, character: "CharacterModel", stuff: "StuffModel", resource_id: str
     ) -> StuffGenerateResourceProperties:
         for can_generate_resource_property in self._get_can_generate_resource_properties(
             character, stuff
@@ -83,9 +85,9 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                 kernel=self._kernel,
             )
 
-            query_params = self.input_model_serializer.dump(self.input_model(
-                resource_id=resource_id,
-            ))
+            query_params = self.input_model_serializer.dump(
+                self.input_model(resource_id=resource_id)
+            )
             actions.append(
                 CharacterActionLink(
                     name=f"Transformer en {resource_description.name} ({quantity_str})",
@@ -94,8 +96,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                         stuff_id=stuff.id,
                         action_type=ActionType.TRANSFORM_STUFF_TO_RESOURCES,
                         query_params=query_params,
-                        # FIXME BS 2019-10-15: We should give description_id, as it,
-                        #
+                        action_description_id=self._description.id,
                     ),
                     cost=can_generate_resource_property.cost,
                 )
@@ -116,7 +117,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     ) -> None:
         if input_.resource_id is not None:
             generate_resource_property = self._get_generate_resource_property(
-                character, stuff, resource_id=input_.resource_id,
+                character, stuff, resource_id=input_.resource_id
             )
 
             if generate_resource_property.cost > character.action_points:

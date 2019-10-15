@@ -5,12 +5,12 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from hapic import HapicData
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import WithResourceAction
@@ -325,7 +325,9 @@ class CharacterController(BaseController):
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithStuffAction,
-            self._action_factory.create_action(action_type, action_description_id=None),
+            self._action_factory.create_action(
+                action_type, action_description_id=hapic_data.path.action_description_id
+            ),
         )
         input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
@@ -405,7 +407,9 @@ class CharacterController(BaseController):
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithResourceAction,
-            self._action_factory.create_action(action_type, action_description_id=None),
+            self._action_factory.create_action(
+                action_type, action_description_id=hapic_data.path.action_description_id
+            ),
         )
         input_ = action.input_model_serializer.load(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
