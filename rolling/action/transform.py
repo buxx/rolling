@@ -41,7 +41,9 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         require_one_of_ability_ids = self._description.properties["require_one_of_ability_ids"]
         if not require_one_of_ability_ids:
             abilities_ok = True
-        elif character.have_one_of_abilities(require_one_of_ability_ids):
+        elif self._kernel.character_lib.have_one_of_abilities(
+            character, require_one_of_ability_ids
+        ):
             abilities_ok = True
 
         if not abilities_ok:
