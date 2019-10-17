@@ -58,7 +58,7 @@ class ResourceLib:
         return self._carried_resource_model_from_doc(resource)
 
     def add_resource_to_build(
-        self, build_id: str, resource_id: str, quantity: float, commit: bool = True
+        self, build_id: int, resource_id: str, quantity: float, commit: bool = True
     ) -> CarriedResourceDescriptionModel:
         resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
             resource_id

@@ -78,7 +78,7 @@ class CharacterLib:
             .one()
         )
 
-    def _document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
+    def document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
@@ -104,11 +104,11 @@ class CharacterLib:
 
     def get(self, id_: str) -> CharacterModel:
         character_document = self.get_document(id_)
-        return self._document_to_model(character_document)
+        return self.document_to_model(character_document)
 
     def get_by_name(self, name: str) -> CharacterModel:
         character_document = self.get_document_by_name(name)
-        return self._document_to_model(character_document)
+        return self.document_to_model(character_document)
 
     def move_on_zone(self, character: CharacterModel, to_row_i: int, to_col_i: int) -> None:
         character_document = self.get_document(character.id)
@@ -126,8 +126,7 @@ class CharacterLib:
         )
 
         return [
-            self._document_to_model(character_document)
-            for character_document in character_documents
+            self.document_to_model(character_document) for character_document in character_documents
         ]
 
     def move(self, character: CharacterModel, to_world_row: int, to_world_col: int) -> None:

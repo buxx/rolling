@@ -285,7 +285,7 @@ class ConstructBuildModel:
     cost_to_spent: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
-class ConstructBuild(WithBuildAction):
+class ConstructBuildAction(WithBuildAction):
     input_model = ConstructBuildModel
     input_model_serializer = serpyco.Serializer(ConstructBuildModel)
 

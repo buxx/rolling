@@ -12,6 +12,8 @@ from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import SeaWater
+from rolling.model.character import CharacterModel
+from rolling.server.document.character import CharacterDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 
@@ -62,12 +64,7 @@ def worldmapb2_kernel(worldmapsourceb2_txt) -> Kernel:
 
 
 @pytest.fixture
-def worldmapc_kernel(worldmapsourcec_txt) -> Kernel:
-    return Kernel(worldmapsourcec_txt)
-
-
-@pytest.fixture
-def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
+def worldmapc_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
     server_db_path = tmp_path / "server.db"
     kernel = Kernel(
         worldmapsourcec_txt,
@@ -80,8 +77,8 @@ def worldmapc_with_zones_kernel(worldmapsourcec_txt, tmp_path) -> Kernel:
 
 
 @pytest.fixture
-def worldmapc_with_zones_server_character_lib(worldmapc_with_zones_kernel: Kernel) -> CharacterLib:
-    return CharacterLib(worldmapc_with_zones_kernel)
+def worldmapc_with_zones_server_character_lib(worldmapc_kernel: Kernel) -> CharacterLib:
+    return CharacterLib(worldmapc_kernel)
 
 
 @pytest.fixture
@@ -144,8 +141,8 @@ def worldmapb2_render_engine(
 
 
 @pytest.fixture
-def worldmapc_with_zones_stuff_lib(worldmapc_with_zones_kernel: Kernel) -> StuffLib:
-    return StuffLib(worldmapc_with_zones_kernel)
+def worldmapc_with_zones_stuff_lib(worldmapc_kernel: Kernel) -> StuffLib:
+    return StuffLib(worldmapc_kernel)
 
 
 @pytest.fixture
@@ -158,3 +155,39 @@ def default_character_competences() -> dict:
         "find_water_comp": 1.0,
         "action_points": 24.0,
     }
+
+
+@pytest.fixture
+def xena(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
+    xena = CharacterDocument(id="xena", name="xena", **default_character_competences)
+    xena.world_row_i = 1
+    xena.world_col_i = 1
+    xena.zone_row_i = 10
+    xena.zone_col_i = 10
+
+    session = worldmapc_kernel.server_db_session
+    session.add(xena)
+    session.commit()
+
+    return xena
+
+
+@pytest.fixture
+def worldmapc_xena_model(xena: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+    character_lib = CharacterLib(worldmapc_kernel)
+    return character_lib.document_to_model(xena)
+
+
+@pytest.fixture
+def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
+    arthur = CharacterDocument(id="arthur", name="arthur", **default_character_competences)
+    arthur.world_row_i = 1
+    arthur.world_col_i = 1
+    arthur.zone_row_i = 10
+    arthur.zone_col_i = 10
+
+    session = worldmapc_kernel.server_db_session
+    session.add(arthur)
+    session.commit()
+
+    return arthur

@@ -25,4 +25,4 @@ class ResourceDocument(Document):
 
     # relations
     carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
-    in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)
+    in_built_id = Column(Integer, ForeignKey("build.id"), nullable=True)

@@ -9,7 +9,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
-from rolling.action.build import ConstructBuild
+from rolling.action.build import ConstructBuildAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
@@ -48,7 +48,7 @@ class ActionFactory:
         ActionType.SEARCH_FOOD: SearchFoodAction,
         ActionType.BEGIN_BUILD: BeginBuildAction,
         ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
-        ActionType.CONSTRUCT_BUILD: ConstructBuild,
+        ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
         ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
     }
 
@@ -79,7 +79,7 @@ class ActionFactory:
         }
         self._with_build_actions: typing.Dict[ActionType, typing.Type[WithBuildAction]] = {
             ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
-            ActionType.CONSTRUCT_BUILD: ConstructBuild,
+            ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
         }
 
     def get_with_stuff_action(

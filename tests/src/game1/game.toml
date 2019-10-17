@@ -7,12 +7,28 @@ default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
 
 [materials]
+  [materials.MIDDLE_PIECE]
+    name = "Moyen morceau"
 
 [ability]
 
 [character_effects]
 
 [resources]
+  [resources.BRANCHES]
+    name = "Petit bois"
+    weight=100000.0
+    material="MIDDLE_PIECE"
+    unit = "M3"
+    clutter = 1000.0
+    actions = []
+  [resources.STONE]
+    name = "Pierre"
+    weight=2000.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = []
 
 [resource_mix]
 
@@ -21,3 +37,21 @@ default_clutter_capacity = 5.0
 [ACTIONS]
 
 [build]
+[build.TEST_BUILD_1]
+  name = "Test build 1"
+  char = "T"
+  building_char = "t"
+  build_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  abilities = []
+  cost = 2.0
+[build.TEST_BUILD_2]
+  name = "Test build 2"
+  char = "L"
+  building_char = "l"
+  build_require_resources = [{resource="BRANCHES", quantity=0.001}, {resource="STONE", quantity=10.0}]
+  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  abilities = []
+  cost = 2.0

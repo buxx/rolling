@@ -11,20 +11,18 @@ from rolling.server.lib.stuff import StuffLib
 
 @pytest.fixture
 def character_lib(
-    worldmapc_with_zones_kernel: Kernel,
+    worldmapc_kernel: Kernel,
     worldmapc_with_zones_server_character_lib: CharacterLib,
     worldmapc_with_zones_stuff_lib: StuffLib,
 ) -> CharacterLib:
-    return CharacterLib(worldmapc_with_zones_kernel, stuff_lib=worldmapc_with_zones_stuff_lib)
+    return CharacterLib(worldmapc_kernel, stuff_lib=worldmapc_with_zones_stuff_lib)
 
 
 @pytest.fixture
-def jose(
-    worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
-) -> CharacterDocument:
+def jose(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
     arthur = CharacterDocument(id="jose", name="jose", **default_character_competences)
 
-    session = worldmapc_with_zones_kernel.server_db_session
+    session = worldmapc_kernel.server_db_session
     session.add(arthur)
     session.commit()
 
@@ -33,7 +31,7 @@ def jose(
 
 @pytest.fixture
 def empty_plastic_bottle(
-    worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
+    worldmapc_kernel: Kernel, default_character_competences: dict
 ) -> StuffDocument:
     stuff = StuffDocument(
         stuff_id="PLASTIC_BOTTLE_1L",
@@ -43,7 +41,7 @@ def empty_plastic_bottle(
         clutter=1.0,
     )
 
-    session = worldmapc_with_zones_kernel.server_db_session
+    session = worldmapc_kernel.server_db_session
     session.add(stuff)
     session.commit()
 
@@ -52,7 +50,7 @@ def empty_plastic_bottle(
 
 @pytest.fixture
 def half_filled_plastic_bottle(
-    worldmapc_with_zones_kernel: Kernel, default_character_competences: dict
+    worldmapc_kernel: Kernel, default_character_competences: dict
 ) -> StuffDocument:
     stuff = StuffDocument(
         stuff_id="PLASTIC_BOTTLE_1L",
@@ -62,7 +60,7 @@ def half_filled_plastic_bottle(
         clutter=1.0,
     )
 
-    session = worldmapc_with_zones_kernel.server_db_session
+    session = worldmapc_kernel.server_db_session
     session.add(stuff)
     session.commit()
 
@@ -72,7 +70,7 @@ def half_filled_plastic_bottle(
 class TestCharacterLib:
     def test_inventory_one_light_item(
         self,
-        worldmapc_with_zones_kernel: Kernel,
+        worldmapc_kernel: Kernel,
         jose: CharacterDocument,
         empty_plastic_bottle: StuffDocument,
         character_lib: CharacterLib,
@@ -83,7 +81,7 @@ class TestCharacterLib:
         assert not inventory.stuff
 
         empty_plastic_bottle.carried_by_id = jose.id
-        worldmapc_with_zones_kernel.server_db_session.commit()
+        worldmapc_kernel.server_db_session.commit()
 
         inventory = character_lib.get_inventory(jose.id)
         assert 1.0 == inventory.clutter
@@ -94,7 +92,7 @@ class TestCharacterLib:
 
     def test_inventory_one_weight_item(
         self,
-        worldmapc_with_zones_kernel: Kernel,
+        worldmapc_kernel: Kernel,
         jose: CharacterDocument,
         half_filled_plastic_bottle: StuffDocument,
         character_lib: CharacterLib,
@@ -105,7 +103,7 @@ class TestCharacterLib:
         assert not inventory.stuff
 
         half_filled_plastic_bottle.carried_by_id = jose.id
-        worldmapc_with_zones_kernel.server_db_session.commit()
+        worldmapc_kernel.server_db_session.commit()
 
         inventory = character_lib.get_inventory(jose.id)
         assert 1.0 == inventory.clutter
@@ -116,7 +114,7 @@ class TestCharacterLib:
 
     def test_inventory_one_two_items(
         self,
-        worldmapc_with_zones_kernel: Kernel,
+        worldmapc_kernel: Kernel,
         jose: CharacterDocument,
         empty_plastic_bottle: StuffDocument,
         half_filled_plastic_bottle: StuffDocument,
@@ -129,7 +127,7 @@ class TestCharacterLib:
 
         half_filled_plastic_bottle.carried_by_id = jose.id
         empty_plastic_bottle.carried_by_id = jose.id
-        worldmapc_with_zones_kernel.server_db_session.commit()
+        worldmapc_kernel.server_db_session.commit()
 
         inventory = character_lib.get_inventory(jose.id)
         assert 2.0 == inventory.clutter
