@@ -21,9 +21,18 @@ if typing.TYPE_CHECKING:
     from rolling.model.stuff import StuffModel
 
 
+def remove_none_values(dict_: dict) -> dict:
+    new_dict = dict(dict_)
+    for key, value in list(new_dict.items()):
+        if value is None:
+            del new_dict[key]
+    return new_dict
+
+
 def get_character_action_url(
     character_id: str, action_type: ActionType, action_description_id: str, query_params: dict
 ) -> str:
+    query_params = remove_none_values(query_params)
     base_url = CHARACTER_ACTION.format(
         character_id=character_id,
         action_type=action_type.value,
@@ -39,6 +48,7 @@ def get_with_build_action_url(
     action_description_id: str,
     query_params: dict,
 ) -> str:
+    query_params = remove_none_values(query_params)
     base_url = WITH_BUILD_ACTION.format(
         character_id=character_id,
         action_type=action_type.value,
@@ -55,6 +65,7 @@ def get_with_stuff_action_url(
     query_params: dict,
     action_description_id: str,
 ) -> str:
+    query_params = remove_none_values(query_params)
     base_url = WITH_STUFF_ACTION.format(
         character_id=character_id,
         action_type=action_type.value,
@@ -71,6 +82,7 @@ def get_with_resource_action_url(
     query_params: dict,
     action_description_id: str,
 ) -> str:
+    query_params = remove_none_values(query_params)
     base_url = WITH_RESOURCE_ACTION.format(
         character_id=character_id,
         action_type=action_type.value,
