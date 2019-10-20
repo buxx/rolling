@@ -1,5 +1,5 @@
 # coding: utf-8
-from setuptools import setup
+from setuptools import setup, find_packages
 
 test_require = ["pytest", "aioresponses"]
 dev_require = ["black", "isort", "pip-utils", "mypy"] + test_require
@@ -11,7 +11,8 @@ setup(
     author="Bastien Sevajol",
     author_email="sevajol.bastien@gmail.com",
     url="https://github.com/buxx/rolling",
-    packages=["rolling"],
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=["urwid", "aiohttp", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
                       'click'],
     extras_require={"dev": dev_require, "test": test_require},
