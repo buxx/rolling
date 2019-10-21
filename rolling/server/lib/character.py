@@ -3,9 +3,12 @@ import typing
 import uuid
 
 from rolling.exception import ImpossibleAction
+from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.meta import FromType
+from rolling.model.meta import RiskType
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
@@ -320,3 +323,20 @@ class CharacterLib:
         character = self.get(character_id)
 
         return MoveZoneInfos(can_move=character.action_points >= move_cost, cost=move_cost)
+
+    def have_from_of_abilities(
+        self, character: CharacterModel, abilities: typing.List[str]
+    ) -> typing.List[HaveAbility]:
+        haves: typing.List[HaveAbility] = []
+
+        if character.have_one_of_abilities(abilities):
+            haves.append(HaveAbility(from_=FromType.CHARACTER, risk=RiskType.NONE))
+
+        for stuff in self._kernel.stuff_lib.get_carried_by(character.id):
+            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                stuff.stuff_id
+            )
+            if stuff_properties.have_one_of_abilities(abilities):
+                haves.append(HaveAbility(from_=FromType.STUFF, risk=RiskType.NONE))
+
+        return haves

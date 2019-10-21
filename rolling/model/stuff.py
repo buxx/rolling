@@ -27,6 +27,12 @@ class StuffProperties:
     material_type: typing.Optional[str] = None
     abilities: typing.List[str] = serpyco.field(default_factory=list)
 
+    def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
+        for ability in abilities:
+            if ability in self.abilities:
+                return True
+        return False
+
 
 @dataclasses.dataclass
 class StuffModel:
