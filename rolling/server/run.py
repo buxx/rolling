@@ -15,7 +15,7 @@ from rolling.log import server_logger
 from rolling.server.application import get_application
 from rolling.server.base import get_kernel
 from rolling.server.document.build import BuildDocument
-from rolling.server.extension import hapic
+from rolling.server.extension.hapic import hapic
 
 
 class ErrorBuilder(SerpycoDefaultErrorBuilder):

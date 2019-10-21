@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship
 from rolling.server.document.base import SqliteNumeric
 from rolling.server.document.resource import ResourceDocument
 from rolling.server.document.stuff import StuffDocument
-from rolling.server.extension import ServerSideDocument as Document
+from rolling.server.extension.sqlalchemy import ServerSideDocument as Document
 
 
 class CharacterDocument(Document):

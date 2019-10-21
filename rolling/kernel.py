@@ -24,8 +24,8 @@ from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.server.action import ActionFactory
 from rolling.server.effect import EffectManager
-from rolling.server.extension import ClientSideDocument
-from rolling.server.extension import ServerSideDocument
+from rolling.server.extension.sqlalchemy import ClientSideDocument
+from rolling.server.extension.sqlalchemy import ServerSideDocument
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.resource import ResourceLib

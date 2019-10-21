@@ -2,7 +2,7 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 
-from rolling.server.extension import ServerSideDocument as Document
+from rolling.server.extension.sqlalchemy import ServerSideDocument as Document
 
 
 class UniverseStateDocument(Document):

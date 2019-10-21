@@ -8,7 +8,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
 
-from rolling.server.extension import ServerSideDocument as Document
+from rolling.server.extension.sqlalchemy import ServerSideDocument as Document
 
 
 class EventDocument(Document):

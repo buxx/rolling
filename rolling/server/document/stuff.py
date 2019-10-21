@@ -13,7 +13,7 @@ from sqlalchemy import Text
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
 from rolling.model.measure import Unit
-from rolling.server.extension import ServerSideDocument as Document
+from rolling.server.extension.sqlalchemy import ServerSideDocument as Document
 
 if typing.TYPE_CHECKING:
     from rolling.model.stuff import StuffProperties

@@ -47,7 +47,7 @@ from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.effect import EffectManager
-from rolling.server.extension import hapic
+from rolling.server.extension.hapic import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import EmptyModel

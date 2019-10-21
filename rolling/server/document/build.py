@@ -9,7 +9,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
 
-from rolling.server.extension import ServerSideDocument as Document
+from rolling.server.extension.sqlalchemy import ServerSideDocument as Document
 
 
 class BuildDocument(Document):

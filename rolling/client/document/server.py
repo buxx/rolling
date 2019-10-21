@@ -2,7 +2,7 @@
 from sqlalchemy import Column
 from sqlalchemy import String
 
-from rolling.server.extension import ClientSideDocument as Document
+from rolling.server.extension.sqlalchemy import ClientSideDocument as Document
 
 
 class ServerDocument(Document):

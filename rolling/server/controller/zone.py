@@ -18,7 +18,7 @@ from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 from rolling.server.controller.base import BaseController
-from rolling.server.extension import hapic
+from rolling.server.extension.hapic import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.zone import ZoneLib

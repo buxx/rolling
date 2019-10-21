@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 
 from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
-from rolling.server.extension import hapic
+from rolling.server.extension.hapic import hapic
 
 
 class WorldController(BaseController):

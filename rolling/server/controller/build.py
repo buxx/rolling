@@ -10,7 +10,7 @@ from rolling.kernel import Kernel
 from rolling.model.build import DescribeBuildInputPath
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import DESCRIBE_BUILD
-from rolling.server.extension import hapic
+from rolling.server.extension.hapic import hapic
 from rolling.util import quantity_to_str
 
 
