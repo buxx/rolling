@@ -103,9 +103,7 @@ if exist "%CYGWIN_ROOT%\%ROLLING_TUI%" (
     del "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
 )
 cscript //Nologo "%DOWNLOADER%" https://cygwin.org/%CYGWIN_SETUP% "%CYGWIN_ROOT%\%CYGWIN_SETUP%" || goto :fail
-cscript //Nologo "%DOWNLOADER%" %ROLLING_TUI% "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
-
-del "%DOWNLOADER%"
+cscript //Nologo "%DOWNLOADER%" %ROLLING_TUI_URL% "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
 
 :: Cygwin command line options: https://cygwin.com/faq/faq.html#faq.setup.cli
 if "%PROXY_HOST%" == "" (
@@ -131,7 +129,7 @@ if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
     rd /s /q "%CYGWIN_ROOT%\.pkg-cache"
 )
 
-set Updater_cmd=%INSTALL_ROOT%cygwin-portable-updater.cmd
+set Updater_cmd=%INSTALL_ROOT%updater.cmd
 echo Creating updater [%Updater_cmd%]...
 (
     echo @echo off
@@ -155,6 +153,10 @@ echo Creating updater [%Updater_cmd%]...
     if "%DELETE_CYGWIN_PACKAGE_CACHE%" == "yes" (
         echo rd /s /q "%%CYGWIN_ROOT%%\.pkg-cache"
     )
+    echo if exist "%CYGWIN_ROOT%\%ROLLING_TUI%" (
+    echo    del "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
+    echo )
+    echo cscript //Nologo "%DOWNLOADER%" %ROLLING_TUI_URL% "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
     echo echo.
     echo echo ###########################################################
     echo echo # Updating [Cygwin Portable] succeeded.
@@ -179,7 +181,7 @@ if exist "%Cygwin_bat%" (
     rename "%Cygwin_bat%" Cygwin.bat.disabled || goto :fail
 )
 
-set Init_sh=%CYGWIN_ROOT%\portable-init.sh
+set Init_sh=%CYGWIN_ROOT%\init.sh
 echo Creating [%Init_sh%]...
 (
     echo #!/usr/bin/env bash
@@ -262,7 +264,7 @@ echo Creating launcher [%Start_cmd%]...
     echo.
     echo %%CYGWIN_DRIVE%%
     echo chdir "%%CYGWIN_ROOT%%\bin"
-    echo bash "%%CYGWIN_ROOT%%\portable-init.sh"
+    echo bash "%%CYGWIN_ROOT%%\init.sh"
     echo.
     echo if "%%1" == "" (
     if "%INSTALL_CONEMU%" == "yes" (
@@ -272,7 +274,7 @@ echo Creating launcher [%Start_cmd%]...
             echo   start "" "%%~dp0conemu\ConEmu.exe" %CON_EMU_OPTIONS%
         )
     ) else (
-        echo   mintty --nopin %MINTTY_OPTIONS% --icon %%CYGWIN_ROOT%%\Cygwin-Terminal.ico python3 rolling-tui.pyz -
+        echo   mintty --nopin %MINTTY_OPTIONS% --icon %%CYGWIN_ROOT%%\Cygwin-Terminal.ico ./rolling-tui.pyz -
     )
     echo ^) else (
     echo   if "%%1" == "no-mintty" (
