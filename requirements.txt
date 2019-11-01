@@ -18,7 +18,7 @@ marshmallow==3.2.1
 more-itertools==7.2.0
 multidict==4.5.2
 mypy-extensions==0.4.3
-Pillow==6.0.0
+Pillow==6.2.1
 pkg-resources==0.0.0
 pluggy==0.8.0
 py==1.7.0
