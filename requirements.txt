@@ -22,7 +22,7 @@ Pillow==6.2.1
 pkg-resources==0.0.0
 pluggy==0.13.0
 py==1.8.0
-pytest==4.0.1
+pytest==5.2.2
 python-dateutil==2.7.5
 python-rapidjson==0.6.3
 PyYAML==4.2b4
