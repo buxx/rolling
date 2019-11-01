@@ -28,7 +28,7 @@ python-rapidjson==0.8.0
 PyYAML==5.1.2
 requests==2.22.0
 serpyco==0.18.0
-shiv==0.0.50
+shiv==0.0.51
 six==1.11.0
 SQLAlchemy==1.3.0b2
 toml==0.10.0
