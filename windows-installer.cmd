@@ -103,7 +103,7 @@ if exist "%CYGWIN_ROOT%\%ROLLING_TUI%" (
     del "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
 )
 cscript //Nologo "%DOWNLOADER%" https://cygwin.org/%CYGWIN_SETUP% "%CYGWIN_ROOT%\%CYGWIN_SETUP%" || goto :fail
-cscript //Nologo "%DOWNLOADER%" %ROLLING_TUI_URL% "%CYGWIN_ROOT%\%ROLLING_TUI%" || goto :fail
+cscript //Nologo "%DOWNLOADER%" %ROLLING_TUI_URL% "%CYGWIN_ROOT%\bin\%ROLLING_TUI%" || goto :fail
 
 :: Cygwin command line options: https://cygwin.com/faq/faq.html#faq.setup.cli
 if "%PROXY_HOST%" == "" (
