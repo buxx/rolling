@@ -172,15 +172,6 @@ echo Creating updater [%Updater_cmd%]...
     echo exit /1
 ) >"%Updater_cmd%" || goto :fail
 
-set Cygwin_bat=%CYGWIN_ROOT%\Cygwin.bat
-if exist "%Cygwin_bat%" (
-    echo Disabling default Cygwin launcher [%Cygwin_bat%]...
-    if exist "%Cygwin_bat%.disabled" (
-        del "%Cygwin_bat%.disabled" || goto :fail
-    )
-    rename "%Cygwin_bat%" Cygwin.bat.disabled || goto :fail
-)
-
 set Init_sh=%CYGWIN_ROOT%\init.sh
 echo Creating [%Init_sh%]...
 (
