@@ -274,7 +274,7 @@ echo Creating launcher [%Start_cmd%]...
             echo   start "" "%%~dp0conemu\ConEmu.exe" %CON_EMU_OPTIONS%
         )
     ) else (
-        echo   mintty --nopin %MINTTY_OPTIONS% --icon %%CYGWIN_ROOT%%\Cygwin-Terminal.ico ./rolling-tui.pyz -
+        echo   mintty --nopin %MINTTY_OPTIONS% --icon %%CYGWIN_ROOT%%\Cygwin-Terminal.ico /bin/rolling-tui.pyz -
     )
     echo ^) else (
     echo   if "%%1" == "no-mintty" (
