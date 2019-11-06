@@ -1,4 +1,7 @@
 #!/usr/bin/bash
-cd /home/root/rolling
+echo Move to rolling directory
+cd ~/rolling
+echo Activate python virtual env
 source venv/bin/activate
-rolling-gui
+echo Start rolling
+python ./rolling-gui.py
