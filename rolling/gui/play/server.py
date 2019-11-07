@@ -16,7 +16,7 @@ class ChooseServerMenu(urwid.ListBox):
         super().__init__(urwid.SimpleListWalker(self._items))
 
     def get_servers(self):
-        return ["127.0.0.1:5000"]
+        return ["127.0.0.1:5000", "s2.bux.fr:7431"]
 
     def choose_server(self, widget: urwid.Button, server_address: str, **kwargs):
         self._controller._choose_server(server_address)
