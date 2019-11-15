@@ -43,6 +43,7 @@ class Controller:
         display_object_manager: DisplayObjectManager = None,
         # TODO BS: enum
         root_menu_mode: str = "normal",
+        disable_ws: bool = False,
     ) -> None:
         self._client = client
         self._asyncio_loop: asyncio.AbstractEventLoop = None
@@ -64,6 +65,7 @@ class Controller:
         self._zone_websocket_connected_event = asyncio.Event()
         self._display_objects_manager = display_object_manager or DisplayObjectManager([])
         self._guilang: typing.Optional[GuilangGenerator] = None
+        self._disable_ws = disable_ws
 
         self._kernel.init_client_db_session()
 
@@ -132,6 +134,9 @@ class Controller:
     async def _get_zone_websocket_jobs(self):
         # FIXME BS 2019-01-23: If exception bellow: urwid completelly crash without info !
         # Simulate crash and setup error logging
+
+        if self._disable_ws:
+            return
 
         zone_websocket_client = ZoneWebSocketClient(
             self,

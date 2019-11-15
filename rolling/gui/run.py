@@ -21,7 +21,7 @@ def run(args: argparse.Namespace) -> None:
 
     loop = asyncio.get_event_loop()
     kernel = Kernel(loop=loop)
-    controller = Controller(client=client, kernel=kernel)
+    controller = Controller(client=client, kernel=kernel, disable_ws=args.disable_ws)
 
     gui_logger.info("Start gui")
     controller.main()
@@ -31,6 +31,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
     parser.add_argument("--server-address", type=str, help="Game server address")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--disable-ws", action="store_true", help="Disable websocket things (debug)")
 
     args = parser.parse_args()
     run(args)
