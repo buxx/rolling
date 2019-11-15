@@ -152,26 +152,28 @@ class Controller:
 
         @capture_errors
         async def read():
-            while True:
-                gui_logger.info("Waiting for open a zone websocket connection")
-                await self._zone_websocket_event.wait()
-                gui_logger.info("Starting zone websocket listening")
-                await zone_websocket_client.make_connection(
-                    self._player_character.world_row_i, self._player_character.world_col_i
-                )
-                self._zone_websocket_connected_event.set()
-                await zone_websocket_client.listen()
-                self._zone_websocket_connected_event.clear()
-                gui_logger.info("Zone websocket job finished")
+            gui_logger.info("Waiting for open a read zone websocket connection")
+            await self._zone_websocket_event.wait()
+            gui_logger.info("Make zone read websocket connection")
+            await zone_websocket_client.make_connection(
+                self._player_character.world_row_i, self._player_character.world_col_i
+            )
+            self._zone_websocket_connected_event.set()
+            gui_logger.debug("Listen on zone read websocket")
+            await zone_websocket_client.listen()
+            self._zone_websocket_connected_event.clear()
+            gui_logger.info("Zone read websocket job finished")
 
         @capture_errors
         async def write():
+            gui_logger.debug("Entering write loop")
             while True:
                 gui_logger.info("Waiting for an object to send to zone websocket")
                 await self._zone_websocket_connected_event.wait()
                 # FIXME BS 2019-01-14: this is blocking, see https://stackoverflow.com/questions/26413613/asyncio-is-it-possible-to-cancel-a-future-been-run-by-an-executor
                 # to make it unblocking
                 event = await self._asyncio_loop.run_in_executor(None, self._to_send_zone_queue.get)
+                gui_logger.debug("Zone write websocket event to send")
                 await zone_websocket_client.send_event(event)
 
         return await asyncio.gather(read(), write())

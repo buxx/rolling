@@ -46,6 +46,7 @@ class ZoneWebSocketClient:
     async def listen(self) -> None:
         while True:
             msg: WSMessage = await self._ws.receive()
+            gui_logger.debug("Zone read websocket message received")
 
             if msg.type == aiohttp.WSMsgType.text:
                 await self._proceed_received_package(msg.data)
@@ -69,4 +70,5 @@ class ZoneWebSocketClient:
 
     async def send_event(self, event: ZoneEvent) -> None:
         event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        gui_logger.debug("Send str version of event over zone write websocket")
         await self._ws.send_str(event_str)
