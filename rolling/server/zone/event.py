@@ -4,6 +4,8 @@ import typing
 
 import serpyco
 
+from rolling.exception import DisconnectClient
+from rolling.exception import UnknownEvent
 from rolling.log import server_logger
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import ZoneEvent
@@ -57,16 +59,26 @@ class PlayerMoveProcessor(EventProcessor):
             try:
                 await socket.send_str(event_str)
             except Exception as exc:
-                server_logger.error(f"Error happen when send event: {str(exc)}")
-                server_logger.exception()
+                server_logger.exception(exc)
+
+
+class ClientWantCloseProcessor(EventProcessor):
+    async def _process(self, row_i: int, col_i: int, event: ZoneEvent[PlayerMoveData]) -> None:
+        raise DisconnectClient()
 
 
 class EventProcessorFactory:
     def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 
-        for zone_event_type, processor_type in [(ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor)]:
+        for zone_event_type, processor_type in [
+            (ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor),
+            (ZoneEventType.CLIENT_WANT_CLOSE, ClientWantCloseProcessor),
+        ]:
             self._processors[zone_event_type] = processor_type(kernel, zone_events_manager)
 
     def get_processor(self, zone_event_type: ZoneEventType) -> EventProcessor:
-        return self._processors[zone_event_type]
+        try:
+            return self._processors[zone_event_type]
+        except KeyError:
+            raise UnknownEvent(f"Unknown event type '{zone_event_type}'")

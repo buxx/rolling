@@ -33,11 +33,23 @@ class NotConnectedToServer(RollingError):
     pass
 
 
-class ZoneWebsocketJobFinished(RollingError):
+class WebsocketError(RollingError):
     pass
 
 
-class UnableToProcessEvent(RollingError):
+class DisconnectClient(WebsocketError):
+    pass
+
+
+class EventError(RollingError):
+    pass
+
+
+class UnknownEvent(EventError):
+    pass
+
+
+class UnableToProcessEvent(EventError):
     def __init__(self, msg: str, event: ZoneEvent) -> None:
         super().__init__(msg)
         self._event = event

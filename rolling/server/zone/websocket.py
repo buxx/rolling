@@ -7,8 +7,11 @@ import aiohttp
 from aiohttp import web
 from aiohttp.web_request import Request
 
+from rolling.exception import DisconnectClient
 from rolling.exception import UnableToProcessEvent
+from rolling.exception import UnknownEvent
 from rolling.log import server_logger
+from rolling.model.event import EmptyData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
@@ -55,7 +58,17 @@ class ZoneEventsManager:
             if msg.type == aiohttp.WSMsgType.ERROR:
                 server_logger.error(f"Zone websocket closed with exception {socket.exception()}")
             else:
-                await self._process_msg(row_i, col_i, msg, socket)
+                try:
+                    await self._process_msg(row_i, col_i, msg, socket)
+                except DisconnectClient:
+                    await socket.send_str(
+                        self._event_serializer_factory.get_serializer(
+                            ZoneEventType.SERVER_PERMIT_CLOSE
+                        ).dump_json(
+                            ZoneEvent(type=ZoneEventType.SERVER_PERMIT_CLOSE, data=EmptyData())
+                        )
+                    )
+                    return
 
         server_logger.info(f"Websocket of zone {row_i},{col_i} closed")
 
@@ -70,7 +83,12 @@ class ZoneEventsManager:
     async def _process_event(
         self, row_i: int, col_i: int, event: ZoneEvent, socket: web.WebSocketResponse
     ) -> None:
-        event_processor = self._event_processor_factory.get_processor(event.type)
+        try:
+            event_processor = self._event_processor_factory.get_processor(event.type)
+        except UnknownEvent:
+            server_logger.warning(f"Unknown received event type '{event.type}'")
+            return
+
         try:
             await event_processor.process(row_i, col_i, event)
         except UnableToProcessEvent as exc:
@@ -81,6 +99,7 @@ class ZoneEventsManager:
                 exception_event.type
             ).dump_json(exception_event)
 
+            # FIXME: do kept this feature ?
             await socket.send_str(exception_event_str)
 
     async def get_sockets(

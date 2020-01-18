@@ -31,7 +31,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
     parser.add_argument("--server-address", type=str, help="Game server address")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--disable-ws", action="store_true", help="Disable websocket things (debug)")
+    parser.add_argument(
+        "--disable-ws", action="store_true", help="Disable websocket things (debug)"
+    )
 
     args = parser.parse_args()
     run(args)

@@ -37,7 +37,7 @@ pub fn extract_block_from_source(
     )))
 }
 
-pub fn get_file_content(file_path: &Path) -> Result<String, Box<Error>> {
+pub fn get_file_content(file_path: &Path) -> Result<String, Box<dyn Error>> {
     let mut file = fs::File::open(file_path)?;
     let mut file_content = String::new();
     file.read_to_string(&mut file_content)?;
