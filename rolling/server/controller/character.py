@@ -75,8 +75,8 @@ class CharacterController(BaseController):
                 ),
                 Part(
                     is_form=True,
-                    form_action=POST_CHARACTER_URL,
-                    items=[*Part.from_dataclass_fields(CreateCharacterModel)],
+                    form_action="/_describe/character/create/do",
+                    items=[*Part.from_dataclass_fields(CreateCharacterModel)] + [Part(go_back_zone=True)],
                 ),
             ],
         )
@@ -449,6 +449,19 @@ class CharacterController(BaseController):
         return self._character_lib.get(character_id)
 
     @hapic.with_api_doc()
+    @hapic.input_body(CreateCharacterModel)
+    @hapic.output_body(Description)
+    async def create_from_description(self, request: Request, hapic_data: HapicData) -> Description:
+        character_id = self._character_lib.create(hapic_data.body)
+        return Description(
+            title="Pret a commencer l'aventure !",
+            items=[
+                Part(label="Continuer", go_back_zone=True),
+            ],
+            new_character_id=character_id,
+        )
+
+    @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterModel)
@@ -543,6 +556,7 @@ class CharacterController(BaseController):
         app.add_routes(
             [
                 web.get("/_describe/character/create", self._describe_create_character),
+                web.post("/_describe/character/create", self._describe_create_character),
                 web.get("/_describe/character/{character_id}/card", self._describe_character_card),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.get(
@@ -559,6 +573,7 @@ class CharacterController(BaseController):
                 ),
                 web.get("/_describe/character/{character_id}/events", self._describe_events),
                 web.post(POST_CHARACTER_URL, self.create),
+                web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.put("/character/{character_id}/move", self.move),

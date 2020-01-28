@@ -54,3 +54,4 @@ class Description:
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     image: typing.Optional[str] = None
     is_long_text: bool = False
+    new_character_id: typing.Optional[str] = None
