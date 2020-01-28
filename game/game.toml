@@ -10,6 +10,7 @@ default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
+cheats = {"*"=["increase_ap"]}
 
 [materials]
   [materials.LIQUID]
@@ -301,6 +302,11 @@ day_turn_every = 86400  # 24 hours
   [ACTIONS.ATTACK_CHARACTER]
     name = "Attaquer"
     actions = ["ATTACK_CHARACTER"]
+    cost = 0.0
+
+  [ACTIONS.CHEATS]
+    name = "Triches"
+    actions = ["CHEATS"]
     cost = 0.0
 
   [ACTIONS.DRINK_FRESH_WATER]
