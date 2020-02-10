@@ -549,7 +549,7 @@ class CharacterController(BaseController):
         hungry = "oui" if character.feel_hungry else "non"
         thirsty = "oui" if character.feel_thirsty else "non"
         return ListOfStrModel(
-            [f"PA: {character.action_points}", f"Faim: {hungry}", f"Soif: {thirsty}"]
+            [f"PV: {round(character.life_points, 1)}", f"PA: {round(character.action_points, 1)}", f"Faim: {hungry}", f"Soif: {thirsty}"]
         )
 
     def bind(self, app: Application) -> None:
@@ -558,8 +558,14 @@ class CharacterController(BaseController):
                 web.get("/_describe/character/create", self._describe_create_character),
                 web.post("/_describe/character/create", self._describe_create_character),
                 web.get("/_describe/character/{character_id}/card", self._describe_character_card),
+                web.post("/_describe/character/{character_id}/card", self._describe_character_card),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.get(
+                    "/_describe/character/{character_id}/on_place_actions",
+                    self._describe_on_place_actions,
+                ),
+                web.post(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
                 ),
@@ -571,7 +577,12 @@ class CharacterController(BaseController):
                     "/_describe/character/{character_id}/build_actions",
                     self._describe_build_actions,
                 ),
+                web.post(
+                    "/_describe/character/{character_id}/build_actions",
+                    self._describe_build_actions,
+                ),
                 web.get("/_describe/character/{character_id}/events", self._describe_events),
+                web.post("/_describe/character/{character_id}/events", self._describe_events),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),
