@@ -483,6 +483,50 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
+    @hapic.input_path(GetMoveZoneInfosModel)
+    @hapic.output_body(Description)
+    async def describe_move_to_zone_infos(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        move_info =  self._character_lib.get_move_to_zone_infos(
+            hapic_data.path.character_id,
+            world_row_i=hapic_data.path.world_row_i,
+            world_col_i=hapic_data.path.world_col_i,
+        )
+
+        buttons = [
+            Part(
+                label="Rester ici",
+                go_back_zone=True,
+            )
+        ]
+        travel_url = (
+            f"/character/{hapic_data.path.character_id}/move"
+            f"?to_world_row={hapic_data.path.world_row_i}"
+            f"&to_world_col={hapic_data.path.world_col_i}"
+        )
+        if move_info.can_move:
+            text = f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA"
+            buttons.insert(0, Part(
+                label="Effectuer le voyage",
+                is_link=True,
+                form_action=travel_url,
+            ))
+        else:
+            text = (
+                f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA. "
+                f"Il ne vous reste pas assez de PA pour l'effectuer."
+            )
+
+        return Description(
+            title="Effectuer un voyage ...",
+            items=[
+                Part(text=text)
+            ] + buttons,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterInventoryModel)
     async def get_inventory(
@@ -516,6 +560,41 @@ class CharacterController(BaseController):
         )
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
         return Response(status=204)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(MoveCharacterQueryModel)
+    @hapic.handle_exception(CantMoveCharacter)
+    @hapic.output_body(Description)
+    async def describe_move(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._character_lib.get(hapic_data.path.character_id)
+        to_world_row = hapic_data.query.to_world_row
+        to_world_col = hapic_data.query.to_world_col
+        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
+
+        if zone_properties.move_cost > character.action_points:
+            message = (
+                f"Ce déplacement coute {zone_properties.move_cost} points d'action mais "
+                f"{character.name} n'en possède que {character.action_points}"
+            )
+        else:
+            message = "Le voyage c'est bien déroulé"
+
+        self._character_lib.move(
+            character,
+            to_world_row=hapic_data.query.to_world_row,
+            to_world_col=hapic_data.query.to_world_col,
+        )
+        self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
+
+        return Description(
+            title="Effectuer un voyage ...",
+            items=[
+                Part(text=message),
+                Part(go_back_zone=True),
+            ],
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(PostTakeStuffModelModel)
@@ -573,6 +652,10 @@ class CharacterController(BaseController):
                     "/character/{character_id}/move-to-zone/{world_row_i}/{world_col_i}",
                     self.get_move_to_zone_infos,
                 ),
+                web.post(
+                    "/_describe/character/{character_id}/move-to-zone/{world_row_i}/{world_col_i}",
+                    self.describe_move_to_zone_infos,
+                ),
                 web.get(
                     "/_describe/character/{character_id}/build_actions",
                     self._describe_build_actions,
@@ -588,6 +671,7 @@ class CharacterController(BaseController):
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.put("/character/{character_id}/move", self.move),
+                web.post("/_describe/character/{character_id}/move", self.describe_move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
                 web.post(DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff),
