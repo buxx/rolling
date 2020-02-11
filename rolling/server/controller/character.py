@@ -501,7 +501,7 @@ class CharacterController(BaseController):
             )
         ]
         travel_url = (
-            f"/character/{hapic_data.path.character_id}/move"
+            f"/_describe/character/{hapic_data.path.character_id}/move"
             f"?to_world_row={hapic_data.path.world_row_i}"
             f"&to_world_col={hapic_data.path.world_col_i}"
         )
