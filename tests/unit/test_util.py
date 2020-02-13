@@ -1,6 +1,9 @@
 # coding: utf-8
+import pytest
+
 from rolling.util import CornerEnum
 from rolling.util import get_corner
+from rolling.util import get_opposite_zone_place
 
 
 def test_get_corner():
@@ -36,3 +39,30 @@ def test_get_corner():
             expected_corner = corners[charr]
 
             assert expected_corner == get_corner(9, 9, real_row_i, real_col_i)
+
+
+@pytest.mark.parametrize(
+    "expected_row_i,expected_col_i,from_,zone_width,zone_height",
+    [
+        (0, 4, CornerEnum.TOP, 9, 9),
+        (7, 2, CornerEnum.TOP_RIGHT, 9, 9),
+        (4, 8, CornerEnum.RIGHT, 9, 9),
+        (7, 6, CornerEnum.BOTTOM_RIGHT, 9, 9),
+        (8, 4, CornerEnum.BOTTOM, 9, 9),
+        (1, 6, CornerEnum.BOTTOM_LEFT, 9, 9),
+        (4, 0, CornerEnum.LEFT, 9, 9),
+        (1, 2, CornerEnum.TOP_LEFT, 9, 9),
+    ]
+)
+def test_get_opposite_zone_place(
+    expected_row_i: int,
+    expected_col_i: int,
+    from_: CornerEnum,
+    zone_width: int,
+    zone_height: int,
+):
+    assert get_opposite_zone_place(
+        from_=from_,
+        zone_width=zone_width,
+        zone_height=zone_height,
+    ) == (expected_row_i, expected_col_i)

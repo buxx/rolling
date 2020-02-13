@@ -82,10 +82,75 @@ class CornerEnum(enum.Enum):
     TOP_RIGHT = "TOP_RIGHT"
     RIGHT = "RIGHT"
     BOTTOM_RIGHT = "BOTTOM_RIGHT"
-    BOTTOM = "TOP"
+    BOTTOM = "BOTTOM"
     BOTTOM_LEFT = "BOTTOM_LEFT"
     LEFT = "LEFT"
     TOP_LEFT = "TOP_LEFT"
+
+
+def get_opposite_zone_place(
+    from_: CornerEnum,
+    zone_width: int,
+    zone_height: int,
+) -> (int, int):
+    width_part_len = zone_width // 3
+    half_width_part_len = width_part_len // 2
+    height_part_len = zone_height // 3
+    half_height_part_len = height_part_len // 2
+
+    if from_ == CornerEnum.TOP:
+        return 0, zone_width // 2
+
+    if from_ == CornerEnum.TOP_RIGHT:
+        return (height_part_len * 2) + half_height_part_len, half_width_part_len + 1
+
+    if from_ == CornerEnum.RIGHT:
+        return zone_height // 2, zone_width - 1
+
+    if from_ == CornerEnum.BOTTOM_RIGHT:
+        return (height_part_len * 2) + half_height_part_len, (width_part_len * 2) + half_width_part_len - 1
+
+    if from_ == CornerEnum.BOTTOM:
+        return zone_height - 1, zone_width // 2
+
+    if from_ == CornerEnum.BOTTOM_LEFT:
+        return half_height_part_len, ((width_part_len * 2) + half_width_part_len - 1)
+
+    if from_ == CornerEnum.LEFT:
+        return zone_height // 2, 0
+
+    if from_ == CornerEnum.TOP_LEFT:
+        return half_height_part_len, half_width_part_len + 1
+
+    raise Exception("It is not possible !")
+
+
+def get_coming_from(before_row_i: int, before_col_i: int, after_row_i: int, after_col_i: int) -> CornerEnum:
+    if after_row_i == before_row_i - 1 and after_col_i == before_col_i:
+        return CornerEnum.BOTTOM
+
+    if after_row_i == before_row_i - 1 and after_col_i == before_col_i + 1:
+        return CornerEnum.TOP_RIGHT
+
+    if after_row_i == before_row_i and after_col_i == before_col_i + 1:
+        return CornerEnum.LEFT
+
+    if after_row_i == before_row_i + 1 and after_col_i == before_col_i + 1:
+        return CornerEnum.TOP_LEFT
+
+    if after_row_i == before_row_i + 1 and after_col_i == before_col_i:
+        return CornerEnum.TOP
+
+    if after_row_i == before_row_i - 1 and after_col_i == before_col_i - 1:
+        return CornerEnum.BOTTOM_RIGHT
+
+    if after_row_i == before_row_i and after_col_i == before_col_i - 1:
+        return CornerEnum.RIGHT
+
+    if after_row_i == before_row_i + 1 and after_col_i == before_col_i - 1:
+        return CornerEnum.BOTTOM_LEFT
+
+    raise Exception("It is not possible !")
 
 
 def get_corner(

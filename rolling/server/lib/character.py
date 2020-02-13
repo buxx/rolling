@@ -21,7 +21,7 @@ from rolling.server.document.event import EventDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
-from rolling.util import filter_action_links
+from rolling.util import filter_action_links, get_coming_from, get_opposite_zone_place
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
@@ -134,10 +134,23 @@ class CharacterLib:
 
     def move(self, character: CharacterModel, to_world_row: int, to_world_col: int) -> None:
         # TODO BS 2019-06-04: Check if move is possible
-        # TODO BS 2019-06-04: Compute how many action point and consume
         character_document = self.get_document(character.id)
+        coming_from = get_coming_from(
+            before_row_i=character_document.world_row_i,
+            before_col_i=character_document.world_col_i,
+            after_row_i=to_world_row,
+            after_col_i=to_world_col,
+        )
         character_document.world_row_i = to_world_row
         character_document.world_col_i = to_world_col
+        new_zone_geography = self._kernel.tile_maps_by_position[(to_world_row, to_world_col)].source.geography
+        new_zone_row_i, new_zone_col_i = get_opposite_zone_place(
+            from_=coming_from,
+            zone_width=new_zone_geography.width,
+            zone_height=new_zone_geography.height,
+        )
+        character_document.zone_row_i = new_zone_row_i
+        character_document.zone_col_i = new_zone_col_i
         self.update(character_document)
 
     def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
