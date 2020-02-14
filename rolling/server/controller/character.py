@@ -598,12 +598,17 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(PostTakeStuffModelModel)
-    @hapic.output_body(EmptyModel, default_http_code=204)
-    async def take_stuff(self, request: Request, hapic_data: HapicData) -> Response:
+    @hapic.output_body(Description)
+    async def take_stuff(self, request: Request, hapic_data: HapicData) -> Description:
         self._character_lib.take_stuff(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
-        return Response(status=204)
+        return Description(
+            title="Objet récupéré",
+            items=[
+                Part(go_back_zone=True),
+            ],
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
