@@ -13,7 +13,7 @@ setup(
     url="https://github.com/buxx/rolling",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["urwid", "aiohttp==3.6.2", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
+    install_requires=["urwid", "aiohttp==3.5.0a1", "serpyco", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
                       'click'],
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={

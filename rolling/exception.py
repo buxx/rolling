@@ -142,3 +142,7 @@ class NoMetaLine(SourceLoadError):
 
 class CantChangeZone(RollingError):
     pass
+
+
+class ServerTurnError(RollingError):
+    pass

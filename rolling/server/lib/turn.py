@@ -3,12 +3,14 @@ from logging import Logger
 import random
 import typing
 
+from rolling.exception import ServerTurnError
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.types import TurnMode
 from rolling.util import get_stuffs_eatable
 from rolling.util import get_stuffs_filled_with_resource_id
 from rolling.util import is_there_resource_id_in_zone
@@ -28,6 +30,11 @@ class TurnLib:
         self._logger = logger or server_logger
 
     def execute_turn(self) -> None:
+        # For now, only manager DAY turn mode
+        turn_mode = self._kernel.game.config.turn_mode
+        if not turn_mode == TurnMode.DAY:
+            raise ServerTurnError(f"Turn mode '{turn_mode}' not yet implemented")
+
         self._generate_stuff()
         self._provide_for_natural_needs()
         self._increment_age()

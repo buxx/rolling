@@ -30,7 +30,7 @@ from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneResource
 from rolling.model.zone import ZoneStuff
 from rolling.server.action import ActionFactory
-from rolling.types import ActionType
+from rolling.types import ActionType, TurnMode
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -45,6 +45,7 @@ class GameConfig:
         self.fill_with_material_ids: typing.List[str] = config_dict["fill_with_material_ids"]
         self.default_weight_capacity: float = config_dict["default_weight_capacity"]
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
+        self.turn_mode: TurnMode = TurnMode(config_dict["turn_mode"])
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
