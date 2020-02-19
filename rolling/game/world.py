@@ -76,7 +76,7 @@ class WorldManager:
 
         try:
             map_tile_type = zone_map.source.geography.rows[zone_row_i][zone_col_i]
-        except KeyError:
+        except IndexError:
             # TODO BS 2019-08-27: maybe raise here
             return []
 
