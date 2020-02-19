@@ -128,12 +128,12 @@ turn_mode = "DAY"
     clutter = 1000.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
 
-  [resources.WILD_RASPBERRIES]
-    name = "Framboises sauvages"
-    weight=1.0
+  [resources.BERRY]
+    name = "Baies"
+    weight=1000.0
     material="MIDDLE_PIECE"
-    unit = "G"
-    clutter = 0.001
+    unit = "L"
+    clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
 
   [resources.PAGUROIDEA]
@@ -174,7 +174,23 @@ turn_mode = "DAY"
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.1
-    actions = []
+    actions = ["DROP_RESOURCE"]
+
+  [resources.NUT]
+    name = "Noix"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE"]
+
+  [resources.GRAMINEAE]
+    name = "Graminés"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE"]
 
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
@@ -224,11 +240,11 @@ turn_mode = "DAY"
     character_effects = ["THIRSTY_SATISFIED"]
     cost = 0.0
 
-  [ACTIONS.EAT_BERRIES]
+  [ACTIONS.EAT_BERRIES]  # and walnuts
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["WILD_RASPBERRIES"]
+    accept_resources = ["BERRY", "NUT"]
     character_effects = ["HUNGRY_SATISFIED"]
-    require = 500.0  # g
+    require = 1.0  # l
     cost = 0.0
 
   [ACTIONS.EAT_MIDDLE_CRUSTACEAN]
@@ -340,7 +356,7 @@ turn_mode = "DAY"
     cost = 6.0
 
   [ACTIONS.HUNT_SMALL_GAME]
-    name = "Cheasser du petit gibier"
+    name = "Cheasser du gibier"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuffs = []
     required_all_stuffs = []
@@ -348,7 +364,40 @@ turn_mode = "DAY"
     required_all_skills = []
     required_one_of_ability = ["HUNT_SMALL_GAME"]
     produce = [
-      {stuff="HARE", quantity=4.0, probability=75.0},  # lièvre, u
+      {stuff="HARE", quantity=1.0, probability=10.0},
+      {stuff="RABBIT", quantity=1.0, probability=10.0},
+      {stuff="POULE", quantity=5.0, probability=50.0},
+      {stuff="FOX", quantity=1.0, probability=10.0},
+      {stuff="FOUINE", quantity=1.0, probability=10.0},
+      {stuff="SANGLIER", quantity=1.0, probability=5.0},
+      {stuff="CHEVREUIL", quantity=1.0, probability=5.0},
+    ]
+    cost = 6.0
+
+  [ACTIONS.GATHERING]
+    name = "Partir en ceuillette"
+    actions = ["SEARCH_FOOD"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    required_one_of_ability = []
+    produce = [
+      {resource="BERRY", quantity=4.0, probability=100.0},
+      {resource="NUT", quantity=5.0, probability=100.0},
+    ]
+    cost = 6.0
+
+  [ACTIONS.GRAMINEAE_HARVEST]
+    name = "Récolter des graminés"
+    actions = ["SEARCH_FOOD"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    required_one_of_ability = []
+    produce = [
+      {resource="GRAMINEAE", quantity=5.0, probability=100.0},
     ]
     cost = 6.0
 

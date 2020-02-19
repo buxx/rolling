@@ -3,7 +3,7 @@
     move_cost = 4.0
 
     [ZONE_PROPERTIES.BEACH.GENERATION]
-      count = 15
+      count = 1
 
       [ZONE_PROPERTIES.BEACH.GENERATION.STUFF]
         [ZONE_PROPERTIES.BEACH.GENERATION.STUFF.PLASTIC_BOTTLE_1L]
@@ -21,6 +21,20 @@
         maximum = 100000.0
         regeneration = 5000.0
 
+    [ZONE_PROPERTIES.BEACH.STUFFS]
+      [ZONE_PROPERTIES.BEACH.STUFFS.HARE]  # bernard l'hermite, u
+        probability = 80.0  # probability to be available on x,y zone at world init
+        maximum = 100.0  # maximum quantity on x,y zone (u)
+        regeneration = 5.0  # quatity generation per turn
+      [ZONE_PROPERTIES.BEACH.STUFFS.RABBIT]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 5.0
+      [ZONE_PROPERTIES.BEACH.STUFFS.FOX]
+        probability = 80.0
+        maximum = 10.0
+        regeneration = 1.0
+
   [ZONE_PROPERTIES.PLAIN]
     move_cost = 4.0
 
@@ -29,6 +43,36 @@
         probability = 80.0  # probability to be available on x,y zone at world init
         maximum = 100.0  # maximum quantity on x,y zone (u)
         regeneration = 5.0  # quatity generation per turn
+      [ZONE_PROPERTIES.PLAIN.STUFFS.RABBIT]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 5.0
+      [ZONE_PROPERTIES.PLAIN.STUFFS.POULE]
+        probability = 100.0
+        maximum = 350.0
+        regeneration = 10.0
+      [ZONE_PROPERTIES.PLAIN.STUFFS.FOX]
+        probability = 80.0
+        maximum = 5.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.PLAIN.STUFFS.FOUINE]
+        probability = 80.0
+        maximum = 30.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.PLAIN.STUFFS.SANGLIER]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 2.0
+      [ZONE_PROPERTIES.PLAIN.STUFFS.CHEVREUIL]
+        probability = 20.0
+        maximum = 50.0
+        regeneration = 1.0
+
+    [ZONE_PROPERTIES.PLAIN.RESOURCES]
+      [ZONE_PROPERTIES.PLAIN.RESOURCES.GRAMINEAE]
+        probability = 100.0  # probability to be available on x,y zone at world init
+        maximum = 10000.0  # maximum quantity on x,y zone
+        regeneration = 100.0  # quatity generation per turn
 
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 15
@@ -46,17 +90,117 @@
   [ZONE_PROPERTIES.MOUNTAIN]
     move_cost = 8.0
 
+
+    [ZONE_PROPERTIES.MOUNTAIN.STUFFS]
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.HARE]
+        probability = 50.0  # probability to be available on x,y zone at world init
+        maximum = 20.0  # maximum quantity on x,y zone (u)
+        regeneration = 1.0  # quatity generation per turn
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.FOX]
+        probability = 50.0
+        maximum = 2.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.FOUINE]
+        probability = 20.0
+        maximum = 10.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.SANGLIER]
+        probability = 60.0
+        maximum = 30.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.CHEVREUIL]
+        probability = 90.0
+        maximum = 100.0
+        regeneration = 2.0
+
     [ZONE_PROPERTIES.MOUNTAIN.GENERATION]
       count = 0
 
   [ZONE_PROPERTIES.JUNGLE]
     move_cost = 8.0
 
+    [ZONE_PROPERTIES.JUNGLE.RESOURCES]
+      [ZONE_PROPERTIES.JUNGLE.RESOURCES.BERRY]
+        probability = 100.0  # probability to be available on x,y zone at world init
+        maximum = 5000.0  # maximum quantity on x,y zone
+        regeneration = 10.0  # quatity generation per turn
+      [ZONE_PROPERTIES.JUNGLE.RESOURCES.NUT]
+        probability = 100.0
+        maximum = 15000.0
+        regeneration = 5.0
+
+    [ZONE_PROPERTIES.JUNGLE.STUFFS]
+      # TODO: ANIMAUX DE LA JUNGLE
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.HARE]  # bernard l'hermite, u
+        probability = 80.0  # probability to be available on x,y zone at world init
+        maximum = 100.0  # maximum quantity on x,y zone (u)
+        regeneration = 5.0  # quatity generation per turn
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.RABBIT]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 5.0
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.POULE]
+        probability = 100.0
+        maximum = 350.0
+        regeneration = 10.0
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.FOX]
+        probability = 80.0
+        maximum = 5.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.FOUINE]
+        probability = 80.0
+        maximum = 30.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.SANGLIER]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 2.0
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.CHEVREUIL]
+        probability = 20.0
+        maximum = 50.0
+        regeneration = 1.0
+
     [ZONE_PROPERTIES.JUNGLE.GENERATION]
       count = 0
 
   [ZONE_PROPERTIES.HILL]
     move_cost = 5.0
+
+    [ZONE_PROPERTIES.HILL.RESOURCES]
+      [ZONE_PROPERTIES.HILL.RESOURCES.GRAMINEAE]
+        probability = 100.0  # probability to be available on x,y zone at world init
+        maximum = 50000.0  # maximum quantity on x,y zone
+        regeneration = 10.0  # quatity generation per turn
+
+    [ZONE_PROPERTIES.HILL.STUFFS]
+      [ZONE_PROPERTIES.HILL.STUFFS.HARE]  # bernard l'hermite, u
+        probability = 80.0  # probability to be available on x,y zone at world init
+        maximum = 100.0  # maximum quantity on x,y zone (u)
+        regeneration = 5.0  # quatity generation per turn
+      [ZONE_PROPERTIES.HILL.STUFFS.RABBIT]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 5.0
+      [ZONE_PROPERTIES.HILL.STUFFS.POULE]
+        probability = 100.0
+        maximum = 350.0
+        regeneration = 10.0
+      [ZONE_PROPERTIES.HILL.STUFFS.FOX]
+        probability = 80.0
+        maximum = 5.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.HILL.STUFFS.FOUINE]
+        probability = 80.0
+        maximum = 30.0
+        regeneration = 1.0
+      [ZONE_PROPERTIES.HILL.STUFFS.SANGLIER]
+        probability = 80.0
+        maximum = 50.0
+        regeneration = 2.0
+      [ZONE_PROPERTIES.HILL.STUFFS.CHEVREUIL]
+        probability = 20.0
+        maximum = 50.0
+        regeneration = 1.0
 
     [ZONE_PROPERTIES.HILL.GENERATION]
       count = 0
