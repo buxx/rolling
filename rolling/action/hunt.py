@@ -28,14 +28,17 @@ class SearchFoodAction(CharacterAction):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         for produce in action_config_raw["produce"]:
             if "resource" not in produce and "stuff" not in produce:
-                raise RollingError("Misconfiguration for action SearchFoodAction")
+                raise RollingError(
+                    "Misconfiguration for action SearchFoodAction (production "
+                    "must contain stuff or resource key"
+                )
 
         return {
-            "required_one_of_stuff_ids": action_config_raw.get("required_one_of_stuffs", []),
-            "required_all_stuff_ids": action_config_raw.get("required_all_stuffs", []),
-            "required_one_of_skill_ids": action_config_raw.get("required_one_of_skills", []),
-            "required_all_skill_ids": action_config_raw.get("required_all_skills", []),
-            "required_one_of_ability_ids": action_config_raw.get("required_one_of_ability", []),
+            "required_one_of_stuff_ids": action_config_raw["required_one_of_stuffs"],
+            "required_all_stuff_ids": action_config_raw["required_all_stuffs"],
+            "required_one_of_skill_ids": action_config_raw["required_one_of_skills"],
+            "required_all_skill_ids": action_config_raw["required_all_skills"],
+            "required_one_of_ability_ids": action_config_raw["required_one_of_ability"],
             "produce": action_config_raw["produce"],
         }
 

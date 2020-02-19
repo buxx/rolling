@@ -11,6 +11,7 @@ from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
 from rolling.action.build import ConstructBuildAction
 from rolling.action.collect import CollectResourceAction
+from rolling.action.craft import CraftStuffWithResourceAction, CraftStuffWithStuffAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.drop import DropResourceAction
@@ -50,6 +51,8 @@ class ActionFactory:
         ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
         ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
         ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
+        ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
+        ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -63,11 +66,13 @@ class ActionFactory:
             ActionType.DROP_STUFF: DropStuffAction,
             ActionType.EAT_STUFF: EatStuffAction,
             ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
+            ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
         }
         self._with_resource_actions: typing.Dict[ActionType, typing.Type[WithResourceAction]] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
             ActionType.MIX_RESOURCES: MixResourcesAction,
             ActionType.EAT_RESOURCE: EatResourceAction,
+            ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
