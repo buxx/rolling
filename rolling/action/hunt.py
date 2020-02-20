@@ -8,6 +8,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
+from rolling.action.utils import check_common_is_possible
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
@@ -28,62 +29,26 @@ class SearchFoodAction(CharacterAction):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         for produce in action_config_raw["produce"]:
             if "resource" not in produce and "stuff" not in produce:
-                raise RollingError("Misconfiguration for action SearchFoodAction")
+                raise RollingError(
+                    "Misconfiguration for action SearchFoodAction (production "
+                    "must contain stuff or resource key"
+                )
 
         return {
-            "required_one_of_stuff_ids": action_config_raw.get("required_one_of_stuffs", []),
-            "required_all_stuff_ids": action_config_raw.get("required_all_stuffs", []),
-            "required_one_of_skill_ids": action_config_raw.get("required_one_of_skills", []),
-            "required_all_skill_ids": action_config_raw.get("required_all_skills", []),
-            "required_one_of_ability_ids": action_config_raw.get("required_one_of_ability", []),
+            "required_one_of_stuff_ids": action_config_raw["required_one_of_stuffs"],
+            "required_all_stuff_ids": action_config_raw["required_all_stuffs"],
+            "required_one_of_skill_ids": action_config_raw["required_one_of_skills"],
+            "required_all_skill_ids": action_config_raw["required_all_skills"],
+            "required_one_of_ability_ids": action_config_raw["required_one_of_ability"],
             "produce": action_config_raw["produce"],
         }
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        character_stuff_ids = [s.id for s in self._kernel.stuff_lib.get_carried_by(character.id)]
-        character_skill_ids = []  # TODO BS 2019-09-26: code it
-        one_of_required_stuff_found = False
-        one_of_required_skill_found = False
-        one_of_required_abilities = False
-
-        for required_one_of_stuff_id in self._description.properties["required_one_of_stuff_ids"]:
-            if required_one_of_stuff_id in character_stuff_ids:
-                one_of_required_stuff_found = True
-
-        for required_one_of_skill_id in self._description.properties["required_one_of_skill_ids"]:
-            if required_one_of_skill_id in character_skill_ids:
-                one_of_required_skill_found = True
-
-        if self._kernel.character_lib.have_from_of_abilities(
-            character, abilities=self._description.properties["required_one_of_ability_ids"]
-        ):
-            one_of_required_abilities = True
-
-        if (
-            self._description.properties["required_one_of_stuff_ids"]
-            and not one_of_required_stuff_found
-        ):
-            raise ImpossibleAction("Manque de matériel")
-
-        if (
-            self._description.properties["required_one_of_skill_ids"]
-            and not one_of_required_skill_found
-        ):
-            raise ImpossibleAction("Manque d'expérience")
-
-        if (
-            self._description.properties["required_one_of_ability_ids"]
-            and not one_of_required_abilities
-        ):
-            raise ImpossibleAction("Manque de matériels ou de compétences")
-
-        for required_all_stuff_id in self._description.properties["required_all_stuff_ids"]:
-            if required_all_stuff_id not in character_stuff_ids:
-                raise ImpossibleAction("Manque de matériels")
-
-        for required_all_skill_id in self._description.properties["required_all_skill_ids"]:
-            if required_all_skill_id not in character_skill_ids:
-                raise ImpossibleAction("Manque de compétences")
+        check_common_is_possible(
+            kernel=self._kernel,
+            description=self._description,
+            character=character,
+        )
 
     def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
         self.check_is_possible(character)

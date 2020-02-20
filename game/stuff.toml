@@ -27,7 +27,13 @@
   name = "Lance de bois"
   weight = 1000.0
   clutter = 1.0
-  actions = ["DROP_STUFF"]
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF"]
+  abilities = ["HUNT_SMALL_GAME", "FIGHT"]
+[WOOD_SPEAR_STRENGHTHENED]
+  name = "Lance de bois renforcé"
+  weight = 1000.0
+  clutter = 1.0
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
 # TODO BS 2019-10-10: living animals ? moving on zone ? farming !
 [HARE]

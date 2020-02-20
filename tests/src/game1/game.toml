@@ -5,6 +5,7 @@ liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]
 default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
+turn_mode = "DAY"
 
 [materials]
   [materials.MIDDLE_PIECE]

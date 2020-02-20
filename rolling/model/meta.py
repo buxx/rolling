@@ -13,4 +13,4 @@ class FromType(Enum):
 
 
 class RiskType(Enum):
-    NONE: "NONE"
+    NONE = "NONE"

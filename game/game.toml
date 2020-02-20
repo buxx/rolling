@@ -23,6 +23,9 @@ turn_mode = "DAY"
   [materials.MIDDLE_PIECE]
     name = "Moyen morceau"
 
+  [materials.BIG_PIECE]
+    name = "Gros morceau"
+
   [materials.GAS]
     name = "Gazeu"
 
@@ -118,7 +121,7 @@ turn_mode = "DAY"
     material="SANDY"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.BRANCHES]
     name = "Petit bois"
@@ -126,7 +129,15 @@ turn_mode = "DAY"
     material="MIDDLE_PIECE"
     unit = "M3"
     clutter = 1000.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
+
+  [resources.WOOD]
+    name = "Bois"
+    weight=1000000.0
+    material="BIG_PIECE"
+    unit = "M3"
+    clutter = 500.0
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.BERRY]
     name = "Baies"
@@ -174,7 +185,7 @@ turn_mode = "DAY"
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.1
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.NUT]
     name = "Noix"
@@ -219,7 +230,24 @@ turn_mode = "DAY"
 
   [extractions.DEAD_TREE]
     tile="DEAD_TREE"
-    resources=[{resource_id="BRANCHES", cost_per_unit=2.0, default_quantity=0.04}]
+    resources=[
+      {resource_id="BRANCHES", cost_per_unit=3.0, default_quantity=0.04},
+      {resource_id="WOOD", cost_per_unit=5.0, default_quantity=0.04},
+    ]
+
+  [extractions.TROPICAL_TREE]
+    tile="TROPICAL_TREE"
+    resources=[
+      {resource_id="BRANCHES", cost_per_unit=4.0, default_quantity=0.04},
+      {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
+    ]
+
+  [extractions.LEAF_TREE]
+    tile="LEAF_TREE"
+    resources=[
+      {resource_id="BRANCHES", cost_per_unit=4.0, default_quantity=0.04},
+      {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
+    ]
 
   [extractions.DIRT]
     tile="DIRT"
@@ -349,6 +377,7 @@ turn_mode = "DAY"
     required_all_stuffs = []
     required_one_of_skills = []
     required_all_skills = []
+    required_one_of_ability = []
     produce = [
       {resource="PAGUROIDEA", quantity=6.0, probability=100.0},  # bernard l'hermite, u
       {resource="MYTILIDA", quantity=1000.0, probability=100.0}  # moule, g
@@ -400,6 +429,38 @@ turn_mode = "DAY"
       {resource="GRAMINEAE", quantity=5.0, probability=100.0},
     ]
     cost = 6.0
+
+  [ACTIONS.CRAFT_WOOD_SPEAR]
+    name = "Fabriquer une lance de bois"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    required_one_of_ability = []
+    produce = [
+      {stuff="WOOD_SPEAR", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.01}
+    ]
+    cost = 4.0
+
+  [ACTIONS.CRAFT_WOOD_SPEAR_STRENGHTHENED]
+    name = "Améliorer en lance de bois renforcé"
+    actions = ["CRAFT_STUFF_WITH_STUFF"]
+    required_one_of_stuffs = []
+    required_all_stuffs = []
+    required_one_of_skills = []
+    required_all_skills = []
+    required_one_of_ability = ["HEAT_UP_LOW_TEMP"]
+    produce = [
+      {stuff="WOOD_SPEAR_STRENGHTHENED", quantity=1.0},
+    ]
+    require = [
+      {stuff="WOOD_SPEAR", quantity=1.0}
+    ]
+    cost = 5.0
 
 [build]
 [build.CAMP_FIRE]

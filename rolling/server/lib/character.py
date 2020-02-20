@@ -205,7 +205,7 @@ class CharacterLib:
                 )
             )
 
-        # Actions with near items
+        # Actions with near build
         for around_row_i, around_col_i in around_character:
             on_same_position_builds = self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
@@ -340,6 +340,9 @@ class CharacterLib:
     def have_from_of_abilities(
         self, character: CharacterModel, abilities: typing.List[str]
     ) -> typing.List[HaveAbility]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
         haves: typing.List[HaveAbility] = []
 
         if character.have_one_of_abilities(abilities):
@@ -351,5 +354,20 @@ class CharacterLib:
             )
             if stuff_properties.have_one_of_abilities(abilities):
                 haves.append(HaveAbility(from_=FromType.STUFF, risk=RiskType.NONE))
+
+        for around_row_i, around_col_i in around_character:
+            for build in self._kernel.build_lib.get_zone_build(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=around_row_i,
+                zone_col_i=around_col_i,
+            ):
+                build_description = self._kernel.game.config.builds[build.build_id]
+                # FIXME BS 20200220: implement "is working" (with turn consumtion)
+                if not build.under_construction:
+                    for ability in abilities:
+                        if ability in build_description.ability_ids:
+                            # TODO BS 20200220: implement risks
+                            haves.append(HaveAbility(from_=FromType.BUILD, risk=RiskType.NONE))
 
         return haves
