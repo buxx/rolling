@@ -30,7 +30,8 @@ from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneResource
 from rolling.model.zone import ZoneStuff
 from rolling.server.action import ActionFactory
-from rolling.types import ActionType, TurnMode
+from rolling.types import ActionType
+from rolling.types import TurnMode
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

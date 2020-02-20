@@ -76,7 +76,8 @@ class CharacterController(BaseController):
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[*Part.from_dataclass_fields(CreateCharacterModel)] + [Part(go_back_zone=True)],
+                    items=[*Part.from_dataclass_fields(CreateCharacterModel)]
+                    + [Part(go_back_zone=True)],
                 ),
             ],
         )
@@ -455,9 +456,7 @@ class CharacterController(BaseController):
         character_id = self._character_lib.create(hapic_data.body)
         return Description(
             title="Pret a commencer l'aventure !",
-            items=[
-                Part(label="Continuer", go_back_zone=True),
-            ],
+            items=[Part(label="Continuer", go_back_zone=True)],
             new_character_id=character_id,
         )
 
@@ -488,18 +487,13 @@ class CharacterController(BaseController):
     async def describe_move_to_zone_infos(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        move_info =  self._character_lib.get_move_to_zone_infos(
+        move_info = self._character_lib.get_move_to_zone_infos(
             hapic_data.path.character_id,
             world_row_i=hapic_data.path.world_row_i,
             world_col_i=hapic_data.path.world_col_i,
         )
 
-        buttons = [
-            Part(
-                label="Rester ici",
-                go_back_zone=True,
-            )
-        ]
+        buttons = [Part(label="Rester ici", go_back_zone=True)]
         travel_url = (
             f"/_describe/character/{hapic_data.path.character_id}/move"
             f"?to_world_row={hapic_data.path.world_row_i}"
@@ -507,23 +501,16 @@ class CharacterController(BaseController):
         )
         if move_info.can_move:
             text = f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA"
-            buttons.insert(0, Part(
-                label="Effectuer le voyage",
-                is_link=True,
-                form_action=travel_url,
-            ))
+            buttons.insert(
+                0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
+            )
         else:
             text = (
                 f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA. "
                 f"Il ne vous reste pas assez de PA pour l'effectuer."
             )
 
-        return Description(
-            title="Effectuer un voyage ...",
-            items=[
-                Part(text=text)
-            ] + buttons,
-        )
+        return Description(title="Effectuer un voyage ...", items=[Part(text=text)] + buttons)
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
@@ -589,11 +576,7 @@ class CharacterController(BaseController):
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
 
         return Description(
-            title="Effectuer un voyage ...",
-            items=[
-                Part(text=message),
-                Part(go_back_zone=True),
-            ],
+            title="Effectuer un voyage ...", items=[Part(text=message), Part(go_back_zone=True)]
         )
 
     @hapic.with_api_doc()
@@ -603,12 +586,7 @@ class CharacterController(BaseController):
         self._character_lib.take_stuff(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
-        return Description(
-            title="Objet récupéré",
-            items=[
-                Part(go_back_zone=True),
-            ],
-        )
+        return Description(title="Objet récupéré", items=[Part(go_back_zone=True)])
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -633,7 +611,12 @@ class CharacterController(BaseController):
         hungry = "oui" if character.feel_hungry else "non"
         thirsty = "oui" if character.feel_thirsty else "non"
         return ListOfStrModel(
-            [f"PV: {round(character.life_points, 1)}", f"PA: {round(character.action_points, 1)}", f"Faim: {hungry}", f"Soif: {thirsty}"]
+            [
+                f"PV: {round(character.life_points, 1)}",
+                f"PA: {round(character.action_points, 1)}",
+                f"Faim: {hungry}",
+                f"Soif: {thirsty}",
+            ]
         )
 
     def bind(self, app: Application) -> None:

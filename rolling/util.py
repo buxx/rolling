@@ -88,11 +88,7 @@ class CornerEnum(enum.Enum):
     TOP_LEFT = "TOP_LEFT"
 
 
-def get_opposite_zone_place(
-    from_: CornerEnum,
-    zone_width: int,
-    zone_height: int,
-) -> (int, int):
+def get_opposite_zone_place(from_: CornerEnum, zone_width: int, zone_height: int) -> (int, int):
     width_part_len = zone_width // 3
     half_width_part_len = width_part_len // 2
     height_part_len = zone_height // 3
@@ -108,7 +104,10 @@ def get_opposite_zone_place(
         return zone_height // 2, zone_width - 1
 
     if from_ == CornerEnum.BOTTOM_RIGHT:
-        return (height_part_len * 2) + half_height_part_len, (width_part_len * 2) + half_width_part_len - 1
+        return (
+            (height_part_len * 2) + half_height_part_len,
+            (width_part_len * 2) + half_width_part_len - 1,
+        )
 
     if from_ == CornerEnum.BOTTOM:
         return zone_height - 1, zone_width // 2
@@ -125,7 +124,9 @@ def get_opposite_zone_place(
     raise Exception("It is not possible !")
 
 
-def get_coming_from(before_row_i: int, before_col_i: int, after_row_i: int, after_col_i: int) -> CornerEnum:
+def get_coming_from(
+    before_row_i: int, before_col_i: int, after_row_i: int, after_col_i: int
+) -> CornerEnum:
     if after_row_i == before_row_i - 1 and after_col_i == before_col_i:
         return CornerEnum.BOTTOM
 

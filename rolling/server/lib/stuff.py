@@ -176,7 +176,9 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def set_carried_by__from_doc(self, stuff_doc: StuffDocument, character_id: str, commit: bool = True) -> None:
+    def set_carried_by__from_doc(
+        self, stuff_doc: StuffDocument, character_id: str, commit: bool = True
+    ) -> None:
         stuff_doc.carried_by_id = character_id
         if commit:
             self._kernel.server_db_session.commit()

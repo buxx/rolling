@@ -21,8 +21,10 @@ from rolling.server.document.event import EventDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
-from rolling.util import filter_action_links, get_coming_from, get_opposite_zone_place
+from rolling.util import filter_action_links
+from rolling.util import get_coming_from
 from rolling.util import get_on_and_around_coordinates
+from rolling.util import get_opposite_zone_place
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -143,7 +145,9 @@ class CharacterLib:
         )
         character_document.world_row_i = to_world_row
         character_document.world_col_i = to_world_col
-        new_zone_geography = self._kernel.tile_maps_by_position[(to_world_row, to_world_col)].source.geography
+        new_zone_geography = self._kernel.tile_maps_by_position[
+            (to_world_row, to_world_col)
+        ].source.geography
         new_zone_row_i, new_zone_col_i = get_opposite_zone_place(
             from_=coming_from,
             zone_width=new_zone_geography.width,

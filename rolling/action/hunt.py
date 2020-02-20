@@ -45,9 +45,7 @@ class SearchFoodAction(CharacterAction):
 
     def check_is_possible(self, character: "CharacterModel") -> None:
         check_common_is_possible(
-            kernel=self._kernel,
-            description=self._description,
-            character=character,
+            kernel=self._kernel, description=self._description, character=character
         )
 
     def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:

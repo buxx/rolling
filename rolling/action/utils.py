@@ -9,7 +9,9 @@ if typing.TYPE_CHECKING:
     from rolling.action.base import ActionDescriptionModel
 
 
-def check_common_is_possible(kernel: "Kernel", description: "ActionDescriptionModel", character: "CharacterModel") -> None:
+def check_common_is_possible(
+    kernel: "Kernel", description: "ActionDescriptionModel", character: "CharacterModel"
+) -> None:
     character_stuff_ids = [s.id for s in kernel.stuff_lib.get_carried_by(character.id)]
     character_skill_ids = []  # TODO BS 2019-09-26: code it
     one_of_required_stuff_found = False
@@ -29,22 +31,13 @@ def check_common_is_possible(kernel: "Kernel", description: "ActionDescriptionMo
     ):
         one_of_required_abilities = True
 
-    if (
-        description.properties["required_one_of_stuff_ids"]
-        and not one_of_required_stuff_found
-    ):
+    if description.properties["required_one_of_stuff_ids"] and not one_of_required_stuff_found:
         raise ImpossibleAction("Manque de matériel")
 
-    if (
-        description.properties["required_one_of_skill_ids"]
-        and not one_of_required_skill_found
-    ):
+    if description.properties["required_one_of_skill_ids"] and not one_of_required_skill_found:
         raise ImpossibleAction("Manque d'expérience")
 
-    if (
-        description.properties["required_one_of_ability_ids"]
-        and not one_of_required_abilities
-    ):
+    if description.properties["required_one_of_ability_ids"] and not one_of_required_abilities:
         raise ImpossibleAction("Manque de matériels ou de compétences")
 
     for required_all_stuff_id in description.properties["required_all_stuff_ids"]:

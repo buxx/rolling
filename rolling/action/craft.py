@@ -4,11 +4,17 @@ import typing
 
 import serpyco
 
-from guilang.description import Description, Part, Type
-from rolling.action.base import WithResourceAction, WithStuffAction, get_with_resource_action_url, \
-    get_with_stuff_action_url, ActionDescriptionModel
+from guilang.description import Description
+from guilang.description import Part
+from guilang.description import Type
+from rolling.action.base import ActionDescriptionModel
+from rolling.action.base import WithResourceAction
+from rolling.action.base import WithStuffAction
+from rolling.action.base import get_with_resource_action_url
+from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import check_common_is_possible
-from rolling.exception import RollingError, ImpossibleAction
+from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import quantity_to_str
@@ -26,7 +32,9 @@ class CraftInput:
 
 class BaseCraftStuff:
     @classmethod
-    def _get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def _get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         for require in action_config_raw["require"]:
             if "resource" not in require and "stuff" not in require:
                 raise RollingError(
@@ -45,8 +53,13 @@ class BaseCraftStuff:
             "require": action_config_raw["require"],
         }
 
-    def _perform(self, character: "CharacterModel", description: ActionDescriptionModel,
-                                  input_: CraftInput, dry_run: bool = True) -> None:
+    def _perform(
+        self,
+        character: "CharacterModel",
+        description: ActionDescriptionModel,
+        input_: CraftInput,
+        dry_run: bool = True,
+    ) -> None:
         carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
         carried_stuffs = self._kernel.stuff_lib.get_carried_by(character.id)
 
@@ -54,7 +67,9 @@ class BaseCraftStuff:
             if "stuff" in require:
                 required_quantity = input_.quantity * int(require["quantity"])
                 stuff_id = require["stuff"]
-                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff_id
+                )
                 carried_stuffs = [c for c in carried_stuffs if c.stuff_id == stuff_id]
                 owned_quantity = len(carried_stuffs)
 
@@ -75,9 +90,7 @@ class BaseCraftStuff:
                 try:
                     carried_resource = next((c for c in carried_resources if c.id == resource_id))
                 except StopIteration:
-                    raise ImpossibleAction(
-                        f"Vous ne possédez pas de {resource_properties.name}"
-                    )
+                    raise ImpossibleAction(f"Vous ne possédez pas de {resource_properties.name}")
                 if carried_resource.quantity < required_quantity:
                     missing_quantity_str = quantity_to_str(
                         kernel=self._kernel,
@@ -113,9 +126,7 @@ class BaseCraftStuff:
                 )
                 self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
                 self._kernel.stuff_lib.set_carried_by__from_doc(
-                    stuff_doc,
-                    character_id=character.id,
-                    commit=False,
+                    stuff_doc, character_id=character.id, commit=False
                 )
 
         self._kernel.server_db_session.commit()
@@ -141,19 +152,19 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
 
         raise ImpossibleAction("Aucune resource requise n'est possédé")
 
-    def check_request_is_possible(self, character: "CharacterModel", resource_id: str,
-                                  input_: CraftInput) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", resource_id: str, input_: CraftInput
+    ) -> None:
         self.check_is_possible(character, resource_id=resource_id)
         check_common_is_possible(
-            kernel=self._kernel,
-            description=self._description,
-            character=character,
+            kernel=self._kernel, description=self._description, character=character
         )
         if input_.quantity is not None:
             self._perform(character, description=self._description, input_=input_, dry_run=True)
 
-    def get_character_actions(self, character: "CharacterModel", resource_id: str) -> typing.List[
-        CharacterActionLink]:
+    def get_character_actions(
+        self, character: "CharacterModel", resource_id: str
+    ) -> typing.List[CharacterActionLink]:
         try:
             self.check_is_possible(character, resource_id)
         except ImpossibleAction:
@@ -173,8 +184,9 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             )
         ]
 
-    def perform(self, character: "CharacterModel", resource_id: str,
-                input_: typing.Any) -> Description:
+    def perform(
+        self, character: "CharacterModel", resource_id: str, input_: typing.Any
+    ) -> Description:
         if input_.quantity is None:
             return Description(
                 title=self._description.name,
@@ -190,11 +202,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                             action_description_id=self._description.id,
                         ),
                         items=[
-                            Part(
-                                label=f"Quelle quantité ?",
-                                type_=Type.NUMBER,
-                                name="quantity",
-                            )
+                            Part(label=f"Quelle quantité ?", type_=Type.NUMBER, name="quantity")
                         ],
                     )
                 ],
@@ -204,16 +212,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         self._perform(character, description=self._description, input_=input_, dry_run=False)
         return Description(
             title="Action effectué avec succès",
-            items=[
-                Part(
-                    items=[
-                        Part(
-                            label=f"Continuer",
-                            go_back_zone=True,
-                        )
-                    ],
-                )
-            ],
+            items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
         )
 
 
@@ -237,19 +236,19 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
 
         raise ImpossibleAction("Aucune resource requise n'est possédé")
 
-    def check_request_is_possible(self, character: "CharacterModel", stuff: "StuffModel",
-                                  input_: typing.Any) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+    ) -> None:
         self.check_is_possible(character, stuff=stuff)
         check_common_is_possible(
-            kernel=self._kernel,
-            description=self._description,
-            character=character,
+            kernel=self._kernel, description=self._description, character=character
         )
         if input_.quantity is not None:
             self._perform(character, description=self._description, input_=input_, dry_run=True)
 
-    def get_character_actions(self, character: "CharacterModel", stuff: "StuffModel") -> \
-    typing.List[CharacterActionLink]:
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
         try:
             self.check_is_possible(character, stuff)
         except ImpossibleAction:
@@ -269,8 +268,9 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             )
         ]
 
-    def perform(self, character: "CharacterModel", stuff: "StuffModel",
-                input_: typing.Any) -> Description:
+    def perform(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+    ) -> Description:
         if input_.quantity is None:
             return Description(
                 title=self._description.name,
@@ -286,11 +286,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                             action_description_id=self._description.id,
                         ),
                         items=[
-                            Part(
-                                label=f"Quelle quantité ?",
-                                type_=Type.NUMBER,
-                                name="quantity",
-                            )
+                            Part(label=f"Quelle quantité ?", type_=Type.NUMBER, name="quantity")
                         ],
                     )
                 ],
@@ -300,14 +296,5 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         self._perform(character, description=self._description, input_=input_, dry_run=False)
         return Description(
             title="Action effectué avec succès",
-            items=[
-                Part(
-                    items=[
-                        Part(
-                            label=f"Continuer",
-                            go_back_zone=True,
-                        )
-                    ],
-                )
-            ],
+            items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
         )

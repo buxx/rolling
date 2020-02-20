@@ -52,17 +52,12 @@ def test_get_corner():
         (1, 6, CornerEnum.BOTTOM_LEFT, 9, 9),
         (4, 0, CornerEnum.LEFT, 9, 9),
         (1, 2, CornerEnum.TOP_LEFT, 9, 9),
-    ]
+    ],
 )
 def test_get_opposite_zone_place(
-    expected_row_i: int,
-    expected_col_i: int,
-    from_: CornerEnum,
-    zone_width: int,
-    zone_height: int,
+    expected_row_i: int, expected_col_i: int, from_: CornerEnum, zone_width: int, zone_height: int
 ):
-    assert get_opposite_zone_place(
-        from_=from_,
-        zone_width=zone_width,
-        zone_height=zone_height,
-    ) == (expected_row_i, expected_col_i)
+    assert get_opposite_zone_place(from_=from_, zone_width=zone_width, zone_height=zone_height) == (
+        expected_row_i,
+        expected_col_i,
+    )

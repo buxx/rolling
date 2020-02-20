@@ -11,7 +11,8 @@ from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
 from rolling.action.build import ConstructBuildAction
 from rolling.action.collect import CollectResourceAction
-from rolling.action.craft import CraftStuffWithResourceAction, CraftStuffWithStuffAction
+from rolling.action.craft import CraftStuffWithResourceAction
+from rolling.action.craft import CraftStuffWithStuffAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.drop import DropResourceAction
