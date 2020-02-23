@@ -19,6 +19,7 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass

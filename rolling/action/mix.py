@@ -16,6 +16,7 @@ from rolling.types import ActionType
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass

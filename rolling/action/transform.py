@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
     from rolling.model.stuff import StuffModel
+    from rolling.kernel import Kernel
 
 
 class TransformStuffIntoResourcesAction(WithStuffAction):

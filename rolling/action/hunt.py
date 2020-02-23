@@ -8,7 +8,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
-from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import check_common_is_possible, fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
@@ -19,6 +19,7 @@ from rolling.util import EmptyModel
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
 
 
 class SearchFoodAction(CharacterAction):
@@ -34,14 +35,9 @@ class SearchFoodAction(CharacterAction):
                     "must contain stuff or resource key"
                 )
 
-        return {
-            "required_one_of_stuff_ids": action_config_raw["required_one_of_stuffs"],
-            "required_all_stuff_ids": action_config_raw["required_all_stuffs"],
-            "required_one_of_skill_ids": action_config_raw["required_one_of_skills"],
-            "required_all_skill_ids": action_config_raw["required_all_skills"],
-            "required_one_of_ability_ids": action_config_raw["required_one_of_ability"],
-            "produce": action_config_raw["produce"],
-        }
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties.update({"produce": action_config_raw["produce"]})
+        return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
         check_common_is_possible(

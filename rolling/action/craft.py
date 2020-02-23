@@ -12,7 +12,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import check_common_is_possible, fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
@@ -23,6 +23,7 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass
@@ -43,15 +44,11 @@ class BaseCraftStuff:
                     "must contain stuff or resource key"
                 )
 
-        return {
-            "required_one_of_stuff_ids": action_config_raw["required_one_of_stuffs"],
-            "required_all_stuff_ids": action_config_raw["required_all_stuffs"],
-            "required_one_of_skill_ids": action_config_raw["required_one_of_skills"],
-            "required_all_skill_ids": action_config_raw["required_all_skills"],
-            "required_one_of_ability_ids": action_config_raw["required_one_of_ability"],
-            "produce": action_config_raw["produce"],
-            "require": action_config_raw["require"],
-        }
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties.update(
+            {"produce": action_config_raw["produce"], "require": action_config_raw["require"]}
+        )
+        return properties
 
     def _perform(
         self,

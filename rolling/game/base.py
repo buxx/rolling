@@ -38,7 +38,8 @@ if typing.TYPE_CHECKING:
 
 
 class GameConfig:
-    def __init__(self, config_dict: dict) -> None:
+    def __init__(self, kernel: "Kernel", config_dict: dict) -> None:
+        self._kernel = kernel
         self.action_points_per_turn: int = config_dict["action_points_per_turn"]
         self.create_character_messages: typing.List[str] = config_dict["create_character_messages"]
         self.fresh_water_resource_id: str = config_dict["fresh_water_resource_id"]
@@ -60,15 +61,15 @@ class GameConfig:
         self._extractions: typing.Dict[
             typing.Type[ZoneMapTileType], ExtractableDescriptionModel
         ] = self._create_extractions(config_dict)
-        self._action_descriptions: typing.Dict[
-            ActionType, typing.List[ActionDescriptionModel]
-        ] = self._create_actions(config_dict)
         self._resource_mixs: typing.Dict[str, ResourceMixDescription] = self._create_resource_mixs(
             config_dict
         )
-        self._fill_resource_actions(config_dict)
         self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(config_dict)
         self._builds: typing.Dict[str, BuildDescription] = self._create_builds(config_dict)
+        self._action_descriptions: typing.Dict[
+            ActionType, typing.List[ActionDescriptionModel]
+        ] = self._create_actions(config_dict)
+        self._fill_resource_actions(config_dict)
 
     @property
     def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
@@ -279,7 +280,7 @@ class GameConfig:
 class Game:
     def __init__(self, kernel: "Kernel", config_folder: str) -> None:
         self._kernel = kernel
-        self._config = GameConfig(toml.load(path.join(config_folder, "game.toml")))
+        self._config = GameConfig(self._kernel, toml.load(path.join(config_folder, "game.toml")))
         self._stuff = self._create_stuff_manager(
             path.join(config_folder, "stuff.toml"), config=self._config
         )
