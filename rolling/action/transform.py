@@ -7,6 +7,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
+from rolling.action.utils import fill_base_action_properties, check_common_is_possible
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.server.link import CharacterActionLink
@@ -27,28 +28,17 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        return {
-            "require_one_of_ability_ids": action_config_raw["require_one_of_ability"],
-            "require_stuff_ids": action_config_raw["require_stuff"],
-            "produce": action_config_raw["produce"],
-        }
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties.update(
+            {"produce": action_config_raw["produce"],}
+        )
+        return properties
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        if stuff.stuff_id not in self._description.properties["require_stuff_ids"]:
+        check_common_is_possible(self._kernel, character=character, description=self._description)
+        # FIXME BS NOW: bug; poule peut etre transforme en viande cuite + peau
+        if stuff.stuff_id not in self._description.properties["required_one_of_stuff_ids"]:
             raise ImpossibleAction("Non concerné")
-
-        abilities_ok = False
-
-        require_one_of_ability_ids = self._description.properties["require_one_of_ability_ids"]
-        if not require_one_of_ability_ids:
-            abilities_ok = True
-        elif self._kernel.character_lib.have_one_of_abilities(
-            character, require_one_of_ability_ids
-        ):
-            abilities_ok = True
-
-        if not abilities_ok:
-            raise ImpossibleAction("Compétences ou matériel insuffisants")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -86,12 +76,17 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
 
         for produce in self._description.properties["produce"]:
             resource_id = produce["resource"]
+            if "coeff" in produce:
+                quantity = stuff.weight * produce["coeff"]
+            else:
+                quantity = produce["quantity"]
             self._kernel.resource_lib.add_resource_to_character(
                 character_id=character.id,
                 resource_id=resource_id,
-                quantity=produce["quantity"],
+                quantity=quantity,
                 commit=False,
             )
+
 
         self._kernel.stuff_lib.destroy(stuff.id)
         self._kernel.server_db_session.commit()

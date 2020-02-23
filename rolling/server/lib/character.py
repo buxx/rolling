@@ -370,7 +370,7 @@ class CharacterLib:
                 # FIXME BS 20200220: implement "is working" (with turn consumtion)
                 if not build.under_construction:
                     for ability in abilities:
-                        if ability in build_description.ability_ids:
+                        if ability.id in build_description.ability_ids:
                             # TODO BS 20200220: implement risks
                             haves.append(HaveAbility(from_=FromType.BUILD, risk=RiskType.NONE))
 

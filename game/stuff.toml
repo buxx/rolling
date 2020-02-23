@@ -41,7 +41,7 @@
   weight = 3500.0
   clutter = 1.2
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[FAISAN]  # TODO: traduce
+[PHEASANT]
   name = "Faisan"
   weight = 1500.0
   clutter = 1.0
@@ -51,7 +51,7 @@
   weight = 2700.0
   clutter = 1.1
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[PERDRIX]  # TODO: traduce
+[PADRIDGE]
   name = "Perdrix"
   weight = 1500.0
   clutter = 1.0
@@ -61,12 +61,12 @@
   weight = 2000.0
   clutter = 1.0
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[POULE]  # TODO: traduce
+[MOORHEN]
   name = "Poule d'eau"
   weight = 600.0
   clutter = 0.5
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[CORBEAU]  # TODO: traduce
+[RAVEN]
   name = "Corbeau"
   weight = 650.0
   clutter = 0.5
@@ -76,17 +76,17 @@
   weight = 5500.0
   clutter = 2.0
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[FOUINE]  # TODO: traduce
+[MARTEN]
   name = "Fouine"
   weight = 2700.0
   clutter = 1.0
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[SANGLIER]  # TODO: traduce
+[BOAR]
   name = "Sanglier"
   weight = 20000.0
   clutter = 10.0
   actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
-[CHEVREUIL]  # TODO: traduce
+[DEER]
   name = "Chevreuil"
   weight = 18000.0
   clutter = 10.0

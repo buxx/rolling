@@ -298,7 +298,7 @@ turn_mode = "DAY"
 
   [ACTIONS.EAT_COOKED_MEAT]
     actions = ["EAT_STUFF"]
-    accept_stuffs = ["RAW_MEAT"]
+    accept_stuffs = ["COOKED_MEAT"]
     required_quantity = 400.0
     character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
@@ -341,23 +341,57 @@ turn_mode = "DAY"
     actions = ["BRING_RESOURCE_ON_BUILD"]
     cost = 0.0
 
+  [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="COOKED_MEAT", coeff=0.3},
+      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+    ]
+    cost = 1.0
+
   [ACTIONS.COOK_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    require_one_of_ability=["HEAT_UP_LOW_TEMP"]
-    require_stuff=["HARE"]
+    required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
     produce = [
-      {resource="COOKED_MEAT", quantity=1200.0},
+      {resource="COOKED_MEAT", coeff=0.3},
+    ]
+    cost = 1.0
+
+  [ACTIONS.BUTCHER_LITTLE_GAME_WITH_SKIN]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_MEAT", coeff=0.4},
       {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
     ]
     cost = 1.0
 
   [ACTIONS.BUTCHER_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    require_one_of_ability=[]
-    require_stuff=["HARE"]
+    required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
     produce = [
-      {resource="RAW_MEAT", quantity=1400.0},
-      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+      {resource="RAW_MEAT", coeff=0.4},
     ]
     cost = 1.0
 
@@ -386,7 +420,7 @@ turn_mode = "DAY"
     cost = 6.0
 
   [ACTIONS.HUNT_SMALL_GAME]
-    name = "Cheasser du gibier"
+    name = "Chasser du gibier"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -395,13 +429,13 @@ turn_mode = "DAY"
     required_one_of_ability_ids = ["HUNT_SMALL_GAME"]
     required_all_ability_ids = []
     produce = [
-      {stuff="HARE", quantity=1.0, probability=10.0},
-      {stuff="RABBIT", quantity=1.0, probability=10.0},
-      {stuff="POULE", quantity=5.0, probability=50.0},
-      {stuff="FOX", quantity=1.0, probability=10.0},
-      {stuff="FOUINE", quantity=1.0, probability=10.0},
-      {stuff="SANGLIER", quantity=1.0, probability=5.0},
-      {stuff="CHEVREUIL", quantity=1.0, probability=5.0},
+      {stuff="HARE", quantity=1.0, probability=30.0},
+      {stuff="RABBIT", quantity=1.0, probability=30.0},
+      {stuff="MOORHEN", quantity=5.0, probability=70.0},
+      {stuff="FOX", quantity=1.0, probability=15.0},
+      {stuff="MARTEN", quantity=1.0, probability=20.0},
+      {stuff="BOAR", quantity=1.0, probability=5.0},
+      {stuff="DEER", quantity=1.0, probability=10.0},
     ]
     cost = 6.0
 

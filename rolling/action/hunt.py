@@ -19,7 +19,6 @@ from rolling.util import EmptyModel
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
-    from rolling.kernel import Kernel
 
 
 class SearchFoodAction(CharacterAction):
@@ -57,7 +56,7 @@ class SearchFoodAction(CharacterAction):
 
         return [
             CharacterActionLink(
-                name=f"Chercher de la nourriture: {self._description.name}",
+                name=self._description.name,
                 link=get_character_action_url(
                     character_id=character.id,
                     action_type=ActionType.SEARCH_FOOD,

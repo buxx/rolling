@@ -13,7 +13,7 @@ if typing.TYPE_CHECKING:
 def check_common_is_possible(
     kernel: "Kernel", description: "ActionDescriptionModel", character: "CharacterModel"
 ) -> None:
-    character_stuff_ids = [s.id for s in kernel.stuff_lib.get_carried_by(character.id)]
+    character_stuff_ids = [s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)]
     character_skill_ids = []  # TODO BS 2019-09-26: code it
     one_of_required_stuff_found = False
     one_of_required_skill_found = False

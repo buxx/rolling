@@ -47,7 +47,7 @@
         probability = 80.0
         maximum = 50.0
         regeneration = 5.0
-      [ZONE_PROPERTIES.PLAIN.STUFFS.POULE]
+      [ZONE_PROPERTIES.PLAIN.STUFFS.MOORHEN]
         probability = 100.0
         maximum = 350.0
         regeneration = 10.0
@@ -55,15 +55,15 @@
         probability = 80.0
         maximum = 5.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.PLAIN.STUFFS.FOUINE]
+      [ZONE_PROPERTIES.PLAIN.STUFFS.MARTEN]
         probability = 80.0
         maximum = 30.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.PLAIN.STUFFS.SANGLIER]
+      [ZONE_PROPERTIES.PLAIN.STUFFS.BOAR]
         probability = 80.0
         maximum = 50.0
         regeneration = 2.0
-      [ZONE_PROPERTIES.PLAIN.STUFFS.CHEVREUIL]
+      [ZONE_PROPERTIES.PLAIN.STUFFS.DEER]
         probability = 20.0
         maximum = 50.0
         regeneration = 1.0
@@ -100,15 +100,15 @@
         probability = 50.0
         maximum = 2.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.FOUINE]
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.MARTEN]
         probability = 20.0
         maximum = 10.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.SANGLIER]
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.BOAR]
         probability = 60.0
         maximum = 30.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.CHEVREUIL]
+      [ZONE_PROPERTIES.MOUNTAIN.STUFFS.DEER]
         probability = 90.0
         maximum = 100.0
         regeneration = 2.0
@@ -139,7 +139,7 @@
         probability = 80.0
         maximum = 50.0
         regeneration = 5.0
-      [ZONE_PROPERTIES.JUNGLE.STUFFS.POULE]
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.MOORHEN]
         probability = 100.0
         maximum = 350.0
         regeneration = 10.0
@@ -147,15 +147,15 @@
         probability = 80.0
         maximum = 5.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.JUNGLE.STUFFS.FOUINE]
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.MARTEN]
         probability = 80.0
         maximum = 30.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.JUNGLE.STUFFS.SANGLIER]
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.BOAR]
         probability = 80.0
         maximum = 50.0
         regeneration = 2.0
-      [ZONE_PROPERTIES.JUNGLE.STUFFS.CHEVREUIL]
+      [ZONE_PROPERTIES.JUNGLE.STUFFS.DEER]
         probability = 20.0
         maximum = 50.0
         regeneration = 1.0
@@ -181,7 +181,7 @@
         probability = 80.0
         maximum = 50.0
         regeneration = 5.0
-      [ZONE_PROPERTIES.HILL.STUFFS.POULE]
+      [ZONE_PROPERTIES.HILL.STUFFS.MOORHEN]
         probability = 100.0
         maximum = 350.0
         regeneration = 10.0
@@ -189,15 +189,15 @@
         probability = 80.0
         maximum = 5.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.HILL.STUFFS.FOUINE]
+      [ZONE_PROPERTIES.HILL.STUFFS.MARTEN]
         probability = 80.0
         maximum = 30.0
         regeneration = 1.0
-      [ZONE_PROPERTIES.HILL.STUFFS.SANGLIER]
+      [ZONE_PROPERTIES.HILL.STUFFS.BOAR]
         probability = 80.0
         maximum = 50.0
         regeneration = 2.0
-      [ZONE_PROPERTIES.HILL.STUFFS.CHEVREUIL]
+      [ZONE_PROPERTIES.HILL.STUFFS.DEER]
         probability = 20.0
         maximum = 50.0
         regeneration = 1.0
