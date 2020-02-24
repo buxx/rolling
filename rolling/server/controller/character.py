@@ -1,4 +1,5 @@
 #  coding: utf-8
+import datetime
 import typing
 
 from aiohttp import web
@@ -50,7 +51,8 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel
+from rolling.util import EmptyModel, character_can_drink_in_its_zone, \
+    get_character_stuff_filled_with_water
 from rolling.util import display_g_or_kg
 from rolling.util import get_description_for_not_enough_ap
 
@@ -610,12 +612,29 @@ class CharacterController(BaseController):
 
         hungry = "oui" if character.feel_hungry else "non"
         thirsty = "oui" if character.feel_thirsty else "non"
+
+        last_state = self._kernel.universe_lib.get_last_state()
+        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
+        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
+        m, s = divmod(next_turn_in_seconds, 60)
+        h, m = divmod(m, 60)
+        next_turn_in_str = f"{h}h{m}m"
+
+        can_drink_str = "Non"
+        if character_can_drink_in_its_zone(
+                self._kernel, character
+            ) or get_character_stuff_filled_with_water(self._kernel, character.id):
+            can_drink_str = "Oui"
+
         return ListOfStrModel(
             [
                 f"PV: {round(character.life_points, 1)}",
                 f"PA: {round(character.action_points, 1)}",
                 f"Faim: {hungry}",
                 f"Soif: {thirsty}",
+                "",
+                f"Passage: {next_turn_in_str}",
+                f"De quoi boire: {can_drink_str}",
             ]
         )
 

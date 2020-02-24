@@ -49,6 +49,10 @@ class GameConfig:
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
         self.turn_mode: TurnMode = TurnMode(config_dict["turn_mode"])
 
+        self.day_turn_every = None
+        if self.turn_mode == TurnMode.DAY:
+            self.day_turn_every = config_dict["day_turn_every"]
+
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
         ] = self._create_character_effects(config_dict)

@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 from asyncio import AbstractEventLoop
 import glob
 import ntpath
@@ -9,6 +10,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
@@ -23,6 +25,7 @@ from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.server.action import ActionFactory
+from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
@@ -30,6 +33,7 @@ from rolling.server.lib.build import BuildLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.server.lib.universe import UniverseLib
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 
@@ -96,6 +100,13 @@ class Kernel:
         self._effect_manager: typing.Optional["EffectManager"] = None
         self._action_factory: typing.Optional[ActionFactory] = None
         self._translation = GlobalTranslation()
+        self._universe_lib: typing.Optional["UniverseLib"] = None
+
+    @property
+    def universe_lib(self) -> UniverseLib:
+        if self._universe_lib is None:
+            self._universe_lib = UniverseLib(self)
+        return self._universe_lib
 
     @property
     def stuff_lib(self) -> StuffLib:
@@ -247,3 +258,14 @@ class Kernel:
         self._server_db_engine = create_engine(f"sqlite:///{self._server_db_path}")
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
+
+    def init(self) -> None:
+        try:
+            self.server_db_session.query(UniverseStateDocument)\
+                .order_by(UniverseStateDocument.turn.desc())\
+                .one()
+        except NoResultFound:
+            self.server_db_session.add(
+                UniverseStateDocument(turned_at=datetime.datetime.utcnow())
+            )
+            self.server_db_session.commit()

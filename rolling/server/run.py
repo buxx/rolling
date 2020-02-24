@@ -52,6 +52,7 @@ def run(args: argparse.Namespace) -> None:
     # FIXME: delete this when model really imported somewhere
     BuildDocument
 
+    kernel.init()
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
     web.run_app(app, host=args.host, port=args.port, access_log=server_logger)
 

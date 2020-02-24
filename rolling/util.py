@@ -8,6 +8,7 @@ from guilang.description import Part
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
+from rolling.server.document.character import CharacterDocument
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
@@ -46,7 +47,7 @@ def is_there_resource_id_in_zone(
             try:
                 for tile_resource_id in list(
                     # FIXME BS 2019-09-14: Only for zero cost !
-                    kernel.game.config.extractions[zone_tile_type].resources.keys()
+                    kernel.game.config.extractions[zone_tile_type.id].resources.keys()
                 ):
                     if tile_resource_id == resource_id:
                         return True
@@ -242,3 +243,24 @@ def get_description_for_not_enough_ap(character: "CharacterModel", cost: float) 
             Part(label="Continue", go_back_zone=True),
         ],
     )
+
+
+def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel") -> bool:
+    # TODO: consider path finding
+    zone_source = kernel.tile_maps_by_position[
+        (character.world_row_i, character.world_col_i)
+    ].source
+    return is_there_resource_id_in_zone(
+        kernel, kernel.game.config.fresh_water_resource_id, zone_source
+    )
+
+
+def get_character_stuff_filled_with_water(kernel: "Kernel", character_id: str) -> typing.Optional["StuffModel"]:
+    try:
+        return next(
+            get_stuffs_filled_with_resource_id(
+                kernel, character_id, kernel.game.config.fresh_water_resource_id
+            )
+        )
+    except StopIteration:
+        pass

@@ -11,7 +11,8 @@ from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.types import TurnMode
-from rolling.util import get_stuffs_eatable
+from rolling.util import get_stuffs_eatable, character_can_drink_in_its_zone, \
+    get_character_stuff_filled_with_water
 from rolling.util import get_stuffs_filled_with_resource_id
 from rolling.util import is_there_resource_id_in_zone
 
@@ -120,23 +121,10 @@ class TurnLib:
 
             self._logger.info(f"Provide natural needs of {character_document.name}")
 
-            # FIXME BS 2019-07-09: if resource with fresh water accessible (find path)
-            #  (and thirsty): drink
-            zone_source = self._kernel.tile_maps_by_position[
-                (character_document.world_row_i, character_document.world_col_i)
-            ].source
-            zone_contains_fresh_water = is_there_resource_id_in_zone(
-                self._kernel, self._kernel.game.config.fresh_water_resource_id, zone_source
+            zone_contains_fresh_water = character_can_drink_in_its_zone(
+                self._kernel, character_document
             )
-            stuff_with_fresh_water = None
-            try:
-                stuff_with_fresh_water = next(
-                    get_stuffs_filled_with_resource_id(
-                        self._kernel, character_id, self._kernel.game.config.fresh_water_resource_id
-                    )
-                )
-            except StopIteration:
-                pass
+            stuff_with_fresh_water = get_character_stuff_filled_with_water(self._kernel, character_id)
 
             # Need drink
             if character_document.feel_thirsty or character_document.dehydrated:
