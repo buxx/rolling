@@ -309,7 +309,7 @@ class Game:
 
             full_info["descriptions"]: typing.List[ActionDescriptionModel] = []
             for action_type_id in full_info.get("actions", []):
-                descriptions = config.actions[ActionType(action_type_id)]
+                descriptions = config.actions.get(ActionType(action_type_id), [])
                 full_info["descriptions"].extend(descriptions)
 
             if "actions" in full_info:

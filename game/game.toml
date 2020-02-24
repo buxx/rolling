@@ -290,16 +290,16 @@ turn_mode = "DAY"
     cost = 0.0
 
   [ACTIONS.EAT_RAW_MEAT]
-    actions = ["EAT_STUFF"]
-    accept_stuffs = ["COOKED_MEAT"]  # g !
-    required_quantity = 500.0
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["RAW_MEAT"]  # g !
+    require = 500.0
     character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
 
   [ACTIONS.EAT_COOKED_MEAT]
-    actions = ["EAT_STUFF"]
-    accept_stuffs = ["COOKED_MEAT"]
-    required_quantity = 400.0
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["COOKED_MEAT"]
+    require = 400.0
     character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
 
