@@ -3,6 +3,7 @@ import typing
 
 import sqlalchemy
 
+from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel
 from rolling.model.measure import Unit
 from rolling.model.stuff import StuffModel
@@ -193,7 +194,11 @@ class StuffLib:
 
         for description in stuff_properties.descriptions:
             action = self._action_factory.get_with_stuff_action(description)
-            actions.extend(action.get_character_actions(character, stuff))
+            try:
+                action.check_is_possible(character, stuff)
+                actions.extend(action.get_character_actions(character, stuff))
+            except ImpossibleAction:
+                pass
 
         return actions
 
