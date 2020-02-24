@@ -10,6 +10,8 @@ class UniverseLib:
         self._kernel = kernel
 
     def get_last_state(self) -> UniverseStateDocument:
-        return self._kernel.server_db_session.query(UniverseStateDocument) \
-            .order_by(UniverseStateDocument.turn.desc()) \
+        return (
+            self._kernel.server_db_session.query(UniverseStateDocument)
+            .order_by(UniverseStateDocument.turn.desc())
             .one()
+        )

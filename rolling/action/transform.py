@@ -29,9 +29,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
-        properties.update(
-            {"produce": action_config_raw["produce"],}
-        )
+        properties.update({"produce": action_config_raw["produce"]})
         return properties
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
@@ -81,12 +79,8 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             else:
                 quantity = produce["quantity"]
             self._kernel.resource_lib.add_resource_to_character(
-                character_id=character.id,
-                resource_id=resource_id,
-                quantity=quantity,
-                commit=False,
+                character_id=character.id, resource_id=resource_id, quantity=quantity, commit=False
             )
-
 
         self._kernel.stuff_lib.destroy(stuff.id)
         self._kernel.server_db_session.commit()

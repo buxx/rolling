@@ -261,11 +261,9 @@ class Kernel:
 
     def init(self) -> None:
         try:
-            self.server_db_session.query(UniverseStateDocument)\
-                .order_by(UniverseStateDocument.turn.desc())\
-                .one()
+            self.server_db_session.query(UniverseStateDocument).order_by(
+                UniverseStateDocument.turn.desc()
+            ).one()
         except NoResultFound:
-            self.server_db_session.add(
-                UniverseStateDocument(turned_at=datetime.datetime.utcnow())
-            )
+            self.server_db_session.add(UniverseStateDocument(turned_at=datetime.datetime.utcnow()))
             self.server_db_session.commit()

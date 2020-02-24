@@ -11,8 +11,11 @@ from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.types import TurnMode
-from rolling.util import get_stuffs_eatable, character_can_drink_in_its_zone, \
-    get_character_stuff_filled_with_water
+from rolling.util import (
+    get_stuffs_eatable,
+    character_can_drink_in_its_zone,
+    get_character_stuff_filled_with_water,
+)
 from rolling.util import get_stuffs_filled_with_resource_id
 from rolling.util import is_there_resource_id_in_zone
 
@@ -124,7 +127,9 @@ class TurnLib:
             zone_contains_fresh_water = character_can_drink_in_its_zone(
                 self._kernel, character_document
             )
-            stuff_with_fresh_water = get_character_stuff_filled_with_water(self._kernel, character_id)
+            stuff_with_fresh_water = get_character_stuff_filled_with_water(
+                self._kernel, character_id
+            )
 
             # Need drink
             if character_document.feel_thirsty or character_document.dehydrated:

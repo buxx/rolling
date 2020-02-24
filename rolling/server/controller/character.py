@@ -51,8 +51,11 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel, character_can_drink_in_its_zone, \
-    get_character_stuff_filled_with_water
+from rolling.util import (
+    EmptyModel,
+    character_can_drink_in_its_zone,
+    get_character_stuff_filled_with_water,
+)
 from rolling.util import display_g_or_kg
 from rolling.util import get_description_for_not_enough_ap
 
@@ -622,8 +625,8 @@ class CharacterController(BaseController):
 
         can_drink_str = "Non"
         if character_can_drink_in_its_zone(
-                self._kernel, character
-            ) or get_character_stuff_filled_with_water(self._kernel, character.id):
+            self._kernel, character
+        ) or get_character_stuff_filled_with_water(self._kernel, character.id):
             can_drink_str = "Oui"
 
         return ListOfStrModel(

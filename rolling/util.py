@@ -255,7 +255,9 @@ def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel
     )
 
 
-def get_character_stuff_filled_with_water(kernel: "Kernel", character_id: str) -> typing.Optional["StuffModel"]:
+def get_character_stuff_filled_with_water(
+    kernel: "Kernel", character_id: str
+) -> typing.Optional["StuffModel"]:
     try:
         return next(
             get_stuffs_filled_with_resource_id(
