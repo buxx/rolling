@@ -644,19 +644,27 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     async def is_dead(self, request: Request, hapic_data: HapicData) -> Response:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=True)
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id, dead=True
+        )
         return Response(body="0" if character_doc.alive else "1")
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def get_post_mortem(self, request: Request, hapic_data: HapicData) -> Description:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=True)
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id, dead=True
+        )
         return Description(
             title=f"{character_doc.name} est mort",
             items=[
-                Part(label="Créer un nouveau personnage", form_action="/_describe/character/create", is_link=True)
-            ]
+                Part(
+                    label="Créer un nouveau personnage",
+                    form_action="/_describe/character/create",
+                    is_link=True,
+                )
+            ],
         )
 
     def bind(self, app: Application) -> None:

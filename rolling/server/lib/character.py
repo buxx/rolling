@@ -40,11 +40,15 @@ class CharacterLib:
 
     @property
     def alive_query(self) -> Query:
-        return self._kernel.server_db_session.query(CharacterDocument).filter(CharacterDocument.alive == True)
+        return self._kernel.server_db_session.query(CharacterDocument).filter(
+            CharacterDocument.alive == True
+        )
 
     @property
     def dead_query(self) -> Query:
-        return self._kernel.server_db_session.query(CharacterDocument).filter(CharacterDocument.alive == False)
+        return self._kernel.server_db_session.query(CharacterDocument).filter(
+            CharacterDocument.alive == False
+        )
 
     def create(self, create_character_model: CreateCharacterModel) -> str:
         character = CharacterDocument()
@@ -82,18 +86,10 @@ class CharacterLib:
     def get_document(self, id_: str, dead: bool = False) -> CharacterDocument:
         query = self.alive_query if not dead else self.dead_query
 
-        return (
-            query
-            .filter(CharacterDocument.id == id_)
-            .one()
-        )
+        return query.filter(CharacterDocument.id == id_).one()
 
     def get_document_by_name(self, name: str) -> CharacterDocument:
-        return (
-            self.alive_query
-            .filter(CharacterDocument.name == name)
-            .one()
-        )
+        return self.alive_query.filter(CharacterDocument.name == name).one()
 
     def document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
         return CharacterModel(
@@ -136,8 +132,7 @@ class CharacterLib:
 
     def get_zone_players(self, row_i: int, col_i: int) -> typing.List[CharacterModel]:
         character_documents = (
-            self.alive_query
-            .filter(CharacterDocument.world_row_i == row_i)
+            self.alive_query.filter(CharacterDocument.world_row_i == row_i)
             .filter(CharacterDocument.world_col_i == col_i)
             .all()
         )
@@ -175,10 +170,19 @@ class CharacterLib:
             self._kernel.server_db_session.commit()
 
     def get_all_character_count(self) -> int:
-        return self._kernel.server_db_session.query(CharacterDocument.id).filter(CharacterDocument.alive == True).count()
+        return (
+            self._kernel.server_db_session.query(CharacterDocument.id)
+            .filter(CharacterDocument.alive == True)
+            .count()
+        )
 
     def get_all_character_ids(self) -> typing.Iterable[str]:
-        return (row[0] for row in self._kernel.server_db_session.query(CharacterDocument.id).filter(CharacterDocument.alive == True).all())
+        return (
+            row[0]
+            for row in self._kernel.server_db_session.query(CharacterDocument.id)
+            .filter(CharacterDocument.alive == True)
+            .all()
+        )
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(character_id)

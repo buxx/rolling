@@ -227,7 +227,9 @@ class TurnLib:
         for character_id in self._character_lib.get_all_character_ids():
             character_doc = self._kernel.character_lib.get_document(character_id)
             if character_doc.alive and character_doc.life_points <= 0:
-                self._logger.info(f"'{character_doc.name}' have '{character_doc.life_points}' life point. kill it.")
+                self._logger.info(
+                    f"'{character_doc.name}' have '{character_doc.life_points}' life point. kill it."
+                )
 
                 character_doc.alive = False
                 for stuff in self._kernel.stuff_lib.get_carried_by(character_id):
