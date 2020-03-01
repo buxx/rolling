@@ -23,6 +23,7 @@ class CharacterDocument(Document):
     world_row_i = Column(Integer, nullable=True)
     zone_col_i = Column(Integer, nullable=True)
     zone_row_i = Column(Integer, nullable=True)
+    alive = Column(Boolean, default=True)
 
     # role play characteristics
     background_story = Column(Text, nullable=True)

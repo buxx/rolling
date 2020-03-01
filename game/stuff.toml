@@ -1,3 +1,10 @@
+[CORPSE]  # system required
+  name = "Corps"
+  weight = 80000.0
+  clutter = 15.0
+  actions = ["DROP_STUFF"]
+  material_type = "SOLID"
+
 [PLASTIC_BOTTLE_1L]
   name = "Plastic bottle"
   filled_at = 0.0

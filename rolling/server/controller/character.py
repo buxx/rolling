@@ -641,6 +641,24 @@ class CharacterController(BaseController):
             ]
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    async def is_dead(self, request: Request, hapic_data: HapicData) -> Response:
+        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=True)
+        return Response(body="0" if character_doc.alive else "1")
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def get_post_mortem(self, request: Request, hapic_data: HapicData) -> Description:
+        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=True)
+        return Description(
+            title=f"{character_doc.name} est mort",
+            items=[
+                Part(label="Créer un nouveau personnage", form_action="/_describe/character/create", is_link=True)
+            ]
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -694,5 +712,7 @@ class CharacterController(BaseController):
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
                 web.get("/character/{character_id}/resume_texts", self.get_resume_texts),
+                web.get("/character/{character_id}/dead", self.is_dead),
+                web.post("/character/{character_id}/post_mortem", self.get_post_mortem),
             ]
         )

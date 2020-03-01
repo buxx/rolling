@@ -2,6 +2,8 @@
 import typing
 import uuid
 
+from sqlalchemy.orm import Query
+
 from rolling.exception import ImpossibleAction
 from rolling.model.ability import HaveAbility, AbilityDescription
 from rolling.model.character import CharacterEventModel
@@ -36,6 +38,14 @@ class CharacterLib:
         self._stuff_lib: StuffLib = stuff_lib or StuffLib(kernel)
         self._action_factory = ActionFactory(kernel)
 
+    @property
+    def alive_query(self) -> Query:
+        return self._kernel.server_db_session.query(CharacterDocument).filter(CharacterDocument.alive == True)
+
+    @property
+    def dead_query(self) -> Query:
+        return self._kernel.server_db_session.query(CharacterDocument).filter(CharacterDocument.alive == False)
+
     def create(self, create_character_model: CreateCharacterModel) -> str:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
@@ -69,16 +79,18 @@ class CharacterLib:
 
         return character.id
 
-    def get_document(self, id_: str) -> CharacterDocument:
+    def get_document(self, id_: str, dead: bool = False) -> CharacterDocument:
+        query = self.alive_query if not dead else self.dead_query
+
         return (
-            self._kernel.server_db_session.query(CharacterDocument)
+            query
             .filter(CharacterDocument.id == id_)
             .one()
         )
 
     def get_document_by_name(self, name: str) -> CharacterDocument:
         return (
-            self._kernel.server_db_session.query(CharacterDocument)
+            self.alive_query
             .filter(CharacterDocument.name == name)
             .one()
         )
@@ -124,7 +136,7 @@ class CharacterLib:
 
     def get_zone_players(self, row_i: int, col_i: int) -> typing.List[CharacterModel]:
         character_documents = (
-            self._kernel.server_db_session.query(CharacterDocument)
+            self.alive_query
             .filter(CharacterDocument.world_row_i == row_i)
             .filter(CharacterDocument.world_col_i == col_i)
             .all()
@@ -163,10 +175,10 @@ class CharacterLib:
             self._kernel.server_db_session.commit()
 
     def get_all_character_count(self) -> int:
-        return self._kernel.server_db_session.query(CharacterDocument.id).count()
+        return self._kernel.server_db_session.query(CharacterDocument.id).filter(CharacterDocument.alive == True).count()
 
     def get_all_character_ids(self) -> typing.Iterable[str]:
-        return (row[0] for row in self._kernel.server_db_session.query(CharacterDocument.id).all())
+        return (row[0] for row in self._kernel.server_db_session.query(CharacterDocument.id).filter(CharacterDocument.alive == True).all())
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(character_id)

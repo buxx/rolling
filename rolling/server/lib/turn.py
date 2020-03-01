@@ -8,6 +8,7 @@ from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.types import TurnMode
@@ -42,6 +43,7 @@ class TurnLib:
         self._generate_stuff()
         self._provide_for_natural_needs()
         self._increment_age()
+        self._kill()
         self._reset_action_points()
 
     def _generate_stuff(self) -> None:
@@ -217,3 +219,43 @@ class TurnLib:
             self._kernel.server_db_session.add(character_doc)
 
         self._kernel.server_db_session.commit()
+
+    def _kill(self) -> None:
+        # In future, increment role play age
+        self._logger.info(f"Kill some characters")
+
+        for character_id in self._character_lib.get_all_character_ids():
+            character_doc = self._kernel.character_lib.get_document(character_id)
+            if character_doc.alive and character_doc.life_points <= 0:
+                self._logger.info(f"'{character_doc.name}' have '{character_doc.life_points}' life point. kill it.")
+
+                character_doc.alive = False
+                for stuff in self._kernel.stuff_lib.get_carried_by(character_id):
+                    self._kernel.stuff_lib.drop(
+                        stuff.id,
+                        world_row_i=character_doc.world_row_i,
+                        world_col_i=character_doc.world_col_i,
+                        zone_row_i=character_doc.zone_row_i,
+                        zone_col_i=character_doc.zone_col_i,
+                    )
+
+                for carried_resource in self._kernel.resource_lib.get_carried_by(character_id):
+                    self._kernel.resource_lib.drop(
+                        character_id=character_id,
+                        resource_id=carried_resource.id,
+                        quantity=carried_resource.quantity,
+                        world_row_i=character_doc.world_row_i,
+                        world_col_i=character_doc.world_col_i,
+                        zone_row_i=character_doc.zone_row_i,
+                        zone_col_i=character_doc.zone_col_i,
+                    )
+
+                corpse = self._stuff_lib.create_document_from_properties(
+                    properties=self._kernel.game.stuff_manager.get_stuff_properties_by_id("CORPSE"),
+                    stuff_id="CORPSE",
+                    world_row_i=character_doc.world_row_i,
+                    world_col_i=character_doc.world_col_i,
+                    zone_row_i=character_doc.zone_row_i,
+                    zone_col_i=character_doc.zone_col_i,
+                )
+                self._kernel.stuff_lib.add_stuff(corpse)
