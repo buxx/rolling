@@ -157,6 +157,7 @@ class CharacterModel:
 @dataclasses.dataclass
 class CharacterEventModel:
     datetime: datetime_.datetime
+    turn: int
     text: str
 
 

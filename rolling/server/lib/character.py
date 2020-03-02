@@ -331,10 +331,11 @@ class CharacterLib:
             .order_by(EventDocument.datetime.desc())
             .limit(count)
         ):
-            yield CharacterEventModel(datetime=event_doc.datetime, text=event_doc.text)
+            yield CharacterEventModel(datetime=event_doc.datetime, text=event_doc.text, turn=event_doc.turn)
 
     def add_event(self, character_id: str, text: str) -> None:
-        self._kernel.server_db_session.add(EventDocument(character_id=character_id, text=text))
+        turn = self._kernel.universe_lib.get_last_state().turn
+        self._kernel.server_db_session.add(EventDocument(character_id=character_id, text=text, turn=turn))
         self._kernel.server_db_session.commit()
 
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:

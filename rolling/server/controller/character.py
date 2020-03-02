@@ -231,7 +231,7 @@ class CharacterController(BaseController):
             title="Evenements:",
             is_long_text=True,
             items=[
-                Part(text=event.datetime.strftime(f"%d %b %Y at %H:%M:%S : {event.text}"))
+                Part(text=event.datetime.strftime(f"Tour {event.turn}: {event.text}"))
                 for event in character_events
             ],
         )

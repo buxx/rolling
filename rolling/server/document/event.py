@@ -17,3 +17,4 @@ class EventDocument(Document):
     text = Column(Text, nullable=False)
     character_id = Column(String(255), ForeignKey("character.id"), nullable=False)
     datetime = Column(DateTime, default=datetime.datetime.utcnow)
+    turn = Column(Integer, nullable=False)
