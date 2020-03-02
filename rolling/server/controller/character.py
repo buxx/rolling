@@ -660,6 +660,11 @@ class CharacterController(BaseController):
             title=f"{character_doc.name} est mort",
             items=[
                 Part(
+                    label="Voir les évènements",
+                    form_action=f"/_describe/character/{hapic_data.path.character_id}/events",
+                    is_link=True,
+                ),
+                Part(
                     label="Créer un nouveau personnage",
                     form_action="/_describe/character/create",
                     is_link=True,
