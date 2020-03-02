@@ -263,7 +263,7 @@ class Kernel:
         try:
             self.server_db_session.query(UniverseStateDocument).order_by(
                 UniverseStateDocument.turn.desc()
-            ).one()
+            ).limit(1).one()
         except NoResultFound:
             self.server_db_session.add(UniverseStateDocument(turned_at=datetime.datetime.utcnow()))
             self.server_db_session.commit()

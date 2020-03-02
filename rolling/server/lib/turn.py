@@ -45,6 +45,9 @@ class TurnLib:
         self._increment_age()
         self._kill()
         self._reset_action_points()
+        self._universe_turn()
+
+        self._kernel.server_db_session.commit()
 
     def _generate_stuff(self) -> None:
         self._logger.info("Generate stuff")
@@ -156,6 +159,7 @@ class TurnLib:
             # Dehydrated !
             if character_document.dehydrated:
                 character_document.life_points -= 1
+                self._kernel.character_lib.add_event(character_id, f"{character_document.name} est déshydraté !")
                 self._logger.info(
                     f"{character_document.name} need to drink but no water ! let {character_document.life_points} life points"
                 )
@@ -179,6 +183,7 @@ class TurnLib:
                     self._kernel.stuff_lib.destroy(stuff_eatable.id, commit=False)
                 elif character_document.starved:
                     character_document.life_points -= 1
+                    self._kernel.character_lib.add_event(character_id, f"{character_document.name} est affamé !")
                     self._logger.info(
                         f"{character_document.name} need to eat but no eatable ! "
                         f"let {character_document.life_points} life points"
@@ -261,3 +266,6 @@ class TurnLib:
                     zone_col_i=character_doc.zone_col_i,
                 )
                 self._kernel.stuff_lib.add_stuff(corpse)
+
+    def _universe_turn(self) -> None:
+        self._kernel.universe_lib.add_new_state()
