@@ -643,6 +643,7 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.handle_exception(NoResultFound, http_code=404)
     async def is_dead(self, request: Request, hapic_data: HapicData) -> Response:
         character_doc = self._kernel.character_lib.get_document(
             hapic_data.path.character_id, dead=True
