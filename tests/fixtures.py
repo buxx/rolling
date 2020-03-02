@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 import os
 
 import pytest
@@ -14,8 +15,11 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import SeaWater
 from rolling.model.character import CharacterModel
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.server.lib.turn import TurnLib
+from rolling.server.lib.universe import UniverseLib
 
 
 @pytest.fixture
@@ -191,3 +195,15 @@ def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
     session.commit()
 
     return arthur
+
+
+@pytest.fixture
+def universe_lib(worldmapc_kernel: Kernel) -> UniverseLib:
+    return UniverseLib(worldmapc_kernel)
+
+
+@pytest.fixture
+def initial_universe_state(worldmapc_kernel: Kernel, universe_lib: UniverseLib) -> UniverseStateDocument:
+    doc = UniverseStateDocument(turn=1, turned_at=datetime.datetime.utcnow())
+    worldmapc_kernel.server_db_session.add(doc)
+    return doc

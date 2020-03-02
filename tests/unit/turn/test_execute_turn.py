@@ -5,6 +5,7 @@ import pytest
 
 from rolling.kernel import Kernel
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.turn import TurnLib
@@ -31,6 +32,7 @@ class TestExecuteTurn:
         turn_lib: TurnLib,
         xena: CharacterDocument,
         arthur: CharacterDocument,
+        initial_universe_state: UniverseStateDocument,
     ) -> None:
         session = worldmapc_kernel.server_db_session
         session.refresh(xena)
