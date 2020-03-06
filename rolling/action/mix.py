@@ -162,7 +162,7 @@ class MixResourcesAction(WithResourceAction):
                 character.id, required_resource.resource.id, required_quantity
             )
 
-        resource_model = self._kernel.resource_lib.add_resource_to_character(
+        self._kernel.resource_lib.add_resource_to_character(
             character.id, resource_mix_description.produce_resource.id, quantity=input_.quantity
         )
 

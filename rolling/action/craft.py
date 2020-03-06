@@ -8,22 +8,25 @@ from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import ActionDescriptionModel
+from rolling.action.base import CharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
+from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import check_common_is_possible, fill_base_action_properties
+from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
+from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
-    from rolling.kernel import Kernel
 
 
 @dataclasses.dataclass
@@ -295,3 +298,257 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             title="Action effectué avec succès",
             items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
         )
+
+
+@dataclasses.dataclass
+class BeginStuffModel:
+    description: typing.Optional[str] = None
+
+
+class BeginStuffConstructionAction(CharacterAction):
+    input_model = BeginStuffModel
+    input_model_serializer = serpyco.Serializer(BeginStuffModel)
+
+    @classmethod
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+        for consume in action_config_raw["consume"]:
+            if "resource" not in consume and "stuff" not in consume:
+                raise RollingError(f"Action config is not correct: {action_config_raw}")
+
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties["produce_stuff_id"] = action_config_raw["produce_stuff_id"]
+        properties["consume"] = action_config_raw["consume"]
+        properties["craft_ap"] = action_config_raw["craft_ap"]
+        properties["default_description"] = action_config_raw.get("default_description", "")
+        properties["link_group_name"] = action_config_raw.get("link_group_name", None)
+        return properties
+
+    def check_is_possible(self, character: "CharacterModel") -> None:
+        pass  # Always accept to display this action
+
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: BeginStuffModel
+    ) -> None:
+        self.check_is_possible(character)
+        check_common_is_possible(self._kernel, description=self._description, character=character)
+
+        for consume in self._description.properties["consume"]:
+            if "resource" in consume:
+                resource_id = consume["resource"]
+                if not self._kernel.resource_lib.have_resource(
+                    character.id, resource_id=resource_id, quantity=consume["quantity"]
+                ):
+                    resource_description = self._kernel.game.config.resources[resource_id]
+                    raise ImpossibleAction(
+                        f"Vous ne possédez pas assez de {resource_description.name}"
+                    )
+
+            elif "stuff" in consume:
+                stuff_id = consume["stuff"]
+                if (
+                    self._kernel.stuff_lib.have_stuff_count(character.id, stuff_id=stuff_id)
+                    < consume["suantity"]
+                ):
+                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        stuff_id
+                    )
+                    raise ImpossibleAction(f"Vous ne possédez pas assez de {stuff_properties.name}")
+
+    def get_character_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            CharacterActionLink(
+                name=f"Commencer {self._description.name}",
+                link=get_character_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
+                    action_description_id=self._description.id,
+                    query_params={},
+                ),
+                cost=self.get_cost(character),
+                group_name=self._description.properties["link_group_name"],
+            )
+        ]
+
+    def perform(self, character: "CharacterModel", input_: BeginStuffModel) -> Description:
+        if not input_.description:
+            require_txts = []
+            for consume in self._description.properties["consume"]:
+                if "resource" in consume:
+                    resource_id = consume["resource"]
+                    resource_description = self._kernel.game.config.resources[resource_id]
+                    quantity_str = quantity_to_str(
+                        consume["quantity"], resource_description.unit, self._kernel
+                    )
+                    require_txts.append(f"{quantity_str} de {resource_description.name}")
+
+                elif "stuff" in consume:
+                    stuff_id = consume["stuff"]
+                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        stuff_id
+                    )
+                    require_txts.append(f"{consume['quantity']} de {stuff_properties.name}")
+
+            return Description(
+                title=f"Commencer {self._description.name}",
+                items=[
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=get_character_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
+                            query_params={},
+                            action_description_id=self._description.id,
+                        ),
+                        items=[Part(text="Consommera :")]
+                        + [Part(text=txt) for txt in require_txts]
+                        + [
+                            Part(
+                                label=f"Vous pouvez fournir une description de l'objet",
+                                type_=Type.STRING,
+                                name="description",
+                                default_value=self._description.properties["default_description"],
+                            )
+                        ],
+                    )
+                ],
+            )
+
+        for consume in self._description.properties["consume"]:
+            if "resource" in consume:
+                resource_id = consume["resource"]
+                self._kernel.resource_lib.reduce_carried_by(
+                    character.id,
+                    resource_id=resource_id,
+                    quantity=consume["quantity"],
+                    commit=False,
+                )
+
+            elif "stuff" in consume:
+                stuff_id = consume["stuff"]
+                carried_stuffs = self._kernel.stuff_lib.get_carried_by(
+                    character.id, stuff_id=stuff_id
+                )
+                for i in range(consume["quantity"]):
+                    self._kernel.stuff_lib.destroy(carried_stuffs[i].id, commit=False)
+
+        stuff_id = self._description.properties["produce_stuff_id"]
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+        stuff_doc = self._kernel.stuff_lib.create_document_from_stuff_properties(
+            properties=stuff_properties,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=character.zone_row_i,
+            zone_col_i=character.zone_col_i,
+        )
+        stuff_doc.description = input_.description or ""
+        stuff_doc.carried_by_id = character.id
+        stuff_doc.ap_spent = 0.0
+        stuff_doc.ap_required = self._description.properties["craft_ap"]
+        stuff_doc.under_construction = True
+        self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
+        self._kernel.server_db_session.commit()
+
+        return Description(
+            title=f"{stuff_properties.name} commencé",
+            items=[Part(label="Continuer", go_back_zone=True)],
+        )
+
+
+@dataclasses.dataclass
+class ContinueStuffModel:
+    ap: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+class ContinueStuffConstructionAction(WithStuffAction):
+    input_model = ContinueStuffModel
+    input_model_serializer = serpyco.Serializer(ContinueStuffModel)
+
+    @classmethod
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        return properties
+
+    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+        if not stuff.under_construction:
+            raise ImpossibleAction("Non concérné")
+
+    def check_request_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
+    ) -> None:
+        self.check_is_possible(character, stuff)
+        if input_.ap:
+            if character.action_points < input_.ap:
+                raise ImpossibleAction(f"{character.name} ne possède passez de points d'actions")
+
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            CharacterActionLink(
+                name=f"Continuer le travail",
+                link=get_with_stuff_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.CONTINUE_STUFF_CONSTRUCTION,
+                    action_description_id=self._description.id,
+                    query_params={},
+                    stuff_id=stuff.id,
+                ),
+                cost=self.get_cost(character, stuff),
+            )
+        ]
+
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: typing.Optional[typing.Any] = None,
+    ) -> typing.Optional[float]:
+        return 0.0  # we use only one action description in config and we don't want ap for continue
+
+    def perform(
+        self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
+    ) -> Description:
+        remain_ap = stuff.ap_required - stuff.ap_spent
+
+        if not input_.ap:
+            return Description(
+                title=f"Continuer de travailler sur {stuff.name}",
+                items=[
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=get_with_stuff_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.CONTINUE_STUFF_CONSTRUCTION,
+                            query_params={},
+                            action_description_id=self._description.id,
+                            stuff_id=stuff.id,
+                        ),
+                        items=[
+                            Part(text=f"Il reste {round(remain_ap, 3)} PA à passer"),
+                            Part(
+                                label=f"Combien de points d'actions dépenser ?",
+                                type_=Type.NUMBER,
+                                name="ap",
+                            ),
+                        ],
+                    )
+                ],
+            )
+
+        consume_ap = min(remain_ap, input_.ap)
+        stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff.id)
+        stuff_doc.ap_spent = float(stuff_doc.ap_spent) + consume_ap
+        self._kernel.character_lib.reduce_action_points(character.id, consume_ap, commit=False)
+
+        if stuff_doc.ap_spent >= stuff_doc.ap_required:
+            stuff_doc.under_construction = False
+            title = f"Construction de {stuff.name} terminé"
+        else:
+            title = f"Construction de {stuff.name} avancé"
+
+        self._kernel.server_db_session.commit()
+        return Description(title=title, items=[Part(label="Retour", go_back_zone=True)])

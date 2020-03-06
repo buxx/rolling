@@ -11,6 +11,7 @@ class CharacterActionLink:
     link: str
     cost: typing.Optional[float] = None
     merge_by: typing.Optional[typing.Any] = None
+    group_name: typing.Optional[str] = None
 
     def get_as_str(self) -> str:
         if not self.cost:

@@ -1,6 +1,6 @@
 # coding: utf-8
-import datetime
 from asyncio import AbstractEventLoop
+import datetime
 import glob
 import ntpath
 import os
@@ -24,6 +24,8 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.event import ZoneEvent
+from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.action import ActionFactory
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.effect import EffectManager
@@ -101,6 +103,8 @@ class Kernel:
         self._action_factory: typing.Optional[ActionFactory] = None
         self._translation = GlobalTranslation()
         self._universe_lib: typing.Optional["UniverseLib"] = None
+
+        self._event_serializer_factory = ZoneEventSerializerFactory()
 
     @property
     def universe_lib(self) -> UniverseLib:
@@ -267,3 +271,12 @@ class Kernel:
         except NoResultFound:
             self.server_db_session.add(UniverseStateDocument(turned_at=datetime.datetime.utcnow()))
             self.server_db_session.commit()
+
+    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
+        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        for socket in self.server_zone_events_manager.get_sockets(row_i, col_i):
+            try:
+                kernel_logger.debug(event_str)
+                await socket.send_str(event_str)
+            except Exception as exc:
+                kernel_logger.exception(exc)

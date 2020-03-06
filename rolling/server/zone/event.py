@@ -2,15 +2,12 @@
 import abc
 import typing
 
-import serpyco
-
 from rolling.exception import DisconnectClient
 from rolling.exception import UnknownEvent
 from rolling.log import server_logger
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
-from rolling.model.event import zone_event_data_types
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.lib.character import CharacterLib
 
@@ -52,8 +49,8 @@ class PlayerMoveProcessor(EventProcessor):
             character, to_row_i=event.data.to_row_i, to_col_i=event.data.to_col_i
         )
 
-        async for socket in self._zone_events_manager.get_sockets(row_i, col_i):
-            event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        for socket in self._zone_events_manager.get_sockets(row_i, col_i):
             server_logger.debug(f"Send event on socket: {event_str}")
 
             try:

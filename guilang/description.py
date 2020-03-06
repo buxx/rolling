@@ -32,6 +32,7 @@ class Part:
     name: typing.Optional[str] = None
     is_link: bool = False
     go_back_zone: bool = False
+    default_value: typing.Optional[str] = None
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
@@ -53,5 +54,7 @@ class Description:
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     image: typing.Optional[str] = None
+    image_id: typing.Optional[int] = None
+    image_extension: typing.Optional[str] = None  # used by client to cache image
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None

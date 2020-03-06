@@ -20,9 +20,11 @@ from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.kernel import Kernel
+from rolling.log import server_logger
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookResourceModelModel
 from rolling.model.character import GetLookStuffModelModel
@@ -33,6 +35,11 @@ from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
+from rolling.model.event import CharacterEnterZoneData
+from rolling.model.event import CharacterExitZoneData
+from rolling.model.event import ZoneEvent
+from rolling.model.event import ZoneEventType
+from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
@@ -51,12 +58,10 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import (
-    EmptyModel,
-    character_can_drink_in_its_zone,
-    get_character_stuff_filled_with_water,
-)
+from rolling.util import EmptyModel
+from rolling.util import character_can_drink_in_its_zone
 from rolling.util import display_g_or_kg
+from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
 
 
@@ -128,7 +133,7 @@ class CharacterController(BaseController):
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
 
         for stuff in inventory.stuff:
-            name = stuff.name
+            name = stuff.get_name()
             descriptions: typing.List[str] = stuff.get_full_description()
 
             description = ""
@@ -200,7 +205,12 @@ class CharacterController(BaseController):
         return Description(
             title="Ici, vous pouvez:",
             items=[
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in character_actions
             ],
         )
@@ -214,7 +224,12 @@ class CharacterController(BaseController):
         return Description(
             title="Ici pouvez démarrer la construction de:",
             items=[
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in build_actions
             ],
         )
@@ -223,17 +238,69 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def _describe_events(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
         character_events = self._character_lib.get_last_events(
             hapic_data.path.character_id, count=100
         )
+        parts = []
+        for event in character_events:
+            there_is_story = bool(self._kernel.character_lib.count_story_pages(event.id))
+
+            form_action = None
+            if there_is_story:
+                form_action = f"/_describe/character/{character.id}/story?event_id={event.id}"
+
+            parts.append(
+                Part(
+                    text=f"Tour {event.turn}: {event.text}",
+                    is_link=there_is_story,
+                    form_action=form_action,
+                )
+            )
+
+        return Description(title="Histoire", is_long_text=True, items=parts)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(DescribeStoryQueryModel)
+    @hapic.output_body(Description)
+    async def _describe_story(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        event = self._kernel.character_lib.get_event(hapic_data.query.event_id)
+        if not hapic_data.query.story_page_id:
+            story_page = self._kernel.character_lib.get_first_story_page(hapic_data.query.event_id)
+        else:
+            story_page = self._kernel.character_lib.get_story_page(hapic_data.query.story_page_id)
+
+        items = []
+        if story_page.previous_page_id:
+            items.append(
+                Part(
+                    label="Page précédente",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/story"
+                    f"?event_id={event.id}&story_page_id={story_page.previous_page_id}",
+                )
+            )
+
+        items.append(Part(text=story_page.text))
+
+        if story_page.next_page_id:
+            items.append(
+                Part(
+                    label="Page suivante",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/story"
+                    f"?event_id={event.id}&story_page_id={story_page.next_page_id}",
+                )
+            )
 
         return Description(
-            title="Evenements:",
+            title=event.text,
+            image_id=story_page.image_id,
+            image_extension=story_page.image_extension,
             is_long_text=True,
-            items=[
-                Part(text=event.datetime.strftime(f"Tour {event.turn}: {event.text}"))
-                for event in character_events
-            ],
+            items=items,
         )
 
     @hapic.with_api_doc()
@@ -248,7 +315,12 @@ class CharacterController(BaseController):
             title=stuff.get_name_and_light_description(),
             image=stuff.image,
             items=[
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in actions
             ],
         )
@@ -266,7 +338,12 @@ class CharacterController(BaseController):
         return Description(
             title=stuff.get_name_and_light_description(),
             items=[
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in actions
             ],
         )
@@ -284,7 +361,12 @@ class CharacterController(BaseController):
         return Description(
             title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
             items=[
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in actions
             ],
         )
@@ -459,6 +541,19 @@ class CharacterController(BaseController):
     @hapic.output_body(Description)
     async def create_from_description(self, request: Request, hapic_data: HapicData) -> Description:
         character_id = self._character_lib.create(hapic_data.body)
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        await self._kernel.send_to_zone_sockets(
+            character_doc.world_row_i,
+            character_doc.world_col_i,
+            event=ZoneEvent(
+                type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                data=CharacterEnterZoneData(
+                    character_id=character_id,
+                    zone_row_i=character_doc.zone_row_i,
+                    zone_col_i=character_doc.zone_col_i,
+                ),
+            ),
+        )
         return Description(
             title="Pret a commencer l'aventure !",
             items=[Part(label="Continuer", go_back_zone=True)],
@@ -526,6 +621,7 @@ class CharacterController(BaseController):
     ) -> CharacterInventoryModel:
         return self._character_lib.get_inventory(hapic_data.path.character_id)
 
+    # FIXME BS: remove (and update tui client ?)
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.input_query(MoveCharacterQueryModel)
@@ -545,10 +641,30 @@ class CharacterController(BaseController):
             )
             return web.json_response({"message": message}, status=400)
 
-        self._character_lib.move(
+        await self._kernel.send_to_zone_sockets(
+            character.world_row_i,
+            character.world_col_i,
+            event=ZoneEvent(
+                type=ZoneEventType.CHARACTER_EXIT_ZONE,
+                data=CharacterExitZoneData(character_id=hapic_data.path.character_id),
+            ),
+        )
+        character_doc = self._character_lib.move(
             character,
             to_world_row=hapic_data.query.to_world_row,
             to_world_col=hapic_data.query.to_world_col,
+        )
+        await self._kernel.send_to_zone_sockets(
+            hapic_data.query.to_world_row,
+            hapic_data.query.to_world_col,
+            event=ZoneEvent(
+                type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                data=CharacterEnterZoneData(
+                    character_id=hapic_data.path.character_id,
+                    zone_row_i=character_doc.zone_row_i,
+                    zone_col_i=character_doc.zone_col_i,
+                ),
+            ),
         )
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
         return Response(status=204)
@@ -573,10 +689,30 @@ class CharacterController(BaseController):
         else:
             message = "Le voyage c'est bien déroulé"
 
-        self._character_lib.move(
+        await self._kernel.send_to_zone_sockets(
+            character.world_row_i,
+            character.world_col_i,
+            event=ZoneEvent(
+                type=ZoneEventType.CHARACTER_EXIT_ZONE,
+                data=CharacterExitZoneData(character_id=hapic_data.path.character_id),
+            ),
+        )
+        character_doc = self._character_lib.move(
             character,
             to_world_row=hapic_data.query.to_world_row,
             to_world_col=hapic_data.query.to_world_col,
+        )
+        await self._kernel.send_to_zone_sockets(
+            hapic_data.query.to_world_row,
+            hapic_data.query.to_world_col,
+            event=ZoneEvent(
+                type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                data=CharacterEnterZoneData(
+                    character_id=hapic_data.path.character_id,
+                    zone_row_i=character_doc.zone_row_i,
+                    zone_col_i=character_doc.zone_col_i,
+                ),
+            ),
         )
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
 
@@ -669,7 +805,7 @@ class CharacterController(BaseController):
                     label="Créer un nouveau personnage",
                     form_action="/_describe/character/create",
                     is_link=True,
-                )
+                ),
             ],
         )
 
@@ -708,6 +844,7 @@ class CharacterController(BaseController):
                 ),
                 web.get("/_describe/character/{character_id}/events", self._describe_events),
                 web.post("/_describe/character/{character_id}/events", self._describe_events),
+                web.post("/_describe/character/{character_id}/story", self._describe_story),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),

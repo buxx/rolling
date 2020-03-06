@@ -11,6 +11,8 @@ from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
 from rolling.action.build import ConstructBuildAction
 from rolling.action.collect import CollectResourceAction
+from rolling.action.craft import BeginStuffConstructionAction
+from rolling.action.craft import ContinueStuffConstructionAction
 from rolling.action.craft import CraftStuffWithResourceAction
 from rolling.action.craft import CraftStuffWithStuffAction
 from rolling.action.drink import DrinkResourceAction
@@ -23,6 +25,7 @@ from rolling.action.empty import EmptyStuffAction
 from rolling.action.fill import FillStuffAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.mix import MixResourcesAction
+from rolling.action.transform import TransformResourcesIntoResourcesAction
 from rolling.action.transform import TransformStuffIntoResourcesAction
 from rolling.types import ActionType
 
@@ -52,8 +55,11 @@ class ActionFactory:
         ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
         ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
         ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
+        ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
         ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
         ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
+        ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
+        ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -68,17 +74,20 @@ class ActionFactory:
             ActionType.EAT_STUFF: EatStuffAction,
             ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
             ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
+            ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
         }
         self._with_resource_actions: typing.Dict[ActionType, typing.Type[WithResourceAction]] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
             ActionType.MIX_RESOURCES: MixResourcesAction,
             ActionType.EAT_RESOURCE: EatResourceAction,
             ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
+            ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
             ActionType.COLLECT_RESOURCE: CollectResourceAction,
             ActionType.SEARCH_FOOD: SearchFoodAction,
+            ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.BEGIN_BUILD: BeginBuildAction

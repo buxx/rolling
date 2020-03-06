@@ -43,10 +43,10 @@ class ZoneEventsManager:
         # Something lik asyncio.ensure_future(self._heartbeat(ws))
 
         # Make it available for send job
-        self._sockets.setdefault((row_i, col_i), []).append(socket)
+        self._sockets.setdefault((int(row_i), int(col_i)), []).append(socket)
 
         # Start to listen client messages
-        await self._listen(socket, row_i, col_i)
+        await self._listen(socket, int(row_i), int(col_i))
 
         return socket
 
@@ -102,8 +102,6 @@ class ZoneEventsManager:
             # FIXME: do kept this feature ?
             await socket.send_str(exception_event_str)
 
-    async def get_sockets(
-        self, row_i: int, col_i: int
-    ) -> typing.AsyncIterable[web.WebSocketResponse]:
-        for socket in self._sockets[(row_i, col_i)]:
+    def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[web.WebSocketResponse]:
+        for socket in self._sockets.get((row_i, col_i), []):
             yield socket

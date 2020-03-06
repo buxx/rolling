@@ -1,15 +1,20 @@
 # coding: utf-8
+import dataclasses
 import typing
 
 import serpyco
 
 from guilang.description import Description
 from guilang.description import Part
+from guilang.description import Type
+from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
+from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import fill_base_action_properties, check_common_is_possible
+from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
-from rolling.exception import NotEnoughActionPoints
+from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import EmptyModel
@@ -19,7 +24,6 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
     from rolling.model.stuff import StuffModel
-    from rolling.kernel import Kernel
 
 
 class TransformStuffIntoResourcesAction(WithStuffAction):
@@ -87,4 +91,133 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
 
         return Description(
             title="Transformation effectué", items=[Part(label="Continuer", go_back_zone=True)]
+        )
+
+
+@dataclasses.dataclass
+class QuantityModel:
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+class TransformResourcesIntoResourcesAction(WithResourceAction):
+    input_model = QuantityModel
+    input_model_serializer = serpyco.Serializer(QuantityModel)
+
+    @classmethod
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+        for produce in action_config_raw["produce"]:
+            if "resource" not in produce or "coeff" not in produce:
+                raise RollingError(
+                    f"Misconfiguration for following action content: {action_config_raw}"
+                )
+
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties["required_resource_id"] = action_config_raw["required_resource_id"]
+        properties["produce"] = action_config_raw["produce"]
+        properties["cost_per_unit"] = action_config_raw["cost_per_unit"]
+        return properties
+
+    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+        if resource_id != self._description.properties["required_resource_id"]:
+            raise ImpossibleAction("Non concerné")
+
+    def check_request_is_possible(
+        self, character: "CharacterModel", resource_id: str, input_: QuantityModel
+    ) -> None:
+        self.check_is_possible(character, resource_id)
+        check_common_is_possible(
+            kernel=self._kernel, description=self._description, character=character
+        )
+
+        required_resource_id = self._description.properties["required_resource_id"]
+        if input_.quantity is not None:
+            carried_resource = self._kernel.resource_lib.get_one_carried_by(
+                character.id, resource_id=required_resource_id
+            )
+            if carried_resource.quantity < input_.quantity:
+                raise ImpossibleAction(f"Vous n'en possédez pas assez")
+
+    def get_character_actions(
+        self, character: "CharacterModel", resource_id: str
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            CharacterActionLink(
+                name=self._description.name,
+                link=get_with_resource_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.TRANSFORM_RESOURCES_TO_RESOURCES,
+                    action_description_id=self._description.id,
+                    resource_id=resource_id,
+                    query_params={},
+                ),
+                cost=self.get_cost(character, resource_id),
+            )
+        ]
+
+    def perform(
+        self, character: "CharacterModel", resource_id: str, input_: QuantityModel
+    ) -> Description:
+        base_cost = self.get_cost(character, resource_id=resource_id, input_=input_)
+        cost_per_unit = self._description.properties["cost_per_unit"]
+        required_resource_description = self._kernel.game.config.resources[
+            self._description.properties["required_resource_id"]
+        ]
+        unit_name = self._kernel.translation.get(required_resource_description.unit)
+        carried_resource = self._kernel.resource_lib.get_one_carried_by(
+            character.id, resource_id=required_resource_description.id
+        )
+
+        if input_.quantity is None:
+            carried_quantity_str = quantity_to_str(
+                carried_resource.quantity, carried_resource.unit, self._kernel
+            )
+            return Description(
+                title=self._description.name,
+                items=[
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=get_with_resource_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.TRANSFORM_RESOURCES_TO_RESOURCES,
+                            resource_id=resource_id,
+                            query_params=self.input_model_serializer.dump(input_),
+                            action_description_id=self._description.id,
+                        ),
+                        items=[
+                            Part(
+                                text=f"Vous possedez {carried_quantity_str} de {carried_resource.name}"
+                            ),
+                            Part(
+                                label=f"Quantité en {unit_name} (coût: {base_cost} + {cost_per_unit} par {unit_name}) ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                            ),
+                        ],
+                    )
+                ],
+            )
+
+        self._kernel.resource_lib.reduce_carried_by(
+            character.id, carried_resource.id, quantity=input_.quantity, commit=False
+        )
+        produced_resources_txts = []
+        for produce in self._description.properties["produce"]:
+            produce_resource = self._kernel.game.config.resources[produce["resource"]]
+            produce_quantity = input_.quantity * produce["coeff"]
+            produce_quantity_str = quantity_to_str(
+                produce_quantity, produce_resource.unit, self._kernel
+            )
+            produced_resources_txts.append(f"{produce_resource.name}: {produce_quantity_str}")
+            self._kernel.resource_lib.add_resource_to_character(
+                character.id,
+                resource_id=produce["resource"],
+                quantity=produce_quantity,
+                commit=False,
+            )
+        self._kernel.server_db_session.commit()
+
+        parts = [Part(text=txt) for txt in produced_resources_txts]
+        return Description(
+            title=f"Effectué", items=parts + [Part(label="Continuer", go_back_zone=True)]
         )

@@ -12,11 +12,9 @@ from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.types import TurnMode
-from rolling.util import (
-    get_stuffs_eatable,
-    character_can_drink_in_its_zone,
-    get_character_stuff_filled_with_water,
-)
+from rolling.util import character_can_drink_in_its_zone
+from rolling.util import get_character_stuff_filled_with_water
+from rolling.util import get_stuffs_eatable
 from rolling.util import get_stuffs_filled_with_resource_id
 from rolling.util import is_there_resource_id_in_zone
 
@@ -159,7 +157,9 @@ class TurnLib:
             # Dehydrated !
             if character_document.dehydrated:
                 character_document.life_points -= 1
-                self._kernel.character_lib.add_event(character_id, f"{character_document.name} est déshydraté !")
+                self._kernel.character_lib.add_event(
+                    character_id, f"{character_document.name} est déshydraté !"
+                )
                 self._logger.info(
                     f"{character_document.name} need to drink but no water ! let {character_document.life_points} life points"
                 )
@@ -183,7 +183,9 @@ class TurnLib:
                     self._kernel.stuff_lib.destroy(stuff_eatable.id, commit=False)
                 elif character_document.starved:
                     character_document.life_points -= 1
-                    self._kernel.character_lib.add_event(character_id, f"{character_document.name} est affamé !")
+                    self._kernel.character_lib.add_event(
+                        character_id, f"{character_document.name} est affamé !"
+                    )
                     self._logger.info(
                         f"{character_document.name} need to eat but no eatable ! "
                         f"let {character_document.life_points} life points"

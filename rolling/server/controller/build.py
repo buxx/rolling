@@ -51,7 +51,12 @@ class BuildController(BaseController):
         parts = carried_in
         parts.extend(
             [
-                Part(text=action.get_as_str(), form_action=action.link, is_link=True)
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
                 for action in character_actions
             ]
         )

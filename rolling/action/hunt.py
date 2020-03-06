@@ -8,7 +8,8 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
-from rolling.action.utils import check_common_is_possible, fill_base_action_properties
+from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
@@ -63,6 +64,7 @@ class SearchFoodAction(CharacterAction):
                     action_description_id=self._description.id,
                     query_params={},
                 ),
+                group_name="Chercher de la nourriture",
                 cost=self.get_cost(character),
             )
         ]

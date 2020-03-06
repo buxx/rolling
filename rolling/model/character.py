@@ -99,6 +99,12 @@ class MoveCharacterQueryModel:
 
 
 @dataclasses.dataclass
+class DescribeStoryQueryModel:
+    event_id: int = serpyco.number_field(cast_on_load=True)
+    story_page_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
 class CharacterModel:
     id: str
     name: str
@@ -156,6 +162,7 @@ class CharacterModel:
 
 @dataclasses.dataclass
 class CharacterEventModel:
+    id: int
     datetime: datetime_.datetime
     turn: int
     text: str

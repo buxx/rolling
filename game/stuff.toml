@@ -47,54 +47,59 @@
   name = "Lièvre"
   weight = 3500.0
   clutter = 1.2
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [PHEASANT]
   name = "Faisan"
   weight = 1500.0
   clutter = 1.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [RABBIT]
   name = "Lapin"
   weight = 2700.0
   clutter = 1.1
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [PADRIDGE]
   name = "Perdrix"
   weight = 1500.0
   clutter = 1.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [DUCK]
   name = "Canard"
   weight = 2000.0
   clutter = 1.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [MOORHEN]
   name = "Poule d'eau"
   weight = 600.0
   clutter = 0.5
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [RAVEN]
   name = "Corbeau"
   weight = 650.0
   clutter = 0.5
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [FOX]
   name = "Renard"
   weight = 5500.0
   clutter = 2.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [MARTEN]
   name = "Fouine"
   weight = 2700.0
   clutter = 1.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [BOAR]
   name = "Sanglier"
   weight = 20000.0
   clutter = 10.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
 [DEER]
   name = "Chevreuil"
   weight = 18000.0
   clutter = 10.0
-  actions = ["EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+[LITTLE_STATUETTE]
+  name = "Petite statuette"
+  weight = 700.0
+  clutter = 0.5
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]

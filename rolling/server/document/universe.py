@@ -1,7 +1,7 @@
 # coding: utf-8
 from sqlalchemy import Column
-from sqlalchemy import Integer
 from sqlalchemy import DateTime
+from sqlalchemy import Integer
 
 from rolling.server.extension import ServerSideDocument as Document
 

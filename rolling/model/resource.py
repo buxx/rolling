@@ -34,4 +34,7 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
         of = " "
         if self.unit != Unit.UNIT:
             of = " de "
-        return f"{quantity_str}{of}{self.name} " f"({weight} et {self.clutter} d'encombrement)"
+        return (
+            f"{quantity_str}{of}{self.name} "
+            f"({weight} et {round(self.clutter, 3)} d'encombrement)"
+        )

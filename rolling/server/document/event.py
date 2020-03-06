@@ -18,3 +18,11 @@ class EventDocument(Document):
     character_id = Column(String(255), ForeignKey("character.id"), nullable=False)
     datetime = Column(DateTime, default=datetime.datetime.utcnow)
     turn = Column(Integer, nullable=False)
+
+
+class StoryPageDocument(Document):
+    __tablename__ = "story_page"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
+    text = Column(Text, nullable=True)
+    image_id = Column(Integer, ForeignKey("image.id"), nullable=True)

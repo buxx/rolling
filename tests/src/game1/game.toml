@@ -1,5 +1,6 @@
 action_points_per_turn = 24
-create_character_messages = ["Go go"]
+create_character_event_title = "You wake up on a beach"
+create_character_event_story_text = """hello"""
 fresh_water_resource_id = "FRESH_WATER"
 liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]

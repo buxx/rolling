@@ -2,6 +2,7 @@
 import json
 import typing
 
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
@@ -36,6 +37,12 @@ class StuffDocument(Document):
     filled_capacity = Column(Numeric(10, 2), nullable=True)
     weight = Column(Numeric(10, 2), nullable=True)  # grams
     clutter = Column(Numeric(10, 2), nullable=True)
+
+    # crafting
+    ap_required = Column(Numeric(10, 4), nullable=False, default=0.0)
+    ap_spent = Column(Numeric(10, 4), nullable=False, default=0.0)
+    under_construction = Column(Boolean(), nullable=False, default=False)
+    description = Column(String, nullable=False, default="")
 
     # meta
     image = Column(String(255), nullable=True)

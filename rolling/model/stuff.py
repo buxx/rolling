@@ -53,6 +53,10 @@ class StuffModel:
     image: typing.Optional[str] = None
     carried_by: typing.Optional[str] = None
     stored_in: typing.Optional[int] = None
+    ap_required: float = 0.0
+    ap_spent: float = 0.0
+    under_construction: bool = False
+    description: str = ""
 
     def get_full_description(self) -> typing.List[str]:
         descriptions: typing.List[str] = []
@@ -68,7 +72,7 @@ class StuffModel:
             descriptions.append(f"{self.filled_with_resource}")
 
         if self.clutter:
-            descriptions.append(f"{self.clutter} d'encombrement")
+            descriptions.append(f"{round(self.clutter, 3)} d'encombrement")
 
         return descriptions
 
@@ -91,7 +95,11 @@ class StuffModel:
             return self.name
 
         description = "(" + ", ".join(descriptions) + ")"
-        return f"{self.name} ({description})"
+        return f"{self.get_name()} ({description})"
+
+    def get_name(self) -> str:
+        under_construction_char = "*" if self.under_construction else ""
+        return f"{self.name}{under_construction_char}"
 
 
 @dataclasses.dataclass

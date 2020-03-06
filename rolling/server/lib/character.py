@@ -1,14 +1,18 @@
 # coding: utf-8
+import os
 import typing
 import uuid
 
 from sqlalchemy.orm import Query
+from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.exception import ImpossibleAction
-from rolling.model.ability import HaveAbility, AbilityDescription
+from rolling.model.ability import AbilityDescription
+from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.event import StoryPage
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
 from rolling.model.stuff import CharacterInventoryModel
@@ -18,10 +22,13 @@ from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.document.base import ImageDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
+from rolling.server.document.event import StoryPageDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
+from rolling.server.util import register_image
 from rolling.types import ActionType
 from rolling.util import filter_action_links
 from rolling.util import get_coming_from
@@ -78,8 +85,24 @@ class CharacterLib:
         self._kernel.server_db_session.add(character)
         self._kernel.server_db_session.commit()
 
-        for message in self._kernel.game.config.create_character_messages:
-            self.add_event(character.id, message)
+        image_id = None
+        if self._kernel.game.config.create_character_event_story_image:
+            image_id = register_image(
+                self._kernel,
+                os.path.join(
+                    self._kernel.game.config.folder_path,
+                    "media",
+                    self._kernel.game.config.create_character_event_story_image,
+                ),
+            )
+
+        event = self.add_event(character.id, self._kernel.game.config.create_character_event_title)
+        first_story_page = StoryPageDocument(
+            event_id=event.id,
+            text=self._kernel.game.config.create_character_event_story_text,
+            image_id=image_id,
+        )
+        self.add_story_pages([first_story_page])
 
         return character.id
 
@@ -141,7 +164,9 @@ class CharacterLib:
             self.document_to_model(character_document) for character_document in character_documents
         ]
 
-    def move(self, character: CharacterModel, to_world_row: int, to_world_col: int) -> None:
+    def move(
+        self, character: CharacterModel, to_world_row: int, to_world_col: int
+    ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
         character_document = self.get_document(character.id)
         coming_from = get_coming_from(
@@ -163,6 +188,7 @@ class CharacterLib:
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
         self.update(character_document)
+        return character_document
 
     def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
         self._kernel.server_db_session.add(character_document)
@@ -185,7 +211,7 @@ class CharacterLib:
         )
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
-        carried_stuff = self._stuff_lib.get_carried_by(character_id)
+        carried_stuff = self._stuff_lib.get_carried_by(character_id, exclude_crafting=False)
         carried_resources = self._kernel.resource_lib.get_carried_by(character_id)
 
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
@@ -322,6 +348,13 @@ class CharacterLib:
 
         raise ImpossibleAction("pas encore codé")
 
+    def get_event(self, event_id: int) -> EventDocument:
+        return (
+            self._kernel.server_db_session.query(EventDocument)
+            .filter(EventDocument.id == event_id)
+            .one()
+        )
+
     def get_last_events(
         self, character_id: str, count: int
     ) -> typing.Iterator[CharacterEventModel]:
@@ -331,11 +364,97 @@ class CharacterLib:
             .order_by(EventDocument.datetime.desc())
             .limit(count)
         ):
-            yield CharacterEventModel(datetime=event_doc.datetime, text=event_doc.text, turn=event_doc.turn)
+            yield CharacterEventModel(
+                id=event_doc.id,
+                datetime=event_doc.datetime,
+                text=event_doc.text,
+                turn=event_doc.turn,
+            )
 
-    def add_event(self, character_id: str, text: str) -> None:
+    def count_story_pages(self, event_id: int) -> int:
+        return (
+            self._kernel.server_db_session.query(StoryPageDocument)
+            .filter(StoryPageDocument.event_id == event_id)
+            .count()
+        )
+
+    def get_first_story_page(self, event_id: int) -> StoryPage:
+        doc = (
+            self._kernel.server_db_session.query(StoryPageDocument)
+            .filter(StoryPageDocument.event_id == event_id)
+            .order_by(StoryPageDocument.id.asc())
+            .limit(1)
+            .one()
+        )
+        return self._story_page_doc_to_model(doc)
+
+    def get_story_page(self, story_page_id: int) -> StoryPage:
+        doc = (
+            self._kernel.server_db_session.query(StoryPageDocument)
+            .filter(StoryPageDocument.id == story_page_id)
+            .one()
+        )
+        return self._story_page_doc_to_model(doc)
+
+    def _story_page_doc_to_model(self, story_page_doc: StoryPageDocument) -> StoryPage:
+        try:
+            previous_page_id = (
+                self._kernel.server_db_session.query(StoryPageDocument.id)
+                .filter(StoryPageDocument.event_id == story_page_doc.event_id)
+                .filter(StoryPageDocument.id < story_page_doc.id)
+                .order_by(StoryPageDocument.id.desc())
+                .limit(1)
+                .scalar()
+            )
+        except NoResultFound:
+            previous_page_id = None
+
+        try:
+            next_page_id = (
+                self._kernel.server_db_session.query(StoryPageDocument.id)
+                .filter(StoryPageDocument.event_id == story_page_doc.event_id)
+                .filter(StoryPageDocument.id > story_page_doc.id)
+                .order_by(StoryPageDocument.id.asc())
+                .limit(1)
+                .scalar()
+            )
+        except NoResultFound:
+            next_page_id = None
+
+        image_extension = (None,)
+        if story_page_doc.image_id:
+            image_extension = (
+                self._kernel.server_db_session.query(ImageDocument.extension)
+                .filter(ImageDocument.id == story_page_doc.image_id)
+                .scalar()
+            )
+
+        return StoryPage(
+            id=story_page_doc.id,
+            event_id=story_page_doc.event_id,
+            image_id=story_page_doc.image_id,
+            image_extension=image_extension,
+            text=story_page_doc.text,
+            previous_page_id=previous_page_id,
+            next_page_id=next_page_id,
+        )
+
+    def add_event(
+        self,
+        character_id: str,
+        title: str,
+        story_pages: typing.Optional[typing.List[StoryPageDocument]] = None,
+    ) -> EventDocument:
+        story_pages = story_pages or []
         turn = self._kernel.universe_lib.get_last_state().turn
-        self._kernel.server_db_session.add(EventDocument(character_id=character_id, text=text, turn=turn))
+        event_doc = EventDocument(character_id=character_id, text=title, turn=turn)
+        self._kernel.server_db_session.add(event_doc)
+        self._kernel.server_db_session.commit()
+        return event_doc
+
+    def add_story_pages(self, story_pages: typing.List[StoryPageDocument]) -> None:
+        for story_page in story_pages:
+            self._kernel.server_db_session.add(story_page)
         self._kernel.server_db_session.commit()
 
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:

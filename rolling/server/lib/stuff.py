@@ -154,15 +154,28 @@ class StuffLib:
             image=doc.image if doc.image else None,
             carried_by=doc.carried_by_id,
             stuff_id=doc.stuff_id,
+            ap_required=float(doc.ap_required),
+            ap_spent=float(doc.ap_spent),
+            under_construction=doc.under_construction,
         )
 
-    def get_carried_by(self, character_id: str) -> typing.List[StuffModel]:
-        carried = (
-            self._kernel.server_db_session.query(StuffDocument)
-            .filter(StuffDocument.carried_by_id == character_id)
-            .all()
+    def get_carried_by(
+        self,
+        character_id: str,
+        exclude_crafting: bool = True,
+        stuff_id: typing.Optional[str] = None,
+    ) -> typing.List[StuffModel]:
+        query = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.carried_by_id == character_id
         )
-        return [self.stuff_model_from_doc(doc) for doc in carried]
+
+        if exclude_crafting:
+            query = query.filter(StuffDocument.under_construction != True)
+
+        if stuff_id:
+            query = query.filter(StuffDocument.stuff_id == stuff_id)
+
+        return [self.stuff_model_from_doc(doc) for doc in query.all()]
 
     def get_stuff_doc(self, stuff_id: int) -> StuffDocument:
         return (
@@ -202,6 +215,7 @@ class StuffLib:
 
         return actions
 
+    # FIXME: exclude crafting stuff
     def fill_stuff_with_resource(self, stuff: StuffModel, resource_id: str) -> None:
         doc = self.get_stuff_doc(stuff.id)
         doc.fill(self._kernel, resource_id, at=100.0)
@@ -209,6 +223,7 @@ class StuffLib:
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()
 
+    # FIXME: exclude crafting stuff
     def empty_stuff(self, stuff: StuffModel) -> None:
         doc = self.get_stuff_doc(stuff.id)
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -232,6 +247,7 @@ class StuffLib:
         )
         return [self.stuff_model_from_doc(doc) for doc in docs]
 
+    # FIXME: exclude crafting stuff
     def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
             StuffDocument.id == stuff_id
@@ -278,3 +294,17 @@ class StuffLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def have_stuff_count(
+        self, character_id: str, stuff_id: str, exclude_crafting: bool = True
+    ) -> int:
+        query = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.carried_by_id == character_id)
+            .filter(StuffDocument.stuff_id == stuff_id)
+        )
+
+        if exclude_crafting:
+            query = query.filter(StuffDocument.under_construction != True)
+
+        return query.count()
