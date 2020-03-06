@@ -203,7 +203,9 @@ def universe_lib(worldmapc_kernel: Kernel) -> UniverseLib:
 
 
 @pytest.fixture
-def initial_universe_state(worldmapc_kernel: Kernel, universe_lib: UniverseLib) -> UniverseStateDocument:
+def initial_universe_state(
+    worldmapc_kernel: Kernel, universe_lib: UniverseLib
+) -> UniverseStateDocument:
     doc = UniverseStateDocument(turn=1, turned_at=datetime.datetime.utcnow())
     worldmapc_kernel.server_db_session.add(doc)
     return doc

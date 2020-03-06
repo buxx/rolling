@@ -41,3 +41,14 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[ZoneEventData]] = 
     ZoneEventType.CLIENT_WANT_CLOSE: EmptyData,
     ZoneEventType.SERVER_PERMIT_CLOSE: EmptyData,
 }
+
+
+@dataclasses.dataclass
+class StoryPage:
+    id: int
+    event_id: int
+    text: str
+    previous_page_id: typing.Optional[int] = None
+    next_page_id: typing.Optional[int] = None
+    image_id: typing.Optional[int] = None
+    image_extension: typing.Optional[str] = None  # used by client to cache image

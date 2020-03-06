@@ -23,6 +23,7 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
+from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetLookResourceModelModel
 from rolling.model.character import GetLookStuffModelModel
@@ -51,12 +52,10 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import (
-    EmptyModel,
-    character_can_drink_in_its_zone,
-    get_character_stuff_filled_with_water,
-)
+from rolling.util import EmptyModel
+from rolling.util import character_can_drink_in_its_zone
 from rolling.util import display_g_or_kg
+from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
 
 
@@ -223,17 +222,69 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def _describe_events(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
         character_events = self._character_lib.get_last_events(
             hapic_data.path.character_id, count=100
         )
+        parts = []
+        for event in character_events:
+            there_is_story = bool(self._kernel.character_lib.count_story_pages(event.id))
+
+            form_action = None
+            if there_is_story:
+                form_action = f"/_describe/character/{character.id}/story?event_id={event.id}"
+
+            parts.append(
+                Part(
+                    text=f"Tour {event.turn}: {event.text}",
+                    is_link=there_is_story,
+                    form_action=form_action,
+                )
+            )
+
+        return Description(title="Histoire", is_long_text=True, items=parts)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(DescribeStoryQueryModel)
+    @hapic.output_body(Description)
+    async def _describe_story(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        event = self._kernel.character_lib.get_event(hapic_data.query.event_id)
+        if not hapic_data.query.story_page_id:
+            story_page = self._kernel.character_lib.get_first_story_page(hapic_data.query.event_id)
+        else:
+            story_page = self._kernel.character_lib.get_story_page(hapic_data.query.story_page_id)
+
+        items = []
+        if story_page.previous_page_id:
+            items.append(
+                Part(
+                    label="Page précédente",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/story"
+                    f"?event_id={event.id}&story_page_id={story_page.previous_page_id}",
+                )
+            )
+
+        items.append(Part(text=story_page.text))
+
+        if story_page.next_page_id:
+            items.append(
+                Part(
+                    label="Page suivante",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/story"
+                    f"?event_id={event.id}&story_page_id={story_page.next_page_id}",
+                )
+            )
 
         return Description(
-            title="Evenements:",
+            title=event.text,
+            image_id=story_page.image_id,
+            image_extension=story_page.image_extension,
             is_long_text=True,
-            items=[
-                Part(text=event.datetime.strftime(f"Tour {event.turn}: {event.text}"))
-                for event in character_events
-            ],
+            items=items,
         )
 
     @hapic.with_api_doc()
@@ -669,7 +720,7 @@ class CharacterController(BaseController):
                     label="Créer un nouveau personnage",
                     form_action="/_describe/character/create",
                     is_link=True,
-                )
+                ),
             ],
         )
 
@@ -708,6 +759,7 @@ class CharacterController(BaseController):
                 ),
                 web.get("/_describe/character/{character_id}/events", self._describe_events),
                 web.post("/_describe/character/{character_id}/events", self._describe_events),
+                web.post("/_describe/character/{character_id}/story", self._describe_story),
                 web.post(POST_CHARACTER_URL, self.create),
                 web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),

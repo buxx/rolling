@@ -7,7 +7,8 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import fill_base_action_properties, check_common_is_possible
+from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.server.link import CharacterActionLink

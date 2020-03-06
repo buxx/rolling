@@ -38,10 +38,17 @@ if typing.TYPE_CHECKING:
 
 
 class GameConfig:
-    def __init__(self, kernel: "Kernel", config_dict: dict) -> None:
+    def __init__(self, kernel: "Kernel", config_dict: dict, folder_path: str) -> None:
+        self._folder_path = folder_path
         self._kernel = kernel
         self.action_points_per_turn: int = config_dict["action_points_per_turn"]
-        self.create_character_messages: typing.List[str] = config_dict["create_character_messages"]
+        self.create_character_event_title: str = config_dict["create_character_event_title"]
+        self.create_character_event_story_image: str = config_dict.get(
+            "create_character_event_story_image"
+        )
+        self.create_character_event_story_text: str = config_dict[
+            "create_character_event_story_text"
+        ]
         self.fresh_water_resource_id: str = config_dict["fresh_water_resource_id"]
         self.liquid_material_id: str = config_dict["liquid_material_id"]
         self.fill_with_material_ids: typing.List[str] = config_dict["fill_with_material_ids"]
@@ -74,6 +81,10 @@ class GameConfig:
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
         self._fill_resource_actions(config_dict)
+
+    @property
+    def folder_path(self) -> str:
+        return self._folder_path
 
     @property
     def materials(self) -> typing.Dict[str, MaterialDescriptionModel]:
@@ -284,7 +295,11 @@ class GameConfig:
 class Game:
     def __init__(self, kernel: "Kernel", config_folder: str) -> None:
         self._kernel = kernel
-        self._config = GameConfig(self._kernel, toml.load(path.join(config_folder, "game.toml")))
+        self._config = GameConfig(
+            self._kernel,
+            toml.load(path.join(config_folder, "game.toml")),
+            folder_path=config_folder,
+        )
         self._stuff = self._create_stuff_manager(
             path.join(config_folder, "stuff.toml"), config=self._config
         )

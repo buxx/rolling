@@ -1,5 +1,8 @@
 action_points_per_turn = 24
-create_character_messages = ["You wake up on a beach", "You feel thirsty ..."]
+create_character_event_title = "You wake up on a beach"
+create_character_event_story_image = "beach_intro.png"
+create_character_event_story_text = """Quel mal de crâne !
+Vous ne vous rappelez pas de grand chose..."""
 fresh_water_resource_id = "FRESH_WATER"
 liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]

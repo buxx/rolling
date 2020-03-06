@@ -1,7 +1,9 @@
 # coding: utf-8
 import typing
 
-from rolling.exception import ImpossibleAction, ConfigurationError, UnknownStuffError
+from rolling.exception import ConfigurationError
+from rolling.exception import ImpossibleAction
+from rolling.exception import UnknownStuffError
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

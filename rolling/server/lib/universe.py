@@ -1,7 +1,7 @@
 import datetime
+import typing
 
 from rolling.server.document.universe import UniverseStateDocument
-import typing
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -21,7 +21,9 @@ class UniverseLib:
 
     def add_new_state(self, commit: bool = True) -> None:
         last_state = self.get_last_state()
-        self._kernel.server_db_session.add(UniverseStateDocument(turn=last_state.turn+1, turned_at=datetime.datetime.utcnow()))
+        self._kernel.server_db_session.add(
+            UniverseStateDocument(turn=last_state.turn + 1, turned_at=datetime.datetime.utcnow())
+        )
 
         if commit:
             self._kernel.server_db_session.commit()
