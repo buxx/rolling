@@ -20,6 +20,10 @@
         probability = 100.0
         maximum = 100000.0
         regeneration = 5000.0
+      [ZONE_PROPERTIES.BEACH.RESOURCES.COCONUT]
+        probability = 100.0
+        maximum = 500.0
+        regeneration = 20.0
 
     [ZONE_PROPERTIES.BEACH.STUFFS]
       [ZONE_PROPERTIES.BEACH.STUFFS.HARE]  # bernard l'hermite, u
@@ -128,6 +132,10 @@
         probability = 100.0
         maximum = 15000.0
         regeneration = 5.0
+      [ZONE_PROPERTIES.JUNGLE.RESOURCES.BANANA]
+        probability = 100.0
+        maximum = 3000.0
+        regeneration = 50.0
 
     [ZONE_PROPERTIES.JUNGLE.STUFFS]
       # TODO: ANIMAUX DE LA JUNGLE

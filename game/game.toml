@@ -151,6 +151,22 @@ day_turn_every = 86400  # 24 hours
     clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
+  [resources.BANANA]
+    name = "Banane"
+    weight=125.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 0.1
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+  [resources.COCONUT]
+    name = "Noix de coco"
+    weight=250.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 0.35
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
   [resources.PAGUROIDEA]
     name = "Bernard-l'hermite"
     weight=100.0  # g
@@ -285,6 +301,13 @@ day_turn_every = 86400  # 24 hours
     accept_resources = ["BERRY", "NUT"]
     character_effects = ["HUNGRY_SATISFIED"]
     require = 1.0  # l
+    cost = 0.0
+
+  [ACTIONS.EAT_FRUITS]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["BANANA", "COCONUT"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 4.0  # U
     cost = 0.0
 
   [ACTIONS.EAT_MIDDLE_CRUSTACEAN]
@@ -468,8 +491,9 @@ day_turn_every = 86400  # 24 hours
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="BERRY", quantity=4.0, probability=100.0},
-      {resource="NUT", quantity=5.0, probability=100.0},
+      {resource="BERRY", quantity=4.0, probability=90.0},
+      {resource="BANANA", quantity=20.0, probability=90.0},
+      {resource="COCONUT", quantity=10.0, probability=90.0},
     ]
     cost = 6.0
 
