@@ -2,12 +2,13 @@
 import typing
 
 from rolling.exception import RollingError
+from rolling.map.source import ZoneMap
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.world import Resource
 from rolling.model.world import World
-from rolling.model.zone import ZoneProperties
+from rolling.model.zone import ZoneProperties, ZoneTileProperties
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
@@ -17,20 +18,69 @@ if typing.TYPE_CHECKING:
 
 class ZoneState:
     def __init__(
-        self, kernel: "Kernel", world_row_i: int, world_col_i: int, properties: ZoneProperties
+        self,
+        kernel: "Kernel",
+        world_row_i: int,
+        world_col_i: int,
+        properties: ZoneProperties,
+        zone_map: ZoneMap,
     ) -> None:
         self._kernel = kernel
         self._world_row_i = world_row_i
         self._world_col_i = world_col_i
         self._properties = properties
+        self._zone_map = zone_map
+
+    @property
+    def zone_map(self) -> ZoneMap:
+        return self._zone_map
 
     def is_there_stuff(self, stuff_id: str) -> bool:
         # TODO BS 2019-09-26: Code real state of stuff/resources (with regeneration, etc)
         return stuff_id in self._properties.stuff_ids
 
-    def is_there_resource(self, stuff_id: str) -> bool:
+    def is_there_resource(
+        self,
+        resource_id: str,
+        check_from_absolute: bool = True,
+        check_from_tiles: bool = True,
+    ) -> bool:
+        assert check_from_absolute or check_from_tiles
+
         # TODO BS 2019-09-26: Code real state of stuff/resources (with regeneration, etc)
-        return stuff_id in self._properties.resource_ids
+        if check_from_absolute:
+            return resource_id in self._properties.resource_ids
+
+        if check_from_tiles:
+            for zone_tile_type in self._zone_map.source.geography.tile_type_positions.keys():
+                tiles_properties = self._kernel.game.world_manager.world.tiles_properties
+                try:
+                    zone_tile_properties: ZoneTileProperties = tiles_properties[zone_tile_type]
+                except KeyError:
+                    continue
+
+                for tile_produce in zone_tile_properties.produce:
+                    if resource_id == tile_produce.resource.id:
+                        return True
+            return False
+
+        raise Exception("should not be here")
+
+    def reduce_resource(self, resource_id: str, quantity: float, commit: bool = True) -> None:
+        pass  # TODO: code resource stock
+
+    def reduce_resource_from_tile(
+        self,
+        resource_id: str,
+        quantity: float,
+        tile_row_i: int,
+        tile_col_i: int,
+        commit: bool = True,
+    ) -> None:
+        pass  # TODO: code resource stock
+
+    def reduce_stuff(self, stuff_id: str, quantity: float, commit: bool = True) -> None:
+        pass  # TODO: code resource stock
 
 
 class WorldManager:
@@ -126,19 +176,11 @@ class WorldManager:
         zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
         zone_type = typing.cast(ZoneMapTileType, zone_type)
         zone_properties = self.get_zone_properties(zone_type)
+        zone_map = self._kernel.tile_maps_by_position[(world_row_i, world_col_i)]
         return ZoneState(
             self._kernel,
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             properties=zone_properties,
+            zone_map=zone_map,
         )
-
-    def is_there_stuff_in_zone(self, world_row_i: int, world_col_i: int, stuff_id: str) -> bool:
-        zone_state = self.get_zone_state(world_row_i, world_col_i)
-        return zone_state.is_there_stuff(stuff_id)
-
-    def is_there_resource_in_zone(
-        self, world_row_i: int, world_col_i: int, resource_id: str
-    ) -> bool:
-        zone_state = self.get_zone_state(world_row_i, world_col_i)
-        return zone_state.is_there_resource(resource_id)

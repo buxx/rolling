@@ -673,3 +673,17 @@ day_turn_every = 86400  # 24 hours
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = ["HEAT_UP_LOW_TEMP"]
   cost = 2.0
+
+  [ACTIONS.SEARCH_WOOD]
+    name = "Chercher du bois (construction/artisanat)"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="WOOD", quantity_per_hour=0.01, random_loss=30.0},
+    ]
+    cost = 0.0

@@ -5,6 +5,8 @@ import typing
 from serpyco import number_field
 
 from rolling.map.type.base import MapTileType
+from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import ZoneGenerationStuff
 
 
@@ -82,6 +84,19 @@ class ZoneProperties:
     def stuff_ids(self) -> typing.Iterator[str]:
         for zone_stuff in self.stuffs:
             yield zone_stuff.stuff_id
+
+
+@dataclasses.dataclass
+class ZoneMapTileProduction:
+    resource: ResourceDescriptionModel
+    start_capacity: float
+    regeneration: float
+
+
+@dataclasses.dataclass
+class ZoneTileProperties:
+    tile_type: typing.Type[ZoneMapTileType]
+    produce: typing.List[ZoneMapTileProduction]
 
 
 @dataclasses.dataclass

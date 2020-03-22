@@ -212,3 +212,20 @@
 
     [ZONE_PROPERTIES.HILL.GENERATION]
       count = 0
+
+[TILES]
+  [TILES.LEAF_TREE]
+    produce = [
+      {resource="WOOD", start_capacity=2.0, regeneration=0.001},
+      {resource="BRANCHES", start_capacity=1.0, regeneration=0.001},
+    ]
+  [TILES.TROPICAL_TREE]
+    produce = [
+      {resource="WOOD", start_capacity=2.5, regeneration=0.002},
+      {resource="BRANCHES", start_capacity=1.5, regeneration=0.002},
+    ]
+  [TILES.DEAD_TREE]
+    produce = [
+      {resource="WOOD", start_capacity=2.0, regeneration=0.0},
+      {resource="BRANCHES", start_capacity=1.0, regeneration=0.0},
+    ]

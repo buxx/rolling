@@ -180,6 +180,7 @@ class Kernel:
     def world_map_source(self, value: WorldMapSource) -> None:
         self._world_map_source = value
 
+    # TODO: rename into zone
     @property
     def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
         if self._world_map_source is None:

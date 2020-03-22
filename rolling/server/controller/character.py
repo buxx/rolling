@@ -184,7 +184,7 @@ class CharacterController(BaseController):
                     text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
                 ),
                 Part(
-                    text=f"Encombrement: {inventory.clutter} ({max_clutter} max{clutter_overcharge})"
+                    text=f"Encombrement: {round(inventory.clutter, 2)} ({round(max_clutter, 2)} max{clutter_overcharge})"
                 ),
                 Part(text=f"Sac(s): {bags_string}"),
                 Part(text=" "),

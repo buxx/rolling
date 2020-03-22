@@ -4,7 +4,8 @@ import typing
 
 from serpyco import nested_field
 
-from rolling.model.zone import WorldTileTypeModel
+from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.zone import WorldTileTypeModel, ZoneTileProperties
 from rolling.model.zone import ZoneProperties
 
 
@@ -22,6 +23,7 @@ class WorldMapModel:
 @dataclasses.dataclass
 class World:
     zones_properties: typing.List[ZoneProperties]
+    tiles_properties: typing.Dict[typing.Type[ZoneMapTileType], ZoneTileProperties]
 
 
 @dataclasses.dataclass
