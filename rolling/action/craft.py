@@ -141,16 +141,11 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        # Consider action ca be possible (displayed in interface) if at least one of required
-        # resources is owned by character
-        carried = self._kernel.resource_lib.get_carried_by(character.id)
-        carried_ids = [r.id for r in carried]
-
         for require in self._description.properties["require"]:
-            if "resource" in require and require["resource"] in carried_ids:
+            if "resource" in require and resource_id in require["resource"]:
                 return
 
-        raise ImpossibleAction("Aucune resource requise n'est possédé")
+        raise ImpossibleAction("non concerné")
 
     def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput

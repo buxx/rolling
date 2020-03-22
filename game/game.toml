@@ -500,9 +500,26 @@ day_turn_every = 86400  # 24 hours
       {stuff="WOOD_SPEAR", quantity=1.0},
     ]
     require = [
-      {resource="WOOD", quantity=0.01}
+      {resource="WOOD", quantity=0.002}
     ]
     cost = 4.0
+
+  [ACTIONS.CRAFT_WOOD_SPEAR_STONE]
+    name = "Fabriquer une lance de bois et pierre"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="WOOD_SPEAR_STONE", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.002}
+    ]
+    cost = 6.0
 
   [ACTIONS.CRAFT_WOOD_SPEAR_STRENGHTHENED]
     name = "Améliorer en lance de bois renforcé"
@@ -521,6 +538,57 @@ day_turn_every = 86400  # 24 hours
     ]
     cost = 5.0
 
+  [ACTIONS.CRAFT_WOOD_ASSEGAI]
+    name = "Fabriquer une sagaie de bois"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="WOOD_ASSEGAI", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.001}
+    ]
+    cost = 4.0
+
+  [ACTIONS.CRAFT_STONE_HAXE]
+    name = "Fabriquer une hache de bois"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="STONE_HAXE", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.002}
+    ]
+    cost = 6.0
+
+  [ACTIONS.CRAFT_LITTLE_SKIN_CANTEEN]
+    name = "Fabriquer une petite gourde en peaux"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="LITTLE_SKIN_CANTEEN", quantity=1.0},
+    ]
+    require = [
+      {resource="LITTLE_ANIMAL_SKIN", quantity=2}
+    ]
+    cost = 6.0
+
   [ACTIONS.MAKE_SMOKED_MEAT]
     name = "Faire de la viande fumée"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
@@ -536,6 +604,22 @@ day_turn_every = 86400  # 24 hours
     required_resource_id = "RAW_MEAT"
     cost_per_unit = 0.0001
     cost = 3.0
+
+  [ACTIONS.MAKE_BRANCHES_FROM_WOOD]
+    name = "Faire du petit bois"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="BRANCHES", coeff=0.9}
+    ]
+    required_resource_id = "WOOD"
+    cost_per_unit = 0.001
+    cost = 0.0
 
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
     name = "Statuette de femme enceinte"

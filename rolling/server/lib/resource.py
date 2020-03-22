@@ -4,6 +4,7 @@ import typing
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.elements import and_
 
+from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
 from rolling.model.character import CharacterModel
@@ -219,7 +220,11 @@ class ResourceLib:
 
         for description in resource_description.descriptions:
             action = self._action_factory.get_with_resource_action(description)
-            actions.extend(action.get_character_actions(character, resource_id))
+            try:
+                action.check_is_possible(character, resource_id=resource_id)
+                actions.extend(action.get_character_actions(character, resource_id))
+            except ImpossibleAction:
+                pass
 
         return actions
 
