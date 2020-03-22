@@ -151,4 +151,3 @@ class ZoneMap:
     row_i: int
     col_i: int
     source: ZoneMapSource
-

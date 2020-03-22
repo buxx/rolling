@@ -76,17 +76,14 @@ class SearchFoodAction(CharacterAction):
         zone_available_production_resource_ids: typing.List[str] = []
         zone_available_production_stuff_ids: typing.List[str] = []
         zone_state = self._kernel.game.world_manager.get_zone_state(
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
+            world_row_i=character.world_row_i, world_col_i=character.world_col_i
         )
 
         for production in productions:
             if "resource" in production:
                 resource_id = production["resource"]
                 if zone_state.is_there_resource(
-                    resource_id,
-                    check_from_absolute=True,
-                    check_from_tiles=False,
+                    resource_id, check_from_absolute=True, check_from_tiles=False
                 ):
                     zone_available_production_resource_ids.append(resource_id)
                     production_per_resource_ids[resource_id] = production

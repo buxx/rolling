@@ -5,8 +5,9 @@ import typing
 from serpyco import nested_field
 
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.zone import WorldTileTypeModel, ZoneTileProperties
+from rolling.model.zone import WorldTileTypeModel
 from rolling.model.zone import ZoneProperties
+from rolling.model.zone import ZoneTileProperties
 
 
 @dataclasses.dataclass

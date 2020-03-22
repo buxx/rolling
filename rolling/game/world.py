@@ -8,7 +8,8 @@ from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.world import Resource
 from rolling.model.world import World
-from rolling.model.zone import ZoneProperties, ZoneTileProperties
+from rolling.model.zone import ZoneProperties
+from rolling.model.zone import ZoneTileProperties
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
@@ -40,10 +41,7 @@ class ZoneState:
         return stuff_id in self._properties.stuff_ids
 
     def is_there_resource(
-        self,
-        resource_id: str,
-        check_from_absolute: bool = True,
-        check_from_tiles: bool = True,
+        self, resource_id: str, check_from_absolute: bool = True, check_from_tiles: bool = True
     ) -> bool:
         assert check_from_absolute or check_from_tiles
 

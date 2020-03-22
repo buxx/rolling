@@ -25,10 +25,12 @@ from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
-from rolling.model.zone import GenerationInfo, ZoneTileProperties, ZoneMapTileProduction
+from rolling.model.zone import GenerationInfo
+from rolling.model.zone import ZoneMapTileProduction
 from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneResource
 from rolling.model.zone import ZoneStuff
+from rolling.model.zone import ZoneTileProperties
 from rolling.server.action import ActionFactory
 from rolling.types import ActionType
 from rolling.types import TurnMode
@@ -367,14 +369,15 @@ class Game:
                         resource=self.config.resources[produce_raw["resource"]],
                         start_capacity=produce_raw["start_capacity"],
                         regeneration=produce_raw["regeneration"],
-                    ) for produce_raw in tile_properties_raw["produce"]
-                ]
+                    )
+                    for produce_raw in tile_properties_raw["produce"]
+                ],
             )
 
-        return WorldManager(self._kernel, World(
-            zones_properties=zones_properties,
-            tiles_properties=tiles_properties,
-        ))
+        return WorldManager(
+            self._kernel,
+            World(zones_properties=zones_properties, tiles_properties=tiles_properties),
+        )
 
     def _get_generation_info(self, zone_data: dict) -> GenerationInfo:
         generation_data = zone_data["GENERATION"]

@@ -823,14 +823,14 @@ class CharacterController(BaseController):
             items=[
                 Part(
                     text=f"Pour ce tour-ci, il reste {round(character_doc.action_points, 2)} "
-                         f"points d'action à {character_doc.name}.",
+                    f"points d'action à {character_doc.name}."
                 ),
                 Part(
                     text="Qu'est-ce que sont les PA ? Les points d'actions, c'est un certain "
-                         "nombre d'unité de temps dont dispose votre personnage pour effectuer"
-                         "ses actions d'ici le prochain passage de tour. Les économiser revient à "
-                         "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
-                         "personnage !"
+                    "nombre d'unité de temps dont dispose votre personnage pour effectuer"
+                    "ses actions d'ici le prochain passage de tour. Les économiser revient à "
+                    "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
+                    "personnage !"
                 ),
             ],
         )
@@ -845,14 +845,14 @@ class CharacterController(BaseController):
             items=[
                 Part(
                     text=f"Pour ce tour-ci, il reste {round(character_doc.action_points, 2)} "
-                         f"points d'action à {character_doc.name}.",
+                    f"points d'action à {character_doc.name}."
                 ),
                 Part(
                     text="Qu'est-ce que sont les PA ? Les points d'actions, c'est un certain "
-                         "nombre d'unité de temps dont dispose votre personnage pour effectuer "
-                         "ses actions d'ici le prochain passage de tour. Les économiser revient à "
-                         "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
-                         "personnage !"
+                    "nombre d'unité de temps dont dispose votre personnage pour effectuer "
+                    "ses actions d'ici le prochain passage de tour. Les économiser revient à "
+                    "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
+                    "personnage !"
                 ),
             ],
         )
@@ -867,11 +867,11 @@ class CharacterController(BaseController):
             items=[
                 Part(
                     text=f"Dans exactement {next_turn_in_str}, le passage de tour sera effectué. "
-                         f"Cela signifie que le temps passe dans le jeu: l'herbe pousse, "
-                         f"l'eau coule, les feux s'éteignent s'il n'ont plus de bois à bruler ... "
-                         f"Mais cela signifie aussi que les personnages perdent des points de vie "
-                         f"s'il n'ont pas a boire ou a manger par exemple !"
-                ),
+                    f"Cela signifie que le temps passe dans le jeu: l'herbe pousse, "
+                    f"l'eau coule, les feux s'éteignent s'il n'ont plus de bois à bruler ... "
+                    f"Mais cela signifie aussi que les personnages perdent des points de vie "
+                    f"s'il n'ont pas a boire ou a manger par exemple !"
+                )
             ],
         )
 

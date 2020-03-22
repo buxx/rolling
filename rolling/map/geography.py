@@ -2,7 +2,8 @@
 import random
 import typing
 
-from rolling.exception import SourceLoadError, TileTypeNotFound
+from rolling.exception import SourceLoadError
+from rolling.exception import TileTypeNotFound
 from rolling.map.legend import MapLegend
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
@@ -21,7 +22,9 @@ class MapGeography:
         missing_right_tile_str: typing.Optional[str] = None,
     ) -> None:
         self._rows: typing.List[typing.List[typing.Type[WorldMapTileType]]] = []
-        self._tile_type_positions: typing.Dict[typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]] = {}
+        self._tile_type_positions: typing.Dict[
+            typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]
+        ] = {}
 
         length = self._get_max_length(raw_lines)
         for row_i, raw_line in enumerate(raw_lines):
@@ -66,7 +69,9 @@ class MapGeography:
         return self._height
 
     @property
-    def tile_type_positions(self) -> typing.Dict[typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]]:
+    def tile_type_positions(
+        self
+    ) -> typing.Dict[typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]]:
         return self._tile_type_positions
 
 
@@ -76,7 +81,7 @@ class WorldMapGeography(MapGeography):
 
 class ZoneMapGeography(MapGeography):
     def get_random_tile_position_containing_resource(
-        self, resource_id: str, kernel: "Kernel",
+        self, resource_id: str, kernel: "Kernel"
     ) -> typing.Tuple[int, int]:
         for tile_type, tile_positions in self.tile_type_positions.items():
             tiles_properties = kernel.game.world_manager.world.tiles_properties
