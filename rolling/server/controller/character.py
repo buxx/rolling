@@ -144,6 +144,7 @@ class CharacterController(BaseController):
                 Part(
                     text=f"{name}{description}",
                     is_link=True,
+                    align="left",
                     form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
                         character_id=hapic_data.path.character_id, stuff_id=stuff.id
                     ),
@@ -155,6 +156,7 @@ class CharacterController(BaseController):
                 Part(
                     text=f"{resource.get_full_description(self._kernel)}",
                     is_link=True,
+                    align="left",
                     form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
                         character_id=hapic_data.path.character_id, resource_id=resource.id
                     ),
