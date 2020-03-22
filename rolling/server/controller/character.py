@@ -743,6 +743,14 @@ class CharacterController(BaseController):
             clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
         )
 
+    def _get_next_turn_str_value(self) -> str:
+        last_state = self._kernel.universe_lib.get_last_state()
+        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
+        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
+        m, s = divmod(next_turn_in_seconds, 60)
+        h, m = divmod(m, 60)
+        return f"{h}h{m}m"
+
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ListOfStrModel)
@@ -751,13 +759,7 @@ class CharacterController(BaseController):
 
         hungry = "oui" if character.feel_hungry else "non"
         thirsty = "oui" if character.feel_thirsty else "non"
-
-        last_state = self._kernel.universe_lib.get_last_state()
-        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
-        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
-        m, s = divmod(next_turn_in_seconds, 60)
-        h, m = divmod(m, 60)
-        next_turn_in_str = f"{h}h{m}m"
+        next_turn_in_str = self._get_next_turn_str_value()
 
         can_drink_str = "Non"
         if character_can_drink_in_its_zone(
@@ -767,13 +769,13 @@ class CharacterController(BaseController):
 
         return ListOfStrModel(
             [
-                f"PV: {round(character.life_points, 1)}",
-                f"PA: {round(character.action_points, 1)}",
-                f"Faim: {hungry}",
-                f"Soif: {thirsty}",
-                "",
-                f"Passage: {next_turn_in_str}",
-                f"De quoi boire: {can_drink_str}",
+                (f"PV: {round(character.life_points, 1)}", None),
+                (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
+                (f"Faim: {hungry}", None),
+                (f"Soif: {thirsty}", None),
+                ("", None),
+                (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
+                (f"De quoi boire: {can_drink_str}", None),
             ]
         )
 
@@ -805,6 +807,68 @@ class CharacterController(BaseController):
                     label="Créer un nouveau personnage",
                     form_action="/_describe/character/create",
                     is_link=True,
+                ),
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_ap(self, request: Request, hapic_data: HapicData) -> Description:
+        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        return Description(
+            title=f"Points d'actions (PA) disponibles",
+            items=[
+                Part(
+                    text=f"Pour ce tour-ci, il reste {round(character_doc.action_points, 2)} "
+                         f"points d'action à {character_doc.name}.",
+                ),
+                Part(
+                    text="Qu'est-ce que sont les PA ? Les points d'actions, c'est un certain "
+                         "nombre d'unité de temps dont dispose votre personnage pour effectuer"
+                         "ses actions d'ici le prochain passage de tour. Les économiser revient à "
+                         "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
+                         "personnage !"
+                ),
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_ap(self, request: Request, hapic_data: HapicData) -> Description:
+        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        return Description(
+            title=f"Points d'actions (PA) disponibles",
+            items=[
+                Part(
+                    text=f"Pour ce tour-ci, il reste {round(character_doc.action_points, 2)} "
+                         f"points d'action à {character_doc.name}.",
+                ),
+                Part(
+                    text="Qu'est-ce que sont les PA ? Les points d'actions, c'est un certain "
+                         "nombre d'unité de temps dont dispose votre personnage pour effectuer "
+                         "ses actions d'ici le prochain passage de tour. Les économiser revient à "
+                         "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
+                         "personnage !"
+                ),
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_turn(self, request: Request, hapic_data: HapicData) -> Description:
+        next_turn_in_str = self._get_next_turn_str_value()
+        return Description(
+            title=f"Passage de tour",
+            items=[
+                Part(
+                    text=f"Dans exactement {next_turn_in_str}, le passage de tour sera effectué. "
+                         f"Cela signifie que le temps passe dans le jeu: l'herbe pousse, "
+                         f"l'eau coule, les feux s'éteignent s'il n'ont plus de bois à bruler ... "
+                         f"Mais cela signifie aussi que les personnages perdent des points de vie "
+                         f"s'il n'ont pas a boire ou a manger par exemple !"
                 ),
             ],
         )
@@ -865,5 +929,7 @@ class CharacterController(BaseController):
                 web.get("/character/{character_id}/resume_texts", self.get_resume_texts),
                 web.get("/character/{character_id}/dead", self.is_dead),
                 web.post("/character/{character_id}/post_mortem", self.get_post_mortem),
+                web.post("/character/{character_id}/AP", self.describe_ap),
+                web.post("/character/{character_id}/turn", self.describe_turn),
             ]
         )

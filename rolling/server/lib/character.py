@@ -108,7 +108,6 @@ class CharacterLib:
 
     def get_document(self, id_: str, dead: bool = False) -> CharacterDocument:
         query = self.alive_query if not dead else self.dead_query
-
         return query.filter(CharacterDocument.id == id_).one()
 
     def get_document_by_name(self, name: str) -> CharacterDocument:

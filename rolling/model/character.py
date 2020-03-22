@@ -170,4 +170,4 @@ class CharacterEventModel:
 
 @dataclasses.dataclass
 class ListOfStrModel:
-    items: typing.List[str]
+    items: typing.List[typing.Tuple[str, typing.Optional[str]]]
