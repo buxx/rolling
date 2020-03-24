@@ -231,6 +231,14 @@ day_turn_every = 86400  # 24 hours
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
+  [resources.RAW_STONE]
+    name = "Pierre brute"
+    weight=2500.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
@@ -442,9 +450,43 @@ day_turn_every = 86400  # 24 hours
     cost = 0.0  # depending on build, progres ...
 
   [ACTIONS.BUILD_CAMP_FIRE]
+    # FIXME BS: add common (to begin and continue progress)
     actions = ["BEGIN_BUILD"]
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
+
+  [ACTIONS.BUILD_BRANCHES_FENCE]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "BRANCHES_FENCE"
+    cost = 1.0
+
+  [ACTIONS.BUILD_WOOD_FENCE]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "WOOD_FENCE"
+    cost = 3.0
+
+  [ACTIONS.BUILD_STONE_WALL]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "STONE_WALL"
+    cost = 4.0
 
   [ACTIONS.HUNT_CRUSTACEANS]
     name = "Chercher des crustacés"
@@ -663,17 +705,6 @@ day_turn_every = 86400  # 24 hours
     cost = 2.0
     link_group_name = "Artisanat d'art"
 
-[build]
-[build.CAMP_FIRE]
-  name = "Feux de camp"
-  char = "⍟"
-  building_char = "x"
-  build_require_resources = [{resource="BRANCHES", quantity=0.001}]
-  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
-  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
-  abilities = ["HEAT_UP_LOW_TEMP"]
-  cost = 2.0
-
   [ACTIONS.SEARCH_WOOD]
     name = "Chercher du bois (construction/artisanat)"
     actions = ["SEARCH_MATERIAL"]
@@ -687,3 +718,69 @@ day_turn_every = 86400  # 24 hours
       {resource="WOOD", quantity_per_hour=0.01, random_loss=30.0},
     ]
     cost = 0.0
+
+  [ACTIONS.SEARCH_BRANCHES]
+    name = "Chercher du bois (petit bois)"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="BRANCHES", quantity_per_hour=0.01, random_loss=30.0},
+    ]
+    cost = 0.0
+
+  [ACTIONS.SEARCH_RAW_STONE]
+    name = "Chercher de la pierre brute (petite constructions)"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_STONE", quantity_per_hour=100, random_loss=30.0},
+    ]
+    cost = 0.0
+
+[build]
+[build.CAMP_FIRE]
+  name = "Feux de camp"
+  char = "⍟"
+  building_char = "x"
+  build_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  abilities = ["HEAT_UP_LOW_TEMP"]
+  cost = 2.0
+[build.BRANCHES_FENCE]
+  name = "Palissade de branches"
+  char = "%"
+  building_char = "x"
+  build_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+[build.WOOD_FENCE]
+  name = "Palissade de bois"
+  char = "£"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=0.01}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+[build.STONE_WALL]
+  name = "Mur de pierre"
+  char = "§"
+  building_char = "x"
+  build_require_resources = [{resource="RAW_STONE", quantity=100}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0

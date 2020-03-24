@@ -11,6 +11,8 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_build_action_url
+from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import MissingResource
 from rolling.exception import NoCarriedResource
@@ -34,6 +36,9 @@ if typing.TYPE_CHECKING:
 
 
 def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:
+    if not build_doc.under_construction:
+        return 100
+
     build_description = kernel.game.config.builds[build_doc.build_id]
     build_spent_ap = float(build_doc.ap_spent)
     return (build_spent_ap * 100) / build_description.cost
@@ -87,12 +92,13 @@ class BeginBuildAction(CharacterAction):
     def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
-        build_doc = self._kernel.build_lib.place_start_build(
+        build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
             build_id=build_description.id,
+            under_construction=True,
         )
         self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=self.get_cost(character, input_)
@@ -416,10 +422,87 @@ class ConstructBuildAction(WithBuildAction):
         )
         self._kernel.server_db_session.commit()
 
-        # FIXME BS NOW: deux erreurs:
-        # * progression faite et reste des resources: mauvais calcul pour pouvoir en déposer encore
-        # * progression faite et reste des resources: mauvais calcul de la progression max possible
-
         return Description(
             title=f"Travail effectué", items=[Part(label="Continuer", go_back_zone=True)]
+        )
+
+
+class BuildAction(CharacterAction):
+    input_model = EmptyModel
+    input_model_serializer = serpyco.Serializer(EmptyModel)
+
+    @classmethod
+    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties["build_id"] = action_config_raw["build"]
+        return properties
+
+    def check_is_possible(self, character: "CharacterModel") -> None:
+        pass
+
+    def check_request_is_possible(self, character: "CharacterModel", input_: EmptyModel) -> None:
+        check_common_is_possible(
+            kernel=self._kernel, description=self._description, character=character
+        )
+        build_id = self._description.properties["build_id"]
+        build_description = self._kernel.game.config.builds[build_id]
+
+        for require in build_description.build_require_resources:
+            if not self._kernel.resource_lib.have_resource(
+                character.id, resource_id=require.resource_id, quantity=require.quantity
+            ):
+                resource_properties = self._kernel.game.config.resources[require.resource_id]
+                required_quantity_str = quantity_to_str(
+                    require.quantity, resource_properties.unit, self._kernel
+                )
+                raise ImpossibleAction(
+                    f"Vous ne possedez pas assez de {resource_properties.name} "
+                    f"({required_quantity_str} requis)"
+                )
+
+    def get_character_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        build_id = self._description.properties["build_id"]
+        build_description = self._kernel.game.config.builds[build_id]
+        return [
+            CharacterActionLink(
+                name=build_description.name,
+                link=get_character_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.BUILD,
+                    action_description_id=self._description.id,
+                    query_params={},
+                ),
+                cost=self.get_cost(character),
+            )
+        ]
+
+    def perform(self, character: "CharacterModel", input_: EmptyModel) -> Description:
+        build_id = self._description.properties["build_id"]
+        build_description = self._kernel.game.config.builds[build_id]
+        self._kernel.build_lib.place_build(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=character.zone_row_i,
+            zone_col_i=character.zone_col_i,
+            build_id=build_description.id,
+            under_construction=False,
+            commit=False,
+        )
+        self._kernel.character_lib.reduce_action_points(
+            character_id=character.id, cost=self.get_cost(character, input_), commit=False
+        )
+        for require in build_description.build_require_resources:
+            self._kernel.resource_lib.reduce_carried_by(
+                character.id,
+                resource_id=require.resource_id,
+                quantity=require.quantity,
+                commit=False,
+            )
+        self._kernel.server_db_session.commit()
+
+        return Description(
+            title=f"{build_description.name} construit",
+            items=[Part(text="Continuer", go_back_zone=True)],
         )

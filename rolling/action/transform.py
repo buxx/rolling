@@ -136,6 +136,22 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             )
             if carried_resource.quantity < input_.quantity:
                 raise ImpossibleAction(f"Vous n'en possédez pas assez")
+            cost = self.get_cost(character, resource_id=resource_id, input_=input_)
+            if character.action_points < cost:
+                raise ImpossibleAction(
+                    f"{character.name} no possède pas assez de points d'actions "
+                    f"({round(cost, 2)} nécessaires)"
+                )
+
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        input_: typing.Optional[QuantityModel] = None,
+    ) -> typing.Optional[float]:
+        if input_ and input_.quantity is not None:
+            return self._description.base_cost * input_.quantity
+        return self._description.base_cost
 
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
@@ -157,7 +173,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: QuantityModel
     ) -> Description:
-        base_cost = self.get_cost(character, resource_id=resource_id, input_=input_)
+        base_cost = self.get_cost(character, resource_id=resource_id)
         cost_per_unit = self._description.properties["cost_per_unit"]
         required_resource_description = self._kernel.game.config.resources[
             self._description.properties["required_resource_id"]
@@ -197,7 +213,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                     )
                 ],
             )
-
+        cost = self.get_cost(character, resource_id=resource_id, input_=input_)
         self._kernel.resource_lib.reduce_carried_by(
             character.id, carried_resource.id, quantity=input_.quantity, commit=False
         )
@@ -215,6 +231,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 quantity=produce_quantity,
                 commit=False,
             )
+        self._kernel.character_lib.reduce_action_points(
+            character_id=character.id, cost=cost, commit=False
+        )
         self._kernel.server_db_session.commit()
 
         parts = [Part(text=txt) for txt in produced_resources_txts]

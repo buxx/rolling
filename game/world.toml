@@ -95,6 +95,13 @@
     move_cost = 8.0
 
 
+    [ZONE_PROPERTIES.MOUNTAIN.RESOURCES]
+      [ZONE_PROPERTIES.MOUNTAIN.RESOURCES.RAW_STONE]
+        probability = 100.0  # probability to be available on x,y zone at world init
+        maximum = 100000000.0  # maximum quantity on x,y zone
+        regeneration = 10000.0  # quatity generation per turn
+
+
     [ZONE_PROPERTIES.MOUNTAIN.STUFFS]
       [ZONE_PROPERTIES.MOUNTAIN.STUFFS.HARE]
         probability = 50.0  # probability to be available on x,y zone at world init

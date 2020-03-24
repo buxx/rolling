@@ -20,7 +20,6 @@ from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
-from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
@@ -58,8 +57,15 @@ class BaseCraftStuff:
         character: "CharacterModel",
         description: ActionDescriptionModel,
         input_: CraftInput,
+        cost: float,
         dry_run: bool = True,
     ) -> None:
+        if character.action_points < cost:
+            raise ImpossibleAction(
+                f"{character.name} no possède pas assez de points d'actions "
+                f"({round(cost, 2)} nécessaires)"
+            )
+
         carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
         carried_stuffs = self._kernel.stuff_lib.get_carried_by(character.id)
 
@@ -128,7 +134,9 @@ class BaseCraftStuff:
                 self._kernel.stuff_lib.set_carried_by__from_doc(
                     stuff_doc, character_id=character.id, commit=False
                 )
-
+        self._kernel.character_lib.reduce_action_points(
+            character_id=character.id, cost=cost, commit=False
+        )
         self._kernel.server_db_session.commit()
 
 
@@ -155,7 +163,13 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             kernel=self._kernel, description=self._description, character=character
         )
         if input_.quantity is not None:
-            self._perform(character, description=self._description, input_=input_, dry_run=True)
+            self._perform(
+                character,
+                description=self._description,
+                input_=input_,
+                cost=self.get_cost(character, resource_id=resource_id, input_=input_),
+                dry_run=True,
+            )
 
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
@@ -179,8 +193,18 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             )
         ]
 
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        input_: typing.Optional[CraftInput] = None,
+    ) -> typing.Optional[float]:
+        if input_ and input_.quantity:
+            return self._description.base_cost * input_.quantity
+        return self._description.base_cost
+
     def perform(
-        self, character: "CharacterModel", resource_id: str, input_: typing.Any
+        self, character: "CharacterModel", resource_id: str, input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
             return Description(
@@ -203,8 +227,13 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                 ],
             )
 
-        self._perform(character, description=self._description, input_=input_, dry_run=True)
-        self._perform(character, description=self._description, input_=input_, dry_run=False)
+        cost = self.get_cost(character, resource_id=resource_id, input_=input_)
+        self._perform(
+            character, description=self._description, input_=input_, cost=cost, dry_run=True
+        )
+        self._perform(
+            character, description=self._description, input_=input_, cost=cost, dry_run=False
+        )
         return Description(
             title="Action effectué avec succès",
             items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
@@ -231,15 +260,28 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
 
         raise ImpossibleAction("Aucune resource requise n'est possédé")
 
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: typing.Optional[typing.Any] = None,
+    ) -> typing.Optional[float]:
+        if input_ and input_.quantity:
+            return self._description.base_cost * input_.quantity
+        return self._description.base_cost
+
     def check_request_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+        self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> None:
         self.check_is_possible(character, stuff=stuff)
         check_common_is_possible(
             kernel=self._kernel, description=self._description, character=character
         )
         if input_.quantity is not None:
-            self._perform(character, description=self._description, input_=input_, dry_run=True)
+            cost = self.get_cost(character, stuff=stuff, input_=input_)
+            self._perform(
+                character, description=self._description, input_=input_, cost=cost, dry_run=True
+            )
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -264,7 +306,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         ]
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
+        self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
             return Description(
@@ -287,8 +329,13 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                 ],
             )
 
-        self._perform(character, description=self._description, input_=input_, dry_run=True)
-        self._perform(character, description=self._description, input_=input_, dry_run=False)
+        cost = self.get_cost(character, stuff=stuff, input_=input_)
+        self._perform(
+            character, description=self._description, input_=input_, cost=cost, dry_run=True
+        )
+        self._perform(
+            character, description=self._description, input_=input_, cost=cost, dry_run=False
+        )
         return Description(
             title="Action effectué avec succès",
             items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
@@ -326,6 +373,13 @@ class BeginStuffConstructionAction(CharacterAction):
     ) -> None:
         self.check_is_possible(character)
         check_common_is_possible(self._kernel, description=self._description, character=character)
+
+        cost = self.get_cost(character)
+        if character.action_points < cost:
+            raise ImpossibleAction(
+                f"{character.name} no possède pas assez de points d'actions "
+                f"({round(cost, 2)} nécessaires)"
+            )
 
         for consume in self._description.properties["consume"]:
             if "resource" in consume:
@@ -444,6 +498,9 @@ class BeginStuffConstructionAction(CharacterAction):
         stuff_doc.ap_required = self._description.properties["craft_ap"]
         stuff_doc.under_construction = True
         self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
+        self._kernel.character_lib.reduce_action_points(
+            character.id, cost=self.get_cost(character), commit=False
+        )
         self._kernel.server_db_session.commit()
 
         return Description(
@@ -499,7 +556,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         self,
         character: "CharacterModel",
         stuff: "StuffModel",
-        input_: typing.Optional[typing.Any] = None,
+        input_: typing.Optional[CraftInput] = None,
     ) -> typing.Optional[float]:
         return 0.0  # we use only one action description in config and we don't want ap for continue
 

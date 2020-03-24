@@ -15,13 +15,14 @@ class BuildLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
-    def place_start_build(
+    def place_build(
         self,
         world_row_i: int,
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
         build_id: str,
+        under_construction: bool = True,
         commit: bool = True,
     ) -> BuildDocument:
         build_doc = BuildDocument(
@@ -30,6 +31,7 @@ class BuildLib:
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
             build_id=build_id,
+            under_construction=under_construction,
         )
         self._kernel.server_db_session.add(build_doc)
 

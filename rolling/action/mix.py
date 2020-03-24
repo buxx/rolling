@@ -111,20 +111,22 @@ class MixResourcesAction(WithResourceAction):
         resource_id: str,
         input_: typing.Optional[input_model] = None,
     ) -> typing.Optional[float]:
-        if input_.quantity is not None:
+        if input_ and input_.quantity is not None:
             resource_mix_description = self._kernel.game.config.resource_mixs[
                 input_.resource_mix_id
             ]
             return resource_mix_description.cost * input_.quantity
+        return self._description.base_cost
 
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
+        base_cost = self.get_cost(character, resource_id=resource_id)
         resource_mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
         unit_name = self._kernel.translation.get(resource_mix_description.produce_resource.unit)
+        cost_per_unit = resource_mix_description.cost
 
         if input_.quantity is None:
-            cost_per_unit = resource_mix_description.cost
             required = ", ".join(
                 [
                     f"{round(r.coeff * 100)}% {r.resource.name}"
@@ -146,7 +148,7 @@ class MixResourcesAction(WithResourceAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité en {unit_name} (coût: {cost_per_unit} par {unit_name}, avec {required}) ?",
+                                label=f"Quantité en {unit_name} (coût: {base_cost} + {cost_per_unit} par {unit_name}, avec {required}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
                             )
@@ -159,12 +161,21 @@ class MixResourcesAction(WithResourceAction):
         for required_resource in resource_mix_description.required_resources:
             required_quantity = required_resource.coeff * input_.quantity
             self._kernel.resource_lib.reduce_carried_by(
-                character.id, required_resource.resource.id, required_quantity
+                character.id, required_resource.resource.id, required_quantity, commit=False
             )
 
         self._kernel.resource_lib.add_resource_to_character(
-            character.id, resource_mix_description.produce_resource.id, quantity=input_.quantity
+            character.id,
+            resource_mix_description.produce_resource.id,
+            quantity=input_.quantity,
+            commit=False,
         )
+        self._kernel.character_lib.reduce_action_points(
+            character_id=character.id,
+            cost=self.get_cost(character, resource_id=resource_id, input_=input_),
+            commit=False,
+        )
+        self._kernel.server_db_session.commit()
 
         return Description(
             title=f"{input_.quantity} "

@@ -146,6 +146,11 @@ class SearchMaterialAction(CharacterAction):
             )
         parts: typing.List[Part] = []
 
+        self._kernel.character_lib.reduce_action_points(
+            character_id=character.id, cost=input_.ap, commit=False
+        )
+        self._kernel.server_db_session.commit()
+
         for resource_id, quantity in found:
             resource_description = self._kernel.game.config.resources[resource_id]
             quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)

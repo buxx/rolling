@@ -9,6 +9,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
+from rolling.action.build import BuildAction
 from rolling.action.build import ConstructBuildAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.craft import BeginStuffConstructionAction
@@ -62,6 +63,7 @@ class ActionFactory:
         ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
         ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
         ActionType.SEARCH_MATERIAL: SearchMaterialAction,
+        ActionType.BUILD: BuildAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -93,7 +95,8 @@ class ActionFactory:
             ActionType.SEARCH_MATERIAL: SearchMaterialAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
-            ActionType.BEGIN_BUILD: BeginBuildAction
+            ActionType.BEGIN_BUILD: BeginBuildAction,
+            ActionType.BUILD: BuildAction,
         }
         self._with_build_actions: typing.Dict[ActionType, typing.Type[WithBuildAction]] = {
             ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
