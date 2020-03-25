@@ -233,6 +233,7 @@ class CharacterLib:
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
+        # FIXME BS: around !
         # Actions with near items
         on_same_position_items = self._stuff_lib.get_zone_stuffs(
             world_row_i=character.world_row_i,
