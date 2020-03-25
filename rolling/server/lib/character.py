@@ -3,6 +3,7 @@ import os
 import typing
 import uuid
 
+from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -152,12 +153,29 @@ class CharacterLib:
         self._kernel.server_db_session.add(character_document)
         self._kernel.server_db_session.commit()
 
-    def get_zone_players(self, row_i: int, col_i: int) -> typing.List[CharacterModel]:
-        character_documents = (
-            self.alive_query.filter(CharacterDocument.world_row_i == row_i)
-            .filter(CharacterDocument.world_col_i == col_i)
-            .all()
-        )
+    def get_zone_players(
+        self,
+        row_i: int,
+        col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        exclude_ids: typing.Optional[typing.List[str]] = None,
+    ) -> typing.List[CharacterModel]:
+        exclude_ids = exclude_ids or []
+        filters = [CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i]
+
+        if exclude_ids:
+            filters.extend([CharacterDocument.id.notin_(exclude_ids)])
+
+        if zone_row_i is not None and zone_col_i is not None:
+            filters.extend(
+                [
+                    CharacterDocument.zone_row_i == zone_row_i,
+                    CharacterDocument.zone_col_i == zone_col_i,
+                ]
+            )
+
+        character_documents = self.alive_query.filter(and_(*filters)).all()
 
         return [
             self.document_to_model(character_document) for character_document in character_documents
@@ -233,6 +251,7 @@ class CharacterLib:
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
+        # FIXME BS: around !
         # Actions with near items
         on_same_position_items = self._stuff_lib.get_zone_stuffs(
             world_row_i=character.world_row_i,

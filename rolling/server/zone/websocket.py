@@ -90,7 +90,7 @@ class ZoneEventsManager:
             return
 
         try:
-            await event_processor.process(row_i, col_i, event)
+            await event_processor.process(row_i, col_i, event, sender_socket=socket)
         except UnableToProcessEvent as exc:
             server_logger.debug(f"Unable to process event {event.type}: {str(exc)}")
 
