@@ -1,5 +1,6 @@
 # coding: utf-8
 import asyncio
+from concurrent.futures._base import CancelledError
 import json
 import typing
 
@@ -43,10 +44,17 @@ class ZoneEventsManager:
         # Something lik asyncio.ensure_future(self._heartbeat(ws))
 
         # Make it available for send job
-        self._sockets.setdefault((int(row_i), int(col_i)), []).append(socket)
+        self._sockets.setdefault((row_i, col_i), []).append(socket)
 
         # Start to listen client messages
-        await self._listen(socket, int(row_i), int(col_i))
+        try:
+            await self._listen(socket, row_i, col_i)
+        except CancelledError:
+            server_logger.debug(f"websocket ({row_i},{col_i}) seems cancelled")
+
+        # If this code reached: ws is disconnected
+        server_logger.debug(f"remove websocket ({row_i},{col_i})")
+        self._sockets[(row_i, col_i)].remove(socket)
 
         return socket
 
