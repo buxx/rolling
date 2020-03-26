@@ -99,6 +99,7 @@ class MoveCharacterQueryModel:
 class DescribeStoryQueryModel:
     event_id: int = serpyco.number_field(cast_on_load=True)
     story_page_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    mark_read: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
 @dataclasses.dataclass
@@ -131,6 +132,7 @@ class CharacterModel:
 
     weight_overcharge: bool = False
     clutter_overcharge: bool = False
+    unread_event: bool = False
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
@@ -163,6 +165,7 @@ class CharacterEventModel:
     datetime: datetime_.datetime
     turn: int
     text: str
+    unread: bool
 
 
 @dataclasses.dataclass

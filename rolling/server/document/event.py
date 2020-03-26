@@ -1,6 +1,7 @@
 # coding: utf-8
 import datetime
 
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
@@ -18,6 +19,7 @@ class EventDocument(Document):
     character_id = Column(String(255), ForeignKey("character.id"), nullable=False)
     datetime = Column(DateTime, default=datetime.datetime.utcnow)
     turn = Column(Integer, nullable=False)
+    read = Column(Boolean, default=False)
 
 
 class StoryPageDocument(Document):

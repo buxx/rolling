@@ -20,7 +20,6 @@ from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.kernel import Kernel
-from rolling.log import server_logger
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -39,7 +38,6 @@ from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
-from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
@@ -247,14 +245,17 @@ class CharacterController(BaseController):
         parts = []
         for event in character_events:
             there_is_story = bool(self._kernel.character_lib.count_story_pages(event.id))
+            unread = "*" if event.unread else ""
 
             form_action = None
             if there_is_story:
-                form_action = f"/_describe/character/{character.id}/story?event_id={event.id}"
+                form_action = (
+                    f"/_describe/character/{character.id}/story?event_id={event.id}&mark_read=1"
+                )
 
             parts.append(
                 Part(
-                    text=f"Tour {event.turn}: {event.text}",
+                    text=f"Tour {event.turn}{unread}: {event.text}",
                     is_link=there_is_story,
                     form_action=form_action,
                 )
@@ -296,6 +297,11 @@ class CharacterController(BaseController):
                     f"?event_id={event.id}&story_page_id={story_page.next_page_id}",
                 )
             )
+
+        if hapic_data.query.mark_read:
+            event.read = True
+            self._kernel.server_db_session.add(event)
+            self._kernel.server_db_session.commit()
 
         return Description(
             title=event.text,
@@ -567,7 +573,7 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterModel)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
-        return self._character_lib.get(hapic_data.path.character_id)
+        return self._character_lib.get(hapic_data.path.character_id, compute_unread_event=True)
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)

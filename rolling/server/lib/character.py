@@ -138,9 +138,19 @@ class CharacterLib:
             ],
         )
 
-    def get(self, id_: str) -> CharacterModel:
+    def get(self, id_: str, compute_unread_event: bool = False) -> CharacterModel:
         character_document = self.get_document(id_)
-        return self.document_to_model(character_document)
+        model = self.document_to_model(character_document)
+
+        if (
+            compute_unread_event
+            and self._kernel.server_db_session.query(EventDocument.id)
+            .filter(and_(EventDocument.character_id == id_, EventDocument.read == False))
+            .count()
+        ):
+            model.unread_event = True
+
+        return model
 
     def get_by_name(self, name: str) -> CharacterModel:
         character_document = self.get_document_by_name(name)
@@ -388,6 +398,7 @@ class CharacterLib:
                 datetime=event_doc.datetime,
                 text=event_doc.text,
                 turn=event_doc.turn,
+                unread=not event_doc.read,
             )
 
     def count_story_pages(self, event_id: int) -> int:
