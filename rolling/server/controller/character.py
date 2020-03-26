@@ -573,7 +573,11 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterModel)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
-        return self._character_lib.get(hapic_data.path.character_id, compute_unread_event=True)
+        return self._character_lib.get(
+            hapic_data.path.character_id,
+            compute_unread_event=True,
+            compute_unread_zone_message=True,
+        )
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)

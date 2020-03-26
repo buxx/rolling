@@ -33,6 +33,7 @@ from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
@@ -103,6 +104,7 @@ class Kernel:
         self._action_factory: typing.Optional[ActionFactory] = None
         self._translation = GlobalTranslation()
         self._universe_lib: typing.Optional["UniverseLib"] = None
+        self._message_lib: typing.Optional[MessageLib] = None
 
         self._event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -111,6 +113,12 @@ class Kernel:
         if self._universe_lib is None:
             self._universe_lib = UniverseLib(self)
         return self._universe_lib
+
+    @property
+    def message_lib(self) -> MessageLib:
+        if self._message_lib is None:
+            self._message_lib = MessageLib(self)
+        return self._message_lib
 
     @property
     def stuff_lib(self) -> StuffLib:

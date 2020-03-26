@@ -27,6 +27,7 @@ from rolling.server.document.base import ImageDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
+from rolling.server.document.message import MessageDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
@@ -138,7 +139,12 @@ class CharacterLib:
             ],
         )
 
-    def get(self, id_: str, compute_unread_event: bool = False) -> CharacterModel:
+    def get(
+        self,
+        id_: str,
+        compute_unread_event: bool = False,
+        compute_unread_zone_message: bool = False,
+    ) -> CharacterModel:
         character_document = self.get_document(id_)
         model = self.document_to_model(character_document)
 
@@ -150,6 +156,19 @@ class CharacterLib:
         ):
             model.unread_event = True
 
+        if (
+            compute_unread_zone_message
+            and self._kernel.server_db_session.query(MessageDocument.id)
+            .filter(
+                MessageDocument.character_id == id_,
+                MessageDocument.zone_row_i != None,
+                MessageDocument.zone_col_i != None,
+                MessageDocument.read == False,
+            )
+            .count()
+        ):
+            model.unread_zone_message = True
+
         return model
 
     def get_by_name(self, name: str) -> CharacterModel:
@@ -160,6 +179,28 @@ class CharacterLib:
         character_document = self.get_document(character.id)
         character_document.zone_row_i = to_row_i
         character_document.zone_col_i = to_col_i
+
+        try:
+            last_character_message = self._kernel.message_lib.get_last_character_zone_messages(
+                character_id=character.id, zone=True
+            )
+            if not last_character_message.is_outzone_message:
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text="Vous avez quitté la zone",
+                        character_id=character_document.id,
+                        author_id=character_document.id,
+                        author_name=character_document.name,
+                        read=True,
+                        zone_row_i=character_document.zone_row_i,
+                        zone_col_i=character_document.zone_col_i,
+                        concerned=[character_document.id],
+                        is_outzone_message=True,
+                    )
+                )
+        except NoResultFound:
+            pass
+
         self._kernel.server_db_session.add(character_document)
         self._kernel.server_db_session.commit()
 

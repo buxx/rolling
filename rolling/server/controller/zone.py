@@ -10,6 +10,7 @@ from hapic.processor.serpyco import SerpycoProcessor
 
 from guilang.description import Description
 from guilang.description import Part
+from guilang.description import Type
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
 from rolling.map.type.base import MapTileType
@@ -17,6 +18,7 @@ from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
+from rolling.model.zone import GetZoneMessageQueryModel
 from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
@@ -121,6 +123,82 @@ class ZoneController(BaseController):
             + characters_parts,
         )
 
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoZoneMapError, http_code=404)
+    @hapic.input_path(GetZonePathModel)
+    @hapic.input_query(GetZoneMessageQueryModel)
+    @hapic.output_body(Description)
+    async def messages(self, request: Request, hapic_data: HapicData) -> Description:
+        # FIXME BS: manage pagination
+        # FIXME BS: secured character_id
+        messages = self._kernel.message_lib.get_character_zone_messages(
+            character_id=hapic_data.query.character_id, zone=True
+        )
+        self._kernel.message_lib.mark_character_zone_messages_as_read(
+            character_id=hapic_data.query.character_id, zone=True
+        )
+
+        # FIXME BS NOW: quand perso quitte/rentre dans zones, ajouter un message (vous avez changé
+        # de zone) (si le message precedent n'est pas "vous avez changé ...))
+        message_parts: typing.List[Part] = []
+        for message in messages:
+            if message.is_outzone_message:
+                message_parts.append(Part(text=message.text or "Vous avez quitté la zone"))
+            else:
+                message_parts.append(Part(text=f"{message.author_name}: {message.text}"))
+
+        return Description(
+            title="Messagerie de zone",
+            items=[
+                Part(
+                    text=f"Cette messagerie regroupe les conversations que votre personnage à tenu "
+                    f"avec tous les personnages se trouvant dans la même zone que lui. "
+                    f"Lorsque vous vous exprimez ici, tous les personnages se trouvant sur la "
+                    f"même zone écoutent."
+                ),
+                Part(
+                    is_form=True,
+                    form_action=f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}"
+                    f"/messages/add?character_id={hapic_data.query.character_id}",
+                    items=[
+                        Part(
+                            label=f"Parler aux personnes presentes ?",
+                            type_=Type.STRING,
+                            name="message",
+                        )
+                    ],
+                ),
+                Part(label=""),
+            ]
+            + message_parts,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoZoneMapError, http_code=404)
+    @hapic.input_path(GetZonePathModel)
+    @hapic.input_query(GetZoneMessageQueryModel)
+    @hapic.output_body(Description)
+    async def add_message(self, request: Request, hapic_data: HapicData) -> Description:
+        post_content = await request.json()
+        self._kernel.message_lib.add_message(
+            hapic_data.query.character_id,
+            message=post_content["message"],
+            zone_row_i=hapic_data.path.row_i,
+            zone_col_i=hapic_data.path.col_i,
+        )
+
+        return Description(
+            title="Message envoyé",
+            items=[
+                Part(
+                    is_link=True,
+                    form_action=f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}/messages"
+                    f"?character_id={hapic_data.query.character_id}",
+                    label="Continuer",
+                )
+            ],
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -132,5 +210,7 @@ class ZoneController(BaseController):
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
                 web.post("/zones/{row_i}/{col_i}/describe", self.describe),
+                web.post("/zones/{row_i}/{col_i}/messages", self.messages),
+                web.post("/zones/{row_i}/{col_i}/messages/add", self.add_message),
             ]
         )

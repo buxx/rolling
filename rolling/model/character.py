@@ -133,6 +133,7 @@ class CharacterModel:
     weight_overcharge: bool = False
     clutter_overcharge: bool = False
     unread_event: bool = False
+    unread_zone_message: bool = False
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
