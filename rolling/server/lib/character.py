@@ -62,11 +62,11 @@ class CharacterLib:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = create_character_model.name
-        character.background_story = create_character_model.background_story
-        character.hunting_and_collecting_comp = create_character_model.hunting_and_collecting_comp
-        character.find_water_comp = create_character_model.find_water_comp
-        character.max_life_comp = create_character_model.max_life_comp
-        character.life_points = character.max_life_comp
+        # character.background_story = create_character_model.background_story
+        # character.hunting_and_collecting_comp = create_character_model.hunting_and_collecting_comp
+        # character.find_water_comp = create_character_model.find_water_comp
+        character.max_life_comp = float(create_character_model.max_life_comp)
+        character.life_points = float(character.max_life_comp)
         character.action_points = self._kernel.game.config.action_points_per_turn
 
         # Place on zone

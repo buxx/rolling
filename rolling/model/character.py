@@ -17,12 +17,9 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class CreateCharacterModel:
     name: str = serpyco.string_field(metadata={"label": "Name"}, min_length=2, max_length=32)
-    background_story: str = serpyco.field(metadata={"label": "Background story", "is_text": True})
-    max_life_comp: float = serpyco.field(metadata={"label": "Max life points"})
-    hunting_and_collecting_comp: float = serpyco.field(
-        metadata={"label": "Hunt and collect ability"}
+    max_life_comp: float = serpyco.number_field(
+        metadata={"label": "Max life points (max 5.0)"}, minimum=1, maximum=5
     )
-    find_water_comp: float = serpyco.field(metadata={"label": "Find water ability"})
 
 
 @dataclasses.dataclass

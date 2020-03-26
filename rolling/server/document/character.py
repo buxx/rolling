@@ -26,10 +26,10 @@ class CharacterDocument(Document):
     alive = Column(Boolean, default=True)
 
     # role play characteristics
-    background_story = Column(Text, nullable=True)
-    max_life_comp = Column(SqliteNumeric(10, 2), nullable=False)
-    hunting_and_collecting_comp = Column(SqliteNumeric(10, 2), nullable=False)
-    find_water_comp = Column(SqliteNumeric(10, 2), nullable=False)
+    background_story = Column(Text, nullable=False, default="")
+    max_life_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
+    hunting_and_collecting_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
+    find_water_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
 
     # role game play
     action_points = Column(SqliteNumeric(10, 2), nullable=False)
