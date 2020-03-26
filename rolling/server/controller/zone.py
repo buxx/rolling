@@ -8,8 +8,11 @@ from aiohttp.web_request import Request
 from hapic import HapicData
 from hapic.processor.serpyco import SerpycoProcessor
 
+from guilang.description import Description
+from guilang.description import Part
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
+from rolling.map.type.base import MapTileType
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
@@ -92,6 +95,32 @@ class ZoneController(BaseController):
         zone_builds = typing.cast(typing.List[ZoneBuildModel], zone_builds)
         return zone_builds
 
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoZoneMapError, http_code=404)
+    @hapic.input_path(GetZonePathModel)
+    @hapic.output_body(Description)
+    async def describe(self, request: Request, hapic_data: HapicData) -> Description:
+        world_rows = self._kernel.world_map_source.geography.rows
+        tile_type: MapTileType = world_rows[hapic_data.path.row_i][hapic_data.path.col_i]
+
+        characters = self._kernel.character_lib.get_zone_players(
+            hapic_data.path.row_i, hapic_data.path.col_i
+        )
+        characters_parts: typing.List[Part] = []
+        for character in characters:
+            characters_parts.append(Part(label=character.name))
+
+        return Description(
+            title=tile_type.get_name(),
+            items=[
+                Part(
+                    text=f"Vous vous trouvez sur {tile_type.get_name()}. "
+                    f"Dans cette zone se trouve également les personnages suivants:"
+                )
+            ]
+            + characters_parts,
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -102,5 +131,6 @@ class ZoneController(BaseController):
                 web.get("/zones/{row_i}/{col_i}/characters", self.get_characters),
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
+                web.post("/zones/{row_i}/{col_i}/describe", self.describe),
             ]
         )

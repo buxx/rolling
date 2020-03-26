@@ -153,6 +153,7 @@ class CharacterLib:
         self._kernel.server_db_session.add(character_document)
         self._kernel.server_db_session.commit()
 
+    # TODO BS: rename into get_zone_characters
     def get_zone_players(
         self,
         row_i: int,

@@ -29,12 +29,14 @@ class WorldMapTileType(MapTileType):
 
 class Sea(WorldMapTileType):
     id = "SEA"
+    name = "Mer"
     foreground_high_color = "#06f"
     background_high_color = "#006"
 
 
 class Mountain(WorldMapTileType):
     id = "MOUNTAIN"
+    name = "Montagne"
     foreground_color = ""
     background_color = ""
     mono = ""
@@ -43,19 +45,23 @@ class Mountain(WorldMapTileType):
 
 class Jungle(WorldMapTileType):
     id = "JUNGLE"
+    name = "Jungle"
     foreground_high_color = "#060"
 
 
 class Hill(WorldMapTileType):
     id = "HILL"
+    name = "Colline"
     foreground_high_color = "#660"
 
 
 class Beach(WorldMapTileType):
     id = "BEACH"
+    name = "Plage"
     foreground_high_color = "#fa0"
 
 
 class Plain(WorldMapTileType):
     id = "PLAIN"
+    name = "Plaine"
     foreground_high_color = "#fda"
