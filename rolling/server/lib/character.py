@@ -200,7 +200,7 @@ class CharacterLib:
             if not last_character_message.is_outzone_message:
                 self._kernel.server_db_session.add(
                     MessageDocument(
-                        text="Vous avez quitté la zone",
+                        text="Vous avez changé de zone",
                         character_id=character_document.id,
                         author_id=character_document.id,
                         author_name=character_document.name,
