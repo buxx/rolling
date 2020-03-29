@@ -28,6 +28,12 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class GetConversationPathModel:
+    character_id: str
+    conversation_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
 class GetMoveZoneInfosModel:
     character_id: str
     world_row_i: int = serpyco.number_field(cast_on_load=True)
@@ -134,6 +140,7 @@ class CharacterModel:
     clutter_overcharge: bool = False
     unread_event: bool = False
     unread_zone_message: bool = False
+    unread_conversation: bool = False
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object

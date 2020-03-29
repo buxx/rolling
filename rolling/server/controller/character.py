@@ -577,6 +577,7 @@ class CharacterController(BaseController):
             hapic_data.path.character_id,
             compute_unread_event=True,
             compute_unread_zone_message=True,
+            compute_unread_conversation=True,
         )
 
     @hapic.with_api_doc()

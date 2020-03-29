@@ -144,6 +144,7 @@ class CharacterLib:
         id_: str,
         compute_unread_event: bool = False,
         compute_unread_zone_message: bool = False,
+        compute_unread_conversation: bool = False,
     ) -> CharacterModel:
         character_document = self.get_document(id_)
         model = self.document_to_model(character_document)
@@ -168,6 +169,18 @@ class CharacterLib:
             .count()
         ):
             model.unread_zone_message = True
+
+        if (
+            compute_unread_conversation
+            and self._kernel.server_db_session.query(MessageDocument.id)
+            .filter(
+                MessageDocument.character_id == id_,
+                MessageDocument.zone == False,
+                MessageDocument.read == False,
+            )
+            .count()
+        ):
+            model.unread_conversation = True
 
         return model
 
@@ -196,6 +209,7 @@ class CharacterLib:
                         zone_col_i=character_document.zone_col_i,
                         concerned=[character_document.id],
                         is_outzone_message=True,
+                        zone=True,
                     )
                 )
         except NoResultFound:

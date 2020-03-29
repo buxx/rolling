@@ -25,5 +25,7 @@ class MessageDocument(Document):
     read = Column(Boolean, default=False)
     zone_row_i = Column(Integer, nullable=True)
     zone_col_i = Column(Integer, nullable=True)
+    zone = Column(Boolean, nullable=False)
     concerned = Column(JSON(), default="[]")  # list of character_id
     is_outzone_message = Column(Boolean, default=False)
+    first_message = Column(Integer, ForeignKey("message.id"), nullable=True)

@@ -6,6 +6,7 @@ from rolling.kernel import Kernel
 from rolling.server.controller.build import BuildController
 from rolling.server.controller.character import CharacterController
 from rolling.server.controller.common import CommonController
+from rolling.server.controller.conversation import ConversationController
 from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
 
@@ -19,5 +20,6 @@ def get_application(kernel: Kernel) -> Application:
     ZoneController(kernel).bind(app)
     WorldController(kernel).bind(app)
     BuildController(kernel).bind(app)
+    ConversationController(kernel).bind(app)
 
     return app

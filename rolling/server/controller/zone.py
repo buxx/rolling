@@ -132,10 +132,10 @@ class ZoneController(BaseController):
         # FIXME BS: manage pagination
         # FIXME BS: secured character_id
         messages = self._kernel.message_lib.get_character_zone_messages(
-            character_id=hapic_data.query.character_id, zone=True
+            character_id=hapic_data.query.character_id
         )
         self._kernel.message_lib.mark_character_zone_messages_as_read(
-            character_id=hapic_data.query.character_id, zone=True
+            character_id=hapic_data.query.character_id
         )
 
         # FIXME BS NOW: quand perso quitte/rentre dans zones, ajouter un message (vous avez changé
@@ -180,7 +180,7 @@ class ZoneController(BaseController):
     @hapic.output_body(Description)
     async def add_message(self, request: Request, hapic_data: HapicData) -> Description:
         post_content = await request.json()
-        self._kernel.message_lib.add_message(
+        self._kernel.message_lib.add_zone_message(
             hapic_data.query.character_id,
             message=post_content["message"],
             zone_row_i=hapic_data.path.row_i,

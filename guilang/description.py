@@ -35,6 +35,9 @@ class Part:
     default_value: typing.Optional[str] = None
     link_group_name: typing.Optional[str] = None
     align: typing.Optional[str] = None
+    value: typing.Optional[str] = None
+    is_checkbox: bool = False
+    checked: bool = False
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
