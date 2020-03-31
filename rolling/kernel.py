@@ -31,6 +31,7 @@ from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
+from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.message import MessageLib
@@ -105,6 +106,7 @@ class Kernel:
         self._translation = GlobalTranslation()
         self._universe_lib: typing.Optional["UniverseLib"] = None
         self._message_lib: typing.Optional[MessageLib] = None
+        self._affinity_lib: typing.Optional[AffinityLib] = None
 
         self._event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -119,6 +121,12 @@ class Kernel:
         if self._message_lib is None:
             self._message_lib = MessageLib(self)
         return self._message_lib
+
+    @property
+    def affinity_lib(self) -> AffinityLib:
+        if self._affinity_lib is None:
+            self._affinity_lib = AffinityLib(self)
+        return self._affinity_lib
 
     @property
     def stuff_lib(self) -> StuffLib:

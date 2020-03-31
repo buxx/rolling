@@ -28,6 +28,19 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class GetAffinityPathModel:
+    character_id: str
+    affinity_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class ModifyAffinityRelationQueryModel:
+    request: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    rejected: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    fighter: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
 class GetConversationPathModel:
     character_id: str
     conversation_id: int = serpyco.number_field(cast_on_load=True)
