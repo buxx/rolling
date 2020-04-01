@@ -66,7 +66,7 @@ class TestAffinity:
     async def test_unit__join_affinity__ok__as_non_member(
         self,
         worldmapc_xena_model: CharacterModel,
-        worldmapc_arhur_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
@@ -75,8 +75,9 @@ class TestAffinity:
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
-        arthur = worldmapc_arhur_model
+        arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
         # list unknowns
@@ -196,7 +197,7 @@ class TestAffinity:
     async def test_unit__reject_affinity__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
-        worldmapc_arhur_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
@@ -204,7 +205,7 @@ class TestAffinity:
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
-        arthur = worldmapc_arhur_model
+        arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
@@ -249,7 +250,7 @@ class TestAffinity:
     async def test_unit__discard_request__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
-        worldmapc_arhur_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
@@ -257,7 +258,7 @@ class TestAffinity:
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
-        arthur = worldmapc_arhur_model
+        arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
@@ -319,14 +320,14 @@ class TestAffinity:
     async def test_unit__only_fight_for_ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
-        worldmapc_arhur_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
-        arthur = worldmapc_arhur_model
+        arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 

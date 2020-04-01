@@ -102,8 +102,9 @@ class AffinityLib:
         character_affinity_ids = (
             self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
             .filter(AffinityRelationDocument.character_id == character_id)
-            .scalar()
+            .all()
         ) or []
+        character_affinity_ids = character_affinity_ids[0] if character_affinity_ids else []
 
         return (
             self._kernel.server_db_session.query(AffinityDocument)

@@ -188,35 +188,17 @@ class CharacterLib:
         character_document = self.get_document_by_name(name)
         return self.document_to_model(character_document)
 
-    def move_on_zone(self, character: CharacterModel, to_row_i: int, to_col_i: int) -> None:
+    def move_on_zone(
+        self, character: CharacterModel, to_row_i: int, to_col_i: int
+    ) -> CharacterDocument:
         character_document = self.get_document(character.id)
         character_document.zone_row_i = to_row_i
         character_document.zone_col_i = to_col_i
 
-        try:
-            last_character_message = self._kernel.message_lib.get_last_character_zone_messages(
-                character_id=character.id, zone=True
-            )
-            if not last_character_message.is_outzone_message:
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text="Vous avez changé de zone",
-                        character_id=character_document.id,
-                        author_id=character_document.id,
-                        author_name=character_document.name,
-                        read=True,
-                        zone_row_i=character_document.zone_row_i,
-                        zone_col_i=character_document.zone_col_i,
-                        concerned=[character_document.id],
-                        is_outzone_message=True,
-                        zone=True,
-                    )
-                )
-        except NoResultFound:
-            pass
-
         self._kernel.server_db_session.add(character_document)
         self._kernel.server_db_session.commit()
+
+        return character_document
 
     # TODO BS: rename into get_zone_characters
     def get_zone_players(
@@ -252,6 +234,8 @@ class CharacterLib:
     ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
         character_document = self.get_document(character.id)
+        from_world_row_i = character_document.world_row_i
+        from_world_col_i = character_document.world_col_i
         coming_from = get_coming_from(
             before_row_i=character_document.world_row_i,
             before_col_i=character_document.world_col_i,
@@ -270,6 +254,14 @@ class CharacterLib:
         )
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
+
+        self._kernel.message_lib.send_messages_due_to_move(
+            character=character,
+            from_world_row_i=from_world_row_i,
+            from_world_col_i=from_world_col_i,
+            to_world_row_i=to_world_row,
+            to_world_col_i=to_world_col,
+        )
         self.update(character_document)
         return character_document
 

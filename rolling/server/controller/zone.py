@@ -138,8 +138,6 @@ class ZoneController(BaseController):
             character_id=hapic_data.query.character_id
         )
 
-        # FIXME BS NOW: quand perso quitte/rentre dans zones, ajouter un message (vous avez changé
-        # de zone) (si le message precedent n'est pas "vous avez changé ...))
         message_parts: typing.List[Part] = []
         for message in messages:
             if message.is_outzone_message:

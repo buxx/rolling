@@ -180,7 +180,12 @@ class ConversationController(BaseController):
 
         message_parts = []
         for message in messages:
-            message_parts.append(Part(text=f"{message.author_name}: {message.text}"))
+            text = (
+                f"{message.author_name}: {message.text}"
+                if not message.is_outzone_message
+                else message.text
+            )
+            message_parts.append(Part(text=text))
 
         self._kernel.message_lib.mark_character_conversation_messages_as_read(
             character_id=hapic_data.path.character_id,

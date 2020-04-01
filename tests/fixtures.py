@@ -63,18 +63,18 @@ def worldmapsourcec_txt() -> str:
 
 
 @pytest.fixture
-def worldmapa_kernel(worldmapsourcea_txt) -> Kernel:
-    return Kernel(worldmapsourcea_txt)
+def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
+    return Kernel(worldmapsourcea_txt, loop=loop)
 
 
 @pytest.fixture
-def worldmapb_kernel(worldmapsourceb2_txt) -> Kernel:
-    return Kernel(worldmapsourceb2_txt)
+def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
+    return Kernel(worldmapsourceb2_txt, loop=loop)
 
 
 @pytest.fixture
-def worldmapb2_kernel(worldmapsourceb2_txt) -> Kernel:
-    return Kernel(worldmapsourceb2_txt)
+def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
+    return Kernel(worldmapsourceb2_txt, loop=loop)
 
 
 @pytest.fixture
@@ -209,9 +209,30 @@ def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
 
 
 @pytest.fixture
-def worldmapc_arhur_model(arthur: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+def franck(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
+    franck = CharacterDocument(id="franck", name="franck", **default_character_competences)
+    franck.world_row_i = 1
+    franck.world_col_i = 1
+    franck.zone_row_i = 11
+    franck.zone_col_i = 11
+
+    session = worldmapc_kernel.server_db_session
+    session.add(franck)
+    session.commit()
+
+    return franck
+
+
+@pytest.fixture
+def worldmapc_arthur_model(arthur: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
     character_lib = CharacterLib(worldmapc_kernel)
     return character_lib.document_to_model(arthur)
+
+
+@pytest.fixture
+def worldmapc_franck_model(franck: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+    character_lib = CharacterLib(worldmapc_kernel)
+    return character_lib.document_to_model(franck)
 
 
 @pytest.fixture
@@ -240,6 +261,9 @@ def worldmapc_web_app(worldmapc_kernel: Kernel, loop, aiohttp_client) -> TestCli
     return loop.run_until_complete(aiohttp_client(app))
 
 
+description_serializer = serpyco.Serializer(Description)
+
+
 @pytest.fixture(scope="session")
 def descr_serializer() -> serpyco.Serializer:
-    return serpyco.Serializer(Description)
+    return description_serializer

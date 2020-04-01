@@ -2,7 +2,10 @@
 import typing
 
 from sqlalchemy.orm import Query
+from sqlalchemy.orm.exc import NoResultFound
 
+from rolling.model.character import CharacterModel
+from rolling.server.document.character import CharacterDocument
 from rolling.server.document.message import MessageDocument
 
 if typing.TYPE_CHECKING:
@@ -119,7 +122,7 @@ class MessageLib:
         return (
             self._get_character_messages_query(character_id, zone=False)
             .group_by(MessageDocument.first_message)
-            .order_by(MessageDocument.datetime.desc())
+            .order_by(MessageDocument.datetime.asc())
             .all()
         )
 
@@ -132,3 +135,133 @@ class MessageLib:
             .order_by(MessageDocument.datetime.desc())
             .all()
         )
+
+    def send_messages_due_to_move(
+        self,
+        character: CharacterModel,
+        from_world_row_i: int,
+        from_world_col_i: int,
+        to_world_row_i: int,
+        to_world_col_i: int,
+    ) -> None:
+        # Zone message
+        try:
+            last_character_message = self._kernel.message_lib.get_last_character_zone_messages(
+                character_id=character.id, zone=True
+            )
+            if not last_character_message.is_outzone_message:
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text="Vous avez changé de zone",
+                        character_id=character.id,
+                        author_id=character.id,
+                        author_name=character.name,
+                        read=True,
+                        zone_row_i=character.zone_row_i,
+                        zone_col_i=character.zone_col_i,
+                        concerned=[character.id],
+                        is_outzone_message=True,
+                        zone=True,
+                        subject=last_character_message.subject,
+                    )
+                )
+        except NoResultFound:
+            pass
+
+        # TODO BS: limit active conversations ?
+        # conversations
+        for (message_id, concerned, subject) in (
+            self._kernel.server_db_session.query(
+                MessageDocument.first_message, MessageDocument.concerned, MessageDocument.subject
+            )
+            .filter(MessageDocument.concerned.contains(character.id))
+            .group_by(MessageDocument.first_message)
+            .all()
+        ):
+            left_names = []
+            for (before_character_id, before_character_name) in (
+                self._kernel.server_db_session.query(CharacterDocument.id, CharacterDocument.name)
+                .filter(
+                    CharacterDocument.world_row_i == from_world_row_i,
+                    CharacterDocument.world_col_i == from_world_col_i,
+                    CharacterDocument.id.in_(set(concerned) - {character.id}),
+                )
+                .order_by(CharacterDocument.name)
+                .all()
+            ):
+                left_names.append(before_character_name)
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text=f"{character.name} n'est plus là pour parler",
+                        character_id=before_character_id,
+                        author_id=character.id,
+                        author_name=character.name,
+                        read=True,
+                        concerned=concerned,
+                        is_outzone_message=True,
+                        zone=False,
+                        first_message=message_id,
+                        subject=subject,
+                    )
+                )
+
+            if left_names:
+                left_names_str = ", ".join(left_names)
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text=f"Vous etes partis et ne pouvez plus parler avec {left_names_str}",
+                        character_id=character.id,
+                        author_id=character.id,
+                        author_name=character.name,
+                        read=True,
+                        concerned=concerned,
+                        is_outzone_message=True,
+                        zone=False,
+                        first_message=message_id,
+                        subject=subject,
+                    )
+                )
+
+            after_names = []
+            for (after_character_id, after_character_name) in (
+                self._kernel.server_db_session.query(CharacterDocument.id, CharacterDocument.name)
+                .filter(
+                    CharacterDocument.world_row_i == to_world_row_i,
+                    CharacterDocument.world_col_i == to_world_col_i,
+                    CharacterDocument.id.in_(set(concerned) - {character.id}),
+                )
+                .order_by(CharacterDocument.name)
+                .all()
+            ):
+                after_names.append(after_character_name)
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text=f"{character.name} vous à rejoin",
+                        character_id=after_character_id,
+                        author_id=character.id,
+                        author_name=character.name,
+                        read=True,
+                        concerned=concerned,
+                        is_outzone_message=True,
+                        zone=False,
+                        first_message=message_id,
+                        subject=subject,
+                    )
+                )
+
+            if after_names:
+                after_names_str = ", ".join(after_names)
+                self._kernel.server_db_session.add(
+                    MessageDocument(
+                        text=f"Vous avez rejoins {after_names_str}",
+                        character_id=character.id,
+                        author_id=character.id,
+                        author_name=character.name,
+                        read=True,
+                        concerned=concerned,
+                        is_outzone_message=True,
+                        zone=False,
+                        first_message=message_id,
+                        subject=subject,
+                    )
+                )
