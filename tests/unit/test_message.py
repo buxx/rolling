@@ -4,10 +4,10 @@ import typing
 from aiohttp.test_utils import TestClient
 import serpyco
 
-from tests.fixtures import description_serializer
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.server.document.message import MessageDocument
+from tests.fixtures import description_serializer
 
 
 class TestMessage:

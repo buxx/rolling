@@ -12,6 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
+from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import WithResourceAction
@@ -25,12 +26,14 @@ from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
-from rolling.model.character import GetLookResourceModelModel
+from rolling.model.character import GetLookInventoryResourceModel
+from rolling.model.character import GetLookResourceModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import GetMoveZoneInfosModel
 from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import TakeResourceModel
 from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
@@ -46,7 +49,8 @@ from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_RESOURCE_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
-from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.controller.url import WITH_BUILD_ACTION
@@ -61,6 +65,7 @@ from rolling.util import character_can_drink_in_its_zone
 from rolling.util import display_g_or_kg
 from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
+from rolling.util import quantity_to_str
 
 
 class CharacterController(BaseController):
@@ -334,6 +339,74 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetLookResourceModel)
+    @hapic.input_query(TakeResourceModel)
+    @hapic.output_body(Description)
+    async def _describe_look_resource(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        resource_description = self._kernel.game.config.resources[hapic_data.path.resource_id]
+        ground_resources = self._kernel.resource_lib.get_ground_resource(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=hapic_data.path.row_i,
+            zone_col_i=hapic_data.path.col_i,
+        )
+        ground_resource_ids = [r.id for r in ground_resources]
+        if hapic_data.path.resource_id not in ground_resource_ids:
+            return Description(
+                title="Cette ressource n'est plus là", items=[Part(is_link=True, go_back_zone=True)]
+            )
+        ground_resource = next(r for r in ground_resources if r.id == hapic_data.path.resource_id)
+
+        available_str = quantity_to_str(
+            ground_resource.quantity, ground_resource.unit, self._kernel
+        )
+        if not hapic_data.query.quantity:
+            return Description(
+                title=resource_description.name,
+                items=[
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
+                            character_id=character.id,
+                            resource_id=hapic_data.path.resource_id,
+                            row_i=hapic_data.path.row_i,
+                            col_i=hapic_data.path.col_i,
+                        ),
+                        items=[
+                            Part(
+                                label=f"Récupérer quelle quantité ({available_str} disponible)?",
+                                name="quantity",
+                                type_=Type.NUMBER,
+                            )
+                        ],
+                    )
+                ],
+            )
+
+        self._kernel.resource_lib.add_resource_to(
+            character_id=character.id,
+            resource_id=hapic_data.path.resource_id,
+            quantity=hapic_data.query.quantity,
+            commit=False,
+        )
+        self._kernel.resource_lib.reduce_on_ground(
+            resource_id=hapic_data.path.resource_id,
+            quantity=hapic_data.query.quantity,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=hapic_data.path.row_i,
+            zone_col_i=hapic_data.path.col_i,
+            commit=True,
+        )
+
+        return Description(
+            title=f"{resource_description.name} récupéré",
+            items=[Part(is_link=True, go_back_zone=True)],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_path(GetLookStuffModelModel)
     @hapic.output_body(Description)
     async def _describe_inventory_look_stuff(
@@ -357,7 +430,7 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
-    @hapic.input_path(GetLookResourceModelModel)
+    @hapic.input_path(GetLookInventoryResourceModel)
     @hapic.output_body(Description)
     async def _describe_inventory_look_resource(
         self, request: Request, hapic_data: HapicData
@@ -929,7 +1002,8 @@ class CharacterController(BaseController):
                 web.put("/character/{character_id}/move", self.move),
                 web.post("/_describe/character/{character_id}/move", self.describe_move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
-                web.post(DESCRIBE_LOOT_AT_STUFF_URL, self._describe_look_stuff),
+                web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),
+                web.post(DESCRIBE_LOOK_AT_RESOURCE_URL, self._describe_look_resource),
                 web.post(DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff),
                 web.post(
                     DESCRIBE_INVENTORY_RESOURCE_ACTION, self._describe_inventory_look_resource

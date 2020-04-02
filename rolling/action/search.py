@@ -141,8 +141,11 @@ class SearchMaterialAction(CharacterAction):
                 continue
 
             found.append((resource_id, quantity_found))
-            self._kernel.resource_lib.add_resource_to_character(
-                character.id, resource_id=resource_id, quantity=quantity_found, commit=False
+            self._kernel.resource_lib.add_resource_to(
+                character_id=character.id,
+                resource_id=resource_id,
+                quantity=quantity_found,
+                commit=False,
             )
         parts: typing.List[Part] = []
 

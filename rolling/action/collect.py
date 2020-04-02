@@ -163,8 +163,11 @@ class CollectResourceAction(CharacterAction):
                 ],
             )
 
-        self._kernel.resource_lib.add_resource_to_character(
-            character_doc.id, input_.resource_id, input_.quantity, commit=False
+        self._kernel.resource_lib.add_resource_to(
+            character_id=character_doc.id,
+            resource_id=input_.resource_id,
+            quantity=input_.quantity,
+            commit=False,
         )
 
         cost = self.get_cost(character, input_=input_)

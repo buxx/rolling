@@ -178,8 +178,8 @@ class TestBringResourcesOnBuild:
         build = worldmapc_mock_build_document
         xena = worldmapc_xena_model
 
-        kernel.resource_lib.add_resource_to_character(
-            xena.id, resource_id="BRANCHES", quantity=0.00025
+        kernel.resource_lib.add_resource_to(
+            character_id=xena.id, resource_id="BRANCHES", quantity=0.00025
         )
 
         assert not kernel.resource_lib.get_stored_in_build(build.id)

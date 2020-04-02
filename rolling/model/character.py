@@ -66,7 +66,20 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
-class GetLookResourceModelModel:
+class TakeResourceModel:
+    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
+class GetLookResourceModel:
+    character_id: str
+    resource_id: str
+    row_i: int = serpyco.number_field(cast_on_load=True)
+    col_i: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class GetLookInventoryResourceModel:
     character_id: str
     resource_id: str
 

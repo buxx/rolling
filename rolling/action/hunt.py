@@ -132,8 +132,11 @@ class SearchFoodAction(CharacterAction):
             result_resource_strs.append(
                 f"{quantity_found} {unit_str} de {resource_description.name} "
             )
-            self._kernel.resource_lib.add_resource_to_character(
-                character.id, resource_id=resource_id, quantity=quantity_found, commit=False
+            self._kernel.resource_lib.add_resource_to(
+                character_id=character.id,
+                resource_id=resource_id,
+                quantity=quantity_found,
+                commit=False,
             )
             zone_state.reduce_resource(resource_id, quantity_found, commit=False)
 

@@ -1,7 +1,10 @@
 # coding: utf-8
 POST_CHARACTER_URL = "/character"
 TAKE_STUFF_URL = "/character/{character_id}/take/{stuff_id}"
-DESCRIBE_LOOT_AT_STUFF_URL = "/_describe/character/{character_id}/look/{stuff_id}"
+DESCRIBE_LOOK_AT_STUFF_URL = "/_describe/character/{character_id}/look/{stuff_id}"
+DESCRIBE_LOOK_AT_RESOURCE_URL = (
+    "/_describe/character/{character_id}/look/{resource_id}/{row_i},{col_i}"
+)
 DESCRIBE_INVENTORY_STUFF_ACTION = "/_describe/character/{character_id}/inventory_look/{stuff_id}"
 DESCRIBE_INVENTORY_RESOURCE_ACTION = (
     "/_describe/character/{character_id}/resource_look/{resource_id}"

@@ -21,7 +21,8 @@ from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
-from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.base import ImageDocument
 from rolling.server.document.character import CharacterDocument
@@ -309,23 +310,44 @@ class CharacterLib:
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
-        # FIXME BS: around !
         # Actions with near items
-        on_same_position_items = self._stuff_lib.get_zone_stuffs(
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
-            zone_row_i=character.zone_row_i,
-            zone_col_i=character.zone_col_i,
-        )
-        for item in on_same_position_items:
-            character_actions_.append(
-                CharacterActionLink(
-                    name=f"Jeter un coup d'oeil sur {item.name}",
-                    link=DESCRIBE_LOOT_AT_STUFF_URL.format(
-                        character_id=character_id, stuff_id=item.id
-                    ),
-                )
+        for around_row_i, around_col_i in around_character:
+            on_same_position_items = self._stuff_lib.get_zone_stuffs(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=around_row_i,
+                zone_col_i=around_col_i,
             )
+            for item in on_same_position_items:
+                character_actions_.append(
+                    CharacterActionLink(
+                        name=f"Jeter un coup d'oeil sur {item.name}",
+                        link=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                            character_id=character_id, stuff_id=item.id
+                        ),
+                    )
+                )
+
+        # Actions with near ground resources
+        for around_row_i, around_col_i in around_character:
+            on_same_position_resources = self._kernel.resource_lib.get_ground_resource(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=around_row_i,
+                zone_col_i=around_col_i,
+            )
+            for resource in on_same_position_resources:
+                character_actions_.append(
+                    CharacterActionLink(
+                        name=f"Jeter un coup d'oeil sur {resource.name}",
+                        link=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
+                            character_id=character_id,
+                            resource_id=resource.id,
+                            row_i=resource.ground_row_i,
+                            col_i=resource.ground_col_i,
+                        ),
+                    )
+                )
 
         # Actions with near build
         for around_row_i, around_col_i in around_character:
@@ -369,7 +391,7 @@ class CharacterLib:
         if stuff.carried_by is None:
             character_actions.append(
                 CharacterActionLink(
-                    name=f"Take {stuff.get_name_and_light_description()}",
+                    name=f"Prendre {stuff.get_name_and_light_description()}",
                     link=TAKE_STUFF_URL.format(character_id=character_id, stuff_id=stuff.id),
                 )
             )

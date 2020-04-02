@@ -251,12 +251,12 @@ class TestConstructBuildAction:
         assert 0.4 == float(build.ap_spent)
 
         # Add some stones and branches
-        kernel.resource_lib.add_resource_to_build(
+        kernel.resource_lib.add_resource_to(
             resource_id="BRANCHES",  # see src/game1/game.toml
             quantity=0.0005,  # 50% see src/game1/game.toml
             build_id=build.id,
         )
-        kernel.resource_lib.add_resource_to_build(
+        kernel.resource_lib.add_resource_to(
             resource_id="STONE",  # see src/game1/game.toml
             quantity=8.0,  # 50% see src/game1/game.toml
             build_id=build.id,

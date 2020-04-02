@@ -27,6 +27,8 @@ class ResourceDescriptionModel:
 class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     quantity: float
     stored_in: typing.Optional[int] = None
+    ground_row_i: typing.Optional[int] = None
+    ground_col_i: typing.Optional[int] = None
 
     def get_full_description(self, kernel: "Kernel") -> str:
         weight = display_g_or_kg(self.weight)
@@ -34,3 +36,11 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
         return (
             f"{self.name} " f"({quantity_str}, {weight}, {round(self.clutter, 3)} d'encombrement)"
         )
+
+
+@dataclasses.dataclass
+class OnGroundResourceModel:
+    id: str
+    quantity: float
+    zone_row_i: int
+    zone_col_i: int

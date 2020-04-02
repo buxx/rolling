@@ -82,7 +82,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                 quantity = stuff.weight * produce["coeff"]
             else:
                 quantity = produce["quantity"]
-            self._kernel.resource_lib.add_resource_to_character(
+            self._kernel.resource_lib.add_resource_to(
                 character_id=character.id, resource_id=resource_id, quantity=quantity, commit=False
             )
 
@@ -225,8 +225,8 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 produce_quantity, produce_resource.unit, self._kernel
             )
             produced_resources_txts.append(f"{produce_resource.name}: {produce_quantity_str}")
-            self._kernel.resource_lib.add_resource_to_character(
-                character.id,
+            self._kernel.resource_lib.add_resource_to(
+                character_id=character.id,
                 resource_id=produce["resource"],
                 quantity=produce_quantity,
                 commit=False,

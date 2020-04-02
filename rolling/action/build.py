@@ -270,8 +270,11 @@ class BringResourcesOnBuild(WithBuildAction):
                 f"{character.name} ne possède pas assez de {resource_description.name}"
             )
 
-        self._kernel.resource_lib.add_resource_to_build(
-            build_doc.id, resource_id=input_.resource_id, quantity=input_.quantity, commit=False
+        self._kernel.resource_lib.add_resource_to(
+            build_id=build_doc.id,
+            resource_id=input_.resource_id,
+            quantity=input_.quantity,
+            commit=False,
         )
         self._kernel.server_db_session.commit()
 

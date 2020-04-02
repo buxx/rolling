@@ -13,10 +13,12 @@ from rolling.model.event import PlayerMoveData
 from rolling.model.event import ThereIsAroundData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
+from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.model.stuff import StuffModel
 from rolling.server.controller.url import DESCRIBE_BUILD
-from rolling.server.controller.url import DESCRIBE_LOOT_AT_STUFF_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.document.build import BuildDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.util import get_on_and_around_coordinates
@@ -116,6 +118,19 @@ class ThereIsAroundProcessor(EventProcessor):
                 )
             )
 
+        resources: typing.List[CarriedResourceDescriptionModel] = []
+        for row_i, col_i in around_character:
+            # FIXME BS: Optimisation here (give all coordinates and make only one query)
+            # And only id/name
+            resources.extend(
+                self._kernel.resource_lib.get_ground_resource(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                )
+            )
+
         builds: typing.List[BuildDocument] = []
         for row_i, col_i in around_character:
             # FIXME BS: Optimisation here (give all coordinates and make only one query)
@@ -148,7 +163,19 @@ class ThereIsAroundProcessor(EventProcessor):
             items.append(
                 (
                     stuff.name,
-                    DESCRIBE_LOOT_AT_STUFF_URL.format(character_id=character.id, stuff_id=stuff.id),
+                    DESCRIBE_LOOK_AT_STUFF_URL.format(character_id=character.id, stuff_id=stuff.id),
+                )
+            )
+        for resource in resources:
+            items.append(
+                (
+                    resource.name,
+                    DESCRIBE_LOOK_AT_RESOURCE_URL.format(
+                        character_id=character.id,
+                        resource_id=resource.id,
+                        row_i=resource.ground_row_i,
+                        col_i=resource.ground_col_i,
+                    ),
                 )
             )
         for build in builds:

@@ -17,6 +17,8 @@ from rolling.map.type.base import MapTileType
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
+from rolling.model.resource import CarriedResourceDescriptionModel
+from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import GetZoneMessageQueryModel
 from rolling.model.zone import GetZonePathModel
@@ -78,6 +80,22 @@ class ZoneController(BaseController):
         return self._stuff_lib.get_zone_stuffs(
             world_row_i=request.match_info["row_i"], world_col_i=request.match_info["col_i"]
         )
+
+    @hapic.with_api_doc()
+    @hapic.handle_exception(NoZoneMapError, http_code=404)
+    @hapic.input_path(GetZonePathModel)
+    @hapic.output_body(OnGroundResourceModel, processor=SerpycoProcessor(many=True))
+    async def get_resources(
+        self, request: Request, hapic_data: HapicData
+    ) -> typing.List[OnGroundResourceModel]:
+        return [
+            OnGroundResourceModel(
+                id=c.id, quantity=c.quantity, zone_row_i=c.ground_row_i, zone_col_i=c.ground_col_i
+            )
+            for c in self._kernel.resource_lib.get_ground_resource(
+                world_row_i=hapic_data.path.row_i, world_col_i=hapic_data.path.col_i
+            )
+        ]
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
@@ -206,6 +224,7 @@ class ZoneController(BaseController):
                 # TODO BS 2019-01-23: put /zones/{row_i}/{col_i}/enter to ask entering in zone
                 web.get("/zones/{row_i}/{col_i}/characters", self.get_characters),
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
+                web.get("/zones/{row_i}/{col_i}/resources", self.get_resources),
                 web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
                 web.post("/zones/{row_i}/{col_i}/describe", self.describe),
                 web.post("/zones/{row_i}/{col_i}/messages", self.messages),

@@ -25,62 +25,63 @@ class ResourceLib:
         self._kernel = kernel
         self._action_factory = ActionFactory(kernel)
 
-    def add_resource_to_character(
-        self, character_id: str, resource_id: str, quantity: float, commit: bool = True
+    def add_resource_to(
+        self,
+        resource_id: str,
+        quantity: float,
+        character_id: typing.Optional[str] = None,
+        build_id: typing.Optional[int] = None,
+        ground: bool = False,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        commit: bool = True,
     ) -> CarriedResourceDescriptionModel:
+        assert character_id or build_id or ground
+        assert (
+            world_row_i is not None
+            and world_col_i is not None
+            and zone_row_i is not None
+            and zone_col_i is not None
+            if ground
+            else True
+        )
+
         resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
             resource_id
         ]
+        if character_id:
+            filters = [
+                ResourceDocument.carried_by_id == character_id,
+                ResourceDocument.resource_id == resource_id,
+            ]
+        elif build_id:
+            filters = [
+                ResourceDocument.in_built_id == build_id,
+                ResourceDocument.resource_id == resource_id,
+            ]
+        elif ground:
+            filters = [
+                ResourceDocument.carried_by_id == None,
+                ResourceDocument.in_built_id == None,
+                ResourceDocument.resource_id == resource_id,
+            ]
+        else:
+            raise NotImplementedError()
         try:
-            resource = (
-                self._kernel.server_db_session.query(ResourceDocument)
-                .filter(
-                    and_(
-                        ResourceDocument.carried_by_id == character_id,
-                        ResourceDocument.resource_id == resource_id,
-                    )
-                )
-                .one()
-            )
+            resource = self._kernel.server_db_session.query(ResourceDocument).filter(*filters).one()
         except NoResultFound:
             resource = ResourceDocument(
                 resource_id=resource_id,
                 carried_by_id=character_id,
-                quantity=0.0,
-                unit=resource_description.unit.value,
-            )
-
-        resource.quantity = float(resource.quantity) + quantity
-        self._kernel.server_db_session.add(resource)
-
-        if commit:
-            self._kernel.server_db_session.commit()
-
-        return self._carried_resource_model_from_doc(resource)
-
-    def add_resource_to_build(
-        self, build_id: int, resource_id: str, quantity: float, commit: bool = True
-    ) -> CarriedResourceDescriptionModel:
-        resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
-            resource_id
-        ]
-        try:
-            resource = (
-                self._kernel.server_db_session.query(ResourceDocument)
-                .filter(
-                    and_(
-                        ResourceDocument.in_built_id == build_id,
-                        ResourceDocument.resource_id == resource_id,
-                    )
-                )
-                .one()
-            )
-        except NoResultFound:
-            resource = ResourceDocument(
-                resource_id=resource_id,
                 in_built_id=build_id,
                 quantity=0.0,
                 unit=resource_description.unit.value,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                zone_row_i=zone_row_i,
+                zone_col_i=zone_col_i,
             )
 
         resource.quantity = float(resource.quantity) + quantity
@@ -99,6 +100,32 @@ class ResourceLib:
         )
         return [self._carried_resource_model_from_doc(doc) for doc in carried]
 
+    def get_ground_resource(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> typing.List[CarriedResourceDescriptionModel]:
+        assert zone_row_i is None if zone_col_i is None else True
+        assert zone_col_i is None if zone_row_i is None else True
+
+        if zone_row_i is not None and zone_col_i is not None:
+            filters = [
+                ResourceDocument.world_row_i == world_row_i,
+                ResourceDocument.world_col_i == world_col_i,
+                ResourceDocument.zone_row_i == zone_row_i,
+                ResourceDocument.zone_col_i == zone_col_i,
+            ]
+        else:
+            filters = [
+                ResourceDocument.world_row_i == world_row_i,
+                ResourceDocument.world_col_i == world_col_i,
+            ]
+
+        carried = self._kernel.server_db_session.query(ResourceDocument).filter(*filters).all()
+        return [self._carried_resource_model_from_doc(doc) for doc in carried]
+
     def get_one_carried_by(
         self, character_id: str, resource_id: str
     ) -> CarriedResourceDescriptionModel:
@@ -115,7 +142,10 @@ class ResourceLib:
         return self._carried_resource_model_from_doc(doc)
 
     def _carried_resource_model_from_doc(
-        self, doc: ResourceDocument
+        self,
+        doc: ResourceDocument,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
     ) -> CarriedResourceDescriptionModel:
         resource_description = self._kernel.game.config.resources[doc.resource_id]
         clutter = float(doc.quantity) * resource_description.clutter
@@ -136,6 +166,8 @@ class ResourceLib:
             clutter=clutter,
             quantity=float(doc.quantity),
             descriptions=resource_description.descriptions,
+            ground_row_i=doc.zone_row_i,
+            ground_col_i=doc.zone_col_i,
         )
 
     def have_resource(
@@ -166,6 +198,27 @@ class ResourceLib:
         filter_ = and_(
             ResourceDocument.carried_by_id == character_id,
             ResourceDocument.resource_id == resource_id,
+        )
+        self._reduce(filter_, quantity=quantity, commit=commit)
+
+    def reduce_on_ground(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        resource_id: str,
+        quantity: float,
+        commit: bool = True,
+    ) -> None:
+        filter_ = and_(
+            ResourceDocument.carried_by_id == None,
+            ResourceDocument.in_built_id == None,
+            ResourceDocument.resource_id == resource_id,
+            ResourceDocument.world_row_i == world_row_i,
+            ResourceDocument.world_col_i == world_col_i,
+            ResourceDocument.zone_row_i == zone_row_i,
+            ResourceDocument.zone_col_i == zone_col_i,
         )
         self._reduce(filter_, quantity=quantity, commit=commit)
 
@@ -210,7 +263,16 @@ class ResourceLib:
         commit: bool = True,
     ) -> None:
         self.reduce_carried_by(character_id, resource_id, quantity, commit=commit)
-        # TODO BS 2019-09-09: add resource on the ground
+        self.add_resource_to(
+            ground=True,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+            commit=commit,
+            quantity=quantity,
+            resource_id=resource_id,
+        )
 
     def get_carrying_actions(
         self, character: CharacterModel, resource_id: str

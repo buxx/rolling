@@ -61,7 +61,9 @@ def create(game_config_dir: str, character_name: str, resource_id: str, quantity
     character_ = kernel.character_lib.get_by_name(character_name)
 
     click.echo("Add resource")
-    kernel.resource_lib.add_resource_to_character(character_.id, resource_id, quantity=quantity)
+    kernel.resource_lib.add_resource_to(
+        character_id=character_.id, resource_id=resource_id, quantity=quantity
+    )
 
 
 @character.command()
