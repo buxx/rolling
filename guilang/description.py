@@ -26,6 +26,7 @@ class Part:
     is_form: bool = False
     form_action: typing.Optional[str] = None
     form_values_in_query: bool = False
+    submit_label: typing.Optional[str] = None
     items: typing.List["Part"] = dataclasses.field(default_factory=list)
     type_: typing.Optional[Type] = None
     label: typing.Optional[str] = None
@@ -38,6 +39,7 @@ class Part:
     value: typing.Optional[str] = None
     is_checkbox: bool = False
     checked: bool = False
+    choices: typing.Optional[typing.List[str]] = None
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
@@ -63,3 +65,4 @@ class Description:
     image_extension: typing.Optional[str] = None  # used by client to cache image
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
+    redirect: typing.Optional[str] = None

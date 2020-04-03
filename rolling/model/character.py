@@ -41,6 +41,11 @@ class ModifyAffinityRelationQueryModel:
 
 
 @dataclasses.dataclass
+class ModifyAffinityRelationBodyModel:
+    join_type: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
 class GetConversationPathModel:
     character_id: str
     conversation_id: int = serpyco.number_field(cast_on_load=True)

@@ -61,6 +61,8 @@ class TestAffinity:
             "Vous êtes membre de cette affinité et vous portez le status de Chef (Vous vous battez pour elle)"
             == descr.items[2].label
         )
+        item_urls = [i.form_action for i in descr.items]
+        assert "/affinity/xena/manage/1" in item_urls
 
     @pytest.mark.parametrize("request_,fighter", [(False, True), (True, True), (True, False)])
     async def test_unit__join_affinity__ok__as_non_member(

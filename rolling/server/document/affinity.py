@@ -28,6 +28,18 @@ CHIEF_STATUS = ("CHIEF_STATUS", "Chef")
 MEMBER_STATUS = ("MEMBER_STATUS", "Membre")
 
 
+affinity_join_str = {
+    AffinityJoinType.ACCEPT_ALL: "Accepter tout de suite",
+    AffinityJoinType.ONE_CHIEF_ACCEPT: "Sur acceptation d'un des chefs",
+    AffinityJoinType.HALF_STATUS_ACCEPT: "Sur acceptation d'une majorité",
+}
+
+affinity_direction_str = {
+    AffinityDirectionType.ONE_DIRECTOR: "Un seul chef",
+    AffinityDirectionType.ELECTED_BY_HALF_STATUS: "Sur acceptation d'une majorité",
+}
+
+
 class AffinityDocument(Document):
     __tablename__ = "affinity"
     id = Column(Integer, autoincrement=True, primary_key=True)

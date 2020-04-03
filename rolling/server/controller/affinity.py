@@ -10,14 +10,17 @@ from hapic import HapicData
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
+from rolling.exception import RollingError
 from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
 from rolling.model.character import GetCharacterPathModel
+from rolling.model.character import ModifyAffinityRelationBodyModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
 from rolling.server.controller.base import BaseController
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.affinity import affinity_join_str
 from rolling.server.extension import hapic
 
 
@@ -231,6 +234,17 @@ class AffinityController(BaseController):
                 )
             )
 
+        # can access management page ?
+        if affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value:
+            if relation.status_id == CHIEF_STATUS[0]:
+                parts.append(
+                    Part(
+                        label="Gérer cette affinité",
+                        is_link=True,
+                        form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
+                    )
+                )
+
         return Description(
             title=affinity.name,
             items=[
@@ -429,15 +443,70 @@ class AffinityController(BaseController):
 
         return Description(title=affinity.name, items=items)
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetAffinityPathModel)
+    @hapic.input_query(ModifyAffinityRelationQueryModel)
+    @hapic.input_body(ModifyAffinityRelationBodyModel)
+    @hapic.output_body(Description)
+    async def manage(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO BS: only chief (or ability) can display this
+        affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
+        relation = self._kernel.affinity_lib.get_character_relation(
+            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+        )
+
+        # proceed submited data
+        j = await request.text()
+        if hapic_data.body.join_type is not None:
+            join_type = list(affinity_join_str.keys())[
+                list(affinity_join_str.values()).index(hapic_data.body.join_type)
+            ]
+
+            # TODO BS: code it
+            if join_type not in [AffinityJoinType.ACCEPT_ALL, AffinityJoinType.ONE_CHIEF_ACCEPT]:
+                raise RollingError("Cette fonctionnalite n'est pas encore disponible")
+
+            affinity.join_type = join_type.value
+            self._kernel.server_db_session.add(affinity)
+            self._kernel.server_db_session.commit()
+            return Description(
+                redirect=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}"
+            )
+
+        join_values = [
+            affinity_join_str[AffinityJoinType.ACCEPT_ALL],
+            affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT],
+            affinity_join_str[AffinityJoinType.HALF_STATUS_ACCEPT],
+        ]
+
+        return Description(
+            title=f"Administration de {affinity.name}",
+            items=[
+                Part(
+                    is_form=True,
+                    submit_label="Enregistrer",
+                    form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
+                    items=[
+                        Part(
+                            label="Mode d'admission des nouveaux membres",
+                            choices=join_values,
+                            name="join_type",
+                            value=affinity_join_str[AffinityJoinType(affinity.join_type)],
+                        )
+                    ],
+                )
+            ],
+        )
+
     def bind(self, app: Application) -> None:
+        url_base = "/affinity/{character_id}"
         app.add_routes(
             [
-                web.post("/affinity/{character_id}", self.main_page),
-                web.post("/affinity/{character_id}/new", self.new),
-                web.post("/affinity/{character_id}/list", self.list),
-                web.post("/affinity/{character_id}/see/{affinity_id}", self.see),
-                web.post(
-                    "/affinity/{character_id}/edit-relation/{affinity_id}", self.edit_relation
-                ),
+                web.post(url_base, self.main_page),
+                web.post(url_base + "/new", self.new),
+                web.post(url_base + "/list", self.list),
+                web.post(url_base + "/see/{affinity_id}", self.see),
+                web.post(url_base + "/edit-relation/{affinity_id}", self.edit_relation),
+                web.post(url_base + "/manage/{affinity_id}", self.manage),
             ]
         )
