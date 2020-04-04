@@ -238,7 +238,7 @@ class AffinityController(BaseController):
 
         # can access management page ?
         if affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value:
-            if relation.status_id == CHIEF_STATUS[0]:
+            if relation and relation.status_id == CHIEF_STATUS[0]:
                 parts.append(
                     Part(
                         label="Gérer cette affinité",
