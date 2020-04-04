@@ -1,12 +1,17 @@
 # coding: utf-8
+import urllib
+
 from aiohttp.test_utils import TestClient
 import pytest
 import serpyco
 
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
+from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import affinity_join_str
 
 
 class TestAffinity:
@@ -195,6 +200,48 @@ class TestAffinity:
                 )
             assert expected_str == descr.items[2].label
 
+    @pytest.mark.parametrize("disallowed,rejected", [(False, True), (True, False), (True, True)])
+    async def test_unit__join_affinity__ok__as_old_member(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+        disallowed: bool,
+        rejected: bool,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+        kernel = worldmapc_kernel
+
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity.join_type = AffinityJoinType.ACCEPT_ALL.value
+        kernel.server_db_session.add(affinity)
+        kernel.server_db_session.add(
+            AffinityRelationDocument(
+                character_id=arthur.id,
+                affinity_id=affinity.id,
+                disallowed=disallowed,
+                rejected=rejected,
+            )
+        )
+        kernel.server_db_session.commit()
+
+        # make a join request
+        resp = await web.post(f"/affinity/{arthur.id}/edit-relation/{affinity.id}?request=1")
+        assert 200 == resp.status
+
+        arthur_relation: AffinityRelationDocument = kernel.server_db_session.query(
+            AffinityRelationDocument
+        ).filter(
+            AffinityRelationDocument.affinity_id == affinity.id,
+            AffinityRelationDocument.character_id == arthur.id,
+        ).one()
+        assert not arthur_relation.accepted
+
     @pytest.mark.parametrize("fighter", [True, False])
     async def test_unit__reject_affinity__ok__nominal_case(
         self,
@@ -373,3 +420,127 @@ class TestAffinity:
         assert f"1 prêt(s)" in descr.items[1].text
         assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
         assert "Vous n'avez plus aucune relation avec cette affinité" == descr.items[2].label
+
+    async def test_unit__manage_ok__nominal_case(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        kernel = worldmapc_kernel
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
+        assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
+
+        # display manage page
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        assert "/affinity/xena/manage/1" == descr.items[0].form_action
+        assert descr.items[0].items[0].choices
+        assert affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT] == descr.items[0].items[0].value
+        for choice in [
+            affinity_join_str[AffinityJoinType.ACCEPT_ALL],
+            affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT],
+            affinity_join_str[AffinityJoinType.HALF_STATUS_ACCEPT],
+        ]:
+            assert choice in descr.items[0].items[0].choices
+
+        # change to accept all
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage/{affinity.id}"
+            f"?join_type={urllib.parse.quote(affinity_join_str[AffinityJoinType.ACCEPT_ALL])}"
+        )
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        assert affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
+        assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
+        assert affinity_join_str[AffinityJoinType.ACCEPT_ALL] == descr.items[0].items[0].value
+
+        # change to one chief accept
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage/{affinity.id}"
+            f"?join_type={urllib.parse.quote(affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT])}"
+        )
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
+        assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
+        assert affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT] == descr.items[0].items[0].value
+
+    async def test_unit__manage_ok__to_accept_all_with_requests(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+        kernel = worldmapc_kernel
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
+        assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
+
+        # display manage page
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        # Insert one pending request
+        kernel.server_db_session.add(
+            AffinityRelationDocument(character_id=arthur.id, affinity_id=affinity.id, request=True)
+        )
+        kernel.server_db_session.commit()
+
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage/{affinity.id}"
+            f"?join_type={urllib.parse.quote(affinity_join_str[AffinityJoinType.ACCEPT_ALL])}"
+        )
+        descr = descr_serializer.load(await resp.json())
+
+        item_urls = [i.form_action for i in descr.items]
+        confirm_url = (
+            f"/affinity/xena/manage/1"
+            f"?join_type={urllib.parse.quote(affinity_join_str[AffinityJoinType.ACCEPT_ALL])}&confirm=1"
+        )
+        assert confirm_url in item_urls
+        assert "/affinity/xena/manage/1" in item_urls
+
+        resp = await web.post(confirm_url)
+        arthur_relation = (
+            kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.character_id == arthur.id,
+                AffinityRelationDocument.affinity_id == affinity.id,
+            )
+            .one()
+        )
+        assert arthur_relation.accepted
+
+    async def test_unit__join_with_type_one_chief_ok__nominal_case(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+        kernel = worldmapc_kernel
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})

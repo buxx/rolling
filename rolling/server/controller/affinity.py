@@ -1,6 +1,7 @@
 #  coding: utf-8
 import json
 from json import JSONDecodeError
+import urllib
 
 from aiohttp import web
 from aiohttp.web_app import Application
@@ -14,12 +15,13 @@ from rolling.exception import RollingError
 from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
 from rolling.model.character import GetCharacterPathModel
-from rolling.model.character import ModifyAffinityRelationBodyModel
+from rolling.model.character import ManageAffinityQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
 from rolling.server.controller.base import BaseController
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.extension import hapic
 
@@ -278,7 +280,12 @@ class AffinityController(BaseController):
             return_ = False
             if hapic_data.query.request and relation:
                 title = f"Requete pour etre membre de {affinity.name} exprimé"
-                relation.request = True
+                if affinity.join_type == AffinityJoinType.ACCEPT_ALL and not (
+                    relation.disallowed or relation.rejected
+                ):
+                    relation.accepted = True
+                else:
+                    relation.request = True
                 return_ = True
             elif hapic_data.query.request == 0 and relation:
                 title = f"Vous ne demandez plus à être membre de {affinity.name}"
@@ -445,8 +452,7 @@ class AffinityController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetAffinityPathModel)
-    @hapic.input_query(ModifyAffinityRelationQueryModel)
-    @hapic.input_body(ModifyAffinityRelationBodyModel)
+    @hapic.input_query(ManageAffinityQueryModel)
     @hapic.output_body(Description)
     async def manage(self, request: Request, hapic_data: HapicData) -> Description:
         # TODO BS: only chief (or ability) can display this
@@ -455,16 +461,58 @@ class AffinityController(BaseController):
             affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
         )
 
+        if hapic_data.query.join_type == affinity_join_str[AffinityJoinType.ACCEPT_ALL]:
+            request_relations = (
+                self._kernel.server_db_session.query(AffinityRelationDocument)
+                .filter(
+                    AffinityRelationDocument.request == True,
+                    AffinityRelationDocument.accepted == False,
+                    AffinityRelationDocument.affinity_id == affinity.id,
+                )
+                .all()
+            )
+            if len(request_relations) and not hapic_data.query.confirm:
+                return Description(
+                    title=affinity.name,
+                    items=[
+                        Part(
+                            text=f'Choisir "{hapic_data.query.join_type}" '
+                            f"acceptera automatiquement {len(request_relations)} demande(s) "
+                            f"en attente"
+                        ),
+                        Part(
+                            label="Confirmer",
+                            is_link=True,
+                            form_action=f"/affinity/{hapic_data.path.character_id}"
+                            f"/manage/{affinity.id}"
+                            f"?join_type={urllib.parse.quote(hapic_data.query.join_type)}"
+                            f"&confirm=1",
+                        ),
+                        Part(
+                            label="Annuler",
+                            is_link=True,
+                            form_action=f"/affinity/{hapic_data.path.character_id}"
+                            f"/manage/{affinity.id}",
+                        ),
+                    ],
+                )
+
         # proceed submited data
-        j = await request.text()
-        if hapic_data.body.join_type is not None:
+        if hapic_data.query.join_type is not None:
             join_type = list(affinity_join_str.keys())[
-                list(affinity_join_str.values()).index(hapic_data.body.join_type)
+                list(affinity_join_str.values()).index(hapic_data.query.join_type)
             ]
 
             # TODO BS: code it
             if join_type not in [AffinityJoinType.ACCEPT_ALL, AffinityJoinType.ONE_CHIEF_ACCEPT]:
                 raise RollingError("Cette fonctionnalite n'est pas encore disponible")
+
+            if join_type == AffinityJoinType.ACCEPT_ALL:
+                self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+                    AffinityRelationDocument.request == True,
+                    AffinityRelationDocument.accepted == False,
+                    AffinityRelationDocument.affinity_id == affinity.id,
+                ).update({"accepted": True, "request": False})
 
             affinity.join_type = join_type.value
             self._kernel.server_db_session.add(affinity)
@@ -484,6 +532,7 @@ class AffinityController(BaseController):
             items=[
                 Part(
                     is_form=True,
+                    form_values_in_query=True,
                     submit_label="Enregistrer",
                     form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
                     items=[

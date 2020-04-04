@@ -34,15 +34,16 @@ class GetAffinityPathModel:
 
 
 @dataclasses.dataclass
+class ManageAffinityQueryModel:
+    join_type: typing.Optional[str] = None
+    confirm: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
 class ModifyAffinityRelationQueryModel:
     request: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
     rejected: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
     fighter: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-
-
-@dataclasses.dataclass
-class ModifyAffinityRelationBodyModel:
-    join_type: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
