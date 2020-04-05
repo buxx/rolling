@@ -1,5 +1,6 @@
 # coding: utf-8
 import enum
+import json
 
 from sqlalchemy import JSON
 from sqlalchemy import Boolean
@@ -9,7 +10,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
+from sqlalchemy.orm import relationship
 
+from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import ServerSideDocument as Document
 
 
@@ -26,7 +29,8 @@ class AffinityDirectionType(enum.Enum):
 
 CHIEF_STATUS = ("CHIEF_STATUS", "Chef")
 MEMBER_STATUS = ("MEMBER_STATUS", "Membre")
-
+WARLORD_STATUS = ("WARLORD_STATUS", "Seigneur de guerre")
+statuses = [CHIEF_STATUS, MEMBER_STATUS, WARLORD_STATUS]
 
 affinity_join_str = {
     AffinityJoinType.ACCEPT_ALL: "Accepter tout de suite",
@@ -52,9 +56,7 @@ class AffinityDocument(Document):
         Enum(*[j.value for j in AffinityDirectionType]),
         default=AffinityDirectionType.ONE_DIRECTOR.value,
     )
-    statuses = Column(
-        JSON, nullable=False, default='[["CHIEF_STATUS", "Chef"], ["MEMBER_STATUS", "Membre"]]'
-    )
+    statuses = Column(JSON, nullable=False, default=json.dumps(statuses))
 
 
 class AffinityRelationDocument(Document):
@@ -67,3 +69,14 @@ class AffinityRelationDocument(Document):
     rejected = Column(Boolean, nullable=False, default=False)  # rejected by character
     status_id = Column(String, nullable=True, default=None)
     fighter = Column(Boolean, nullable=False, default=False)
+
+    user = relationship(
+        "CharacterDocument",
+        foreign_keys=[character_id],
+        primaryjoin=CharacterDocument.id == character_id,
+    )
+    affinity = relationship(
+        "AffinityDocument",
+        foreign_keys=[affinity_id],
+        primaryjoin=AffinityDocument.id == affinity_id,
+    )

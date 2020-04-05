@@ -34,9 +34,26 @@ class GetAffinityPathModel:
 
 
 @dataclasses.dataclass
+class GetAffinityRelationPathModel:
+    character_id: str
+    relation_character_id: str
+    affinity_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
 class ManageAffinityQueryModel:
     join_type: typing.Optional[str] = None
     confirm: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
+class ManageAffinityRelationQueryModel:
+    disallowed: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
+class ManageAffinityRelationBodyModel:
+    status: typing.Optional[str] = None
 
 
 @dataclasses.dataclass

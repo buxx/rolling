@@ -15,8 +15,11 @@ from guilang.description import Type
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
+from rolling.model.character import GetAffinityRelationPathModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import ManageAffinityQueryModel
+from rolling.model.character import ManageAffinityRelationBodyModel
+from rolling.model.character import ManageAffinityRelationQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
 from rolling.server.controller.base import BaseController
 from rolling.server.document.affinity import CHIEF_STATUS
@@ -24,6 +27,7 @@ from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import affinity_join_str
+from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
 
 
@@ -56,11 +60,16 @@ class AffinityController(BaseController):
                 else:
                     rel_str = "Combattant"
             rel_str = f"({rel_str})" if rel_str else ""
+            label = f"{affinity.name} {rel_str}"
+
+            if self._kernel.affinity_lib.there_is_unvote_relation(affinity, relation):
+                label = f"*{label}"
+
             affiliated_parts.append(
                 Part(
                     is_link=True,
                     form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                    label=f"{affinity.name} {rel_str}",
+                    label=label,
                 )
             )
 
@@ -240,9 +249,14 @@ class AffinityController(BaseController):
         # can access management page ?
         if affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value:
             if relation and relation.status_id == CHIEF_STATUS[0]:
+                need_action = (
+                    "*"
+                    if self._kernel.affinity_lib.there_is_unvote_relation(affinity, relation)
+                    else ""
+                )
                 parts.append(
                     Part(
-                        label="Gérer cette affinité",
+                        label=f"{need_action}Gérer cette affinité",
                         is_link=True,
                         form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
                     )
@@ -539,6 +553,14 @@ class AffinityController(BaseController):
             )
             .count()
         )
+        member_count = (
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.accepted == True,
+            )
+            .count()
+        )
         parts = [
             Part(
                 label=f"Il y a actuellement {request_count} demande(s) d'adhésion",
@@ -546,7 +568,14 @@ class AffinityController(BaseController):
                 form_action=(
                     f"/affinity/{hapic_data.path.character_id}/manage-requests/{affinity.id}"
                 ),
-            )
+            ),
+            Part(
+                label=f"Il y a actuellement {member_count} membre(s)",
+                is_link=True,
+                form_action=(
+                    f"/affinity/{hapic_data.path.character_id}/manage-relations/{affinity.id}"
+                ),
+            ),
         ]
 
         return Description(
@@ -637,6 +666,105 @@ class AffinityController(BaseController):
             ],
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetAffinityPathModel)
+    @hapic.output_body(Description)
+    async def manage_relations(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO BS: only chief (or ability) can display this
+        affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
+        relation = self._kernel.affinity_lib.get_character_relation(
+            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+        )
+
+        parts = []
+        for character_id, character_name, status_id in (
+            self._kernel.server_db_session.query(
+                CharacterDocument.id, CharacterDocument.name, AffinityRelationDocument.status_id
+            )
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.accepted == True,
+            )
+            .join(AffinityRelationDocument.user)
+            .all()
+        ):
+            status_str = dict(json.loads(affinity.statuses))[status_id]
+            parts.append(
+                Part(
+                    is_link=True,
+                    label=f"{character_name} ({status_str})",
+                    form_action=(
+                        f"/affinity/{hapic_data.path.character_id}"
+                        f"/manage-relations/{affinity.id}/{character_id}"
+                    ),
+                )
+            )
+
+        return Description(title=f"Membre(s) de {affinity.name}", items=parts)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetAffinityRelationPathModel)
+    @hapic.input_query(ManageAffinityRelationQueryModel)
+    @hapic.input_body(ManageAffinityRelationBodyModel)
+    @hapic.output_body(Description)
+    async def manage_relation(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO BS: only chief (or ability) can display this
+        affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
+        displayer_relation = self._kernel.affinity_lib.get_character_relation(
+            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+        )
+        relation = self._kernel.affinity_lib.get_character_relation(
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.relation_character_id,
+        )
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.relation_character_id
+        )
+        # for now, only permit manage member
+        assert relation.accepted
+        here_url = (
+            f"/affinity/{hapic_data.path.character_id}"
+            f"/manage-relations/{affinity.id}/{character_doc.id}"
+        )
+        statuses = dict(json.loads(affinity.statuses))
+
+        if hapic_data.query.disallowed is not None and hapic_data.query.disallowed:
+            relation.disallowed = True
+            relation.accepted = False
+            self._kernel.server_db_session.add(relation)
+            self._kernel.server_db_session.commit()
+            return Description(redirect=f"/affinity/{hapic_data.path.character_id}")
+
+        if hapic_data.body.status:
+            status_id = list(statuses.keys())[list(statuses.values()).index(hapic_data.body.status)]
+            relation.status_id = status_id
+            self._kernel.server_db_session.add(relation)
+            self._kernel.server_db_session.commit()
+
+        status_str = statuses[relation.status_id]
+        return Description(
+            title=character_doc.name,
+            items=[
+                Part(
+                    is_link=True,
+                    form_action=here_url + "?disallowed=1",
+                    label=f"Exclure {character_doc.name}",
+                ),
+                Part(
+                    is_form=True,
+                    form_action=here_url,
+                    items=[
+                        Part(
+                            label=f"Changer le status de {character_doc.name} ?",
+                            choices=list(statuses.values()),
+                            value=status_str,
+                            name="status",
+                        )
+                    ],
+                ),
+            ],
+        )
+
     def bind(self, app: Application) -> None:
         url_base = "/affinity/{character_id}"
         app.add_routes(
@@ -648,5 +776,10 @@ class AffinityController(BaseController):
                 web.post(url_base + "/edit-relation/{affinity_id}", self.edit_relation),
                 web.post(url_base + "/manage/{affinity_id}", self.manage),
                 web.post(url_base + "/manage-requests/{affinity_id}", self.manage_requests),
+                web.post(url_base + "/manage-relations/{affinity_id}", self.manage_relations),
+                web.post(
+                    url_base + "/manage-relations/{affinity_id}/{relation_character_id}",
+                    self.manage_relation,
+                ),
             ]
         )

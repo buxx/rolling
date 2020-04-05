@@ -4,6 +4,7 @@ import typing
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
@@ -131,3 +132,20 @@ class AffinityLib:
             )
             .count()
         )
+
+    def there_is_unvote_relation(
+        self, affinity: AffinityDocument, relation: AffinityRelationDocument
+    ) -> bool:
+        if affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value:
+            if relation.status_id == CHIEF_STATUS[0]:
+                if (
+                    self._kernel.server_db_session.query(AffinityRelationDocument)
+                    .filter(
+                        AffinityRelationDocument.affinity_id == affinity.id,
+                        AffinityRelationDocument.accepted == False,
+                        AffinityRelationDocument.request == True,
+                    )
+                    .count()
+                ):
+                    return True
+        return False

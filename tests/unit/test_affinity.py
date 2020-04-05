@@ -7,11 +7,15 @@ import serpyco
 
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import affinity_join_str
+from rolling.server.document.affinity import statuses
 
 
 class TestAffinity:
@@ -39,7 +43,13 @@ class TestAffinity:
         assert "MyAffinity" == affinity.name
         assert "ONE_CHIEF_ACCEPT" == affinity.join_type
         assert "ONE_DIRECTOR" == affinity.direction_type
-        assert '[["CHIEF_STATUS", "Chef"], ["MEMBER_STATUS", "Membre"]]' == affinity.statuses
+        assert (
+            "["
+            '["CHIEF_STATUS", "Chef"], '
+            '["MEMBER_STATUS", "Membre"], '
+            '["WARLORD_STATUS", "Seigneur de guerre"]'
+            "]" == affinity.statuses
+        )
 
         rel = kernel.server_db_session.query(AffinityRelationDocument).one()
         assert rel.accepted
@@ -583,6 +593,15 @@ class TestAffinity:
         character_model = kernel.character_lib.get(xena.id, compute_unvote_affinity_relation=True)
         assert character_model.unvote_affinity_relation
 
+        # on affinity list, affinity is blinking
+        resp = await web.post(f"/affinity/{xena.id}")
+        descr = descr_serializer.load(await resp.json())
+        assert "*MyAffinity (Chef, Combattant)" == descr.items[-1].label
+        # on see affinity, link blinking
+        resp = await web.post(f"/affinity/{xena.id}/see/{1}")
+        descr = descr_serializer.load(await resp.json())
+        assert "*Gérer cette affinité" in [i.label for i in descr.items]
+
         # display manage requests
         resp = await web.post(f"/affinity/{xena.id}/manage-requests/{affinity.id}")
         descr = descr_serializer.load(await resp.json())
@@ -617,4 +636,67 @@ class TestAffinity:
         ).one()
         assert accept == arthur_relation.accepted
         assert not arthur_relation.request
-        # FIXME BS NOW: test and code "*xxx*" on affinity pages (requests)
+
+    @pytest.mark.parametrize("to_status_str", [CHIEF_STATUS[1], WARLORD_STATUS[1]])
+    async def test_unit__change_member_status__ok__nominal_case(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+        to_status_str: str,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+        kernel = worldmapc_kernel
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
+        kernel.server_db_session.add(affinity)
+        kernel.server_db_session.add(
+            AffinityRelationDocument(
+                character_id=arthur.id,
+                affinity_id=affinity.id,
+                accepted=True,
+                status_id=MEMBER_STATUS[0],
+            )
+        )
+        kernel.server_db_session.commit()
+
+        # display manage relation page
+        resp = await web.post(f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}")
+        assert 200 == resp.status
+        descr = descr_serializer.load(await resp.json())
+
+        item_urls = [i.form_action for i in descr.items]
+        assert (
+            f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}?disallowed=1"
+            in item_urls
+        )
+        assert descr.items[1].is_form
+        assert "status" == descr.items[1].items[0].name
+        assert ["Chef", "Membre", "Seigneur de guerre"] == descr.items[1].items[0].choices
+        assert "Membre" == descr.items[1].items[0].value
+
+        # change status
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}",
+            json={"status": to_status_str},
+        )
+        assert 200 == resp.status
+        descr = descr_serializer.load(await resp.json())
+        assert to_status_str == descr.items[1].items[0].value
+
+        arthur_relation: AffinityRelationDocument = (
+            kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.character_id == arthur.id,
+                AffinityRelationDocument.affinity_id == affinity.id,
+            )
+            .one()
+        )
+        statuses_dict = dict(statuses)
+        expected = list(statuses_dict.keys())[list(statuses_dict.values()).index(to_status_str)]
+        assert arthur_relation.status_id == expected
