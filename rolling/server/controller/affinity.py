@@ -630,6 +630,7 @@ class AffinityController(BaseController):
                     if choose == "Accepter":
                         request.accepted = True
                         request.request = False
+                        request.status_id = affinity.default_status_id
                     elif choose == "Refuser":
                         request.accepted = False
                         request.request = False

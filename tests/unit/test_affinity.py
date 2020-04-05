@@ -700,3 +700,45 @@ class TestAffinity:
         statuses_dict = dict(statuses)
         expected = list(statuses_dict.keys())[list(statuses_dict.values()).index(to_status_str)]
         assert arthur_relation.status_id == expected
+
+    async def test_unit__disallow_member__ok__nominal_case(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
+        worldmapc_kernel: Kernel,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+        kernel = worldmapc_kernel
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
+        kernel.server_db_session.add(affinity)
+        kernel.server_db_session.add(
+            AffinityRelationDocument(
+                character_id=arthur.id,
+                affinity_id=affinity.id,
+                accepted=True,
+                status_id=MEMBER_STATUS[0],
+            )
+        )
+        kernel.server_db_session.commit()
+
+        # disallow arthur
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}?disallowed=1"
+        )
+        assert 200 == resp.status
+        arthur_relation: AffinityRelationDocument = (
+            kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.character_id == arthur.id,
+                AffinityRelationDocument.affinity_id == affinity.id,
+            )
+            .one()
+        )
+        assert not arthur_relation.accepted
+        assert arthur_relation.disallowed

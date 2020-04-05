@@ -57,6 +57,7 @@ class AffinityDocument(Document):
         default=AffinityDirectionType.ONE_DIRECTOR.value,
     )
     statuses = Column(JSON, nullable=False, default=json.dumps(statuses))
+    default_status_id = Column(String, nullable=False, default=MEMBER_STATUS[0])
 
 
 class AffinityRelationDocument(Document):
