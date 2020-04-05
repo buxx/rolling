@@ -1,9 +1,13 @@
 # coding: utf-8
 import logging
 
+from aiohttp.test_utils import TestClient
 import pytest
+import serpyco
 
 from rolling.kernel import Kernel
+from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.lib.character import CharacterLib
@@ -50,11 +54,52 @@ class TestExecuteTurn:
         assert 1 == arthur.alive_since
 
     @pytest.mark.usefixtures("initial_universe_state")
-    def test_unit__character_die__ok__affinity_relations_discard(
+    async def test_unit__character_die__ok__affinity_relations_discard(
         self,
         worldmapc_kernel: Kernel,
         turn_lib: TurnLib,
         xena: CharacterDocument,
         arthur: CharacterDocument,
+        worldmapc_web_app: TestClient,
+        descr_serializer: serpyco.Serializer,
     ) -> None:
-        pass  # FIXME BS NOW: code it
+        session = worldmapc_kernel.server_db_session
+        session.refresh(xena)
+        session.refresh(arthur)
+        web = worldmapc_web_app
+        kernel = worldmapc_kernel
+
+        # fixtures
+        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity.join_type = AffinityJoinType.ACCEPT_ALL.value
+        kernel.server_db_session.add(affinity)
+        kernel.server_db_session.commit()
+        resp = await web.post(
+            f"/affinity/{arthur.id}/edit-relation/{affinity.id}?request=1&fighter=1"
+        )
+        assert 200 == resp.status
+
+        # see affinity
+        resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
+        descr = descr_serializer.load(await resp.json())
+        assert "MyAffinity" == descr.title
+        assert "2 membre(s)" in descr.items[1].text
+        assert f"2 prêt(s)" in descr.items[1].text
+
+        # make turn kill arthur
+        arthur_doc = kernel.character_lib.get_document(arthur.id)
+        arthur_doc.life_points = 0
+        kernel.server_db_session.add(arthur_doc)
+        kernel.server_db_session.commit()
+        turn_lib.execute_turn()
+
+        arthur_doc = kernel.character_lib.get_document(arthur.id, dead=True)
+        assert not arthur_doc.alive
+
+        # see affinity
+        resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
+        descr = descr_serializer.load(await resp.json())
+        assert "MyAffinity" == descr.title
+        assert "1 membre(s)" in descr.items[1].text
+        assert f"1 prêt(s)" in descr.items[1].text

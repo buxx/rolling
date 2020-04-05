@@ -297,7 +297,9 @@ class AffinityController(BaseController):
                 self._kernel.affinity_lib.join(
                     character_id=hapic_data.path.character_id,
                     affinity_id=hapic_data.path.affinity_id,
-                    accepted=True if affinity.join_type == AffinityJoinType.ACCEPT_ALL else False,
+                    accepted=True
+                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
+                    else False,
                     fighter=True if hapic_data.query.fighter else False,
                     request=True,
                 )
