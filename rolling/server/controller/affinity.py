@@ -1,6 +1,7 @@
 #  coding: utf-8
 import json
 from json import JSONDecodeError
+import typing
 import urllib
 
 from aiohttp import web
@@ -527,6 +528,25 @@ class AffinityController(BaseController):
             affinity_join_str[AffinityJoinType.HALF_STATUS_ACCEPT],
         ]
 
+        request_count = (
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.accepted == False,
+                AffinityRelationDocument.request == True,
+            )
+            .count()
+        )
+        parts = [
+            Part(
+                label=f"Il y a actuellement {request_count} demande(s) d'adhésion",
+                is_link=bool(request_count),
+                form_action=(
+                    f"/affinity/{hapic_data.path.character_id}/manage-requests/{affinity.id}"
+                ),
+            )
+        ]
+
         return Description(
             title=f"Administration de {affinity.name}",
             items=[
@@ -544,6 +564,74 @@ class AffinityController(BaseController):
                         )
                     ],
                 )
+            ]
+            + parts,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetAffinityPathModel)
+    @hapic.output_body(Description)
+    async def manage_requests(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO BS: only chief (or ability) can display this
+        affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
+        relation = self._kernel.affinity_lib.get_character_relation(
+            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+        )
+        requests: typing.List[AffinityRelationDocument] = self._kernel.server_db_session.query(
+            AffinityRelationDocument
+        ).filter(
+            AffinityRelationDocument.affinity_id == affinity.id,
+            AffinityRelationDocument.accepted == False,
+            AffinityRelationDocument.request == True,
+        ).all()
+
+        data = {}
+        try:
+            data = await request.json()
+        except JSONDecodeError:
+            pass
+
+        request: AffinityRelationDocument
+        if data:
+            for request in list(requests):
+                choose = data.get(request.character_id)
+                if choose:
+                    if choose == "Accepter":
+                        request.accepted = True
+                        request.request = False
+                    elif choose == "Refuser":
+                        request.accepted = False
+                        request.request = False
+                        request.disallowed = True
+
+                    self._kernel.server_db_session.add(request)
+                    self._kernel.server_db_session.commit()
+                    requests.remove(request)
+
+        form_parts = []
+        for request in requests:
+            character = self._kernel.character_lib.get_document(request.character_id)
+            form_parts.append(
+                Part(
+                    label=f"{character.name}",
+                    name=character.id,
+                    choices=["Ne rien décider", "Accepter", "Refuser"],
+                    value="Ne rien décider",
+                )
+            )
+
+        return Description(
+            title=f"Demande(s) d'adhésion pour {affinity.name}",
+            items=[
+                Part(
+                    is_form=True,
+                    submit_label="Enregistrer",
+                    form_action=(
+                        f"/affinity/{hapic_data.path.character_id}"
+                        f"/manage-requests/{affinity.id}"
+                    ),
+                    items=form_parts,
+                )
             ],
         )
 
@@ -557,5 +645,6 @@ class AffinityController(BaseController):
                 web.post(url_base + "/see/{affinity_id}", self.see),
                 web.post(url_base + "/edit-relation/{affinity_id}", self.edit_relation),
                 web.post(url_base + "/manage/{affinity_id}", self.manage),
+                web.post(url_base + "/manage-requests/{affinity_id}", self.manage_requests),
             ]
         )

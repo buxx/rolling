@@ -26,13 +26,13 @@ def turn_lib(
 
 
 class TestExecuteTurn:
+    @pytest.mark.usefixtures("initial_universe_state")
     def test_alive_since_evolution(
         self,
         worldmapc_kernel: Kernel,
         turn_lib: TurnLib,
         xena: CharacterDocument,
         arthur: CharacterDocument,
-        initial_universe_state: UniverseStateDocument,
     ) -> None:
         session = worldmapc_kernel.server_db_session
         session.refresh(xena)
@@ -48,3 +48,13 @@ class TestExecuteTurn:
 
         assert 1 == xena.alive_since
         assert 1 == arthur.alive_since
+
+    @pytest.mark.usefixtures("initial_universe_state")
+    def test_unit__character_die__ok__affinity_relations_discard(
+        self,
+        worldmapc_kernel: Kernel,
+        turn_lib: TurnLib,
+        xena: CharacterDocument,
+        arthur: CharacterDocument,
+    ) -> None:
+        pass  # FIXME BS NOW: code it

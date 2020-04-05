@@ -24,6 +24,10 @@ from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import AffinityDirectionType
+from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.base import ImageDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
@@ -146,10 +150,12 @@ class CharacterLib:
         compute_unread_event: bool = False,
         compute_unread_zone_message: bool = False,
         compute_unread_conversation: bool = False,
+        compute_unvote_affinity_relation: bool = False,
     ) -> CharacterModel:
         character_document = self.get_document(id_)
         model = self.document_to_model(character_document)
 
+        # TODO BS: Move these compute unread/unvote in respective libs
         if (
             compute_unread_event
             and self._kernel.server_db_session.query(EventDocument.id)
@@ -182,6 +188,38 @@ class CharacterLib:
             .count()
         ):
             model.unread_conversation = True
+
+        if compute_unvote_affinity_relation:
+            character_chief_affinity_ids = [
+                r[0]
+                for r in self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
+                .filter(
+                    AffinityRelationDocument.character_id == character_document.id,
+                    AffinityRelationDocument.accepted == True,
+                    AffinityRelationDocument.status_id == CHIEF_STATUS[0],
+                )
+                .all()
+            ]
+            # TODO BS: implement other direction types
+            character_chief_affinity_ids = [
+                a[0]
+                for a in self._kernel.server_db_session.query(AffinityDocument.id)
+                .filter(
+                    AffinityDocument.id.in_(character_chief_affinity_ids),
+                    AffinityDocument.direction_type.in_([AffinityDirectionType.ONE_DIRECTOR.value]),
+                )
+                .all()
+            ]
+            if (
+                self._kernel.server_db_session.query(AffinityRelationDocument)
+                .filter(
+                    AffinityRelationDocument.affinity_id.in_(character_chief_affinity_ids),
+                    AffinityRelationDocument.accepted == False,
+                    AffinityRelationDocument.request == True,
+                )
+                .count()
+            ):
+                model.unvote_affinity_relation = True
 
         return model
 
@@ -610,3 +648,41 @@ class CharacterLib:
                             haves.append(HaveAbility(from_=FromType.BUILD, risk=RiskType.NONE))
 
         return haves
+
+    def kill(self, character_id: str) -> None:
+        character_doc = self.get_document(character_id)
+        character_doc.alive = False
+        for stuff in self._kernel.stuff_lib.get_carried_by(character_id):
+            self._kernel.stuff_lib.drop(
+                stuff.id,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                zone_row_i=character_doc.zone_row_i,
+                zone_col_i=character_doc.zone_col_i,
+            )
+
+        for carried_resource in self._kernel.resource_lib.get_carried_by(character_id):
+            self._kernel.resource_lib.drop(
+                character_id=character_id,
+                resource_id=carried_resource.id,
+                quantity=carried_resource.quantity,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                zone_row_i=character_doc.zone_row_i,
+                zone_col_i=character_doc.zone_col_i,
+            )
+
+        corpse = self._stuff_lib.create_document_from_properties(
+            properties=self._kernel.game.stuff_manager.get_stuff_properties_by_id("CORPSE"),
+            stuff_id="CORPSE",
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            zone_row_i=character_doc.zone_row_i,
+            zone_col_i=character_doc.zone_col_i,
+        )
+        self._kernel.stuff_lib.add_stuff(corpse)
+
+        # Remove affinity relations
+        self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.character_id == character_doc.id
+        ).update({"accepted": False, "request": False, "fighter": False})

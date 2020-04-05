@@ -531,6 +531,7 @@ class TestAffinity:
         )
         assert arthur_relation.accepted
 
+    @pytest.mark.parametrize("accept", [True, False])
     async def test_unit__join_with_type_one_chief_ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -538,9 +539,82 @@ class TestAffinity:
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        accept: bool,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
+        kernel.server_db_session.add(affinity)
+        kernel.server_db_session.commit()
+
+        # manage page display "0" requests
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        item_urls = [i.form_action for i in descr.items]
+        item_labels = [i.label for i in descr.items]
+        assert "/affinity/xena/manage-requests/1" in item_urls
+        assert "Il y a actuellement 0 demande(s) d'adhésion" in item_labels
+        # no signal to vote for xena
+        character_model = kernel.character_lib.get(xena.id, compute_unvote_affinity_relation=True)
+        assert not character_model.unvote_affinity_relation
+
+        # make an request for arthur
+        kernel.server_db_session.add(
+            AffinityRelationDocument(
+                character_id=arthur.id, affinity_id=affinity.id, request=True, accepted=False
+            )
+        )
+        kernel.server_db_session.commit()
+
+        # manage page display "1" requests
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        item_urls = [i.form_action for i in descr.items]
+        item_labels = [i.label for i in descr.items]
+        assert "/affinity/xena/manage-requests/1" in item_urls
+        assert "Il y a actuellement 1 demande(s) d'adhésion" in item_labels
+        # have signal to vote for xena
+        character_model = kernel.character_lib.get(xena.id, compute_unvote_affinity_relation=True)
+        assert character_model.unvote_affinity_relation
+
+        # display manage requests
+        resp = await web.post(f"/affinity/{xena.id}/manage-requests/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+
+        assert f"/affinity/{xena.id}/manage-requests/{affinity.id}" == descr.items[0].form_action
+        assert arthur.id == descr.items[0].items[0].name
+        assert ["Ne rien décider", "Accepter", "Refuser"] == descr.items[0].items[0].choices
+
+        # Accept arthur
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage-requests/{affinity.id}",
+            json={arthur.id: "Accepter" if accept else "Refuser"},
+        )
+        assert 200 == resp.status
+
+        # manage page display "0" requests
+        resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+        item_labels = [i.label for i in descr.items]
+        assert "Il y a actuellement 0 demande(s) d'adhésion" in item_labels
+
+        # display manage requests: no more requests
+        resp = await web.post(f"/affinity/{xena.id}/manage-requests/{affinity.id}")
+        descr = descr_serializer.load(await resp.json())
+        assert not descr.items[0].items
+
+        arthur_relation: AffinityRelationDocument = kernel.server_db_session.query(
+            AffinityRelationDocument
+        ).filter(
+            AffinityRelationDocument.affinity_id == affinity.id,
+            AffinityRelationDocument.character_id == arthur.id,
+        ).one()
+        assert accept == arthur_relation.accepted
+        assert not arthur_relation.request
+        # FIXME BS NOW: test and code "*xxx*" on affinity pages (requests)

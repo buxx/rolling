@@ -651,6 +651,7 @@ class CharacterController(BaseController):
             compute_unread_event=True,
             compute_unread_zone_message=True,
             compute_unread_conversation=True,
+            compute_unvote_affinity_relation=True,
         )
 
     @hapic.with_api_doc()

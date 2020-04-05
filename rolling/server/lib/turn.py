@@ -237,37 +237,7 @@ class TurnLib:
                 self._logger.info(
                     f"'{character_doc.name}' have '{character_doc.life_points}' life point. kill it."
                 )
-
-                character_doc.alive = False
-                for stuff in self._kernel.stuff_lib.get_carried_by(character_id):
-                    self._kernel.stuff_lib.drop(
-                        stuff.id,
-                        world_row_i=character_doc.world_row_i,
-                        world_col_i=character_doc.world_col_i,
-                        zone_row_i=character_doc.zone_row_i,
-                        zone_col_i=character_doc.zone_col_i,
-                    )
-
-                for carried_resource in self._kernel.resource_lib.get_carried_by(character_id):
-                    self._kernel.resource_lib.drop(
-                        character_id=character_id,
-                        resource_id=carried_resource.id,
-                        quantity=carried_resource.quantity,
-                        world_row_i=character_doc.world_row_i,
-                        world_col_i=character_doc.world_col_i,
-                        zone_row_i=character_doc.zone_row_i,
-                        zone_col_i=character_doc.zone_col_i,
-                    )
-
-                corpse = self._stuff_lib.create_document_from_properties(
-                    properties=self._kernel.game.stuff_manager.get_stuff_properties_by_id("CORPSE"),
-                    stuff_id="CORPSE",
-                    world_row_i=character_doc.world_row_i,
-                    world_col_i=character_doc.world_col_i,
-                    zone_row_i=character_doc.zone_row_i,
-                    zone_col_i=character_doc.zone_col_i,
-                )
-                self._kernel.stuff_lib.add_stuff(corpse)
+                self._kernel.character_lib.kill(character_doc.id)
 
     def _universe_turn(self) -> None:
         self._kernel.universe_lib.add_new_state()
