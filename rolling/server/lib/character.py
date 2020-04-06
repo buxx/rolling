@@ -124,6 +124,8 @@ class CharacterLib:
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
+            attack_allowed_loss_rate=character_document.attack_allowed_loss_rate,
+            defend_allowed_loss_rate=character_document.defend_allowed_loss_rate,
             world_col_i=character_document.world_col_i,
             world_row_i=character_document.world_row_i,
             zone_col_i=character_document.zone_col_i,

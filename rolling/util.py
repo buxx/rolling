@@ -265,3 +265,6 @@ def get_character_stuff_filled_with_water(
         )
     except StopIteration:
         pass
+
+
+clamp = lambda n, minn, maxn: max(min(maxn, n), minn)

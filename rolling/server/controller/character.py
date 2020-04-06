@@ -34,6 +34,7 @@ from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import TakeResourceModel
+from rolling.model.character import UpdateCharacterCardBodyModel
 from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
@@ -62,6 +63,7 @@ from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import EmptyModel
 from rolling.util import character_can_drink_in_its_zone
+from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
@@ -97,11 +99,29 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_body(UpdateCharacterCardBodyModel)
     @hapic.output_body(Description)
     async def _describe_character_card(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._character_lib.get(hapic_data.path.character_id)
+        doc = self._character_lib.get_document(character.id)
+
+        if (
+            hapic_data.body.attack_allowed_loss_rate is not None
+            or hapic_data.body.defend_allowed_loss_rate is not None
+        ):
+            if hapic_data.body.attack_allowed_loss_rate is not None:
+                input_ = int(hapic_data.body.attack_allowed_loss_rate)
+                input_ = clamp(input_, 0, 100)
+                doc.attack_allowed_loss_rate = input_
+            if hapic_data.body.defend_allowed_loss_rate is not None:
+                input_ = int(hapic_data.body.defend_allowed_loss_rate)
+                input_ = clamp(input_, 0, 100)
+                doc.defend_allowed_loss_rate = input_
+            self._kernel.server_db_session.add(doc)
+            self._kernel.server_db_session.commit()
+
         return Description(
             title="Fiche de personnage",
             items=[
@@ -117,10 +137,30 @@ class CharacterController(BaseController):
                 ),
                 Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
                 Part(label="Faim", text="oui" if character.feel_hungry else "non"),
-                Part(text="Compétences"),
-                Part(text="------------"),
-                Part(label="Chasse et ceuillete", text=str(character.hunting_and_collecting_comp)),
-                Part(label="Trouver de l'eau", text=str(character.find_water_comp)),
+                Part(text=""),
+                Part(
+                    is_form=True,
+                    form_action=f"/_describe/character/{character.id}/card",
+                    items=[
+                        Part(
+                            text="Si vous occupez la position de chef de guerre, vous pouvez "
+                            "décider de la part de perte maximale dans vos rangs avant "
+                            "d'ordonner le replis"
+                        ),
+                        Part(
+                            label="Lorsque vous menez un assault (%)",
+                            type_=Type.NUMBER,
+                            name="attack_allowed_loss_rate",
+                            default_value=str(doc.attack_allowed_loss_rate),
+                        ),
+                        Part(
+                            label="Lorsque vous êtes attaqué (%)",
+                            type_=Type.NUMBER,
+                            name="defend_allowed_loss_rate",
+                            default_value=str(doc.defend_allowed_loss_rate),
+                        ),
+                    ],
+                ),
             ],
         )
 

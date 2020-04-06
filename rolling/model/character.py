@@ -28,6 +28,16 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class UpdateCharacterCardBodyModel:
+    attack_allowed_loss_rate: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    defend_allowed_loss_rate: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+
+
+@dataclasses.dataclass
 class GetAffinityPathModel:
     character_id: str
     affinity_id: int = serpyco.number_field(cast_on_load=True)
@@ -168,6 +178,8 @@ class CharacterModel:
     find_water_comp: float
     life_points: float
     action_points: float
+    attack_allowed_loss_rate: int
+    defend_allowed_loss_rate: int
     # FIXME BS 2019-10-14: base code of that
     ability_ids: typing.List[str] = serpyco.field(default_factory=list)
 

@@ -30,6 +30,9 @@ class CharacterDocument(Document):
     max_life_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
     hunting_and_collecting_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
     find_water_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
+    # percent of injured/died fighter before retreat
+    attack_allowed_loss_rate = Column(Integer, nullable=False, default=30)
+    defend_allowed_loss_rate = Column(Integer, nullable=False, default=30)
 
     # role game play
     action_points = Column(SqliteNumeric(10, 2), nullable=False)
