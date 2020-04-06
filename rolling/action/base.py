@@ -9,6 +9,7 @@ import serpyco
 from guilang.description import Description
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_BUILD_ACTION
+from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.link import CharacterActionLink
@@ -87,6 +88,23 @@ def get_with_resource_action_url(
         character_id=character_id,
         action_type=action_type.value,
         resource_id=resource_id,
+        action_description_id=action_description_id,
+    )
+    return f"{base_url}?{urlencode(query_params)}"
+
+
+def get_with_character_action_url(
+    character_id: str,
+    action_type: ActionType,
+    with_character_id: str,
+    query_params: dict,
+    action_description_id: str,
+) -> str:
+    query_params = remove_none_values(query_params)
+    base_url = WITH_CHARACTER_ACTION.format(
+        character_id=character_id,
+        action_type=action_type.value,
+        with_character_id=with_character_id,
         action_description_id=action_description_id,
     )
     return f"{base_url}?{urlencode(query_params)}"
@@ -233,3 +251,37 @@ class CharacterAction(Action):
         self, character: "CharacterModel", input_: typing.Optional[typing.Any] = None
     ) -> typing.Optional[float]:
         return self._description.base_cost
+
+
+class WithCharacterAction(Action):
+    @abc.abstractmethod
+    def check_is_possible(
+        self, character: "CharacterModel", with_character: "CharacterModel"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    def check_request_is_possible(
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    def get_character_actions(
+        self, character: "CharacterModel", with_character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        pass
+
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: typing.Optional[typing.Any] = None,
+    ) -> typing.Optional[float]:
+        return self._description.base_cost
+
+    @abc.abstractmethod
+    def perform(
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+    ) -> Description:
+        pass

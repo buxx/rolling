@@ -1,10 +1,9 @@
 # coding: utf-8
 import typing
 
-from rolling.action.bag import NotUseAsBagAction
-from rolling.action.bag import UseAsBagAction
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
+from rolling.action.base import WithCharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.build import BeginBuildAction
@@ -23,12 +22,21 @@ from rolling.action.drop import DropStuffAction
 from rolling.action.eat import EatResourceAction
 from rolling.action.eat import EatStuffAction
 from rolling.action.empty import EmptyStuffAction
+from rolling.action.fight import AttackCharacterAction
 from rolling.action.fill import FillStuffAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
 from rolling.action.transform import TransformResourcesIntoResourcesAction
 from rolling.action.transform import TransformStuffIntoResourcesAction
+from rolling.action.use import NotUseAsArmorAction
+from rolling.action.use import NotUseAsBagAction
+from rolling.action.use import NotUseAsShieldAction
+from rolling.action.use import NotUseAsWeaponAction
+from rolling.action.use import UseAsArmorAction
+from rolling.action.use import UseAsBagAction
+from rolling.action.use import UseAsShieldAction
+from rolling.action.use import UseAsWeaponAction
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -47,6 +55,12 @@ class ActionFactory:
         ActionType.COLLECT_RESOURCE: CollectResourceAction,
         ActionType.USE_AS_BAG: UseAsBagAction,
         ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
+        ActionType.USE_AS_WEAPON: UseAsWeaponAction,
+        ActionType.NOT_USE_AS_WEAPON: NotUseAsWeaponAction,
+        ActionType.USE_AS_SHIELD: UseAsShieldAction,
+        ActionType.NOT_USE_AS_SHIELD: NotUseAsShieldAction,
+        ActionType.USE_AS_ARMOR: UseAsArmorAction,
+        ActionType.NOT_USE_AS_ARMOR: NotUseAsArmorAction,
         ActionType.DROP_STUFF: DropStuffAction,
         ActionType.DROP_RESOURCE: DropResourceAction,
         ActionType.MIX_RESOURCES: MixResourcesAction,
@@ -64,6 +78,7 @@ class ActionFactory:
         ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
         ActionType.SEARCH_MATERIAL: SearchMaterialAction,
         ActionType.BUILD: BuildAction,
+        ActionType.ATTACK_CHARACTER: AttackCharacterAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -79,6 +94,12 @@ class ActionFactory:
             ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
             ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
             ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
+            ActionType.USE_AS_WEAPON: UseAsWeaponAction,
+            ActionType.NOT_USE_AS_WEAPON: NotUseAsWeaponAction,
+            ActionType.USE_AS_SHIELD: UseAsShieldAction,
+            ActionType.NOT_USE_AS_SHIELD: NotUseAsShieldAction,
+            ActionType.USE_AS_ARMOR: UseAsArmorAction,
+            ActionType.NOT_USE_AS_ARMOR: NotUseAsArmorAction,
         }
         self._with_resource_actions: typing.Dict[ActionType, typing.Type[WithResourceAction]] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
@@ -86,6 +107,9 @@ class ActionFactory:
             ActionType.EAT_RESOURCE: EatResourceAction,
             ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
             ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
+        }
+        self._with_character_actions: typing.Dict[ActionType, typing.Type[WithCharacterAction]] = {
+            ActionType.ATTACK_CHARACTER: AttackCharacterAction
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
@@ -161,6 +185,15 @@ class ActionFactory:
 
         return actions
 
+    def get_all_with_character_actions(self) -> typing.List[WithCharacterAction]:
+        actions: typing.List[WithCharacterAction] = []
+
+        for action_type, action_class in self._with_character_actions.items():
+            for action_description in self._kernel.game.config.actions[action_type]:
+                actions.append(action_class(kernel=self._kernel, description=action_description))
+
+        return actions
+
     def create_action(
         self, action_type: ActionType, action_description_id: typing.Optional[str] = None
     ) -> typing.Union[CharacterAction, WithStuffAction]:
@@ -170,6 +203,7 @@ class ActionFactory:
             or action_type in self._character_actions
             or action_type in self._build_actions
             or action_type in self._with_build_actions
+            or action_type in self._with_character_actions
         ):
             for action_description in self._kernel.game.config.actions[action_type]:
                 if action_description_id is None or action_description.id == action_description_id:

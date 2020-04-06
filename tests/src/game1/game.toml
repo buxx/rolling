@@ -37,8 +37,6 @@ day_turn_every = 3600
 
 [extractions]
 
-[ACTIONS]
-
 [build]
 [build.TEST_BUILD_1]
   name = "Test build 1"
@@ -58,3 +56,28 @@ day_turn_every = 3600
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = []
   cost = 2.0
+
+[ACTIONS]
+  [ACTIONS.USE_AS_WEAPON]
+    actions = ["USE_AS_WEAPON"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_WEAPON]
+    actions = ["NOT_USE_AS_WEAPON"]
+    cost = 0.0
+
+  [ACTIONS.USE_AS_SHIELD]
+    actions = ["USE_AS_SHIELD"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_SHIELD]
+    actions = ["NOT_USE_AS_SHIELD"]
+    cost = 0.0
+
+  [ACTIONS.USE_AS_ARMOR]
+    actions = ["USE_AS_ARMOR"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_ARMOR]
+    actions = ["NOT_USE_AS_ARMOR"]
+    cost = 0.0

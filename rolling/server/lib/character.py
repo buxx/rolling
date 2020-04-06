@@ -3,6 +3,7 @@ import os
 import typing
 import uuid
 
+import sqlalchemy
 from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
@@ -10,6 +11,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from rolling.exception import ImpossibleAction
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
+from rolling.model.character import FIGHT_AP_CONSUME
+from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
@@ -21,6 +24,7 @@ from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
@@ -121,9 +125,26 @@ class CharacterLib:
         return self.alive_query.filter(CharacterDocument.name == name).one()
 
     def document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
+        weapon = None
+        weapon_doc = character_document.used_as_primary_weapon
+        if weapon_doc:
+            weapon = self._kernel.stuff_lib.stuff_model_from_doc(weapon_doc)
+
+        shield = None
+        shield_doc = character_document.used_as_shield
+        if shield_doc:
+            shield = self._kernel.stuff_lib.stuff_model_from_doc(shield_doc)
+
+        armor = None
+        armor_doc = character_document.used_as_armor
+        if armor_doc:
+            armor = self._kernel.stuff_lib.stuff_model_from_doc(armor_doc)
+
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
+            attack_allowed_loss_rate=character_document.attack_allowed_loss_rate,
+            defend_allowed_loss_rate=character_document.defend_allowed_loss_rate,
             world_col_i=character_document.world_col_i,
             world_row_i=character_document.world_row_i,
             zone_col_i=character_document.zone_col_i,
@@ -137,12 +158,22 @@ class CharacterLib:
             feel_hungry=character_document.feel_hungry,
             dehydrated=character_document.dehydrated,
             starved=character_document.starved,
+            tiredness=character_document.tiredness,
             action_points=float(character_document.action_points),
             bags=[
                 self._stuff_lib.stuff_model_from_doc(bag_doc)
                 for bag_doc in character_document.used_as_bag
             ],
+            weapon=weapon,
+            shield=shield,
+            armor=armor,
         )
+
+    def get_multiple(self, character_ids: typing.List[str]) -> typing.List[CharacterModel]:
+        return [
+            self.document_to_model(doc)
+            for doc in self.alive_query.filter(CharacterDocument.id.in_(character_ids)).all()
+        ]
 
     def get(
         self,
@@ -558,7 +589,7 @@ class CharacterLib:
         except NoResultFound:
             next_page_id = None
 
-        image_extension = (None,)
+        image_extension = None
         if story_page_doc.image_id:
             image_extension = (
                 self._kernel.server_db_session.query(ImageDocument.extension)
@@ -581,12 +612,17 @@ class CharacterLib:
         character_id: str,
         title: str,
         story_pages: typing.Optional[typing.List[StoryPageDocument]] = None,
+        read: bool = False,
     ) -> EventDocument:
         story_pages = story_pages or []
         turn = self._kernel.universe_lib.get_last_state().turn
-        event_doc = EventDocument(character_id=character_id, text=title, turn=turn)
+        event_doc = EventDocument(character_id=character_id, text=title, turn=turn, read=read)
         self._kernel.server_db_session.add(event_doc)
         self._kernel.server_db_session.commit()
+        if story_pages:
+            for story_page in story_pages:
+                story_page.event_id = event_doc.id
+            self.add_story_pages(story_pages)
         return event_doc
 
     def add_story_pages(self, story_pages: typing.List[StoryPageDocument]) -> None:
@@ -686,3 +722,81 @@ class CharacterLib:
         self._kernel.server_db_session.query(AffinityRelationDocument).filter(
             AffinityRelationDocument.character_id == character_doc.id
         ).update({"accepted": False, "request": False, "fighter": False})
+
+    def increase_tiredness(self, character_id: str, value: int, commit: bool = True) -> None:
+        doc = self.get_document(character_id)
+
+        new_tiredness = doc.tiredness + value
+        if new_tiredness > 100:
+            new_tiredness = 100
+        doc.tiredness = new_tiredness
+
+        if commit:
+            self._kernel.server_db_session.add(doc)
+            self._kernel.server_db_session.commit()
+
+    def reduce_tiredness(self, character_id: str, value: int, commit: bool = True) -> None:
+        doc = self.get_document(character_id)
+
+        new_tiredness = doc.tiredness - value
+        if new_tiredness < 0:
+            new_tiredness = 0
+        doc.tiredness = new_tiredness
+
+        if commit:
+            self._kernel.server_db_session.add(doc)
+            self._kernel.server_db_session.commit()
+
+    def _get_ready_to_fight_query(
+        self, character_ids: typing.List[str], world_row_i: int, world_col_i: int
+    ) -> sqlalchemy.orm.Query:
+        return self._kernel.character_lib.alive_query.filter(
+            CharacterDocument.id.in_(character_ids),
+            CharacterDocument.tiredness <= int(MINIMUM_BEFORE_EXHAUSTED),
+            CharacterDocument.action_points >= int(FIGHT_AP_CONSUME),
+            CharacterDocument.world_row_i == world_row_i,
+            CharacterDocument.world_col_i == world_col_i,
+        )
+
+    def get_ready_to_fight_count(
+        self, character_ids: typing.List[str], world_row_i: int, world_col_i: int
+    ) -> int:
+        return self._get_ready_to_fight_query(
+            character_ids, world_row_i=world_row_i, world_col_i=world_col_i
+        ).count()
+
+    def get_ready_to_fights(
+        self, character_ids: typing.List[str], world_row_i: int, world_col_i: int
+    ) -> typing.List[CharacterModel]:
+        return [
+            self.document_to_model(doc)
+            for doc in self._get_ready_to_fight_query(
+                character_ids, world_row_i=world_row_i, world_col_i=world_col_i
+            ).all()
+        ]
+
+    def reduce_life_points(self, character_id: str, value: float, commit: bool = True) -> float:
+        doc = self.get_document(character_id)
+        doc.life_points = float(doc.life_points) - value
+
+        if commit:
+            self._kernel.server_db_session.add(doc)
+            self._kernel.server_db_session.commit()
+
+        return doc.life_points
+
+    def get_with_character_actions(
+        self, character: CharacterModel, with_character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        character_actions: typing.List[CharacterActionLink] = []
+
+        for action in self._kernel.action_factory.get_all_with_character_actions():
+            try:
+                action.check_is_possible(character, with_character=with_character)
+                character_actions.extend(
+                    action.get_character_actions(character, with_character=with_character)
+                )
+            except ImpossibleAction:
+                pass
+
+        return character_actions

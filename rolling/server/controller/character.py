@@ -15,6 +15,7 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
+from rolling.action.base import WithCharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.exception import CantMoveCharacter
@@ -26,6 +27,7 @@ from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
+from rolling.model.character import GetLookCharacterModel
 from rolling.model.character import GetLookInventoryResourceModel
 from rolling.model.character import GetLookResourceModel
 from rolling.model.character import GetLookStuffModelModel
@@ -34,7 +36,9 @@ from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import TakeResourceModel
+from rolling.model.character import UpdateCharacterCardBodyModel
 from rolling.model.character import WithBuildActionModel
+from rolling.model.character import WithCharacterActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.event import CharacterEnterZoneData
@@ -49,11 +53,13 @@ from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_RESOURCE_ACTION
 from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.controller.url import WITH_BUILD_ACTION
+from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.effect import EffectManager
@@ -62,6 +68,7 @@ from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import EmptyModel
 from rolling.util import character_can_drink_in_its_zone
+from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
@@ -97,11 +104,30 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_body(UpdateCharacterCardBodyModel)
     @hapic.output_body(Description)
     async def _describe_character_card(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._character_lib.get(hapic_data.path.character_id)
+        doc = self._character_lib.get_document(character.id)
+
+        if (
+            hapic_data.body.attack_allowed_loss_rate is not None
+            or hapic_data.body.defend_allowed_loss_rate is not None
+        ):
+            if hapic_data.body.attack_allowed_loss_rate is not None:
+                input_ = int(hapic_data.body.attack_allowed_loss_rate)
+                input_ = clamp(input_, 0, 100)
+                doc.attack_allowed_loss_rate = input_
+            if hapic_data.body.defend_allowed_loss_rate is not None:
+                input_ = int(hapic_data.body.defend_allowed_loss_rate)
+                input_ = clamp(input_, 0, 100)
+                doc.defend_allowed_loss_rate = input_
+            self._kernel.server_db_session.add(doc)
+            self._kernel.server_db_session.commit()
+
+        # FIXME BS NOW: afficher arme, etc + lien pour enlever
         return Description(
             title="Fiche de personnage",
             items=[
@@ -117,10 +143,60 @@ class CharacterController(BaseController):
                 ),
                 Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
                 Part(label="Faim", text="oui" if character.feel_hungry else "non"),
-                Part(text="Compétences"),
-                Part(text="------------"),
-                Part(label="Chasse et ceuillete", text=str(character.hunting_and_collecting_comp)),
-                Part(label="Trouver de l'eau", text=str(character.find_water_comp)),
+                Part(
+                    label="Arme",
+                    text=character.weapon.name if character.weapon else "aucune",
+                    is_link=True if character.weapon else False,
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=character.weapon.id
+                    )
+                    if character.weapon
+                    else None,
+                ),
+                Part(
+                    label="Bouclier",
+                    text=character.shield.name if character.shield else "aucun",
+                    is_link=True if character.shield else False,
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=character.weapon.id
+                    )
+                    if character.weapon
+                    else None,
+                ),
+                Part(
+                    label="Armure",
+                    text=character.armor.name if character.armor else "aucune",
+                    is_link=True if character.armor else False,
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=character.weapon.id
+                    )
+                    if character.weapon
+                    else None,
+                ),
+                Part(text=""),
+                Part(
+                    is_form=True,
+                    form_action=f"/_describe/character/{character.id}/card",
+                    items=[
+                        Part(
+                            text="Si vous occupez la position de chef de guerre, vous pouvez "
+                            "décider de la part de perte maximale dans vos rangs avant "
+                            "d'ordonner le replis"
+                        ),
+                        Part(
+                            label="Lorsque vous menez un assault (%)",
+                            type_=Type.NUMBER,
+                            name="attack_allowed_loss_rate",
+                            default_value=str(doc.attack_allowed_loss_rate),
+                        ),
+                        Part(
+                            label="Lorsque vous êtes attaqué (%)",
+                            type_=Type.NUMBER,
+                            name="defend_allowed_loss_rate",
+                            default_value=str(doc.defend_allowed_loss_rate),
+                        ),
+                    ],
+                ),
             ],
         )
 
@@ -339,6 +415,31 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetLookCharacterModel)
+    @hapic.output_body(Description)
+    async def _describe_look_character(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        # TODO BS: check is in same zone
+        character = self._character_lib.get(hapic_data.path.character_id)
+        with_character = self._character_lib.get(hapic_data.path.with_character_id)
+        actions = self._character_lib.get_with_character_actions(
+            character=character, with_character=with_character
+        )
+        return Description(
+            title=with_character.name,
+            items=[
+                Part(
+                    text=action.get_as_str(),
+                    form_action=action.link,
+                    is_link=True,
+                    link_group_name=action.group_name,
+                )
+                for action in actions
+            ],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_path(GetLookResourceModel)
     @hapic.input_query(TakeResourceModel)
     @hapic.output_body(Description)
@@ -482,7 +583,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
             )
 
         return action.perform(character_model, input_)
@@ -521,7 +622,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
             )
 
         return action.perform(character=character_model, stuff=stuff, input_=input_)
@@ -554,7 +655,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
@@ -566,7 +667,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
             )
 
     @hapic.with_api_doc()
@@ -603,11 +704,53 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continue", go_back_zone=True)],
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
             )
 
         return action.perform(
             character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(WithCharacterActionModel)
+    @hapic.output_body(Description)
+    async def with_character_action(self, request: Request, hapic_data: HapicData) -> Description:
+        action_type = hapic_data.path.action_type
+        action = typing.cast(
+            WithCharacterAction,
+            self._action_factory.create_action(
+                action_type, action_description_id=hapic_data.path.action_description_id
+            ),
+        )
+        input_ = action.input_model_serializer.load(dict(request.query))
+        character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
+        with_character_model = self._kernel.character_lib.get(hapic_data.path.with_character_id)
+
+        cost = action.get_cost(character_model, with_character_model, input_=input_)
+        if cost is not None and character_model.action_points < cost:
+            return Description(
+                title="Action impossible",
+                items=[
+                    Part(
+                        text=f"{character_model.name} ne possède plus assez de points d'actions "
+                        f"({character_model.action_points} restant et {cost} nécessaires)"
+                    ),
+                    Part(label="Continue", go_back_zone=True),
+                ],
+            )
+
+        try:
+            action.check_request_is_possible(
+                character=character_model, with_character=with_character_model, input_=input_
+            )
+        except ImpossibleAction as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+            )
+
+        return action.perform(
+            character=character_model, with_character=with_character_model, input_=input_
         )
 
     @hapic.with_api_doc()
@@ -1005,6 +1148,7 @@ class CharacterController(BaseController):
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),
                 web.post(DESCRIBE_LOOK_AT_RESOURCE_URL, self._describe_look_resource),
+                web.post(DESCRIBE_LOOK_AT_CHARACTER_URL, self._describe_look_character),
                 web.post(DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff),
                 web.post(
                     DESCRIBE_INVENTORY_RESOURCE_ACTION, self._describe_inventory_look_resource
@@ -1013,6 +1157,7 @@ class CharacterController(BaseController):
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
                 web.post(WITH_BUILD_ACTION, self.with_build_action),
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
+                web.post(WITH_CHARACTER_ACTION, self.with_character_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
                 web.get("/character/{character_id}/resume_texts", self.get_resume_texts),
                 web.get("/character/{character_id}/dead", self.is_dead),

@@ -17,6 +17,7 @@ from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.model.stuff import StuffModel
 from rolling.server.controller.url import DESCRIBE_BUILD
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.document.build import BuildDocument
@@ -186,8 +187,15 @@ class ThereIsAroundProcessor(EventProcessor):
                     DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
                 )
             )
-        for character in characters:
-            items.append((character.name, None))
+        for character_ in characters:
+            items.append(
+                (
+                    character_.name,
+                    DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=character_.id
+                    ),
+                )
+            )
 
         around_event = ZoneEvent(type=ZoneEventType.THERE_IS_AROUND, data=ThereIsAroundData(items))
         event_str = self._event_serializer_factory.get_serializer(

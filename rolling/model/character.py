@@ -14,6 +14,13 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
+MINIMUM_BEFORE_TIRED = 49
+MINIMUM_BEFORE_EXHAUSTED = 79
+FIGHT_AP_CONSUME = 3
+FIGHT_LP_REQUIRE = 1.5
+FIGHT_TIREDNESS_INCREASE = 35
+
+
 @dataclasses.dataclass
 class CreateCharacterModel:
     name: str = serpyco.string_field(metadata={"label": "Name"}, min_length=2, max_length=32)
@@ -25,6 +32,16 @@ class CreateCharacterModel:
 @dataclasses.dataclass
 class GetCharacterPathModel:
     character_id: str
+
+
+@dataclasses.dataclass
+class UpdateCharacterCardBodyModel:
+    attack_allowed_loss_rate: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    defend_allowed_loss_rate: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 @dataclasses.dataclass
@@ -89,6 +106,12 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
+class GetLookCharacterModel:
+    character_id: str
+    with_character_id: str
+
+
+@dataclasses.dataclass
 class TakeResourceModel:
     quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
@@ -145,6 +168,14 @@ class WithResourceActionModel:
 
 
 @dataclasses.dataclass
+class WithCharacterActionModel:
+    character_id: str
+    with_character_id: str
+    action_type: ActionType
+    action_description_id: str
+
+
+@dataclasses.dataclass
 class MoveCharacterQueryModel:
     to_world_row: int = serpyco.number_field(cast_on_load=True)
     to_world_col: int = serpyco.number_field(cast_on_load=True)
@@ -168,6 +199,8 @@ class CharacterModel:
     find_water_comp: float
     life_points: float
     action_points: float
+    attack_allowed_loss_rate: int
+    defend_allowed_loss_rate: int
     # FIXME BS 2019-10-14: base code of that
     ability_ids: typing.List[str] = serpyco.field(default_factory=list)
 
@@ -180,10 +213,15 @@ class CharacterModel:
     dehydrated: bool = False
     feel_hungry: bool = True
     starved: bool = False
+    tiredness: int = 0
 
     _display_object = None
 
     bags: typing.List[StuffModel] = serpyco.field(default_factory=list)
+    # FIXME BS NOW: fill them from doc
+    weapon: typing.Optional[StuffModel] = None
+    shield: typing.Optional[StuffModel] = None
+    armor: typing.Optional[StuffModel] = None
 
     weight_overcharge: bool = False
     clutter_overcharge: bool = False
@@ -192,8 +230,31 @@ class CharacterModel:
     unread_conversation: bool = False
     unvote_affinity_relation: bool = False
 
+    @property
+    def tired(self) -> bool:
+        return self.tiredness > MINIMUM_BEFORE_TIRED
+
+    @property
+    def exhausted(self) -> bool:
+        return self.tiredness > MINIMUM_BEFORE_EXHAUSTED
+
+    def is_attack_ready(self) -> bool:
+        return (
+            not self.exhausted
+            and self.action_points >= FIGHT_AP_CONSUME
+            and self.life_points >= FIGHT_LP_REQUIRE
+        )
+
+    def is_defend_ready(self) -> bool:
+        return not self.exhausted and self.life_points >= FIGHT_LP_REQUIRE
+
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
+
+    @property
+    def force_weapon_multiplier(self) -> float:
+        # FIXME: character spec
+        return 1.0
 
     @property
     def display_object(self) -> "DisplayObject":

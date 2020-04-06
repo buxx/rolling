@@ -2,6 +2,7 @@
 import typing
 
 import sqlalchemy
+from sqlalchemy.orm import Query
 
 from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel
@@ -157,6 +158,15 @@ class StuffLib:
             ap_required=float(doc.ap_required),
             ap_spent=float(doc.ap_spent),
             under_construction=doc.under_construction,
+            weapon=stuff_properties.weapon,
+            armor=stuff_properties.armor,
+            shield=stuff_properties.shield,
+            estoc=stuff_properties.estoc,
+            blunt=stuff_properties.blunt,
+            sharp=stuff_properties.sharp,
+            protect_estoc=stuff_properties.protect_estoc,
+            protect_blunt=stuff_properties.protect_blunt,
+            protect_sharp=stuff_properties.protect_sharp,
         )
 
     def get_carried_by(
@@ -258,11 +268,81 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+    # FIXME: exclude crafting stuff
+    def set_as_used_as_weapon(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        # FIXME BS NOW: replace query by shared query (ready stuff)
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_weapon_by_id = character_id
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    # FIXME: exclude crafting stuff
+    def set_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        # FIXME BS NOW: replace query by shared query (ready stuff)
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_armor_by_id = character_id
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    # FIXME: exclude crafting stuff
+    def set_as_used_as_shield(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        # FIXME BS NOW: replace query by shared query (ready stuff)
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_shield_by_id = character_id
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
     def unset_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
             StuffDocument.id == stuff_id
         ).one()
         stuff_doc.used_as_bag_by_id = None
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def unset_as_used_as_weapon(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_weapon_by_id = None
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def unset_as_used_as_shield(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_shield_by_id = None
+        self._kernel.server_db_session.add(stuff_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def unset_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).one()
+        stuff_doc.used_as_armor_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 
         if commit:

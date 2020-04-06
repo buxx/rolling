@@ -22,7 +22,12 @@ from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMapSource
 from rolling.map.type.zone import SeaWater
 from rolling.model.character import CharacterModel
+from rolling.model.stuff import StuffModel
 from rolling.server.application import get_application
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
+from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.extension import hapic
@@ -160,16 +165,21 @@ def worldmapc_with_zones_stuff_lib(worldmapc_kernel: Kernel) -> StuffLib:
     return StuffLib(worldmapc_kernel)
 
 
+_default_character_competences = {
+    "background_story": "",
+    "max_life_comp": 5.0,
+    "life_points": 5.0,
+    "hunting_and_collecting_comp": 2.0,
+    "find_water_comp": 1.0,
+    "action_points": 24.0,
+    "attack_allowed_loss_rate": 30.0,
+    "defend_allowed_loss_rate": 30.0,
+}
+
+
 @pytest.fixture
 def default_character_competences() -> dict:
-    return {
-        "background_story": "",
-        "max_life_comp": 5.0,
-        "life_points": 5.0,
-        "hunting_and_collecting_comp": 2.0,
-        "find_water_comp": 1.0,
-        "action_points": 24.0,
-    }
+    return _default_character_competences
 
 
 @pytest.fixture
@@ -267,3 +277,181 @@ description_serializer = serpyco.Serializer(Description)
 @pytest.fixture(scope="session")
 def descr_serializer() -> serpyco.Serializer:
     return description_serializer
+
+
+@pytest.fixture
+def france_affinity(worldmapc_kernel: Kernel) -> AffinityDocument:
+    doc = AffinityDocument(name="France")
+    worldmapc_kernel.server_db_session.add(doc)
+    worldmapc_kernel.server_db_session.commit()
+    return doc
+
+
+@pytest.fixture
+def england_affinity(worldmapc_kernel: Kernel) -> AffinityDocument:
+    doc = AffinityDocument(name="England")
+    worldmapc_kernel.server_db_session.add(doc)
+    worldmapc_kernel.server_db_session.commit()
+    return doc
+
+
+@pytest.fixture
+def burgundian_affinity(worldmapc_kernel: Kernel) -> AffinityDocument:
+    doc = AffinityDocument(name="Burgundian")
+    worldmapc_kernel.server_db_session.add(doc)
+    worldmapc_kernel.server_db_session.commit()
+    return doc
+
+
+def _create_soldiers(
+    kernel: Kernel, affinity: AffinityDocument, count: int, warlord: bool = False
+) -> typing.List[CharacterModel]:
+    models = []
+    name = "soldier" if not warlord else "warlord"
+    for i in range(count):
+        doc = CharacterDocument(
+            id=f"{affinity.name.lower()}_{name}{i}",
+            name=f"{affinity.name}{name.capitalize()}{i}",
+            **_default_character_competences,
+        )
+        doc.world_row_i = 1
+        doc.world_col_i = 1
+        doc.zone_row_i = 10
+        doc.zone_col_i = 10
+
+        kernel.server_db_session.add(doc)
+        kernel.server_db_session.commit()
+        kernel.server_db_session.add(
+            AffinityRelationDocument(
+                affinity_id=affinity.id,
+                character_id=doc.id,
+                accepted=True,
+                fighter=True,
+                status_id=MEMBER_STATUS[0] if not warlord else WARLORD_STATUS[0],
+            )
+        )
+        models.append(kernel.character_lib.document_to_model(doc))
+
+    kernel.server_db_session.commit()
+    return models
+
+
+@pytest.fixture
+def france_fighters(
+    worldmapc_kernel: Kernel, france_affinity: AffinityDocument
+) -> typing.List[CharacterModel]:
+    return _create_soldiers(worldmapc_kernel, france_affinity, 5)
+
+
+@pytest.fixture
+def england_fighters(
+    worldmapc_kernel: Kernel, england_affinity: AffinityDocument
+) -> typing.List[CharacterModel]:
+    return _create_soldiers(worldmapc_kernel, england_affinity, 5)
+
+
+@pytest.fixture
+def burgundian_fighters(
+    worldmapc_kernel: Kernel, burgundian_affinity: AffinityDocument
+) -> typing.List[CharacterModel]:
+    return _create_soldiers(worldmapc_kernel, burgundian_affinity, 5)
+
+
+@pytest.fixture
+def france_warlord(worldmapc_kernel: Kernel, france_affinity: AffinityDocument) -> CharacterModel:
+    return _create_soldiers(worldmapc_kernel, france_affinity, 1, warlord=True)[0]
+
+
+@pytest.fixture
+def england_warlord(worldmapc_kernel: Kernel, england_affinity: AffinityDocument) -> CharacterModel:
+    return _create_soldiers(worldmapc_kernel, england_affinity, 1, warlord=True)[0]
+
+
+@pytest.fixture
+def burgundian_warlord(
+    worldmapc_kernel: Kernel, burgundian_affinity: AffinityDocument
+) -> CharacterModel:
+    return _create_soldiers(worldmapc_kernel, burgundian_affinity, 1, warlord=True)[0]
+
+
+def _create_stuff(kernel: Kernel, stuff_id: str) -> StuffModel:
+    haxe_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+    haxe_doc = kernel.stuff_lib.create_document_from_stuff_properties(
+        haxe_properties, world_row_i=0, world_col_i=0, zone_row_i=0, zone_col_i=0
+    )
+    kernel.stuff_lib.add_stuff(haxe_doc)
+    return kernel.stuff_lib.get_stuff(haxe_doc.id)
+
+
+@pytest.fixture
+def worldmapc_xena_haxe(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    haxe = _create_stuff(kernel, "STONE_HAXE")
+    kernel.stuff_lib.set_carried_by(haxe.id, xena.id)
+    return haxe
+
+
+@pytest.fixture
+def worldmapc_xena_leather_jacket(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    haxe = _create_stuff(kernel, "LEATHER_JACKET")
+    kernel.stuff_lib.set_carried_by(haxe.id, xena.id)
+    return haxe
+
+
+@pytest.fixture
+def worldmapc_xena_wood_shield(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    shield = _create_stuff(kernel, "WOOD_SHIELD")
+    kernel.stuff_lib.set_carried_by(shield.id, xena.id)
+    return shield
+
+
+@pytest.fixture
+def worldmapc_xena_haxe_weapon(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel, worldmapc_xena_haxe: StuffModel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+    haxe = worldmapc_xena_haxe
+
+    kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe.id)
+    return haxe
+
+
+@pytest.fixture
+def worldmapc_arthur_leather_jacket(
+    worldmapc_arthur_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    arthur = worldmapc_arthur_model
+    kernel = worldmapc_kernel
+
+    jacket = _create_stuff(kernel, "LEATHER_JACKET")
+    kernel.stuff_lib.set_carried_by(jacket.id, arthur.id)
+    return jacket
+
+
+@pytest.fixture
+def worldmapc_arthur_leather_jacket_armor(
+    worldmapc_arthur_model: CharacterModel,
+    worldmapc_kernel: Kernel,
+    worldmapc_arthur_leather_jacket: StuffModel,
+) -> StuffModel:
+    arthur = worldmapc_arthur_model
+    kernel = worldmapc_kernel
+    leather_jacket = worldmapc_arthur_leather_jacket
+
+    kernel.stuff_lib.set_as_used_as_armor(arthur.id, leather_jacket.id)
+    return leather_jacket

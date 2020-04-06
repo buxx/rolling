@@ -50,6 +50,9 @@ class StuffDocument(Document):
     # relations
     carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     used_as_bag_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
+    used_as_weapon_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
+    used_as_shield_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
+    used_as_armor_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)
 
     def fill(self, kernel: "Kernel", with_resource: str, at: float) -> None:

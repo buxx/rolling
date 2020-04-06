@@ -298,6 +298,11 @@ day_turn_every = 86400  # 24 hours
     resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
 
 [ACTIONS]
+  [ACTIONS.ATTACK_CHARACTER]
+    name = "Attaquer"
+    actions = ["ATTACK_CHARACTER"]
+    cost = 0.0
+
   [ACTIONS.DRINK_FRESH_WATER]
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
     accept_resources = ["FRESH_WATER"]
@@ -373,6 +378,30 @@ day_turn_every = 86400  # 24 hours
 
   [ACTIONS.NOT_USE_AS_BAG]
     actions = ["NOT_USE_AS_BAG"]
+    cost = 0.0
+
+  [ACTIONS.USE_AS_WEAPON]
+    actions = ["USE_AS_WEAPON"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_WEAPON]
+    actions = ["NOT_USE_AS_WEAPON"]
+    cost = 0.0
+
+  [ACTIONS.USE_AS_SHIELD]
+    actions = ["USE_AS_SHIELD"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_SHIELD]
+    actions = ["NOT_USE_AS_SHIELD"]
+    cost = 0.0
+
+  [ACTIONS.USE_AS_ARMOR]
+    actions = ["USE_AS_ARMOR"]
+    cost = 0.0
+
+  [ACTIONS.NOT_USE_AS_ARMOR]
+    actions = ["NOT_USE_AS_ARMOR"]
     cost = 0.0
 
   [ACTIONS.COLLECT_RESOURCE]
@@ -701,9 +730,45 @@ day_turn_every = 86400  # 24 hours
     consume = [
       {resource="WOOD", quantity=0.01}  # FIXME: in action, accept stuff to as required
     ]
-    craft_ap = 20.0
+    craft_ap = 24.0
     cost = 2.0
     link_group_name = "Artisanat d'art"
+
+  [ACTIONS.CONSTRUCT_PRIMITIVE_WOOD_SHIELD]
+    name = "Bouclier de planche"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "PRIMITIVE_WOOD_SHIELD"
+    default_description = "Fait d'une pièce de bois raclé"
+    consume = [
+      {resource="WOOD", quantity=0.05}  # FIXME: in action, accept stuff to as required
+    ]
+    craft_ap = 16.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_ANIMAL_SKIN_COAT]
+    name = "Veste de peaux animales"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "ANIMAL_SKIN_COAT"
+    default_description = "Fait de plusieurs pièces de fourrures"
+    consume = [
+      {resource="LITTLE_ANIMAL_SKIN", quantity=20}  # FIXME: in action, accept stuff to as required
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Vestimentaire"
 
   [ACTIONS.SEARCH_WOOD]
     name = "Chercher du bois (construction/artisanat)"

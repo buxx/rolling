@@ -1,15 +1,20 @@
 # coding: utf-8
 import typing
 
+import sqlalchemy
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
+from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
+from rolling.model.character import CharacterModel
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.character import CharacterDocument
 from rolling.server.document.message import MessageDocument
 
 if typing.TYPE_CHECKING:
@@ -72,6 +77,13 @@ class AffinityLib:
             .one()
         )
 
+    def get_multiple(self, affinity_ids: typing.List[int]) -> typing.List[AffinityDocument]:
+        return (
+            self._kernel.server_db_session.query(AffinityDocument)
+            .filter(AffinityDocument.id.in_(affinity_ids))
+            .all()
+        )
+
     def get_character_relation(
         self, affinity_id: int, character_id: str
     ) -> typing.Optional[AffinityRelationDocument]:
@@ -86,6 +98,21 @@ class AffinityLib:
             )
         except NoResultFound:
             return None
+
+    def get_accepted_affinities(
+        self, character_id: str, warlord: bool = False
+    ) -> typing.List[AffinityRelationDocument]:
+        query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.character_id == character_id,
+            AffinityRelationDocument.accepted == True,
+        )
+
+        if warlord:
+            query = query.filter(
+                AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0]))
+            )
+
+        return query.all()
 
     def get_with_relation(
         self, character_id: str
@@ -149,3 +176,71 @@ class AffinityLib:
                 ):
                     return True
         return False
+
+    def get_affinity_fighter_ids(self, affinity_id: int) -> typing.List[str]:
+        return [
+            r[0]
+            for r in (
+                self._kernel.server_db_session.query(AffinityRelationDocument.character_id)
+                .filter(
+                    AffinityRelationDocument.affinity_id == affinity_id,
+                    AffinityRelationDocument.fighter == True,
+                )
+                .all()
+            )
+        ]
+
+    def count_ready_fighter(self, affinity_id: int, world_row_i: int, world_col_i: int) -> int:
+        affinity_fighter_ids = self.get_affinity_fighter_ids(affinity_id)
+        if not affinity_fighter_ids:
+            return 0
+
+        return self._kernel.character_lib.get_ready_to_fight_count(
+            affinity_fighter_ids, world_row_i=world_row_i, world_col_i=world_col_i
+        )
+
+    def get_ready_fighters(
+        self, affinity_id: int, world_row_i: int, world_col_i: int
+    ) -> typing.List[CharacterModel]:
+        affinity_fighter_ids = self.get_affinity_fighter_ids(affinity_id)
+        return self._kernel.character_lib.get_ready_to_fights(
+            affinity_fighter_ids, world_row_i=world_row_i, world_col_i=world_col_i
+        )
+
+    def have_active_or_fighter_relation_with(
+        self, character_id: str, affinity_ids: typing.List[int]
+    ) -> bool:
+        return bool(
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id.in_(affinity_ids),
+                AffinityRelationDocument.character_id == character_id,
+                sqlalchemy.or_(
+                    AffinityRelationDocument.accepted == True,
+                    AffinityRelationDocument.fighter == True,
+                ),
+            )
+            .count()
+        )
+
+    def get_active_relation(self, character_id: str, affinity_id: int) -> AffinityRelationDocument:
+        return (
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.character_id == character_id,
+                AffinityRelationDocument.affinity_id == affinity_id,
+                AffinityRelationDocument.accepted == True,
+            )
+            .one()
+        )
+
+    def character_is_in_affinity(self, character_id: str, affinity_id: int) -> bool:
+        return bool(
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.character_id == character_id,
+                AffinityRelationDocument.affinity_id == affinity_id,
+                AffinityRelationDocument.accepted == True,
+            )
+            .count()
+        )

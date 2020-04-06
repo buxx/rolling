@@ -11,3 +11,36 @@
   filled_unity = "L"
   weight = 0.1
   clutter = 1.0
+
+[STONE_HAXE]
+  name = "Hache de pierre"
+  weight = 1000.0
+  clutter = 1.0
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF"]
+  abilities = ["HUNT_SMALL_GAME", "FIGHT"]
+  weapon = true
+  estoc = 0
+  blunt = 10
+  sharp = 10
+
+[LEATHER_JACKET]
+  name = "Veste de cuir"
+  weight = 2500.0
+  clutter = 2.0
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF"]
+  abilities = []
+  armor = true
+  protect_estoc = 15
+  protect_blunt = 10
+  protect_sharp = 10
+
+[WOOD_SHIELD]
+  name = "Bouclier de bois"
+  weight = 2500.0
+  clutter = 5.0
+  actions = ["DROP_STUFF"]
+  abilities = []
+  shield = true
+  protect_estoc = 30
+  protect_blunt = 10
+  protect_sharp = 30

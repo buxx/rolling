@@ -1,4 +1,5 @@
 # coding: utf-8
+import enum
 import typing
 
 from rolling.exception import ConfigurationError
@@ -107,3 +108,23 @@ def fill_base_action_properties(
             raise ConfigurationError(f"ability_id '{ability_id}' is unknown for '{action_class}'")
 
     return properties
+
+
+class AroundPercent(enum.Enum):
+    LESS = "LESS"
+    IN = "IN"
+    MORE = "MORE"
+
+
+def in_percent(reference: float, number: float, percent: int) -> AroundPercent:
+    percent_val = reference * (percent / 100)
+    minimum = reference - percent_val
+    maximum = reference + percent_val
+
+    if number < minimum:
+        return AroundPercent.LESS
+
+    if number > maximum:
+        return AroundPercent.MORE
+
+    return AroundPercent.IN

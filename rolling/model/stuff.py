@@ -26,6 +26,16 @@ class StuffProperties:
     descriptions: typing.List[ActionDescriptionModel] = serpyco.field(default_factory=list)
     material_type: typing.Optional[str] = None
     abilities: typing.List[str] = serpyco.field(default_factory=list)
+    weapon: bool = False
+    shield: bool = False
+    armor: bool = False
+    estoc: int = 0  # estoc (pointe de lame)
+    blunt: int = 0  # frappe (gourdin)
+    sharp: int = 0  # taille (coupant de lame)
+    protect_estoc: int = 0
+    protect_blunt: int = 0
+    protect_sharp: int = 0
+    damages: float = 0.0
 
     def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
         for ability in abilities:
@@ -57,6 +67,21 @@ class StuffModel:
     ap_spent: float = 0.0
     under_construction: bool = False
     description: str = ""
+    weapon: bool = False
+    shield: bool = False
+    armor: bool = False
+    estoc: int = 0
+    blunt: int = 0
+    sharp: int = 0
+    protect_estoc: int = 0
+    protect_blunt: int = 0
+    protect_sharp: int = 0
+    damages: float = 0.0
+
+    @property
+    def ready_for_use(self) -> bool:
+        # TODO BS: is broken, etc
+        return not self.under_construction
 
     def get_full_description(self) -> typing.List[str]:
         descriptions: typing.List[str] = []

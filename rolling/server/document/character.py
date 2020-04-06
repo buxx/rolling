@@ -30,6 +30,9 @@ class CharacterDocument(Document):
     max_life_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
     hunting_and_collecting_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
     find_water_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
+    # percent of injured/died fighter before retreat
+    attack_allowed_loss_rate = Column(Integer, nullable=False, default=30)
+    defend_allowed_loss_rate = Column(Integer, nullable=False, default=30)
 
     # role game play
     action_points = Column(SqliteNumeric(10, 2), nullable=False)
@@ -39,6 +42,8 @@ class CharacterDocument(Document):
     _effect_ids = Column(Text, default="")
     feel_hungry = Column(Boolean, default=True)
     starved = Column(Boolean, default=False)
+    # FIXME BS: add sleep action
+    tiredness = Column(Integer, nullable=False, default=0)  # /100
 
     # transport
     shipped_stuff = relationship(
@@ -46,6 +51,15 @@ class CharacterDocument(Document):
     )
     used_as_bag = relationship(
         StuffDocument, foreign_keys=[StuffDocument.used_as_bag_by_id], uselist=True
+    )
+    used_as_primary_weapon = relationship(
+        StuffDocument, foreign_keys=[StuffDocument.used_as_weapon_by_id], uselist=False
+    )
+    used_as_shield = relationship(
+        StuffDocument, foreign_keys=[StuffDocument.used_as_shield_by_id], uselist=False
+    )
+    used_as_armor = relationship(
+        StuffDocument, foreign_keys=[StuffDocument.used_as_armor_by_id], uselist=False
     )
     shipped_resource = relationship(
         ResourceDocument, foreign_keys=[ResourceDocument.carried_by_id], uselist=True
