@@ -127,7 +127,6 @@ class CharacterController(BaseController):
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
 
-        # FIXME BS NOW: afficher arme, etc + lien pour enlever
         return Description(
             title="Fiche de personnage",
             items=[
