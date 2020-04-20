@@ -33,6 +33,7 @@ from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.base import ImageDocument
+from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
@@ -182,6 +183,7 @@ class CharacterLib:
         compute_unread_zone_message: bool = False,
         compute_unread_conversation: bool = False,
         compute_unvote_affinity_relation: bool = False,
+        compute_unread_transactions: bool = False,
     ) -> CharacterModel:
         character_document = self.get_document(id_)
         model = self.document_to_model(character_document)
@@ -251,6 +253,14 @@ class CharacterLib:
                 .count()
             ):
                 model.unvote_affinity_relation = True
+
+        if compute_unread_transactions:
+            if (
+                self._kernel.business_lib.get_incoming_transactions_query(id_)
+                .filter(OfferDocument.read == False)
+                .count()
+            ):
+                model.unread_transactions = True
 
         return model
 
@@ -788,7 +798,33 @@ class CharacterLib:
     def get_with_character_actions(
         self, character: CharacterModel, with_character: CharacterModel
     ) -> typing.List[CharacterActionLink]:
-        character_actions: typing.List[CharacterActionLink] = []
+        character_actions: typing.List[CharacterActionLink] = [
+            CharacterActionLink(
+                name="Voir la fiche",
+                link=f"/character/{character.id}/card/{with_character.id}",
+                cost=0.0,
+            ),
+            CharacterActionLink(
+                name="Voir l'inventaire",
+                link=f"/character/{character.id}/inventory/{with_character.id}",
+                cost=0.0,
+            ),
+            CharacterActionLink(
+                name="Voir les conversations",
+                link=f"/conversation/{character.id}?with_character_id={with_character.id}",
+                cost=0.0,
+            ),
+            CharacterActionLink(
+                name="Démarrer une nouvelle conversation",
+                link=f"/conversation/{character.id}/start?with_character_id={with_character.id}",
+                cost=0.0,
+            ),
+            CharacterActionLink(
+                name="Faire une proposition commerciale",
+                link=f"/business/{character.id}/offers-create?with_character_id={with_character.id}",
+                cost=0.0,
+            ),
+        ]
 
         for action in self._kernel.action_factory.get_all_with_character_actions():
             try:

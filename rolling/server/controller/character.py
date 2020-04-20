@@ -27,6 +27,7 @@ from rolling.model.character import CharacterModel
 from rolling.model.character import CreateCharacterModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
+from rolling.model.character import GetCharacterWithPathModel
 from rolling.model.character import GetLookCharacterModel
 from rolling.model.character import GetLookInventoryResourceModel
 from rolling.model.character import GetLookResourceModel
@@ -127,7 +128,6 @@ class CharacterController(BaseController):
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
 
-        # FIXME BS NOW: afficher arme, etc + lien pour enlever
         return Description(
             title="Fiche de personnage",
             items=[
@@ -147,6 +147,7 @@ class CharacterController(BaseController):
                     label="Arme",
                     text=character.weapon.name if character.weapon else "aucune",
                     is_link=True if character.weapon else False,
+                    align="left",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=character.weapon.id
                     )
@@ -157,6 +158,7 @@ class CharacterController(BaseController):
                     label="Bouclier",
                     text=character.shield.name if character.shield else "aucun",
                     is_link=True if character.shield else False,
+                    align="left",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=character.weapon.id
                     )
@@ -167,6 +169,7 @@ class CharacterController(BaseController):
                     label="Armure",
                     text=character.armor.name if character.armor else "aucune",
                     is_link=True if character.armor else False,
+                    align="left",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=character.weapon.id
                     )
@@ -201,14 +204,71 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterWithPathModel)
+    @hapic.output_body(Description)
+    async def with_character_card(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO: check same zone
+        character = self._character_lib.get(hapic_data.path.character_id)
+        with_character = self._character_lib.get(hapic_data.path.with_character_id)
+        return Description(
+            title=f"Fiche de {with_character.name}",
+            items=[Part(text="Personnage"), Part(text=f"Nom: {with_character.name}")],
+        )
+
+    @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def _describe_inventory(self, request: Request, hapic_data: HapicData) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(character.id)
+        inventory_parts = self._get_inventory_parts(character, inventory)
+
+        max_weight = character.get_weight_capacity(self._kernel)
+        max_clutter = character.get_clutter_capacity(self._kernel)
+
+        weight_overcharge = ""
+        clutter_overcharge = ""
+
+        if inventory.weight > character.get_weight_capacity(self._kernel):
+            weight_overcharge = " surcharge!"
+
+        if inventory.clutter > character.get_clutter_capacity(self._kernel):
+            clutter_overcharge = " surcharge!"
+
+        weight_str = display_g_or_kg(inventory.weight)
+        max_weight_str = display_g_or_kg(max_weight)
+
+        return Description(
+            title="Inventory",
+            items=[
+                Part(
+                    text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
+                ),
+                Part(
+                    text=f"Encombrement: {round(inventory.clutter, 2)} ({round(max_clutter, 2)} max{clutter_overcharge})"
+                ),
+            ]
+            + inventory_parts,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterWithPathModel)
+    @hapic.output_body(Description)
+    async def with_inventory(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO: check same zone
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        with_character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(with_character.id)
+        inventory_parts = self._get_inventory_parts(with_character, inventory)
+
+        return Description(title="Inventory", items=inventory_parts)
+
+    def _get_inventory_parts(
+        self, character: CharacterModel, inventory: CharacterInventoryModel
+    ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
-        bags = self._character_lib.get_used_bags(hapic_data.path.character_id)
+        bags = self._character_lib.get_used_bags(character.id)
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
 
         for stuff in inventory.stuff:
@@ -225,7 +285,7 @@ class CharacterController(BaseController):
                     is_link=True,
                     align="left",
                     form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                        character_id=hapic_data.path.character_id, stuff_id=stuff.id
+                        character_id=character.id, stuff_id=stuff.id
                     ),
                 )
             )
@@ -237,43 +297,20 @@ class CharacterController(BaseController):
                     is_link=True,
                     align="left",
                     form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
-                        character_id=hapic_data.path.character_id, resource_id=resource.id
+                        character_id=character.id, resource_id=resource.id
                     ),
                 )
             )
 
-        max_weight = character.get_weight_capacity(self._kernel)
-        max_clutter = character.get_clutter_capacity(self._kernel)
-
-        weight_overcharge = ""
-        clutter_overcharge = ""
-
-        if inventory.weight > character.get_weight_capacity(self._kernel):
-            weight_overcharge = " surcharge!"
-
-        if inventory.clutter > character.get_clutter_capacity(self._kernel):
-            clutter_overcharge = " surcharge!"
-
-        weight_str = display_g_or_kg(inventory.weight)
-        max_weight_str = display_g_or_kg(max_weight)
-        return Description(
-            title="Inventory",
-            items=[
-                Part(
-                    text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
-                ),
-                Part(
-                    text=f"Encombrement: {round(inventory.clutter, 2)} ({round(max_clutter, 2)} max{clutter_overcharge})"
-                ),
-                Part(text=f"Sac(s): {bags_string}"),
-                Part(text=" "),
-                Part(text="Items:"),
-                *stuff_items,
-                Part(text=" "),
-                Part(text="Resources:"),
-                *resource_items,
-            ],
-        )
+        return [
+            Part(text=f"Sac(s): {bags_string}"),
+            Part(text=" "),
+            Part(text="Items:"),
+            *stuff_items,
+            Part(text=" "),
+            Part(text="Resources:"),
+            *resource_items,
+        ]
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -795,6 +832,7 @@ class CharacterController(BaseController):
             compute_unread_zone_message=True,
             compute_unread_conversation=True,
             compute_unvote_affinity_relation=True,
+            compute_unread_transactions=True,
         )
 
     @hapic.with_api_doc()
@@ -1110,8 +1148,14 @@ class CharacterController(BaseController):
                 web.post("/_describe/character/create", self._describe_create_character),
                 web.get("/_describe/character/{character_id}/card", self._describe_character_card),
                 web.post("/_describe/character/{character_id}/card", self._describe_character_card),
+                web.post(
+                    "/character/{character_id}/card/{with_character_id}", self.with_character_card
+                ),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post(
+                    "/character/{character_id}/inventory/{with_character_id}", self.with_inventory
+                ),
                 web.get(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,

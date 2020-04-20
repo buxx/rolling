@@ -14,6 +14,10 @@ class StuffManager:
         self._items = items
         self._items_by_id = dict(((s.id, s) for s in items))
 
+    @property
+    def items(self) -> typing.List["StuffProperties"]:
+        return self._items
+
     def get_stuff_properties_by_id(self, stuff_id: str) -> "StuffProperties":
         try:
             return self._items_by_id[stuff_id]

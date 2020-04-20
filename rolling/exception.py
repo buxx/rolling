@@ -146,3 +146,7 @@ class CantChangeZone(RollingError):
 
 class ServerTurnError(RollingError):
     pass
+
+
+class WrongStrInput(RollingError):
+    pass

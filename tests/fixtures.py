@@ -374,7 +374,7 @@ def burgundian_warlord(
     return _create_soldiers(worldmapc_kernel, burgundian_affinity, 1, warlord=True)[0]
 
 
-def _create_stuff(kernel: Kernel, stuff_id: str) -> StuffModel:
+def create_stuff(kernel: Kernel, stuff_id: str) -> StuffModel:
     haxe_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
     haxe_doc = kernel.stuff_lib.create_document_from_stuff_properties(
         haxe_properties, world_row_i=0, world_col_i=0, zone_row_i=0, zone_col_i=0
@@ -390,7 +390,7 @@ def worldmapc_xena_haxe(
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel
 
-    haxe = _create_stuff(kernel, "STONE_HAXE")
+    haxe = create_stuff(kernel, "STONE_HAXE")
     kernel.stuff_lib.set_carried_by(haxe.id, xena.id)
     return haxe
 
@@ -402,7 +402,7 @@ def worldmapc_xena_leather_jacket(
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel
 
-    haxe = _create_stuff(kernel, "LEATHER_JACKET")
+    haxe = create_stuff(kernel, "LEATHER_JACKET")
     kernel.stuff_lib.set_carried_by(haxe.id, xena.id)
     return haxe
 
@@ -414,7 +414,7 @@ def worldmapc_xena_wood_shield(
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel
 
-    shield = _create_stuff(kernel, "WOOD_SHIELD")
+    shield = create_stuff(kernel, "WOOD_SHIELD")
     kernel.stuff_lib.set_carried_by(shield.id, xena.id)
     return shield
 
@@ -438,7 +438,7 @@ def worldmapc_arthur_leather_jacket(
     arthur = worldmapc_arthur_model
     kernel = worldmapc_kernel
 
-    jacket = _create_stuff(kernel, "LEATHER_JACKET")
+    jacket = create_stuff(kernel, "LEATHER_JACKET")
     kernel.stuff_lib.set_carried_by(jacket.id, arthur.id)
     return jacket
 

@@ -117,14 +117,19 @@ class MessageLib:
 
             self._kernel.server_db_session.commit()
 
-    def get_conversation_first_messages(self, character_id: str) -> typing.List[MessageDocument]:
-        # FIXME BS: order by last message
-        return (
+    def get_conversation_first_messages(
+        self, character_id: str, with_character_id: typing.Optional[str] = None
+    ) -> typing.List[MessageDocument]:
+        query = (
             self._get_character_messages_query(character_id, zone=False)
             .group_by(MessageDocument.first_message)
             .order_by(MessageDocument.datetime.asc())
-            .all()
         )
+
+        if with_character_id:
+            query = query.filter(MessageDocument.concerned.contains(with_character_id))
+
+        return query.all()
 
     def get_conversation_messages(
         self, character_id: str, conversation_id: int

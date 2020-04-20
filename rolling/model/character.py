@@ -7,6 +7,8 @@ import serpyco
 
 from rolling.exception import RollingError
 from rolling.model.stuff import StuffModel
+from rolling.server.document.business import OfferItemPosition
+from rolling.server.document.business import OfferOperand
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
@@ -32,6 +34,83 @@ class CreateCharacterModel:
 @dataclasses.dataclass
 class GetCharacterPathModel:
     character_id: str
+
+
+@dataclasses.dataclass
+class ConversationsQueryModel:
+    with_character_id: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
+class GetCharacterWithPathModel:
+    character_id: str
+    with_character_id: str
+
+
+@dataclasses.dataclass
+class GetOfferPathModel:
+    character_id: str
+    offer_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class SeeOfferPathModel:
+    character_id: str
+    owner_id: str
+    offer_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class SeeOfferQueryModel:
+    mark_as_read: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
+class DealOfferQueryModel:
+    request_item_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    offer_item_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    confirm: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
+class RemoveOfferItemPathModel:
+    character_id: str
+    offer_id: int = serpyco.number_field(cast_on_load=True)
+    item_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class UpdateOfferQueryModel:
+    open: int = serpyco.number_field(cast_on_load=True, default=0)
+    close: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
+class AddOfferItemQuery:
+    position: OfferItemPosition
+
+
+@dataclasses.dataclass
+class CreateOfferQueryModel:
+    permanent: int = serpyco.number_field(cast_on_load=True, default=0)
+    with_character_id: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
+class CreateOfferBodyModel:
+    title: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
+class GetOfferBodyModel:
+    request_operand: typing.Optional[str] = None
+    offer_operand: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
+class AddOfferItemBodyModel:
+    value: typing.Optional[str] = None
+    quantity: float = serpyco.number_field(cast_on_load=True, default=None)
 
 
 @dataclasses.dataclass
@@ -229,6 +308,7 @@ class CharacterModel:
     unread_zone_message: bool = False
     unread_conversation: bool = False
     unvote_affinity_relation: bool = False
+    unread_transactions: bool = False
 
     @property
     def tired(self) -> bool:

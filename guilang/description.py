@@ -40,6 +40,7 @@ class Part:
     is_checkbox: bool = False
     checked: bool = False
     choices: typing.Optional[typing.List[str]] = None
+    search_by_str: bool = False
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
