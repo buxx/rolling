@@ -6,4 +6,4 @@ python:
 install:
   - "python setup.py develop"
   - "pip install -e '.[dev]'"
-script: pytest tests
+script: pytest tests --disable-pytest-warnings
