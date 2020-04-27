@@ -39,6 +39,7 @@ class BusinessLib:
 
     def get_transactions_query(self, character_id: str) -> Query:
         return self._kernel.server_db_session.query(OfferDocument).filter(
+            OfferDocument.permanent == False,
             or_(
                 and_(
                     OfferDocument.character_id == character_id,
