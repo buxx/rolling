@@ -309,7 +309,10 @@ class BusinessController(BaseController):
             )
 
         if offer.request_items:
-            if offer.request_operand == OfferOperand.OR.value and not hapic_data.query.request_item_id:
+            if (
+                offer.request_operand == OfferOperand.OR.value
+                and not hapic_data.query.request_item_id
+            ):
                 parts = []
                 for item in offer.request_items:
                     parts.append(
@@ -326,7 +329,11 @@ class BusinessController(BaseController):
 
         if offer.offer_operand == OfferOperand.OR.value and not hapic_data.query.offer_item_id:
             parts = []
-            request_item_str = f"request_item_id={hapic_data.query.request_item_id}" if hapic_data.query.request_item_id else ""
+            request_item_str = (
+                f"request_item_id={hapic_data.query.request_item_id}"
+                if hapic_data.query.request_item_id
+                else ""
+            )
             for item in offer.offer_items:
                 if self._kernel.business_lib.have_item(offer.character_id, item.id):
                     parts.append(
@@ -334,8 +341,7 @@ class BusinessController(BaseController):
                             is_link=True,
                             label=f"Faire ce marché et obtenir {item.get_name(self._kernel, True)}",
                             form_action=(
-                                here_url + f"&{request_item_str}"
-                                f"&offer_item_id={item.id}"
+                                here_url + f"&{request_item_str}" f"&offer_item_id={item.id}"
                             ),
                         )
                     )

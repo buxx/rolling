@@ -20,7 +20,8 @@ from rolling.model.character import CharacterModel
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
-from rolling.model.zone import GetZoneMessageQueryModel, GetZoneCharacterPathModel
+from rolling.model.zone import GetZoneCharacterPathModel
+from rolling.model.zone import GetZoneMessageQueryModel
 from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
@@ -135,8 +136,9 @@ class ZoneController(BaseController):
                         label=character.name,
                         is_link=True,
                         form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                            character_id=hapic_data.path.character_id, with_character_id=character.id
-                        )
+                            character_id=hapic_data.path.character_id,
+                            with_character_id=character.id,
+                        ),
                     )
                 )
 

@@ -10,6 +10,7 @@ from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
 from rolling.action.build import BuildAction
 from rolling.action.build import ConstructBuildAction
+from rolling.action.cheats import CheatsCharacterAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.craft import BeginStuffConstructionAction
 from rolling.action.craft import ContinueStuffConstructionAction
@@ -79,6 +80,7 @@ class ActionFactory:
         ActionType.SEARCH_MATERIAL: SearchMaterialAction,
         ActionType.BUILD: BuildAction,
         ActionType.ATTACK_CHARACTER: AttackCharacterAction,
+        ActionType.CHEATS: CheatsCharacterAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -117,6 +119,7 @@ class ActionFactory:
             ActionType.SEARCH_FOOD: SearchFoodAction,
             ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
             ActionType.SEARCH_MATERIAL: SearchMaterialAction,
+            ActionType.CHEATS: CheatsCharacterAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.BEGIN_BUILD: BeginBuildAction,
