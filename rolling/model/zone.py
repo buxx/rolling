@@ -41,6 +41,13 @@ class GetZonePathModel:
 
 
 @dataclasses.dataclass(frozen=True)
+class GetZoneCharacterPathModel:
+    character_id: str
+    row_i: int = number_field(cast_on_load=True)
+    col_i: int = number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass(frozen=True)
 class GetZoneMessageQueryModel:
     character_id: str
 

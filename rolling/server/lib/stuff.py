@@ -196,14 +196,15 @@ class StuffLib:
 
     def set_carried_by(self, stuff_id: int, character_id: str, commit: bool = True) -> None:
         stuff_doc = self.get_stuff_doc(stuff_id)
-        stuff_doc.carried_by_id = character_id
-        if commit:
-            self._kernel.server_db_session.commit()
+        self.set_carried_by__from_doc(stuff_doc, character_id=character_id, commit=commit)
 
     def set_carried_by__from_doc(
         self, stuff_doc: StuffDocument, character_id: str, commit: bool = True
     ) -> None:
         stuff_doc.carried_by_id = character_id
+        stuff_doc.used_as_shield_by_id = None
+        stuff_doc.used_as_armor_by_id = None
+        stuff_doc.used_as_weapon_by_id = None
         if commit:
             self._kernel.server_db_session.commit()
 
@@ -388,3 +389,28 @@ class StuffLib:
             query = query.filter(StuffDocument.under_construction != True)
 
         return query.count()
+
+    def get_first_carried_stuff(
+        self,
+        character_id: str,
+        stuff_id: str,
+        exclude_crafting: bool = True,
+        exclude_used_as: bool = True,
+    ) -> StuffModel:
+        query = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.carried_by_id == character_id)
+            .filter(StuffDocument.stuff_id == stuff_id)
+        )
+
+        if exclude_crafting:
+            query = query.filter(StuffDocument.under_construction != True)
+
+        if exclude_used_as:
+            query = query.filter(
+                StuffDocument.used_as_shield_by_id == None,
+                StuffDocument.used_as_armor_by_id == None,
+                StuffDocument.used_as_weapon_by_id == None,
+            )
+
+        return self.stuff_model_from_doc(query.limit(1).one())

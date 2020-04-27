@@ -228,6 +228,7 @@ def quantity_to_str(quantity: float, unit: Unit, kernel: "Kernel") -> str:
     if unit == Unit.GRAM:
         return display_g_or_kg(quantity)
     unit_str = kernel.translation.get(unit)
+    quantity = int(quantity) if unit == Unit.UNIT else float(quantity)
     return f"{str(quantity)} {unit_str}"
 
 

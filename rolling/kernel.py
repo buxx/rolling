@@ -33,6 +33,7 @@ from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
 from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
+from rolling.server.lib.business import BusinessLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
@@ -108,6 +109,7 @@ class Kernel:
         self._universe_lib: typing.Optional["UniverseLib"] = None
         self._message_lib: typing.Optional[MessageLib] = None
         self._affinity_lib: typing.Optional[AffinityLib] = None
+        self._business_lib: typing.Optional[BusinessLib] = None
         self._fight_lib: typing.Optional[FightLib] = None
 
         self._event_serializer_factory = ZoneEventSerializerFactory()
@@ -141,6 +143,12 @@ class Kernel:
         if self._stuff_lib is None:
             self._stuff_lib = StuffLib(self)
         return self._stuff_lib
+
+    @property
+    def business_lib(self) -> BusinessLib:
+        if self._business_lib is None:
+            self._business_lib = BusinessLib(self)
+        return self._business_lib
 
     @property
     def resource_lib(self) -> ResourceLib:

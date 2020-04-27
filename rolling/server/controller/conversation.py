@@ -10,6 +10,7 @@ from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
 from rolling.kernel import Kernel
+from rolling.model.character import ConversationsQueryModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetConversationPathModel
 from rolling.server.controller.base import BaseController
@@ -24,10 +25,12 @@ class ConversationController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(ConversationsQueryModel)
     @hapic.output_body(Description)
     async def main_page(self, request: Request, hapic_data: HapicData) -> Description:
         messages = self._kernel.message_lib.get_conversation_first_messages(
-            hapic_data.path.character_id
+            hapic_data.path.character_id,
+            hapic_data.query.with_character_id,  # FIXME BS NOW: test it
         )
         conversation_parts = []
         for message in messages:
@@ -70,6 +73,7 @@ class ConversationController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(ConversationsQueryModel)
     @hapic.output_body(Description)
     async def start(self, request: Request, hapic_data: HapicData) -> Description:
         character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
@@ -130,7 +134,8 @@ class ConversationController(BaseController):
                     value="on",
                     is_checkbox=True,
                     name=zone_character.id,
-                    checked=False,
+                    # FIXME BS NOW: test it
+                    checked=zone_character.id == hapic_data.query.with_character_id,
                 )
             )
 

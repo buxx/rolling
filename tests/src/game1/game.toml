@@ -18,6 +18,13 @@ day_turn_every = 3600
 [character_effects]
 
 [resources]
+  [resources.RED_WINE]
+    name = "Vin rouge"
+    weight=1000.0
+    material="LIQUID"
+    unit = "L"
+    clutter = 1.0
+    actions = []
   [resources.BRANCHES]
     name = "Petit bois"
     weight=100000.0
@@ -31,6 +38,13 @@ day_turn_every = 3600
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 1.0
+    actions = []
+  [resources.WOOD]
+    name = "Bois"
+    weight=1000000.0
+    material="BIG_PIECE"
+    unit = "M3"
+    clutter = 500.0
     actions = []
 
 [resource_mix]

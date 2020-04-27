@@ -20,11 +20,12 @@ from rolling.model.character import CharacterModel
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
-from rolling.model.zone import GetZoneMessageQueryModel
+from rolling.model.zone import GetZoneMessageQueryModel, GetZoneCharacterPathModel
 from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 from rolling.server.controller.base import BaseController
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
@@ -117,7 +118,7 @@ class ZoneController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
-    @hapic.input_path(GetZonePathModel)
+    @hapic.input_path(GetZoneCharacterPathModel)
     @hapic.output_body(Description)
     async def describe(self, request: Request, hapic_data: HapicData) -> Description:
         world_rows = self._kernel.world_map_source.geography.rows
@@ -128,7 +129,16 @@ class ZoneController(BaseController):
         )
         characters_parts: typing.List[Part] = []
         for character in characters:
-            characters_parts.append(Part(label=character.name))
+            if character.id != hapic_data.path.character_id:
+                characters_parts.append(
+                    Part(
+                        label=character.name,
+                        is_link=True,
+                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                            character_id=hapic_data.path.character_id, with_character_id=character.id
+                        )
+                    )
+                )
 
         return Description(
             title=tile_type.get_name(),
@@ -226,7 +236,7 @@ class ZoneController(BaseController):
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/resources", self.get_resources),
                 web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
-                web.post("/zones/{row_i}/{col_i}/describe", self.describe),
+                web.post("/zones/{row_i}/{col_i}/describe/{character_id}", self.describe),
                 web.post("/zones/{row_i}/{col_i}/messages", self.messages),
                 web.post("/zones/{row_i}/{col_i}/messages/add", self.add_message),
             ]
