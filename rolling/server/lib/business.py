@@ -164,7 +164,9 @@ class BusinessLib:
 
         if offer.request_operand == OfferOperand.OR.value:
             if request_item_id:
-                request_items.append(next(i for i in offer.request_items if i.id == request_item_id))
+                request_items.append(
+                    next(i for i in offer.request_items if i.id == request_item_id)
+                )
         else:
             request_items.extend(offer.request_items)
 
