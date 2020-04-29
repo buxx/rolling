@@ -61,7 +61,9 @@ class BuildController(BaseController):
             ]
         )
 
-        return Description(title=f"{build_description.name}{on_construction}", items=parts)
+        return Description(
+            title=f"{build_description.name}{on_construction}", items=parts, can_be_back_url=True
+        )
 
     def bind(self, app: Application) -> None:
         app.add_routes([web.post(DESCRIBE_BUILD, self._describe)])

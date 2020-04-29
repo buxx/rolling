@@ -58,8 +58,10 @@ class ConversationController(BaseController):
             title="Conversations",
             items=[
                 Part(
-                    text="Les conversations sont les échanges de paroles tenu avec d'autres "
-                    "personnages"
+                    text=(
+                        "Les conversations sont les échanges de paroles"
+                        " tenus avec d'autres personnages"
+                    )
                 ),
                 Part(
                     is_link=True,
@@ -69,6 +71,7 @@ class ConversationController(BaseController):
                 Part(text="Ci-dessous les conversations précédentes ou en cours"),
             ]
             + conversation_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -97,10 +100,15 @@ class ConversationController(BaseController):
                                 label="Retour",
                                 form_action=f"/conversation/{hapic_data.path.character_id}/start",
                             ),
+                            Part(
+                                is_link=True,
+                                go_back_zone=True,
+                                label="Retourner à l'écran de déplacements",
+                            ),
                         ],
                     )
 
-                self._kernel.message_lib.add_conversation_message(
+                conversation_id = self._kernel.message_lib.add_conversation_message(
                     author_id=hapic_data.path.character_id,
                     subject=data.get("subject", "Une conversation"),
                     message=data["message"],
@@ -110,7 +118,21 @@ class ConversationController(BaseController):
                     title="Démarrer une nouvelle conversation",
                     items=[
                         Part(text="Conversation démarré"),
-                        Part(is_link=True, go_back_zone=True),
+                        Part(
+                            is_link=True,
+                            go_back_zone=True,
+                            label="Retourner à l'écran de déplacements",
+                        ),
+                        Part(
+                            is_link=True,
+                            label="Retourner aux conversations",
+                            form_action=f"/conversation/{hapic_data.path.character_id}",
+                        ),
+                        Part(
+                            is_link=True,
+                            label="Voir la conversation",
+                            form_action=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}",
+                        ),
                     ],
                 )
 
@@ -122,7 +144,14 @@ class ConversationController(BaseController):
                 title="Démarrer une nouvelle conversation",
                 items=[
                     Part(text="Il n'y a personne ici avec qui converser"),
-                    Part(is_link=True, go_back_zone=True),
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    ),
+                    Part(
+                        is_link=True,
+                        label="Retourner aux conversations",
+                        form_action=f"/conversation/{hapic_data.path.character_id}",
+                    ),
                 ],
             )
 
@@ -161,6 +190,12 @@ class ConversationController(BaseController):
                             name="message",
                         ),
                     ],
+                ),
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner aux conversations",
+                    form_action=f"/conversation/{hapic_data.path.character_id}",
                 ),
             ],
         )
@@ -216,6 +251,7 @@ class ConversationController(BaseController):
                 Part(text="Conversation (message le plus récente en haut):"),
             ]
             + message_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -240,8 +276,20 @@ class ConversationController(BaseController):
         )
 
         return Description(
-            title=last_message.subject,
-            items=[Part(label="Message ajouté", is_link=True, go_back_zone=True)],
+            title="Message ajouté",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner aux conversations",
+                    form_action=f"/conversation/{hapic_data.path.character_id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir la conversation",
+                    form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
+                ),
+            ],
         )
 
     @hapic.with_api_doc()
@@ -292,7 +340,18 @@ class ConversationController(BaseController):
                     is_form=True,
                     form_action=f"/conversation/{hapic_data.path.character_id}/edit-concerned/{hapic_data.path.conversation_id}",
                     items=character_parts,
-                )
+                ),
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner aux conversations",
+                    form_action=f"/conversation/{hapic_data.path.character_id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir la conversation",
+                    form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
+                ),
             ],
         )
 

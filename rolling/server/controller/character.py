@@ -130,6 +130,7 @@ class CharacterController(BaseController):
 
         return Description(
             title="Fiche de personnage",
+            can_be_back_url=True,
             items=[
                 Part(text="Personnage"),
                 Part(text="------------"),
@@ -213,6 +214,7 @@ class CharacterController(BaseController):
         return Description(
             title=f"Fiche de {with_character.name}",
             items=[Part(text="Personnage"), Part(text=f"Nom: {with_character.name}")],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -249,6 +251,7 @@ class CharacterController(BaseController):
                 ),
             ]
             + inventory_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -261,7 +264,7 @@ class CharacterController(BaseController):
         inventory = self._character_lib.get_inventory(with_character.id)
         inventory_parts = self._get_inventory_parts(with_character, inventory)
 
-        return Description(title="Inventory", items=inventory_parts)
+        return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
         self, character: CharacterModel, inventory: CharacterInventoryModel
@@ -331,6 +334,7 @@ class CharacterController(BaseController):
                 )
                 for action in character_actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -340,7 +344,7 @@ class CharacterController(BaseController):
         build_actions = self._character_lib.get_build_actions(hapic_data.path.character_id)
 
         return Description(
-            title="Ici pouvez démarrer la construction de:",
+            title="Démarrer une construction",
             items=[
                 Part(
                     text=action.get_as_str(),
@@ -350,6 +354,7 @@ class CharacterController(BaseController):
                 )
                 for action in build_actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -379,7 +384,7 @@ class CharacterController(BaseController):
                 )
             )
 
-        return Description(title="Histoire", is_long_text=True, items=parts)
+        return Description(title="Histoire", is_long_text=True, items=parts, can_be_back_url=True)
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -427,6 +432,7 @@ class CharacterController(BaseController):
             image_extension=story_page.image_extension,
             is_long_text=True,
             items=items,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -449,6 +455,7 @@ class CharacterController(BaseController):
                 )
                 for action in actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -474,6 +481,7 @@ class CharacterController(BaseController):
                 )
                 for action in actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -521,6 +529,7 @@ class CharacterController(BaseController):
                         ],
                     )
                 ],
+                can_be_back_url=True,
             )
 
         self._kernel.resource_lib.add_resource_to(
@@ -542,6 +551,7 @@ class CharacterController(BaseController):
         return Description(
             title=f"{resource_description.name} récupéré",
             items=[Part(is_link=True, go_back_zone=True)],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -565,6 +575,7 @@ class CharacterController(BaseController):
                 )
                 for action in actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -588,6 +599,7 @@ class CharacterController(BaseController):
                 )
                 for action in actions
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -1077,28 +1089,7 @@ class CharacterController(BaseController):
                     is_link=True,
                 ),
             ],
-        )
-
-    @hapic.with_api_doc()
-    @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(Description)
-    async def describe_ap(self, request: Request, hapic_data: HapicData) -> Description:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
-        return Description(
-            title=f"Points d'actions (PA) disponibles",
-            items=[
-                Part(
-                    text=f"Pour ce tour-ci, il reste {round(character_doc.action_points, 2)} "
-                    f"points d'action à {character_doc.name}."
-                ),
-                Part(
-                    text="Qu'est-ce que sont les PA ? Les points d'actions, c'est un certain "
-                    "nombre d'unité de temps dont dispose votre personnage pour effectuer"
-                    "ses actions d'ici le prochain passage de tour. Les économiser revient à "
-                    "rester oisif. Ce qui n'est pas dénué d'intêrret pour le moral de votre "
-                    "personnage !"
-                ),
-            ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -1121,6 +1112,7 @@ class CharacterController(BaseController):
                     "personnage !"
                 ),
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -1139,6 +1131,7 @@ class CharacterController(BaseController):
                     f"s'il n'ont pas a boire ou a manger par exemple !"
                 )
             ],
+            can_be_back_url=True,
         )
 
     def bind(self, app: Application) -> None:

@@ -119,7 +119,10 @@ class DrinkResourceAction(CharacterAction):
             self._kernel.server_db_session.commit()
 
         return Description(
-            title="Action effectué", items=[Part(label="Continue", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+            ],
         )
 
 
@@ -204,5 +207,8 @@ class DrinkStuffAction(WithStuffAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title="Vous avez bu ça", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Vous avez bu",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+            ],
         )

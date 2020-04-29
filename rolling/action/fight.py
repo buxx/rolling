@@ -14,6 +14,7 @@ from rolling.model.character import CharacterModel
 from rolling.model.event import StoryPage
 from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDocument
@@ -112,7 +113,17 @@ class AttackCharacterAction(WithCharacterAction):
                     label="Attaquer seul et en mon nom uniquement",
                 ),
             ]
-            + parts,
+            + parts
+            + [
+                Part(
+                    is_link=True,
+                    label="Retourner à la fiche personnage",
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=with_character.id
+                    ),
+                )
+            ],
+            can_be_back_url=True,
         )
 
     def _get_attack_lonely_description(
@@ -145,7 +156,13 @@ class AttackCharacterAction(WithCharacterAction):
                     form_action=here_url + "&lonely=1&confirm=1",
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
-                Part(is_link=True, go_back_zone=True, label=f"Annuler"),
+                Part(
+                    is_link=True,
+                    label="Retourner à la fiche personnage",
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=with_character.id
+                    ),
+                ),
             ],
         )
 
@@ -190,7 +207,17 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Attaquer {with_character.name} seul",
-            items=parts + [Part(is_link=True, go_back_zone=True, label=f"Continuer")],
+            items=parts
+            + [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner à la fiche personnage",
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=with_character.id
+                    ),
+                ),
+            ],
         )
 
     def _proceed_events(
@@ -269,6 +296,16 @@ class AttackCharacterAction(WithCharacterAction):
                         f"en tant que {as_affinity.name} car il/elle est affilié à "
                         f"{as_affinity.name}"
                     ),
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    ),
+                    Part(
+                        is_link=True,
+                        label="Retourner à la fiche personnage",
+                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                            character_id=character.id, with_character_id=with_character.id
+                        ),
+                    ),
                     Part(is_link=True, form_action=here_url, label="Retour"),
                 ],
             )
@@ -294,7 +331,23 @@ class AttackCharacterAction(WithCharacterAction):
             )
             for in_conflict_str in in_conflict_strs:
                 parts.append(Part(text=f"- {in_conflict_str}"))
-            parts.append(Part(is_link=True, form_action=here_url, label="Retour"))
+
+            parts.extend(
+                [
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    ),
+                    Part(
+                        is_link=True,
+                        label="Retourner à la fiche personnage",
+                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                            character_id=character.id, with_character_id=with_character.id
+                        ),
+                    ),
+                    Part(is_link=True, form_action=here_url, label="Retour"),
+                ]
+            )
+
             return Description(title=title, items=parts)
 
     def _get_attack_as_affinity_description(
@@ -346,7 +399,15 @@ class AttackCharacterAction(WithCharacterAction):
                     form_action=here_url + f"&as_affinity={as_affinity_id}&confirm=1",
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
-                Part(is_link=True, go_back_zone=True, label=f"Annuler"),
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner à la fiche personnage",
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=with_character.id
+                    ),
+                ),
+                Part(is_link=True, form_action=here_url, label=f"Retour"),
             ],
         )
 
@@ -386,7 +447,18 @@ class AttackCharacterAction(WithCharacterAction):
         self._kill_deads(attack_description.all_fighters + defense_description.all_fighters)
 
         return Description(
-            title=title, items=parts + [Part(is_link=True, go_back_zone=True, label=f"Continuer")]
+            title=title,
+            items=parts
+            + [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner à la fiche personnage",
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=with_character.id
+                    ),
+                ),
+            ],
         )
 
     def perform(

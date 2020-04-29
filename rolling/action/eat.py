@@ -134,7 +134,15 @@ class EatResourceAction(WithResourceAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title="Action effectué", items=[Part(label="Continue", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -200,5 +208,13 @@ class EatStuffAction(WithStuffAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title="Action effectué", items=[Part(label="Continue", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )

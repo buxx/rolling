@@ -151,6 +151,7 @@ class ZoneController(BaseController):
                 )
             ]
             + characters_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -199,6 +200,7 @@ class ZoneController(BaseController):
                 Part(label=""),
             ]
             + message_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -223,7 +225,16 @@ class ZoneController(BaseController):
                     form_action=f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}/messages"
                     f"?character_id={hapic_data.query.character_id}",
                     label="Continuer",
-                )
+                ),
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner aux messages de zone",
+                    form_action=(
+                        f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}"
+                        f"/messages?character_id={hapic_data.query.character_id}"
+                    ),
+                ),
             ],
         )
 
@@ -233,7 +244,6 @@ class ZoneController(BaseController):
                 web.get("/zones/tiles", self.get_tiles),
                 web.get("/zones/{row_i}/{col_i}", self.get_zone),
                 web.get("/zones/{row_i}/{col_i}/events", self.events),
-                # TODO BS 2019-01-23: put /zones/{row_i}/{col_i}/enter to ask entering in zone
                 web.get("/zones/{row_i}/{col_i}/characters", self.get_characters),
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/resources", self.get_resources),

@@ -232,7 +232,9 @@ def quantity_to_str(quantity: float, unit: Unit, kernel: "Kernel") -> str:
     return f"{str(quantity)} {unit_str}"
 
 
-def get_description_for_not_enough_ap(character: "CharacterModel", cost: float) -> Description:
+def get_description_for_not_enough_ap(
+    character: "CharacterModel", cost: float, can_be_back_url: bool = False
+) -> Description:
     return Description(
         title="Action impossible",
         items=[
@@ -240,8 +242,9 @@ def get_description_for_not_enough_ap(character: "CharacterModel", cost: float) 
                 text=f"{character.name} ne possède plus assez de points d'actions "
                 f"({character.action_points} restant et {cost} nécessaires)"
             ),
-            Part(label="Continue", go_back_zone=True),
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ],
+        can_be_back_url=can_be_back_url,
     )
 
 

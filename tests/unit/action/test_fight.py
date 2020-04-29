@@ -524,7 +524,9 @@ class TestFightAction:
     ) -> None:
         with patch(
             "rolling.server.lib.fight.FightLib.get_damage", new=lambda *_, **__: 1000.0
-        ), patch("random.shuffle", new=lambda l: l):
+        ), patch("random.shuffle", new=lambda l: l), patch(
+            "rolling.server.lib.fight.FightLib.defenser_evade", new=lambda *_, **__: False
+        ):
             attack_action.perform(
                 france_warlord,
                 with_character=england_warlord,

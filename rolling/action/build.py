@@ -106,14 +106,16 @@ class BeginBuildAction(CharacterAction):
         return Description(
             title=f"{build_description.name} commencé",
             items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
-                    text="Continuer",
+                    label="Voir le batiment",
                     is_link=True,
                     form_action=DESCRIBE_BUILD.format(
                         build_id=build_doc.id, character_id=character.id
                     ),
-                )
+                ),
             ],
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -240,6 +242,7 @@ class BringResourcesOnBuild(WithBuildAction):
             return Description(
                 title=f"Cette construction nécessite encore {left_str} "
                 f"de {resource_description.name} (soit {round(left_percent)}%)",
+                can_be_back_url=True,
                 items=[
                     Part(
                         is_form=True,
@@ -285,7 +288,17 @@ class BringResourcesOnBuild(WithBuildAction):
 
         return Description(
             title=f"{quantity_str} {resource_description.name} déposé pour {build_description.name}",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    label="Voir le batiment",
+                    is_link=True,
+                    form_action=DESCRIBE_BUILD.format(
+                        build_id=build_doc.id, character_id=character.id
+                    ),
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -426,7 +439,18 @@ class ConstructBuildAction(WithBuildAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"Travail effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title=f"Travail effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    label="Voir le batiment",
+                    is_link=True,
+                    form_action=DESCRIBE_BUILD.format(
+                        build_id=build_doc.id, character_id=character.id
+                    ),
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -484,7 +508,7 @@ class BuildAction(CharacterAction):
     def perform(self, character: "CharacterModel", input_: EmptyModel) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
-        self._kernel.build_lib.place_build(
+        build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
@@ -507,5 +531,15 @@ class BuildAction(CharacterAction):
 
         return Description(
             title=f"{build_description.name} construit",
-            items=[Part(text="Continuer", go_back_zone=True)],
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    label="Voir le batiment",
+                    is_link=True,
+                    form_action=DESCRIBE_BUILD.format(
+                        build_id=build_doc.id, character_id=character.id
+                    ),
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )

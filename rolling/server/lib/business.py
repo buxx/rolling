@@ -51,7 +51,7 @@ class BusinessLib:
                     OfferDocument.with_character_id == character_id,
                     OfferDocument.status.in_((OfferStatus.OPEN.value,)),
                 ),
-            )
+            ),
         )
 
     def get_incoming_transactions_query(self, character_id: str) -> Query:

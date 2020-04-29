@@ -90,7 +90,15 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title="Transformation effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Transformation effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -238,5 +246,14 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
 
         parts = [Part(text=txt) for txt in produced_resources_txts]
         return Description(
-            title=f"Effectué", items=parts + [Part(label="Continuer", go_back_zone=True)]
+            title=f"Effectué",
+            items=parts
+            + [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )

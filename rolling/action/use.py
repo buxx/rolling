@@ -59,7 +59,15 @@ class NotUseAsBagAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_bag(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -109,7 +117,15 @@ class UseAsBagAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_bag(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -159,7 +175,15 @@ class UseAsWeaponAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -204,7 +228,15 @@ class NotUseAsWeaponAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -254,7 +286,15 @@ class UseAsShieldAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -299,7 +339,15 @@ class NotUseAsShieldAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -349,7 +397,15 @@ class UseAsArmorAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -394,5 +450,13 @@ class NotUseAsArmorAction(WithStuffAction):
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)
         return Description(
-            title="Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title="Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )

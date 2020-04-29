@@ -175,5 +175,7 @@ class SearchFoodAction(CharacterAction):
         for result_stuff_str in result_stuff_strs:
             parts.append(Part(text=result_stuff_str))
 
-        parts.append(Part(label="Continuer", go_back_zone=True))
+        parts.append(
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+        )
         return Description(title="Vous avez trouvé", items=parts)

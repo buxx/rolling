@@ -18,6 +18,7 @@ from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import quantity_to_str
@@ -236,7 +237,15 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -292,6 +301,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             return []
 
         return [
+            # FIXME BS NOW: all CharacterActionLink must generate a can_be_back_url=True
             CharacterActionLink(
                 name=self._description.name,
                 link=get_with_stuff_action_url(
@@ -338,7 +348,15 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            items=[Part(items=[Part(label=f"Continuer", go_back_zone=True)])],
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -505,7 +523,17 @@ class BeginStuffConstructionAction(CharacterAction):
 
         return Description(
             title=f"{stuff_properties.name} commencé",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'objet commencé",
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=stuff_doc.id
+                    ),
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -603,4 +631,17 @@ class ContinueStuffConstructionAction(WithStuffAction):
             title = f"Construction de {stuff.name} avancé"
 
         self._kernel.server_db_session.commit()
-        return Description(title=title, items=[Part(label="Retour", go_back_zone=True)])
+        return Description(
+            title=title,
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'objet commencé",
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=stuff_doc.id
+                    ),
+                ),
+            ],
+            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
+        )

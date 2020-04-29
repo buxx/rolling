@@ -88,7 +88,7 @@ class MessageLib:
         message: str,
         concerned: typing.List[str],
         conversation_id: typing.Optional[int] = None,
-    ) -> None:
+    ) -> int:
         author_doc = self._kernel.character_lib.get_document(author_id)
         concerned = [author_id] + concerned
         messages = []
@@ -116,6 +116,8 @@ class MessageLib:
                 message.first_message = first_message.id
 
             self._kernel.server_db_session.commit()
+            return first_message.id
+        return conversation_id
 
     def get_conversation_first_messages(
         self, character_id: str, with_character_id: typing.Optional[str] = None

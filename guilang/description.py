@@ -67,3 +67,5 @@ class Description:
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
     redirect: typing.Optional[str] = None
+    force_back_url: typing.Optional[str] = None
+    can_be_back_url: bool = False

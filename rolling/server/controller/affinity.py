@@ -93,6 +93,7 @@ class AffinityController(BaseController):
                 Part(text="Ci-dessous les affinités avec lesquelles vous etes affiliés"),
             ]
             + affiliated_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -117,6 +118,7 @@ class AffinityController(BaseController):
                 Part(text="Ci-dessous, les affinités pour lesquelles vous n'avez aucune relation.")
             ]
             + non_affiliated_parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -145,7 +147,22 @@ class AffinityController(BaseController):
             )
             return Description(
                 title="Affinités créée",
-                items=[Part(text="Et vous en êtes le chef"), Part(is_link=True, go_back_zone=True)],
+                items=[
+                    Part(text="Et vous en êtes le chef"),
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    ),
+                    Part(
+                        is_link=True,
+                        label=f"Voir la fiche de {affinity_doc.name}",
+                        form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity_doc.id}",
+                    ),
+                    Part(
+                        is_link=True,
+                        label="Voir les affinités",
+                        form_action=f"/affinity/{hapic_data.path.character_id}",
+                    ),
+                ],
             )
 
         return Description(
@@ -155,7 +172,12 @@ class AffinityController(BaseController):
                     is_form=True,
                     form_action=f"/affinity/{hapic_data.path.character_id}/new",
                     items=[Part(label="Nom", name="name", type_=Type.STRING)],
-                )
+                ),
+                Part(
+                    is_link=True,
+                    label="Retour aux affinités",
+                    form_action=f"/affinity/{hapic_data.path.character_id}",
+                ),
             ],
         )
 
@@ -254,13 +276,23 @@ class AffinityController(BaseController):
                     if self._kernel.affinity_lib.there_is_unvote_relation(affinity, relation)
                     else ""
                 )
-                parts.append(
-                    Part(
-                        label=f"{need_action}Gérer cette affinité",
-                        is_link=True,
-                        form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
-                    )
+                parts.extend(
+                    [
+                        Part(
+                            label=f"{need_action}Gérer cette affinité",
+                            is_link=True,
+                            form_action=f"/affinity/{hapic_data.path.character_id}/manage/{affinity.id}",
+                        )
+                    ]
                 )
+
+        parts.append(
+            Part(
+                is_link=True,
+                label="Retour aux affinités",
+                form_action=f"/affinity/{hapic_data.path.character_id}",
+            )
+        )
 
         return Description(
             title=affinity.name,
@@ -274,6 +306,7 @@ class AffinityController(BaseController):
                 ),
             ]
             + parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -353,7 +386,26 @@ class AffinityController(BaseController):
 
             if return_:
                 self._kernel.server_db_session.commit()
-                return Description(title=title, items=[Part(is_link=True, go_back_zone=True)])
+                return Description(
+                    title=title,
+                    items=[
+                        Part(
+                            is_link=True,
+                            go_back_zone=True,
+                            label="Retourner à l'écran de déplacements",
+                        ),
+                        Part(
+                            is_link=True,
+                            label=f"Voir la fiche de {affinity.name}",
+                            form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
+                        ),
+                        Part(
+                            is_link=True,
+                            label="Voir les affinités",
+                            form_action=f"/affinity/{hapic_data.path.character_id}",
+                        ),
+                    ],
+                )
 
         items = []
 
@@ -464,6 +516,22 @@ class AffinityController(BaseController):
                         label="Me battre pour cette affinité",
                     )
                 )
+
+        items.extend(
+            [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label=f"Voir la fiche de {affinity.name}",
+                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir les affinités",
+                    form_action=f"/affinity/{hapic_data.path.character_id}",
+                ),
+            ]
+        )
 
         return Description(title=affinity.name, items=items)
 
@@ -576,6 +644,12 @@ class AffinityController(BaseController):
                     f"/affinity/{hapic_data.path.character_id}/manage-relations/{affinity.id}"
                 ),
             ),
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+            Part(
+                is_link=True,
+                label="Voir les affinités",
+                form_action=f"/affinity/{hapic_data.path.character_id}",
+            ),
         ]
 
         return Description(
@@ -597,6 +671,7 @@ class AffinityController(BaseController):
                 )
             ]
             + parts,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -664,7 +739,21 @@ class AffinityController(BaseController):
                     ),
                     items=form_parts,
                 )
+            ]
+            + [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label=f"Voir la fiche de {affinity.name}",
+                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir les affinités",
+                    form_action=f"/affinity/{hapic_data.path.character_id}",
+                ),
             ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -701,7 +790,23 @@ class AffinityController(BaseController):
                 )
             )
 
-        return Description(title=f"Membre(s) de {affinity.name}", items=parts)
+        parts.extend(
+            [
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label=f"Voir la fiche de {affinity.name}",
+                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir les affinités",
+                    form_action=f"/affinity/{hapic_data.path.character_id}",
+                ),
+            ]
+        )
+
+        return Description(title=f"Membre(s) de {affinity.name}", items=parts, can_be_back_url=True)
 
     @hapic.with_api_doc()
     @hapic.input_path(GetAffinityRelationPathModel)
@@ -763,7 +868,19 @@ class AffinityController(BaseController):
                         )
                     ],
                 ),
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label=f"Voir la fiche de {affinity.name}",
+                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
+                ),
+                Part(
+                    is_link=True,
+                    label="Voir les affinités",
+                    form_action=f"/affinity/{hapic_data.path.character_id}",
+                ),
             ],
+            can_be_back_url=True,
         )
 
     def bind(self, app: Application) -> None:

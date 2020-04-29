@@ -10,6 +10,7 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantFill
 from rolling.exception import ImpossibleAction
 from rolling.model.character import FillStuffWithResourceModel
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 
@@ -80,12 +81,25 @@ class FillStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
+        parts = [
+            Part(
+                is_link=True,
+                label="Voir l'inventaire",
+                form_action=f"/_describe/character/{character.id}/inventory",
+            ),
+            Part(
+                is_link=True,
+                label="Voir l'objet",
+                form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                    character_id=character.id, stuff_id=stuff.id
+                ),
+            ),
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+        ]
+
         try:
             self._kernel.stuff_lib.fill_stuff_with_resource(stuff, input_.resource_id)
         except CantFill as exc:
-            return Description(title=str(exc), items=[Part(label="Revenir", go_back_zone=True)])
+            return Description(title=str(exc), items=parts)
 
-        return Description(
-            title=f"{stuff.name} rempli(e) avec {input_.resource_id}",
-            items=[Part(label="Continuer", go_back_zone=True)],
-        )
+        return Description(title=f"{stuff.name} rempli(e) avec {input_.resource_id}", items=parts)

@@ -9,6 +9,7 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
 from rolling.util import EmptyModel
@@ -59,11 +60,24 @@ class EmptyStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
+        parts = [
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+            Part(
+                is_link=True,
+                label="Voir l'inventaire",
+                form_action=f"/_describe/character/{character.id}/inventory",
+            ),
+            Part(
+                is_link=True,
+                label="Voir l'objet",
+                form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                    character_id=character.id, stuff_id=stuff.id
+                ),
+            ),
+        ]
+
         try:
             self._kernel.stuff_lib.empty_stuff(stuff)
         except CantEmpty as exc:
-            return Description(title=str(exc), items=[Part(label="Revenir", go_back_zone=True)])
-
-        return Description(
-            title=f"{stuff.name} vidé(e)", items=[Part(label="Continuer", go_back_zone=True)]
-        )
+            return Description(title=str(exc), items=parts)
+        return Description(title=f"{stuff.name} vidé(e)", items=parts)

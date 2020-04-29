@@ -82,5 +82,10 @@ class CheatsCharacterAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
             return Description(
-                title="Points d'actions rechargés", items=[Part(is_link=True, go_back_zone=True)]
+                title="Points d'actions rechargés",
+                items=[
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    )
+                ],
             )

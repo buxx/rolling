@@ -76,7 +76,15 @@ class DropStuffAction(WithStuffAction):
             zone_col_i=character.zone_col_i,
         )
         return Description(
-            title=f"{stuff.name} laissé ici", items=[Part(label="Continuer", go_back_zone=True)]
+            title=f"{stuff.name} laissé ici",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
 
 
@@ -166,5 +174,13 @@ class DropResourceAction(WithResourceAction):
             zone_col_i=character.zone_col_i,
         )
         return Description(
-            title=f"Action effectué", items=[Part(label="Continuer", go_back_zone=True)]
+            title=f"Action effectué",
+            items=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Voir l'inventaire",
+                    form_action=f"/_describe/character/{character.id}/inventory",
+                ),
+            ],
         )
