@@ -2,7 +2,7 @@
   name = "Corps"
   weight = 80000.0
   clutter = 15.0
-  actions = ["DROP_STUFF"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   material_type = "SOLID"
 
 [PLASTIC_BOTTLE_1L]

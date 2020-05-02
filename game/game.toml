@@ -480,6 +480,19 @@ cheats = {"*"=["increase_ap"]}
     ]
     cost = 1.0
 
+  [ACTIONS.BUTCHER_CORPS]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    required_one_of_stuff_ids = ["CORPSE"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_MEAT", coeff=0.4},
+    ]
+    cost = 4.0
+
   [ACTIONS.CONSTRUCT_BUILD]  # required by system !
     actions = ["CONSTRUCT_BUILD"]
     cost = 0.0  # depending on build, progres ...

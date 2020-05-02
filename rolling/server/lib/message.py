@@ -16,12 +16,12 @@ class MessageLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
-    def _get_character_messages_query(self, character_id: str, zone: bool = False) -> Query:
+    def _get_character_messages_query(self, character_id: str, zone: typing.Optional[bool] = None) -> Query:
         query = self._kernel.server_db_session.query(MessageDocument).filter(
             MessageDocument.character_id == character_id
         )
 
-        if zone:
+        if zone is not None:
             query = query.filter(MessageDocument.zone == zone)
 
         return query
