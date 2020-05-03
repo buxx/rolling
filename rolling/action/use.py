@@ -196,8 +196,9 @@ class NotUseAsWeaponAction(WithStuffAction):
         return {}
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        if character.weapon and character.weapon.id != stuff.id:
-            raise ImpossibleAction("Vous n'utilisez pas cette arme")
+        if character.weapon and character.weapon.id == stuff.id:
+            return
+        raise ImpossibleAction("Vous n'utilisez pas cette arme")
 
     def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
@@ -307,8 +308,9 @@ class NotUseAsShieldAction(WithStuffAction):
         return {}
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        if character.shield and character.shield.id != stuff.id:
-            raise ImpossibleAction("Vous n'utilisez pas ce bouclier")
+        if character.shield and character.shield.id == stuff.id:
+            return
+        raise ImpossibleAction("Vous n'utilisez pas ce bouclier")
 
     def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
@@ -419,7 +421,8 @@ class NotUseAsArmorAction(WithStuffAction):
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         if character.armor and character.armor.id == stuff.id:
-            raise ImpossibleAction("Vous n'utilisez pas cette armure/equipement")
+            return
+        raise ImpossibleAction("Vous n'utilisez pas cette armure/equipement")
 
     def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
