@@ -418,7 +418,7 @@ class NotUseAsArmorAction(WithStuffAction):
         return {}
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        if character.armor and character.armor.id != stuff.id:
+        if character.armor and character.armor.id == stuff.id:
             raise ImpossibleAction("Vous n'utilisez pas cette armure/equipement")
 
     def check_request_is_possible(

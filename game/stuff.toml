@@ -42,7 +42,7 @@
   material_type = "OBJECT"
   is_bag = true
 [ANIMAL_SKIN_COAT]
-  name = "Vest de peaux animales"
+  name = "Veste de peaux animales"
   weight = 2000.0
   clutter = 3.0
   actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR", "CONTINUE_STUFF_CONSTRUCTION"]
