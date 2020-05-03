@@ -1,6 +1,7 @@
 [ZONE_PROPERTIES]
   [ZONE_PROPERTIES.BEACH]
     move_cost = 4.0
+    description = """Sur une plage, vous devriez trouver des crustacés. Ainsi que des poissons si vous avez de quoi les attraper."""
 
     [ZONE_PROPERTIES.BEACH.GENERATION]
       count = 1
@@ -41,6 +42,7 @@
 
   [ZONE_PROPERTIES.PLAIN]
     move_cost = 4.0
+    description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits et des graminés."""
 
     [ZONE_PROPERTIES.PLAIN.STUFFS]
       [ZONE_PROPERTIES.PLAIN.STUFFS.HARE]  # bernard l'hermite, u
@@ -87,13 +89,14 @@
 
   [ZONE_PROPERTIES.SEA]
     move_cost = 6.0
+    description = ""
 
     [ZONE_PROPERTIES.SEA.GENERATION]
       count = 0
 
   [ZONE_PROPERTIES.MOUNTAIN]
     move_cost = 8.0
-
+    description = "En montagne, vous devriez pouvoir trouver des animaux de petit et moyen gabarits."
 
     [ZONE_PROPERTIES.MOUNTAIN.RESOURCES]
       [ZONE_PROPERTIES.MOUNTAIN.RESOURCES.RAW_STONE]
@@ -129,6 +132,7 @@
 
   [ZONE_PROPERTIES.JUNGLE]
     move_cost = 8.0
+    description = """Dans la jungle, vous devriez pouvoir trouver des fruits et baies en tout genre. Ainsi que des animaux de moyen et gros gabarits."""
 
     [ZONE_PROPERTIES.JUNGLE.RESOURCES]
       [ZONE_PROPERTIES.JUNGLE.RESOURCES.BERRY]
@@ -180,6 +184,7 @@
 
   [ZONE_PROPERTIES.HILL]
     move_cost = 5.0
+    description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des graminés."""
 
     [ZONE_PROPERTIES.HILL.RESOURCES]
       [ZONE_PROPERTIES.HILL.RESOURCES.GRAMINEAE]

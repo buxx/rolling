@@ -358,6 +358,7 @@ class Game:
                     move_cost=move_cost,
                     resources=resources,
                     stuffs=stuffs,
+                    description=zone_data.get("description", ""),
                 )
             )
 

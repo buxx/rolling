@@ -86,6 +86,7 @@ class ZoneProperties:
     move_cost: float
     resources: typing.List[ZoneResource]
     stuffs: typing.List[ZoneStuff]
+    description: str
 
     @property
     def resource_ids(self) -> typing.Iterator[str]:

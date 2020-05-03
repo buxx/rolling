@@ -124,6 +124,7 @@ class ZoneController(BaseController):
     async def describe(self, request: Request, hapic_data: HapicData) -> Description:
         world_rows = self._kernel.world_map_source.geography.rows
         tile_type: MapTileType = world_rows[hapic_data.path.row_i][hapic_data.path.col_i]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(tile_type)
 
         characters = self._kernel.character_lib.get_zone_players(
             hapic_data.path.row_i, hapic_data.path.col_i
@@ -145,9 +146,10 @@ class ZoneController(BaseController):
         return Description(
             title=tile_type.get_name(),
             items=[
+                Part(text=f"Vous vous trouvez sur {tile_type.get_name()}."),
+                Part(text=zone_properties.description),
                 Part(
-                    text=f"Vous vous trouvez sur {tile_type.get_name()}. "
-                    f"Dans cette zone se trouve également les personnages suivants:"
+                    text=f"Dans cette zone se trouve également les personnages suivants:"
                 )
             ]
             + characters_parts,
