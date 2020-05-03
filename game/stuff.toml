@@ -45,7 +45,7 @@
   name = "Vest de peaux animales"
   weight = 2000.0
   clutter = 3.0
-  actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR"]
+  actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR", "CONTINUE_STUFF_CONSTRUCTION"]
   armor = true
   protect_estoc = 5
   protect_blunt = 5
@@ -54,7 +54,7 @@
   name = "Bouclier de planche"
   weight = 3500.0
   clutter = 5.0
-  actions = ["DROP_STUFF", "USE_AS_SHIELD", "NOT_USE_AS_SHIELD"]
+  actions = ["DROP_STUFF", "USE_AS_SHIELD", "NOT_USE_AS_SHIELD", "CONTINUE_STUFF_CONSTRUCTION"]
   shield = true
   protect_estoc = 10
   protect_blunt = 10
