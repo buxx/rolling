@@ -144,6 +144,8 @@ class CharacterController(BaseController):
                 ),
                 Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
                 Part(label="Faim", text="oui" if character.feel_hungry else "non"),
+                Part(label="Fatigué", text="oui" if character.tired else "non"),
+                Part(label="Exténué", text="oui" if character.exhausted else "non"),
                 Part(
                     label="Arme",
                     text=character.weapon.name if character.weapon else "aucune",
