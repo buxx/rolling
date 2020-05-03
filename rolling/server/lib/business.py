@@ -11,6 +11,7 @@ from rolling.server.document.business import OfferItemDocument
 from rolling.server.document.business import OfferItemPosition
 from rolling.server.document.business import OfferOperand
 from rolling.server.document.business import OfferStatus
+from rolling.server.document.event import EventDocument, StoryPageDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -154,11 +155,11 @@ class BusinessLib:
         character_id: str,
         request_item_id: typing.Optional[int] = None,
         offer_item_id: typing.Optional[int] = None,
-        commit: bool = True,
     ) -> None:
         offer: OfferDocument = self.get_offer_query(offer_id).one()
         request_items: typing.List[OfferItemDocument] = []
         offer_items: typing.List[OfferItemDocument] = []
+        event_texts: typing.List[str] = ["Vous avez obtenu:"]
 
         if not self.character_can_deal(character_id, offer_id):
             raise RollingError(f"Character {character_id} cannot make deal {offer_id}")
@@ -203,12 +204,19 @@ class BusinessLib:
 
         for request_item in request_items:
             _deal_item(request_item, giver_id=character_id, receiver_id=offer.character_id)
+            event_texts.append(f"- {request_item.get_name(self._kernel, quantity=True)}")
 
+        event_texts.append("Vous avez donné:")
         for offer_item in offer_items:
             _deal_item(offer_item, giver_id=offer.character_id, receiver_id=character_id)
+            event_texts.append(f"- {offer_item.get_name(self._kernel, quantity=True)}")
 
-        if commit:
-            self._kernel.server_db_session.commit()
+        self._kernel.character_lib.add_event(
+            offer.character_id,
+            title=f"Un affaire à été conclu: {offer.title}",
+            story_pages=[StoryPageDocument(text="\n".join(event_texts))],
+        )
+        self._kernel.server_db_session.commit()
 
     def mark_as_read(self, offer_id: int) -> None:
         self.get_offer_query(offer_id).update({"read": True})
