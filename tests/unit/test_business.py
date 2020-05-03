@@ -14,6 +14,7 @@ from rolling.server.document.business import OfferItemDocument
 from rolling.server.document.business import OfferItemPosition
 from rolling.server.document.business import OfferOperand
 from rolling.server.document.business import OfferStatus
+from rolling.server.document.universe import UniverseStateDocument
 from tests.fixtures import create_stuff
 from tests.fixtures import description_serializer
 
@@ -684,6 +685,7 @@ class TestBusiness:
         worldmapc_web_app: TestClient,
         worldmapc_kernel: Kernel,
         xena_permanent_and_offer: OfferDocument,
+        initial_universe_state: UniverseStateDocument,
     ) -> None:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
@@ -775,6 +777,7 @@ class TestBusiness:
         worldmapc_web_app: TestClient,
         worldmapc_kernel: Kernel,
         xena_permanent_or_offer: OfferDocument,
+        initial_universe_state: UniverseStateDocument,
     ) -> None:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
@@ -852,6 +855,7 @@ class TestBusiness:
         worldmapc_arthur_model: CharacterModel,
         worldmapc_web_app: TestClient,
         worldmapc_kernel: Kernel,
+        initial_universe_state: UniverseStateDocument,
     ) -> None:
         """+ conteur main page + vue depuis target + blinker"""
         xena = worldmapc_xena_model
