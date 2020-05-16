@@ -167,6 +167,7 @@ class StuffLib:
             protect_estoc=stuff_properties.protect_estoc,
             protect_blunt=stuff_properties.protect_blunt,
             protect_sharp=stuff_properties.protect_sharp,
+            classes=stuff_properties.classes,
         )
 
     def get_carried_by(

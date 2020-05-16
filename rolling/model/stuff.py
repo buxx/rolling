@@ -36,6 +36,7 @@ class StuffProperties:
     protect_blunt: int = 0
     protect_sharp: int = 0
     damages: float = 0.0
+    classes: typing.List[str] = serpyco.field(default_factory=list)
 
     def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
         for ability in abilities:
@@ -77,6 +78,7 @@ class StuffModel:
     protect_blunt: int = 0
     protect_sharp: int = 0
     damages: float = 0.0
+    classes: typing.List[str] = serpyco.field(default_factory=list)
 
     @property
     def ready_for_use(self) -> bool:

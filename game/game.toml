@@ -841,6 +841,7 @@ cheats = {"*"=["increase_ap"]}
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = ["HEAT_UP_LOW_TEMP"]
   cost = 2.0
+  classes = ["CAMPFIRE"]
 [build.BRANCHES_FENCE]
   name = "Palissade de branches"
   char = "%"
@@ -850,6 +851,7 @@ cheats = {"*"=["increase_ap"]}
   power_on_require_resources = []
   abilities = []
   cost = 0.0
+  classes = ["WALL"]
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
@@ -859,6 +861,7 @@ cheats = {"*"=["increase_ap"]}
   power_on_require_resources = []
   abilities = []
   cost = 0.0
+  classes = ["WALL"]
 [build.STONE_WALL]
   name = "Mur de pierre"
   char = "§"
@@ -868,3 +871,4 @@ cheats = {"*"=["increase_ap"]}
   power_on_require_resources = []
   abilities = []
   cost = 0.0
+  classes = ["WALL"]
