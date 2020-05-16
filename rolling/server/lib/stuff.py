@@ -120,7 +120,7 @@ class StuffLib:
             StuffDocument.world_col_i == world_col_i,
         ]
 
-        if zone_row_i and zone_col_i:
+        if zone_row_i is not None and zone_col_i is not None:
             filters.extend(
                 [StuffDocument.zone_row_i == zone_row_i, StuffDocument.zone_col_i == zone_col_i]
             )
