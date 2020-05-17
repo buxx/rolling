@@ -86,6 +86,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                 character_id=character.id, resource_id=resource_id, quantity=quantity, commit=False
             )
 
+        # FIXME BS NOW: reduce action point ?!
         self._kernel.stuff_lib.destroy(stuff.id)
         self._kernel.server_db_session.commit()
 
