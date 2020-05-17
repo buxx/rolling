@@ -5,3 +5,4 @@
 * Pour les prod "vestimentaire" (TOUTE CONFONDUS), préciser le nombre de petite peau nécessaire ?
 * Un chevreuil donne "1 petite peau", soit comme un lièvre
 * Parfois ca me dit "vous avez trouvé 0 lièvre". Quelle différence avec les autres fois où ca n'en parle pas ? (de lièvre et autres non attrapés ?)
+* Bordure gauche, case du haut. Ca fait partir au NO ! au lieu de O (ça doit buggé partout ça)

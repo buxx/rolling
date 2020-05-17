@@ -423,7 +423,7 @@ class ConstructBuildAction(WithBuildAction):
         real_progress_cost = input_cost_to_spent
 
         if character.action_points < input_cost_to_spent:
-            raise NotEnoughActionPoints(input_cost_to_spent)
+            raise ImpossibleAction("Pas assez de Points d'Actions")
 
         consume_resources_percent = (real_progress_cost * 100) / build_description.cost
 
