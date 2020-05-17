@@ -15,6 +15,7 @@
   image = "bottle.jpg"
   actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
+  classes = ["BOTTLE"]
 
 [LITTLE_SKIN_CANTEEN]
   name = "Petite gourde de peau"
@@ -25,6 +26,7 @@
   clutter = 1.0
   actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
+  classes = ["BOTTLE"]
 [STONE]
   name = "Stone"
   weight = 2000.0
@@ -41,6 +43,7 @@
   actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
   material_type = "OBJECT"
   is_bag = true
+  classes = ["BAG", "LITTLE_BAG"]
 [ANIMAL_SKIN_COAT]
   name = "Veste de peaux animales"
   weight = 2000.0
@@ -50,6 +53,7 @@
   protect_estoc = 5
   protect_blunt = 5
   protect_sharp = 5
+  classes = ["ARMOR", "COAT"]
 [PRIMITIVE_WOOD_SHIELD]
   name = "Bouclier de planche"
   weight = 3500.0
@@ -59,6 +63,7 @@
   protect_estoc = 10
   protect_blunt = 10
   protect_sharp = 10
+  classes = ["SHIELD"]
 [WOOD_SPEAR]
   name = "Lance de bois"
   weight = 1000.0
@@ -70,6 +75,7 @@
   blunt = 0
   sharp = 0
   damages = 1.0
+  classes = ["WEAPON", "SPEAR"]
 [WOOD_SPEAR_STONE]
   name = "Lance de bois et pierre"
   weight = 1200.0
@@ -81,6 +87,7 @@
   blunt = 0
   sharp = 0
   damages = 1.1
+  classes = ["WEAPON", "SPEAR"]
 [WOOD_SPEAR_STRENGHTHENED]
   name = "Lance de bois renforcé"
   weight = 1000.0
@@ -92,6 +99,7 @@
   blunt = 0
   sharp = 0
   damages = 1.1
+  classes = ["WEAPON", "SPEAR"]
 [WOOD_ASSEGAI]
   name = "Sagaie de bois"
   weight = 500.0
@@ -103,6 +111,7 @@
   blunt = 0
   sharp = 0
   damages = 1.0
+  classes = ["WEAPON", "SPEAR"]
 [STONE_HAXE]
   name = "Hache de pierre"
   weight = 1000.0
@@ -114,64 +123,77 @@
   blunt = 10
   sharp = 10
   damages = 1.0
+  classes = ["WEAPON", "HAXE"]
 # TODO BS 2019-10-10: living animals ? moving on zone ? farming !
 [HARE]
   name = "Lièvre"
   weight = 3500.0
   clutter = 1.2
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "RABBIT"]
 [PHEASANT]
   name = "Faisan"
   weight = 1500.0
   clutter = 1.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "BIRD"]
 [RABBIT]
   name = "Lapin"
   weight = 2700.0
   clutter = 1.1
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "RABBIT"]
 [PADRIDGE]
   name = "Perdrix"
   weight = 1500.0
   clutter = 1.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "BIRD"]
 [DUCK]
   name = "Canard"
   weight = 2000.0
   clutter = 1.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "BIRD"]
 [MOORHEN]
   name = "Poule d'eau"
   weight = 600.0
   clutter = 0.5
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "BIRD"]
 [RAVEN]
   name = "Corbeau"
   weight = 650.0
   clutter = 0.5
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "BIRD"]
 [FOX]
   name = "Renard"
   weight = 5500.0
   clutter = 2.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "LITTLE_PREDATOR"]
 [MARTEN]
   name = "Fouine"
   weight = 2700.0
   clutter = 1.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "LITTLE_PREDATOR"]
 [BOAR]
   name = "Sanglier"
   weight = 20000.0
   clutter = 10.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
 [DEER]
   name = "Chevreuil"
   weight = 18000.0
   clutter = 10.0
   actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
 [LITTLE_STATUETTE]
   name = "Petite statuette"
   weight = 700.0
   clutter = 0.5
   actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT", "STATUETTE"]

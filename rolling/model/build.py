@@ -42,6 +42,7 @@ class BuildDescription:
     power_on_require_resources: typing.List[BuildPowerOnRequireResourceDescription]
     ability_ids: typing.List[str]
     cost: float
+    classes: typing.List[str] = serpyco.field(default_factory=list)
 
 
 @dataclasses.dataclass
@@ -56,6 +57,8 @@ class ZoneBuildModel:
     col_i: int = serpyco.number_field(getter=lambda b: b.doc.zone_col_i)
     char: str = serpyco.string_field(getter=lambda b: b.desc.char)
     id: int = serpyco.number_field(getter=lambda b: b.doc.id)
+    build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)
+    classes: typing.List[str] = serpyco.field(default_factory=list, getter=lambda b: b.desc.classes)
 
 
 @dataclasses.dataclass

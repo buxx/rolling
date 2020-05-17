@@ -290,6 +290,7 @@ class GameConfig:
                     )
                     for r in build_raw.get("power_on_require_resources", [])
                 ],
+                classes=build_raw.get("classes", []),
             )
 
         return builds
