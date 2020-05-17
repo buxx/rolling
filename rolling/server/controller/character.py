@@ -881,7 +881,11 @@ class CharacterController(BaseController):
             f"?to_world_row={hapic_data.path.world_row_i}"
             f"&to_world_col={hapic_data.path.world_col_i}"
         )
-        parts = [Part(text=f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} Point d'Actions")]
+        parts = [
+            Part(
+                text=f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} Point d'Actions"
+            )
+        ]
 
         if move_info.can_move:
             buttons.insert(
@@ -914,9 +918,7 @@ class CharacterController(BaseController):
         move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
         move_info = self._character_lib.get_move_to_zone_infos(
-            hapic_data.path.character_id,
-            world_row_i=to_world_row,
-            world_col_i=to_world_col,
+            hapic_data.path.character_id, world_row_i=to_world_row, world_col_i=to_world_col
         )
 
         if move_info.can_move:
@@ -952,7 +954,8 @@ class CharacterController(BaseController):
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
 
         return Description(
-            title="Effectuer un voyage ...", items=[Part(text=message) for message in messages] + [Part(go_back_zone=True)]
+            title="Effectuer un voyage ...",
+            items=[Part(text=message) for message in messages] + [Part(go_back_zone=True)],
         )
 
     @hapic.with_api_doc()

@@ -577,7 +577,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                     stuff_id=stuff.id,
                 ),
                 cost=self.get_cost(character, stuff),
-                merge_by="continue_craft"
+                merge_by="continue_craft",
             )
         ]
 

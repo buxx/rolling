@@ -148,9 +148,7 @@ class ZoneController(BaseController):
             items=[
                 Part(text=f"Vous vous trouvez sur {tile_type.get_name()}."),
                 Part(text=zone_properties.description),
-                Part(
-                    text=f"Dans cette zone se trouve également les personnages suivants:"
-                )
+                Part(text=f"Dans cette zone se trouve également les personnages suivants:"),
             ]
             + characters_parts,
             can_be_back_url=True,

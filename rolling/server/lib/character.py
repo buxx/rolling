@@ -669,14 +669,14 @@ class CharacterLib:
             can_move = False
             cannot_move_reasons.append("Le personnage est épuisé.")
 
-        if inventory.weight > character.get_weight_capacity(self._kernel) or inventory.clutter > character.get_clutter_capacity(self._kernel):
+        if inventory.weight > character.get_weight_capacity(
+            self._kernel
+        ) or inventory.clutter > character.get_clutter_capacity(self._kernel):
             can_move = False
             cannot_move_reasons.append("Le personnage est surchargé.")
 
         return MoveZoneInfos(
-            can_move=can_move,
-            cost=move_cost,
-            cannot_move_reasons=cannot_move_reasons,
+            can_move=can_move, cost=move_cost, cannot_move_reasons=cannot_move_reasons
         )
 
     def have_from_of_abilities(
