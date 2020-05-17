@@ -657,8 +657,27 @@ class CharacterLib:
         zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
         move_cost = self._kernel.game.world_manager.get_zone_properties(zone_type).move_cost
         character = self.get(character_id)
+        inventory = self.get_inventory(character_id)
+        can_move = True
+        cannot_move_reasons: typing.List[str] = []
 
-        return MoveZoneInfos(can_move=character.action_points >= move_cost, cost=move_cost)
+        if character.action_points < move_cost:
+            can_move = False
+            cannot_move_reasons.append("Pas assez de Point d'Actions.")
+
+        if character.exhausted:
+            can_move = False
+            cannot_move_reasons.append("Le personnage est épuisé.")
+
+        if inventory.weight > character.get_weight_capacity(self._kernel) or inventory.clutter > character.get_clutter_capacity(self._kernel):
+            can_move = False
+            cannot_move_reasons.append("Le personnage est surchargé.")
+
+        return MoveZoneInfos(
+            can_move=can_move,
+            cost=move_cost,
+            cannot_move_reasons=cannot_move_reasons,
+        )
 
     def have_from_of_abilities(
         self, character: CharacterModel, abilities: typing.List[AbilityDescription]

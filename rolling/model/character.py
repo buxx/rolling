@@ -302,8 +302,6 @@ class CharacterModel:
     shield: typing.Optional[StuffModel] = None
     armor: typing.Optional[StuffModel] = None
 
-    weight_overcharge: bool = False
-    clutter_overcharge: bool = False
     unread_event: bool = False
     unread_zone_message: bool = False
     unread_conversation: bool = False
