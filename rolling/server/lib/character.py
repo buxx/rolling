@@ -470,7 +470,7 @@ class CharacterLib:
         if stuff.carried_by is None:
             character_actions.append(
                 CharacterActionLink(
-                    name=f"Prendre {stuff.get_name_and_light_description()}",
+                    name=f"Prendre {stuff.get_name_and_light_description(self._kernel)}",
                     link=TAKE_STUFF_URL.format(character_id=character_id, stuff_id=stuff.id),
                 )
             )

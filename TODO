@@ -1,6 +1,4 @@
 * J'ai l'impression que les prod obtenues (ou demandées pour un mur de pierre par ex) sont pas cohérentes (prod de 3/4.000 kg de pierre en 24h ^^)
-* Pour la viande fumée, vérifier le coût en PA (3 + 0.0001/g) j'ai l'impression qu'il y a une erreur dans le calcul au vu du nombre de PA que me demande le jeu pour faire 250g (mini pour manger) => 750 PA (je pense que t'as un souci g/kg)
-* Quand on remplit une gourde d'eau, dans l'inventaire elle ne s'appelle plus gourde (ou gourde pleine) mais "FRESH_WATER"
 * Pour les animaux chassés, il serait plus intéressant dans l'inventaire d'en avoir le nombre, et pas une ligne par animal => "6 poules d'eau" et pas 6 lignes "poule d'eau"
 * Pour les prod "vestimentaire" (TOUTE CONFONDUS), préciser le nombre de petite peau nécessaire ?
 * Un chevreuil donne "1 petite peau", soit comme un lièvre

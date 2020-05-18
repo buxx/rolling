@@ -9,6 +9,9 @@ from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.util import display_g_or_kg
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
 
 @dataclasses.dataclass
 class StuffProperties:
@@ -85,7 +88,7 @@ class StuffModel:
         # TODO BS: is broken, etc
         return not self.under_construction
 
-    def get_full_description(self) -> typing.List[str]:
+    def get_full_description(self, kernel: "Kernel") -> typing.List[str]:
         descriptions: typing.List[str] = []
 
         if self.weight:
@@ -95,34 +98,34 @@ class StuffModel:
             descriptions.append(f"{self.filled_at}%")
 
         if self.filled_with_resource is not None:
-            # TODO BS 2019-07-04: translation
-            descriptions.append(f"{self.filled_with_resource}")
+            resource_description = kernel.game.config.resources[self.filled_with_resource]
+            descriptions.append(f"{resource_description.name}")
 
         if self.clutter:
             descriptions.append(f"{round(self.clutter, 3)} d'encombrement")
 
         return descriptions
 
-    def get_light_description(self) -> typing.List[str]:
+    def get_light_description(self, kernel: "Kernel") -> typing.List[str]:
         descriptions: typing.List[str] = []
 
         if self.filled_at is not None:
             descriptions.append(f"{self.filled_at}%")
 
         if self.filled_with_resource is not None:
-            # TODO BS 2019-07-04: translation
-            descriptions.append(f"{self.filled_with_resource}")
+            resource_description = kernel.game.config.resources[self.filled_with_resource]
+            descriptions.append(f"{resource_description.name}")
 
         return descriptions
 
-    def get_name_and_light_description(self) -> str:
-        descriptions = self.get_light_description()
+    def get_name_and_light_description(self, kernel: "Kernel") -> str:
+        descriptions = self.get_light_description(kernel)
 
         if not descriptions:
             return self.name
 
         description = "(" + ", ".join(descriptions) + ")"
-        return f"{self.get_name()} ({description})"
+        return f"{self.get_name()} {description}"
 
     def get_name(self) -> str:
         under_construction_char = "*" if self.under_construction else ""

@@ -175,9 +175,10 @@ class DrinkStuffAction(WithStuffAction):
             and stuff.filled_with_resource in accept_resources_ids
         ):
             query_params = self.input_model(stuff_id=stuff.id)
+            resource_description = self._kernel.game.config.resources[stuff.filled_with_resource]
             return [
                 CharacterActionLink(
-                    name=f"Drink {stuff.filled_with_resource}",
+                    name=f"Boire {resource_description.name}",
                     link=get_with_stuff_action_url(
                         character.id,
                         ActionType.DRINK_STUFF,

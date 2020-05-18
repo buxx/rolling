@@ -278,7 +278,7 @@ class CharacterController(BaseController):
 
         for stuff in inventory.stuff:
             name = stuff.get_name()
-            descriptions: typing.List[str] = stuff.get_full_description()
+            descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
 
             description = ""
             if descriptions:
@@ -446,7 +446,7 @@ class CharacterController(BaseController):
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Description(
-            title=stuff.get_name_and_light_description(),
+            title=stuff.get_name_and_light_description(self._kernel),
             image=stuff.image,
             items=[
                 Part(
@@ -567,7 +567,7 @@ class CharacterController(BaseController):
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Description(
-            title=stuff.get_name_and_light_description(),
+            title=stuff.get_name_and_light_description(self._kernel),
             items=[
                 Part(
                     text=action.get_as_str(),
