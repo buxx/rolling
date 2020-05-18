@@ -103,4 +103,6 @@ class FillStuffAction(WithStuffAction):
             return Description(title=str(exc), items=parts)
 
         resource_description = self._kernel.game.config.resources[input_.resource_id]
-        return Description(title=f"{stuff.name} rempli(e) avec {resource_description.name}", items=parts)
+        return Description(
+            title=f"{stuff.name} rempli(e) avec {resource_description.name}", items=parts
+        )

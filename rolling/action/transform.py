@@ -159,7 +159,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         input_: typing.Optional[QuantityModel] = None,
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None:
-            return self._description.base_cost + (self._description.properties['cost_per_unit'] * input_.quantity)
+            return self._description.base_cost + (
+                self._description.properties["cost_per_unit"] * input_.quantity
+            )
         return self._description.base_cost
 
     def get_character_actions(
