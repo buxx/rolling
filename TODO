@@ -1,5 +1,3 @@
 * J'ai l'impression que les prod obtenues (ou demandées pour un mur de pierre par ex) sont pas cohérentes (prod de 3/4.000 kg de pierre en 24h ^^)
 * Pour les animaux chassés, il serait plus intéressant dans l'inventaire d'en avoir le nombre, et pas une ligne par animal => "6 poules d'eau" et pas 6 lignes "poule d'eau"
-* Pour les prod "vestimentaire" (TOUTE CONFONDUS), préciser le nombre de petite peau nécessaire ?
-* Parfois ca me dit "vous avez trouvé 0 lièvre". Quelle différence avec les autres fois où ca n'en parle pas ? (de lièvre et autres non attrapés ?)
 * Bordure gauche, case du haut. Ca fait partir au NO ! au lieu de O (ça doit buggé partout ça)
