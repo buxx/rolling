@@ -134,6 +134,10 @@ class Action(abc.ABC):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         pass
 
+    @property
+    def description(self) -> ActionDescriptionModel:
+        return self._description
+
 
 class WithStuffAction(Action):
     @abc.abstractmethod

@@ -7,9 +7,15 @@ import typing
 from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.server.document.base import ImageDocument
+from guilang.description import Part, Description, Type
+from rolling.action.base import get_with_stuff_action_url
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
+    from rolling.action.base import WithStuffAction
+    from rolling.types import ActionType
 
 
 def register_image(kernel: "Kernel", file_path: str) -> int:
@@ -38,3 +44,68 @@ def register_image(kernel: "Kernel", file_path: str) -> int:
             f.write(file_bytes)
 
     return image_id
+
+
+def with_multiple_carried_stuffs(
+    action: "WithStuffAction",
+    kernel: "Kernel",
+    character: "CharacterModel",
+    stuff: "StuffModel",
+    input_: typing.Any,
+    action_type: "ActionType",
+    do_for_one_func: typing.Callable[["CharacterModel", "StuffModel", typing.Any], typing.List["Part"]],
+    title: str,
+    success_parts: typing.List["Part"],
+) -> Description:
+    all_carried = kernel.stuff_lib.get_carried_by(character.id, stuff_id=stuff.stuff_id)
+    if len(all_carried) > 1 and input_.quantity is None:
+        return Description(
+            title=title,
+            items=[
+                Part(text=f"Vous possedez {len(all_carried)} {stuff.name}, éxécuter cette action sur combien ?"),
+                Part(
+                    is_form=True,
+                    form_action=get_with_stuff_action_url(
+                        character_id=character.id,
+                        action_type=action_type,
+                        stuff_id=stuff.id,
+                        query_params=action.input_model_serializer.dump(input_),
+                        action_description_id=action.description.id,
+                    ),
+                    submit_label="Continuer",
+                    form_values_in_query=True,
+                    items=[
+                        Part(
+                            label="Quantité",
+                            name="quantity",
+                            type_=Type.NUMBER,
+                            default_value="1",
+                        )
+                    ]
+                ),
+                Part(
+                    is_link=True,
+                    label=f"Faire ça avec les {len(all_carried)}"
+                ),
+            ]
+        )
+
+    if input_.quantity is not None:
+        do_it_count = input_.quantity
+    else:
+        do_it_count = 1
+
+    parts = []
+    for i in range(do_it_count):
+        parts.extend(
+            do_for_one_func(
+                character,
+                all_carried[i],
+                input_,
+            )
+        )
+
+    return Description(
+        title=title,
+        items=parts + success_parts,
+    )

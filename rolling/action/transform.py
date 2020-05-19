@@ -16,6 +16,7 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.server.link import CharacterActionLink
+from rolling.server.util import with_multiple_carried_stuffs
 from rolling.types import ActionType
 from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
@@ -26,9 +27,14 @@ if typing.TYPE_CHECKING:
     from rolling.model.stuff import StuffModel
 
 
+@dataclasses.dataclass
+class TransformStuffIntoResourcesModel:
+    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
 class TransformStuffIntoResourcesAction(WithStuffAction):
-    input_model = EmptyModel
-    input_model_serializer = serpyco.Serializer(EmptyModel)
+    input_model = TransformStuffIntoResourcesModel
+    input_model_serializer = serpyco.Serializer(TransformStuffIntoResourcesModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -67,39 +73,49 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         ]
 
     def check_request_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+        self, character: "CharacterModel", stuff: "StuffModel", input_: TransformStuffIntoResourcesModel
     ) -> None:
         self.check_is_possible(character, stuff)
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+        self, character: "CharacterModel", stuff: "StuffModel", input_: TransformStuffIntoResourcesModel
     ) -> Description:
         self.check_request_is_possible(character, stuff, input_)
 
-        for produce in self._description.properties["produce"]:
-            resource_id = produce["resource"]
-            if "coeff" in produce:
-                quantity = stuff.weight * produce["coeff"]
-            else:
-                quantity = produce["quantity"]
-            self._kernel.resource_lib.add_resource_to(
-                character_id=character.id, resource_id=resource_id, quantity=quantity, commit=False
-            )
+        def do_for_one(character_: "CharacterModel", stuff_: "StuffModel", input__: TransformStuffIntoResourcesModel) -> typing.List[Part]:
+            for produce in self._description.properties["produce"]:
+                resource_id = produce["resource"]
+                if "coeff" in produce:
+                    quantity = stuff_.weight * produce["coeff"]
+                else:
+                    quantity = produce["quantity"]
+                self._kernel.resource_lib.add_resource_to(
+                    character_id=character_.id, resource_id=resource_id, quantity=quantity,
+                    commit=False
+                )
 
-        # FIXME BS NOW: reduce action point ?!
-        self._kernel.stuff_lib.destroy(stuff.id)
-        self._kernel.server_db_session.commit()
+            # FIXME BS NOW: reduce action point ?!
+            self._kernel.stuff_lib.destroy(stuff_.id)
+            self._kernel.server_db_session.commit()
+            return []
 
-        return Description(
+        return with_multiple_carried_stuffs(
+            self,
+            self._kernel,
+            character=character,
+            stuff=stuff,
+            input_=input_,
+            action_type=ActionType.TRANSFORM_STUFF_TO_RESOURCES,
+            do_for_one_func=do_for_one,
             title="Transformation effectué",
-            items=[
+            success_parts=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                 ),
-            ],
+            ]
         )
 
 
