@@ -47,6 +47,7 @@ from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
@@ -275,8 +276,17 @@ class CharacterController(BaseController):
         resource_items: typing.List[Part] = []
         bags = self._character_lib.get_used_bags(character.id)
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
+        stuff_count: typing.Dict[str, int] = {}
 
         for stuff in inventory.stuff:
+            stuff_count.setdefault(stuff.stuff_id, 0)
+            stuff_count[stuff.stuff_id] += 1
+
+        stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
+        for stuff in inventory.stuff:
+            if stuff_displayed[stuff.stuff_id]:
+                continue
+
             name = stuff.get_name()
             descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
 
@@ -284,9 +294,13 @@ class CharacterController(BaseController):
             if descriptions:
                 description = " (" + ", ".join(descriptions) + ")"
 
+            if stuff_count[stuff.stuff_id] > 1:
+                text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
+            else:
+                text = f"{name}{description}"
             stuff_items.append(
                 Part(
-                    text=f"{name}{description}",
+                    text=text,
                     is_link=True,
                     align="left",
                     form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
@@ -294,6 +308,7 @@ class CharacterController(BaseController):
                     ),
                 )
             )
+            stuff_displayed[stuff.stuff_id] = True
 
         for resource in inventory.resource:
             resource_items.append(
@@ -509,6 +524,7 @@ class CharacterController(BaseController):
         available_str = quantity_to_str(
             ground_resource.quantity, ground_resource.unit, self._kernel
         )
+        unit_str = self._kernel.translation.get(ground_resource.unit)
         if not hapic_data.query.quantity:
             return Description(
                 title=resource_description.name,
@@ -524,9 +540,10 @@ class CharacterController(BaseController):
                         ),
                         items=[
                             Part(
-                                label=f"Récupérer quelle quantité ({available_str} disponible)?",
+                                label=f"Récupérer quelle quantité ({unit_str}, {available_str} disponible)?",
                                 name="quantity",
                                 type_=Type.NUMBER,
+                                default_value=str(ground_resource.quantity),
                             )
                         ],
                     )

@@ -74,7 +74,9 @@ class DropStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: DropStuffModel
     ) -> Description:
-        def do_for_one(character_: "CharacterModel", stuff_: "StuffModel", input__: DropStuffModel) -> typing.List[Part]:
+        def do_for_one(
+            character_: "CharacterModel", stuff_: "StuffModel", input__: DropStuffModel
+        ) -> typing.List[Part]:
             self._kernel.stuff_lib.drop(
                 stuff_.id,
                 world_row_i=character_.world_row_i,
@@ -100,7 +102,7 @@ class DropStuffAction(WithStuffAction):
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                 ),
-            ]
+            ],
         )
 
 

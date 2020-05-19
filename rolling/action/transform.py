@@ -73,16 +73,26 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         ]
 
     def check_request_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: TransformStuffIntoResourcesModel
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: TransformStuffIntoResourcesModel,
     ) -> None:
         self.check_is_possible(character, stuff)
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: TransformStuffIntoResourcesModel
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: TransformStuffIntoResourcesModel,
     ) -> Description:
         self.check_request_is_possible(character, stuff, input_)
 
-        def do_for_one(character_: "CharacterModel", stuff_: "StuffModel", input__: TransformStuffIntoResourcesModel) -> typing.List[Part]:
+        def do_for_one(
+            character_: "CharacterModel",
+            stuff_: "StuffModel",
+            input__: TransformStuffIntoResourcesModel,
+        ) -> typing.List[Part]:
             for produce in self._description.properties["produce"]:
                 resource_id = produce["resource"]
                 if "coeff" in produce:
@@ -90,8 +100,10 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                 else:
                     quantity = produce["quantity"]
                 self._kernel.resource_lib.add_resource_to(
-                    character_id=character_.id, resource_id=resource_id, quantity=quantity,
-                    commit=False
+                    character_id=character_.id,
+                    resource_id=resource_id,
+                    quantity=quantity,
+                    commit=False,
                 )
 
             # FIXME BS NOW: reduce action point ?!
@@ -115,7 +127,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                 ),
-            ]
+            ],
         )
 
 

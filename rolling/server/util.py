@@ -6,9 +6,11 @@ import typing
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from rolling.server.document.base import ImageDocument
-from guilang.description import Part, Description, Type
+from guilang.description import Description
+from guilang.description import Part
+from guilang.description import Type
 from rolling.action.base import get_with_stuff_action_url
+from rolling.server.document.base import ImageDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -53,7 +55,9 @@ def with_multiple_carried_stuffs(
     stuff: "StuffModel",
     input_: typing.Any,
     action_type: "ActionType",
-    do_for_one_func: typing.Callable[["CharacterModel", "StuffModel", typing.Any], typing.List["Part"]],
+    do_for_one_func: typing.Callable[
+        ["CharacterModel", "StuffModel", typing.Any], typing.List["Part"]
+    ],
     title: str,
     success_parts: typing.List["Part"],
 ) -> Description:
@@ -62,7 +66,9 @@ def with_multiple_carried_stuffs(
         return Description(
             title=title,
             items=[
-                Part(text=f"Vous possedez {len(all_carried)} {stuff.name}, éxécuter cette action sur combien ?"),
+                Part(
+                    text=f"Vous possedez {len(all_carried)} {stuff.name}, éxécuter cette action sur combien ?"
+                ),
                 Part(
                     is_form=True,
                     form_action=get_with_stuff_action_url(
@@ -76,18 +82,12 @@ def with_multiple_carried_stuffs(
                     form_values_in_query=True,
                     items=[
                         Part(
-                            label="Quantité",
-                            name="quantity",
-                            type_=Type.NUMBER,
-                            default_value="1",
+                            label="Quantité", name="quantity", type_=Type.NUMBER, default_value="1"
                         )
-                    ]
+                    ],
                 ),
-                Part(
-                    is_link=True,
-                    label=f"Faire ça avec les {len(all_carried)}"
-                ),
-            ]
+                Part(is_link=True, label=f"Faire ça avec les {len(all_carried)}"),
+            ],
         )
 
     if input_.quantity is not None:
@@ -97,15 +97,6 @@ def with_multiple_carried_stuffs(
 
     parts = []
     for i in range(do_it_count):
-        parts.extend(
-            do_for_one_func(
-                character,
-                all_carried[i],
-                input_,
-            )
-        )
+        parts.extend(do_for_one_func(character, all_carried[i], input_))
 
-    return Description(
-        title=title,
-        items=parts + success_parts,
-    )
+    return Description(title=title, items=parts + success_parts)
