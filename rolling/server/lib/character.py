@@ -69,6 +69,10 @@ class CharacterLib:
             CharacterDocument.alive == False
         )
 
+    @property
+    def dont_care_alive_query(self) -> Query:
+        return self._kernel.server_db_session.query(CharacterDocument)
+
     def create(self, create_character_model: CreateCharacterModel) -> str:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
@@ -118,8 +122,13 @@ class CharacterLib:
 
         return character.id
 
-    def get_document(self, id_: str, dead: bool = False) -> CharacterDocument:
-        query = self.alive_query if not dead else self.dead_query
+    def get_document(self, id_: str, dead: typing.Optional[bool] = False) -> CharacterDocument:
+        if dead is None:
+            query = self.dont_care_alive_query
+        elif dead:
+            query = self.dead_query
+        else:
+            query = self.alive_query
         return query.filter(CharacterDocument.id == id_).one()
 
     def get_document_by_name(self, name: str) -> CharacterDocument:
