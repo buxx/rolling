@@ -363,7 +363,7 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def _describe_events(self, request: Request, hapic_data: HapicData) -> Description:
-        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=None)
         character_events = self._character_lib.get_last_events(
             hapic_data.path.character_id, count=100
         )
@@ -393,7 +393,7 @@ class CharacterController(BaseController):
     @hapic.input_query(DescribeStoryQueryModel)
     @hapic.output_body(Description)
     async def _describe_story(self, request: Request, hapic_data: HapicData) -> Description:
-        character = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        character = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=None)
         event = self._kernel.character_lib.get_event(hapic_data.query.event_id)
         if not hapic_data.query.story_page_id:
             story_page = self._kernel.character_lib.get_first_story_page(hapic_data.query.event_id)
