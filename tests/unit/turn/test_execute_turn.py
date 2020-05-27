@@ -103,3 +103,30 @@ class TestExecuteTurn:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"1 prêt(s)" in descr.items[1].text
+
+    @pytest.mark.usefixtures("initial_universe_state")
+    @pytest.mark.parametrize(
+        "feel_thirsty,feel_hungry,before_lp,after_lp",
+        [(False, False, 1.0, 2.0), (True, False, 1.0, 1.0), (False, True, 1.0, 1.0)],
+    )
+    def test_lp_up__ok__natural_needs(
+        self,
+        worldmapc_kernel: Kernel,
+        turn_lib: TurnLib,
+        xena: CharacterDocument,
+        feel_thirsty: bool,
+        feel_hungry: bool,
+        before_lp: float,
+        after_lp: float,
+    ) -> None:
+        kernel = worldmapc_kernel
+
+        xena.life_points = before_lp
+        xena.feel_thirsty = feel_thirsty
+        xena.feel_hungry = feel_hungry
+        kernel.character_lib.update(xena)
+
+        turn_lib.execute_turn()
+
+        xena = kernel.character_lib.get_document(xena.id)
+        assert xena.life_points == after_lp
