@@ -420,6 +420,26 @@ def worldmapc_xena_wood_shield(
 
 
 @pytest.fixture
+def worldmapc_xena_wood_shield2(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    shield2 = create_stuff(kernel, "WOOD_SHIELD")
+    kernel.stuff_lib.set_carried_by(shield2.id, xena.id)
+    return shield2
+
+
+@pytest.fixture
+def worldmapc_xena_wood(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel) -> None:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    kernel.resource_lib.add_resource_to("WOOD", 0.2, xena.id)
+
+
+@pytest.fixture
 def worldmapc_xena_haxe_weapon(
     worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel, worldmapc_xena_haxe: StuffModel
 ) -> StuffModel:
