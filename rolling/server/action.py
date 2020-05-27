@@ -26,8 +26,10 @@ from rolling.action.empty import EmptyStuffAction
 from rolling.action.fight import AttackCharacterAction
 from rolling.action.fill import FillStuffAction
 from rolling.action.hunt import SearchFoodAction
+from rolling.action.kill import KillCharacterAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
+from rolling.action.take import TakeOnCharacterAction
 from rolling.action.transform import TransformResourcesIntoResourcesAction
 from rolling.action.transform import TransformStuffIntoResourcesAction
 from rolling.action.use import NotUseAsArmorAction
@@ -81,6 +83,8 @@ class ActionFactory:
         ActionType.BUILD: BuildAction,
         ActionType.ATTACK_CHARACTER: AttackCharacterAction,
         ActionType.CHEATS: CheatsCharacterAction,
+        ActionType.KILL_CHARACTER: KillCharacterAction,
+        ActionType.TAKE_ON_CHARACTER: TakeOnCharacterAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -111,7 +115,9 @@ class ActionFactory:
             ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
         }
         self._with_character_actions: typing.Dict[ActionType, typing.Type[WithCharacterAction]] = {
-            ActionType.ATTACK_CHARACTER: AttackCharacterAction
+            ActionType.ATTACK_CHARACTER: AttackCharacterAction,
+            ActionType.KILL_CHARACTER: KillCharacterAction,
+            ActionType.TAKE_ON_CHARACTER: TakeOnCharacterAction,
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,

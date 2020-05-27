@@ -426,6 +426,14 @@ cheats = {"*"=["increase_ap"]}
     actions = ["BRING_RESOURCE_ON_BUILD"]
     cost = 0.0
 
+  [ACTIONS.KILL_CHARACTER]
+    actions = ["KILL_CHARACTER"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_ON_CHARACTER]
+    actions = ["TAKE_ON_CHARACTER"]
+    cost = 0.0
+
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]

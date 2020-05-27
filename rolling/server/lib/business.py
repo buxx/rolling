@@ -11,7 +11,8 @@ from rolling.server.document.business import OfferItemDocument
 from rolling.server.document.business import OfferItemPosition
 from rolling.server.document.business import OfferOperand
 from rolling.server.document.business import OfferStatus
-from rolling.server.document.event import EventDocument, StoryPageDocument
+from rolling.server.document.event import EventDocument
+from rolling.server.document.event import StoryPageDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

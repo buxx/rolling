@@ -19,7 +19,7 @@ if typing.TYPE_CHECKING:
 MINIMUM_BEFORE_TIRED = 49
 MINIMUM_BEFORE_EXHAUSTED = 79
 FIGHT_AP_CONSUME = 3
-FIGHT_LP_REQUIRE = 1.5
+FIGHT_LP_REQUIRE = 1.0
 FIGHT_TIREDNESS_INCREASE = 35
 
 
@@ -318,15 +318,20 @@ class CharacterModel:
     def exhausted(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_EXHAUSTED
 
+    @property
+    def vulnerable(self) -> bool:
+        return not self.is_defend_ready()
+
     def is_attack_ready(self) -> bool:
         return (
             not self.exhausted
             and self.action_points >= FIGHT_AP_CONSUME
-            and self.life_points >= FIGHT_LP_REQUIRE
+            and self.life_points > FIGHT_LP_REQUIRE
         )
 
     def is_defend_ready(self) -> bool:
-        return not self.exhausted and self.life_points >= FIGHT_LP_REQUIRE
+        # FIXME BS: keep exhausted ?
+        return not self.exhausted and self.life_points > FIGHT_LP_REQUIRE
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
