@@ -430,8 +430,8 @@ cheats = {"*"=["increase_ap"]}
     actions = ["KILL_CHARACTER"]
     cost = 0.0
 
-  [ACTIONS.TAKE_ON_CHARACTER]
-    actions = ["TAKE_ON_CHARACTER"]
+  [ACTIONS.TAKE_FROM_CHARACTER]
+    actions = ["TAKE_FROM_CHARACTER"]
     cost = 0.0
 
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]

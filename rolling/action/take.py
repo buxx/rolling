@@ -22,7 +22,7 @@ if typing.TYPE_CHECKING:
 
 
 @dataclasses.dataclass
-class TakeOnModel:
+class TakeFromModel:
     take_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
     take_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
@@ -33,9 +33,9 @@ class TakeOnModel:
     )
 
 
-class TakeOnCharacterAction(WithCharacterAction):
-    input_model = TakeOnModel
-    input_model_serializer = serpyco.Serializer(TakeOnModel)
+class TakeFromCharacterAction(WithCharacterAction):
+    input_model = TakeFromModel
+    input_model_serializer = serpyco.Serializer(TakeFromModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -55,7 +55,7 @@ class TakeOnCharacterAction(WithCharacterAction):
                 )
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeOnModel
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
     ) -> None:
         self.check_is_possible(character, with_character)
 
@@ -87,18 +87,18 @@ class TakeOnCharacterAction(WithCharacterAction):
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
-        input_: typing.Optional[TakeOnModel] = None,
+        input_: typing.Optional[TakeFromModel] = None,
     ) -> str:
         return get_with_character_action_url(
             character_id=character.id,
             with_character_id=with_character.id,
-            action_type=ActionType.TAKE_ON_CHARACTER,
+            action_type=ActionType.TAKE_FROM_CHARACTER,
             query_params=self.input_model_serializer.dump(input_) if input_ else {},
             action_description_id=self._description.id,
         )
 
     def _get_take_something_description(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeOnModel
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
     ) -> Description:
         parts = []
         carried_stuffs = self._kernel.stuff_lib.get_carried_by(
@@ -114,7 +114,7 @@ class TakeOnCharacterAction(WithCharacterAction):
                         is_link=True,
                         label=f"Prendre {carried_stuff.name}",
                         form_action=self._get_url(
-                            character, with_character, TakeOnModel(take_stuff_id=carried_stuff.id)
+                            character, with_character, TakeFromModel(take_stuff_id=carried_stuff.id)
                         ),
                     )
                 )
@@ -126,7 +126,9 @@ class TakeOnCharacterAction(WithCharacterAction):
                     is_link=True,
                     label=f"Prendre {carried_resource.name}",
                     form_action=self._get_url(
-                        character, with_character, TakeOnModel(take_resource_id=carried_resource.id)
+                        character,
+                        with_character,
+                        TakeFromModel(take_resource_id=carried_resource.id),
                     ),
                 )
             )
@@ -148,7 +150,7 @@ class TakeOnCharacterAction(WithCharacterAction):
         )
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeOnModel
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
     ) -> Description:
         if input_.take_stuff_id is not None:
             stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.take_stuff_id)
