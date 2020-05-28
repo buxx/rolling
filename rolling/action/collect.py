@@ -98,6 +98,7 @@ class CollectResourceAction(CharacterAction):
                         ),
                         cost=None,
                         merge_by=(ActionType.COLLECT_RESOURCE, resource.id),
+                        group_name="Ramasser du matériel ou des ressources",
                     )
                 )
 

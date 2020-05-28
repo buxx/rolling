@@ -148,6 +148,8 @@ class SearchFoodAction(CharacterAction):
             quantity_found = round(
                 production_per_stuff_ids[stuff_id]["quantity"] * quantity_found_coeff
             )
+            if not quantity_found:
+                continue
             result_stuff_strs.append(f"{quantity_found} de {stuff_properties.name} ")
             for i in range(quantity_found):
                 stuff_doc = self._kernel.stuff_lib.create_document_from_properties(

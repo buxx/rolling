@@ -122,3 +122,4 @@ class ZoneRequiredPlayerData:
 class MoveZoneInfos:
     can_move: bool
     cost: float
+    cannot_move_reasons: typing.List[str]

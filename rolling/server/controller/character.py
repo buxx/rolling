@@ -47,6 +47,7 @@ from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
@@ -275,18 +276,31 @@ class CharacterController(BaseController):
         resource_items: typing.List[Part] = []
         bags = self._character_lib.get_used_bags(character.id)
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
+        stuff_count: typing.Dict[str, int] = {}
 
         for stuff in inventory.stuff:
+            stuff_count.setdefault(stuff.stuff_id, 0)
+            stuff_count[stuff.stuff_id] += 1
+
+        stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
+        for stuff in inventory.stuff:
+            if stuff_displayed[stuff.stuff_id]:
+                continue
+
             name = stuff.get_name()
-            descriptions: typing.List[str] = stuff.get_full_description()
+            descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
 
             description = ""
             if descriptions:
                 description = " (" + ", ".join(descriptions) + ")"
 
+            if stuff_count[stuff.stuff_id] > 1:
+                text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
+            else:
+                text = f"{name}{description}"
             stuff_items.append(
                 Part(
-                    text=f"{name}{description}",
+                    text=text,
                     is_link=True,
                     align="left",
                     form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
@@ -294,6 +308,7 @@ class CharacterController(BaseController):
                     ),
                 )
             )
+            stuff_displayed[stuff.stuff_id] = True
 
         for resource in inventory.resource:
             resource_items.append(
@@ -446,7 +461,7 @@ class CharacterController(BaseController):
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Description(
-            title=stuff.get_name_and_light_description(),
+            title=stuff.get_name_and_light_description(self._kernel),
             image=stuff.image,
             items=[
                 Part(
@@ -509,6 +524,7 @@ class CharacterController(BaseController):
         available_str = quantity_to_str(
             ground_resource.quantity, ground_resource.unit, self._kernel
         )
+        unit_str = self._kernel.translation.get(ground_resource.unit)
         if not hapic_data.query.quantity:
             return Description(
                 title=resource_description.name,
@@ -524,9 +540,10 @@ class CharacterController(BaseController):
                         ),
                         items=[
                             Part(
-                                label=f"Récupérer quelle quantité ({available_str} disponible)?",
+                                label=f"Récupérer quelle quantité ({unit_str}, {available_str} disponible)?",
                                 name="quantity",
                                 type_=Type.NUMBER,
+                                default_value=str(ground_resource.quantity),
                             )
                         ],
                     )
@@ -567,7 +584,7 @@ class CharacterController(BaseController):
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
         return Description(
-            title=stuff.get_name_and_light_description(),
+            title=stuff.get_name_and_light_description(self._kernel),
             items=[
                 Part(
                     text=action.get_as_str(),
@@ -881,18 +898,21 @@ class CharacterController(BaseController):
             f"?to_world_row={hapic_data.path.world_row_i}"
             f"&to_world_col={hapic_data.path.world_col_i}"
         )
+        parts = [
+            Part(
+                text=f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} Point d'Actions"
+            )
+        ]
+
         if move_info.can_move:
-            text = f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA"
             buttons.insert(
                 0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
             )
         else:
-            text = (
-                f"Le voyage que vous envisagez nécéssite {round(move_info.cost, 2)} PA. "
-                f"Il ne vous reste pas assez de PA pour l'effectuer."
-            )
+            for reason in move_info.cannot_move_reasons:
+                parts.append(Part(text=reason))
 
-        return Description(title="Effectuer un voyage ...", items=[Part(text=text)] + buttons)
+        return Description(title="Effectuer un voyage ...", items=parts + buttons)
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
@@ -902,54 +922,6 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> CharacterInventoryModel:
         return self._character_lib.get_inventory(hapic_data.path.character_id)
-
-    # FIXME BS: remove (and update tui client ?)
-    @hapic.with_api_doc()
-    @hapic.input_path(GetCharacterPathModel)
-    @hapic.input_query(MoveCharacterQueryModel)
-    @hapic.handle_exception(CantMoveCharacter)
-    @hapic.output_body(EmptyModel)
-    async def move(self, request: Request, hapic_data: HapicData) -> Response:
-        character = self._character_lib.get(hapic_data.path.character_id)
-        to_world_row = hapic_data.query.to_world_row
-        to_world_col = hapic_data.query.to_world_col
-        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
-        zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
-
-        if zone_properties.move_cost > character.action_points:
-            message = (
-                f"Ce déplacement coute {zone_properties.move_cost} points d'action mais "
-                f"{character.name} n'en possède que {character.action_points}"
-            )
-            return web.json_response({"message": message}, status=400)
-
-        await self._kernel.send_to_zone_sockets(
-            character.world_row_i,
-            character.world_col_i,
-            event=ZoneEvent(
-                type=ZoneEventType.CHARACTER_EXIT_ZONE,
-                data=CharacterExitZoneData(character_id=hapic_data.path.character_id),
-            ),
-        )
-        character_doc = self._character_lib.move(
-            character,
-            to_world_row=hapic_data.query.to_world_row,
-            to_world_col=hapic_data.query.to_world_col,
-        )
-        await self._kernel.send_to_zone_sockets(
-            hapic_data.query.to_world_row,
-            hapic_data.query.to_world_col,
-            event=ZoneEvent(
-                type=ZoneEventType.CHARACTER_ENTER_ZONE,
-                data=CharacterEnterZoneData(
-                    character_id=hapic_data.path.character_id,
-                    zone_row_i=character_doc.zone_row_i,
-                    zone_col_i=character_doc.zone_col_i,
-                ),
-            ),
-        )
-        self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
-        return Response(status=204)
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -962,14 +934,14 @@ class CharacterController(BaseController):
         to_world_col = hapic_data.query.to_world_col
         move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
+        move_info = self._character_lib.get_move_to_zone_infos(
+            hapic_data.path.character_id, world_row_i=to_world_row, world_col_i=to_world_col
+        )
 
-        if zone_properties.move_cost > character.action_points:
-            message = (
-                f"Ce déplacement coute {zone_properties.move_cost} points d'action mais "
-                f"{character.name} n'en possède que {character.action_points}"
-            )
+        if move_info.can_move:
+            messages = ["Le voyage c'est bien déroulé"]
         else:
-            message = "Le voyage c'est bien déroulé"
+            messages = list(move_info.cannot_move_reasons)
 
         await self._kernel.send_to_zone_sockets(
             character.world_row_i,
@@ -999,7 +971,8 @@ class CharacterController(BaseController):
         self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
 
         return Description(
-            title="Effectuer un voyage ...", items=[Part(text=message), Part(go_back_zone=True)]
+            title="Effectuer un voyage ...",
+            items=[Part(text=message) for message in messages] + [Part(go_back_zone=True)],
         )
 
     @hapic.with_api_doc()
@@ -1182,7 +1155,6 @@ class CharacterController(BaseController):
                 web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
-                web.put("/character/{character_id}/move", self.move),
                 web.post("/_describe/character/{character_id}/move", self.describe_move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),

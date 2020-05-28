@@ -40,9 +40,10 @@ class TurnLib:
 
         self._generate_stuff()
         self._provide_for_natural_needs()
+        self._improve_conditions()
         self._increment_age()
         self._kill()
-        self._reset_action_points()
+        self._reset_characters_props()
         self._universe_turn()
 
         self._kernel.server_db_session.commit()
@@ -170,7 +171,7 @@ class TurnLib:
                 )
                 character_document.dehydrated = True
 
-            # Need drink
+            # Need to eat
             if character_document.feel_hungry or character_document.starved:
                 stuff_eatable = None
                 try:
@@ -196,9 +197,34 @@ class TurnLib:
                     )
                     character_document.starved = True
 
-            character_document.feel_thirsty = True  # Always need to drink after turn
-            character_document.feel_hungry = True  # Always need to eat after turn
             self._character_lib.update(character_document)
+
+    def _improve_conditions(self) -> None:
+        character_ids = list(self._character_lib.get_all_character_ids())
+        self._logger.info(f"Improve conditions of {len(character_ids)} characters")
+
+        for character_id in character_ids:
+            # TODO: diseases, effect, etc
+            character_document = self._character_lib.get_document(character_id)
+            if not character_document.is_alive:
+                continue
+
+            if (
+                not character_document.dehydrated
+                and not character_document.starved
+                and not character_document.feel_hungry
+                and not character_document.feel_thirsty
+            ):
+                before_life_points = character_document.life_points
+                character_document.life_points = min(
+                    before_life_points + 1, character_document.max_life_comp
+                )
+
+                if before_life_points != character_document.life_points:
+                    self._kernel.character_lib.add_event(
+                        character_id, f"{character_document.name} se sent plus en forme"
+                    )
+                    self._character_lib.update(character_document)
 
     def _increment_age(self) -> None:
         # In future, increment role play age
@@ -216,13 +242,19 @@ class TurnLib:
             character_document.alive_since += 1
             self._character_lib.update(character_document)
 
-    def _reset_action_points(self) -> None:
+    def _reset_characters_props(self) -> None:
         character_ids = list(self._character_lib.get_all_character_ids())
         self._logger.info(f"Reset action points of {len(character_ids)} characters")
 
         for character_id in character_ids:
             character_doc = self._kernel.character_lib.get_document(character_id)
+            if not character_doc.is_alive:
+                continue
+
             character_doc.action_points = 24.0
+            character_doc.feel_thirsty = True  # Always need to drink after turn
+            character_doc.feel_hungry = True  # Always need to eat after turn
+
             self._kernel.server_db_session.add(character_doc)
 
         self._kernel.server_db_session.commit()

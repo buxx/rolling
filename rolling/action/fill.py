@@ -64,7 +64,7 @@ class FillStuffAction(WithStuffAction):
                 query_params = self.input_model(resource_id=resource.id)
                 actions.append(
                     CharacterActionLink(
-                        name=f"Fill {stuff.name} with {resource.name}",
+                        name=f"Remplir {stuff.name} avec {resource.name}",
                         link=get_with_stuff_action_url(
                             character_id=character.id,
                             action_type=ActionType.FILL_STUFF,
@@ -102,4 +102,7 @@ class FillStuffAction(WithStuffAction):
         except CantFill as exc:
             return Description(title=str(exc), items=parts)
 
-        return Description(title=f"{stuff.name} rempli(e) avec {input_.resource_id}", items=parts)
+        resource_description = self._kernel.game.config.resources[input_.resource_id]
+        return Description(
+            title=f"{stuff.name} rempli(e) avec {resource_description.name}", items=parts
+        )

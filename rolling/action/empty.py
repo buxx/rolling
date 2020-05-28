@@ -43,7 +43,7 @@ class EmptyStuffAction(WithStuffAction):
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = [
             CharacterActionLink(
-                name=f"Empty {stuff.name}",
+                name=f"Vider {stuff.name}",
                 link=get_with_stuff_action_url(
                     character_id=character.id,
                     action_type=ActionType.EMPTY_STUFF,

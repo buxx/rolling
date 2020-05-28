@@ -14,6 +14,7 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
 from rolling.server.link import CharacterActionLink
+from rolling.server.util import with_multiple_carried_stuffs
 from rolling.types import ActionType
 from rolling.util import EmptyModel
 
@@ -29,9 +30,14 @@ class DropResourceModel:
     quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
 
 
+@dataclasses.dataclass
+class DropStuffModel:
+    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
 class DropStuffAction(WithStuffAction):
-    input_model: typing.Type[EmptyModel] = EmptyModel
-    input_model_serializer = serpyco.Serializer(input_model)
+    input_model: typing.Type[DropStuffModel] = DropStuffModel
+    input_model_serializer = serpyco.Serializer(DropStuffModel)
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         if stuff.carried_by != character.id:
@@ -66,18 +72,30 @@ class DropStuffAction(WithStuffAction):
         return actions
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+        self, character: "CharacterModel", stuff: "StuffModel", input_: DropStuffModel
     ) -> Description:
-        self._kernel.stuff_lib.drop(
-            stuff.id,
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
-            zone_row_i=character.zone_row_i,
-            zone_col_i=character.zone_col_i,
-        )
-        return Description(
-            title=f"{stuff.name} laissé ici",
-            items=[
+        def do_for_one(
+            character_: "CharacterModel", stuff_: "StuffModel", input__: DropStuffModel
+        ) -> typing.List[Part]:
+            self._kernel.stuff_lib.drop(
+                stuff_.id,
+                world_row_i=character_.world_row_i,
+                world_col_i=character_.world_col_i,
+                zone_row_i=character_.zone_row_i,
+                zone_col_i=character_.zone_col_i,
+            )
+            return [Part(text=f"{stuff_.name} laissé ici")]
+
+        return with_multiple_carried_stuffs(
+            self,
+            self._kernel,
+            character=character,
+            stuff=stuff,
+            input_=input_,
+            action_type=ActionType.DROP_STUFF,
+            do_for_one_func=do_for_one,
+            title="Laisser quelque-chose ici",
+            success_parts=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -158,6 +176,7 @@ class DropResourceAction(WithResourceAction):
                                 label=f"Quantité à laisser ici ({unit_trans}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value=str(carried_resource.quantity),
                             )
                         ],
                     )

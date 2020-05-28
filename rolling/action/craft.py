@@ -82,7 +82,7 @@ class BaseCraftStuff:
 
                 if owned_quantity < required_quantity:
                     raise ImpossibleAction(
-                        f"Il vous manque {required_quantity - owned_quantity} {stuff_properties.name}"
+                        f"Vous ne possédez pas assez de {stuff_properties.name}: {required_quantity} nécessaire(s)"
                     )
 
                 if not dry_run:
@@ -105,7 +105,7 @@ class BaseCraftStuff:
                         unit=carried_resource.unit,
                     )
                     raise ImpossibleAction(
-                        f"Il vous manque {missing_quantity_str} de {carried_resource.name}"
+                        f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} nécessaire(s)"
                     )
 
                 if not dry_run:
@@ -402,24 +402,30 @@ class BeginStuffConstructionAction(CharacterAction):
         for consume in self._description.properties["consume"]:
             if "resource" in consume:
                 resource_id = consume["resource"]
+                resource_description = self._kernel.game.config.resources[resource_id]
+                quantity = consume["quantity"]
+                quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
                 if not self._kernel.resource_lib.have_resource(
-                    character.id, resource_id=resource_id, quantity=consume["quantity"]
+                    character.id, resource_id=resource_id, quantity=quantity
                 ):
                     resource_description = self._kernel.game.config.resources[resource_id]
                     raise ImpossibleAction(
-                        f"Vous ne possédez pas assez de {resource_description.name}"
+                        f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
                     )
 
             elif "stuff" in consume:
                 stuff_id = consume["stuff"]
+                quantity = consume["quantity"]
                 if (
                     self._kernel.stuff_lib.have_stuff_count(character.id, stuff_id=stuff_id)
-                    < consume["suantity"]
+                    < quantity
                 ):
                     stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
                         stuff_id
                     )
-                    raise ImpossibleAction(f"Vous ne possédez pas assez de {stuff_properties.name}")
+                    raise ImpossibleAction(
+                        f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
+                    )
 
     def get_character_actions(
         self, character: "CharacterModel"
@@ -577,7 +583,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                     stuff_id=stuff.id,
                 ),
                 cost=self.get_cost(character, stuff),
-                merge_by="continue_craft"
+                merge_by="continue_craft",
             )
         ]
 

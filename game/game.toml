@@ -426,6 +426,14 @@ cheats = {"*"=["increase_ap"]}
     actions = ["BRING_RESOURCE_ON_BUILD"]
     cost = 0.0
 
+  [ACTIONS.KILL_CHARACTER]
+    actions = ["KILL_CHARACTER"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_ON_CHARACTER]
+    actions = ["TAKE_ON_CHARACTER"]
+    cost = 0.0
+
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
@@ -437,6 +445,20 @@ cheats = {"*"=["increase_ap"]}
     produce = [
       {resource="COOKED_MEAT", coeff=0.3},
       {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+    ]
+    cost = 1.0
+
+  [ACTIONS.COOK_MEDIUM_GAME_WITH_SKIN]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    required_one_of_stuff_ids = ["DEER"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="COOKED_MEAT", coeff=0.3},
+      {resource="LITTLE_ANIMAL_SKIN", quantity=3.0}
     ]
     cost = 1.0
 
@@ -467,6 +489,20 @@ cheats = {"*"=["increase_ap"]}
     ]
     cost = 1.0
 
+  [ACTIONS.BUTCHER_MEDIUM_GAME_WITH_SKIN]
+    actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
+    required_one_of_stuff_ids = ["DEER"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_MEAT", coeff=0.4},
+      {resource="LITTLE_ANIMAL_SKIN", quantity=3.0}
+    ]
+    cost = 1.0
+
   [ACTIONS.BUTCHER_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
@@ -480,7 +516,7 @@ cheats = {"*"=["increase_ap"]}
     ]
     cost = 1.0
 
-  [ACTIONS.BUTCHER_CORPS]
+  [ACTIONS.BUTCHER_CORPSE]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["CORPSE"]
     required_all_stuff_ids = []
