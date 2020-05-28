@@ -28,6 +28,8 @@ class ZoneMapConnector:
 
     def move_is_possible(self, new_offset: typing.Tuple[int, int]) -> bool:
         if (
+            # FIXME delete gui code
+            True or
             self._controller.player_character.weight_overcharge
             or self._controller.player_character.clutter_overcharge
         ):
