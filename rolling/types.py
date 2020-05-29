@@ -38,6 +38,7 @@ class ActionType(enum.Enum):
     CHEATS = "CHEATS"
     KILL_CHARACTER = "KILL_CHARACTER"
     TAKE_FROM_CHARACTER = "TAKE_FROM_CHARACTER"
+    GIVE_TO_CHARACTER = "GIVE_TO_CHARACTER"
 
 
 class TurnMode(enum.Enum):

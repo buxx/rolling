@@ -434,6 +434,10 @@ cheats = {"*"=["increase_ap"]}
     actions = ["TAKE_FROM_CHARACTER"]
     cost = 0.0
 
+  [ACTIONS.GIVE_TO_CHARACTER]
+    actions = ["GIVE_TO_CHARACTER"]
+    cost = 0.0
+
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
