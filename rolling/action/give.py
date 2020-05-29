@@ -22,20 +22,20 @@ if typing.TYPE_CHECKING:
 
 
 @dataclasses.dataclass
-class TakeFromModel:
-    take_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    take_stuff_quantity: typing.Optional[int] = serpyco.number_field(
+class GiveToModel:
+    give_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    give_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    take_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
-    take_resource_quantity: typing.Optional[float] = serpyco.number_field(
+    give_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
+    give_resource_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
 
 
-class TakeFromCharacterAction(WithCharacterAction):
-    input_model = TakeFromModel
-    input_model_serializer = serpyco.Serializer(TakeFromModel)
+class GiveToCharacterAction(WithCharacterAction):
+    input_model = GiveToModel
+    input_model_serializer = serpyco.Serializer(GiveToModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -44,67 +44,57 @@ class TakeFromCharacterAction(WithCharacterAction):
     def check_is_possible(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> None:
-        # TODO BS: Check here is possible too with affinities (like chief
-        #  can manipulate, firendship, etc)
-        if not with_character.vulnerable:
-            raise ImpossibleAction(f"{with_character.name} est en capacité de se defendre")
-        else:
-            if not character.is_attack_ready():
-                raise ImpossibleAction(
-                    f"{character.name} ne peut contraindre {with_character.name}"
-                )
+        pass  # TODO: user config to refuse receiving ?
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: GiveToModel
     ) -> None:
         self.check_is_possible(character, with_character)
 
-        if input_.take_resource_id is not None and input_.take_resource_quantity:
+        if input_.give_resource_id is not None and input_.give_resource_quantity:
             if not self._kernel.resource_lib.have_resource(
-                character_id=with_character.id,
-                resource_id=input_.take_resource_id,
-                quantity=input_.take_resource_quantity,
+                character_id=character.id,
+                resource_id=input_.give_resource_id,
+                quantity=input_.give_resource_quantity,
             ):
-                raise ImpossibleAction(f"{with_character.name} n'en à pas assez")
+                raise ImpossibleAction(f"{character.name} n'en à pas assez")
 
-        if input_.take_stuff_id:
+        if input_.give_stuff_id:
             try:
-                stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.take_stuff_id)
+                stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.give_stuff_id)
             except NoResultFound:
-                raise ImpossibleAction(f"objet inexistant")
+                raise ImpossibleAction(f"Objet inexistant")
             carried_count = self._kernel.stuff_lib.have_stuff_count(
-                character_id=with_character.id, stuff_id=stuff.stuff_id
+                character_id=character.id, stuff_id=stuff.stuff_id
             )
-            if carried_count < (input_.take_stuff_quantity or 1):
-                raise ImpossibleAction(f"{with_character.name} n'en à pas assez")
+            if carried_count < (input_.give_stuff_quantity or 1):
+                raise ImpossibleAction(f"{character.name} n'en à pas assez")
 
     def get_character_actions(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
-        return [CharacterActionLink(name="Prendre", link=self._get_url(character, with_character))]
+        return [CharacterActionLink(name="Donner", link=self._get_url(character, with_character))]
 
     def _get_url(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
-        input_: typing.Optional[TakeFromModel] = None,
+        input_: typing.Optional[GiveToModel] = None,
     ) -> str:
         return get_with_character_action_url(
             character_id=character.id,
             with_character_id=with_character.id,
-            action_type=ActionType.TAKE_FROM_CHARACTER,
+            action_type=ActionType.GIVE_TO_CHARACTER,
             query_params=self.input_model_serializer.dump(input_) if input_ else {},
             action_description_id=self._description.id,
         )
 
-    def _get_take_something_description(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
+    def _get_give_something_description(
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: GiveToModel
     ) -> Description:
         parts = []
-        carried_stuffs = self._kernel.stuff_lib.get_carried_by(
-            with_character.id, exclude_crafting=False
-        )
-        carried_resources = self._kernel.resource_lib.get_carried_by(with_character.id)
+        carried_stuffs = self._kernel.stuff_lib.get_carried_by(character.id, exclude_crafting=False)
+        carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
 
         displayed_stuff_ids: typing.List[str] = []
         for carried_stuff in carried_stuffs:
@@ -112,9 +102,9 @@ class TakeFromCharacterAction(WithCharacterAction):
                 parts.append(
                     Part(
                         is_link=True,
-                        label=f"Prendre {carried_stuff.name}",
+                        label=f"Donner {carried_stuff.name}",
                         form_action=self._get_url(
-                            character, with_character, TakeFromModel(take_stuff_id=carried_stuff.id)
+                            character, with_character, GiveToModel(give_stuff_id=carried_stuff.id)
                         ),
                     )
                 )
@@ -124,17 +114,15 @@ class TakeFromCharacterAction(WithCharacterAction):
             parts.append(
                 Part(
                     is_link=True,
-                    label=f"Prendre {carried_resource.name}",
+                    label=f"Donner {carried_resource.name}",
                     form_action=self._get_url(
-                        character,
-                        with_character,
-                        TakeFromModel(take_resource_id=carried_resource.id),
+                        character, with_character, GiveToModel(give_resource_id=carried_resource.id)
                     ),
                 )
             )
 
         return Description(
-            title=f"Prendre sur {with_character.name}",
+            title=f"Donner à {with_character.name}",
             items=parts
             + [
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
@@ -150,18 +138,18 @@ class TakeFromCharacterAction(WithCharacterAction):
         )
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
+        self, character: "CharacterModel", with_character: "CharacterModel", input_: GiveToModel
     ) -> Description:
-        if input_.take_stuff_id is not None:
-            stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.take_stuff_id)
+        if input_.give_stuff_id is not None:
+            stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.give_stuff_id)
             likes_this_stuff = self._kernel.stuff_lib.get_carried_by(
-                with_character.id, exclude_crafting=False, stuff_id=stuff.stuff_id
+                character.id, exclude_crafting=False, stuff_id=stuff.stuff_id
             )
 
-            if input_.take_stuff_quantity is None:
+            if input_.give_stuff_quantity is None:
                 if len(likes_this_stuff) > 1:
                     return Description(
-                        title=f"Prendre {stuff.name} sur {with_character.name}",
+                        title=f"Donner {stuff.name} à {with_character.name}",
                         items=[
                             Part(
                                 is_form=True,
@@ -172,7 +160,7 @@ class TakeFromCharacterAction(WithCharacterAction):
                                     Part(
                                         label="Quantité ?",
                                         type_=Type.NUMBER,
-                                        name="take_stuff_quantity",
+                                        name="give_stuff_quantity",
                                         default_value=str(len(likes_this_stuff)),
                                     )
                                 ],
@@ -180,21 +168,21 @@ class TakeFromCharacterAction(WithCharacterAction):
                         ],
                         can_be_back_url=True,
                     )
-                input_.take_stuff_quantity = 1
+                input_.give_stuff_quantity = 1
 
-            for i in range(input_.take_stuff_quantity):
-                self._kernel.stuff_lib.set_carried_by(likes_this_stuff[i].id, character.id)
+            for i in range(input_.give_stuff_quantity):
+                self._kernel.stuff_lib.set_carried_by(likes_this_stuff[i].id, with_character.id)
 
-        if input_.take_resource_id is not None:
-            resource_description = self._kernel.game.config.resources[input_.take_resource_id]
+        if input_.give_resource_id is not None:
+            resource_description = self._kernel.game.config.resources[input_.give_resource_id]
             carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                with_character.id, input_.take_resource_id
+                character.id, input_.give_resource_id
             )
 
-            if input_.take_resource_quantity is None:
+            if input_.give_resource_quantity is None:
                 unit_str = self._kernel.translation.get(resource_description.unit)
                 return Description(
-                    title=f"Prendre {resource_description.name} sur {with_character.name}",
+                    title=f"Donner {resource_description.name} à {with_character.name}",
                     items=[
                         Part(
                             is_form=True,
@@ -205,7 +193,7 @@ class TakeFromCharacterAction(WithCharacterAction):
                                 Part(
                                     label=f"Quantité ({unit_str}) ?",
                                     type_=Type.NUMBER,
-                                    name="take_resource_quantity",
+                                    name="give_resource_quantity",
                                     default_value=str(carried_resource.quantity),
                                 )
                             ],
@@ -214,14 +202,14 @@ class TakeFromCharacterAction(WithCharacterAction):
                     can_be_back_url=True,
                 )
             self._kernel.resource_lib.reduce_carried_by(
-                character_id=with_character.id,
-                resource_id=input_.take_resource_id,
-                quantity=input_.take_resource_quantity,
+                character_id=character.id,
+                resource_id=input_.give_resource_id,
+                quantity=input_.give_resource_quantity,
             )
             self._kernel.resource_lib.add_resource_to(
-                character_id=character.id,
-                resource_id=input_.take_resource_id,
-                quantity=input_.take_resource_quantity,
+                character_id=with_character.id,
+                resource_id=input_.give_resource_id,
+                quantity=input_.give_resource_quantity,
             )
 
-        return self._get_take_something_description(character, with_character, input_)
+        return self._get_give_something_description(character, with_character, input_)
