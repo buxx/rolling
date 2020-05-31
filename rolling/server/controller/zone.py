@@ -6,7 +6,6 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic import HapicData
-from hapic.processor.serpyco import SerpycoProcessor
 
 from guilang.description import Description
 from guilang.description import Part
@@ -31,6 +30,7 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.zone import ZoneLib
+from rolling.server.processor import RollingSerpycoProcessor
 
 
 class ZoneController(BaseController):
@@ -46,7 +46,7 @@ class ZoneController(BaseController):
         self._stuff_lib = stuff_lib or StuffLib(self._kernel)
 
     @hapic.with_api_doc()
-    @hapic.output_body(ZoneTileTypeModel, processor=SerpycoProcessor(many=True))
+    @hapic.output_body(ZoneTileTypeModel, processor=RollingSerpycoProcessor(many=True))
     async def get_tiles(self, request: Request) -> typing.List[ZoneTileTypeModel]:
         return self._tile_lib.get_all_tiles()
 
@@ -66,7 +66,7 @@ class ZoneController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
-    @hapic.output_body(CharacterModel, processor=SerpycoProcessor(many=True))
+    @hapic.output_body(CharacterModel, processor=RollingSerpycoProcessor(many=True))
     async def get_characters(
         self, request: Request, hapic_data: HapicData
     ) -> typing.List[CharacterModel]:
@@ -77,7 +77,7 @@ class ZoneController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
-    @hapic.output_body(StuffModel, processor=SerpycoProcessor(many=True))
+    @hapic.output_body(StuffModel, processor=RollingSerpycoProcessor(many=True))
     async def get_stuff(self, request: Request, hapic_data: HapicData) -> typing.List[StuffModel]:
         return self._stuff_lib.get_zone_stuffs(
             world_row_i=request.match_info["row_i"], world_col_i=request.match_info["col_i"]
@@ -86,7 +86,7 @@ class ZoneController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
-    @hapic.output_body(OnGroundResourceModel, processor=SerpycoProcessor(many=True))
+    @hapic.output_body(OnGroundResourceModel, processor=RollingSerpycoProcessor(many=True))
     async def get_resources(
         self, request: Request, hapic_data: HapicData
     ) -> typing.List[OnGroundResourceModel]:
@@ -102,7 +102,7 @@ class ZoneController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
-    @hapic.output_body(ZoneBuildModel, processor=SerpycoProcessor(many=True))
+    @hapic.output_body(ZoneBuildModel, processor=RollingSerpycoProcessor(many=True))
     async def get_builds(
         self, request: Request, hapic_data: HapicData
     ) -> typing.List[ZoneBuildModel]:

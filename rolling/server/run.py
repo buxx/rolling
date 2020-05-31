@@ -8,7 +8,6 @@ from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
-from hapic.processor.serpyco import SerpycoProcessor
 
 from rolling.log import configure_logging
 from rolling.log import server_logger
@@ -16,6 +15,7 @@ from rolling.server.application import get_application
 from rolling.server.base import get_kernel
 from rolling.server.document.build import BuildDocument
 from rolling.server.extension import hapic
+from rolling.server.processor import RollingSerpycoProcessor
 
 
 class ErrorBuilder(SerpycoDefaultErrorBuilder):
@@ -46,7 +46,7 @@ def run(args: argparse.Namespace) -> None:
     context = AiohttpContext(app, debug=args.debug, default_error_builder=ErrorBuilder())
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)
-    hapic.set_processor_class(SerpycoProcessor)
+    hapic.set_processor_class(RollingSerpycoProcessor)
     hapic.set_context(context)
 
     # FIXME: delete this when model really imported somewhere

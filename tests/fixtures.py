@@ -7,7 +7,6 @@ from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_exceptions import HTTPNotFound
 from hapic.ext.aiohttp.context import AiohttpContext
-from hapic.processor.serpyco import SerpycoProcessor
 import pytest
 import serpyco
 
@@ -266,7 +265,7 @@ def worldmapc_web_app(worldmapc_kernel: Kernel, loop, aiohttp_client) -> TestCli
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)
     hapic.reset_context()
-    hapic.set_processor_class(SerpycoProcessor)
+    hapic.set_processor_class(RollingSerpycoProcessor)
     hapic.set_context(context)
     return loop.run_until_complete(aiohttp_client(app))
 

@@ -41,6 +41,7 @@ class Part:
     checked: bool = False
     choices: typing.Optional[typing.List[str]] = None
     search_by_str: bool = False
+    id: typing.Optional[int] = None
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
