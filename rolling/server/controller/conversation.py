@@ -115,25 +115,7 @@ class ConversationController(BaseController):
                     concerned=selected_character_ids,
                 )
                 return Description(
-                    title="Démarrer une nouvelle conversation",
-                    items=[
-                        Part(text="Conversation démarré"),
-                        Part(
-                            is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
-                        Part(
-                            is_link=True,
-                            label="Retourner aux conversations",
-                            form_action=f"/conversation/{hapic_data.path.character_id}",
-                        ),
-                        Part(
-                            is_link=True,
-                            label="Voir la conversation",
-                            form_action=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}",
-                        ),
-                    ],
+                    redirect=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}",
                 )
 
         except JSONDecodeError:
@@ -250,7 +232,18 @@ class ConversationController(BaseController):
                 ),
                 Part(text="Conversation (message le plus récente en haut):"),
             ]
-            + message_parts,
+            + message_parts + [
+                Part(
+                    is_link=True,
+                    go_back_zone=True,
+                    label="Retourner à l'écran de déplacements",
+                ),
+                Part(
+                    is_link=True,
+                    label="Retourner aux conversations",
+                    form_action=f"/conversation/{hapic_data.path.character_id}",
+                ),
+            ],
             can_be_back_url=True,
         )
 
@@ -276,20 +269,7 @@ class ConversationController(BaseController):
         )
 
         return Description(
-            title="Message ajouté",
-            items=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner aux conversations",
-                    form_action=f"/conversation/{hapic_data.path.character_id}",
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir la conversation",
-                    form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
-                ),
-            ],
+            redirect=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}"
         )
 
     @hapic.with_api_doc()

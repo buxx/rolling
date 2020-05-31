@@ -218,24 +218,10 @@ class ZoneController(BaseController):
         )
 
         return Description(
-            title="Message envoyé",
-            items=[
-                Part(
-                    is_link=True,
-                    form_action=f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}/messages"
-                    f"?character_id={hapic_data.query.character_id}",
-                    label="Continuer",
-                ),
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner aux messages de zone",
-                    form_action=(
-                        f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}"
-                        f"/messages?character_id={hapic_data.query.character_id}"
-                    ),
-                ),
-            ],
+            redirect=(
+                f"/zones/{hapic_data.path.row_i}/{hapic_data.path.col_i}"
+                f"/messages?character_id={hapic_data.query.character_id}"
+            )
         )
 
     def bind(self, app: Application) -> None:
