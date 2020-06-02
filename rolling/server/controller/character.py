@@ -341,7 +341,7 @@ class CharacterController(BaseController):
         character_actions = self._character_lib.get_on_place_actions(hapic_data.path.character_id)
 
         return Description(
-            title="Ici, vous pouvez:",
+            title="Que voulez-vous faire ?",
             items=[
                 Part(
                     text=action.get_as_str(),
@@ -416,8 +416,9 @@ class CharacterController(BaseController):
             story_page = self._kernel.character_lib.get_story_page(hapic_data.query.story_page_id)
 
         items = []
+        footer_links = []
         if story_page.previous_page_id:
-            items.append(
+            footer_links.append(
                 Part(
                     label="Page précédente",
                     is_link=True,
@@ -429,7 +430,7 @@ class CharacterController(BaseController):
         items.append(Part(text=story_page.text))
 
         if story_page.next_page_id:
-            items.append(
+            footer_links.append(
                 Part(
                     label="Page suivante",
                     is_link=True,
@@ -437,6 +438,14 @@ class CharacterController(BaseController):
                     f"?event_id={event.id}&story_page_id={story_page.next_page_id}",
                 )
             )
+
+        footer_links.append(
+            Part(
+                label="Retour aux évènements",
+                is_link=True,
+                form_action=f"/_describe/character/{character.id}/events",
+            )
+        )
 
         if hapic_data.query.mark_read:
             event.read = True
@@ -449,6 +458,7 @@ class CharacterController(BaseController):
             image_extension=story_page.image_extension,
             is_long_text=True,
             items=items,
+            footer_links=footer_links,
             can_be_back_url=True,
         )
 

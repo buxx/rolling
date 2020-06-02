@@ -115,7 +115,7 @@ class ConversationController(BaseController):
                     concerned=selected_character_ids,
                 )
                 return Description(
-                    redirect=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}",
+                    redirect=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}"
                 )
 
         except JSONDecodeError:
@@ -162,17 +162,19 @@ class ConversationController(BaseController):
                     items=character_parts
                     + [
                         Part(
-                            label="Choisissez un titre ci-dessous",
+                            label="Choisissez un titre",
                             type_=Type.STRING,
                             name="subject",
                         ),
                         Part(
-                            label="Saisissez votre élocuction ci-dessous",
+                            label="Saisissez votre élocuction",
                             type_=Type.STRING,
                             name="message",
                         ),
                     ],
                 ),
+            ],
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -218,13 +220,13 @@ class ConversationController(BaseController):
             title=messages[-1].subject,
             items=[
                 Part(text="Cette conversation concerne les personnages suivants"),
-                Part(label=", ".join(concerned_names)),
+                Part(text=", ".join(concerned_names)),
                 Part(
                     is_form=True,
                     form_action=f"/conversation/{hapic_data.path.character_id}/add/{hapic_data.path.conversation_id}",
                     items=[
                         Part(
-                            label="Pour ajouter un message, ajoutez-le ci-dessous:",
+                            label="Ajouter un message",
                             type_=Type.STRING,
                             name="message",
                         )
@@ -232,16 +234,14 @@ class ConversationController(BaseController):
                 ),
                 Part(text="Conversation (message le plus récente en haut):"),
             ]
-            + message_parts + [
-                Part(
-                    is_link=True,
-                    go_back_zone=True,
-                    label="Retourner à l'écran de déplacements",
-                ),
+            + message_parts,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux conversations",
                     form_action=f"/conversation/{hapic_data.path.character_id}",
+                    classes=["primary"],
                 ),
             ],
             can_be_back_url=True,
@@ -320,7 +320,9 @@ class ConversationController(BaseController):
                     is_form=True,
                     form_action=f"/conversation/{hapic_data.path.character_id}/edit-concerned/{hapic_data.path.conversation_id}",
                     items=character_parts,
-                ),
+                )
+            ],
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -331,6 +333,7 @@ class ConversationController(BaseController):
                     is_link=True,
                     label="Voir la conversation",
                     form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
+                    classes=["primary"],
                 ),
             ],
         )

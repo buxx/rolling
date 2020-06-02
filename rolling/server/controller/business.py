@@ -112,17 +112,18 @@ class BusinessController(BaseController):
                 )
             )
 
-        parts.extend(
-            [
+        return Description(
+            title="Commerce: vos offres",
+            items=parts,
+            footer_links=[
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
                 )
-            ]
+            ],
+            can_be_back_url=True,
         )
-
-        return Description(title="Commerce: vos offres", items=parts, can_be_back_url=True)
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -160,19 +161,19 @@ class BusinessController(BaseController):
                 )
             )
 
-        parts.extend(
-            [
+        return Description(
+            title="Commerce: vos transaction avec des personnes",
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
+                    classes=["primary"],
                 ),
-            ]
-        )
-
-        return Description(
-            title="Commerce: vos transaction avec des personnes", items=parts, can_be_back_url=True
+            ],
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -218,17 +219,6 @@ class BusinessController(BaseController):
         else:
             parts.append(Part(label="Activer", is_link=True, form_action=here_url + "&open=1"))
 
-        parts.extend(
-            [
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner sur la page Commerce",
-                    form_action=f"/business/{hapic_data.path.character_id}",
-                ),
-            ]
-        )
-
         return Description(
             title=offer.title,
             items=[
@@ -237,6 +227,15 @@ class BusinessController(BaseController):
                 )
             ]
             + parts,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner sur la page Commerce",
+                    form_action=f"/business/{hapic_data.path.character_id}",
+                    classes=["primary"],
+                ),
+            ],
         )
 
     @hapic.with_api_doc()
@@ -281,18 +280,20 @@ class BusinessController(BaseController):
 
         title = f"{offer.title}{with_str}"
 
-        parts.extend(
-            [
+        return Description(
+            title=title,
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
+                    classes=["primary"],
                 ),
-            ]
+            ],
+            can_be_back_url=True,
         )
-
-        return Description(title=title, items=parts, can_be_back_url=True)
 
     @hapic.with_api_doc()
     @hapic.input_path(SeeOfferPathModel)
@@ -314,8 +315,8 @@ class BusinessController(BaseController):
         if not self._kernel.business_lib.owner_can_deal(offer.id):
             return Description(
                 title=offer.title,
-                items=[
-                    Part(text=f"{offer_owner.name} ne peut pas assurer cette opération"),
+                items=[Part(text=f"{offer_owner.name} ne peut pas assurer cette opération")],
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -330,6 +331,7 @@ class BusinessController(BaseController):
                         form_action=(
                             f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                         ),
+                        classes=["primary"],
                     ),
                 ],
                 can_be_back_url=True,
@@ -340,8 +342,8 @@ class BusinessController(BaseController):
         ):
             return Description(
                 title=offer.title,
-                items=[
-                    Part(text="Vous ne possédez pas ce qu'il faut pour faire ce marché"),
+                items=[Part(text="Vous ne possédez pas ce qu'il faut pour faire ce marché")],
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -356,6 +358,7 @@ class BusinessController(BaseController):
                         form_action=(
                             f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                         ),
+                        classes=["primary"],
                     ),
                 ],
             )
@@ -370,8 +373,8 @@ class BusinessController(BaseController):
                     self._kernel.business_lib.changer_offer_status(offer.id, OfferStatus.ACCEPTED)
                 return Description(
                     title=offer.title,
-                    items=[
-                        Part(text="Marché effectué"),
+                    items=[Part(text="Marché effectué")],
+                    footer_links=[
                         Part(
                             is_link=True,
                             go_back_zone=True,
@@ -388,6 +391,7 @@ class BusinessController(BaseController):
                             form_action=(
                                 f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                             ),
+                            classes=["primary"],
                         ),
                     ],
                 )
@@ -398,7 +402,9 @@ class BusinessController(BaseController):
                         is_link=True,
                         form_action=here_url + "&confirm=1",
                         label="Je confirme vouloir faire ce marché",
-                    ),
+                    )
+                ],
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -413,6 +419,7 @@ class BusinessController(BaseController):
                         form_action=(
                             f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                         ),
+                        classes=["primary"],
                     ),
                 ],
             )
@@ -433,8 +440,8 @@ class BusinessController(BaseController):
                     )
                 return Description(
                     title=offer.title,
-                    items=parts
-                    + [
+                    items=parts,
+                    footer_links=[
                         Part(
                             is_link=True,
                             go_back_zone=True,
@@ -451,6 +458,7 @@ class BusinessController(BaseController):
                             form_action=(
                                 f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                             ),
+                            classes=["primary"],
                         ),
                     ],
                     can_be_back_url=True,
@@ -476,8 +484,8 @@ class BusinessController(BaseController):
                     )
             return Description(
                 title=offer.title,
-                items=parts
-                + [
+                items=parts,
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -492,6 +500,7 @@ class BusinessController(BaseController):
                         form_action=(
                             f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                         ),
+                        classes=["primary"],
                     ),
                 ],
             )
@@ -503,19 +512,20 @@ class BusinessController(BaseController):
             offer_item_id=hapic_data.query.offer_item_id,
         )
 
-        parts = [
+        footer_links = [
             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
             Part(
                 is_link=True,
                 label="Retourner sur la page Commerce",
                 form_action=f"/business/{hapic_data.path.character_id}",
+                classes=["primary"],
             ),
         ]
 
         if not offer.permanent:
             self._kernel.business_lib.changer_offer_status(offer.id, OfferStatus.ACCEPTED)
         else:
-            parts.append(
+            footer_links.append(
                 Part(
                     is_link=True,
                     label=f"Retourner sur la fiche de {offer.title}",
@@ -525,7 +535,9 @@ class BusinessController(BaseController):
                 )
             )
 
-        return Description(title=offer.title, items=[Part(text="Marché effectué")] + parts)
+        return Description(
+            title=offer.title, items=[Part(text="Marché effectué")], footer_links=footer_links
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -569,7 +581,9 @@ class BusinessController(BaseController):
                             type_=Type.STRING,
                         )
                     ],
-                ),
+                )
+            ],
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -739,7 +753,9 @@ class BusinessController(BaseController):
                         ),
                         Part(label="Quantité ?", name="quantity", type_=Type.NUMBER),
                     ],
-                ),
+                )
+            ],
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -752,6 +768,7 @@ class BusinessController(BaseController):
                     form_action=(
                         f"/business/{hapic_data.path.character_id}/see-offer/{offer.character_id}/{offer.id}"
                     ),
+                    classes=["primary"],
                 ),
             ],
         )

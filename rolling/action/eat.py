@@ -135,12 +135,13 @@ class EatResourceAction(WithResourceAction):
 
         return Description(
             title="Action effectué",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
         )
@@ -209,12 +210,13 @@ class EatStuffAction(WithStuffAction):
 
         return Description(
             title="Action effectué",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
         )

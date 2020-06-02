@@ -60,7 +60,7 @@ class EmptyStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
-        parts = [
+        footer_links = [
             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
             Part(
                 is_link=True,
@@ -73,11 +73,12 @@ class EmptyStuffAction(WithStuffAction):
                 form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                     character_id=character.id, stuff_id=stuff.id
                 ),
+                classes=["primary"],
             ),
         ]
 
         try:
             self._kernel.stuff_lib.empty_stuff(stuff)
         except CantEmpty as exc:
-            return Description(title=str(exc), items=parts)
-        return Description(title=f"{stuff.name} vidé(e)", items=parts)
+            return Description(title=str(exc), footer_links=footer_links)
+        return Description(title=f"{stuff.name} vidé(e)", footer_links=footer_links)

@@ -113,15 +113,17 @@ class AttackCharacterAction(WithCharacterAction):
                     label="Attaquer seul et en mon nom uniquement",
                 ),
             ]
-            + parts
-            + [
+            + parts,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
-                )
+                    classes=["primary"],
+                ),
             ],
             can_be_back_url=True,
         )
@@ -207,8 +209,8 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Attaquer {with_character.name} seul",
-            items=parts
-            + [
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -216,6 +218,7 @@ class AttackCharacterAction(WithCharacterAction):
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
+                    classes=["primary"],
                 ),
             ],
         )
@@ -295,7 +298,9 @@ class AttackCharacterAction(WithCharacterAction):
                         text=f"Vous ne pouvez pas attaquer {with_character.name} "
                         f"en tant que {as_affinity.name} car il/elle est affilié à "
                         f"{as_affinity.name}"
-                    ),
+                    )
+                ],
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -306,7 +311,7 @@ class AttackCharacterAction(WithCharacterAction):
                             character_id=character.id, with_character_id=with_character.id
                         ),
                     ),
-                    Part(is_link=True, form_action=here_url, label="Retour"),
+                    Part(is_link=True, form_action=here_url, label="Retour", classes=["primary"]),
                 ],
             )
         except NoResultFound:
@@ -332,8 +337,10 @@ class AttackCharacterAction(WithCharacterAction):
             for in_conflict_str in in_conflict_strs:
                 parts.append(Part(text=f"- {in_conflict_str}"))
 
-            parts.extend(
-                [
+            return Description(
+                title=title,
+                items=parts,
+                footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
                     ),
@@ -343,12 +350,11 @@ class AttackCharacterAction(WithCharacterAction):
                         form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                             character_id=character.id, with_character_id=with_character.id
                         ),
+                        classes=["primary"],
                     ),
                     Part(is_link=True, form_action=here_url, label="Retour"),
-                ]
+                ],
             )
-
-            return Description(title=title, items=parts)
 
     def _get_attack_as_affinity_description(
         self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int
@@ -399,6 +405,8 @@ class AttackCharacterAction(WithCharacterAction):
                     form_action=here_url + f"&as_affinity={as_affinity_id}&confirm=1",
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
+            ],
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -407,7 +415,7 @@ class AttackCharacterAction(WithCharacterAction):
                         character_id=character.id, with_character_id=with_character.id
                     ),
                 ),
-                Part(is_link=True, form_action=here_url, label=f"Retour"),
+                Part(is_link=True, form_action=here_url, label=f"Retour", classes=["Primary"]),
             ],
         )
 
@@ -448,8 +456,8 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=title,
-            items=parts
-            + [
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -457,6 +465,7 @@ class AttackCharacterAction(WithCharacterAction):
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
+                    classes=["primary"],
                 ),
             ],
         )

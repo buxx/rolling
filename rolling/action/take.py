@@ -135,8 +135,8 @@ class TakeFromCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Prendre sur {with_character.name}",
-            items=parts
-            + [
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,

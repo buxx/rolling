@@ -120,7 +120,7 @@ class DrinkResourceAction(CharacterAction):
 
         return Description(
             title="Action effectué",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
             ],
         )
@@ -209,7 +209,7 @@ class DrinkStuffAction(WithStuffAction):
 
         return Description(
             title="Vous avez bu",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
             ],
         )

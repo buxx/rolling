@@ -81,7 +81,7 @@ class FillStuffAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
-        parts = [
+        footer_links = [
             Part(
                 is_link=True,
                 label="Voir l'inventaire",
@@ -93,6 +93,7 @@ class FillStuffAction(WithStuffAction):
                 form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                     character_id=character.id, stuff_id=stuff.id
                 ),
+                classes=["primary"],
             ),
             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
@@ -100,9 +101,10 @@ class FillStuffAction(WithStuffAction):
         try:
             self._kernel.stuff_lib.fill_stuff_with_resource(stuff, input_.resource_id)
         except CantFill as exc:
-            return Description(title=str(exc), items=parts)
+            return Description(title=str(exc), footer_links=footer_links)
 
         resource_description = self._kernel.game.config.resources[input_.resource_id]
         return Description(
-            title=f"{stuff.name} rempli(e) avec {resource_description.name}", items=parts
+            title=f"{stuff.name} rempli(e) avec {resource_description.name}",
+            footer_links=footer_links,
         )

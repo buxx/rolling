@@ -237,12 +237,13 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
             force_back_url=f"/_describe/character/{character.id}/on_place_actions",
@@ -348,12 +349,13 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
             force_back_url=f"/_describe/character/{character.id}/on_place_actions",
@@ -529,7 +531,7 @@ class BeginStuffConstructionAction(CharacterAction):
 
         return Description(
             title=f"{stuff_properties.name} commencé",
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -537,6 +539,7 @@ class BeginStuffConstructionAction(CharacterAction):
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=stuff_doc.id
                     ),
+                    classes=["primary"],
                 ),
             ],
             force_back_url=f"/_describe/character/{character.id}/on_place_actions",
@@ -640,7 +643,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         self._kernel.server_db_session.commit()
         return Description(
             title=title,
-            items=[
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
@@ -648,6 +651,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=stuff_doc.id
                     ),
+                    classes=["primary"],
                 ),
             ],
             force_back_url=f"/_describe/character/{character.id}/on_place_actions",

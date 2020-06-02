@@ -159,7 +159,10 @@ class SearchMaterialAction(CharacterAction):
             quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
             parts.append(Part(text=f"{quantity_str} de {resource_description.name}"))
 
-        parts.extend(
-            [Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")]
+        return Description(
+            title="Vous avez récupéré",
+            items=parts,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+            ],
         )
-        return Description(title="Vous avez récupéré", items=parts)

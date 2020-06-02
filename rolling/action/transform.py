@@ -126,6 +126,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
         )
@@ -278,13 +279,14 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         parts = [Part(text=txt) for txt in produced_resources_txts]
         return Description(
             title=f"Effectué",
-            items=parts
-            + [
+            items=parts,
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
+                    classes=["primary"],
                 ),
             ],
         )

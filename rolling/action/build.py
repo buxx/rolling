@@ -440,7 +440,8 @@ class ConstructBuildAction(WithBuildAction):
 
         return Description(
             title=f"Travail effectué",
-            items=[
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Voir le batiment",
@@ -448,9 +449,9 @@ class ConstructBuildAction(WithBuildAction):
                     form_action=DESCRIBE_BUILD.format(
                         build_id=build_doc.id, character_id=character.id
                     ),
+                    classes=["primary"],
                 ),
             ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -531,7 +532,9 @@ class BuildAction(CharacterAction):
 
         return Description(
             title=f"{build_description.name} construit",
-            items=[
+            items=[],
+            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Voir le batiment",
@@ -539,7 +542,7 @@ class BuildAction(CharacterAction):
                     form_action=DESCRIBE_BUILD.format(
                         build_id=build_doc.id, character_id=character.id
                     ),
+                    classes=["primary"],
                 ),
             ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
         )

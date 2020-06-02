@@ -42,6 +42,7 @@ class Part:
     choices: typing.Optional[typing.List[str]] = None
     search_by_str: bool = False
     id: typing.Optional[int] = None
+    classes: typing.List[str] = dataclasses.field(default_factory=list)
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
@@ -62,6 +63,7 @@ class Part:
 class Description:
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
+    footer_links: typing.List[Part] = dataclasses.field(default_factory=list)
     image: typing.Optional[str] = None
     image_id: typing.Optional[int] = None
     image_extension: typing.Optional[str] = None  # used by client to cache image

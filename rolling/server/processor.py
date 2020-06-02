@@ -1,5 +1,6 @@
 # coding: utf-8
 import typing
+
 from hapic.processor.serpyco import SerpycoProcessor
 
 from guilang.description import Description
