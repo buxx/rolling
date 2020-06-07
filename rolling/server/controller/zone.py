@@ -125,7 +125,7 @@ class ZoneController(BaseController):
         world_rows = self._kernel.world_map_source.geography.rows
         tile_type: MapTileType = world_rows[hapic_data.path.row_i][hapic_data.path.col_i]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(tile_type)
-
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
         characters = self._kernel.character_lib.get_zone_players(
             hapic_data.path.row_i, hapic_data.path.col_i
         )
@@ -143,13 +143,40 @@ class ZoneController(BaseController):
                     )
                 )
 
+        affinities_parts = []
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(character.id):
+            affinity = self._kernel.affinity_lib.get_affinity(affinity_relation.affinity_id)
+            here_count = self._kernel.affinity_lib.count_members(
+                affinity.id,
+                fighter=None,
+                world_row_i=hapic_data.path.row_i,
+                world_col_i=hapic_data.path.col_i,
+                exclude_character_ids=[character.id],
+            )
+            if here_count:
+                fighter_here_count = self._kernel.affinity_lib.count_members(
+                    affinity.id,
+                    fighter=True,
+                    world_row_i=hapic_data.path.row_i,
+                    world_col_i=hapic_data.path.col_i,
+                    exclude_character_ids=[character.id],
+                )
+                affinities_parts.append(
+                    Part(
+                        text=f"Sur cette zone, il y a actuellement avec vous {here_count} "
+                        f"membre(s) de {affinity.name} (dont {fighter_here_count} "
+                        f"combattant(s))"
+                    )
+                )
+
         return Description(
             title=tile_type.get_name(),
             items=[
                 Part(text=f"Vous vous trouvez sur {tile_type.get_name()}."),
                 Part(text=zone_properties.description),
-                Part(text=f"Dans cette zone se trouve également les personnages suivants:"),
             ]
+            + affinities_parts
+            + [Part(text=f"Dans cette zone se trouve également les personnages suivants:")]
             + characters_parts,
             can_be_back_url=True,
         )

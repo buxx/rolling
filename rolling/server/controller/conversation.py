@@ -161,16 +161,8 @@ class ConversationController(BaseController):
                     form_action=f"/conversation/{hapic_data.path.character_id}/start",
                     items=character_parts
                     + [
-                        Part(
-                            label="Choisissez un titre",
-                            type_=Type.STRING,
-                            name="subject",
-                        ),
-                        Part(
-                            label="Saisissez votre élocuction",
-                            type_=Type.STRING,
-                            name="message",
-                        ),
+                        Part(label="Choisissez un titre", type_=Type.STRING, name="subject"),
+                        Part(label="Saisissez votre élocuction", type_=Type.STRING, name="message"),
                     ],
                 ),
             ],
@@ -224,13 +216,7 @@ class ConversationController(BaseController):
                 Part(
                     is_form=True,
                     form_action=f"/conversation/{hapic_data.path.character_id}/add/{hapic_data.path.conversation_id}",
-                    items=[
-                        Part(
-                            label="Ajouter un message",
-                            type_=Type.STRING,
-                            name="message",
-                        )
-                    ],
+                    items=[Part(label="Ajouter un message", type_=Type.STRING, name="message")],
                 ),
                 Part(text="Conversation (message le plus récente en haut):"),
             ]

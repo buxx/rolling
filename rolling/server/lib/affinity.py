@@ -140,25 +140,41 @@ class AffinityLib:
             .all()
         )
 
-    def count_members(self, affinity_id: int, fighter: typing.Optional[bool] = None) -> int:
+    def count_members(
+        self,
+        affinity_id: int,
+        fighter: typing.Optional[bool] = None,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        exclude_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> int:
         if not fighter:
-            return (
-                self._kernel.server_db_session.query(AffinityRelationDocument)
-                .filter(
-                    AffinityRelationDocument.affinity_id == affinity_id,
-                    AffinityRelationDocument.accepted == True,
-                )
-                .count()
+            query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+                AffinityRelationDocument.affinity_id == affinity_id,
+                AffinityRelationDocument.accepted == True,
             )
-
-        return (
-            self._kernel.server_db_session.query(AffinityRelationDocument)
-            .filter(
+        else:
+            query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
                 AffinityRelationDocument.affinity_id == affinity_id,
                 AffinityRelationDocument.fighter == True,
             )
-            .count()
-        )
+
+        if world_row_i is not None and world_col_i is not None:
+            zone_character_ids = [
+                r[0]
+                for r in self._kernel.character_lib.alive_query_ids.filter(
+                    CharacterDocument.world_row_i == world_row_i,
+                    CharacterDocument.world_col_i == world_col_i,
+                ).all()
+            ]
+            query = query.filter(AffinityRelationDocument.character_id.in_(zone_character_ids))
+
+        if exclude_character_ids:
+            query = query.filter(
+                AffinityRelationDocument.character_id.notin_(exclude_character_ids)
+            )
+
+        return query.count()
 
     def there_is_unvote_relation(
         self, affinity: AffinityDocument, relation: AffinityRelationDocument

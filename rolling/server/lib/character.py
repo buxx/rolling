@@ -64,6 +64,12 @@ class CharacterLib:
         )
 
     @property
+    def alive_query_ids(self) -> Query:
+        return self._kernel.server_db_session.query(CharacterDocument.id).filter(
+            CharacterDocument.alive == True
+        )
+
+    @property
     def dead_query(self) -> Query:
         return self._kernel.server_db_session.query(CharacterDocument).filter(
             CharacterDocument.alive == False
