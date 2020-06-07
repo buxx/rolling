@@ -33,6 +33,7 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from rolling.server.processor import RollingSerpycoProcessor
 from rolling.server.run import ErrorBuilder
 
 

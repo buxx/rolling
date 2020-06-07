@@ -220,7 +220,7 @@ class TestMessage:
         descr = description_serializer.load(await resp.json())
 
         for between_character in between:
-            assert between_character.name in descr.items[1].label
+            assert between_character.name in descr.items[1].text
 
         assert 4 + message_count == len(descr.items)
         messages_ = [i.text for i in descr.items[4:]]
