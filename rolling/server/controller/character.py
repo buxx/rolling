@@ -35,6 +35,7 @@ from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import GetMoveZoneInfosModel
 from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
+from rolling.model.character import PickFromInventoryQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import TakeResourceModel
 from rolling.model.character import UpdateCharacterCardBodyModel
@@ -255,6 +256,92 @@ class CharacterController(BaseController):
             ]
             + inventory_parts,
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(PickFromInventoryQueryModel)
+    @hapic.output_body(Description)
+    async def pick_from_inventory(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(character.id)
+        form_parts = []
+        form_action = (
+            f"/_describe/character/{character.id}/pick_from_inventory"
+            f"?callback_url={hapic_data.query.callback_url}"
+            f"&cancel_url={hapic_data.query.cancel_url}"
+            f"&title={hapic_data.query.title}"
+        )
+        can_be_back_url = True
+
+        if hapic_data.query.resource_id is None and hapic_data.query.stuff_id is None:
+            stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
+            for stuff in inventory.stuff:
+                if stuff_displayed[stuff.stuff_id]:
+                    continue
+
+                form_parts.append(
+                    Part(
+                        label=stuff.get_name_and_light_description(self._kernel),
+                        is_link=True,
+                        form_action=form_action + f"&stuff_id={stuff.stuff_id}",
+                    )
+                )
+
+            for resource in inventory.resource:
+                form_parts.append(
+                    Part(
+                        label=resource.name,
+                        text=f"{resource.get_full_description(self._kernel)}",
+                        is_link=True,
+                        form_action=form_action + f"&resource_id={resource.id}",
+                    )
+                )
+        else:
+            form_action = hapic_data.query.callback_url + (
+                "?" if "?" not in hapic_data.query.callback_url else ""
+            )
+            can_be_back_url = False
+
+            if hapic_data.query.resource_id is not None:
+                form_action = f"{form_action}&resource_id={hapic_data.query.resource_id}"
+                default_value = self._kernel.resource_lib.get_one_carried_by(
+                    character.id, resource_id=hapic_data.query.resource_id
+                ).quantity
+                resource_description = self._kernel.game.config.resources[
+                    hapic_data.query.resource_id
+                ]
+                unit_str = self._kernel.translation.get(resource_description.unit)
+                quantity_prefix = "resource_"
+            else:
+                form_action = f"{form_action}&stuff_id={hapic_data.query.stuff_id}"
+                default_value = self._kernel.stuff_lib.have_stuff_count(
+                    character.id, stuff_id=hapic_data.query.stuff_id
+                )
+                unit_str = "unité"
+                quantity_prefix = "stuff_"
+
+            form_parts.append(
+                Part(
+                    label=f"Quantité ({unit_str}) ?",
+                    name=f"{quantity_prefix}quantity",
+                    type_=Type.NUMBER,
+                    default_value=str(default_value),
+                )
+            )
+
+        return Description(
+            title=hapic_data.query.title or "Choisir depuis votre inventaire",
+            items=[
+                Part(
+                    is_form=True,
+                    form_action=form_action,
+                    form_values_in_query=True,
+                    items=form_parts,
+                ),
+                Part(label="Retour", is_link=True, form_action=hapic_data.query.cancel_url),
+            ],
+            can_be_back_url=can_be_back_url,
         )
 
     @hapic.with_api_doc()
@@ -1165,6 +1252,10 @@ class CharacterController(BaseController):
                 web.post("/_describe/character/create/do", self.create_from_description),
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post(
+                    "/_describe/character/{character_id}/pick_from_inventory",
+                    self.pick_from_inventory,
+                ),
                 web.post("/_describe/character/{character_id}/move", self.describe_move),
                 web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),

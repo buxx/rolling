@@ -10,10 +10,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
-from rolling.exception import RollingError
 from rolling.exception import WrongStrInput
 from rolling.kernel import Kernel
-from rolling.model.character import AddOfferItemBodyModel
 from rolling.model.character import AddOfferItemQuery
 from rolling.model.character import CreateOfferBodyModel
 from rolling.model.character import CreateOfferQueryModel
@@ -686,7 +684,6 @@ class BusinessController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetOfferPathModel)
     @hapic.input_query(AddOfferItemQuery)
-    @hapic.input_body(AddOfferItemBodyModel)
     @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.handle_exception(WrongStrInput, http_code=400)
     @hapic.output_body(Description)
@@ -695,6 +692,10 @@ class BusinessController(BaseController):
         offer: OfferDocument = self._kernel.business_lib.get_offer_query(
             hapic_data.path.offer_id
         ).one()
+        here_url = (
+            f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
+            f"/add-item?position={hapic_data.query.position.value}"
+        )
 
         if hapic_data.query.position == OfferItemPosition.REQUEST:
             title = f"Aouter un élément demandé à {offer.title}"
@@ -710,24 +711,50 @@ class BusinessController(BaseController):
         for stuff_properties in self._kernel.game.stuff_manager.items:
             stuff_by_name[f"{stuff_properties.name} (unité)"] = stuff_properties
 
-        if hapic_data.body.quantity and hapic_data.body.value:
-            raw_quantity = hapic_data.body.quantity
-            if hapic_data.body.value in resource_by_name:
+        # compatible for "pick from inventory" params
+        quantity = None
+        resource_id = None
+        stuff_id = None
+
+        if hapic_data.query.quantity:
+            quantity = hapic_data.query.quantity
+
+        if hapic_data.query.resource_quantity:
+            quantity = hapic_data.query.resource_quantity
+
+        if hapic_data.query.stuff_quantity:
+            quantity = hapic_data.query.stuff_quantity
+
+        if hapic_data.query.resource_id:
+            resource_id = hapic_data.query.resource_id
+
+        if hapic_data.query.stuff_id:
+            stuff_id = hapic_data.query.stuff_id
+
+        if hapic_data.query.value:
+            if hapic_data.query.value in resource_by_name:
+                resource_id = resource_by_name[hapic_data.query.value].id
+            elif hapic_data.query.value in stuff_by_name:
+                stuff_id = stuff_by_name[hapic_data.query.value].id
+
+        if quantity and (resource_id or stuff_id):
+            raw_quantity = quantity
+            if resource_id:
                 self._kernel.business_lib.add_item(
                     offer.id,
-                    resource_id=resource_by_name[hapic_data.body.value].id,
+                    resource_id=resource_id,
                     quantity=raw_quantity,
                     position=hapic_data.query.position,
                 )
-            elif hapic_data.body.value in stuff_by_name:
+            elif stuff_id:
                 self._kernel.business_lib.add_item(
                     offer.id,
-                    stuff_id=stuff_by_name[hapic_data.body.value].id,
+                    stuff_id=stuff_id,
                     quantity=int(raw_quantity),
                     position=hapic_data.query.position,
                 )
             else:
-                raise WrongStrInput(f"Unknown '{hapic_data.body.value}'")
+                raise WrongStrInput(f"Unknown '{hapic_data.query.value}'")
 
             return Description(
                 redirect=f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
@@ -738,10 +765,8 @@ class BusinessController(BaseController):
             items=[
                 Part(
                     is_form=True,
-                    form_action=(
-                        f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
-                        f"/add-item?position={hapic_data.query.position.value}"
-                    ),
+                    form_action=here_url,
+                    form_values_in_query=True,
                     items=[
                         Part(
                             label="Sélectionnez une ressource ou un object",
@@ -753,7 +778,17 @@ class BusinessController(BaseController):
                         ),
                         Part(label="Quantité ?", name="quantity", type_=Type.NUMBER),
                     ],
-                )
+                ),
+                Part(
+                    label="Ou depuis votre inventaire",
+                    is_link=True,
+                    form_action=(
+                        f"/_describe/character/{hapic_data.path.character_id}/pick_from_inventory"
+                        f"?callback_url={here_url}"
+                        f"&cancel_url={here_url}"
+                        f"&title={title}"
+                    ),
+                ),
             ],
             footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),

@@ -362,8 +362,8 @@ class TestBusiness:
         # Add one stuff
         assert (
             await web.post(
-                f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST",
-                json={"value": "Plastic bottle (unité)", "quantity": "1"},
+                f"/business/{xena.id}/offers/{1}/add-item"
+                f"?position=REQUEST&value=Plastic bottle (unité)&quantity=1"
             )
         ).status == 200
         await self._assert_edit_offer(
@@ -373,8 +373,8 @@ class TestBusiness:
         # Add one resource
         assert (
             await web.post(
-                f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST",
-                json={"value": "Petit bois (mètre cubes)", "quantity": "1.50"},
+                f"/business/{xena.id}/offers/{1}/add-item"
+                f"?position=REQUEST&value=Petit bois (mètre cubes)&quantity=1.50"
             )
         ).status == 200
         await self._assert_edit_offer(
@@ -406,8 +406,7 @@ class TestBusiness:
         # Add one stuff
         assert (
             await web.post(
-                f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST",
-                json={"value": "Plastic bottle (unité)", "quantity": "1"},
+                f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST&value=Plastic bottle (unité)&quantity=1"
             )
         ).status == 200
         await self._assert_edit_offer(
@@ -871,14 +870,14 @@ class TestBusiness:
         ).status == 200
         assert (
             await web.post(
-                f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST",
-                json={"value": "Plastic bottle (unité)", "quantity": "1"},
+                f"/business/{xena.id}/offers/{1}/add-item"
+                f"?position=REQUEST&value=Plastic bottle (unité)&quantity=1"
             )
         ).status == 200
         assert (
             await web.post(
-                f"/business/{xena.id}/offers/{1}/add-item?position=OFFER",
-                json={"value": "Vin rouge (litres)", "quantity": "1.5"},
+                f"/business/{xena.id}/offers/{1}/add-item"
+                f"?position=OFFER&value=Vin rouge (litres)&quantity=1.5"
             )
         ).status == 200
         assert (await web.post(f"/business/{xena.id}/offers/{1}?open=1")).status == 200

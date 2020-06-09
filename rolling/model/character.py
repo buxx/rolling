@@ -37,6 +37,19 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class PickFromInventoryQueryModel:
+    callback_url: str
+    cancel_url: str
+    title: typing.Optional[str] = None
+    resource_id: typing.Optional[str] = None
+    resource_quantity: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    stuff_id: typing.Optional[str] = None
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
 class ConversationsQueryModel:
     with_character_id: typing.Optional[str] = None
 
@@ -88,6 +101,15 @@ class UpdateOfferQueryModel:
 @dataclasses.dataclass
 class AddOfferItemQuery:
     position: OfferItemPosition
+    value: typing.Optional[str] = None
+    quantity: float = serpyco.number_field(cast_on_load=True, default=None)
+    # bellow: from inventory pick
+    resource_id: typing.Optional[str] = None
+    resource_quantity: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    stuff_id: typing.Optional[str] = None
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 @dataclasses.dataclass
@@ -105,12 +127,6 @@ class CreateOfferBodyModel:
 class GetOfferBodyModel:
     request_operand: typing.Optional[str] = None
     offer_operand: typing.Optional[str] = None
-
-
-@dataclasses.dataclass
-class AddOfferItemBodyModel:
-    value: typing.Optional[str] = None
-    quantity: float = serpyco.number_field(cast_on_load=True, default=None)
 
 
 @dataclasses.dataclass

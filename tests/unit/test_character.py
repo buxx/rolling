@@ -135,3 +135,51 @@ class TestCharacter:
         await self._use_as(web, ActionType.NOT_USE_AS_ARMOR, xena.id, jacket.id)
         armor = await self._get_card_item(web, xena.id, "Armure")
         assert armor.text == "aucune"
+
+    async def test_unit__pick_from_inventory(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_xena_haxe: StuffModel,
+        worldmapc_xena_wood: None,
+        worldmapc_web_app: TestClient,
+    ) -> None:
+        web = worldmapc_web_app
+        xena = worldmapc_xena_model
+
+        pick_url = (
+            f"/_describe/character/{xena.id}/pick_from_inventory"
+            f"?callback_url=to_somewhere"
+            f"&cancel_url=or_here"
+            f"&title=The title"
+        )
+        resp = await web.post(pick_url)
+        assert resp.status == 200
+        descr = description_serializer.load(await resp.json())
+
+        assert descr.title == "The title"
+        assert descr.items[0].is_form
+        assert descr.items[0].form_action == pick_url
+
+        descr_links = [p.form_action for p in descr.items[0].items]
+        stone_haxe_url = f"{pick_url}&stuff_id=STONE_HAXE"
+        wood_url = f"{pick_url}&resource_id=WOOD"
+        assert stone_haxe_url in descr_links
+        assert wood_url in descr_links
+
+        resp = await web.post(stone_haxe_url)
+        assert resp.status == 200
+        descr = description_serializer.load(await resp.json())
+        assert descr.items[0].is_form
+        assert descr.items[0].form_action == f"to_somewhere?&stuff_id=STONE_HAXE"
+        assert descr.items[0].items[0].name == "stuff_quantity"
+        assert descr.items[0].items[0].default_value == "1"
+        assert descr.items[0].form_values_in_query
+
+        resp = await web.post(wood_url)
+        assert resp.status == 200
+        descr = description_serializer.load(await resp.json())
+        assert descr.items[0].is_form
+        assert descr.items[0].form_action == f"to_somewhere?&resource_id=WOOD"
+        assert descr.items[0].items[0].name == "resource_quantity"
+        assert descr.items[0].items[0].default_value == "0.2"
+        assert descr.items[0].form_values_in_query
