@@ -34,6 +34,86 @@ cheats = {"*"=["increase_ap"]}
   [materials.GAS]
     name = "Gazeu"
 
+# FIXME: all max 5.0: min(math.log(<ap>, 4), 5.0) ; chaque action doit pouvoir definir un coeff de bonus grace a skill
+[skill]
+
+[skill.strength]
+  name = "Force"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.perception]
+  name = "Perception"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.endurance]
+  name = "Endurance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.charism]
+  name = "Charisme"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.intelligence]
+  name = "Intelligence"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.agility]
+  name = "Agilité"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.luck]
+  name = "Chance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.crafts]
+  name = "Artisanat"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.hunting_gathering]
+  name = "Chasse & Ceuillette"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.fight]
+  name = "Combat"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.crafts]
+  name = "Tannerie"
+  type = "2.Metiers2"
+  default = 1.0
+
+[skill.spear_fight]
+  name = "Combat a la lance"
+  type = "3.Spécifique"
+  default = 1.0
+
+[skill.shield_fight]
+  name = "Combat au bouclier"
+  type = "3.Spécifique"
+  default = 1.0
+
+# TODO: s'aquiert en boolean
+[knowledge]
+[knowledge.pottery]
+  name = "Poterie"
+  ap_required = 100.0
+  instructor_coeff = 3.0
+
+[knowledge.blacksmith]
+  name = "Forgeron"
+  ap_required = 300.0
+  instructor_coeff = 2.0
+
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
   name = "Cuisson"
