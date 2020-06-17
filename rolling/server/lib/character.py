@@ -1,4 +1,5 @@
 # coding: utf-8
+import math
 import os
 import typing
 import uuid
@@ -15,16 +16,16 @@ from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
-from rolling.model.character import CreateCharacterModel
 from rolling.model.event import StoryPage
+from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
+from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
-from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
@@ -37,11 +38,12 @@ from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
+from rolling.server.document.knowledge import CharacterKnowledge
 from rolling.server.document.message import MessageDocument
+from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
-from rolling.types import ActionType
 from rolling.util import filter_action_links
 from rolling.util import get_coming_from
 from rolling.util import get_on_and_around_coordinates
@@ -49,6 +51,9 @@ from rolling.util import get_opposite_zone_place
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+
+DEFAULT_LOG_BASE = 4
+STARING_LIFE_POINTS = 3.0  # + endurance
 
 
 class CharacterLib:
@@ -79,14 +84,11 @@ class CharacterLib:
     def dont_care_alive_query(self) -> Query:
         return self._kernel.server_db_session.query(CharacterDocument)
 
-    def create(self, create_character_model: CreateCharacterModel) -> str:
+    def create(self, name: str, skills: typing.Dict[str, float]) -> str:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
-        character.name = create_character_model.name
-        # character.background_story = create_character_model.background_story
-        # character.hunting_and_collecting_comp = create_character_model.hunting_and_collecting_comp
-        # character.find_water_comp = create_character_model.find_water_comp
-        character.max_life_comp = float(create_character_model.max_life_comp)
+        character.name = name
+        character.max_life_comp = STARING_LIFE_POINTS + skills["endurance"]
         character.life_points = float(character.max_life_comp)
         character.action_points = self._kernel.game.config.action_points_per_turn
 
@@ -107,6 +109,13 @@ class CharacterLib:
         self._kernel.server_db_session.add(character)
         self._kernel.server_db_session.commit()
 
+        for skill_id, skill_value in skills.items():
+            self._kernel.server_db_session.add(
+                self._kernel.character_lib.create_skill_doc(character.id, skill_id, skill_value)
+            )
+        self._kernel.server_db_session.commit()
+        self.ensure_skills_for_character(character.id)
+
         image_id = None
         if self._kernel.game.config.create_character_event_story_image:
             image_id = register_image(
@@ -126,7 +135,30 @@ class CharacterLib:
         )
         self.add_story_pages([first_story_page])
 
+        self.ensure_skills_for_character(character.id)
         return character.id
+
+    def ensure_skills_for_character(self, character_id: str, commit: bool = True) -> None:
+        for skill_id, skill_description in self._kernel.game.config.skills.items():
+            if (
+                not self._kernel.server_db_session.query(CharacterSkillDocument)
+                .filter(
+                    CharacterSkillDocument.character_id == character_id,
+                    CharacterSkillDocument.skill_id == skill_id,
+                )
+                .count()
+            ):
+                default_value = skill_description.default
+                # find matching counter for default_value
+                counter = 1
+                while math.log(counter, DEFAULT_LOG_BASE) < default_value:
+                    counter += 1
+
+                self._kernel.server_db_session.add(
+                    self.create_skill_doc(character_id, skill_id, value=default_value)
+                )
+        if commit:
+            self._kernel.server_db_session.commit()
 
     def get_document(self, id_: str, dead: typing.Optional[bool] = False) -> CharacterDocument:
         if dead is None:
@@ -156,6 +188,28 @@ class CharacterLib:
         if armor_doc:
             armor = self._kernel.stuff_lib.stuff_model_from_doc(armor_doc)
 
+        skills: typing.Dict[str, CharacterSkillModel] = {
+            skill_document.skill_id: CharacterSkillModel(
+                id=skill_document.skill_id,
+                name=self._kernel.game.config.skills[skill_document.skill_id].name,
+                value=float(skill_document.value),
+            )
+            for skill_document in self._kernel.server_db_session.query(CharacterSkillDocument)
+            .filter(CharacterSkillDocument.character_id == character_document.id)
+            .all()
+        }
+        knowledges: typing.Dict[str, KnowledgeDescription] = {
+            row[0]: self._kernel.game.config.knowledge[row[0]]
+            for row in self._kernel.server_db_session.query(CharacterKnowledge.knowledge_id)
+            .filter(CharacterKnowledge.character_id == character_document.id)
+            .all()
+        }
+
+        ability_ids = []
+        for knowledge_description in knowledges.values():
+            ability_ids.extend(knowledge_description.abilities)
+        ability_ids = list(set(ability_ids))
+
         return CharacterModel(
             id=character_document.id,
             name=character_document.name,
@@ -183,6 +237,9 @@ class CharacterLib:
             weapon=weapon,
             shield=shield,
             armor=armor,
+            skills=skills,
+            knowledges=knowledges,
+            ability_ids=ability_ids,
         )
 
     def get_multiple(self, character_ids: typing.List[str]) -> typing.List[CharacterModel]:
@@ -870,3 +927,28 @@ class CharacterLib:
                 pass
 
         return character_actions
+
+    def create_skill_doc(self, character_id: str, skill_id: str, value: float) -> CharacterSkillDocument:
+        # find matching counter for default_value
+        counter = 1
+        while math.log(counter, DEFAULT_LOG_BASE) < value:
+            counter += 1
+
+        return CharacterSkillDocument(
+            skill_id=skill_id,
+            character_id=character_id,
+            value=str(value),
+            counter=counter,
+        )
+
+    def increase_skill(self, character_id: str, skill_id: str, increment: int, commit: bool = True) -> None:
+        skill_doc: CharacterSkillDocument = self._kernel.server_db_session.query(CharacterSkillDocument).filter(
+            CharacterSkillDocument.character_id == character_id,
+            CharacterSkillDocument.skill_id == skill_id,
+        )
+        skill_doc.counter += increment
+        skill_doc.value = math.log(skill_doc.counter, DEFAULT_LOG_BASE)
+
+        self._kernel.server_db_session.add(skill_doc)
+        if commit:
+            self._kernel.server_db_session.commit()

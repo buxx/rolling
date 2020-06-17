@@ -14,6 +14,11 @@ from rolling.server.document.character import CharacterDocument
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
+EVADE_SKILL_ID = "agility"
+PROBABILITY_TO_EVADE_MULTIPLIER = 6
+PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY = 90  # percent
+PROBABILITY_TO_EVADE_START_PROBABILITY = 50  # percent
+
 
 class FightLib:
     def __init__(self, kernel: "Kernel") -> None:
@@ -244,6 +249,9 @@ class FightLib:
                     if opponent.life_points < 0:
                         story_sentences.append(f"Le coup à été fatal pour {opponent.name}.")
 
+                    # FIXME BS NOW: write test about this
+                    self.increase_attacker_skills(fighter, attacker_weapon)
+
                 story.append(" ".join(story_sentences))
                 self._kernel.character_lib.reduce_action_points(fighter.id, FIGHT_AP_CONSUME)
                 self._kernel.character_lib.increase_tiredness(fighter.id, FIGHT_TIREDNESS_INCREASE)
@@ -280,20 +288,30 @@ class FightLib:
         weapon: Weapon,
         defenser_weapon: Weapon,
     ) -> bool:
-        # FIXME BS: compute it from character specs
-        return bool(random.choice([0, 1]))
+        probability_to_evade = PROBABILITY_TO_EVADE_START_PROBABILITY  # percent
+        probability_to_evade += (
+            opponent.get_skill_value(EVADE_SKILL_ID) - from_.get_skill_value(EVADE_SKILL_ID)
+        ) * PROBABILITY_TO_EVADE_MULTIPLIER
+        probability_to_evade = min(PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY, probability_to_evade)
+
+        return bool(random.randint(0, 100) < probability_to_evade)
 
     def get_damage(self, fighter: CharacterModel, weapon: Weapon) -> float:
-        # FIXME BS: code it
-        damages = (fighter.force_weapon_multiplier * weapon.base_damage) * (
-            random.randrange(8, 12, 1) / 10
-        )
+        damages = (
+            fighter.force_weapon_multiplier
+            * weapon.base_damage
+            * fighter.get_with_weapon_coeff(weapon, self._kernel)
+        ) * (random.randrange(8, 12, 1) / 10)
         return round(damages, 2)
 
     def apply_damage_on_equipment(self, opponent: CharacterModel, equipment: Weapon) -> None:
-        # USe updated stuff model infos
+        # Use updated stuff model infos
         pass  # TODO: Code it; display state
 
     def apply_damage_on_character(self, opponent: CharacterModel, damages: float) -> None:
         new_life_points = self._kernel.character_lib.reduce_life_points(opponent.id, value=damages)
         opponent.life_points = new_life_points
+
+    def increase_attacker_skills(self, fighter: CharacterModel, weapon: Weapon) -> None:
+        for skill_id in weapon.get_bonus_with_skills(self._kernel):
+            self._kernel.character_lib.increase_skill(fighter.id, skill_id, 1)

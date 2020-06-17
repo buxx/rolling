@@ -81,7 +81,7 @@
         regeneration = 100.0  # quatity generation per turn
 
     [ZONE_PROPERTIES.PLAIN.GENERATION]
-      count = 15
+      count = 1
 
       [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF]
         [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF.STONE]

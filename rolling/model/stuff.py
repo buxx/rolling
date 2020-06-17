@@ -40,6 +40,7 @@ class StuffProperties:
     protect_sharp: int = 0
     damages: float = 0.0
     classes: typing.List[str] = serpyco.field(default_factory=list)
+    skills_bonus: typing.List[str] = serpyco.field(default_factory=list)
 
     def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
         for ability in abilities:

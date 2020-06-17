@@ -13,6 +13,10 @@ class RollingError(Exception):
     pass
 
 
+class UserDisplayError(RollingError):
+    pass
+
+
 class SourceLoadError(RollingError):
     pass
 

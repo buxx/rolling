@@ -60,6 +60,7 @@
   clutter = 5.0
   actions = ["DROP_STUFF", "USE_AS_SHIELD", "NOT_USE_AS_SHIELD", "CONTINUE_STUFF_CONSTRUCTION"]
   shield = true
+  skills_bonus = ["shield_fight"]
   protect_estoc = 10
   protect_blunt = 10
   protect_sharp = 10
@@ -71,6 +72,7 @@
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
+  skills_bonus = ["spear_fight"]
   estoc = 10
   blunt = 0
   sharp = 0
@@ -83,6 +85,7 @@
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
+  skills_bonus = ["spear_fight"]
   estoc = 12
   blunt = 0
   sharp = 0
@@ -95,6 +98,7 @@
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
+  skills_bonus = ["spear_fight"]
   estoc = 11
   blunt = 0
   sharp = 0
@@ -107,6 +111,7 @@
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
+  skills_bonus = ["spear_fight"]
   estoc = 10
   blunt = 0
   sharp = 0
@@ -119,6 +124,7 @@
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
+  skills_bonus = ["haxe_fight"]
   estoc = 0
   blunt = 10
   sharp = 10

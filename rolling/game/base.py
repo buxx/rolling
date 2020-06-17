@@ -17,11 +17,15 @@ from rolling.model.build import BuildTurnRequireResourceDescription
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.extraction import ExtractableDescriptionModel
 from rolling.model.extraction import ExtractableResourceDescriptionModel
+from rolling.model.knowledge import DEFAULT_INSTRUCTOR_COEFF
+from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.material import MaterialDescriptionModel
 from rolling.model.measure import Unit
 from rolling.model.mix import RequiredResourceForMix
 from rolling.model.mix import ResourceMixDescription
 from rolling.model.resource import ResourceDescriptionModel
+from rolling.model.skill import DEFAULT_MAXIMUM_SKILL
+from rolling.model.skill import SkillDescription
 from rolling.model.stuff import StuffProperties
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.model.world import World
@@ -58,6 +62,8 @@ class GameConfig:
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
         self.turn_mode: TurnMode = TurnMode(config_dict["turn_mode"])
         self.cheats: typing.Dict[str, typing.List[str]] = config_dict.get("cheats")
+        self.create_character_skills: typing.List[str] = config_dict["create_character_skills"]
+        self.create_character_max_points: float = config_dict["create_character_max_points"]
 
         self.day_turn_every = None
         if self.turn_mode == TurnMode.DAY:
@@ -84,6 +90,10 @@ class GameConfig:
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
         self._fill_resource_actions(config_dict)
+        self._skills: typing.Dict[str, SkillDescription] = self._create_skills(config_dict)
+        self._knowledge: typing.Dict[str, KnowledgeDescription] = self._create_knowledges(
+            config_dict
+        )
 
     @property
     def folder_path(self) -> str:
@@ -120,6 +130,14 @@ class GameConfig:
     @property
     def builds(self) -> typing.Dict[str, BuildDescription]:
         return self._builds
+
+    @property
+    def skills(self) -> typing.Dict[str, SkillDescription]:
+        return self._skills
+
+    @property
+    def knowledge(self) -> typing.Dict[str, KnowledgeDescription]:
+        return self._knowledge
 
     def _create_character_effects(
         self, config_raw: dict
@@ -294,6 +312,29 @@ class GameConfig:
             )
 
         return builds
+
+    def _create_skills(self, config_raw: dict) -> typing.Dict[str, SkillDescription]:
+        return {
+            skill_id: SkillDescription(
+                id=skill_id,
+                name=skill_raw["name"],
+                default=skill_raw["default"],
+                maximum=skill_raw.get("maximum", DEFAULT_MAXIMUM_SKILL),
+            )
+            for skill_id, skill_raw in config_raw.get("skill", {}).items()
+        }
+
+    def _create_knowledges(self, config_raw: dict) -> typing.Dict[str, KnowledgeDescription]:
+        return {
+            knowledge_id: KnowledgeDescription(
+                id=knowledge_id,
+                name=knowledge_raw["name"],
+                ap_required=knowledge_raw["ap_required"],
+                instructor_coeff=knowledge_raw.get("instructor_coeff", DEFAULT_INSTRUCTOR_COEFF),
+                abilities=knowledge_raw.get("abilities", []),
+            )
+            for knowledge_id, knowledge_raw in config_raw.get("knowledge", {}).items()
+        }
 
 
 class Game:

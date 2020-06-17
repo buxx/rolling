@@ -9,6 +9,7 @@ from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
 
+from rolling.exception import UserDisplayError
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
@@ -45,6 +46,7 @@ def run(args: argparse.Namespace) -> None:
     server_logger.info("Configure web api")
     context = AiohttpContext(app, debug=args.debug, default_error_builder=ErrorBuilder())
     context.handle_exception(HTTPNotFound, http_code=404)
+    context.handle_exception(UserDisplayError, http_code=400)
     context.handle_exception(Exception, http_code=500)
     hapic.set_processor_class(RollingSerpycoProcessor)
     hapic.set_context(context)

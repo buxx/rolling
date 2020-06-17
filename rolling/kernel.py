@@ -27,6 +27,7 @@ from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.event import ZoneEvent
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.action import ActionFactory
+from rolling.server.document.character import CharacterDocument
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
@@ -304,6 +305,12 @@ class Kernel:
         except NoResultFound:
             self.server_db_session.add(UniverseStateDocument(turned_at=datetime.datetime.utcnow()))
             self.server_db_session.commit()
+
+        # Ensure all skills are present in db for each character
+        if self.server_db_session.query(CharacterDocument).count():
+            for row in self.server_db_session.query(CharacterDocument.id).all():
+                self.character_lib.ensure_skills_for_character(row[0])
+        self.server_db_session.commit()
 
     async def send_to_zone_sockets(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
         event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)

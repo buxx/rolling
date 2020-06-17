@@ -10,7 +10,6 @@ from rolling.exception import CantChangeZone
 from rolling.exception import ClientServerExchangeError
 from rolling.model.build import ZoneBuildModel
 from rolling.model.character import CharacterModel
-from rolling.model.character import CreateCharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneMapModel
@@ -21,7 +20,6 @@ from rolling.model.zone import ZoneTileTypeModel
 class HttpClient:
     def __init__(self, server_address: str) -> None:
         self._server_address = server_address
-        self._create_character_serializer = serpyco.Serializer(CreateCharacterModel)
         self._character_serializer = serpyco.Serializer(CharacterModel)
         self._characters_serializer = serpyco.Serializer(CharacterModel, many=True)
         self._stuffs_serializer = serpyco.Serializer(StuffModel, many=True)

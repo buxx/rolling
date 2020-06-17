@@ -18,13 +18,12 @@ from rolling.action.base import WithBuildAction
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.exception import CantMoveCharacter
+from rolling.exception import CantMoveCharacter, UserDisplayError
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
-from rolling.model.character import CreateCharacterModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetCharacterWithPathModel
@@ -48,7 +47,6 @@ from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.stuff import CharacterInventoryModel
-from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
@@ -59,7 +57,6 @@ from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
-from rolling.server.controller.url import POST_CHARACTER_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_CHARACTER_ACTION
@@ -69,13 +66,14 @@ from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import EmptyModel
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
 from rolling.util import quantity_to_str
+
+base_skills = ["strength", "perception", "endurance", "charism", "intelligence", "agility", "luck"]
 
 
 class CharacterController(BaseController):
@@ -89,18 +87,57 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.output_body(Description)
     async def _describe_create_character(self, request: Request) -> Description:
+        maximum_points = self._kernel.game.config.create_character_max_points
+        parts = [
+            Part(
+                text="Traits physionomiques"
+            ),
+        ]
+        for skill_id in base_skills:
+            skill_description = self._kernel.game.config.skills[skill_id]
+            parts.append(
+                Part(
+                    label=skill_description.name,
+                    type_=Type.NUMBER,
+                    default_value=str(skill_description.default),
+                    name=skill_id,
+                )
+            )
+
+        parts.append(
+            Part(
+                text="Spécialisations",
+            )
+        )
+
+        for skill_id in self._kernel.game.config.create_character_skills:
+            skill_description = self._kernel.game.config.skills[skill_id]
+            parts.append(
+                Part(
+                    label=skill_description.name,
+                    type_=Type.NUMBER,
+                    default_value=str(skill_description.default),
+                    name=skill_id,
+                )
+            )
+
         return Description(
-            title="Create your character",
+            title="Créer votre personnage",
             items=[
                 Part(
-                    text="It's your character who play this game. "
-                    "Prepare a beautiful story for him"
+                    text="C'est le moment de créer votre personnage. Ci-dessous, vous pouvez "
+                         f"répartir jusqu'à {maximum_points} points de compétences."
                 ),
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[*Part.from_dataclass_fields(CreateCharacterModel)]
-                    + [Part(go_back_zone=True)],
+                    items=[
+                        Part(
+                            label="Nom du personnage",
+                            type_=Type.NUMBER,
+                            name="name",
+                        ),
+                    ] + parts,
                 ),
             ],
         )
@@ -204,6 +241,44 @@ class CharacterController(BaseController):
                             default_value=str(doc.defend_allowed_loss_rate),
                         ),
                     ],
+                ),
+            ],
+            footer_links=[
+                Part(
+                    is_link=True,
+                    label="Caractéristiques et compétences",
+                    form_action=f"/character/{character.id}/skills_and_knowledge",
+                )
+            ],
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def skills_and_knowledge(self, request: Request, hapic_data: HapicData) -> Description:
+        # TODO: check same zone
+        character = self._character_lib.get(hapic_data.path.character_id)
+        items = [Part(text="# CARACTERISTIQUES")]
+
+        for skill_description in self._kernel.game.config.skills.values():
+            skill_value = character.get_skill_value(skill_description.id)
+            items.append(Part(text=f"{skill_description.name}: {skill_value}"))
+
+        items.append(Part(text="# COMPETENCES"))
+
+        for knowledge_description in self._kernel.game.config.knowledge.values():
+            if character.have_knowledge(knowledge_description.id):
+                items.append(Part(text=f"{knowledge_description.name}"))
+
+        return Description(
+            title=f"Caractéristiques et compétences de {character.name}",
+            items=items,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    label="Fiche personnage",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/card",
                 ),
             ],
         )
@@ -919,17 +994,33 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
-    @hapic.input_body(CreateCharacterModel)
-    @hapic.output_body(CharacterModel, default_http_code=201)
-    async def create(self, request: Request, hapic_data: HapicData) -> CharacterModel:
-        character_id = self._character_lib.create(hapic_data.body)
-        return self._character_lib.get(character_id)
-
-    @hapic.with_api_doc()
-    @hapic.input_body(CreateCharacterModel)
     @hapic.output_body(Description)
-    async def create_from_description(self, request: Request, hapic_data: HapicData) -> Description:
-        character_id = self._character_lib.create(hapic_data.body)
+    async def create_character_do(self, request: Request) -> Description:
+        data = await request.json()
+        skills: typing.Dict[str, float] = {}
+        skills_total = 0.0
+
+        for skill_id in base_skills + self._kernel.game.config.create_character_skills:
+            value = float(data[skill_id])
+
+            if value < 0.0:
+                raise UserDisplayError("Valeur négative refusée")
+
+            skills[skill_id] = value
+            skills_total += value
+
+        maximum_points = self._kernel.game.config.create_character_max_points
+        if skills_total > maximum_points:
+            raise UserDisplayError(
+                f"Vous avez choisis {skills_total} points au total ({maximum_points} max)"
+            )
+
+        if len(data["name"]) < 3 or len(data["name"]) > 21:
+            raise UserDisplayError(
+                f"Le nom du personnage doit faire entre 3 et 21 caractères"
+            )
+
+        character_id = self._character_lib.create(data["name"], skills)
         character_doc = self._kernel.character_lib.get_document(character_id)
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
@@ -1248,8 +1339,7 @@ class CharacterController(BaseController):
                 web.get("/_describe/character/{character_id}/events", self._describe_events),
                 web.post("/_describe/character/{character_id}/events", self._describe_events),
                 web.post("/_describe/character/{character_id}/story", self._describe_story),
-                web.post(POST_CHARACTER_URL, self.create),
-                web.post("/_describe/character/create/do", self.create_from_description),
+                web.post("/_describe/character/create/do", self.create_character_do),
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post(
@@ -1276,5 +1366,8 @@ class CharacterController(BaseController):
                 web.post("/character/{character_id}/post_mortem", self.get_post_mortem),
                 web.post("/character/{character_id}/AP", self.describe_ap),
                 web.post("/character/{character_id}/turn", self.describe_turn),
+                web.post(
+                    "/character/{character_id}/skills_and_knowledge", self.skills_and_knowledge
+                ),
             ]
         )

@@ -193,6 +193,7 @@ def xena(worldmapc_kernel: Kernel, default_character_competences: dict) -> Chara
     session = worldmapc_kernel.server_db_session
     session.add(xena)
     session.commit()
+    worldmapc_kernel.character_lib.ensure_skills_for_character(xena.id)
 
     return xena
 
@@ -214,6 +215,7 @@ def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
     session = worldmapc_kernel.server_db_session
     session.add(arthur)
     session.commit()
+    worldmapc_kernel.character_lib.ensure_skills_for_character(arthur.id)
 
     return arthur
 
@@ -229,6 +231,7 @@ def franck(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
     session = worldmapc_kernel.server_db_session
     session.add(franck)
     session.commit()
+    worldmapc_kernel.character_lib.ensure_skills_for_character(franck.id)
 
     return franck
 
@@ -330,6 +333,7 @@ def _create_soldiers(
                 status_id=MEMBER_STATUS[0] if not warlord else WARLORD_STATUS[0],
             )
         )
+        kernel.character_lib.ensure_skills_for_character(doc.id)
         models.append(kernel.character_lib.document_to_model(doc))
 
     kernel.server_db_session.commit()

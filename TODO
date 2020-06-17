@@ -1,4 +1,2 @@
-* J'ai l'impression que les prod obtenues (ou demandées pour un mur de pierre par ex) sont pas cohérentes (prod de 3/4.000 kg de pierre en 24h ^^)
-* METTRE ACTION PAR QUANTITE PARTOUT OU POSSIBLE (SUR STUFF) POUR LE MOMENT (ex. ramasser objets similaires ?)
-* Bordure gauche, case du haut. Ca fait partir au NO ! au lieu de O (ça doit buggé partout ça)
-* le serveur peut préciser les parts qui sont en fin de page (typiquement les retours) de facon a mieux placer le submit
+* Faire un tour sur les skills pour re-réfléchir à leur impacts
+* BUG: déposer une arme ne l'enlève pas en tant qu'arme (probablement idem

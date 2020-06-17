@@ -21,6 +21,8 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
 
+HUNTING_AND_GATHERING_SKILL_ID = "hunting_gathering"
+
 
 class SearchFoodAction(CharacterAction):
     input_model = EmptyModel
@@ -78,6 +80,7 @@ class SearchFoodAction(CharacterAction):
         zone_state = self._kernel.game.world_manager.get_zone_state(
             world_row_i=character.world_row_i, world_col_i=character.world_col_i
         )
+        minimum_by_skill = 10 * character.get_skill_value(HUNTING_AND_GATHERING_SKILL_ID)
 
         for production in productions:
             if "resource" in production:
@@ -103,22 +106,21 @@ class SearchFoodAction(CharacterAction):
         found_stuff_ids: typing.List[str] = []
 
         for resource_id in zone_available_production_resource_ids:
-            # TODO BS 2019-09-26: modify probability here if skill or stuff helping
             probability = production_per_resource_ids[resource_id]["probability"]
+            probability += minimum_by_skill
             if random.randint(0, 100) <= probability:
                 found_resource_ids.append(resource_id)
 
         for stuff_id in zone_available_production_stuff_ids:
-            # TODO BS 2019-09-26: modify probability here if skill or stuff helping
             probability = production_per_stuff_ids[stuff_id]["probability"]
+            probability += minimum_by_skill
             if random.randint(0, 100) <= probability:
                 found_stuff_ids.append(stuff_id)
 
         result_resource_strs = []
         for resource_id in found_resource_ids:
-            # TODO BS 2019-09-26: Modify here quantity found with skills, competences, stuffs ...
             resource_description = self._kernel.game.config.resources[resource_id]
-            quantity_found_coeff = random.randint(0, 100) / 100
+            quantity_found_coeff = max(minimum_by_skill, random.randint(0, 100)) / 100
             quantity_found = (
                 production_per_resource_ids[resource_id]["quantity"] * quantity_found_coeff
             )
@@ -142,9 +144,8 @@ class SearchFoodAction(CharacterAction):
 
         result_stuff_strs = []
         for stuff_id in found_stuff_ids:
-            # TODO BS 2019-09-26: Modify here quantity found with skills, competences, stuffs ...
             stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
-            quantity_found_coeff = random.randint(0, 100) / 100
+            quantity_found_coeff = max(minimum_by_skill, random.randint(0, 100)) / 100
             quantity_found = round(
                 production_per_stuff_ids[stuff_id]["quantity"] * quantity_found_coeff
             )

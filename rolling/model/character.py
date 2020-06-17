@@ -6,14 +6,16 @@ import typing
 import serpyco
 
 from rolling.exception import RollingError
+from rolling.model.knowledge import KnowledgeDescription
+from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import StuffModel
 from rolling.server.document.business import OfferItemPosition
-from rolling.server.document.business import OfferOperand
 from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject
     from rolling.kernel import Kernel
+    from rolling.model.fight import Weapon
 
 
 MINIMUM_BEFORE_TIRED = 49
@@ -21,14 +23,8 @@ MINIMUM_BEFORE_EXHAUSTED = 79
 FIGHT_AP_CONSUME = 3
 FIGHT_LP_REQUIRE = 1.0
 FIGHT_TIREDNESS_INCREASE = 35
-
-
-@dataclasses.dataclass
-class CreateCharacterModel:
-    name: str = serpyco.string_field(metadata={"label": "Name"}, min_length=2, max_length=32)
-    max_life_comp: float = serpyco.number_field(
-        metadata={"label": "Max life points (max 5.0)"}, minimum=1, maximum=5
-    )
+STRENGTH_SKILL_ID = "strength"
+MAXIMUM_FORCE_WEAPON_MULTIPLIER = 2.0
 
 
 @dataclasses.dataclass
@@ -296,7 +292,9 @@ class CharacterModel:
     action_points: float
     attack_allowed_loss_rate: int
     defend_allowed_loss_rate: int
-    # FIXME BS 2019-10-14: base code of that
+    skills: typing.Dict[str, CharacterSkillModel]
+    knowledges: typing.Dict[str, KnowledgeDescription]
+    # NOTE: must be feed (like with knowledges) at creation
     ability_ids: typing.List[str] = serpyco.field(default_factory=list)
 
     world_col_i: int = None
@@ -352,8 +350,7 @@ class CharacterModel:
 
     @property
     def force_weapon_multiplier(self) -> float:
-        # FIXME: character spec
-        return 1.0
+        return min(MAXIMUM_FORCE_WEAPON_MULTIPLIER, self.get_skill_value(STRENGTH_SKILL_ID))
 
     @property
     def display_object(self) -> "DisplayObject":
@@ -363,7 +360,7 @@ class CharacterModel:
         return self._display_object
 
     def get_weight_capacity(self, kernel: "Kernel") -> float:
-        return kernel.game.config.default_weight_capacity
+        return kernel.game.config.default_weight_capacity * self.get_skill_value(STRENGTH_SKILL_ID)
 
     def get_clutter_capacity(self, kernel: "Kernel") -> float:
         return kernel.game.config.default_clutter_capacity + sum(
@@ -375,6 +372,20 @@ class CharacterModel:
             if ability in self.ability_ids:
                 return True
         return False
+
+    def get_skill_value(self, skill_id: str) -> float:
+        return self.skills[skill_id].value
+
+    def have_knowledge(self, knowledge_id: str) -> bool:
+        return knowledge_id in self.knowledges
+
+    def get_with_weapon_coeff(self, weapon: "Weapon", kernel: "Kernel") -> float:
+        better_coeff = 1.0
+        for bonus_skill_id in weapon.get_bonus_with_skills(kernel):
+            with_this_skill_bonus = self.get_skill_value(bonus_skill_id) / 2
+            if with_this_skill_bonus > better_coeff:
+                better_coeff = with_this_skill_bonus
+        return better_coeff
 
 
 @dataclasses.dataclass

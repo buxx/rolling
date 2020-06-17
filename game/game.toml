@@ -11,6 +11,8 @@ default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
 cheats = {"*"=["increase_ap"]}
+create_character_skills = ["crafts", "hunting_gathering", "tannery"]
+create_character_max_points = 13.0
 
 [materials]
   [materials.LIQUID]
@@ -34,6 +36,85 @@ cheats = {"*"=["increase_ap"]}
   [materials.GAS]
     name = "Gazeu"
 
+[skill]
+[skill.strength]  # required by system (max weight)
+  name = "Force"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.perception]  # required by system
+  name = "Perception"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.endurance]  # required by system
+  name = "Endurance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.charism]  # required by system
+  name = "Charisme"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.intelligence]  # required by system (craft)
+  name = "Intelligence"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.agility]  # required by system (fight)
+  name = "Agilité"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.luck]  # required by system
+  name = "Chance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.crafts]  # required by system (craft)
+  name = "Artisanat"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.hunting_gathering]  # required by action "SEARCH_FOOD"
+  name = "Chasse & Ceuillette"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.tannery]
+  name = "Tannerie"
+  type = "2.Metiers2"
+  default = 0.0
+
+[skill.spear_fight]
+  name = "Combat a la lance"
+  type = "3.Spécifique"
+  default = 0.0
+
+[skill.haxe_fight]
+  name = "Combat a la hache"
+  type = "3.Spécifique"
+  default = 0.0
+
+[skill.shield_fight]
+  name = "Combat au bouclier"
+  type = "3.Spécifique"
+  default = 0.0
+
+# TODO: s'aquiert en boolean
+[knowledge]
+[knowledge.pottery]
+  name = "Poterie"
+  ap_required = 100.0
+  instructor_coeff = 3.0
+  abilities = ["MAKE_POTTERY"]
+
+[knowledge.blacksmith]
+  name = "Forgeron"
+  ap_required = 300.0
+  abilities = ["MAKE_BASE_BLACKSMITH"]
+
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
   name = "Cuisson"
@@ -41,6 +122,10 @@ cheats = {"*"=["increase_ap"]}
   name = "Se battre"
 [ability.HUNT_SMALL_GAME]
   name = "Chasse de petit gibier"
+[ability.MAKE_POTTERY]
+  name = "Frabrication de poterie"
+[ability.MAKE_BASE_BLACKSMITH]
+  name = "Maitrise de la forge"
 
 [character_effects]
   [character_effects.THIRSTY_SATISFIED]

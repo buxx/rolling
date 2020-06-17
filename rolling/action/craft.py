@@ -18,6 +18,7 @@ from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.model.skill import DEFAULT_MAXIMUM_SKILL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
 from rolling.types import ActionType
@@ -200,9 +201,11 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         resource_id: str,
         input_: typing.Optional[CraftInput] = None,
     ) -> typing.Optional[float]:
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
+        base_cost = max(self._description.base_cost / 2, self._description.base_cost - bonus)
         if input_ and input_.quantity:
-            return self._description.base_cost * input_.quantity
-        return self._description.base_cost
+            return base_cost * input_.quantity
+        return base_cost
 
     def perform(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
@@ -276,9 +279,11 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         stuff: "StuffModel",
         input_: typing.Optional[typing.Any] = None,
     ) -> typing.Optional[float]:
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
+        base_cost = max(self._description.base_cost / 2, self._description.base_cost - bonus)
         if input_ and input_.quantity:
-            return self._description.base_cost * input_.quantity
-        return self._description.base_cost
+            return base_cost * input_.quantity
+        return base_cost
 
     def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
@@ -601,7 +606,10 @@ class ContinueStuffConstructionAction(WithStuffAction):
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
     ) -> Description:
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
+        bonus_divider = max(1.0, (bonus * 2) / DEFAULT_MAXIMUM_SKILL)
         remain_ap = stuff.ap_required - stuff.ap_spent
+        remain_ap_for_character = remain_ap / bonus_divider
 
         if not input_.ap:
             return Description(
@@ -618,7 +626,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                             stuff_id=stuff.id,
                         ),
                         items=[
-                            Part(text=f"Il reste {round(remain_ap, 3)} PA à passer"),
+                            Part(text=f"Il reste {round(remain_ap, 3)} PA à passer ({round(remain_ap_for_character, 3)} avec vos bonus)"),
                             Part(
                                 label=f"Combien de points d'actions dépenser ?",
                                 type_=Type.NUMBER,
@@ -629,7 +637,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                 ],
             )
 
-        consume_ap = min(remain_ap, input_.ap)
+        consume_ap = min(remain_ap, input_.ap * bonus_divider)
         stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff.id)
         stuff_doc.ap_spent = float(stuff_doc.ap_spent) + consume_ap
         self._kernel.character_lib.reduce_action_points(character.id, consume_ap, commit=False)

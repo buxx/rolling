@@ -113,6 +113,7 @@ class SearchMaterialAction(CharacterAction):
             quantity_per_hour = produce["quantity_per_hour"]
             random_loss = produce["random_loss"]
             quantity_found = ap_spent * quantity_per_hour
+            # FIXME BS NOW: bonus with action config skill ?
             quantity_found = quantity_found - (
                 quantity_found * random.randint(0, random_loss) / 100
             )

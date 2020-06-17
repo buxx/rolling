@@ -8,10 +8,59 @@ default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 3600
+create_character_skills = ["crafts", "hunting_gathering", "tannery"]
+create_character_max_points = 13.0
 
 [materials]
   [materials.MIDDLE_PIECE]
     name = "Moyen morceau"
+
+
+[skill]
+[skill.strength]  # required by system (max weight)
+  name = "Force"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.perception]  # required by system
+  name = "Perception"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.endurance]  # required by system
+  name = "Endurance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.charism]  # required by system
+  name = "Charisme"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.intelligence]  # required by system (craft)
+  name = "Intelligence"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.agility]  # required by system (fight)
+  name = "Agilité"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.luck]  # required by system
+  name = "Chance"
+  type = "0.Physionomique"
+  default = 1.0
+
+[skill.crafts]  # required by system (craft)
+  name = "Artisanat"
+  type = "1.Metiers"
+  default = 1.0
+
+[skill.hunting_gathering]  # required by action "SEARCH_FOOD"
+  name = "Chasse & Ceuillette"
+  type = "1.Metiers"
+  default = 1.0
 
 [ability]
 

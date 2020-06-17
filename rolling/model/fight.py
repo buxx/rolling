@@ -9,6 +9,9 @@ from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.server.document.affinity import AffinityDocument
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
 
 @dataclasses.dataclass
 class DefendDescription:
@@ -88,6 +91,14 @@ class Weapon:
         if self.stuff:
             return self.stuff.protect_blunt
         return 0
+
+    def get_bonus_with_skills(self, kernel: "Kernel") -> typing.List[str]:
+        if self.stuff:
+            stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
+                self.stuff.stuff_id
+            )
+            return stuff_properties.skills_bonus
+        return []
 
     def _get_around_percent_absorb(
         self, weapon: "Weapon"
