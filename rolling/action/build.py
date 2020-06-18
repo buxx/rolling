@@ -6,6 +6,7 @@ import serpyco
 
 from guilang.description import Description
 from guilang.description import Part
+from guilang.description import RequestClicks
 from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
@@ -16,10 +17,16 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import MissingResource
 from rolling.exception import NoCarriedResource
-from rolling.exception import NotEnoughActionPoints
 from rolling.exception import NotEnoughResource
 from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildRequireResourceDescription
+from rolling.model.build import ZoneBuildModel
+from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.event import ClickActionData
+from rolling.model.event import NewBuildData
+from rolling.model.event import NewResumeTextData
+from rolling.model.event import ZoneEvent
+from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.controller.url import DESCRIBE_BUILD
@@ -455,9 +462,15 @@ class ConstructBuildAction(WithBuildAction):
         )
 
 
+@dataclasses.dataclass
+class BuildModel:
+    row_i: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    col_i: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
 class BuildAction(CharacterAction):
-    input_model = EmptyModel
-    input_model_serializer = serpyco.Serializer(EmptyModel)
+    input_model = BuildModel
+    input_model_serializer = serpyco.Serializer(BuildModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -468,12 +481,15 @@ class BuildAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: EmptyModel) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: BuildModel) -> None:
         check_common_is_possible(
             kernel=self._kernel, description=self._description, character=character
         )
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
+
+        if character.action_points < self.get_cost(character, input_):
+            raise ImpossibleAction("Pas assez de points d'actions")
 
         for require in build_description.build_require_resources:
             if not self._kernel.resource_lib.have_resource(
@@ -496,24 +512,51 @@ class BuildAction(CharacterAction):
         return [
             CharacterActionLink(
                 name=build_description.name,
-                link=get_character_action_url(
-                    character_id=character.id,
-                    action_type=ActionType.BUILD,
-                    action_description_id=self._description.id,
-                    query_params={},
-                ),
+                link=self.get_base_url(character),
                 cost=self.get_cost(character),
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: EmptyModel) -> Description:
+    def get_base_url(self, character: "CharacterModel") -> str:
+        return get_character_action_url(
+            character_id=character.id,
+            action_type=ActionType.BUILD,
+            action_description_id=self._description.id,
+            query_params={},
+        )
+
+    def perform(self, character: "CharacterModel", input_: BuildModel) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
+        return Description(
+            request_clicks=RequestClicks(
+                base_url=self.get_base_url(character),
+                cursor_classes=build_description.classes,
+                many=build_description.many,
+            )
+        )
+
+    def perform_from_event(
+        self, character: "CharacterModel", input_: BuildModel
+    ) -> typing.Tuple[typing.List[ZoneEvent], typing.List[ZoneEvent]]:
+        assert input_.row_i
+        assert input_.col_i
+        build_id = self._description.properties["build_id"]
+        build_description = self._kernel.game.config.builds[build_id]
+
+        if self._kernel.build_lib.get_zone_build(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
+        ):
+            return [], []
+
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
-            zone_row_i=character.zone_row_i,
-            zone_col_i=character.zone_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
             build_id=build_description.id,
             under_construction=False,
             commit=False,
@@ -530,19 +573,21 @@ class BuildAction(CharacterAction):
             )
         self._kernel.server_db_session.commit()
 
-        return Description(
-            title=f"{build_description.name} construit",
-            items=[],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
+        return (
+            [
+                ZoneEvent(
+                    type=ZoneEventType.NEW_BUILD,
+                    data=NewBuildData(
+                        build=ZoneBuildModelContainer(doc=build_doc, desc=build_description)
                     ),
-                    classes=["primary"],
-                ),
+                )
+            ],
+            [
+                ZoneEvent(
+                    type=ZoneEventType.NEW_RESUME_TEXT,
+                    data=NewResumeTextData(
+                        resume=self._kernel.character_lib.get_resume_text(character.id)
+                    ),
+                )
             ],
         )

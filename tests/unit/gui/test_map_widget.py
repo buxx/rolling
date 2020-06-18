@@ -83,7 +83,9 @@ def controller(
 
 @pytest.fixture
 def franck_model(default_character_competences: dict) -> CharacterModel:
-    return CharacterModel(id="abc", name="franck", **default_character_competences, skills={}, knowledges=[])
+    return CharacterModel(
+        id="abc", name="franck", **default_character_competences, skills={}, knowledges=[]
+    )
 
 
 class TestZoneMapWidget:

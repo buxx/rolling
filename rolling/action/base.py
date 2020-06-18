@@ -7,6 +7,8 @@ from urllib.parse import urlencode
 import serpyco
 
 from guilang.description import Description
+from rolling.model.event import ZoneEvent
+from rolling.model.event import ZoneEventData
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_CHARACTER_ACTION
@@ -249,6 +251,14 @@ class CharacterAction(Action):
 
     @abc.abstractmethod
     def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+        pass
+
+    def perform_from_event(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> typing.Tuple[typing.List[ZoneEvent], typing.List[ZoneEvent]]:
+        """
+        return: [0]: all zone websockets; [1]: sender socket
+        """
         pass
 
     def get_cost(

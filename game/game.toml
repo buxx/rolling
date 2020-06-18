@@ -623,7 +623,6 @@ create_character_max_points = 13.0
     cost = 0.0  # depending on build, progres ...
 
   [ACTIONS.BUILD_CAMP_FIRE]
-    # FIXME BS: add common (to begin and continue progress)
     actions = ["BEGIN_BUILD"]
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
@@ -967,6 +966,7 @@ create_character_max_points = 13.0
   abilities = ["HEAT_UP_LOW_TEMP"]
   cost = 2.0
   classes = ["CAMPFIRE"]
+  many = false
 [build.BRANCHES_FENCE]
   name = "Palissade de branches"
   char = "%"
@@ -977,6 +977,7 @@ create_character_max_points = 13.0
   abilities = []
   cost = 0.0
   classes = ["WALL"]
+  many = true
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
@@ -987,6 +988,7 @@ create_character_max_points = 13.0
   abilities = []
   cost = 0.0
   classes = ["WALL"]
+  many = true
 [build.STONE_WALL]
   name = "Mur de pierre"
   char = "§"
@@ -997,3 +999,4 @@ create_character_max_points = 13.0
   abilities = []
   cost = 0.0
   classes = ["WALL"]
+  many = true

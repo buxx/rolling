@@ -43,6 +43,7 @@ class BuildDescription:
     ability_ids: typing.List[str]
     cost: float
     classes: typing.List[str] = serpyco.field(default_factory=list)
+    many: bool = False
 
 
 @dataclasses.dataclass

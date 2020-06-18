@@ -626,7 +626,9 @@ class ContinueStuffConstructionAction(WithStuffAction):
                             stuff_id=stuff.id,
                         ),
                         items=[
-                            Part(text=f"Il reste {round(remain_ap, 3)} PA à passer ({round(remain_ap_for_character, 3)} avec vos bonus)"),
+                            Part(
+                                text=f"Il reste {round(remain_ap, 3)} PA à passer ({round(remain_ap_for_character, 3)} avec vos bonus)"
+                            ),
                             Part(
                                 label=f"Combien de points d'actions dépenser ?",
                                 type_=Type.NUMBER,

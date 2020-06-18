@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 import math
 import os
 import typing
@@ -44,7 +45,9 @@ from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
+from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
+from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_coming_from
 from rolling.util import get_on_and_around_coordinates
 from rolling.util import get_opposite_zone_place
@@ -928,21 +931,24 @@ class CharacterLib:
 
         return character_actions
 
-    def create_skill_doc(self, character_id: str, skill_id: str, value: float) -> CharacterSkillDocument:
+    def create_skill_doc(
+        self, character_id: str, skill_id: str, value: float
+    ) -> CharacterSkillDocument:
         # find matching counter for default_value
         counter = 1
         while math.log(counter, DEFAULT_LOG_BASE) < value:
             counter += 1
 
         return CharacterSkillDocument(
-            skill_id=skill_id,
-            character_id=character_id,
-            value=str(value),
-            counter=counter,
+            skill_id=skill_id, character_id=character_id, value=str(value), counter=counter
         )
 
-    def increase_skill(self, character_id: str, skill_id: str, increment: int, commit: bool = True) -> None:
-        skill_doc: CharacterSkillDocument = self._kernel.server_db_session.query(CharacterSkillDocument).filter(
+    def increase_skill(
+        self, character_id: str, skill_id: str, increment: int, commit: bool = True
+    ) -> None:
+        skill_doc: CharacterSkillDocument = self._kernel.server_db_session.query(
+            CharacterSkillDocument
+        ).filter(
             CharacterSkillDocument.character_id == character_id,
             CharacterSkillDocument.skill_id == skill_id,
         )
@@ -952,3 +958,36 @@ class CharacterLib:
         self._kernel.server_db_session.add(skill_doc)
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_next_turn_str_value(self) -> str:
+        last_state = self._kernel.universe_lib.get_last_state()
+        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
+        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
+        m, s = divmod(next_turn_in_seconds, 60)
+        h, m = divmod(m, 60)
+        return f"{h}h{m}m"
+
+    def get_resume_text(
+        self, character_id: str
+    ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
+        character = self.get(character_id)
+
+        hungry = "oui" if character.feel_hungry else "non"
+        thirsty = "oui" if character.feel_thirsty else "non"
+        next_turn_in_str = self.get_next_turn_str_value()
+
+        can_drink_str = "Non"
+        if character_can_drink_in_its_zone(
+            self._kernel, character
+        ) or get_character_stuff_filled_with_water(self._kernel, character.id):
+            can_drink_str = "Oui"
+
+        return [
+            (f"PV: {round(character.life_points, 1)}", None),
+            (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
+            (f"Faim: {hungry}", None),
+            (f"Soif: {thirsty}", None),
+            ("", None),
+            (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
+            (f"De quoi boire: {can_drink_str}", None),
+        ]

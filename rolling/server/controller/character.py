@@ -18,9 +18,10 @@ from rolling.action.base import WithBuildAction
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
-from rolling.exception import CantMoveCharacter, UserDisplayError
+from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
+from rolling.exception import UserDisplayError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
@@ -88,11 +89,7 @@ class CharacterController(BaseController):
     @hapic.output_body(Description)
     async def _describe_create_character(self, request: Request) -> Description:
         maximum_points = self._kernel.game.config.create_character_max_points
-        parts = [
-            Part(
-                text="Traits physionomiques"
-            ),
-        ]
+        parts = [Part(text="Traits physionomiques")]
         for skill_id in base_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
             parts.append(
@@ -104,11 +101,7 @@ class CharacterController(BaseController):
                 )
             )
 
-        parts.append(
-            Part(
-                text="Spécialisations",
-            )
-        )
+        parts.append(Part(text="Spécialisations"))
 
         for skill_id in self._kernel.game.config.create_character_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
@@ -126,18 +119,12 @@ class CharacterController(BaseController):
             items=[
                 Part(
                     text="C'est le moment de créer votre personnage. Ci-dessous, vous pouvez "
-                         f"répartir jusqu'à {maximum_points} points de compétences."
+                    f"répartir jusqu'à {maximum_points} points de compétences."
                 ),
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[
-                        Part(
-                            label="Nom du personnage",
-                            type_=Type.NUMBER,
-                            name="name",
-                        ),
-                    ] + parts,
+                    items=[Part(label="Nom du personnage", type_=Type.NUMBER, name="name")] + parts,
                 ),
             ],
         )
@@ -1016,9 +1003,7 @@ class CharacterController(BaseController):
             )
 
         if len(data["name"]) < 3 or len(data["name"]) > 21:
-            raise UserDisplayError(
-                f"Le nom du personnage doit faire entre 3 et 21 caractères"
-            )
+            raise UserDisplayError(f"Le nom du personnage doit faire entre 3 et 21 caractères")
 
         character_id = self._character_lib.create(data["name"], skills)
         character_doc = self._kernel.character_lib.get_document(character_id)
@@ -1186,40 +1171,12 @@ class CharacterController(BaseController):
             clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
         )
 
-    def _get_next_turn_str_value(self) -> str:
-        last_state = self._kernel.universe_lib.get_last_state()
-        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
-        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
-        m, s = divmod(next_turn_in_seconds, 60)
-        h, m = divmod(m, 60)
-        return f"{h}h{m}m"
-
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ListOfStrModel)
     async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfStrModel:
-        character = self._character_lib.get(hapic_data.path.character_id)
-
-        hungry = "oui" if character.feel_hungry else "non"
-        thirsty = "oui" if character.feel_thirsty else "non"
-        next_turn_in_str = self._get_next_turn_str_value()
-
-        can_drink_str = "Non"
-        if character_can_drink_in_its_zone(
-            self._kernel, character
-        ) or get_character_stuff_filled_with_water(self._kernel, character.id):
-            can_drink_str = "Oui"
-
         return ListOfStrModel(
-            [
-                (f"PV: {round(character.life_points, 1)}", None),
-                (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
-                (f"Faim: {hungry}", None),
-                (f"Soif: {thirsty}", None),
-                ("", None),
-                (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
-                (f"De quoi boire: {can_drink_str}", None),
-            ]
+            self._kernel.character_lib.get_resume_text(hapic_data.path.character_id)
         )
 
     @hapic.with_api_doc()
@@ -1282,7 +1239,7 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def describe_turn(self, request: Request, hapic_data: HapicData) -> Description:
-        next_turn_in_str = self._get_next_turn_str_value()
+        next_turn_in_str = self._kernel.character_lib.get_next_turn_str_value()
         return Description(
             title=f"Passage de tour",
             items=[

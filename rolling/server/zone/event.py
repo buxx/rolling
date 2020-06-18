@@ -5,9 +5,11 @@ import typing
 from aiohttp import web
 
 from rolling.exception import DisconnectClient
+from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
 from rolling.log import server_logger
 from rolling.model.character import CharacterModel
+from rolling.model.event import ClickActionData
 from rolling.model.event import ClientRequireAroundData
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import ThereIsAroundData
@@ -22,6 +24,7 @@ from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.document.build import BuildDocument
 from rolling.server.lib.character import CharacterLib
+from rolling.types import ActionType
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
@@ -204,6 +207,57 @@ class ThereIsAroundProcessor(EventProcessor):
         await sender_socket.send_str(event_str)
 
 
+class ClickActionProcessor(EventProcessor):
+    async def _process(
+        self,
+        row_i: int,
+        col_i: int,
+        event: ZoneEvent[ClickActionData],
+        sender_socket: web.WebSocketResponse,
+    ) -> None:
+        # FIXME Experimental way to identify action ...for now, only manage build ...
+        path = event.data.base_url.split("?")[0]
+        parts = path.split("/")
+        character_id: str = parts[2]
+        build_description_id: str = parts[5]
+        character = self._kernel.character_lib.get(character_id)
+
+        # FIXME BS: use dicts instead list for action descriptions
+        description = next(
+            ad
+            for ad in self._kernel.game.config.actions[ActionType.BUILD]
+            if ad.id == build_description_id
+        )
+        action = self._kernel.action_factory.get_build_action(description)
+        input_ = action.input_model_serializer.load(event.data.to_dict())
+        try:
+            action.check_request_is_possible(character, input_)
+            zone_events, sender_events = action.perform_from_event(character, input_)
+        except ImpossibleAction as exc:
+            # TODO BS: send event error
+            server_logger.error(f"impossible action {build_description_id}: {str(exc)}")
+            return
+
+        for zone_event in zone_events:
+            event_str = self._event_serializer_factory.get_serializer(zone_event.type).dump_json(
+                zone_event
+            )
+            for socket in self._zone_events_manager.get_sockets(row_i, col_i):
+                server_logger.debug(f"Send event on socket: {event_str}")
+
+                try:
+                    await socket.send_str(event_str)
+                except Exception as exc:
+                    server_logger.exception(exc)
+
+        for sender_event in sender_events:
+            event_str = self._event_serializer_factory.get_serializer(sender_event.type).dump_json(
+                sender_event
+            )
+            server_logger.debug(f"Send event on socket: {event_str}")
+            await sender_socket.send_str(event_str)
+
+
 class EventProcessorFactory:
     def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
@@ -212,6 +266,7 @@ class EventProcessorFactory:
             (ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor),
             (ZoneEventType.CLIENT_WANT_CLOSE, ClientWantCloseProcessor),
             (ZoneEventType.CLIENT_REQUIRE_AROUND, ThereIsAroundProcessor),
+            (ZoneEventType.CLICK_ACTION_EVENT, ClickActionProcessor),
         ]:
             self._processors[zone_event_type] = processor_type(kernel, zone_events_manager)
 

@@ -60,6 +60,13 @@ class Part:
 
 
 @dataclasses.dataclass
+class RequestClicks:
+    base_url: str
+    cursor_classes: typing.List[str]
+    many: bool = False
+
+
+@dataclasses.dataclass
 class Description:
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
@@ -72,3 +79,4 @@ class Description:
     redirect: typing.Optional[str] = None
     force_back_url: typing.Optional[str] = None
     can_be_back_url: bool = False
+    request_clicks: typing.Optional[RequestClicks] = None
