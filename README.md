@@ -1,18 +1,14 @@
 # Rolling
 
-A [role game engine](https://redbricks.games/home/rolling-117).
+Server side of [rolling](https://redbricks.games/home/rolling-117) game.
+
+![Rollgui screenshot](https://redbricks.games/uploads/117/game/Coffee_231_illustration.png)
 
 # Development
 
-## Os requires
-
-On debian-like OS, need following debian packages:
-
-    libsqlite3-dev
-
 ## Python environment require
 
-A python3.7+ required. To install required packages:
+A python3.7+ is required and **prefer a virtual env**. To install required packages:
 
     pip install --upgrade pip setuptools
     python setup.py develop
@@ -20,6 +16,48 @@ A python3.7+ required. To install required packages:
 Then install dev packages:
 
     pip install -e ".[dev]"
+
+## Generate a map
+
+Need [Rust](https://www.rust-lang.org/learn/get-started)
+
+Write a text file wontaing, for example, myworldmap.txt
+
+```
+::LEGEND
+~ SEA*
+^ MOUNTAIN
+ፆ JUNGLE
+∩ HILL
+⡩ BEACH
+⠃ PLAIN
+::META
+SPAWN:RANDOM:BEACH,
+::GEO
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~ፆ^ፆፆ~~~~~~~~~~~~
+~~~~~~~~ፆ^^^∩ፆ~~~~~~~~~~~
+~~~~~~~⡩ፆ∩∩∩∩⡩~~~~~~~~~~~
+~~~~~~⡩ፆፆ∩∩∩ፆፆ⡩~~~~~~~~~~
+~~~~~~⡩ፆፆፆፆፆፆፆ⡩~~~~~~~~~~
+~~~~~~⡩⠃⠃⠃ፆፆፆፆ⡩~~~~~~~~~~
+~~~~~~⡩⠃⠃⠃⠃⠃⠃⡩~~~~~~~~~~~
+~~~~~~~⡩⠃⠃⠃⠃⡩~~~~~~~~~~~~
+~~~~~~~~⡩⡩⡩⡩~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+```
+
+Then, generate zones maps:
+
+    cargo run myworldmap.txt --height 64 --width 64 --output-dir myzones
+
+## Start server
+
+    rolling-server --host 127.0.0.1 --port 5002 --debug ./myworldmap.txt ./myzones ./game
+
+Where `./myworldmap.txt` is previously created world map text file, `./myzones` previously generated zones folder and `./game` the config folder (you can use [repository folder](https://github.com/buxx/rolling/tree/master/game) or copied and modified one).
 
 # Roadmap (fr)
 
