@@ -1,6 +1,6 @@
 # Rolling
 
-Server side of [rolling](https://redbricks.games/home/rolling-117) game.
+Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [rollgui](https://github.com/buxx/rollgui) for client side.
 
 ![Rollgui screenshot](https://redbricks.games/uploads/117/game/Coffee_231_illustration.png)
 
