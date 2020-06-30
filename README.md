@@ -21,7 +21,7 @@ Then install dev packages:
 
 Need [Rust](https://www.rust-lang.org/learn/get-started)
 
-Write a text file wontaing, for example, myworldmap.txt
+Write a text file (ex. myworldmap.txt) containg, for example:
 
 ```
 ::LEGEND
