@@ -3,7 +3,7 @@ aioresponses==0.6.4
 apispec==3.3.1
 apispec_marshmallow_advanced==0.4
 apispec_serpyco==0.19
-appdirs==1.4.3
+appdirs==1.4.4
 async-timeout==3.0.1
 atomicwrites==1.2.1
 attrs==18.2.0
