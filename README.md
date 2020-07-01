@@ -149,6 +149,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Débourrage (pour animaux de monte)
   * ☐ Monte d'animaux (véhicules)
   * ☐ Remorques
+  * ☐ Le poids transporté influent sur les durées de déplacement au lieu de l'empếcher "au gramme près"
 
 * Univers
   * ☑ Décors de base
