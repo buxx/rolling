@@ -65,7 +65,6 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
 
 * Légende
   * ☐ A faire
-  * … En cours
   * ☑ Fait
   * **prochaines fonctionnalités développées**
 
@@ -120,6 +119,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Proposer de suivre
   * ☐ Proposer de faire une action a un autre perso
   * ☐ Cultures
+  * ☐ **Chasse: Proposer des actions groupés sur les animaux (transformation en viande, peau, etc)**
 
 * Gameplay
   * ☐ Restreindre l'accès a des informations comme l'existence des affinités, nom de zone, etc et permettre leurs transmissions

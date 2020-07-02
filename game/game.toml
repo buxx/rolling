@@ -157,16 +157,8 @@ create_character_max_points = 13.0
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.RED_WINE]
-    name = "Vin rouge"
-    weight=1000.0
-    material="LIQUID"
-    unit = "L"
-    clutter = 1.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.WHITE_WINE]
-    name = "Vin blanc"
+  [resources.WINE]
+    name = "Vin"
     weight=1000.0
     material="LIQUID"
     unit = "L"
@@ -181,22 +173,6 @@ create_character_max_points = 13.0
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.PEBBLES]
-    name = "Galets"
-    weight=2000.0
-    material="LITTLE_OBJECT"
-    unit = "L"
-    clutter = 1.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.AIR]
-    name = "Air"
-    weight=0.0
-    material="GAS"
-    unit = "L"
-    clutter = 1.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
   [resources.DIRT]
     name = "Terre"
     weight=1500.0
@@ -206,19 +182,11 @@ create_character_max_points = 13.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.WET_DIRT]
-    name = "Terre mouillé"
+    name = "Terre crue"
     weight=2000.0
     material="SANDY"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
-
-  [resources.BRANCHES]
-    name = "Petit bois"
-    weight=100000.0
-    material="MIDDLE_PIECE"
-    unit = "M3"
-    clutter = 1000.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.WOOD]
@@ -229,44 +197,20 @@ create_character_max_points = 13.0
     clutter = 500.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
-  [resources.BERRY]
-    name = "Baies"
+  [resources.VEGETAL_FOOD_FRESH]
+    name = "Nourriture végétale fraiche"
     weight=1000.0
     material="MIDDLE_PIECE"
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.BANANA]
-    name = "Banane"
-    weight=125.0
+  [resources.SHELLFISH_FRESH]
+    name = "Fruits de mers frais"
+    weight=1000.0  # g
     material="MIDDLE_PIECE"
-    unit = "U"
-    clutter = 0.1
-    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.COCONUT]
-    name = "Noix de coco"
-    weight=250.0
-    material="MIDDLE_PIECE"
-    unit = "U"
-    clutter = 0.35
-    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.PAGUROIDEA]
-    name = "Bernard-l'hermite"
-    weight=100.0  # g
-    material="MIDDLE_PIECE"
-    unit = "U"
-    clutter = 0.25
-    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.MYTILIDA]
-    name = "Moule"
-    weight=1000.0
-    material="MIDDLE_PIECE"
-    unit = "G"
-    clutter = 0.002
+    unit = "L"
+    clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.RAW_MEAT]
@@ -293,21 +237,13 @@ create_character_max_points = 13.0
     clutter = 0.0004
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.LITTLE_ANIMAL_SKIN]
-    name = "Petite peau"
-    weight=200.0
+  [resources.ANIMAL_SKIN]
+    name = "Peau animale"
+    weight=500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 0.1
+    clutter = 0.2
     actions = ["DROP_RESOURCE", "CRAFT_STUFF_WITH_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
-
-  [resources.NUT]
-    name = "Noix"
-    weight=1000.0
-    material="MIDDLE_PIECE"
-    unit = "L"
-    clutter = 1.0
-    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.GRAMINEAE]
     name = "Graminés"
@@ -353,21 +289,18 @@ create_character_max_points = 13.0
   [extractions.DEAD_TREE]
     tile="DEAD_TREE"
     resources=[
-      {resource_id="BRANCHES", cost_per_unit=3.0, default_quantity=0.04},
       {resource_id="WOOD", cost_per_unit=5.0, default_quantity=0.04},
     ]
 
   [extractions.TROPICAL_TREE]
     tile="TROPICAL_TREE"
     resources=[
-      {resource_id="BRANCHES", cost_per_unit=4.0, default_quantity=0.04},
       {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
     ]
 
   [extractions.LEAF_TREE]
     tile="LEAF_TREE"
     resources=[
-      {resource_id="BRANCHES", cost_per_unit=4.0, default_quantity=0.04},
       {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
     ]
 
@@ -400,32 +333,18 @@ create_character_max_points = 13.0
     character_effects = ["THIRSTY_SATISFIED"]
     cost = 0.0
 
-  [ACTIONS.EAT_BERRIES]  # and walnuts
+  [ACTIONS.EAT_FRESH_FRUITS]
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["BERRY", "NUT"]
+    accept_resources = ["VEGETAL_FOOD_FRESH"]
     character_effects = ["HUNGRY_SATISFIED"]
-    require = 1.0  # l
+    require = 1.0
     cost = 0.0
 
-  [ACTIONS.EAT_FRUITS]
+  [ACTIONS.EAT_SHELLFISH_FRESH]
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["BANANA", "COCONUT"]
+    accept_resources = ["SHELLFISH_FRESH"]
     character_effects = ["HUNGRY_SATISFIED"]
-    require = 4.0  # U
-    cost = 0.0
-
-  [ACTIONS.EAT_MIDDLE_CRUSTACEAN]
-    actions = ["EAT_RESOURCE"]
-    accept_resources = ["PAGUROIDEA"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 5.0  # unit
-    cost = 0.0
-
-  [ACTIONS.EAT_LITTLE_CRUSTACEAN]
-    actions = ["EAT_RESOURCE"]
-    accept_resources = ["MYTILIDA"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 1000.0  # g
+    require = 1.0
     cost = 0.0
 
   [ACTIONS.EAT_RAW_MEAT]
@@ -451,7 +370,7 @@ create_character_max_points = 13.0
 
   [ACTIONS.DRINK_WINE]
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
-    accept_resources = ["RED_WINE", "WHITE_WINE"]
+    accept_resources = ["WINE"]
     character_effects = ["DRUNK"]
     cost = 0.0
 
@@ -533,7 +452,7 @@ create_character_max_points = 13.0
     required_all_ability_ids = []
     produce = [
       {resource="COOKED_MEAT", coeff=0.3},
-      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+      {resource="ANIMAL_SKIN", quantity=1.0}
     ]
     cost = 1.0
 
@@ -547,7 +466,7 @@ create_character_max_points = 13.0
     required_all_ability_ids = []
     produce = [
       {resource="COOKED_MEAT", coeff=0.3},
-      {resource="LITTLE_ANIMAL_SKIN", quantity=3.0}
+      {resource="ANIMAL_SKIN", quantity=3.0}
     ]
     cost = 1.0
 
@@ -574,7 +493,7 @@ create_character_max_points = 13.0
     required_all_ability_ids = []
     produce = [
       {resource="RAW_MEAT", coeff=0.4},
-      {resource="LITTLE_ANIMAL_SKIN", quantity=1.0}
+      {resource="ANIMAL_SKIN", quantity=1.0}
     ]
     cost = 1.0
 
@@ -588,7 +507,7 @@ create_character_max_points = 13.0
     required_all_ability_ids = []
     produce = [
       {resource="RAW_MEAT", coeff=0.4},
-      {resource="LITTLE_ANIMAL_SKIN", quantity=3.0}
+      {resource="ANIMAL_SKIN", quantity=3.0}
     ]
     cost = 1.0
 
@@ -661,7 +580,7 @@ create_character_max_points = 13.0
     cost = 4.0
 
   [ACTIONS.HUNT_CRUSTACEANS]
-    name = "Chercher des crustacés"
+    name = "Chercher des fruits de mer"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -670,8 +589,7 @@ create_character_max_points = 13.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="PAGUROIDEA", quantity=6.0, probability=100.0},  # bernard l'hermite, u
-      {resource="MYTILIDA", quantity=1000.0, probability=100.0}  # moule, g
+      {resource="SHELLFISH_FRESH", quantity=5.0, probability=100.0},
     ]
     cost = 6.0
 
@@ -705,9 +623,7 @@ create_character_max_points = 13.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="BERRY", quantity=4.0, probability=90.0},
-      {resource="BANANA", quantity=20.0, probability=90.0},
-      {resource="COCONUT", quantity=10.0, probability=90.0},
+      {resource="VEGETAL_FOOD_FRESH", quantity=5.0, probability=100.0},
     ]
     cost = 6.0
 
@@ -823,7 +739,7 @@ create_character_max_points = 13.0
       {stuff="LITTLE_SKIN_CANTEEN", quantity=1.0},
     ]
     require = [
-      {resource="LITTLE_ANIMAL_SKIN", quantity=2}
+      {resource="ANIMAL_SKIN", quantity=2}
     ]
     cost = 6.0
 
@@ -842,22 +758,6 @@ create_character_max_points = 13.0
     required_resource_id = "RAW_MEAT"
     cost_per_unit = 0.0001
     cost = 3.0
-
-  [ACTIONS.MAKE_BRANCHES_FROM_WOOD]
-    name = "Faire du petit bois"
-    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="BRANCHES", coeff=0.9}
-    ]
-    required_resource_id = "WOOD"
-    cost_per_unit = 0.001
-    cost = 0.0
 
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
     name = "Statuette de femme enceinte"
@@ -907,7 +807,7 @@ create_character_max_points = 13.0
     produce_stuff_id = "ANIMAL_SKIN_COAT"
     default_description = "Fait de plusieurs pièces de fourrures"
     consume = [
-      {resource="LITTLE_ANIMAL_SKIN", quantity=20}  # FIXME: in action, accept stuff to as required
+      {resource="ANIMAL_SKIN", quantity=20}  # FIXME: in action, accept stuff to as required
     ]
     craft_ap = 20.0
     cost = 2.0
@@ -924,20 +824,6 @@ create_character_max_points = 13.0
     required_all_ability_ids = []
     produce = [
       {resource="WOOD", quantity_per_hour=0.01, random_loss=30.0},
-    ]
-    cost = 0.0
-
-  [ACTIONS.SEARCH_BRANCHES]
-    name = "Chercher du bois (petit bois)"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="BRANCHES", quantity_per_hour=0.01, random_loss=30.0},
     ]
     cost = 0.0
 
@@ -960,24 +846,13 @@ create_character_max_points = 13.0
   name = "Feux de camp"
   char = "⍟"
   building_char = "x"
-  build_require_resources = [{resource="BRANCHES", quantity=0.001}]
-  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
-  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  build_require_resources = [{resource="WOOD", quantity=0.001}]
+  turn_require_resources = [{resource="WOOD", quantity=0.01}]
+  power_on_require_resources = [{resource="WOOD", quantity=0.001}]
   abilities = ["HEAT_UP_LOW_TEMP"]
   cost = 2.0
   classes = ["CAMPFIRE"]
   many = false
-[build.BRANCHES_FENCE]
-  name = "Palissade de branches"
-  char = "%"
-  building_char = "x"
-  build_require_resources = [{resource="BRANCHES", quantity=0.01}]
-  turn_require_resources = []
-  power_on_require_resources = []
-  abilities = []
-  cost = 0.0
-  classes = ["WALL"]
-  many = true
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
