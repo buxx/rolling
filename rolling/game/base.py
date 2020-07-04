@@ -21,6 +21,7 @@ from rolling.model.knowledge import DEFAULT_INSTRUCTOR_COEFF
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.material import MaterialDescriptionModel
 from rolling.model.measure import Unit
+from rolling.model.meta import TransportType
 from rolling.model.mix import RequiredResourceForMix
 from rolling.model.mix import ResourceMixDescription
 from rolling.model.resource import ResourceDescriptionModel
@@ -310,6 +311,9 @@ class GameConfig:
                 ],
                 classes=build_raw.get("classes", []),
                 many=build_raw.get("many", False),
+                traversable={
+                    TransportType(k): v for k, v in build_raw.get("traversable", {}).items()
+                },
             )
 
         return builds

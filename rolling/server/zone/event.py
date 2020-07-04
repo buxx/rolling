@@ -66,10 +66,10 @@ class PlayerMoveProcessor(EventProcessor):
         event: ZoneEvent[PlayerMoveData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        # TODO BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
+        # FIXME BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
         # TODO BS 2019-01-23: Check given character id is authenticated used (security)
-        # TODO BS 2019-09-05: Check if not in surcharge
-
+        # FIXME BS 2020-07-04: Check there is no build with traversable false
+        # FIXME BS 2020-07-04: check move is just near previous position + refuse move event
         character = self._character_lib.get(event.data.character_id)
         self._character_lib.move_on_zone(
             character, to_row_i=event.data.to_row_i, to_col_i=event.data.to_col_i

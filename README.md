@@ -89,7 +89,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Peupler le jeu d'évènement pour le l'histoire du personnage
   * ☐ Participation à plusieurs de la rédaction de l'histoire (récits)
   * ☐ Etendre une construction (ex. cave de stockage) (tuiles côtes-a-côtes)
-  * ☐ **Batiments qui empeche le mouvement (ex. murs)**
+  * ☑ Batiments qui empeche le mouvement (ex. murs)
 
 * Actions
   * ☑ Ramasser un objet

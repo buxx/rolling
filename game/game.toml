@@ -546,17 +546,6 @@ create_character_max_points = 13.0
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
 
-  [ACTIONS.BUILD_BRANCHES_FENCE]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    actions = ["BUILD"]
-    build = "BRANCHES_FENCE"
-    cost = 1.0
-
   [ACTIONS.BUILD_WOOD_FENCE]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -864,6 +853,7 @@ create_character_max_points = 13.0
   cost = 0.0
   classes = ["WALL"]
   many = true
+  traversable = {"WALKING"=false}
 [build.STONE_WALL]
   name = "Mur de pierre"
   char = "§"
@@ -875,3 +865,4 @@ create_character_max_points = 13.0
   cost = 0.0
   classes = ["WALL"]
   many = true
+  traversable = {"WALKING"=false}

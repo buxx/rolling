@@ -4,6 +4,7 @@ import typing
 
 import serpyco
 
+from rolling.model.meta import TransportType
 from rolling.server.document.build import BuildDocument
 
 
@@ -44,6 +45,7 @@ class BuildDescription:
     cost: float
     classes: typing.List[str] = serpyco.field(default_factory=list)
     many: bool = False
+    traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -60,6 +62,9 @@ class ZoneBuildModel:
     id: int = serpyco.number_field(getter=lambda b: b.doc.id)
     build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)
     classes: typing.List[str] = serpyco.field(default_factory=list, getter=lambda b: b.desc.classes)
+    traversable: typing.Dict[TransportType, bool] = serpyco.field(
+        default_factory=dict, getter=lambda b: b.desc.traversable
+    )
 
 
 @dataclasses.dataclass
