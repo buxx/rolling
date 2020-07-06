@@ -2,10 +2,12 @@
 import dataclasses
 import typing
 
+import serpyco
 from serpyco import number_field
 
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.character import CharacterModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import ZoneGenerationStuff
 
@@ -123,3 +125,7 @@ class MoveZoneInfos:
     can_move: bool
     cost: float
     cannot_move_reasons: typing.List[str]
+    followers_can: typing.List[CharacterModel] = serpyco.field(default_factory=list)
+    followers_cannot: typing.List[CharacterModel] = serpyco.field(default_factory=list)
+    followers_discreetly_can: typing.List[CharacterModel] = serpyco.field(default_factory=list)
+    followers_discreetly_cannot: typing.List[CharacterModel] = serpyco.field(default_factory=list)

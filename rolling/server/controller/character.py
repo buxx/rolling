@@ -171,7 +171,7 @@ class CharacterController(BaseController):
                 Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
                 Part(label="Faim", text="oui" if character.feel_hungry else "non"),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
-                Part(label="Exténué", text="oui" if character.exhausted else "non"),
+                Part(label="Exténué", text="oui" if character.is_exhausted() else "non"),
                 Part(
                     label="Arme",
                     text=character.weapon.name if character.weapon else "aucune",
@@ -532,6 +532,7 @@ class CharacterController(BaseController):
             hapic_data.path.character_id, count=100
         )
         parts = []
+        event_ids_to_mark_read = []
         for event in character_events:
             there_is_story = bool(self._kernel.character_lib.count_story_pages(event.id))
             unread = "*" if event.unread else ""
@@ -549,6 +550,12 @@ class CharacterController(BaseController):
                     form_action=form_action,
                 )
             )
+
+            if not there_is_story and event.unread:
+                event_ids_to_mark_read.append(event.id)
+
+            if event_ids_to_mark_read:
+                self._kernel.character_lib.mark_event_as_read(event_ids_to_mark_read)
 
         return Description(title="Histoire", is_long_text=True, items=parts, can_be_back_url=True)
 
@@ -597,9 +604,7 @@ class CharacterController(BaseController):
         )
 
         if hapic_data.query.mark_read:
-            event.read = True
-            self._kernel.server_db_session.add(event)
-            self._kernel.server_db_session.commit()
+            self._kernel.character_lib.mark_event_as_read([event.id])
 
         return Description(
             title=event.text,
@@ -1077,6 +1082,21 @@ class CharacterController(BaseController):
             )
         ]
 
+        if move_info.followers_can:
+            parts.append(
+                Part(
+                    text=f"{len(move_info.followers_can)} personnage(s) vous suivront dans ce déplacement"
+                )
+            )
+
+        if move_info.followers_cannot:
+            names = ", ".join([f.name for f in move_info.followers_cannot])
+            parts.append(
+                Part(
+                    text=f"{len(move_info.followers_cannot)} personnage(s) ne pourront pas vous suivre dans ce déplacement: {names}"
+                )
+            )
+
         if move_info.can_move:
             buttons.insert(
                 0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
@@ -1116,32 +1136,47 @@ class CharacterController(BaseController):
         else:
             messages = list(move_info.cannot_move_reasons)
 
-        await self._kernel.send_to_zone_sockets(
-            character.world_row_i,
-            character.world_col_i,
-            event=ZoneEvent(
-                type=ZoneEventType.CHARACTER_EXIT_ZONE,
-                data=CharacterExitZoneData(character_id=hapic_data.path.character_id),
-            ),
-        )
-        character_doc = self._character_lib.move(
-            character,
-            to_world_row=hapic_data.query.to_world_row,
-            to_world_col=hapic_data.query.to_world_col,
-        )
-        await self._kernel.send_to_zone_sockets(
-            hapic_data.query.to_world_row,
-            hapic_data.query.to_world_col,
-            event=ZoneEvent(
-                type=ZoneEventType.CHARACTER_ENTER_ZONE,
-                data=CharacterEnterZoneData(
-                    character_id=hapic_data.path.character_id,
-                    zone_row_i=character_doc.zone_row_i,
-                    zone_col_i=character_doc.zone_col_i,
+        for character_ in (
+            move_info.followers_can + move_info.followers_discreetly_can + [character]
+        ):
+            await self._kernel.send_to_zone_sockets(
+                character_.world_row_i,
+                character_.world_col_i,
+                event=ZoneEvent(
+                    type=ZoneEventType.CHARACTER_EXIT_ZONE,
+                    data=CharacterExitZoneData(character_id=character_.id),
                 ),
-            ),
-        )
-        self._character_lib.reduce_action_points(character.id, zone_properties.move_cost)
+            )
+
+            character_doc = self._character_lib.move(
+                character_,
+                to_world_row=hapic_data.query.to_world_row,
+                to_world_col=hapic_data.query.to_world_col,
+            )
+            await self._kernel.send_to_zone_sockets(
+                hapic_data.query.to_world_row,
+                hapic_data.query.to_world_col,
+                event=ZoneEvent(
+                    type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                    data=CharacterEnterZoneData(
+                        character_id=character_.id,
+                        zone_row_i=character_doc.zone_row_i,
+                        zone_col_i=character_doc.zone_col_i,
+                    ),
+                ),
+            )
+            self._character_lib.reduce_action_points(character_.id, zone_properties.move_cost)
+
+            if character_ != character:
+                self._kernel.character_lib.add_event(
+                    character_.id, f"Vous avez suivis {character.name}"
+                )
+                # FIXME BS NOW: si connecté, event pour voyage !
+
+        for character_ in move_info.followers_cannot + move_info.followers_discreetly_cannot:
+            self._kernel.character_lib.add_event(
+                character_.id, f"Vous n'avez pas pu suivre {character.name} (fatigue ou surcharge)"
+            )
 
         return Description(
             title="Effectuer un voyage ...",

@@ -3,6 +3,7 @@ import typing
 
 from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
@@ -76,3 +77,10 @@ class CharacterDocument(Document):
     @effect_ids.setter
     def effect_ids(self, value: typing.List[str]) -> None:
         self._effect_ids = ",".join(value)
+
+
+class FollowCharacterDocument(Document):
+    __tablename__ = "follow_character"
+    follower_id = Column(String(255), ForeignKey("character.id"), nullable=False, primary_key=True)
+    followed_id = Column(String(255), ForeignKey("character.id"), nullable=False, primary_key=True)
+    discreetly = Column(Boolean, default=False, nullable=False)

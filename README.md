@@ -68,6 +68,10 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☑ Fait
   * **prochaines fonctionnalités développées**
 
+* Bugs
+  * ☐ **Appaition à la création de perso dans l'eau**
+  * ☐ **Voyage vers une zone où on ne peut pas bouger (eau)**
+
 * Bases
   * ☑ Création personnage
   * ☑ Mécanisme de caractéristiques et compétences
@@ -134,7 +138,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Nommer des lieux (ex. pour déclarer une ville dans une zone)
   * ☐ **Acquérir une connaissance seul**
   * ☐ **Acquérir une connaissance avec un formateur**
-  * ☐ **Déplacements en groupe (suivre) lors de changement de zones**
+  * ☑ Déplacements en groupe (suivre) lors de changement de zones
   * ☐ Cacher des objets/ressources et chercher aux alentours
   * ☐ % de perte au combat: a l'attaque, interruption. A la defense, fuite.
   * ☐ Fuite lors d'une defense: charisme/compétence permet de ne pas voir les combattant fuir n'importe-où

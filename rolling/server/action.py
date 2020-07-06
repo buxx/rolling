@@ -25,6 +25,8 @@ from rolling.action.eat import EatStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fight import AttackCharacterAction
 from rolling.action.fill import FillStuffAction
+from rolling.action.follow import FollowCharacterAction
+from rolling.action.follow import StopFollowCharacterAction
 from rolling.action.give import GiveToCharacterAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.kill import KillCharacterAction
@@ -87,6 +89,8 @@ class ActionFactory:
         ActionType.KILL_CHARACTER: KillCharacterAction,
         ActionType.TAKE_FROM_CHARACTER: TakeFromCharacterAction,
         ActionType.GIVE_TO_CHARACTER: GiveToCharacterAction,
+        ActionType.FOLLOW_CHARACTER: FollowCharacterAction,
+        ActionType.STOP_FOLLOW_CHARACTER: StopFollowCharacterAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -121,6 +125,8 @@ class ActionFactory:
             ActionType.KILL_CHARACTER: KillCharacterAction,
             ActionType.TAKE_FROM_CHARACTER: TakeFromCharacterAction,
             ActionType.GIVE_TO_CHARACTER: GiveToCharacterAction,
+            ActionType.FOLLOW_CHARACTER: FollowCharacterAction,
+            ActionType.STOP_FOLLOW_CHARACTER: StopFollowCharacterAction,
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,

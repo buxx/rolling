@@ -326,8 +326,7 @@ class CharacterModel:
     def tired(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_TIRED
 
-    @property
-    def exhausted(self) -> bool:
+    def is_exhausted(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_EXHAUSTED
 
     @property
@@ -336,14 +335,14 @@ class CharacterModel:
 
     def is_attack_ready(self) -> bool:
         return (
-            not self.exhausted
+            not self.is_exhausted()
             and self.action_points >= FIGHT_AP_CONSUME
             and self.life_points > FIGHT_LP_REQUIRE
         )
 
     def is_defend_ready(self) -> bool:
         # FIXME BS: keep exhausted ?
-        return not self.exhausted and self.life_points > FIGHT_LP_REQUIRE
+        return not self.is_exhausted() and self.life_points > FIGHT_LP_REQUIRE
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object

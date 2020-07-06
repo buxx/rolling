@@ -37,6 +37,7 @@ from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.character import FollowCharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.document.knowledge import CharacterKnowledge
@@ -600,6 +601,12 @@ class CharacterLib:
 
         raise ImpossibleAction("pas encore codé")
 
+    def mark_event_as_read(self, event_ids: typing.List[int]) -> None:
+        self._kernel.server_db_session.query(EventDocument).filter(
+            EventDocument.id.in_(event_ids)
+        ).update({"read": True}, synchronize_session="fetch")
+        self._kernel.server_db_session.commit()
+
     def get_event(self, event_id: int) -> EventDocument:
         return (
             self._kernel.server_db_session.query(EventDocument)
@@ -740,7 +747,7 @@ class CharacterLib:
             can_move = False
             cannot_move_reasons.append("Pas assez de Point d'Actions.")
 
-        if character.exhausted:
+        if character.is_exhausted():
             can_move = False
             cannot_move_reasons.append("Le personnage est épuisé.")
 
@@ -750,8 +757,36 @@ class CharacterLib:
             can_move = False
             cannot_move_reasons.append("Le personnage est surchargé.")
 
+        followers_can = []
+        followers_cannot = []
+        followers_discreetly_can = []
+        followers_discreetly_cannot = []
+        for follow, follower in self._kernel.character_lib.get_following(character_id):
+            follower_inventory = self.get_inventory(follower.id)
+            if (
+                follower_inventory.weight > follower.get_weight_capacity(self._kernel)
+                or follower_inventory.clutter > follower.get_clutter_capacity(self._kernel)
+                or follower.is_exhausted()
+                or follower.action_points < move_cost
+            ):
+                if follow.discreetly:
+                    followers_discreetly_cannot.append(follower)
+                else:
+                    followers_cannot.append(follower)
+            else:
+                if follow.discreetly:
+                    followers_discreetly_can.append(follower)
+                else:
+                    followers_can.append(follower)
+
         return MoveZoneInfos(
-            can_move=can_move, cost=move_cost, cannot_move_reasons=cannot_move_reasons
+            can_move=can_move,
+            cost=move_cost,
+            cannot_move_reasons=cannot_move_reasons,
+            followers_can=followers_can,
+            followers_cannot=followers_cannot,
+            followers_discreetly_can=followers_discreetly_can,
+            followers_discreetly_cannot=followers_discreetly_cannot,
         )
 
     def have_from_of_abilities(
@@ -991,3 +1026,77 @@ class CharacterLib:
             (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
             (f"De quoi boire: {can_drink_str}", None),
         ]
+
+    def is_following(
+        self, follower_id: str, followed_id: str, discreetly: typing.Optional[bool] = None
+    ) -> bool:
+        query = self._kernel.server_db_session.query(FollowCharacterDocument).filter(
+            FollowCharacterDocument.follower_id == follower_id,
+            FollowCharacterDocument.followed_id == followed_id,
+        )
+
+        if discreetly is not None:
+            query = query.filter(FollowCharacterDocument.discreetly == discreetly)
+
+        return bool(query.count())
+
+    def get_following(
+        self, followed_id: str, discreetly: typing.Optional[bool] = None
+    ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
+        query = self._kernel.server_db_session.query(FollowCharacterDocument).filter(
+            FollowCharacterDocument.followed_id == followed_id
+        )
+
+        if discreetly is not None:
+            query = query.filter(FollowCharacterDocument.discreetly == discreetly)
+
+        follows = [r for r in query.all()]
+        follows_by_id = {f.follower_id: f for f in follows}
+
+        return [
+            (follows_by_id[doc.id], self.document_to_model(doc))
+            for doc in self.alive_query.filter(CharacterDocument.id.in_(follows_by_id.keys())).all()
+        ]
+
+    def set_following(
+        self,
+        follower_id: str,
+        followed_id: str,
+        discreetly: typing.Optional[bool] = None,
+        commit: bool = True,
+    ) -> None:
+        try:
+            follow = (
+                self._kernel.server_db_session.query(FollowCharacterDocument)
+                .filter(
+                    FollowCharacterDocument.follower_id == follower_id,
+                    FollowCharacterDocument.followed_id == followed_id,
+                )
+                .one()
+            )
+        except NoResultFound:
+            follow = FollowCharacterDocument(
+                follower_id=follower_id, followed_id=followed_id, discreetly=discreetly
+            )
+
+        self._kernel.server_db_session.add(follow)
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def set_not_following(self, follower_id: str, followed_id: str, commit: bool = True) -> None:
+        try:
+            follow = (
+                self._kernel.server_db_session.query(FollowCharacterDocument)
+                .filter(
+                    FollowCharacterDocument.follower_id == follower_id,
+                    FollowCharacterDocument.followed_id == followed_id,
+                )
+                .one()
+            )
+        except NoResultFound:
+            return
+
+        self._kernel.server_db_session.delete(follow)
+        if commit:
+            self._kernel.server_db_session.commit()
