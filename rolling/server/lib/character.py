@@ -761,7 +761,7 @@ class CharacterLib:
         followers_cannot = []
         followers_discreetly_can = []
         followers_discreetly_cannot = []
-        for follow, follower in self._kernel.character_lib.get_following(character_id):
+        for follow, follower in self._kernel.character_lib.get_follower(character_id):
             follower_inventory = self.get_inventory(follower.id)
             if (
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
@@ -1006,6 +1006,12 @@ class CharacterLib:
         self, character_id: str
     ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
         character = self.get(character_id)
+        followers_count = self.get_follower_count(
+            character_id, row_i=character.world_row_i, col_i=character.world_col_i
+        )
+        following_count = self.get_followed_count(
+            character_id, row_i=character.world_row_i, col_i=character.world_col_i
+        )
 
         hungry = "oui" if character.feel_hungry else "non"
         thirsty = "oui" if character.feel_thirsty else "non"
@@ -1025,6 +1031,8 @@ class CharacterLib:
             ("", None),
             (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
             (f"De quoi boire: {can_drink_str}", None),
+            (f"Suivis: {following_count}", None),
+            (f"Suiveurs: {followers_count}", None),
         ]
 
     def is_following(
@@ -1040,9 +1048,13 @@ class CharacterLib:
 
         return bool(query.count())
 
-    def get_following(
-        self, followed_id: str, discreetly: typing.Optional[bool] = None
-    ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
+    def get_follower_query(
+        self,
+        followed_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> Query:
         query = self._kernel.server_db_session.query(FollowCharacterDocument).filter(
             FollowCharacterDocument.followed_id == followed_id
         )
@@ -1050,6 +1062,40 @@ class CharacterLib:
         if discreetly is not None:
             query = query.filter(FollowCharacterDocument.discreetly == discreetly)
 
+        if row_i is not None and col_i is not None:
+            here_ids = self.get_zone_character_ids(row_i, col_i)
+            query = query.filter(FollowCharacterDocument.follower_id.in_(here_ids))
+
+        return query
+
+    def get_followed_query(
+        self,
+        follower_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> Query:
+        query = self._kernel.server_db_session.query(FollowCharacterDocument).filter(
+            FollowCharacterDocument.follower_id == follower_id
+        )
+
+        if discreetly is not None:
+            query = query.filter(FollowCharacterDocument.discreetly == discreetly)
+
+        if row_i is not None and col_i is not None:
+            here_ids = self.get_zone_character_ids(row_i, col_i)
+            query = query.filter(FollowCharacterDocument.followed_id.in_(here_ids))
+
+        return query
+
+    def get_follower(
+        self,
+        followed_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
+        query = self.get_follower_query(followed_id, discreetly, row_i=row_i, col_i=col_i)
         follows = [r for r in query.all()]
         follows_by_id = {f.follower_id: f for f in follows}
 
@@ -1057,6 +1103,24 @@ class CharacterLib:
             (follows_by_id[doc.id], self.document_to_model(doc))
             for doc in self.alive_query.filter(CharacterDocument.id.in_(follows_by_id.keys())).all()
         ]
+
+    def get_follower_count(
+        self,
+        followed_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self.get_follower_query(followed_id, discreetly, row_i=row_i, col_i=col_i).count()
+
+    def get_followed_count(
+        self,
+        follower_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self.get_followed_query(follower_id, discreetly, row_i=row_i, col_i=col_i).count()
 
     def set_following(
         self,
@@ -1100,3 +1164,11 @@ class CharacterLib:
         self._kernel.server_db_session.delete(follow)
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_zone_character_ids(self, row_i: int, col_i: int) -> typing.List[str]:
+        return [
+            r[0]
+            for r in self._kernel.server_db_session.query(CharacterDocument.id)
+            .filter(CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i)
+            .all()
+        ]
