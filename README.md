@@ -95,7 +95,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Participation à plusieurs de la rédaction de l'histoire (récits)
   * ☐ Etendre une construction (ex. cave de stockage) (tuiles côtes-a-côtes)
   * ☑ Batiments qui empeche le mouvement (ex. murs)
-  * ☐ **Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone**
+  * ☑ Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone
 
 * Actions
   * ☑ Ramasser un objet
