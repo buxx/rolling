@@ -85,6 +85,12 @@ class CharacterLib:
         )
 
     @property
+    def dead_query_ids(self) -> Query:
+        return self._kernel.server_db_session.query(CharacterDocument.id).filter(
+            CharacterDocument.alive == False
+        )
+
+    @property
     def dont_care_alive_query(self) -> Query:
         return self._kernel.server_db_session.query(CharacterDocument)
 
@@ -1183,10 +1189,19 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def get_zone_character_ids(self, row_i: int, col_i: int) -> typing.List[str]:
+    def get_zone_character_ids(
+        self, row_i: int, col_i: int, alive: typing.Optional[bool] = None
+    ) -> typing.List[str]:
+        if alive is None:
+            query = self._kernel.server_db_session.query(CharacterDocument.id)
+        elif alive:
+            query = self.alive_query_ids
+        else:
+            query = self.dead_query_ids
+
         return [
             r[0]
-            for r in self._kernel.server_db_session.query(CharacterDocument.id)
-            .filter(CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i)
-            .all()
+            for r in query.filter(
+                CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i
+            ).all()
         ]

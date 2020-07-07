@@ -169,6 +169,25 @@ class ZoneController(BaseController):
                     )
                 )
 
+        character_affinity_ids = [
+            r.affinity_id for r in self._kernel.affinity_lib.get_accepted_affinities(character.id)
+        ]
+        for relation in self._kernel.affinity_lib.get_zone_relations(
+            row_i=character.world_row_i,
+            col_i=character.world_col_i,
+            accepted=True,
+            affinity_ids=character_affinity_ids,
+            exclude_character_ids=[character.id],
+        ):
+            affinity = self._kernel.affinity_lib.get_affinity(relation.affinity_id)
+            affinities_parts.append(
+                Part(
+                    is_link=True,
+                    label=f"Fiche de {affinity.name}",
+                    form_action=f"/affinity/{character.id}/see/{affinity.id}",
+                )
+            )
+
         return Description(
             title=tile_type.get_name(),
             items=[
@@ -176,7 +195,7 @@ class ZoneController(BaseController):
                 Part(text=zone_properties.description),
             ]
             + affinities_parts
-            + [Part(text=f"Dans cette zone se trouve également les personnages suivants:")]
+            + [Part(text=f"Dans cette zone se trouvent les personnages suivants:")]
             + characters_parts,
             can_be_back_url=True,
         )

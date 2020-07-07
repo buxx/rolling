@@ -275,3 +275,32 @@ class AffinityLib:
             query = query.filter(AffinityRelationDocument.character_id.in_(here_ids))
 
         return [self._kernel.character_lib.get(r[0]) for r in query.all()]
+
+    def get_zone_relations(
+        self,
+        row_i: int,
+        col_i: int,
+        accepted: typing.Optional[bool] = None,
+        affinity_ids: typing.Optional[typing.List[int]] = None,
+        exclude_character_ids: typing.Optional[typing.List[str]] = None,
+        character_is_alive: typing.Optional[bool] = True,
+    ) -> typing.List[AffinityRelationDocument]:
+        here_ids = self._kernel.character_lib.get_zone_character_ids(
+            row_i, col_i, alive=character_is_alive
+        )
+        query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.character_id.in_(here_ids)
+        )
+
+        if accepted is not None:
+            query = query.filter(AffinityRelationDocument.accepted == accepted)
+
+        if affinity_ids is not None:
+            query = query.filter(AffinityRelationDocument.affinity_id.in_(affinity_ids))
+
+        if exclude_character_ids is not None:
+            query = query.filter(
+                AffinityRelationDocument.character_id.notin_(exclude_character_ids)
+            )
+
+        return query.all()
