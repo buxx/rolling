@@ -4,6 +4,7 @@ from enum import Enum
 
 class TransportType(Enum):
     WALKING = "WALKING"
+    BOAT = "BOAT"
 
 
 class FromType(Enum):

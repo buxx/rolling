@@ -8,6 +8,7 @@ from serpyco import number_field
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.character import CharacterModel
+from rolling.model.meta import TransportType
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import ZoneGenerationStuff
 
@@ -89,6 +90,7 @@ class ZoneProperties:
     resources: typing.List[ZoneResource]
     stuffs: typing.List[ZoneStuff]
     description: str
+    require_transport_type: typing.List[TransportType] = serpyco.field(default_factory=list)
 
     @property
     def resource_ids(self) -> typing.Iterator[str]:

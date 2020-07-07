@@ -398,14 +398,16 @@ class Game:
             resources = list(self._get_zone_resources(zone_data))
             stuffs = list(self._get_zone_stuffs(zone_data))
 
+            world_map_tile_type = WorldMapTileType.get_for_id(zone_type_str)
             zones_properties.append(
                 ZoneProperties(
-                    WorldMapTileType.get_for_id(zone_type_str),
+                    world_map_tile_type,
                     generation_info=generation_info,
                     move_cost=move_cost,
                     resources=resources,
                     stuffs=stuffs,
                     description=zone_data.get("description", ""),
+                    require_transport_type=world_map_tile_type.require_transport_type,
                 )
             )
 

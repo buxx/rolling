@@ -69,7 +69,6 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * **prochaines fonctionnalités développées**
 
 * Bugs
-  * ☐ **Voyage vers une zone où on ne peut pas bouger (eau)**
   * ☐ **des footer_links n'apparaissent pas (ex. lien fiche sur follow)**
 
 * Bases
@@ -95,6 +94,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Etendre une construction (ex. cave de stockage) (tuiles côtes-a-côtes)
   * ☑ Batiments qui empeche le mouvement (ex. murs)
   * ☑ Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone
+  * ☐ Interdire la construction au bord de la zone (pour permettre les voyages)
 
 * Actions
   * ☑ Ramasser un objet

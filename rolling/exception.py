@@ -80,6 +80,10 @@ class SameZoneError(RollingError):
     pass
 
 
+class CannotMoveToZoneError(RollingError):
+    pass
+
+
 class NoDisplayObjectAtThisPosition(RollingError):
     pass
 

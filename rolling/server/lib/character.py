@@ -10,6 +10,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
+from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
@@ -21,6 +22,7 @@ from rolling.model.event import StoryPage
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
+from rolling.model.meta import TransportType
 from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
@@ -763,6 +765,12 @@ class CharacterLib:
             can_move = False
             cannot_move_reasons.append("Le personnage est surchargé.")
 
+        try:
+            self.check_can_move_to_zone(world_row_i, world_col_i, character)
+        except CannotMoveToZoneError as exc:
+            can_move = False
+            cannot_move_reasons.append(str(exc))
+
         followers_can = []
         followers_cannot = []
         followers_discreetly_can = []
@@ -770,12 +778,18 @@ class CharacterLib:
         for follow, follower in self._kernel.character_lib.get_follower(
             character_id, row_i=character.world_row_i, col_i=character.world_col_i
         ):
+            transport_type_ok = True
+            try:
+                self.check_can_move_to_zone(world_row_i, world_col_i, follower)
+            except CannotMoveToZoneError:
+                transport_type_ok = False
             follower_inventory = self.get_inventory(follower.id)
             if (
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
                 or follower_inventory.clutter > follower.get_clutter_capacity(self._kernel)
                 or follower.is_exhausted()
                 or follower.action_points < move_cost
+                or not transport_type_ok
             ):
                 if follow.discreetly:
                     followers_discreetly_cannot.append(follower)
@@ -1205,3 +1219,16 @@ class CharacterLib:
                 CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i
             ).all()
         ]
+
+    def check_can_move_to_zone(
+        self, world_row_i: int, world_col_i: int, character: CharacterModel
+    ) -> None:
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(zone_type)
+
+        # TODO BS 20200707: currently hardcoded
+        if (
+            zone_properties.require_transport_type
+            and TransportType.WALKING not in zone_properties.require_transport_type
+        ):
+            raise CannotMoveToZoneError("Mode de transport inadapté")

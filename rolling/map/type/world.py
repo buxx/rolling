@@ -2,11 +2,13 @@
 import typing
 
 from rolling.map.type.base import MapTileType
+from rolling.model.meta import TransportType
 
 
 class WorldMapTileType(MapTileType):
     _list_cache: typing.Dict[str, typing.Type["WorldMapTileType"]] = None
     _full_id_pattern = "WORLD_TILE__{}"
+    require_transport_type: typing.List[TransportType] = []
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["WorldMapTileType"]]:
@@ -32,6 +34,7 @@ class Sea(WorldMapTileType):
     name = "Mer"
     foreground_high_color = "#06f"
     background_high_color = "#006"
+    require_transport_type = [TransportType.BOAT]
 
 
 class Mountain(WorldMapTileType):
