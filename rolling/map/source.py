@@ -11,6 +11,7 @@ from rolling.map.legend import ZoneMapLegend
 from rolling.map.meta import WorldMapMeta
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import WorldMapTileType
+from rolling.model.meta import TransportType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -137,7 +138,7 @@ class ZoneMapSource(MapSource):
 
         for row_i, row in enumerate(self.geography.rows):
             for col_i, map_tile_type in enumerate(row):
-                if traversable_properties[map_tile_type]:
+                if traversable_properties[map_tile_type].get(TransportType.WALKING.value):
                     available_coordinates.append((row_i, col_i))
 
         if not available_coordinates:

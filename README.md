@@ -69,7 +69,6 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * **prochaines fonctionnalités développées**
 
 * Bugs
-  * ☐ **Appaition à la création de perso dans l'eau**
   * ☐ **Voyage vers une zone où on ne peut pas bouger (eau)**
   * ☐ **des footer_links n'apparaissent pas (ex. lien fiche sur follow)**
 
@@ -165,6 +164,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Générateur d'avatar (voir piou-piou)
   * ☐ Générateur de décors (illustration zones)
   * ☐ Présentation du serveur configurable (affiché à la création du personnage)
+  * ☐ Ajouter des objets en végétaux tressés (action restreinte a certaines type de zones)
 
 * Fonctionnalités extras
   * ☐ Historiser les déplacements (world map) de tous les personnages pour fabriquer des cartes démographiques
