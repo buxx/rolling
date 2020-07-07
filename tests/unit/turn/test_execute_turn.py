@@ -98,7 +98,7 @@ class TestExecuteTurn:
         assert not arthur_doc.alive
 
         # see affinity
-        resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
+        resp = await web.post(f"/affinity/{xena.id}/see/{1}")
         descr = descr_serializer.load(await resp.json())
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
