@@ -11,7 +11,7 @@ default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
 cheats = {"*"=["increase_ap"]}
-create_character_skills = ["crafts", "hunting_gathering", "tannery"]
+create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", "basketry"]
 create_character_max_points = 13.0
 
 [materials]
@@ -82,8 +82,18 @@ create_character_max_points = 13.0
   type = "1.Metiers"
   default = 1.0
 
+[skill.basketry]
+  name = "Vannerie"
+  type = "2.Metiers2"
+  default = 0.0
+
 [skill.tannery]
   name = "Tannerie"
+  type = "2.Metiers2"
+  default = 0.0
+
+[skill.pottery]
+  name = "Poterie"
   type = "2.Metiers2"
   default = 0.0
 
@@ -102,13 +112,24 @@ create_character_max_points = 13.0
   type = "3.Spécifique"
   default = 0.0
 
-# TODO: s'aquiert en boolean
 [knowledge]
+[knowledge.basketry]
+  name = "Vanerie"
+  ap_required = 10.0
+  instructor_coeff = 2.0
+  abilities = ["BASKETRY"]
+
+[knowledge.tannery]
+  name = "Tannerie"
+  ap_required = 50.0
+  instructor_coeff = 2.0
+  abilities = ["TANNERY"]
+
 [knowledge.pottery]
   name = "Poterie"
   ap_required = 100.0
   instructor_coeff = 3.0
-  abilities = ["MAKE_POTTERY"]
+  abilities = ["POTTERY"]
 
 [knowledge.blacksmith]
   name = "Forgeron"
@@ -122,8 +143,12 @@ create_character_max_points = 13.0
   name = "Se battre"
 [ability.HUNT_SMALL_GAME]
   name = "Chasse de petit gibier"
-[ability.MAKE_POTTERY]
+[ability.POTTERY]
   name = "Frabrication de poterie"
+[ability.BASKETRY]
+  name = "Vannerie"
+[ability.TANNERY]
+  name = "Tannerie"
 [ability.MAKE_BASE_BLACKSMITH]
   name = "Maitrise de la forge"
 
@@ -809,6 +834,40 @@ create_character_max_points = 13.0
     craft_ap = 20.0
     cost = 2.0
     link_group_name = "Vestimentaire"
+
+  [ACTIONS.CONSTRUCT_BASKETRY_BAG]
+    name = "Sac végétal"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BASKETRY"]
+    produce_stuff_id = "LITTLE_BASKETRY_BAG"
+    default_description = "Petit sac en jutte"
+    consume = []
+    craft_ap = 5.0
+    cost = 1.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.CONSTRUCT_SKIN_BAG]
+    name = "Sac en peaux"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "LITTLE_SKIN_BAG"
+    default_description = "Petit sac en peau"
+    consume = [
+      {resource="ANIMAL_SKIN", quantity=2}
+    ]
+    craft_ap = 5.0
+    cost = 1.0
+    link_group_name = "Utilitaire"
 
   [ACTIONS.SEARCH_WOOD]
     name = "Chercher du bois (construction/artisanat)"

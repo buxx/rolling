@@ -125,6 +125,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Proposer de faire une action a un autre perso
   * ☐ Cultures
   * ☐ **Chasse: Proposer des actions groupés sur les animaux (transformation en viande, peau, etc)**
+  * ☐ **Généraliser l'usage de craft par progression d'ap mais pouvoir simplifier/en faire plusieurs d'affilé en une dépense**
 
 * Gameplay
   * ☐ Restreindre l'accès a des informations comme l'existence des affinités, nom de zone, etc et permettre leurs transmissions

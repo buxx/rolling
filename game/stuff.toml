@@ -35,6 +35,15 @@
   actions = ["DROP_STUFF"]
   material_type = "SOLID"
   weapon = true
+[LITTLE_BASKETRY_BAG]
+  name = "Petit sac végétal"
+  weight = 1000.0
+  clutter = 0.0
+  clutter_capacity = 4.0
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
+  material_type = "OBJECT"
+  is_bag = true
+  classes = ["BAG", "LITTLE_BAG", "BASKETRY_BAG"]
 [LITTLE_SKIN_BAG]
   name = "Petit sac en peau"
   weight = 1200.0
@@ -43,7 +52,7 @@
   actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
   material_type = "OBJECT"
   is_bag = true
-  classes = ["BAG", "LITTLE_BAG"]
+  classes = ["BAG", "LITTLE_BAG", "SKIN_BAG"]
 [ANIMAL_SKIN_COAT]
   name = "Veste de peaux animales"
   weight = 2000.0
