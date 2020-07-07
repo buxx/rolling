@@ -761,7 +761,9 @@ class CharacterLib:
         followers_cannot = []
         followers_discreetly_can = []
         followers_discreetly_cannot = []
-        for follow, follower in self._kernel.character_lib.get_follower(character_id):
+        for follow, follower in self._kernel.character_lib.get_follower(
+            character_id, row_i=character.world_row_i, col_i=character.world_col_i
+        ):
             follower_inventory = self.get_inventory(follower.id)
             if (
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
@@ -1112,6 +1114,22 @@ class CharacterLib:
         col_i: typing.Optional[int] = None,
     ) -> int:
         return self.get_follower_query(followed_id, discreetly, row_i=row_i, col_i=col_i).count()
+
+    def get_followed(
+        self,
+        follower_id: str,
+        discreetly: typing.Optional[bool] = None,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
+        query = self.get_followed_query(follower_id, discreetly, row_i=row_i, col_i=col_i)
+        follows = [r for r in query.all()]
+        follows_by_id = {f.followed_id: f for f in follows}
+
+        return [
+            (follows_by_id[doc.id], self.document_to_model(doc))
+            for doc in self.alive_query.filter(CharacterDocument.id.in_(follows_by_id.keys())).all()
+        ]
 
     def get_followed_count(
         self,

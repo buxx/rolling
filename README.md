@@ -71,6 +71,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
 * Bugs
   * ☐ **Appaition à la création de perso dans l'eau**
   * ☐ **Voyage vers une zone où on ne peut pas bouger (eau)**
+  * ☐ **des footer_links n'apparaissent pas (ex. lien fiche sur follow)**
 
 * Bases
   * ☑ Création personnage

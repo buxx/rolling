@@ -154,6 +154,16 @@ class CharacterController(BaseController):
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
 
+        # FIXME BS NOW: ajouter un bouton et vue (si action descr existe) personnages suivis
+        followed_count = self._character_lib.get_followed_count(character.id)
+        parts = [
+            Part(
+                is_link=True,
+                form_action=f"/character/{character.id}/followed",
+                label=f"Vous suivez {followed_count} personnages",
+            )
+        ]
+
         return Description(
             title="Fiche de personnage",
             can_be_back_url=True,
@@ -229,7 +239,8 @@ class CharacterController(BaseController):
                         ),
                     ],
                 ),
-            ],
+            ]
+            + parts,
             footer_links=[
                 Part(
                     is_link=True,
@@ -1289,6 +1300,40 @@ class CharacterController(BaseController):
             can_be_back_url=True,
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def followed(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._character_lib.get(hapic_data.path.character_id)
+        parts = []
+        followed: CharacterModel
+        for follow, followed in self._kernel.character_lib.get_followed(character.id):
+            here = (
+                followed.world_row_i == character.world_row_i
+                and followed.world_col_i == character.world_col_i
+            )
+            parts.append(
+                Part(
+                    is_link=True,
+                    label=f"{followed.name}" + (" (n'est pas dans cette zone)" if not here else ""),
+                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                        character_id=character.id, with_character_id=followed.id
+                    ),
+                )
+            )
+        return Description(
+            title=f"Personnages suivis",
+            items=parts,
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    label="Fiche personnage",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/card",
+                ),
+            ],
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -1361,5 +1406,6 @@ class CharacterController(BaseController):
                 web.post(
                     "/character/{character_id}/skills_and_knowledge", self.skills_and_knowledge
                 ),
+                web.post("/character/{character_id}/followed", self.followed),
             ]
         )

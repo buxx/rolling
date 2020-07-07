@@ -12,6 +12,7 @@ from hapic import HapicData
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
+from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
@@ -29,6 +30,7 @@ from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
+from rolling.types import ActionType
 
 
 class AffinityController(BaseController):
@@ -192,6 +194,7 @@ class AffinityController(BaseController):
         relation = self._kernel.affinity_lib.get_character_relation(
             affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
         )
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
         member_count = self._kernel.affinity_lib.count_members(hapic_data.path.affinity_id)
         fighter_count = self._kernel.affinity_lib.count_members(
             hapic_data.path.affinity_id, fighter=True
@@ -288,6 +291,41 @@ class AffinityController(BaseController):
                         )
                     ]
                 )
+
+        if (
+            ActionType.FOLLOW_CHARACTER in self._kernel.game.config.actions
+            and ActionType.STOP_FOLLOW_CHARACTER in self._kernel.game.config.actions
+        ):
+            follow_action = self._kernel.action_factory.create_action(
+                ActionType.FOLLOW_CHARACTER, ActionType.FOLLOW_CHARACTER.name
+            )
+            stop_follow_action = self._kernel.action_factory.create_action(
+                ActionType.STOP_FOLLOW_CHARACTER, ActionType.STOP_FOLLOW_CHARACTER.name
+            )
+            for followable_character in self._kernel.affinity_lib.get_chief_or_warlord_of_affinity(
+                affinity.id, row_i=character.world_row_i, col_i=character.world_col_i
+            ):
+                if followable_character.id == character.id:
+                    break
+
+                for action in [follow_action, stop_follow_action]:
+                    try:
+                        action.check_is_possible(character, followable_character)
+                        parts.extend(
+                            [
+                                Part(
+                                    text=action_link.get_as_str(),
+                                    form_action=action_link.link,
+                                    is_link=True,
+                                    link_group_name=action_link.group_name,
+                                )
+                                for action_link in action.get_character_actions(
+                                    character, followable_character
+                                )
+                            ]
+                        )
+                    except ImpossibleAction:
+                        pass
 
         return Description(
             title=affinity.name,

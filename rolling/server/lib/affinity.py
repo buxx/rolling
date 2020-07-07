@@ -2,10 +2,8 @@
 import typing
 
 import sqlalchemy
-from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
-from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterModel
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
@@ -15,7 +13,6 @@ from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.character import CharacterDocument
-from rolling.server.document.message import MessageDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -260,3 +257,21 @@ class AffinityLib:
             )
             .count()
         )
+
+    def get_chief_or_warlord_of_affinity(
+        self,
+        affinity_id: str,
+        row_i: typing.Optional[int] = None,
+        col_i: typing.Optional[int] = None,
+    ) -> typing.List[CharacterModel]:
+        query = self._kernel.server_db_session.query(AffinityRelationDocument.character_id).filter(
+            AffinityRelationDocument.affinity_id == affinity_id,
+            AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0])),
+            AffinityRelationDocument.accepted == True,
+        )
+
+        if row_i is not None and col_i is not None:
+            here_ids = self._kernel.character_lib.get_zone_character_ids(row_i, col_i)
+            query = query.filter(AffinityRelationDocument.character_id.in_(here_ids))
+
+        return [self._kernel.character_lib.get(r[0]) for r in query.all()]

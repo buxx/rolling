@@ -69,9 +69,11 @@ class FollowCharacterAction(WithCharacterAction):
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         return [
-            CharacterActionLink(name="Suivre", link=self._get_url(character, with_character)),
             CharacterActionLink(
-                name="Suivre discrètement",
+                name=f"Suivre {with_character.name}", link=self._get_url(character, with_character)
+            ),
+            CharacterActionLink(
+                name=f"Suivre {with_character.name} discrètement",
                 link=self._get_url(character, with_character, input_=FollowModel(discreetly=True)),
             ),
         ]
@@ -84,9 +86,10 @@ class FollowCharacterAction(WithCharacterAction):
         )
 
         return Description(
-            title=f"Vous suivez {with_character.name}" + " discrètement"
-            if input_.discreetly
-            else "",
+            title=(
+                f"Vous suivez {with_character.name}"
+                + (" discrètement" if input_.discreetly else "")
+            ),
             items=[],
             footer_links=[
                 Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
@@ -142,13 +145,14 @@ class StopFollowCharacterAction(WithCharacterAction):
         ):
             return [
                 CharacterActionLink(
-                    name="Arreter de suivre discrètement",
+                    name=f"Arreter de suivre {with_character.name} discrètement",
                     link=self._get_url(character, with_character),
                 )
             ]
         return [
             CharacterActionLink(
-                name="Arreter de suivre", link=self._get_url(character, with_character)
+                name=f"Arreter de suivre {with_character.name}",
+                link=self._get_url(character, with_character),
             )
         ]
 

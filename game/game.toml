@@ -442,11 +442,11 @@ create_character_max_points = 13.0
     actions = ["GIVE_TO_CHARACTER"]
     cost = 0.0
 
-  [ACTIONS.FOLLOW_CHARACTER]
+  [ACTIONS.FOLLOW_CHARACTER]  # ID must be keeped if action keeped
     actions = ["FOLLOW_CHARACTER"]
     cost = 0.0
 
-  [ACTIONS.STOP_FOLLOW_CHARACTER]
+  [ACTIONS.STOP_FOLLOW_CHARACTER]  # ID must be keeped if action keeped
     actions = ["STOP_FOLLOW_CHARACTER"]
     cost = 0.0
 
