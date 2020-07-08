@@ -134,7 +134,7 @@ create_character_max_points = 13.0
 [knowledge.blacksmith]
   name = "Forgeron"
   ap_required = 300.0
-  abilities = ["MAKE_BASE_BLACKSMITH"]
+  abilities = ["BASE_BLACKSMITH"]
 
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
@@ -149,7 +149,7 @@ create_character_max_points = 13.0
   name = "Vannerie"
 [ability.TANNERY]
   name = "Tannerie"
-[ability.MAKE_BASE_BLACKSMITH]
+[ability.BASE_BLACKSMITH]
   name = "Maitrise de la forge"
 
 [character_effects]
