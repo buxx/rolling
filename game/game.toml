@@ -15,6 +15,7 @@ create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", 
 create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith"]
 create_character_knowledges_count = 1
 create_character_max_points = 13.0
+max_action_propose_turns = 3
 
 [materials]
   [materials.LIQUID]
@@ -487,6 +488,14 @@ create_character_max_points = 13.0
 
   [ACTIONS.LEARN_KNOWLEDGE]  # ID must be keeped if action keeped
     actions = ["LEARN_KNOWLEDGE"]
+    cost = 0.0
+
+  [ACTIONS.PROPOSE_TEACH_KNOWLEDGE]  # ID must be keeped if action keeped
+    actions = ["PROPOSE_TEACH_KNOWLEDGE"]
+    cost = 0.0
+
+  [ACTIONS.TEACH_KNOWLEDGE]  # ID must be keeped if action keeped
+    actions = ["TEACH_KNOWLEDGE"]
     cost = 0.0
 
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]

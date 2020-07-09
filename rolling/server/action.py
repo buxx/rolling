@@ -1,6 +1,7 @@
 # coding: utf-8
 import typing
 
+from guilang.description import Description
 from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import WithCharacterAction
@@ -31,6 +32,8 @@ from rolling.action.give import GiveToCharacterAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.kill import KillCharacterAction
 from rolling.action.knowledge import LearnKnowledgeAction
+from rolling.action.knowledge import ProposeTeachKnowledgeAction
+from rolling.action.knowledge import TeachKnowledgeAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
 from rolling.action.take import TakeFromCharacterAction
@@ -44,7 +47,8 @@ from rolling.action.use import UseAsArmorAction
 from rolling.action.use import UseAsBagAction
 from rolling.action.use import UseAsShieldAction
 from rolling.action.use import UseAsWeaponAction
-from rolling.types import ActionType
+from rolling.server.document.action import PendingActionDocument, AuthorizePendingActionDocument
+from rolling.types import ActionType, ActionScope
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -93,6 +97,8 @@ class ActionFactory:
         ActionType.FOLLOW_CHARACTER: FollowCharacterAction,
         ActionType.STOP_FOLLOW_CHARACTER: StopFollowCharacterAction,
         ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
+        ActionType.PROPOSE_TEACH_KNOWLEDGE: ProposeTeachKnowledgeAction,
+        ActionType.TEACH_KNOWLEDGE: TeachKnowledgeAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -129,6 +135,8 @@ class ActionFactory:
             ActionType.GIVE_TO_CHARACTER: GiveToCharacterAction,
             ActionType.FOLLOW_CHARACTER: FollowCharacterAction,
             ActionType.STOP_FOLLOW_CHARACTER: StopFollowCharacterAction,
+            ActionType.TEACH_KNOWLEDGE: TeachKnowledgeAction,
+            ActionType.PROPOSE_TEACH_KNOWLEDGE: ProposeTeachKnowledgeAction,
         }
         self._character_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
@@ -231,3 +239,50 @@ class ActionFactory:
                     return self.actions[action_type](self._kernel, description=action_description)
 
         raise NotImplementedError(f"Unknown {action_description_id}:{action_type}")
+
+    def create_pending_action(
+        self,
+        action_scope: ActionScope,
+        action_type: ActionType,
+        action_description_id: str,
+        character_id: str,
+        parameters: dict,
+        expire_at_turn: int,
+        with_character_id: typing.Optional[str] = None,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
+        suggested_by: typing.Optional[str] = None,
+    ) -> PendingActionDocument:
+        pending_action_document = PendingActionDocument(
+            action_scope=action_scope.value,
+            action_type=action_type.value,
+            action_description_id=action_description_id,
+            character_id=character_id,
+            parameters=parameters,
+            expire_at_turn=expire_at_turn,
+            with_character_id=with_character_id,
+            stuff_id=stuff_id,
+            resource_id=resource_id,
+            suggested_by=suggested_by,
+        )
+        self._kernel.server_db_session.add(pending_action_document)
+        self._kernel.server_db_session.commit()
+        return pending_action_document
+
+    def add_pending_action_authorization(
+        self,
+        pending_action_id: int,
+        authorized_character_id: str,
+        expire_at_turn: int,
+    ) -> AuthorizePendingActionDocument:
+        authorization = AuthorizePendingActionDocument(
+            pending_action_id=pending_action_id,
+            authorized_character_id=authorized_character_id,
+            expire_at_turn=expire_at_turn,
+        )
+        self._kernel.server_db_session.add(authorization)
+        self._kernel.server_db_session.commit()
+        return authorization
+
+    def execute_from_pending(self, pending_id: int) -> Description:
+        pass
