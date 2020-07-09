@@ -9,6 +9,8 @@ default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 3600
 create_character_skills = ["crafts", "hunting_gathering", "tannery"]
+create_character_knowledges = ["blacksmith"]
+create_character_knowledges_count = 1
 create_character_max_points = 13.0
 
 [materials]
@@ -62,7 +64,25 @@ create_character_max_points = 13.0
   type = "1.Metiers"
   default = 1.0
 
+
+[knowledge]
+[knowledge.blacksmith]
+  name = "Forgeron"
+  ap_required = 10.0
+  abilities = ["BLACKSMITH"]
+
+[knowledge.blacksmith2]
+  name = "Forgeron2"
+  ap_required = 300.0
+  abilities = ["BLACKSMITH2"]
+  requires = ["BLACKSMITH"]
+
 [ability]
+
+[ability.BLACKSMITH]
+  name = "Maitrise de la forge"
+[ability.BLACKSMITH2]
+  name = "Maitrise de la forge avancé"
 
 [character_effects]
 
@@ -143,4 +163,8 @@ create_character_max_points = 13.0
 
   [ACTIONS.NOT_USE_AS_ARMOR]
     actions = ["NOT_USE_AS_ARMOR"]
+    cost = 0.0
+
+  [ACTIONS.LEARN_KNOWLEDGE]  # ID must be keeped if action keeped
+    actions = ["LEARN_KNOWLEDGE"]
     cost = 0.0

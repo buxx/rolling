@@ -64,6 +64,12 @@ class GameConfig:
         self.turn_mode: TurnMode = TurnMode(config_dict["turn_mode"])
         self.cheats: typing.Dict[str, typing.List[str]] = config_dict.get("cheats")
         self.create_character_skills: typing.List[str] = config_dict["create_character_skills"]
+        self.create_character_knowledges: typing.List[str] = config_dict[
+            "create_character_knowledges"
+        ]
+        self.create_character_knowledges_count: int = config_dict[
+            "create_character_knowledges_count"
+        ]
         self.create_character_max_points: float = config_dict["create_character_max_points"]
 
         self.day_turn_every = None
@@ -334,9 +340,10 @@ class GameConfig:
             knowledge_id: KnowledgeDescription(
                 id=knowledge_id,
                 name=knowledge_raw["name"],
-                ap_required=knowledge_raw["ap_required"],
+                ap_required=int(knowledge_raw["ap_required"]),
                 instructor_coeff=knowledge_raw.get("instructor_coeff", DEFAULT_INSTRUCTOR_COEFF),
                 abilities=knowledge_raw.get("abilities", []),
+                requires=knowledge_raw.get("requires", []),
             )
             for knowledge_id, knowledge_raw in config_raw.get("knowledge", {}).items()
         }

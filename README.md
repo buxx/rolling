@@ -138,8 +138,8 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ PA des bâtiments (pour l'usage à plusieurs)
   * ☐ Mécanismes de monaie
   * ☐ Nommer des lieux (ex. pour déclarer une ville dans une zone)
-  * ☐ **Acquérir une connaissance seul**
-  * ☐ **Acquérir une connaissance avec un formateur**
+  * ☑ Acquérir une connaissance seul
+  * ☐ **Acquérir une connaissance avec un formateur** (table avec proposition ?)
   * ☑ Déplacements en groupe (suivre) lors de changement de zones
   * ☐ Cacher des objets/ressources et chercher aux alentours
   * ☐ % de perte au combat: a l'attaque, interruption. A la defense, fuite.

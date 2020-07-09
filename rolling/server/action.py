@@ -30,6 +30,7 @@ from rolling.action.follow import StopFollowCharacterAction
 from rolling.action.give import GiveToCharacterAction
 from rolling.action.hunt import SearchFoodAction
 from rolling.action.kill import KillCharacterAction
+from rolling.action.knowledge import LearnKnowledgeAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
 from rolling.action.take import TakeFromCharacterAction
@@ -91,6 +92,7 @@ class ActionFactory:
         ActionType.GIVE_TO_CHARACTER: GiveToCharacterAction,
         ActionType.FOLLOW_CHARACTER: FollowCharacterAction,
         ActionType.STOP_FOLLOW_CHARACTER: StopFollowCharacterAction,
+        ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -134,6 +136,7 @@ class ActionFactory:
             ActionType.SEARCH_FOOD: SearchFoodAction,
             ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
             ActionType.SEARCH_MATERIAL: SearchMaterialAction,
+            ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
             ActionType.CHEATS: CheatsCharacterAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
@@ -214,7 +217,7 @@ class ActionFactory:
 
     def create_action(
         self, action_type: ActionType, action_description_id: typing.Optional[str] = None
-    ) -> typing.Union[CharacterAction, WithStuffAction, WithCharacterAction]:
+    ) -> typing.Union[CharacterAction, WithStuffAction, WithCharacterAction, CharacterAction]:
         if (
             action_type in self._with_stuff_actions
             or action_type in self._with_resource_actions

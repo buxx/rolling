@@ -97,7 +97,7 @@ class CharacterController(BaseController):
                     label=skill_description.name,
                     type_=Type.NUMBER,
                     default_value=str(skill_description.default),
-                    name=skill_id,
+                    name=f"skill__{skill_id}",
                 )
             )
 
@@ -110,16 +110,38 @@ class CharacterController(BaseController):
                     label=skill_description.name,
                     type_=Type.NUMBER,
                     default_value=str(skill_description.default),
-                    name=skill_id,
+                    name=f"skill__{skill_id}",
                 )
             )
+
+        create_character_knowledges = self._kernel.game.config.create_character_knowledges
+        if (
+            create_character_knowledges
+            and self._kernel.game.config.create_character_knowledges_count
+        ):
+            parts.append(Part(text="Connaissances"))
+            for knowledge_id in create_character_knowledges:
+                knowledge_description = self._kernel.game.config.knowledge[knowledge_id]
+                parts.append(
+                    Part(
+                        is_checkbox=True,
+                        label=knowledge_description.name,
+                        name=f"knowledge__{knowledge_description.id}",
+                    )
+                )
+            # there is a bug in gui (checkbox not displayed if are at end)
+            parts.append(Part(text=""))
 
         return Description(
             title="Créer votre personnage",
             items=[
                 Part(
-                    text="C'est le moment de créer votre personnage. Ci-dessous, vous pouvez "
-                    f"répartir jusqu'à {maximum_points} points de compétences."
+                    text=(
+                        "C'est le moment de créer votre personnage. Ci-dessous, vous pouvez "
+                        f"répartir jusqu'à {maximum_points} points de compétences et choisir "
+                        f"{self._kernel.game.config.create_character_knowledges_count} "
+                        f"connaissance(s)."
+                    )
                 ),
                 Part(
                     is_form=True,
@@ -1003,8 +1025,11 @@ class CharacterController(BaseController):
         skills: typing.Dict[str, float] = {}
         skills_total = 0.0
 
+        if len(data["name"]) < 3 or len(data["name"]) > 21:
+            raise UserDisplayError(f"Le nom du personnage doit faire entre 3 et 21 caractères")
+
         for skill_id in base_skills + self._kernel.game.config.create_character_skills:
-            value = float(data[skill_id])
+            value = float(data[f"skill__{skill_id}"])
 
             if value < 0.0:
                 raise UserDisplayError("Valeur négative refusée")
@@ -1018,11 +1043,33 @@ class CharacterController(BaseController):
                 f"Vous avez choisis {skills_total} points au total ({maximum_points} max)"
             )
 
-        if len(data["name"]) < 3 or len(data["name"]) > 21:
-            raise UserDisplayError(f"Le nom du personnage doit faire entre 3 et 21 caractères")
+        create_character_knowledges = self._kernel.game.config.create_character_knowledges
+        knowledges = []
+        if (
+            create_character_knowledges
+            and self._kernel.game.config.create_character_knowledges_count
+        ):
+            if (
+                len(
+                    [
+                        k_id
+                        for k_id in create_character_knowledges
+                        if f"knowledge__{k_id}" in data and data[f"knowledge__{k_id}"] == "on"
+                    ]
+                )
+                > self._kernel.game.config.create_character_knowledges_count
+            ):
+                raise UserDisplayError(f"Vous avez choisis trop de connaissances")
+            for knowledge_id in create_character_knowledges:
+                if (
+                    f"knowledge__{knowledge_id}" in data
+                    and data[f"knowledge__{knowledge_id}"] == "on"
+                ):
+                    knowledges.append(knowledge_id)
 
-        character_id = self._character_lib.create(data["name"], skills)
+        character_id = self._character_lib.create(data["name"], skills, knowledges)
         character_doc = self._kernel.character_lib.get_document(character_id)
+
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
             character_doc.world_col_i,

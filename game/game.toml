@@ -12,6 +12,8 @@ turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
 cheats = {"*"=["increase_ap"]}
 create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", "basketry"]
+create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith"]
+create_character_knowledges_count = 1
 create_character_max_points = 13.0
 
 [materials]
@@ -134,7 +136,13 @@ create_character_max_points = 13.0
 [knowledge.blacksmith]
   name = "Forgeron"
   ap_required = 300.0
-  abilities = ["BASE_BLACKSMITH"]
+  abilities = ["BLACKSMITH"]
+
+[knowledge.blacksmith2]
+  name = "Forgeron2"
+  ap_required = 300.0
+  abilities = ["BLACKSMITH2"]
+  requires = ["BLACKSMITH"]
 
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
@@ -149,8 +157,10 @@ create_character_max_points = 13.0
   name = "Vannerie"
 [ability.TANNERY]
   name = "Tannerie"
-[ability.BASE_BLACKSMITH]
+[ability.BLACKSMITH]
   name = "Maitrise de la forge"
+[ability.BLACKSMITH2]
+  name = "Maitrise de la forge avancé"
 
 [character_effects]
   [character_effects.THIRSTY_SATISFIED]
@@ -473,6 +483,10 @@ create_character_max_points = 13.0
 
   [ACTIONS.STOP_FOLLOW_CHARACTER]  # ID must be keeped if action keeped
     actions = ["STOP_FOLLOW_CHARACTER"]
+    cost = 0.0
+
+  [ACTIONS.LEARN_KNOWLEDGE]  # ID must be keeped if action keeped
+    actions = ["LEARN_KNOWLEDGE"]
     cost = 0.0
 
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]

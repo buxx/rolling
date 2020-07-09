@@ -9,6 +9,7 @@ DEFAULT_INSTRUCTOR_COEFF = 2.0
 class KnowledgeDescription:
     id: str
     name: str
-    ap_required: float
+    ap_required: int
     instructor_coeff: float
     abilities: typing.List[str]
+    requires: typing.List[str]

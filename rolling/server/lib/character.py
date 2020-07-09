@@ -42,7 +42,7 @@ from rolling.server.document.character import CharacterDocument
 from rolling.server.document.character import FollowCharacterDocument
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
-from rolling.server.document.knowledge import CharacterKnowledge
+from rolling.server.document.knowledge import CharacterKnowledgeDocument
 from rolling.server.document.message import MessageDocument
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
@@ -96,7 +96,9 @@ class CharacterLib:
     def dont_care_alive_query(self) -> Query:
         return self._kernel.server_db_session.query(CharacterDocument)
 
-    def create(self, name: str, skills: typing.Dict[str, float]) -> str:
+    def create(
+        self, name: str, skills: typing.Dict[str, float], knowledges: typing.List[str]
+    ) -> str:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = name
@@ -127,6 +129,13 @@ class CharacterLib:
             )
         self._kernel.server_db_session.commit()
         self.ensure_skills_for_character(character.id)
+
+        for knowledge_id in knowledges:
+            self._kernel.character_lib.increase_knowledge_progress(
+                character.id,
+                knowledge_id,
+                ap=int(self._kernel.game.config.knowledge[knowledge_id].ap_required),
+            )
 
         image_id = None
         if self._kernel.game.config.create_character_event_story_image:
@@ -212,9 +221,12 @@ class CharacterLib:
         }
         knowledges: typing.Dict[str, KnowledgeDescription] = {
             row[0]: self._kernel.game.config.knowledge[row[0]]
-            for row in self._kernel.server_db_session.query(CharacterKnowledge.knowledge_id)
-            .filter(CharacterKnowledge.character_id == character_document.id)
+            for row in self._kernel.server_db_session.query(
+                CharacterKnowledgeDocument.knowledge_id, CharacterKnowledgeDocument.acquired
+            )
+            .filter(CharacterKnowledgeDocument.character_id == character_document.id)
             .all()
+            if row[1]
         }
 
         ability_ids = []
@@ -1232,3 +1244,45 @@ class CharacterLib:
             and TransportType.WALKING not in zone_properties.require_transport_type
         ):
             raise CannotMoveToZoneError("Mode de transport inadapté")
+
+    def get_knowledge_progress(self, character_id: str, knowledge_id: str) -> int:
+        try:
+            return (
+                self._kernel.server_db_session.query(CharacterKnowledgeDocument.progress)
+                .filter(
+                    CharacterKnowledgeDocument.character_id == character_id,
+                    CharacterKnowledgeDocument.knowledge_id == knowledge_id,
+                )
+                .one()[0]
+            )
+        except NoResultFound:
+            return 0
+
+    def increase_knowledge_progress(
+        self, character_id: str, knowledge_id: str, ap: int, commit: bool = True
+    ) -> bool:
+        try:
+            knowledge = (
+                self._kernel.server_db_session.query(CharacterKnowledgeDocument)
+                .filter(
+                    CharacterKnowledgeDocument.character_id == character_id,
+                    CharacterKnowledgeDocument.knowledge_id == knowledge_id,
+                )
+                .one()
+            )
+        except NoResultFound:
+            knowledge = CharacterKnowledgeDocument(
+                character_id=character_id, knowledge_id=knowledge_id, progress=0
+            )
+
+        knowledge_description = self._kernel.game.config.knowledge[knowledge_id]
+        knowledge.progress = knowledge.progress + ap
+
+        if knowledge.progress >= knowledge_description.ap_required:
+            knowledge.acquired = True
+
+        self._kernel.server_db_session.add(knowledge)
+        if commit:
+            self._kernel.server_db_session.commit()
+
+        return knowledge.acquired
