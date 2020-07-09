@@ -2,6 +2,14 @@
 import enum
 
 
+class ActionScope(enum.Enum):
+    CHARACTER = "CHARACTER"
+    RESOURCE = "RESOURCE"
+    STUFF = "STUFF"
+    WITH_CHARACTER = "WITH_CHARACTER"
+    BUILD = "BUILD"
+
+
 class ActionType(enum.Enum):
     FILL_STUFF = "FILL_STUFF"
     EMPTY_STUFF = "EMPTY_STUFF"
@@ -42,6 +50,8 @@ class ActionType(enum.Enum):
     FOLLOW_CHARACTER = "FOLLOW_CHARACTER"
     STOP_FOLLOW_CHARACTER = "STOP_FOLLOW_CHARACTER"
     LEARN_KNOWLEDGE = "LEARN_KNOWLEDGE"
+    PROPOSE_TEACH_KNOWLEDGE = "PROPOSE_TEACH_KNOWLEDGE"
+    TEACH_KNOWLEDGE = "TEACH_KNOWLEDGE"
 
 
 class TurnMode(enum.Enum):

@@ -33,6 +33,17 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class GetCharacterAndPendingActionPathModel:
+    character_id: str
+    pending_action_id: int = serpyco.field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class PendingActionQueryModel:
+    do: int = serpyco.field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
 class PickFromInventoryQueryModel:
     callback_url: str
     cancel_url: str
@@ -321,6 +332,7 @@ class CharacterModel:
     unread_conversation: bool = False
     unvote_affinity_relation: bool = False
     unread_transactions: bool = False
+    pending_actions: int = 0
 
     @property
     def tired(self) -> bool:

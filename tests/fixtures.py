@@ -195,6 +195,10 @@ def xena(worldmapc_kernel: Kernel, default_character_competences: dict) -> Chara
     session.commit()
     worldmapc_kernel.character_lib.ensure_skills_for_character(xena.id)
 
+    worldmapc_kernel.character_lib.increase_knowledge_progress(
+        xena.id, "blacksmith", worldmapc_kernel.game.config.knowledge["blacksmith"].ap_required
+    )
+
     return xena
 
 

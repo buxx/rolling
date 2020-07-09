@@ -139,7 +139,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Mécanismes de monaie
   * ☐ Nommer des lieux (ex. pour déclarer une ville dans une zone)
   * ☑ Acquérir une connaissance seul
-  * ☐ **Acquérir une connaissance avec un formateur** (table avec proposition ?)
+  * ☑ Acquérir une connaissance avec un formateur
   * ☑ Déplacements en groupe (suivre) lors de changement de zones
   * ☐ Cacher des objets/ressources et chercher aux alentours
   * ☐ % de perte au combat: a l'attaque, interruption. A la defense, fuite.
@@ -184,6 +184,8 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Click sur tuile: ouverture de page d'actions
   * ☐ Les actions qui nécessaite une position (ex. à coté de) envoient une requête de déplacement au GUI avant de s'éxecuter
   * ☐ Affichage dans l'écran de Zone les nouvelles prop. commerciales, invit°, etc
+  * ☐ **Afficher si à manger dans la zone (sidebar)**
+  * ☐ **Afficher cobien de combattant protèges dans la zone (sidebar)**
 
 * Mécanique serveur
   * ☐ Contrôle des positions pour les actions (prendre, attaquer corps-à-corps/distance, etc)
@@ -192,6 +194,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
 * Optimisation/Changements serveur
   * ☐ Connexions serveur async
   * ☐ Passage à PostgreSQL
+  * ☐ Calcul de "a boire", "a manger", "protégé par" calculés par websockets (perf)
 
 * Gestion du serveur
   * ☐ Conversion txt -> pixel RGB des cartes

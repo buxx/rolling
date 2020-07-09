@@ -46,6 +46,8 @@ class TurnLib:
         self._reset_characters_props()
         self._universe_turn()
 
+        # FIXME BS NOW: remove pending actions and authorizations
+
         self._kernel.server_db_session.commit()
 
     def _generate_stuff(self) -> None:
