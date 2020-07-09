@@ -38,7 +38,7 @@ class TestLearnKnowledgeAction:
         assert descr.title == "Apprendre Forgeron"
         assert (
             descr.items[0].text
-            == "Il reste 10.0 points d'actions à dépenser pour apprendre Forgeron"
+            == "Il reste 10 points d'actions à dépenser pour apprendre Forgeron"
         )
         assert descr.items[1].is_form
         assert descr.items[1].items[0].name == "ap"
