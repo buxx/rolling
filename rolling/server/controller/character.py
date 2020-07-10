@@ -26,6 +26,7 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import DescribeStoryQueryModel
+from rolling.model.character import GetCharacterAndPendingActionPathModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetCharacterWithPathModel
 from rolling.model.character import GetLookCharacterModel
@@ -35,6 +36,7 @@ from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import GetMoveZoneInfosModel
 from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
+from rolling.model.character import PendingActionQueryModel
 from rolling.model.character import PickFromInventoryQueryModel
 from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import TakeResourceModel
@@ -521,10 +523,24 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character_actions = self._character_lib.get_on_place_actions(hapic_data.path.character_id)
+        pending_actions_count = self._kernel.character_lib.get_pending_actions_count(
+            hapic_data.path.character_id
+        )
+
+        parts = []
+        if pending_actions_count:
+            parts.append(
+                Part(
+                    is_link=True,
+                    form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions",
+                    label=f"{pending_actions_count} propositions d'actions",
+                )
+            )
 
         return Description(
             title="Que voulez-vous faire ?",
-            items=[
+            items=parts
+            + [
                 Part(
                     text=action.get_as_str(),
                     form_action=action.link,
@@ -534,6 +550,78 @@ class CharacterController(BaseController):
                 for action in character_actions
             ],
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def pending_actions(self, request: Request, hapic_data: HapicData) -> Description:
+        pending_actions = self._kernel.character_lib.get_pending_actions(
+            hapic_data.path.character_id
+        )
+
+        parts = []
+        for pending_action in pending_actions:
+            parts.append(
+                Part(
+                    is_link=True,
+                    form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}",
+                    label=pending_action.name,
+                )
+            )
+
+        return Description(title="Propositions d'actions", items=parts, can_be_back_url=True)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterAndPendingActionPathModel)
+    @hapic.input_query(PendingActionQueryModel)
+    @hapic.output_body(Description)
+    async def pending_action(self, request: Request, hapic_data: HapicData) -> Description:
+        pending_action = self._kernel.character_lib.get_pending_action(
+            hapic_data.path.pending_action_id,
+            check_authorized_character_id=hapic_data.path.character_id,
+        )
+
+        if hapic_data.query.do:
+            try:
+                return self._kernel.action_factory.execute_pending(
+                    pending_action
+                )
+            except ImpossibleAction as exc:
+                return Description(
+                    title="Action impossible",
+                    items=[Part(text=str(exc))],
+                    footer_links=[
+                        Part(
+                            is_link=True,
+                            go_back_zone=True,
+                            label="Retourner à l'écran de déplacements",
+                        ),
+                        Part(
+                            is_link=True,
+                            label="Retourner aux propositions d'actions",
+                            form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
+                        ),
+                    ],
+                )
+
+        return Description(
+            title=pending_action.name,
+            items=[
+                Part(
+                    is_link=True,
+                    label="Effectuer cette action",
+                    form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}?do=1",
+                )
+            ],
+            footer_links=[
+                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+                Part(
+                    is_link=True,
+                    label="Retourner aux propositions d'actions",
+                    form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
+                ),
+            ],
         )
 
     @hapic.with_api_doc()
@@ -1403,6 +1491,13 @@ class CharacterController(BaseController):
                 web.post(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/pending_actions", self.pending_actions
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/pending_actions/{pending_action_id}",
+                    self.pending_action,
                 ),
                 web.get(
                     "/character/{character_id}/move-to-zone/{world_row_i}/{world_col_i}",

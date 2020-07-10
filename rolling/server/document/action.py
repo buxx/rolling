@@ -1,6 +1,8 @@
 # coding: utf-8
-from sqlalchemy import JSON, Enum
+from sqlalchemy import JSON
+from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -23,10 +25,15 @@ class PendingActionDocument(Document):
     resource_id = Column(String, nullable=True)
     expire_at_turn = Column(Integer, nullable=False)
     suggested_by = Column(String(255), ForeignKey("character.id"), nullable=True)
+    name = Column(String(255), nullable=False)
+    delete_after_first_perform = Column(Boolean(), default=True)
 
 
 class AuthorizePendingActionDocument(Document):
     __tablename__ = "authorize_pending_action"
-    pending_action_id = Column(Integer, ForeignKey("pending_action.id"), nullable=False, primary_key=True)
-    authorized_character_id = Column(String(255), ForeignKey("character.id"), nullable=True, primary_key=True)
-    expire_at_turn = Column(Integer, nullable=False)
+    pending_action_id = Column(
+        Integer, ForeignKey("pending_action.id"), nullable=False, primary_key=True
+    )
+    authorized_character_id = Column(
+        String(255), ForeignKey("character.id"), nullable=True, primary_key=True
+    )

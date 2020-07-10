@@ -32,6 +32,8 @@ from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
+from rolling.server.document.action import AuthorizePendingActionDocument
+from rolling.server.document.action import PendingActionDocument
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
@@ -1286,3 +1288,45 @@ class CharacterLib:
             self._kernel.server_db_session.commit()
 
         return knowledge.acquired
+
+    def get_pending_actions_count(self, character_id: str) -> int:
+        return (
+            self._kernel.server_db_session.query(AuthorizePendingActionDocument)
+            .filter(AuthorizePendingActionDocument.authorized_character_id == character_id)
+            .count()
+        )
+
+    def get_pending_actions(self, character_id: str) -> typing.List[PendingActionDocument]:
+        pending_action_ids = [
+            r[0]
+            for r in self._kernel.server_db_session.query(
+                AuthorizePendingActionDocument.pending_action_id
+            )
+            .filter(AuthorizePendingActionDocument.authorized_character_id == character_id)
+            .all()
+        ]
+        return (
+            self._kernel.server_db_session.query(PendingActionDocument)
+            .filter(PendingActionDocument.id.in_(pending_action_ids))
+            .all()
+        )
+
+    def get_pending_action(
+        self, pending_action_id: int, check_authorized_character_id: str
+    ) -> PendingActionDocument:
+        if (
+            not self._kernel.server_db_session.query(AuthorizePendingActionDocument)
+            .filter(
+                AuthorizePendingActionDocument.authorized_character_id
+                == check_authorized_character_id,
+                AuthorizePendingActionDocument.pending_action_id == pending_action_id,
+            )
+            .count()
+        ):
+            raise ImpossibleAction("Action non authorisé")
+
+        return (
+            self._kernel.server_db_session.query(PendingActionDocument)
+            .filter(PendingActionDocument.id == pending_action_id)
+            .one()
+        )

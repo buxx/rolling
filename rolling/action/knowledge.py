@@ -254,11 +254,14 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
             ),
             expire_at_turn=self._kernel.universe_lib.get_last_state().turn + (input_.expire - 1),
             suggested_by=character.id,
+            name=(
+                f"Prendre un cours de {knowledge_description.name} avec"
+                f" {character.name} pendant {input_.ap} points d'actions"
+            ),
+            delete_after_first_perform=True,
         )
         self._kernel.action_factory.add_pending_action_authorization(
-            pending_action_id=pending_action_document.id,
-            authorized_character_id=with_character.id,
-            expire_at_turn=self._kernel.universe_lib.get_last_state().turn + (input_.expire - 1),
+            pending_action_id=pending_action_document.id, authorized_character_id=with_character.id
         )
 
         return Description(
@@ -311,11 +314,16 @@ class TeachKnowledgeAction(WithCharacterAction):
         return []  # should not be called because called from pending action
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TeachKnowledgeModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: TeachKnowledgeModel,
     ) -> Description:
         knowledge_description = self._kernel.game.config.knowledge[input_.knowledge_id]
         if self._kernel.character_lib.increase_knowledge_progress(
-            with_character.id, input_.knowledge_id, ap=int(input_.ap * knowledge_description.instructor_coeff)
+            with_character.id,
+            input_.knowledge_id,
+            ap=int(input_.ap * knowledge_description.instructor_coeff),
         ):
             title = "Connaissance acquise !"
         else:

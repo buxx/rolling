@@ -47,8 +47,10 @@ from rolling.action.use import UseAsArmorAction
 from rolling.action.use import UseAsBagAction
 from rolling.action.use import UseAsShieldAction
 from rolling.action.use import UseAsWeaponAction
-from rolling.server.document.action import PendingActionDocument, AuthorizePendingActionDocument
-from rolling.types import ActionType, ActionScope
+from rolling.server.document.action import AuthorizePendingActionDocument
+from rolling.server.document.action import PendingActionDocument
+from rolling.types import ActionScope
+from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -248,10 +250,12 @@ class ActionFactory:
         character_id: str,
         parameters: dict,
         expire_at_turn: int,
+        name: str,
         with_character_id: typing.Optional[str] = None,
         stuff_id: typing.Optional[int] = None,
         resource_id: typing.Optional[str] = None,
         suggested_by: typing.Optional[str] = None,
+        delete_after_first_perform: bool = True,
     ) -> PendingActionDocument:
         pending_action_document = PendingActionDocument(
             action_scope=action_scope.value,
@@ -264,25 +268,42 @@ class ActionFactory:
             stuff_id=stuff_id,
             resource_id=resource_id,
             suggested_by=suggested_by,
+            name=name,
+            delete_after_first_perform=delete_after_first_perform,
         )
         self._kernel.server_db_session.add(pending_action_document)
         self._kernel.server_db_session.commit()
         return pending_action_document
 
     def add_pending_action_authorization(
-        self,
-        pending_action_id: int,
-        authorized_character_id: str,
-        expire_at_turn: int,
+        self, pending_action_id: int, authorized_character_id: str
     ) -> AuthorizePendingActionDocument:
         authorization = AuthorizePendingActionDocument(
-            pending_action_id=pending_action_id,
-            authorized_character_id=authorized_character_id,
-            expire_at_turn=expire_at_turn,
+            pending_action_id=pending_action_id, authorized_character_id=authorized_character_id
         )
         self._kernel.server_db_session.add(authorization)
         self._kernel.server_db_session.commit()
         return authorization
 
-    def execute_from_pending(self, pending_id: int) -> Description:
-        pass
+    def execute_pending(self, pending_action: PendingActionDocument) -> Description:
+        action = self.create_action(
+            action_type=ActionType(pending_action.action_type),
+            action_description_id=pending_action.action_description_id,
+        )
+        character = self._kernel.character_lib.get(pending_action.character_id)
+        if pending_action.action_scope == ActionScope.WITH_CHARACTER.value:
+            with_character = self._kernel.character_lib.get(pending_action.with_character_id)
+            input_ = action.input_model_serializer.load(pending_action.parameters)
+            action.check_request_is_possible(character, with_character, input_=input_)
+            description = action.perform(character, with_character, input_=input_)
+        else:
+            raise NotImplementedError("TODO")
+
+        if pending_action.delete_after_first_perform:
+            self._kernel.server_db_session.query(AuthorizePendingActionDocument).filter(
+                AuthorizePendingActionDocument.pending_action_id == pending_action.id
+            ).delete()
+            self._kernel.server_db_session.query(PendingActionDocument).filter(PendingActionDocument.id == pending_action.id).delete()
+            # FIXME BS: ca pas l'air de suppriemr ... verra aux tests
+
+        return description
