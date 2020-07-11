@@ -93,6 +93,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Participation à plusieurs de la rédaction de l'histoire (récits)
   * ☐ Etendre une construction (ex. cave de stockage) (tuiles côtes-a-côtes)
   * ☑ Batiments qui empeche le mouvement (ex. murs)
+  * ☐ Batiments permettant de conserver la nourriture
   * ☑ Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone
   * ☐ Interdire la construction au bord de la zone (pour permettre les voyages)
 
@@ -156,6 +157,10 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Monte d'animaux (véhicules)
   * ☐ Remorques
   * ☐ Le poids transporté influent sur les durées de déplacement au lieu de l'empếcher "au gramme près"
+  * ☐ Météo et influence sur les actions (hiver = peu de nourriture !)
+  * ☐ Péromption des aliments (avec influence du stockage: sac, grenier, jarre, etc)
+  * ☐ Regain de points de vies au passage de tour
+  * ☐ Modifier l'environnement: ex. creuser des tranchés (eau qui coule)
 
 * Univers
   * ☑ Décors de base
@@ -205,3 +210,5 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Pages de scores: zones les plus civilisés (constructions/qualités)
   * ☐ Pages de scores: démographies (+historisation pour carte)
   * ☐ Pages de scores: combativité (+historisation pour carte)
+  * ☐ Pages de scores: mortalité (+historisation pour carte)
+  * ☐ Outils de gestion pour les maitres du jeu
