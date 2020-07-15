@@ -161,6 +161,12 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Péromption des aliments (avec influence du stockage: sac, grenier, jarre, etc)
   * ☐ Regain de points de vies au passage de tour
   * ☐ Modifier l'environnement: ex. creuser des tranchés (eau qui coule)
+  * ☐ **Inventaire/Affinité: pouvoir donner accès à son inventaire à une/des affinités**
+  * ☐ Depuis l'inventaire, accès aux ressources/objets disponible à travers les affinités (inventaires des persos, bâtiments, protectorat)
+  * ☐ Protectorat
+  * ☐ Pouvoir qualifier un personnage (ex. le bon, le fou, le gros, etc) après avoir assez cottoyé, et en faire le nom publique si beaucoup partagé.
+  * ☐ Pouvoir se cacher
+  * ☐ Accords: non aggression, échange de valeurs (produits vs PA), etc
 
 * Univers
   * ☑ Décors de base
