@@ -223,9 +223,9 @@ class CharacterController(BaseController):
                     is_link=True if character.shield else False,
                     align="left",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
-                        character_id=character.id, stuff_id=character.weapon.id
+                        character_id=character.id, stuff_id=character.shield.id
                     )
-                    if character.weapon
+                    if character.shield
                     else None,
                 ),
                 Part(
@@ -234,9 +234,20 @@ class CharacterController(BaseController):
                     is_link=True if character.armor else False,
                     align="left",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
-                        character_id=character.id, stuff_id=character.weapon.id
+                        character_id=character.id, stuff_id=character.armor.id
                     )
-                    if character.weapon
+                    if character.armor
+                    else None,
+                ),
+                Part(
+                    label="Sac",
+                    text=character.bags[0].name if character.bags else "aucune",
+                    is_link=True if character.bags else False,
+                    align="left",
+                    form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=character.bags[0].id
+                    )
+                    if character.bags
                     else None,
                 ),
                 Part(text=""),

@@ -26,6 +26,11 @@ def resource():
     pass
 
 
+@character.group()
+def knowledge():
+    pass
+
+
 @stuff.command()
 @click.argument("game-config-dir")
 @click.argument("character-name")
@@ -95,6 +100,24 @@ def ap(game_config_dir: str, character_name: str, action_points: int) -> None:
     character_doc.action_points = action_points
     kernel.server_db_session.add(character_doc)
     kernel.server_db_session.commit()
+
+
+@knowledge.command()
+@click.argument("game-config-dir")
+@click.argument("character-name")
+@click.argument("knowledge-id")
+def setup(game_config_dir: str, character_name: str, knowledge_id: str) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(game_config_folder=game_config_dir)
+    click.echo("Search character by name")
+    character_ = kernel.character_lib.get_by_name(character_name)
+    character_doc = kernel.character_lib.get_document(character_.id)
+    click.echo("Setup knowledge")
+    kernel.character_lib.increase_knowledge_progress(
+        character_doc.id,
+        knowledge_id,
+        ap=int(kernel.game.config.knowledge[knowledge_id].ap_required),
+    )
 
 
 if __name__ == "__main__":
