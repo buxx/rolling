@@ -361,12 +361,33 @@ class StuffLib:
     ) -> None:
         stuff_doc = self.get_stuff_doc(stuff_id)
         stuff_doc.carried_by_id = None
+        self.un_use_stuff_doc(stuff_doc)
         stuff_doc.world_row_i = world_row_i
         stuff_doc.world_col_i = world_col_i
         stuff_doc.zone_row_i = zone_row_i
         stuff_doc.zone_col_i = zone_col_i
         self._kernel.server_db_session.add(stuff_doc)
 
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def un_use_stuff_doc(self, doc: StuffDocument) -> None:
+        doc.used_as_armor_by_id = None
+        doc.used_as_bag_by_id = None
+        doc.used_as_shield_by_id = None
+        doc.used_as_weapon_by_id = None
+
+    def un_use_stuff(self, stuff_id: int, commit: bool = True) -> None:
+        self._kernel.server_db_session.query(StuffDocument).filter(
+            StuffDocument.id == stuff_id
+        ).update(
+            {
+                "used_as_armor_by_id": None,
+                "used_as_bag_by_id": None,
+                "used_as_shield_by_id": None,
+                "used_as_weapon_by_id": None,
+            }
+        )
         if commit:
             self._kernel.server_db_session.commit()
 

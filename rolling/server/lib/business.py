@@ -199,6 +199,7 @@ class BusinessLib:
                     stuff = self._kernel.stuff_lib.get_first_carried_stuff(
                         character_id=giver_id, stuff_id=item.stuff_id
                     )
+                    self._kernel.stuff_lib.un_use_stuff(stuff.id)  # TODO BS 20200719: test it
                     self._kernel.stuff_lib.set_carried_by(
                         stuff_id=stuff.id, character_id=receiver_id, commit=False
                     )
