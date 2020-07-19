@@ -116,6 +116,21 @@ max_action_propose_turns = 3
     unit = "M3"
     clutter = 500.0
     actions = []
+  [resources.VEGETAL_FIBER]
+    name = "Fibre végétale"
+    weight=50000.0
+    material="MIDDLE_PIECE"
+    unit = "M3"
+    clutter = 100.0
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+  [resources.CLOTH]
+    name = "Pièce de tissu"
+    weight=500.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+
 
 [resource_mix]
 
@@ -176,4 +191,20 @@ max_action_propose_turns = 3
 
   [ACTIONS.TEACH_KNOWLEDGE]  # ID must be keeped if action keeped
     actions = ["TEACH_KNOWLEDGE"]
+    cost = 0.0
+
+  [ACTIONS.MAKE_CLOTH]
+    name = "Produire du tissu"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="CLOTH", coeff=2}
+    ]
+    required_resource_id = "VEGETAL_FIBER"
+    cost_per_unit = 5
     cost = 0.0

@@ -69,8 +69,7 @@ class TestLearnKnowledgeAction:
         descr = learn_action.perform(franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith"))
         assert descr.title == "Apprendre Forgeron"
         assert (
-            descr.items[0].text
-            == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
+            descr.items[0].text == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
         )
 
         descr = learn_action.perform(

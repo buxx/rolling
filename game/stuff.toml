@@ -5,18 +5,6 @@
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   material_type = "SOLID"
 
-[PLASTIC_BOTTLE_1L]
-  name = "Plastic bottle"
-  filled_at = 0.0
-  filled_unity = "L"
-  filled_capacity = 1.0
-  weight = 0.1
-  clutter = 1.0
-  image = "bottle.jpg"
-  actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
-  material_type = "OBJECT"
-  classes = ["BOTTLE"]
-
 [LITTLE_SKIN_CANTEEN]
   name = "Petite gourde de peau"
   filled_at = 0.0
@@ -27,52 +15,102 @@
   actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
   classes = ["BOTTLE"]
-[STONE]
-  name = "Stone"
-  weight = 2000.0
-  clutter = 1.0
-  image = "stone.jpg"
-  actions = ["DROP_STUFF"]
-  material_type = "SOLID"
-  weapon = true
-[LITTLE_BASKETRY_BAG]
-  name = "Petit sac végétal"
+[BASKETRY_BAG]
+  name = "Sac végétal"
   weight = 1000.0
-  clutter = 0.0
+  clutter = 2.0
   clutter_capacity = 4.0
-  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
   material_type = "OBJECT"
   is_bag = true
   classes = ["BAG", "LITTLE_BAG", "BASKETRY_BAG"]
-[LITTLE_SKIN_BAG]
-  name = "Petit sac en peau"
-  weight = 1200.0
-  clutter = 0.0
+[SKIN_BAG]
+  name = "Sac de peaux"
+  weight = 2000.0
+  clutter = 2.0
   clutter_capacity = 5.0
-  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG"]
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
   material_type = "OBJECT"
   is_bag = true
   classes = ["BAG", "LITTLE_BAG", "SKIN_BAG"]
-[ANIMAL_SKIN_COAT]
-  name = "Veste de peaux animales"
-  weight = 2000.0
+[LEATHER_BAG]
+  name = "Sac de cuir"
+  weight = 1500.0
+  clutter = 2.0
+  clutter_capacity = 7.0
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
+  material_type = "OBJECT"
+  is_bag = true
+  classes = ["BAG", "LITTLE_BAG", "LEATHER_BAG"]
+[TRAVOIS]
+  name = "Travois"
+  weight = 10000.0
+  clutter = 10.0
+  clutter_capacity = 12.0
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
+  material_type = "OBJECT"
+  is_bag = true
+  classes = ["BAG"]
+[CLOTH_BAG]
+  name = "Sac de toile"
+  weight = 1000.0
+  clutter = 0.0
+  clutter_capacity = 8.0
+  actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
+  material_type = "OBJECT"
+  is_bag = true
+  classes = ["BAG", "LITTLE_BAG", "CLOTH_BAG"]
+[ANIMAL_SKIN_CLOTHES]
+  name = "Habits de peaux"
+  weight = 4000.0
   clutter = 3.0
   actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR", "CONTINUE_STUFF_CONSTRUCTION"]
   armor = true
-  protect_estoc = 5
+  protect_estoc = 1
   protect_blunt = 5
   protect_sharp = 5
-  classes = ["ARMOR", "COAT"]
+  classes = ["ARMOR", "CLOTHES"]
+[LEATHER_CLOTHES]
+  name = "Habits de cuir"
+  weight = 2000.0
+  clutter = 2.0
+  actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR", "CONTINUE_STUFF_CONSTRUCTION"]
+  armor = true
+  protect_estoc = 5
+  protect_blunt = 10
+  protect_sharp = 10
+  classes = ["ARMOR", "CLOTHES"]
+[LEATHER_BRIGANDINE]
+  name = "Brigandine de cuir"
+  weight = 2250.0
+  clutter = 3.0
+  actions = ["DROP_STUFF", "USE_AS_ARMOR", "NOT_USE_AS_ARMOR", "CONTINUE_STUFF_CONSTRUCTION"]
+  armor = true
+  protect_estoc = 12
+  protect_blunt = 15
+  protect_sharp = 15
+  classes = ["ARMOR", "CLOTHES", "LEATHER_ARMOR"]
 [PRIMITIVE_WOOD_SHIELD]
-  name = "Bouclier de planche"
+  name = "Coque de bois"
   weight = 3500.0
   clutter = 5.0
   actions = ["DROP_STUFF", "USE_AS_SHIELD", "NOT_USE_AS_SHIELD", "CONTINUE_STUFF_CONSTRUCTION"]
   shield = true
   skills_bonus = ["shield_fight"]
-  protect_estoc = 10
-  protect_blunt = 10
+  protect_estoc = 8
+  protect_blunt = 5
   protect_sharp = 10
+  classes = ["SHIELD"]
+[WOOD_SHIELD]
+  name = "Bouclier de bois"
+  weight = 4000.0
+  clutter = 4.0
+  actions = ["DROP_STUFF", "USE_AS_SHIELD", "NOT_USE_AS_SHIELD", "CONTINUE_STUFF_CONSTRUCTION"]
+  shield = true
+  skills_bonus = ["shield_fight"]
+  protect_estoc = 15
+  protect_blunt = 10
+  protect_sharp = 15
   classes = ["SHIELD"]
 [WOOD_SPEAR]
   name = "Lance de bois"
@@ -87,42 +125,16 @@
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "SPEAR"]
-[WOOD_SPEAR_STONE]
-  name = "Lance de bois et pierre"
-  weight = 1200.0
-  clutter = 1.0
+[WOOD_MACE]
+  name = "Massue"
+  weight = 5000.0
+  clutter = 2.0
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
-  skills_bonus = ["spear_fight"]
-  estoc = 12
-  blunt = 0
-  sharp = 0
-  damages = 1.1
-  classes = ["WEAPON", "SPEAR"]
-[WOOD_SPEAR_STRENGHTHENED]
-  name = "Lance de bois renforcé"
-  weight = 1000.0
-  clutter = 1.0
-  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
-  abilities = ["HUNT_SMALL_GAME", "FIGHT"]
-  weapon = true
-  skills_bonus = ["spear_fight"]
-  estoc = 11
-  blunt = 0
-  sharp = 0
-  damages = 1.1
-  classes = ["WEAPON", "SPEAR"]
-[WOOD_ASSEGAI]
-  name = "Sagaie de bois"
-  weight = 500.0
-  clutter = 1.0
-  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
-  abilities = ["HUNT_SMALL_GAME", "FIGHT"]
-  weapon = true
-  skills_bonus = ["spear_fight"]
-  estoc = 10
-  blunt = 0
+  skills_bonus = ["mace_fight"]
+  estoc = 0
+  blunt = 10
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "SPEAR"]
@@ -139,7 +151,6 @@
   sharp = 10
   damages = 1.0
   classes = ["WEAPON", "HAXE"]
-# TODO BS 2019-10-10: living animals ? moving on zone ? farming !
 [HARE]
   name = "Lièvre"
   weight = 3500.0

@@ -12,7 +12,7 @@ turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
 cheats = {"*"=["increase_ap"]}
 create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", "basketry"]
-create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith"]
+create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith", "leatherwork"]
 create_character_knowledges_count = 1
 create_character_max_points = 13.0
 max_action_propose_turns = 3
@@ -145,6 +145,12 @@ max_action_propose_turns = 3
   abilities = ["BLACKSMITH2"]
   requires = ["BLACKSMITH"]
 
+[knowledge.leatherwork]
+  name = "Maroquinerie"
+  ap_required = 100.0
+  abilities = ["LEATHERWORK"]
+  requires = []
+
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
   name = "Cuisson"
@@ -162,6 +168,10 @@ max_action_propose_turns = 3
   name = "Maitrise de la forge"
 [ability.BLACKSMITH2]
   name = "Maitrise de la forge avancé"
+[ability.LEATHERWORK]
+  name = "Maroquinerie"
+[ability.LOOMING]
+  name = "Tissage"
 
 [character_effects]
   [character_effects.THIRSTY_SATISFIED]
@@ -251,7 +261,7 @@ max_action_propose_turns = 3
 
   [resources.RAW_MEAT]
     name = "Viande crue"
-    weight=1000.0
+    weight=1.0
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.0005
@@ -259,7 +269,7 @@ max_action_propose_turns = 3
 
   [resources.COOKED_MEAT]
     name = "Viande cuite"
-    weight=1000.0
+    weight=1.0
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.0005
@@ -267,7 +277,7 @@ max_action_propose_turns = 3
 
   [resources.SMOKED_MEAT]
     name = "Viande fumée"
-    weight=1000.0
+    weight=1.0
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.0004
@@ -289,9 +299,41 @@ max_action_propose_turns = 3
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
+  [resources.BREAD]
+    name = "Pain"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
   [resources.RAW_STONE]
     name = "Pierre brute"
     weight=2500.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+  [resources.LEATHER_PIECE]
+    name = "Pièce de cuir"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+  [resources.VEGETAL_FIBER]
+    name = "Fibre végétale"
+    weight=50000.0
+    material="MIDDLE_PIECE"
+    unit = "M3"
+    clutter = 100.0
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+  [resources.CLOTH]
+    name = "Pièce de tissu"
+    weight=500.0
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 1.0
@@ -401,6 +443,13 @@ max_action_propose_turns = 3
     actions = ["EAT_RESOURCE"]
     accept_resources = ["SMOKED_MEAT"]
     require = 250.0
+    character_effects = ["HUNGRY_SATISFIED"]
+    cost = 0.0
+
+  [ACTIONS.EAT_BREAD]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["BREAD"]
+    require = 500.0
     character_effects = ["HUNGRY_SATISFIED"]
     cost = 0.0
 
@@ -602,6 +651,11 @@ max_action_propose_turns = 3
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
 
+  [ACTIONS.BUILD_LOOM]
+    actions = ["BEGIN_BUILD"]
+    build = "LOOM"
+    cost = 0.1  # start build cost
+
   [ACTIONS.BUILD_WOOD_FENCE]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -613,6 +667,17 @@ max_action_propose_turns = 3
     build = "WOOD_FENCE"
     cost = 3.0
 
+  [ACTIONS.BUILD_BRUSHWOOD_EDGE]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "BRUSHWOOD_EDGE"
+    cost = 0.5
+
   [ACTIONS.BUILD_STONE_WALL]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -623,6 +688,17 @@ max_action_propose_turns = 3
     actions = ["BUILD"]
     build = "STONE_WALL"
     cost = 4.0
+
+  [ACTIONS.BUILD_DIRT_WALL]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "DIRT_WALL"
+    cost = 2.0
 
   [ACTIONS.HUNT_CRUSTACEANS]
     name = "Chercher des fruits de mer"
@@ -703,8 +779,8 @@ max_action_propose_turns = 3
     ]
     cost = 4.0
 
-  [ACTIONS.CRAFT_WOOD_SPEAR_STONE]
-    name = "Fabriquer une lance de bois et pierre"
+  [ACTIONS.CRAFT_WOOD_MACE]
+    name = "Fabriquer une massue en bois"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -713,44 +789,10 @@ max_action_propose_turns = 3
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {stuff="WOOD_SPEAR_STONE", quantity=1.0},
+      {stuff="WOOD_MACE", quantity=1.0},
     ]
     require = [
-      {resource="WOOD", quantity=0.002}
-    ]
-    cost = 6.0
-
-  [ACTIONS.CRAFT_WOOD_SPEAR_STRENGHTHENED]
-    name = "Améliorer en lance de bois renforcé"
-    actions = ["CRAFT_STUFF_WITH_STUFF"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
-    required_all_ability_ids = []
-    produce = [
-      {stuff="WOOD_SPEAR_STRENGHTHENED", quantity=1.0},
-    ]
-    require = [
-      {stuff="WOOD_SPEAR", quantity=1.0}
-    ]
-    cost = 5.0
-
-  [ACTIONS.CRAFT_WOOD_ASSEGAI]
-    name = "Fabriquer une sagaie de bois"
-    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {stuff="WOOD_ASSEGAI", quantity=1.0},
-    ]
-    require = [
-      {resource="WOOD", quantity=0.001}
+      {resource="WOOD", quantity=0.01}
     ]
     cost = 4.0
 
@@ -804,6 +846,54 @@ max_action_propose_turns = 3
     cost_per_unit = 0.0001
     cost = 3.0
 
+  [ACTIONS.MAKE_BREAD]
+    name = "Faire du pain"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="BREAD", coeff=1000.0}
+    ]
+    required_resource_id = "GRAMINEAE"
+    cost_per_unit = 0.05
+    cost = 3.0
+
+  [ACTIONS.MAKE_LEATHER_PIECE]
+    name = "Produire une pièce de cuir"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["LEATHERWORK"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="LEATHER_PIECE", coeff=1}
+    ]
+    required_resource_id = "ANIMAL_SKIN"
+    cost_per_unit = 5
+    cost = 1.0
+
+  [ACTIONS.MAKE_CLOTH]
+    name = "Produire du tissu"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["LOOMING"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="CLOTH", coeff=1}
+    ]
+    required_resource_id = "VEGETAL_FIBER"
+    cost_per_unit = 5
+    cost = 0.0
+
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
     name = "Statuette de femme enceinte"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
@@ -823,7 +913,7 @@ max_action_propose_turns = 3
     link_group_name = "Artisanat d'art"
 
   [ACTIONS.CONSTRUCT_PRIMITIVE_WOOD_SHIELD]
-    name = "Bouclier de planche"
+    name = "Coque de bois"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -840,8 +930,8 @@ max_action_propose_turns = 3
     cost = 2.0
     link_group_name = "Matériel de guerre"
 
-  [ACTIONS.CONSTRUCT_ANIMAL_SKIN_COAT]
-    name = "Veste de peaux animales"
+  [ACTIONS.CONSTRUCT_ANIMAL_SKIN_CLOTHES]
+    name = "Habits de peaux"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -849,13 +939,49 @@ max_action_propose_turns = 3
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = []
-    produce_stuff_id = "ANIMAL_SKIN_COAT"
+    produce_stuff_id = "ANIMAL_SKIN_CLOTHES"
     default_description = "Fait de plusieurs pièces de fourrures"
     consume = [
-      {resource="ANIMAL_SKIN", quantity=20}  # FIXME: in action, accept stuff to as required
+      {resource="ANIMAL_SKIN", quantity=5}
     ]
     craft_ap = 20.0
-    cost = 2.0
+    cost = 1.0
+    link_group_name = "Vestimentaire"
+
+  [ACTIONS.CONSTRUCT_LEATHER_CLOTHES]
+    name = "Habits de cuir"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "LEATHER_CLOTHES"
+    default_description = "Fait de plusieurs pièces de cuir"
+    consume = [
+      {resource="LEATHER_PIECE", quantity=5}
+    ]
+    craft_ap = 20.0
+    cost = 1.0
+    link_group_name = "Vestimentaire"
+
+  [ACTIONS.CONSTRUCT_LEATHER_BRIGANDINE]
+    name = "Brigandine de cuir"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["LEATHERWORK"]
+    required_all_ability_ids = []
+    produce_stuff_id = "LEATHER_BRIGANDINE"
+    default_description = "Fait de pièces de cuir renforcé"
+    consume = [
+      {resource="LEATHER_PIECE", quantity=8}
+    ]
+    craft_ap = 35.0
+    cost = 1.0
     link_group_name = "Vestimentaire"
 
   [ACTIONS.CONSTRUCT_BASKETRY_BAG]
@@ -867,7 +993,7 @@ max_action_propose_turns = 3
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = ["BASKETRY"]
-    produce_stuff_id = "LITTLE_BASKETRY_BAG"
+    produce_stuff_id = "BASKETRY_BAG"
     default_description = "Petit sac en jutte"
     consume = []
     craft_ap = 5.0
@@ -883,12 +1009,67 @@ max_action_propose_turns = 3
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = []
-    produce_stuff_id = "LITTLE_SKIN_BAG"
+    produce_stuff_id = "SKIN_BAG"
     default_description = "Petit sac en peau"
     consume = [
       {resource="ANIMAL_SKIN", quantity=2}
     ]
     craft_ap = 5.0
+    cost = 1.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.CONSTRUCT_CLOTH_BAG]
+    name = "Sac de toile"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "CLOTH_BAG"
+    default_description = "Petit sac en toile et en cuir"
+    consume = [
+      {resource="LEATHER_PIECE", quantity=1},
+      {resource="CLOTH", quantity=1}
+    ]
+    craft_ap = 25.0
+    cost = 1.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.CONSTRUCT_LEATHER_BAG]
+    name = "Sac de cuir"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["LEATHERWORK"]
+    required_all_ability_ids = []
+    produce_stuff_id = "SKIN_BAG"
+    default_description = "Petit sac en cuir"
+    consume = [
+      {resource="LEATHER_PIECE", quantity=5}
+    ]
+    craft_ap = 10.0
+    cost = 1.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.CONSTRUCT_TRAVOIS]
+    name = "Travois"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "TRAVOIS"
+    default_description = "En pièces de bois assemblés"
+    consume = [
+      {resource="WOOD", quantity=0.5}
+    ]
+    craft_ap = 15.0
     cost = 1.0
     link_group_name = "Utilitaire"
 
@@ -920,6 +1101,20 @@ max_action_propose_turns = 3
     ]
     cost = 0.0
 
+  [ACTIONS.SEARCH_VEGETAL_FIBER]
+    name = "Chercher de la fibre végétale"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="VEGETAL_FIBER", quantity_per_hour=0.5, random_loss=30.0},
+    ]
+    cost = 0.0
+
 [build]
 [build.CAMP_FIRE]
   name = "Feux de camp"
@@ -932,6 +1127,27 @@ max_action_propose_turns = 3
   cost = 2.0
   classes = ["CAMPFIRE"]
   many = false
+[build.LOOM]
+  name = "Métier à tisser"
+  char = "$"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=0.5}]
+  abilities = ["LOOMING"]
+  cost = 50.0
+  classes = ["LOOM"]
+  many = false
+[build.BRUSHWOOD_EDGE]
+  name = "Haie de branchages"
+  char = "/"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=0.005}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["WALL"]
+  many = true
+  traversable = {"WALKING"=true}
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
@@ -949,6 +1165,18 @@ max_action_propose_turns = 3
   char = "§"
   building_char = "x"
   build_require_resources = [{resource="RAW_STONE", quantity=100}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["WALL"]
+  many = true
+  traversable = {"WALKING"=false}
+[build.DIRT_WALL]
+  name = "Mur de terre"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="DIRT", quantity=0.1}]
   turn_require_resources = []
   power_on_require_resources = []
   abilities = []

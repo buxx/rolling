@@ -7,9 +7,9 @@
       count = 1
 
       [ZONE_PROPERTIES.BEACH.GENERATION.STUFF]
-        [ZONE_PROPERTIES.BEACH.GENERATION.STUFF.PLASTIC_BOTTLE_1L]
-          probability = 100.0
-          filled_at = 0.0
+#        [ZONE_PROPERTIES.BEACH.GENERATION.STUFF.PLASTIC_BOTTLE_1L]
+#          probability = 100.0
+#          filled_at = 0.0
           # TODO BS 2019-07-04: add filled_with_resource, and change structure to permit multipler same stuff id
 
     [ZONE_PROPERTIES.BEACH.RESOURCES]
@@ -34,7 +34,7 @@
 
   [ZONE_PROPERTIES.PLAIN]
     move_cost = 4.0
-    description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits et des graminés."""
+    description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits, des graminés et de la fibre végétale."""
 
     [ZONE_PROPERTIES.PLAIN.STUFFS]
       [ZONE_PROPERTIES.PLAIN.STUFFS.HARE]  # bernard l'hermite, u
@@ -71,13 +71,17 @@
         probability = 100.0  # probability to be available on x,y zone at world init
         maximum = 10000.0  # maximum quantity on x,y zone
         regeneration = 100.0  # quatity generation per turn
+      [ZONE_PROPERTIES.PLAIN.RESOURCES.VEGETAL_FIBER]
+        probability = 100.0
+        maximum = 1000.0
+        regeneration = 10.0
 
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 1
 
       [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF]
-        [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF.STONE]
-          probability = 100.0
+#        [ZONE_PROPERTIES.PLAIN.GENERATION.STUFF.STONE]
+#          probability = 100.0
 
   [ZONE_PROPERTIES.SEA]
     move_cost = 6.0
@@ -124,13 +128,17 @@
 
   [ZONE_PROPERTIES.JUNGLE]
     move_cost = 8.0
-    description = """Dans la jungle, vous devriez pouvoir trouver des fruits et baies en tout genre. Ainsi que des animaux de moyen et gros gabarits."""
+    description = """Dans la jungle, vous devriez pouvoir trouver des fruits et baies en tout genre, des animaux de moyen et gros gabarits et de la fibre végétale."""
 
     [ZONE_PROPERTIES.JUNGLE.RESOURCES]
       [ZONE_PROPERTIES.JUNGLE.RESOURCES.VEGETAL_FOOD_FRESH]
         probability = 100.0  # probability to be available on x,y zone at world init
         maximum = 5000.0  # maximum quantity on x,y zone
         regeneration = 10.0  # quatity generation per turn
+      [ZONE_PROPERTIES.JUNGLE.RESOURCES.VEGETAL_FIBER]
+        probability = 100.0
+        maximum = 200.0
+        regeneration = 5.0
 
     [ZONE_PROPERTIES.JUNGLE.STUFFS]
       # TODO: ANIMAUX DE LA JUNGLE
@@ -168,13 +176,17 @@
 
   [ZONE_PROPERTIES.HILL]
     move_cost = 5.0
-    description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des graminés."""
+    description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des graminés et de la fibre végétale."""
 
     [ZONE_PROPERTIES.HILL.RESOURCES]
       [ZONE_PROPERTIES.HILL.RESOURCES.GRAMINEAE]
         probability = 100.0  # probability to be available on x,y zone at world init
         maximum = 50000.0  # maximum quantity on x,y zone
         regeneration = 10.0  # quatity generation per turn
+      [ZONE_PROPERTIES.HILL.RESOURCES.VEGETAL_FIBER]
+        probability = 100.0
+        maximum = 1000.0
+        regeneration = 10.0
 
     [ZONE_PROPERTIES.HILL.STUFFS]
       [ZONE_PROPERTIES.HILL.STUFFS.HARE]  # bernard l'hermite, u

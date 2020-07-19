@@ -15,6 +15,7 @@ from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.model.measure import Unit
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
 from rolling.types import ActionType
@@ -181,6 +182,36 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                     f"({round(cost, 2)} nécessaires)"
                 )
 
+    def _adapt_quantity(self, quantity: float) -> float:
+        there_is_unit = -1
+        for produce in self._description.properties["produce"]:
+            produce_resource = self._kernel.game.config.resources[produce["resource"]]
+            if produce_resource.unit == Unit.UNIT:
+                if there_is_unit != -1 and produce["coeff"] % there_is_unit:
+                    raise ImpossibleAction(
+                        "Erreur configuration serveur: les productions doivent"
+                        " etre unitaires et multiples entiers"
+                    )
+
+                there_is_unit = produce["coeff"]
+            elif there_is_unit != -1:
+                raise ImpossibleAction(
+                    "Erreur configuration serveur: les productions doivent etre unitaires"
+                )
+
+        if there_is_unit == -1:
+            return quantity
+
+        produce_quantity = quantity * there_is_unit
+        if produce_quantity < 1.0:
+            raise ImpossibleAction("Pas assez de matière première")
+        not_round = float("0." + str(str(produce_quantity).split(".")[1]))
+
+        if not not_round:
+            return quantity
+
+        return quantity - (not_round / there_is_unit)
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -188,8 +219,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         input_: typing.Optional[QuantityModel] = None,
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None:
+            real_quantity = self._adapt_quantity(input_.quantity)
             return self._description.base_cost + (
-                self._description.properties["cost_per_unit"] * input_.quantity
+                self._description.properties["cost_per_unit"] * real_quantity
             )
         return self._description.base_cost
 
@@ -253,14 +285,15 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                     )
                 ],
             )
+        real_quantity = self._adapt_quantity(input_.quantity)
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
         self._kernel.resource_lib.reduce_carried_by(
-            character.id, carried_resource.id, quantity=input_.quantity, commit=False
+            character.id, carried_resource.id, quantity=real_quantity, commit=False
         )
         produced_resources_txts = []
         for produce in self._description.properties["produce"]:
             produce_resource = self._kernel.game.config.resources[produce["resource"]]
-            produce_quantity = input_.quantity * produce["coeff"]
+            produce_quantity = real_quantity * produce["coeff"]
             produce_quantity_str = quantity_to_str(
                 produce_quantity, produce_resource.unit, self._kernel
             )
