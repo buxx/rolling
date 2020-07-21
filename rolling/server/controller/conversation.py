@@ -258,71 +258,71 @@ class ConversationController(BaseController):
             redirect=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}"
         )
 
-    @hapic.with_api_doc()
-    @hapic.input_path(GetConversationPathModel)
-    @hapic.output_body(Description)
-    async def edit_concerned(self, request: Request, hapic_data: HapicData) -> Description:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
-        message = (
-            self._kernel.server_db_session.query(MessageDocument)
-            .filter(MessageDocument.id == hapic_data.path.conversation_id)
-            .one()
-        )
-        first_message = (
-            self._kernel.server_db_session.query(MessageDocument)
-            .filter(MessageDocument.id == message.first_message)
-            .one()
-        )
-        last_message = (
-            self._kernel.server_db_session.query(MessageDocument)
-            .filter(MessageDocument.first_message == message.first_message)
-            .order_by(MessageDocument.datetime.desc())
-            .limit(1)
-            .one()
-        )
-        zone_characters = self._kernel.character_lib.get_zone_players(
-            row_i=character_doc.world_row_i,
-            col_i=character_doc.world_col_i,
-            exclude_ids=[hapic_data.path.character_id],
-        )
-
-        character_parts = []
-        for zone_character in zone_characters:
-            character_parts.append(
-                Part(
-                    label=zone_character.name,
-                    value="on",
-                    is_checkbox=True,
-                    name=zone_character.id,
-                    checked=zone_character.id in last_message.concerned,
-                )
-            )
-
-        return Description(
-            title=first_message.subject,
-            items=[
-                Part(
-                    text="Vous pouvez ajouter les personnages ci-dessous à la conversation",
-                    is_form=True,
-                    form_action=f"/conversation/{hapic_data.path.character_id}/edit-concerned/{hapic_data.path.conversation_id}",
-                    items=character_parts,
-                )
-            ],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner aux conversations",
-                    form_action=f"/conversation/{hapic_data.path.character_id}",
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir la conversation",
-                    form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
-                    classes=["primary"],
-                ),
-            ],
-        )
+    # @hapic.with_api_doc()
+    # @hapic.input_path(GetConversationPathModel)
+    # @hapic.output_body(Description)
+    # async def edit_concerned(self, request: Request, hapic_data: HapicData) -> Description:
+    #     character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+    #     message = (
+    #         self._kernel.server_db_session.query(MessageDocument)
+    #         .filter(MessageDocument.id == hapic_data.path.conversation_id)
+    #         .one()
+    #     )
+    #     first_message = (
+    #         self._kernel.server_db_session.query(MessageDocument)
+    #         .filter(MessageDocument.id == message.first_message)
+    #         .one()
+    #     )
+    #     last_message = (
+    #         self._kernel.server_db_session.query(MessageDocument)
+    #         .filter(MessageDocument.first_message == message.first_message)
+    #         .order_by(MessageDocument.datetime.desc())
+    #         .limit(1)
+    #         .one()
+    #     )
+    #     zone_characters = self._kernel.character_lib.get_zone_players(
+    #         row_i=character_doc.world_row_i,
+    #         col_i=character_doc.world_col_i,
+    #         exclude_ids=[hapic_data.path.character_id],
+    #     )
+    #
+    #     character_parts = []
+    #     for zone_character in zone_characters:
+    #         character_parts.append(
+    #             Part(
+    #                 label=zone_character.name,
+    #                 value="on",
+    #                 is_checkbox=True,
+    #                 name=zone_character.id,
+    #                 checked=zone_character.id in last_message.concerned,
+    #             )
+    #         )
+    #
+    #     return Description(
+    #         title=first_message.subject,
+    #         items=[
+    #             Part(
+    #                 text="Vous pouvez ajouter les personnages ci-dessous à la conversation",
+    #                 is_form=True,
+    #                 form_action=f"/conversation/{hapic_data.path.character_id}/edit-concerned/{hapic_data.path.conversation_id}",
+    #                 items=character_parts,
+    #             )
+    #         ],
+    #         footer_links=[
+    #             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+    #             Part(
+    #                 is_link=True,
+    #                 label="Retourner aux conversations",
+    #                 form_action=f"/conversation/{hapic_data.path.character_id}",
+    #             ),
+    #             Part(
+    #                 is_link=True,
+    #                 label="Voir la conversation",
+    #                 form_action=f"/conversation/{hapic_data.path.character_id}/read/{hapic_data.path.conversation_id}",
+    #                 classes=["primary"],
+    #             ),
+    #         ],
+    #     )
 
     def bind(self, app: Application) -> None:
         app.add_routes(

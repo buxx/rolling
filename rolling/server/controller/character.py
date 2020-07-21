@@ -1264,15 +1264,6 @@ class CharacterController(BaseController):
         return Description(title="Effectuer un voyage ...", items=parts + buttons)
 
     @hapic.with_api_doc()
-    @hapic.handle_exception(NoResultFound, http_code=404)
-    @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(CharacterInventoryModel)
-    async def get_inventory(
-        self, request: Request, hapic_data: HapicData
-    ) -> CharacterInventoryModel:
-        return self._character_lib.get_inventory(hapic_data.path.character_id)
-
-    @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.input_query(MoveCharacterQueryModel)
     @hapic.handle_exception(CantMoveCharacter)

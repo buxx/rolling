@@ -117,7 +117,7 @@ class ActionDescriptionModel:
     id: str
     action_type: ActionType
     base_cost: float
-    properties: dict
+    properties: typing.Dict[str, typing.Any]
     name: typing.Optional[str] = None
 
 

@@ -50,9 +50,7 @@ def run(args: argparse.Namespace) -> None:
     context.handle_exception(Exception, http_code=500)
     hapic.set_processor_class(RollingSerpycoProcessor)
     hapic.set_context(context)
-
-    # FIXME: delete this when model really imported somewhere
-    BuildDocument
+    hapic.add_documentation_view("/doc")
 
     kernel.init()
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
