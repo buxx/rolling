@@ -115,6 +115,12 @@ max_action_propose_turns = 3
   type = "3.Spécifique"
   default = 0.0
 
+[skill.mace_fight]
+  name = "Combat a la masse"
+  type = "3.Spécifique"
+  default = 0.0
+
+
 [knowledge]
 [knowledge.basketry]
   name = "Vanerie"
