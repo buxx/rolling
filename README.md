@@ -96,6 +96,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Batiments permettant de conserver la nourriture
   * ☑ Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone
   * ☐ Interdire la construction au bord de la zone (pour permettre les voyages)
+  * ☐ Phase test 2: poisson fumé; bois sur plage (peu)
 
 * Actions
   * ☑ Ramasser un objet
@@ -125,8 +126,8 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Proposer de suivre
   * ☐ Proposer de faire une action a un autre perso
   * ☐ Cultures
-  * ☐ **Chasse: Proposer des actions groupés sur les animaux (transformation en viande, peau, etc)**
-  * ☐ **Généraliser l'usage de craft par progression d'ap mais pouvoir simplifier/en faire plusieurs d'affilé en une dépense**
+  * ☐ Chasse: Proposer des actions groupés sur les animaux (transformation en viande, peau, etc)
+  * ☐ Généraliser l'usage de craft par progression d'ap mais pouvoir simplifier/en faire plusieurs d'affilé en une dépense
 
 * Gameplay
   * ☐ Restreindre l'accès a des informations comme l'existence des affinités, nom de zone, etc et permettre leurs transmissions
@@ -196,7 +197,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Les actions qui nécessaite une position (ex. à coté de) envoient une requête de déplacement au GUI avant de s'éxecuter
   * ☐ Affichage dans l'écran de Zone les nouvelles prop. commerciales, invit°, etc
   * ☐ **Afficher si à manger dans la zone (sidebar)**
-  * ☐ **Afficher cobien de combattant protèges dans la zone (sidebar)**
+  * ☐ **Afficher combien de combattant protègent dans la zone (sidebar)**
 
 * Mécanique serveur
   * ☐ Contrôle des positions pour les actions (prendre, attaquer corps-à-corps/distance, etc)
