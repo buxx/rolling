@@ -16,6 +16,7 @@ create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith", "
 create_character_knowledges_count = 1
 create_character_max_points = 13.0
 max_action_propose_turns = 3
+reduce_tiredness_per_turn = 50
 
 [materials]
   [materials.LIQUID]

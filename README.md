@@ -97,7 +97,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☑ Page zone, afficher 1 bouton par affinité appartenu avec au moins un perso dans la zone
   * ☐ Interdire la construction au bord de la zone (pour permettre les voyages)
   * ☐ Phase test 2: poisson fumé; bois sur plage (peu)
-  * ☐ **retirer de la fatigue au passage de tour**
+  * ☑ Retirer de la fatigue au passage de tour
 
 * Actions
   * ☑ Ramasser un objet

@@ -72,6 +72,7 @@ class GameConfig:
         ]
         self.create_character_max_points: float = config_dict["create_character_max_points"]
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
+        self.reduce_tiredness_per_turn: int = config_dict["reduce_tiredness_per_turn"]
 
         self.day_turn_every = None
         if self.turn_mode == TurnMode.DAY:

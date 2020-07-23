@@ -211,6 +211,8 @@ class TurnLib:
             if not character_document.is_alive:
                 continue
 
+            self._character_lib.reduce_tiredness(character_id, self._kernel.game.config.reduce_tiredness_per_turn)
+
             if (
                 not character_document.dehydrated
                 and not character_document.starved
