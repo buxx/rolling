@@ -169,6 +169,8 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Pouvoir qualifier un personnage (ex. le bon, le fou, le gros, etc) après avoir assez cottoyé, et en faire le nom publique si beaucoup partagé.
   * ☐ Pouvoir se cacher
   * ☐ Accords: non aggression, échange de valeurs (produits vs PA), etc
+  * ☐ **De quoi manger/boire: prendre en compte ce qui est au sol**
+  * ☐ De quoi manger/boire: prendre en compte ce qui est partagé par les affinités
 
 * Univers
   * ☑ Décors de base
