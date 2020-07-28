@@ -10,7 +10,7 @@ default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
 turn_mode = "DAY"
 day_turn_every = 86400  # 24 hours
-cheats = {"*"=["increase_ap"]}
+cheats = {"*"=["increase_ap", "reduce_tiredness"]}
 create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", "basketry"]
 create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith", "leatherwork"]
 create_character_knowledges_count = 1

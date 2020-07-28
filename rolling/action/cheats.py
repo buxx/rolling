@@ -73,6 +73,19 @@ class CheatsCharacterAction(CharacterAction):
                 )
             )
 
+        if "reduce_tiredness" in available_cheats:
+            action_links.append(
+                CharacterActionLink(
+                    name="(Triche) Réduire la fatigue",
+                    link=get_character_action_url(
+                        character_id=character.id,
+                        action_type=ActionType.CHEATS,
+                        action_description_id=self._description.id,
+                        query_params={"cheat_id": "reduce_tiredness"},
+                    ),
+                )
+            )
+
         return action_links
 
     def perform(self, character: "CharacterModel", input_: CheatsModel) -> Description:
@@ -83,6 +96,16 @@ class CheatsCharacterAction(CharacterAction):
             self._kernel.server_db_session.commit()
             return Description(
                 title="Points d'actions rechargés",
+                footer_links=[
+                    Part(
+                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
+                    )
+                ],
+            )
+        if input_.cheat_id == "reduce_tiredness":
+            self._kernel.character_lib.reduce_tiredness(character.id, 100)
+            return Description(
+                title="Plus de fatigue",
                 footer_links=[
                     Part(
                         is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
