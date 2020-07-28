@@ -292,6 +292,7 @@ class CharacterLib:
         compute_unvote_affinity_relation: bool = False,
         compute_unread_transactions: bool = False,
         compute_pending_actions: bool = False,
+        compute_with_fighters: bool = False,
     ) -> CharacterModel:
         character_document = self.get_document(id_)
         model = self.document_to_model(character_document)
@@ -372,6 +373,9 @@ class CharacterLib:
 
         if compute_pending_actions:
             model.pending_actions = self.get_pending_actions_count(character_document.id)
+
+        if compute_with_fighters:
+            model.with_fighters_count = self.get_with_fighters_count(character_document.id)
 
         return model
 
@@ -1078,6 +1082,8 @@ class CharacterLib:
         except StopIteration:
             can_eat_str = "Non"
 
+        fighter_with_him = self._kernel.character_lib.get_with_fighters_count(character_id)
+
         return [
             (f"PV: {round(character.life_points, 1)}", None),
             (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
@@ -1089,6 +1095,7 @@ class CharacterLib:
             (f"De quoi manger: {can_eat_str}", None),
             (f"Suivis: {following_count}", None),
             (f"Suiveurs: {followers_count}", None),
+            (f"Combattants: {fighter_with_him}", None),
         ]
 
     def is_following(
@@ -1394,3 +1401,20 @@ class CharacterLib:
                         )
                     except ImpossibleAction:
                         pass
+
+    def get_with_fighters_count(self, character_id: str) -> int:
+        here_ids = []
+        character_document = self.get_document(character_id)
+
+        for affinity in self._kernel.affinity_lib.get_accepted_affinities(character_id):
+            here_ids.extend(
+                self._kernel.affinity_lib.get_members_ids(
+                    affinity.affinity_id,
+                    fighter=True,
+                    world_row_i=character_document.world_row_i,
+                    world_col_i=character_document.world_col_i,
+                    exclude_character_ids=[character_id],
+                )
+            )
+
+        return len(set(here_ids))

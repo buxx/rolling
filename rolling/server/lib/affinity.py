@@ -2,6 +2,7 @@
 import typing
 
 import sqlalchemy
+from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.model.character import CharacterModel
@@ -137,14 +138,14 @@ class AffinityLib:
             .all()
         )
 
-    def count_members(
+    def members_query(
         self,
         affinity_id: int,
         fighter: typing.Optional[bool] = None,
         world_row_i: typing.Optional[int] = None,
         world_col_i: typing.Optional[int] = None,
         exclude_character_ids: typing.Optional[typing.List[str]] = None,
-    ) -> int:
+    ) -> Query:
         if not fighter:
             query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
                 AffinityRelationDocument.affinity_id == affinity_id,
@@ -171,7 +172,44 @@ class AffinityLib:
                 AffinityRelationDocument.character_id.notin_(exclude_character_ids)
             )
 
-        return query.count()
+        return query
+
+    def count_members(
+        self,
+        affinity_id: int,
+        fighter: typing.Optional[bool] = None,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        exclude_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> int:
+        return self.members_query(
+            affinity_id,
+            fighter=fighter,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            exclude_character_ids=exclude_character_ids,
+        ).count()
+
+    def get_members_ids(
+        self,
+        affinity_id: int,
+        fighter: typing.Optional[bool] = None,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        exclude_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> typing.List[str]:
+        return [
+            r[0]
+            for r in self.members_query(
+                affinity_id,
+                fighter=fighter,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                exclude_character_ids=exclude_character_ids,
+            )
+            .with_entities(AffinityRelationDocument.character_id)
+            .all()
+        ]
 
     def there_is_unvote_relation(
         self, affinity: AffinityDocument, relation: AffinityRelationDocument

@@ -198,7 +198,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Les actions qui nécessaite une position (ex. à coté de) envoient une requête de déplacement au GUI avant de s'éxecuter
   * ☐ Affichage dans l'écran de Zone les nouvelles prop. commerciales, invit°, etc
   * ☑ Afficher si à manger dans la zone (sidebar)
-  * ☐ **Afficher combien de combattant protègent dans la zone (sidebar)**
+  * ☑ Afficher combien de combattant protègent dans la zone (sidebar)
 
 * Mécanique serveur
   * ☐ Contrôle des positions pour les actions (prendre, attaquer corps-à-corps/distance, etc)
