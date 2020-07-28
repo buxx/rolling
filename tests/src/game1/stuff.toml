@@ -44,3 +44,10 @@
   protect_estoc = 30
   protect_blunt = 10
   protect_sharp = 30
+
+[APPLE]
+  name = "Pomme"
+  weight = 100.0
+  clutter = 0.1
+  actions = ["EAT_STUFF"]
+  abilities = []

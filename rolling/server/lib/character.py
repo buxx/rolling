@@ -10,6 +10,8 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
+from rolling.action.base import ActionDescriptionModel, WithResourceAction, WithStuffAction
+from rolling.action.eat import EatResourceModel, EatStuffModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.model.ability import AbilityDescription
@@ -18,6 +20,8 @@ from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
+from rolling.model.consume import Consumeable
+from rolling.model.eat import EatResourceFromCharacterInventory, EatStuffFromCharacterInventory
 from rolling.model.event import StoryPage
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
@@ -50,6 +54,7 @@ from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
+from rolling.types import ActionType
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
 from rolling.util import get_character_stuff_filled_with_water
@@ -1063,6 +1068,12 @@ class CharacterLib:
         ) or get_character_stuff_filled_with_water(self._kernel, character.id):
             can_drink_str = "Oui"
 
+        try:
+            next(self.get_eatables(character))
+            can_eat_str = "Oui"
+        except StopIteration:
+            can_eat_str = "Non"
+
         return [
             (f"PV: {round(character.life_points, 1)}", None),
             (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
@@ -1071,6 +1082,7 @@ class CharacterLib:
             ("", None),
             (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
             (f"De quoi boire: {can_drink_str}", None),
+            (f"De quoi manger: {can_eat_str}", None),
             (f"Suivis: {following_count}", None),
             (f"Suiveurs: {followers_count}", None),
         ]
@@ -1334,3 +1346,52 @@ class CharacterLib:
             .filter(PendingActionDocument.id == pending_action_id)
             .one()
         )
+
+    def get_eatables(self, character: CharacterModel) -> typing.Generator[Consumeable, None, None]:
+        # With inventory resources
+        for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
+            resource_properties = self._kernel.game.config.resources[carried_resource.id]
+            for description in resource_properties.descriptions:
+                if description.action_type == ActionType.EAT_RESOURCE:
+                    eat_resource_action: WithResourceAction = self._kernel.action_factory.create_action(
+                        action_type=ActionType.EAT_RESOURCE,
+                        action_description_id=description.id,
+                    )
+                    try:
+                        eat_resource_action.check_request_is_possible(
+                            character=character,
+                            resource_id=carried_resource.id,
+                            input_=EatResourceModel(),
+                        )
+                        yield EatResourceFromCharacterInventory(
+                            character,
+                            action=eat_resource_action,
+                            resource_id=carried_resource.id,
+                            input_=EatResourceModel()
+                        )
+                    except ImpossibleAction:
+                        pass
+
+        # With inventory stuffs
+        for stuff in self._kernel.stuff_lib.get_carried_by(character.id):
+            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff.stuff_id)
+            for description in stuff_properties.descriptions:
+                if description.action_type == ActionType.EAT_STUFF:
+                    eat_stuff_action: WithStuffAction = self._kernel.action_factory.create_action(
+                        action_type=ActionType.EAT_STUFF,
+                        action_description_id=description.id,
+                    )
+                    try:
+                        eat_stuff_action.check_request_is_possible(
+                            character=character,
+                            stuff=stuff,
+                            input_=EatStuffModel(),
+                        )
+                        yield EatStuffFromCharacterInventory(
+                            character,
+                            stuff=stuff,
+                            action=eat_stuff_action,
+                            input_=EatStuffModel(),
+                        )
+                    except ImpossibleAction:
+                        pass

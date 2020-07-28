@@ -3,7 +3,7 @@ from logging import Logger
 import random
 import typing
 
-from rolling.exception import ServerTurnError
+from rolling.exception import ServerTurnError, ErrorWhenConsume
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
@@ -125,13 +125,14 @@ class TurnLib:
 
         for character_id in character_ids:
             character_document = self._character_lib.get_document(character_id)
+            character = self._character_lib.get(character_id)
             if not character_document.is_alive:
                 continue
 
             self._logger.info(f"Provide natural needs of {character_document.name}")
 
             zone_contains_fresh_water = character_can_drink_in_its_zone(
-                self._kernel, character_document
+                self._kernel, character
             )
             stuff_with_fresh_water = get_character_stuff_filled_with_water(
                 self._kernel, character_id
@@ -175,15 +176,18 @@ class TurnLib:
 
             # Need to eat
             if character_document.feel_hungry or character_document.starved:
-                stuff_eatable = None
-                try:
-                    stuff_eatable = next(get_stuffs_eatable(self._kernel, character_id))
-                except StopIteration:
-                    pass
+                have_eat = False
 
-                if stuff_eatable:
-                    character_document.starved = False
-                    self._kernel.stuff_lib.destroy(stuff_eatable.id, commit=False)
+                for eatable in self._kernel.character_lib.get_eatables(character):
+                    try:
+                        eatable.consume()
+                        have_eat = True
+                        break
+                    except ErrorWhenConsume as exc:
+                        server_logger.error(f"{character.name} can't eat because {str(exc)}")
+
+                if have_eat:
+                    pass
                 elif character_document.starved:
                     character_document.life_points -= 1
                     self._kernel.character_lib.add_event(

@@ -158,3 +158,7 @@ class ServerTurnError(RollingError):
 
 class WrongStrInput(RollingError):
     pass
+
+
+class ErrorWhenConsume(RollingError):
+    pass

@@ -248,6 +248,7 @@ def get_description_for_not_enough_ap(
     )
 
 
+# FIXME BS: replace by iterator on eatable object (to manage all case like invent friends)
 def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel") -> bool:
     # TODO: consider path finding
     zone_source = kernel.tile_maps_by_position[

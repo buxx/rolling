@@ -87,6 +87,8 @@ reduce_tiredness_per_turn = 50
   name = "Maitrise de la forge avancé"
 
 [character_effects]
+  [character_effects.HUNGRY_SATISFIED]
+    attributes_to_false = ["starved", "feel_hungry"]
 
 [resources]
   [resources.RED_WINE]
@@ -131,6 +133,13 @@ reduce_tiredness_per_turn = 50
     unit = "U"
     clutter = 1.0
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+  [resources.VEGETAL_FOOD_FRESH]
+    name = "Nourriture végétale fraiche"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 1.0
+    actions = ["EAT_RESOURCE"]
 
 
 [resource_mix]
@@ -208,4 +217,16 @@ reduce_tiredness_per_turn = 50
     ]
     required_resource_id = "VEGETAL_FIBER"
     cost_per_unit = 5
+    cost = 0.0
+  [ACTIONS.EAT_FRESH_FRUITS]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["VEGETAL_FOOD_FRESH"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 1.0
+    cost = 0.0
+  [ACTIONS.EAT_APPLE]
+    actions = ["EAT_STUFF"]
+    accept_stuffs = ["APPLE"]
+    character_effects = ["HUNGRY_SATISFIED"]
+    require = 1.0
     cost = 0.0
