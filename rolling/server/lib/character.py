@@ -10,8 +10,11 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
-from rolling.action.base import ActionDescriptionModel, WithResourceAction, WithStuffAction
-from rolling.action.eat import EatResourceModel, EatStuffModel
+from rolling.action.base import ActionDescriptionModel
+from rolling.action.base import WithResourceAction
+from rolling.action.base import WithStuffAction
+from rolling.action.eat import EatResourceModel
+from rolling.action.eat import EatStuffModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.model.ability import AbilityDescription
@@ -21,7 +24,8 @@ from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.consume import Consumeable
-from rolling.model.eat import EatResourceFromCharacterInventory, EatStuffFromCharacterInventory
+from rolling.model.eat import EatResourceFromCharacterInventory
+from rolling.model.eat import EatStuffFromCharacterInventory
 from rolling.model.event import StoryPage
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
@@ -1354,8 +1358,7 @@ class CharacterLib:
             for description in resource_properties.descriptions:
                 if description.action_type == ActionType.EAT_RESOURCE:
                     eat_resource_action: WithResourceAction = self._kernel.action_factory.create_action(
-                        action_type=ActionType.EAT_RESOURCE,
-                        action_description_id=description.id,
+                        action_type=ActionType.EAT_RESOURCE, action_description_id=description.id
                     )
                     try:
                         eat_resource_action.check_request_is_possible(
@@ -1367,31 +1370,27 @@ class CharacterLib:
                             character,
                             action=eat_resource_action,
                             resource_id=carried_resource.id,
-                            input_=EatResourceModel()
+                            input_=EatResourceModel(),
                         )
                     except ImpossibleAction:
                         pass
 
         # With inventory stuffs
         for stuff in self._kernel.stuff_lib.get_carried_by(character.id):
-            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff.stuff_id)
+            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                stuff.stuff_id
+            )
             for description in stuff_properties.descriptions:
                 if description.action_type == ActionType.EAT_STUFF:
                     eat_stuff_action: WithStuffAction = self._kernel.action_factory.create_action(
-                        action_type=ActionType.EAT_STUFF,
-                        action_description_id=description.id,
+                        action_type=ActionType.EAT_STUFF, action_description_id=description.id
                     )
                     try:
                         eat_stuff_action.check_request_is_possible(
-                            character=character,
-                            stuff=stuff,
-                            input_=EatStuffModel(),
+                            character=character, stuff=stuff, input_=EatStuffModel()
                         )
                         yield EatStuffFromCharacterInventory(
-                            character,
-                            stuff=stuff,
-                            action=eat_stuff_action,
-                            input_=EatStuffModel(),
+                            character, stuff=stuff, action=eat_stuff_action, input_=EatStuffModel()
                         )
                     except ImpossibleAction:
                         pass

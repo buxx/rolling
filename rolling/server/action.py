@@ -227,7 +227,9 @@ class ActionFactory:
 
     def create_action(
         self, action_type: ActionType, action_description_id: typing.Optional[str] = None
-    ) -> typing.Union[CharacterAction, WithStuffAction, WithCharacterAction, CharacterAction, WithResourceAction]:
+    ) -> typing.Union[
+        CharacterAction, WithStuffAction, WithCharacterAction, CharacterAction, WithResourceAction
+    ]:
         if (
             action_type in self._with_stuff_actions
             or action_type in self._with_resource_actions

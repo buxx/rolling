@@ -3,7 +3,8 @@ from logging import Logger
 import random
 import typing
 
-from rolling.exception import ServerTurnError, ErrorWhenConsume
+from rolling.exception import ErrorWhenConsume
+from rolling.exception import ServerTurnError
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
@@ -131,9 +132,7 @@ class TurnLib:
 
             self._logger.info(f"Provide natural needs of {character_document.name}")
 
-            zone_contains_fresh_water = character_can_drink_in_its_zone(
-                self._kernel, character
-            )
+            zone_contains_fresh_water = character_can_drink_in_its_zone(self._kernel, character)
             stuff_with_fresh_water = get_character_stuff_filled_with_water(
                 self._kernel, character_id
             )
@@ -215,7 +214,9 @@ class TurnLib:
             if not character_document.is_alive:
                 continue
 
-            self._character_lib.reduce_tiredness(character_id, self._kernel.game.config.reduce_tiredness_per_turn)
+            self._character_lib.reduce_tiredness(
+                character_id, self._kernel.game.config.reduce_tiredness_per_turn
+            )
 
             if (
                 not character_document.dehydrated

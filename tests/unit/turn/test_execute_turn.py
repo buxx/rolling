@@ -132,55 +132,55 @@ class TestExecuteTurn:
         assert xena.life_points == after_lp
 
     def test_eat__ok__eat_resource(
-        self,
-        worldmapc_kernel: Kernel,
-        turn_lib: TurnLib,
-        xena: CharacterDocument,
+        self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument
     ) -> None:
         kernel = worldmapc_kernel
 
         kernel.resource_lib.add_resource_to(
             character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=1.0
         )
-        with unittest.mock.patch("rolling.server.effect.EffectManager.enable_effect") as fake_enable_effect:
+        with unittest.mock.patch(
+            "rolling.server.effect.EffectManager.enable_effect"
+        ) as fake_enable_effect:
             turn_lib.execute_turn()
 
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH")
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH"
+        )
         assert fake_enable_effect.called
-        assert fake_enable_effect.call_args_list[0][0][1].id == 'HUNGRY_SATISFIED'
+        assert fake_enable_effect.call_args_list[0][0][1].id == "HUNGRY_SATISFIED"
 
     def test_eat__ko__eat_resource_but_not_enough(
-        self,
-        worldmapc_kernel: Kernel,
-        turn_lib: TurnLib,
-        xena: CharacterDocument,
+        self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument
     ) -> None:
         kernel = worldmapc_kernel
 
         kernel.resource_lib.add_resource_to(
             character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.5  # not enough
         )
-        with unittest.mock.patch("rolling.server.effect.EffectManager.enable_effect") as fake_enable_effect:
+        with unittest.mock.patch(
+            "rolling.server.effect.EffectManager.enable_effect"
+        ) as fake_enable_effect:
             turn_lib.execute_turn()
 
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.5
+        )
         assert not fake_enable_effect.called
 
     def test_eat__ok__eat_stuff(
-        self,
-        worldmapc_kernel: Kernel,
-        turn_lib: TurnLib,
-        xena: CharacterDocument,
+        self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument
     ) -> None:
         kernel = worldmapc_kernel
 
         apple = create_stuff(kernel, "APPLE")
         kernel.stuff_lib.set_carried_by(apple.id, xena.id)
 
-        with unittest.mock.patch("rolling.server.effect.EffectManager.enable_effect") as fake_enable_effect:
+        with unittest.mock.patch(
+            "rolling.server.effect.EffectManager.enable_effect"
+        ) as fake_enable_effect:
             turn_lib.execute_turn()
 
         assert not kernel.stuff_lib.have_stuff_count(character_id=xena.id, stuff_id="APPLE")
         assert fake_enable_effect.called
-        assert fake_enable_effect.call_args_list[0][0][1].id == 'HUNGRY_SATISFIED'
-
+        assert fake_enable_effect.call_args_list[0][0][1].id == "HUNGRY_SATISFIED"
