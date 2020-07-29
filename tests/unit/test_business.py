@@ -703,14 +703,14 @@ class TestBusiness:
         kernel.stuff_lib.set_carried_by(jacket.id, character_id=xena.id)
 
         assert kernel.resource_lib.have_resource(xena.id, "WOOD", 0.5)
-        assert kernel.stuff_lib.have_stuff_count(xena.id, "LEATHER_JACKET")
+        assert kernel.stuff_lib.get_stuff_count(xena.id, "LEATHER_JACKET")
         assert not kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(xena.id, "STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(xena.id, "STONE_HAXE")
 
         assert not kernel.resource_lib.have_resource(arthur.id, "WOOD", 0.5)
-        assert not kernel.stuff_lib.have_stuff_count(arthur.id, "LEATHER_JACKET")
+        assert not kernel.stuff_lib.get_stuff_count(arthur.id, "LEATHER_JACKET")
         assert kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(arthur.id, "STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(arthur.id, "STONE_HAXE")
 
         resp = await web.post(
             f"/business/{arthur.id}/see-offer/{offer.character_id}/{offer.id}/deal"
@@ -732,14 +732,14 @@ class TestBusiness:
         assert "Marché effectué" in item_labels
 
         assert not kernel.resource_lib.have_resource(xena.id, "WOOD", 0.5)
-        assert not kernel.stuff_lib.have_stuff_count(xena.id, "LEATHER_JACKET")
+        assert not kernel.stuff_lib.get_stuff_count(xena.id, "LEATHER_JACKET")
         assert kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(xena.id, "STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(xena.id, "STONE_HAXE")
 
         assert kernel.resource_lib.have_resource(arthur.id, "WOOD", 0.5)
-        assert kernel.stuff_lib.have_stuff_count(arthur.id, "LEATHER_JACKET")
+        assert kernel.stuff_lib.get_stuff_count(arthur.id, "LEATHER_JACKET")
         assert not kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(arthur.id, "STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(arthur.id, "STONE_HAXE")
 
     async def test_read_offer__make_transaction__missing_all_request_or(
         self,
@@ -794,11 +794,11 @@ class TestBusiness:
 
         assert kernel.resource_lib.have_resource(xena.id, "WOOD", 0.5)
         assert not kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(xena.id, "STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(xena.id, "STONE_HAXE")
 
         assert not kernel.resource_lib.have_resource(arthur.id, "WOOD", 0.5)
         assert kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(arthur.id, "STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(arthur.id, "STONE_HAXE")
 
         resp = await web.post(
             f"/business/{arthur.id}/see-offer/{offer.character_id}/{offer.id}/deal"
@@ -842,11 +842,11 @@ class TestBusiness:
 
         assert not kernel.resource_lib.have_resource(xena.id, "WOOD", 0.5)
         assert kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(xena.id, "STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(xena.id, "STONE_HAXE")
 
         assert kernel.resource_lib.have_resource(arthur.id, "WOOD", 0.5)
         assert not kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(arthur.id, "STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(arthur.id, "STONE_HAXE")
 
     async def test_create_with_character_transaction(
         self,
@@ -913,10 +913,10 @@ class TestBusiness:
         kernel.stuff_lib.set_carried_by(bottle.id, character_id=arthur.id)
 
         assert kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(xena.id, "PLASTIC_BOTTLE_1L")
+        assert not kernel.stuff_lib.get_stuff_count(xena.id, "PLASTIC_BOTTLE_1L")
 
         assert not kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(arthur.id, "PLASTIC_BOTTLE_1L")
+        assert kernel.stuff_lib.get_stuff_count(arthur.id, "PLASTIC_BOTTLE_1L")
 
         await self._assert_read_offer(
             kernel,
@@ -972,10 +972,10 @@ class TestBusiness:
         assert (await web.post(go_url)).status == 200
 
         assert not kernel.resource_lib.have_resource(xena.id, "RED_WINE", 1.5)
-        assert kernel.stuff_lib.have_stuff_count(xena.id, "PLASTIC_BOTTLE_1L")
+        assert kernel.stuff_lib.get_stuff_count(xena.id, "PLASTIC_BOTTLE_1L")
 
         assert kernel.resource_lib.have_resource(arthur.id, "RED_WINE", 1.5)
-        assert not kernel.stuff_lib.have_stuff_count(arthur.id, "PLASTIC_BOTTLE_1L")
+        assert not kernel.stuff_lib.get_stuff_count(arthur.id, "PLASTIC_BOTTLE_1L")
 
         # xena main page
         resp: ClientResponse = await web.post(f"/business/{xena.id}")

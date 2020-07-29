@@ -54,6 +54,7 @@ class StuffDocument(Document):
     used_as_shield_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     used_as_armor_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)
+    shared_with_affinity_id = Column(Integer, ForeignKey("affinity.id"), nullable=True)
 
     def fill(self, kernel: "Kernel", with_resource: str, at: float) -> None:
         if self.filled_with_resource is not None and self.filled_with_resource != with_resource:

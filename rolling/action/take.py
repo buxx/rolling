@@ -72,7 +72,7 @@ class TakeFromCharacterAction(WithCharacterAction):
                 stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.take_stuff_id)
             except NoResultFound:
                 raise ImpossibleAction(f"objet inexistant")
-            carried_count = self._kernel.stuff_lib.have_stuff_count(
+            carried_count = self._kernel.stuff_lib.get_stuff_count(
                 character_id=with_character.id, stuff_id=stuff.stuff_id
             )
             if carried_count < (input_.take_stuff_quantity or 1):

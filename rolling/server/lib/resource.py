@@ -1,6 +1,8 @@
 # coding: utf-8
 import typing
 
+from sqlalchemy import Column
+from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.elements import and_
 
@@ -24,6 +26,47 @@ class ResourceLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
         self._action_factory = ActionFactory(kernel)
+
+    def get_base_query(
+        self,
+        carried_by_id: typing.Optional[str] = None,
+        in_built_id: typing.Optional[int] = None,
+        shared_with_affinity_id: typing.Optional[int] = None,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
+        only_columns: typing.Optional[typing.List[Column]] = None,
+    ) -> Query:
+        if world_row_i or world_col_i:
+            assert world_row_i and world_col_i
+        if zone_row_i or zone_col_i:
+            assert zone_row_i and zone_col_i
+
+        if only_columns is not None:
+            query = self._kernel.server_db_session.query(*only_columns)
+        else:
+            query = self._kernel.server_db_session.query(ResourceDocument)
+
+        query = query.filter(
+            ResourceDocument.shared_with_affinity_id == shared_with_affinity_id,
+            ResourceDocument.carried_by_id == carried_by_id,
+            ResourceDocument.in_built_id == in_built_id,
+        )
+
+        if world_row_i is not None and world_col_i is not None:
+            query = query.filter(ResourceDocument.world_row_i == world_row_i)
+            query = query.filter(ResourceDocument.world_col_i == world_col_i)
+
+        if zone_row_i is not None and zone_col_i is not None:
+            query = query.filter(ResourceDocument.zone_row_i == zone_row_i)
+            query = query.filter(ResourceDocument.zone_col_i == zone_col_i)
+
+        if resource_id is not None:
+            query = query.filter(ResourceDocument.resource_id == resource_id)
+
+        return query
 
     def add_resource_to(
         self,
@@ -93,11 +136,7 @@ class ResourceLib:
         return self._carried_resource_model_from_doc(resource)
 
     def get_carried_by(self, character_id: str) -> typing.List[CarriedResourceDescriptionModel]:
-        carried = (
-            self._kernel.server_db_session.query(ResourceDocument)
-            .filter(ResourceDocument.carried_by_id == character_id)
-            .all()
-        )
+        carried = self.get_base_query(carried_by_id=character_id).all()
         return [self._carried_resource_model_from_doc(doc) for doc in carried]
 
     def get_ground_resource(
@@ -107,38 +146,18 @@ class ResourceLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
     ) -> typing.List[CarriedResourceDescriptionModel]:
-        assert zone_row_i is None if zone_col_i is None else True
-        assert zone_col_i is None if zone_row_i is None else True
-
-        if zone_row_i is not None and zone_col_i is not None:
-            filters = [
-                ResourceDocument.world_row_i == world_row_i,
-                ResourceDocument.world_col_i == world_col_i,
-                ResourceDocument.zone_row_i == zone_row_i,
-                ResourceDocument.zone_col_i == zone_col_i,
-            ]
-        else:
-            filters = [
-                ResourceDocument.world_row_i == world_row_i,
-                ResourceDocument.world_col_i == world_col_i,
-            ]
-
-        carried = self._kernel.server_db_session.query(ResourceDocument).filter(*filters).all()
+        carried = self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).all()
         return [self._carried_resource_model_from_doc(doc) for doc in carried]
 
     def get_one_carried_by(
         self, character_id: str, resource_id: str
     ) -> CarriedResourceDescriptionModel:
-        doc = (
-            self._kernel.server_db_session.query(ResourceDocument)
-            .filter(
-                and_(
-                    ResourceDocument.carried_by_id == character_id,
-                    ResourceDocument.resource_id == resource_id,
-                )
-            )
-            .one()
-        )
+        doc = self.get_base_query(carried_by_id=character_id, resource_id=resource_id).one()
         return self._carried_resource_model_from_doc(doc)
 
     def _carried_resource_model_from_doc(
@@ -174,16 +193,9 @@ class ResourceLib:
         self, character_id: str, resource_id: str, quantity: typing.Optional[float] = None
     ) -> bool:
         try:
-            resource_doc = (
-                self._kernel.server_db_session.query(ResourceDocument)
-                .filter(
-                    and_(
-                        ResourceDocument.carried_by_id == character_id,
-                        ResourceDocument.resource_id == resource_id,
-                    )
-                )
-                .one()
-            )
+            resource_doc = self.get_base_query(
+                carried_by_id=character_id, resource_id=resource_id
+            ).one()
         except NoResultFound:
             return False
 
@@ -198,6 +210,7 @@ class ResourceLib:
         filter_ = and_(
             ResourceDocument.carried_by_id == character_id,
             ResourceDocument.resource_id == resource_id,
+            ResourceDocument.shared_with_affinity_id == None,
         )
         self._reduce(filter_, quantity=quantity, commit=commit)
 
@@ -214,6 +227,7 @@ class ResourceLib:
         filter_ = and_(
             ResourceDocument.carried_by_id == None,
             ResourceDocument.in_built_id == None,
+            ResourceDocument.carried_by_id == None,
             ResourceDocument.resource_id == resource_id,
             ResourceDocument.world_row_i == world_row_i,
             ResourceDocument.world_col_i == world_col_i,
@@ -291,9 +305,5 @@ class ResourceLib:
         return actions
 
     def get_stored_in_build(self, build_id: int) -> typing.List[CarriedResourceDescriptionModel]:
-        carried = (
-            self._kernel.server_db_session.query(ResourceDocument)
-            .filter(ResourceDocument.in_built_id == build_id)
-            .all()
-        )
+        carried = self.get_base_query(in_built_id=build_id).all()
         return [self._carried_resource_model_from_doc(doc) for doc in carried]

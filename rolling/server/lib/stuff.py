@@ -2,6 +2,7 @@
 import typing
 
 import sqlalchemy
+from sqlalchemy import Column
 from sqlalchemy.orm import Query
 
 from rolling.exception import ImpossibleAction
@@ -22,6 +23,63 @@ class StuffLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
         self._action_factory = ActionFactory(kernel)
+
+    def get_base_query(
+        self,
+        carried_by_id: typing.Optional[str] = None,
+        in_built_id: typing.Optional[int] = None,
+        shared_with_affinity_id: typing.Optional[int] = None,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        stuff_id: typing.Optional[str] = None,
+        id_: typing.Optional[int] = None,
+        exclude_crafting: bool = False,
+        exclude_used_as: bool = False,
+        only_columns: typing.Optional[typing.List[Column]] = None,
+    ) -> Query:
+        if world_row_i or world_col_i:
+            assert world_row_i and world_col_i
+        if zone_row_i or zone_col_i:
+            assert zone_row_i and zone_col_i
+
+        if only_columns is not None:
+            query = self._kernel.server_db_session.query(*only_columns)
+        else:
+            query = self._kernel.server_db_session.query(StuffDocument)
+
+        query = query.filter(
+            StuffDocument.shared_with_affinity_id == shared_with_affinity_id,
+            StuffDocument.carried_by_id == carried_by_id,
+            StuffDocument.in_built_id == in_built_id,
+        )
+
+        if exclude_crafting:
+            query = query.filter(StuffDocument.under_construction == False)
+
+        if exclude_used_as:
+            query = query.filter(
+                StuffDocument.used_as_shield_by_id == None,
+                StuffDocument.used_as_armor_by_id == None,
+                StuffDocument.used_as_weapon_by_id == None,
+            )
+
+        if world_row_i is not None and world_col_i is not None:
+            query = query.filter(StuffDocument.world_row_i == world_row_i)
+            query = query.filter(StuffDocument.world_col_i == world_col_i)
+
+        if zone_row_i is not None and zone_col_i is not None:
+            query = query.filter(StuffDocument.zone_row_i == zone_row_i)
+            query = query.filter(StuffDocument.zone_col_i == zone_col_i)
+
+        if stuff_id is not None:
+            query = query.filter(StuffDocument.stuff_id == stuff_id)
+
+        if id_ is not None:
+            query = query.filter(StuffDocument.id == id_)
+
+        return query
 
     @classmethod
     def create_document_from_generation_properties(
@@ -114,22 +172,12 @@ class StuffLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
     ) -> typing.List[StuffModel]:
-        filters = [
-            StuffDocument.carried_by_id == None,
-            StuffDocument.world_row_i == world_row_i,
-            StuffDocument.world_col_i == world_col_i,
-        ]
-
-        if zone_row_i is not None and zone_col_i is not None:
-            filters.extend(
-                [StuffDocument.zone_row_i == zone_row_i, StuffDocument.zone_col_i == zone_col_i]
-            )
-
-        stuff_docs = (
-            self._kernel.server_db_session.query(StuffDocument)
-            .filter(sqlalchemy.and_(*filters))
-            .all()
-        )
+        stuff_docs = self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).all()
         return [self.stuff_model_from_doc(doc) for doc in stuff_docs]
 
     def get_stuff(self, stuff_id: int) -> StuffModel:
@@ -176,17 +224,12 @@ class StuffLib:
         exclude_crafting: bool = True,
         stuff_id: typing.Optional[str] = None,
     ) -> typing.List[StuffModel]:
-        query = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.carried_by_id == character_id
-        )
-
-        if exclude_crafting:
-            query = query.filter(StuffDocument.under_construction != True)
-
-        if stuff_id:
-            query = query.filter(StuffDocument.stuff_id == stuff_id)
-
-        return [self.stuff_model_from_doc(doc) for doc in query.all()]
+        return [
+            self.stuff_model_from_doc(doc)
+            for doc in self.get_base_query(
+                carried_by_id=character_id, exclude_crafting=exclude_crafting, stuff_id=stuff_id
+            ).all()
+        ]
 
     def get_stuff_doc(self, stuff_id: int) -> StuffDocument:
         return (
@@ -247,17 +290,12 @@ class StuffLib:
         self._kernel.server_db_session.commit()
 
     def get_carried_and_used_bags(self, character_id: str) -> typing.List[StuffModel]:
-        docs = (
-            self._kernel.server_db_session.query(StuffDocument)
-            .filter(
-                sqlalchemy.and_(
-                    StuffDocument.carried_by_id == character_id,
-                    StuffDocument.used_as_bag_by_id == character_id,
-                )
-            )
+        return [
+            self.stuff_model_from_doc(doc)
+            for doc in self.get_base_query(carried_by_id=character_id)
+            .filter(StuffDocument.used_as_bag_by_id == character_id)
             .all()
-        )
-        return [self.stuff_model_from_doc(doc) for doc in docs]
+        ]
 
     # FIXME: exclude crafting stuff
     def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
@@ -398,19 +436,12 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def have_stuff_count(
+    def get_stuff_count(
         self, character_id: str, stuff_id: str, exclude_crafting: bool = True
     ) -> int:
-        query = (
-            self._kernel.server_db_session.query(StuffDocument)
-            .filter(StuffDocument.carried_by_id == character_id)
-            .filter(StuffDocument.stuff_id == stuff_id)
-        )
-
-        if exclude_crafting:
-            query = query.filter(StuffDocument.under_construction != True)
-
-        return query.count()
+        return self.get_base_query(
+            carried_by_id=character_id, stuff_id=stuff_id, exclude_crafting=exclude_crafting
+        ).count()
 
     def get_first_carried_stuff(
         self,
@@ -419,20 +450,10 @@ class StuffLib:
         exclude_crafting: bool = True,
         exclude_used_as: bool = True,
     ) -> StuffModel:
-        query = (
-            self._kernel.server_db_session.query(StuffDocument)
-            .filter(StuffDocument.carried_by_id == character_id)
-            .filter(StuffDocument.stuff_id == stuff_id)
+        query = self.get_base_query(
+            carried_by_id=character_id,
+            stuff_id=stuff_id,
+            exclude_crafting=exclude_crafting,
+            exclude_used_as=exclude_used_as,
         )
-
-        if exclude_crafting:
-            query = query.filter(StuffDocument.under_construction != True)
-
-        if exclude_used_as:
-            query = query.filter(
-                StuffDocument.used_as_shield_by_id == None,
-                StuffDocument.used_as_armor_by_id == None,
-                StuffDocument.used_as_weapon_by_id == None,
-            )
-
         return self.stuff_model_from_doc(query.limit(1).one())

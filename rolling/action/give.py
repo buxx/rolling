@@ -64,7 +64,7 @@ class GiveToCharacterAction(WithCharacterAction):
                 stuff: StuffModel = self._kernel.stuff_lib.get_stuff(input_.give_stuff_id)
             except NoResultFound:
                 raise ImpossibleAction(f"Objet inexistant")
-            carried_count = self._kernel.stuff_lib.have_stuff_count(
+            carried_count = self._kernel.stuff_lib.get_stuff_count(
                 character_id=character.id, stuff_id=stuff.stuff_id
             )
             if carried_count < (input_.give_stuff_quantity or 1):

@@ -423,7 +423,7 @@ class CharacterController(BaseController):
                 quantity_prefix = "resource_"
             else:
                 form_action = f"{form_action}&stuff_id={hapic_data.query.stuff_id}"
-                default_value = self._kernel.stuff_lib.have_stuff_count(
+                default_value = self._kernel.stuff_lib.get_stuff_count(
                     character.id, stuff_id=hapic_data.query.stuff_id
                 )
                 unit_str = "unité"

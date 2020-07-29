@@ -181,6 +181,6 @@ class TestExecuteTurn:
         ) as fake_enable_effect:
             turn_lib.execute_turn()
 
-        assert not kernel.stuff_lib.have_stuff_count(character_id=xena.id, stuff_id="APPLE")
+        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="APPLE")
         assert fake_enable_effect.called
         assert fake_enable_effect.call_args_list[0][0][1].id == "HUNGRY_SATISFIED"
