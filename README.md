@@ -18,7 +18,7 @@ If you need to create a virtual environment, you can use the following:
 
     python3 -m venv venv
 
-The activate it in current terminal with:
+Then activate it in current terminal with:
 
     source venv/bin/activate
 
