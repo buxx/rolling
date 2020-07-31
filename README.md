@@ -4,11 +4,15 @@ Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [ro
 
 ![Rollgui screenshot](https://redbricks.games/uploads/117/game/Coffee_231_illustration.png)
 
-# Development
+# Installation
+
+A python3.7+ is required. If you use debian, debian 10 is required if you want to use OS python packaged. But you can compile python3.7 on your system.
+
+Following documentation assume you use debian 10 or simial OS. You will need:
+
+    apt-get install git python3 python3-venv build-essential python3-dev
 
 ## Python environment require
-
-A python3.7+ is required.
 
 If you need to create a virtual environment, you can use the following:
 
@@ -192,6 +196,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Accords: non aggression, échange de valeurs (produits vs PA), etc
   * ☐ **De quoi manger/boire: prendre en compte ce qui est au sol**
   * ☐ De quoi manger/boire: prendre en compte ce qui est partagé par les affinités
+  * ☐ Signaler (au sein d'une affinité) un perso comme recherché (mort/vif) genre voleur
 
 * Univers
   * ☑ Décors de base
