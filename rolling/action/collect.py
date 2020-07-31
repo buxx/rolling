@@ -13,8 +13,8 @@ from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
+from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:

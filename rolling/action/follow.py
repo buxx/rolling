@@ -9,9 +9,9 @@ from guilang.description import Part
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_with_character_action_url
 from rolling.exception import ImpossibleAction
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig

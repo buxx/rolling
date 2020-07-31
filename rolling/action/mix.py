@@ -10,8 +10,8 @@ from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.exception import ImpossibleAction
+from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel

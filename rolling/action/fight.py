@@ -14,13 +14,13 @@ from rolling.model.character import CharacterModel
 from rolling.model.event import StoryPage
 from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig

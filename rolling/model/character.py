@@ -9,8 +9,8 @@ from rolling.exception import RollingError
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import StuffModel
+from rolling.rolling_types import ActionType
 from rolling.server.document.business import OfferItemPosition
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.gui.map.object import DisplayObject

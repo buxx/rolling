@@ -13,9 +13,9 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
+from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
-from rolling.types import ActionType
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:

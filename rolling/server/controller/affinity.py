@@ -22,6 +22,7 @@ from rolling.model.character import ManageAffinityQueryModel
 from rolling.model.character import ManageAffinityRelationBodyModel
 from rolling.model.character import ManageAffinityRelationQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
+from rolling.rolling_types import ActionType
 from rolling.server.controller.base import BaseController
 from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
@@ -30,7 +31,6 @@ from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
-from rolling.types import ActionType
 
 
 class AffinityController(BaseController):

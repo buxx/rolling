@@ -10,10 +10,10 @@ from rolling.action.fight import AttackModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
+from rolling.rolling_types import ActionType
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
-from rolling.types import ActionType
 
 
 @pytest.fixture

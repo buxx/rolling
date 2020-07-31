@@ -9,9 +9,9 @@ from rolling.action.build import ConstructBuildModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
+from rolling.rolling_types import ActionType
 from rolling.server.document.build import BuildDocument
 from rolling.server.document.resource import ResourceDocument
-from rolling.types import ActionType
 
 
 @pytest.fixture

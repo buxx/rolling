@@ -11,7 +11,7 @@ from rolling.action.knowledge import ProposeTeachKnowledgeModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
-from rolling.types import ActionType
+from rolling.rolling_types import ActionType
 from tests.fixtures import description_serializer
 
 

@@ -10,9 +10,9 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantFill
 from rolling.exception import ImpossibleAction
 from rolling.model.character import FillStuffWithResourceModel
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel

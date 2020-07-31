@@ -10,7 +10,7 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
-from rolling.types import ActionType
+from rolling.rolling_types import ActionType
 from tests.fixtures import description_serializer
 
 

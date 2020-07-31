@@ -2,7 +2,7 @@
 import dataclasses
 import typing
 
-from rolling.types import ActionType
+from rolling.rolling_types import ActionType
 
 
 @dataclasses.dataclass

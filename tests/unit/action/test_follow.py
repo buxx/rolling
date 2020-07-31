@@ -10,7 +10,7 @@ from rolling.action.follow import FollowCharacterAction
 from rolling.action.follow import FollowModel
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
-from rolling.types import ActionType
+from rolling.rolling_types import ActionType
 from tests.fixtures import description_serializer
 
 

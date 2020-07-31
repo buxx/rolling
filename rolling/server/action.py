@@ -47,10 +47,10 @@ from rolling.action.use import UseAsArmorAction
 from rolling.action.use import UseAsBagAction
 from rolling.action.use import UseAsShieldAction
 from rolling.action.use import UseAsWeaponAction
+from rolling.rolling_types import ActionScope
+from rolling.rolling_types import ActionType
 from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
-from rolling.types import ActionScope
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

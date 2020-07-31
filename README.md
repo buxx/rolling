@@ -8,9 +8,20 @@ Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [ro
 
 ## Python environment require
 
-A python3.7+ is required and **prefer a virtual env**. To install required packages:
+A python3.7+ is required.
+
+If you need to create a virtual environment, you can use the following:
+
+    python3 -m venv venv
+
+The activate it in current terminal with:
+
+    source venv/bin/activate
+
+To install required python packages:
 
     pip install --upgrade pip setuptools
+    pip install -r requirements.txt
     python setup.py develop
 
 Then install dev packages:
@@ -58,6 +69,16 @@ Then, generate zones maps:
     rolling-server --host 127.0.0.1 --port 5002 --debug ./myworldmap.txt ./myzones ./game
 
 Where `./myworldmap.txt` is previously created world map text file, `./myzones` previously generated zones folder and `./game` the config folder (you can use [repository folder](https://github.com/buxx/rolling/tree/master/game) or copied and modified one).
+
+## Use docker image
+
+To build docker image:
+
+    docker build . -t rolling:latest
+
+To run server:
+
+    docker run -v <local path containing world.txt>:/world -v <local path containing zones>:/zones -v <local path containing game config>:/game -v -v <local path for db>:/db rolling:latest
 
 # Roadmap (fr)
 

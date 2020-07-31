@@ -29,10 +29,10 @@ from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 

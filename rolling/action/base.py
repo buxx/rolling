@@ -9,13 +9,13 @@ import serpyco
 from guilang.description import Description
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventData
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

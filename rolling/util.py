@@ -7,8 +7,8 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
+from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel

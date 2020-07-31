@@ -35,6 +35,7 @@ from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
+from rolling.rolling_types import ActionType
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
@@ -58,7 +59,6 @@ from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
-from rolling.types import ActionType
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
 from rolling.util import get_character_stuff_filled_with_water

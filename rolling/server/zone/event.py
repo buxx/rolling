@@ -18,13 +18,13 @@ from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.model.stuff import StuffModel
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.document.build import BuildDocument
 from rolling.server.lib.character import CharacterLib
-from rolling.types import ActionType
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:

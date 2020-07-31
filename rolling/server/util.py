@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
     from rolling.action.base import WithStuffAction
-    from rolling.types import ActionType
+    from rolling.rolling_types import ActionType
 
 
 def register_image(kernel: "Kernel", file_path: str) -> int:

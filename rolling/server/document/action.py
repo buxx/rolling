@@ -7,9 +7,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 
+from rolling.rolling_types import ActionScope
+from rolling.rolling_types import ActionType
 from rolling.server.extension import ServerSideDocument as Document
-from rolling.types import ActionScope
-from rolling.types import ActionType
 
 
 class PendingActionDocument(Document):

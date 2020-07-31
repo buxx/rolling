@@ -19,9 +19,9 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.skill import DEFAULT_MAXIMUM_SKILL
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:

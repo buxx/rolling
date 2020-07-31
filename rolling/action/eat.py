@@ -12,8 +12,8 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.effect import CharacterEffectDescriptionModel
+from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 
 if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel

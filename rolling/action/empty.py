@@ -9,9 +9,9 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
+from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
-from rolling.types import ActionType
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:

@@ -8,7 +8,7 @@ from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
-from rolling.types import ActionType
+from rolling.rolling_types import ActionType
 
 
 @pytest.fixture

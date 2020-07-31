@@ -9,10 +9,10 @@ from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.rolling_types import TurnMode
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.types import TurnMode
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_stuffs_eatable
