@@ -327,6 +327,17 @@ class AffinityController(BaseController):
                     except ImpossibleAction:
                         pass
 
+        count_things_shared_with = self._kernel.affinity_lib.count_things_shared_with_affinity(
+            character_id=character.id, affinity_id=affinity.id
+        )
+        parts.append(
+            Part(
+                is_link=True,
+                form_action=f"/_describe/character/{character.id}/shared-inventory?affinity_id={affinity.id}",
+                label=f"Voir ce que je partager avec ({count_things_shared_with})",
+            )
+        )
+
         return Description(
             title=affinity.name,
             items=[

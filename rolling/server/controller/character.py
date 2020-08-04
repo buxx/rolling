@@ -39,6 +39,7 @@ from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PendingActionQueryModel
 from rolling.model.character import PickFromInventoryQueryModel
 from rolling.model.character import PostTakeStuffModelModel
+from rolling.model.character import SharedInventoryQueryModel
 from rolling.model.character import TakeResourceModel
 from rolling.model.character import UpdateCharacterCardBodyModel
 from rolling.model.character import WithBuildActionModel
@@ -49,7 +50,9 @@ from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
+from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
 from rolling.server.action import ActionFactory
@@ -65,18 +68,312 @@ from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
+from rolling.server.document.affinity import AffinityDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
-from rolling.util import character_can_drink_in_its_zone
+from rolling.server.transfer import TransferStuffOrResources
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
-from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_description_for_not_enough_ap
 from rolling.util import quantity_to_str
 
 base_skills = ["strength", "perception", "endurance", "charism", "intelligence", "agility", "luck"]
+
+
+class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
+    def __init__(
+        self, kernel: Kernel, character: CharacterModel, affinity: AffinityDocument
+    ) -> None:
+        self.__kernel = kernel
+        self._character = character
+        self._affinity = affinity
+
+    @property
+    def _kernel(self) -> "Kernel":
+        return self.__kernel
+
+    def _get_available_stuffs(self) -> typing.List[StuffModel]:
+        return self._kernel.stuff_lib.get_carried_by(
+            character_id=self._character.id, exclude_shared_with_affinity=True
+        )
+
+    def _get_available_resources(self) -> typing.List[CarriedResourceDescriptionModel]:
+        return self._kernel.resource_lib.get_carried_by(
+            character_id=self._character.id, exclude_shared_with_affinity=True
+        )
+
+    def _get_url(
+        self,
+        stuff_id: typing.Optional[int] = None,
+        stuff_quantity: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
+        resource_quantity: typing.Optional[float] = None,
+    ) -> str:
+        url = (
+            f"/_describe/character/{self._character.id}"
+            f"/shared-inventory/add?affinity_id={self._affinity.id}"
+        )
+
+        if stuff_id:
+            url += f"&stuff_id={stuff_id}"
+
+        if stuff_quantity:
+            url += f"&stuff_quantity={stuff_quantity}"
+
+        if resource_id:
+            url += f"&resource_id={resource_id}"
+
+        if resource_quantity:
+            url += f"&resource_quantity={resource_quantity}"
+
+        return url
+
+    def _get_title(
+        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+    ) -> str:
+        if stuff_id is not None:
+            stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
+            return f"Partager {stuff.name} avec {self._affinity.name}"
+
+        if resource_id is not None:
+            resource_description = self._kernel.game.config.resources[resource_id]
+            return f"Partager {resource_description.name} avec {self._affinity.name}"
+
+        return f"Partager avec {self._affinity.name}"
+
+    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
+        if sizing_up_quantity:
+            return []
+
+        return [
+            Part(
+                is_link=True,
+                label="Retourner a la fiche de l'affinité",
+                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
+            ),
+            Part(
+                is_link=True,
+                label="Retourner a l'inventaire",
+                form_action=f"/_describe/character/{self._character.id}/inventory",
+            ),
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+        ]
+
+    def _get_stuff(self, stuff_id: int) -> StuffModel:
+        return self._kernel.stuff_lib.get_stuff(stuff_id)
+
+    def _get_likes_this_stuff(self, stuff_id: str) -> typing.List[StuffModel]:
+        return self._kernel.stuff_lib.get_carried_by(
+            self._character.id,
+            exclude_crafting=False,
+            stuff_id=stuff_id,
+            exclude_shared_with_affinity=True,
+        )
+
+    def _transfer_stuff(self, stuff_id: int) -> None:
+        self._kernel.stuff_lib.set_shared_with_affinity(stuff_id, self._affinity.id)
+
+    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+        return self._kernel.resource_lib.get_one_carried_by(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            exclude_shared_with_affinity=True,
+        )
+
+    def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
+        try:
+            stuff: StuffModel = self._kernel.stuff_lib.get_stuff(stuff_id)
+        except NoResultFound:
+            raise ImpossibleAction(f"Objet inexistant")
+
+        if quantity > self._kernel.stuff_lib.get_stuff_count(
+            character_id=self._character.id,
+            stuff_id=stuff.stuff_id,
+            exclude_shared_with_affinity=True,
+        ):
+            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+
+    def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
+        if not self._kernel.resource_lib.have_resource(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            exclude_shared_with_affinity=True,
+        ):
+            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+
+    def _transfer_resource(self, resource_id: str, quantity: float) -> None:
+        self._kernel.resource_lib.reduce_carried_by(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            exclude_shared_with_affinity=True,
+        )
+        self._kernel.resource_lib.add_resource_to(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            shared_with_affinity_id=self._affinity.id,
+        )
+
+    def _get_stuff_name(self, stuff: StuffModel) -> str:
+        return stuff.get_name_and_light_description(self._kernel)
+
+    def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
+        return resource.get_light_description(self._kernel)
+
+
+class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
+    def __init__(
+        self, kernel: Kernel, character: CharacterModel, affinity: AffinityDocument
+    ) -> None:
+        self.__kernel = kernel
+        self._character = character
+        self._affinity = affinity
+
+    @property
+    def _kernel(self) -> "Kernel":
+        return self.__kernel
+
+    def _get_available_stuffs(self) -> typing.List[StuffModel]:
+        return self._kernel.stuff_lib.get_shared_with_affinity(
+            character_id=self._character.id, affinity_id=self._affinity.id
+        )
+
+    def _get_available_resources(self) -> typing.List[CarriedResourceDescriptionModel]:
+        return self._kernel.resource_lib.get_shared_with_affinity(
+            character_id=self._character.id, affinity_id=self._affinity.id
+        )
+
+    def _get_url(
+        self,
+        stuff_id: typing.Optional[int] = None,
+        stuff_quantity: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
+        resource_quantity: typing.Optional[float] = None,
+    ) -> str:
+        url = (
+            f"/_describe/character/{self._character.id}"
+            f"/shared-inventory?affinity_id={self._affinity.id}"
+        )
+
+        if stuff_id:
+            url += f"&stuff_id={stuff_id}"
+
+        if stuff_quantity:
+            url += f"&stuff_quantity={stuff_quantity}"
+
+        if resource_id:
+            url += f"&resource_id={resource_id}"
+
+        if resource_quantity:
+            url += f"&resource_quantity={resource_quantity}"
+
+        return url
+
+    def _get_title(
+        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+    ) -> str:
+        if stuff_id is not None:
+            stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
+            return f"Ne plus partager {stuff.name} avec {self._affinity.name}"
+
+        if resource_id is not None:
+            resource_description = self._kernel.game.config.resources[resource_id]
+            return f"Ne plus partager {resource_description.name} avec {self._affinity.name}"
+
+        return f"Inventaire partagé avec {self._affinity.name}"
+
+    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
+        if sizing_up_quantity:
+            return []
+
+        return [
+            Part(
+                is_link=True,
+                label="Partager quelque chose",
+                form_action=(
+                    f"/_describe/character/{self._character.id}"
+                    f"/shared-inventory/add?affinity_id={self._affinity.id}"
+                ),
+            ),
+            Part(
+                is_link=True,
+                label="Retourner a la fiche de l'affinité",
+                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
+            ),
+            Part(
+                is_link=True,
+                label="Retourner a l'inventaire",
+                form_action=f"/_describe/character/{self._character.id}/inventory",
+            ),
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+        ]
+
+    def _get_stuff(self, stuff_id: int) -> StuffModel:
+        return self._kernel.stuff_lib.get_stuff(stuff_id)
+
+    def _get_likes_this_stuff(self, stuff_id: str) -> typing.List[StuffModel]:
+        return self._kernel.stuff_lib.get_carried_by(
+            self._character.id,
+            exclude_crafting=False,
+            stuff_id=stuff_id,
+            shared_with_affinity_ids=[self._affinity.id],
+        )
+
+    def _transfer_stuff(self, stuff_id: int) -> None:
+        self._kernel.stuff_lib.unshare_with_affinity(stuff_id)
+
+    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+        return self._kernel.resource_lib.get_one_carried_by(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            shared_with_affinity_ids=[self._affinity.id],
+        )
+
+    def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
+        try:
+            stuff: StuffModel = self._kernel.stuff_lib.get_stuff(stuff_id)
+        except NoResultFound:
+            raise ImpossibleAction(f"Objet inexistant")
+
+        if quantity > self._kernel.stuff_lib.get_stuff_count(
+            character_id=self._character.id,
+            stuff_id=stuff.stuff_id,
+            shared_with_affinity_ids=[self._affinity.id],
+        ):
+            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+
+    def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
+        if not self._kernel.resource_lib.have_resource(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            shared_with_affinity_id=self._affinity.id,
+        ):
+            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+
+    def _transfer_resource(self, resource_id: str, quantity: float) -> None:
+        self._kernel.resource_lib.reduce_carried_by(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            shared_with_affinity_id=self._affinity.id,
+        )
+        self._kernel.resource_lib.add_resource_to(
+            character_id=self._character.id,
+            resource_id=resource_id,
+            quantity=quantity,
+            exclude_shared_with_affinity=True,
+        )
+
+    def _get_stuff_name(self, stuff: StuffModel) -> str:
+        return stuff.get_name_and_light_description(self._kernel)
+
+    def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
+        return resource.get_light_description(self._kernel)
 
 
 class CharacterController(BaseController):
@@ -352,6 +649,29 @@ class CharacterController(BaseController):
         weight_str = display_g_or_kg(inventory.weight)
         max_weight_str = display_g_or_kg(max_weight)
 
+        footer_links = []
+
+        count_things_shared_withs = 0
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+            character_id=character.id
+        ):
+            count_things_shared_withs += self._kernel.affinity_lib.count_things_shared_with_affinity(
+                character_id=character.id, affinity_id=affinity_relation.affinity_id
+            )
+
+        if count_things_shared_withs:
+            footer_links.append(
+                Part(
+                    is_link=True,
+                    label=f"Voir ce qui est paratgé ({count_things_shared_withs})",
+                    form_action=f"/_describe/character/{character.id}/inventory/shared-with",
+                )
+            )
+
+        footer_links.append(
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+        )
+
         return Description(
             title="Inventory",
             items=[
@@ -363,7 +683,89 @@ class CharacterController(BaseController):
                 ),
             ]
             + inventory_parts,
+            footer_links=footer_links,
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_shared_with_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        items = []
+        footer_links = [
+            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
+        ]
+
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+            character_id=character.id
+        ):
+            affinity = self._kernel.affinity_lib.get_affinity(affinity_relation.affinity_id)
+            count_things_shared_with = self._kernel.affinity_lib.count_things_shared_with_affinity(
+                character_id=character.id, affinity_id=affinity_relation.affinity_id
+            )
+            items.append(
+                Part(
+                    is_link=True,
+                    label=f"Avec {affinity.name} ({count_things_shared_with})",
+                    form_action=(
+                        f"/_describe/character/{character.id}"
+                        f"/shared-inventory?affinity_id={affinity.id}"
+                    ),
+                )
+            )
+
+        return Description(
+            title="Inventaire partagé avec des affinités",
+            items=items,
+            footer_links=footer_links,
+            can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(SharedInventoryQueryModel)
+    @hapic.output_body(Description)
+    async def _describe_shared_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        input_: SharedInventoryQueryModel = hapic_data.query
+        character_id = hapic_data.path.character_id
+        character = self._kernel.character_lib.get(character_id)
+        affinity_id = input_.affinity_id
+        affinity = self._kernel.affinity_lib.get_affinity(affinity_id)
+
+        return SeeSharedWithAffinityStuffOrResources(
+            kernel=self._kernel, character=character, affinity=affinity
+        ).get_description(
+            stuff_id=input_.stuff_id,
+            stuff_quantity=input_.stuff_quantity,
+            resource_id=input_.resource_id,
+            resource_quantity=input_.resource_quantity,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(SharedInventoryQueryModel)
+    @hapic.output_body(Description)
+    async def _describe_add_to_shared_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        input_: SharedInventoryQueryModel = hapic_data.query
+        character_id = hapic_data.path.character_id
+        character = self._kernel.character_lib.get(character_id)
+        affinity_id = input_.affinity_id
+        affinity = self._kernel.affinity_lib.get_affinity(affinity_id)
+
+        return ShareWithAffinityStuffOrResources(
+            kernel=self._kernel, character=character, affinity=affinity
+        ).get_description(
+            stuff_id=input_.stuff_id,
+            stuff_quantity=input_.stuff_quantity,
+            resource_id=input_.resource_id,
+            resource_quantity=input_.resource_quantity,
         )
 
     @hapic.with_api_doc()
@@ -1483,6 +1885,10 @@ class CharacterController(BaseController):
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post(
+                    "/_describe/character/{character_id}/inventory/shared-with",
+                    self._describe_shared_with_inventory,
+                ),
+                web.post(
                     "/character/{character_id}/inventory/{with_character_id}", self.with_inventory
                 ),
                 web.get(
@@ -1522,6 +1928,14 @@ class CharacterController(BaseController):
                 web.post("/_describe/character/create/do", self.create_character_do),
                 web.get("/character/{character_id}", self.get),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post(
+                    "/_describe/character/{character_id}/shared-inventory",
+                    self._describe_shared_inventory,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/shared-inventory/add",
+                    self._describe_add_to_shared_inventory,
+                ),
                 web.post(
                     "/_describe/character/{character_id}/pick_from_inventory",
                     self.pick_from_inventory,

@@ -31,7 +31,8 @@ class ResourceLib:
         self,
         carried_by_id: typing.Optional[str] = None,
         in_built_id: typing.Optional[int] = None,
-        shared_with_affinity_id: typing.Optional[int] = None,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+        exclude_shared_with_affinity: bool = False,
         world_row_i: typing.Optional[int] = None,
         world_col_i: typing.Optional[int] = None,
         zone_row_i: typing.Optional[int] = None,
@@ -39,18 +40,26 @@ class ResourceLib:
         resource_id: typing.Optional[str] = None,
         only_columns: typing.Optional[typing.List[Column]] = None,
     ) -> Query:
-        if world_row_i or world_col_i:
-            assert world_row_i and world_col_i
-        if zone_row_i or zone_col_i:
-            assert zone_row_i and zone_col_i
+        if world_row_i is not None or world_col_i is not None:
+            assert world_row_i is not None and world_col_i is not None
+        if zone_row_i is not None or zone_col_i is not None:
+            assert zone_row_i is not None and zone_col_i is not None
 
         if only_columns is not None:
             query = self._kernel.server_db_session.query(*only_columns)
         else:
             query = self._kernel.server_db_session.query(ResourceDocument)
 
+        if shared_with_affinity_ids is not None:
+            assert not exclude_shared_with_affinity
+            query = query.filter(
+                ResourceDocument.shared_with_affinity_id.in_(shared_with_affinity_ids)
+            )
+
+        if exclude_shared_with_affinity:
+            query = query.filter(ResourceDocument.shared_with_affinity_id == None)
+
         query = query.filter(
-            ResourceDocument.shared_with_affinity_id == shared_with_affinity_id,
             ResourceDocument.carried_by_id == carried_by_id,
             ResourceDocument.in_built_id == in_built_id,
         )
@@ -79,6 +88,8 @@ class ResourceLib:
         world_col_i: typing.Optional[int] = None,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
+        shared_with_affinity_id: typing.Optional[int] = None,
+        exclude_shared_with_affinity: bool = False,
         commit: bool = True,
     ) -> CarriedResourceDescriptionModel:
         assert character_id or build_id or ground
@@ -112,6 +123,14 @@ class ResourceLib:
             ]
         else:
             raise NotImplementedError()
+
+        if exclude_shared_with_affinity:
+            assert shared_with_affinity_id is None
+            filters.append(ResourceDocument.shared_with_affinity_id == None)
+
+        if shared_with_affinity_id is not None:
+            filters.append(ResourceDocument.shared_with_affinity_id == shared_with_affinity_id)
+
         try:
             resource = self._kernel.server_db_session.query(ResourceDocument).filter(*filters).one()
         except NoResultFound:
@@ -125,6 +144,7 @@ class ResourceLib:
                 world_col_i=world_col_i,
                 zone_row_i=zone_row_i,
                 zone_col_i=zone_col_i,
+                shared_with_affinity_id=shared_with_affinity_id,
             )
 
         resource.quantity = float(resource.quantity) + quantity
@@ -133,11 +153,30 @@ class ResourceLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-        return self._carried_resource_model_from_doc(resource)
+        return self._carried_resource_model_from_doc([resource])
 
-    def get_carried_by(self, character_id: str) -> typing.List[CarriedResourceDescriptionModel]:
-        carried = self.get_base_query(carried_by_id=character_id).all()
-        return [self._carried_resource_model_from_doc(doc) for doc in carried]
+    def get_carried_by(
+        self,
+        character_id: str,
+        exclude_shared_with_affinity: bool = False,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+    ) -> typing.List[CarriedResourceDescriptionModel]:
+        resource_docs: typing.List[ResourceDocument] = self.get_base_query(
+            carried_by_id=character_id,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_ids=shared_with_affinity_ids,
+        ).all()
+
+        resource_docs_by_resource_id = {}
+        for resource_doc in resource_docs:
+            resource_docs_by_resource_id.setdefault(resource_doc.resource_id, []).append(
+                resource_doc
+            )
+
+        carried_models = []
+        for resource_docs_ in resource_docs_by_resource_id.values():
+            carried_models.append(self._carried_resource_model_from_doc(resource_docs_))
+        return carried_models
 
     def get_ground_resource(
         self,
@@ -152,67 +191,101 @@ class ResourceLib:
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
         ).all()
-        return [self._carried_resource_model_from_doc(doc) for doc in carried]
+        return [self._carried_resource_model_from_doc([doc]) for doc in carried]
 
     def get_one_carried_by(
-        self, character_id: str, resource_id: str
+        self,
+        character_id: str,
+        resource_id: str,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+        exclude_shared_with_affinity: bool = False,
     ) -> CarriedResourceDescriptionModel:
-        doc = self.get_base_query(carried_by_id=character_id, resource_id=resource_id).one()
-        return self._carried_resource_model_from_doc(doc)
+        docs = self.get_base_query(
+            carried_by_id=character_id,
+            resource_id=resource_id,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_ids=shared_with_affinity_ids,
+        ).all()
+        return self._carried_resource_model_from_doc(docs)
 
     def _carried_resource_model_from_doc(
         self,
-        doc: ResourceDocument,
+        docs: typing.List[ResourceDocument],
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
     ) -> CarriedResourceDescriptionModel:
-        resource_description = self._kernel.game.config.resources[doc.resource_id]
-        clutter = float(doc.quantity) * resource_description.clutter
+        resource_description = self._kernel.game.config.resources[docs[0].resource_id]
+        quantity = sum([float(doc.quantity) for doc in docs])
+        clutter = quantity * resource_description.clutter
 
         if resource_description.unit in (Unit.UNIT, Unit.CUBIC, Unit.LITTER):
-            weight = float(doc.quantity) * resource_description.weight
+            weight = quantity * resource_description.weight
         elif resource_description.unit in (Unit.GRAM,):
-            weight = float(doc.quantity)
+            weight = quantity
         else:
             raise NotImplementedError()
 
         return CarriedResourceDescriptionModel(
-            id=doc.resource_id,
+            id=docs[0].resource_id,
             name=resource_description.name,
             weight=weight,
             material_type=resource_description.material_type,
             unit=resource_description.unit,
             clutter=clutter,
-            quantity=float(doc.quantity),
+            quantity=quantity,
             descriptions=resource_description.descriptions,
-            ground_row_i=doc.zone_row_i,
-            ground_col_i=doc.zone_col_i,
+            ground_row_i=docs[0].zone_row_i,
+            ground_col_i=docs[0].zone_col_i,
         )
 
     def have_resource(
-        self, character_id: str, resource_id: str, quantity: typing.Optional[float] = None
+        self,
+        character_id: str,
+        resource_id: str,
+        quantity: typing.Optional[float] = None,
+        exclude_shared_with_affinity: bool = False,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
     ) -> bool:
-        try:
-            resource_doc = self.get_base_query(
-                carried_by_id=character_id, resource_id=resource_id
-            ).one()
-        except NoResultFound:
+        resource_docs = self.get_base_query(
+            carried_by_id=character_id,
+            resource_id=resource_id,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_ids=shared_with_affinity_ids,
+        ).all()
+
+        if not resource_docs:
             return False
 
         if quantity is not None:
-            return float(resource_doc.quantity) >= quantity
+            total_quantity = sum(float(d.quantity) for d in resource_docs)
+            return total_quantity >= quantity
 
         return True
 
     def reduce_carried_by(
-        self, character_id: str, resource_id: str, quantity: float, commit: bool = True
+        self,
+        character_id: str,
+        resource_id: str,
+        quantity: float,
+        exclude_shared_with_affinity: bool = False,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+        commit: bool = True,
     ) -> None:
-        filter_ = and_(
+        if exclude_shared_with_affinity:
+            assert shared_with_affinity_ids is None
+
+        filters = [
             ResourceDocument.carried_by_id == character_id,
             ResourceDocument.resource_id == resource_id,
-            ResourceDocument.shared_with_affinity_id == None,
-        )
-        self._reduce(filter_, quantity=quantity, commit=commit)
+        ]
+
+        if exclude_shared_with_affinity:
+            filters.append(ResourceDocument.shared_with_affinity_id == None)
+
+        if shared_with_affinity_ids:
+            filters.append(ResourceDocument.shared_with_affinity_id.in_(shared_with_affinity_ids))
+
+        self._reduce(and_(*filters), quantity=quantity, commit=commit)
 
     def reduce_on_ground(
         self,
@@ -245,22 +318,30 @@ class ResourceLib:
         self._reduce(filter_, quantity=quantity, commit=commit)
 
     def _reduce(self, filter_, quantity: float, commit: bool = True) -> None:
-        try:
-            resource_doc = (
-                self._kernel.server_db_session.query(ResourceDocument).filter(filter_).one()
-            )
-        except NoResultFound:
+        resource_docs = self._kernel.server_db_session.query(ResourceDocument).filter(filter_).all()
+
+        if not resource_docs:
             raise NoCarriedResource()
 
-        if float(resource_doc.quantity) < quantity:
+        total_quantity = sum([float(d.quantity) for d in resource_docs])
+        if total_quantity < quantity:
             raise NotEnoughResource()
 
-        resource_doc.quantity = float(resource_doc.quantity) - quantity
+        to_reduce = quantity
 
-        if float(resource_doc.quantity) <= 0:
-            self._kernel.server_db_session.delete(resource_doc)
-        else:
-            self._kernel.server_db_session.add(resource_doc)
+        for resource_doc in resource_docs:
+            if to_reduce <= 0:
+                break
+
+            if float(resource_doc.quantity) < to_reduce:
+                to_reduce -= float(resource_doc.quantity)
+                self._kernel.server_db_session.delete(resource_doc)
+            elif float(resource_doc.quantity) == to_reduce:
+                to_reduce = 0.0
+                self._kernel.server_db_session.delete(resource_doc)
+            else:
+                resource_doc.quantity = float(resource_doc.quantity) - to_reduce
+                self._kernel.server_db_session.add(resource_doc)
 
         if commit:
             self._kernel.server_db_session.commit()
@@ -306,4 +387,14 @@ class ResourceLib:
 
     def get_stored_in_build(self, build_id: int) -> typing.List[CarriedResourceDescriptionModel]:
         carried = self.get_base_query(in_built_id=build_id).all()
-        return [self._carried_resource_model_from_doc(doc) for doc in carried]
+        return [self._carried_resource_model_from_doc([doc]) for doc in carried]
+
+    def get_shared_with_affinity(
+        self, character_id: str, affinity_id: int
+    ) -> typing.List[CarriedResourceDescriptionModel]:
+        return [
+            self._carried_resource_model_from_doc([doc])
+            for doc in self.get_base_query(
+                carried_by_id=character_id, shared_with_affinity_ids=[affinity_id]
+            ).all()
+        ]

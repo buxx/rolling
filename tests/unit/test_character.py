@@ -11,6 +11,10 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import AffinityDirectionType
+from rolling.server.document.affinity import AffinityJoinType
 from tests.fixtures import description_serializer
 
 
@@ -183,3 +187,168 @@ class TestCharacter:
         assert descr.items[0].items[0].name == "resource_quantity"
         assert descr.items[0].items[0].default_value == "0.2"
         assert descr.items[0].form_values_in_query
+
+    # FIXME BS NOW: Ajouter les trucs partagés avec l'affinité au TAKE
+    @pytest.mark.parametrize("arthur_take", [False])
+    async def test_unit__share_with_affinity_then_take(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_xena_haxe: StuffModel,
+        worldmapc_xena_wood: None,
+        worldmapc_arthur_model: CharacterModel,
+        worldmapc_web_app: TestClient,
+        worldmapc_kernel: Kernel,
+        arthur_take: bool,
+    ) -> None:
+        web = worldmapc_web_app
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+        arthur = worldmapc_arthur_model
+
+        # Create affinity
+        affinity = kernel.affinity_lib.create(
+            name="MyAffinity",
+            join_type=AffinityJoinType.ACCEPT_ALL,
+            direction_type=AffinityDirectionType.ONE_DIRECTOR,
+        )
+        kernel.affinity_lib.join(
+            character_id=xena.id, affinity_id=affinity.id, accepted=True, status_id=CHIEF_STATUS[0]
+        )
+        kernel.affinity_lib.join(
+            character_id=arthur.id,
+            affinity_id=affinity.id,
+            accepted=True,
+            status_id=MEMBER_STATUS[0],
+        )
+
+        # Did see affinity button ?
+        response = await web.post(f"/affinity/{xena.id}/see/{affinity.id}")
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        urls = [i.form_action for i in desc.items]
+        assert "Voir ce que je partager avec (0)" in labels
+        assert f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1" in urls
+
+        # See shared things
+        response = await web.post(f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1")
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        assert "Hache de pierre" not in labels
+        assert "Bois (0.2 mètre cubes)" not in labels
+        assert "Bois (0.1 mètre cubes)" not in labels
+        footer_link_labels = [i.label for i in desc.footer_links]
+        footer_link_urls = [i.form_action for i in desc.footer_links]
+        assert "Partager quelque chose" in footer_link_labels
+        assert (
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1" in footer_link_urls
+        )
+
+        # See shareable things
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1"
+        )
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        urls = [i.form_action for i in desc.items]
+        assert "Hache de pierre" in labels
+        assert "Bois (0.2 mètre cubes)" in labels
+        assert (
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&stuff_id=1" in urls
+        )
+        assert (
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&resource_id=WOOD"
+            in urls
+        )
+
+        # Share stuff
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&stuff_id=1"
+        )
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        assert "Hache de pierre" not in labels
+        assert "Bois (0.2 mètre cubes)" in labels
+
+        # Share wood
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&resource_id=WOOD"
+        )
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        assert desc.items[0].is_form
+        assert desc.items[0].form_values_in_query
+        assert desc.items[0].items[0].name == "resource_quantity"
+
+        # Share wood with quantity
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1"
+            f"&resource_id=WOOD&resource_quantity=0.1"
+        )
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        assert "Hache de pierre" not in labels
+        assert "Bois (0.2 mètre cubes)" not in labels
+        assert "Bois (0.1 mètre cubes)" in labels
+
+        # See shared
+        response = await web.post(f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1")
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        urls = [i.form_action for i in desc.items]
+        assert "Hache de pierre" in labels
+        assert "Bois (0.1 mètre cubes)" in labels
+        assert f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&stuff_id=1" in urls
+        assert (
+            f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&resource_id=WOOD"
+            in urls
+        )
+
+        # See shared link in inventory
+        response = await web.post(f"/_describe/character/{xena.id}/inventory")
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        footer_link_labels = [i.label for i in desc.footer_links]
+        footer_link_urls = [i.form_action for i in desc.footer_links]
+        assert "Voir ce qui est paratgé (2)" in footer_link_labels
+        assert f"/_describe/character/{xena.id}/inventory/shared-with" in footer_link_urls
+
+        # See shared affinity with
+        response = await web.post(f"/_describe/character/{xena.id}/inventory/shared-with")
+        assert response.status == 200
+        desc = description_serializer.load(await response.json())
+        labels = [i.label for i in desc.items]
+        urls = [i.form_action for i in desc.items]
+        assert "Avec MyAffinity (2)" in labels
+        assert f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1" in urls
+
+        if arthur_take:
+            pass  # FIXME test take here
+        else:
+            # Unshare stuff
+            response = await web.post(
+                f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&stuff_id=1"
+            )
+            assert response.status == 200
+
+            # Unshare resource
+            response = await web.post(
+                f"/_describe/character/{xena.id}/shared-inventory?"
+                f"affinity_id=1&resource_id=WOOD&resource_quantity=0.1"
+            )
+            assert response.status == 200
+
+            # See shared
+            response = await web.post(
+                f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1"
+            )
+            assert response.status == 200
+            desc = description_serializer.load(await response.json())
+            labels = [i.label for i in desc.items]
+            assert "Hache de pierre" not in labels
+            assert "Bois (0.1 mètre cubes)" not in labels

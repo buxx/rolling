@@ -10,6 +10,7 @@ from rolling.model.measure import Unit
 from rolling.server.extension import ServerSideDocument as Document
 
 
+# FIXME BS: id, unit pas utilisés
 class ResourceDocument(Document):
     __tablename__ = "resource"
     id = Column(Integer, primary_key=True, autoincrement=True)

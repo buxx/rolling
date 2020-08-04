@@ -44,22 +44,22 @@ class TestGiveAction:
         item_label_and_urls = [(i.label, i.form_action) for i in description.items]
 
         assert (
-            "Donner Bouclier de bois",
+            "Bouclier de bois",
             "/character/xena/with-character-action/GIVE_TO_CHARACTER/arthur/GIVE_TO_CHARACTER"
             f"?give_stuff_id={worldmapc_xena_wood_shield.id}",
         ) in item_label_and_urls
         assert (
-            "Donner Bouclier de bois",
+            "Bouclier de bois",
             "/character/xena/with-character-action/GIVE_TO_CHARACTER/arthur/GIVE_TO_CHARACTER"
             f"?give_stuff_id={worldmapc_xena_wood_shield2.id}",
         ) not in item_label_and_urls  # not in because links merged
         assert (
-            "Donner Veste de cuir",
+            "Veste de cuir",
             "/character/xena/with-character-action/GIVE_TO_CHARACTER/arthur/GIVE_TO_CHARACTER"
             f"?give_stuff_id={worldmapc_xena_leather_jacket.id}",
         ) in item_label_and_urls
         assert (
-            "Donner Bois",
+            "Bois",
             "/character/xena/with-character-action/GIVE_TO_CHARACTER/arthur/GIVE_TO_CHARACTER"
             "?give_resource_id=WOOD",
         ) in item_label_and_urls

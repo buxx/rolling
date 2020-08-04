@@ -1,4 +1,6 @@
 # coding: utf-8
+import typing
+
 import pytest
 
 from rolling.action.base import ActionDescriptionModel
@@ -9,6 +11,10 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import AffinityDirectionType
+from rolling.server.document.affinity import AffinityJoinType
 
 
 @pytest.fixture
@@ -24,13 +30,54 @@ def take_action(worldmapc_kernel: Kernel) -> TakeFromCharacterAction:
     )
 
 
+ModifierType = typing.Callable[
+    ["TestTakeAction", Kernel, CharacterModel, CharacterModel], CharacterModel
+]
+
+
 class TestTakeAction:
-    def _apply_low_lp(self, kernel: Kernel, character: CharacterModel) -> CharacterModel:
-        doc = kernel.character_lib.get_document(character.id)
+    def _apply_low_lp(
+        self, kernel: Kernel, xena: CharacterModel, arthur: CharacterModel
+    ) -> CharacterModel:
+        doc = kernel.character_lib.get_document(xena.id)
         doc.life_points = 0.1
         kernel.server_db_session.add(doc)
         kernel.server_db_session.commit()
-        return kernel.character_lib.get(character.id)
+        return kernel.character_lib.get(xena.id)
+
+    def _apply_shares(
+        self, kernel: Kernel, xena: CharacterModel, arthur: CharacterModel
+    ) -> CharacterModel:
+        affinity_doc = kernel.affinity_lib.create(
+            "MyAffinity",
+            join_type=AffinityJoinType.ACCEPT_ALL,
+            direction_type=AffinityDirectionType.ONE_DIRECTOR,
+        )
+        kernel.affinity_lib.join(
+            xena.id, affinity_doc.id, accepted=True, status_id=MEMBER_STATUS[0]
+        )
+        kernel.affinity_lib.join(
+            arthur.id, affinity_doc.id, accepted=True, status_id=CHIEF_STATUS[0]
+        )
+
+        for stuff in kernel.stuff_lib.get_carried_by(xena.id):
+            kernel.stuff_lib.set_shared_with_affinity(stuff.id, affinity_doc.id)
+
+        for carried_resource in kernel.resource_lib.get_carried_by(xena.id):
+            kernel.resource_lib.reduce_carried_by(
+                character_id=xena.id,
+                resource_id=carried_resource.id,
+                quantity=carried_resource.quantity,
+                exclude_shared_with_affinity=True,
+            )
+            kernel.resource_lib.add_resource_to(
+                character_id=xena.id,
+                resource_id=carried_resource.id,
+                quantity=carried_resource.quantity,
+                shared_with_affinity_id=affinity_doc.id,
+            )
+
+        return xena
 
     def test_unit__take_is_possible__ok(
         self,
@@ -44,7 +91,7 @@ class TestTakeAction:
         arthur = worldmapc_arthur_model
 
         # set xena LP very low to be vulnerable
-        xena = self._apply_low_lp(kernel, xena)
+        xena = self._apply_low_lp(kernel, xena, arthur)
 
         take_action.check_is_possible(arthur, xena)
 
@@ -62,8 +109,9 @@ class TestTakeAction:
         with pytest.raises(ImpossibleAction) as caught:
             take_action.check_is_possible(arthur, xena)
 
-        assert str(caught.value) == "xena est en capacité de se defendre"
+        assert str(caught.value) == "arthur ne peut contraindre xena"
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -74,35 +122,37 @@ class TestTakeAction:
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         description = take_action.perform(arthur, xena, TakeFromModel())
         item_label_and_urls = [(i.label, i.form_action) for i in description.items]
 
         assert (
-            "Prendre Bouclier de bois",
+            "Bouclier de bois",
             "/character/arthur/with-character-action/TAKE_FROM_CHARACTER/xena/TAKE_FROM_CHARACTER"
             f"?take_stuff_id={worldmapc_xena_wood_shield.id}",
         ) in item_label_and_urls
         assert (
-            "Prendre Bouclier de bois",
+            "Bouclier de bois",
             "/character/arthur/with-character-action/TAKE_FROM_CHARACTER/xena/TAKE_FROM_CHARACTER"
             f"?take_stuff_id={worldmapc_xena_wood_shield2.id}",
         ) not in item_label_and_urls  # not in because links merged
         assert (
-            "Prendre Veste de cuir",
+            "Veste de cuir",
             "/character/arthur/with-character-action/TAKE_FROM_CHARACTER/xena/TAKE_FROM_CHARACTER"
             f"?take_stuff_id={worldmapc_xena_leather_jacket.id}",
         ) in item_label_and_urls
         assert (
-            "Prendre Bois",
+            "Bois",
             "/character/arthur/with-character-action/TAKE_FROM_CHARACTER/xena/TAKE_FROM_CHARACTER"
             "?take_resource_id=WOOD",
         ) in item_label_and_urls
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_one_then_one_shield__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -113,9 +163,10 @@ class TestTakeAction:
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         description = take_action.perform(
@@ -154,6 +205,7 @@ class TestTakeAction:
             == arthur.id
         )
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_two_shields__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -164,9 +216,10 @@ class TestTakeAction:
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         description = take_action.perform(
@@ -192,6 +245,7 @@ class TestTakeAction:
             == arthur.id
         )
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_one_jacket__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -200,9 +254,10 @@ class TestTakeAction:
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         take_action.perform(
@@ -213,6 +268,7 @@ class TestTakeAction:
             == arthur.id
         )
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_wood__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -220,9 +276,10 @@ class TestTakeAction:
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         description = take_action.perform(arthur, xena, TakeFromModel(take_resource_id="WOOD"))
@@ -245,6 +302,7 @@ class TestTakeAction:
         assert kernel.resource_lib.have_resource(arthur.id, resource_id="WOOD", quantity=0.2)
         assert not kernel.resource_lib.have_resource(xena.id, resource_id="WOOD")
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_wood__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -252,9 +310,10 @@ class TestTakeAction:
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood: None,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
@@ -266,6 +325,7 @@ class TestTakeAction:
                 ),
             )
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_shield__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -273,9 +333,10 @@ class TestTakeAction:
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood_shield: StuffModel,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
@@ -285,15 +346,17 @@ class TestTakeAction:
                 TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2),
             )
 
+    @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_shield__err__dont_have(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
         take_action: TakeFromCharacterAction,
+        modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
-        xena = self._apply_low_lp(kernel, worldmapc_xena_model)
+        xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
