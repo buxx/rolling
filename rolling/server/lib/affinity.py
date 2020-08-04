@@ -342,3 +342,13 @@ class AffinityLib:
             )
 
         return query.all()
+
+    def count_things_shared_with_affinity(self, character_id: str, affinity_id: int) -> int:
+        return (
+            self._kernel.resource_lib.get_base_query(
+                carried_by_id=character_id, shared_with_affinity_id=affinity_id
+            ).count()
+            + self._kernel.stuff_lib.get_base_query(
+                carried_by_id=character_id, shared_with_affinity_id=affinity_id
+            ).count()
+        )

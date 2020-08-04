@@ -33,6 +33,17 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class SharedInventoryQueryModel:
+    affinity_id: int = serpyco.field(cast_on_load=True)
+    resource_id: typing.Optional[str] = None
+    resource_quantity: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
 class GetCharacterAndPendingActionPathModel:
     character_id: str
     pending_action_id: int = serpyco.field(cast_on_load=True)

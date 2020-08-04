@@ -29,6 +29,7 @@ class StuffLib:
         carried_by_id: typing.Optional[str] = None,
         in_built_id: typing.Optional[int] = None,
         shared_with_affinity_id: typing.Optional[int] = None,
+        exclude_shared_with_affinity: bool = False,
         world_row_i: typing.Optional[int] = None,
         world_col_i: typing.Optional[int] = None,
         zone_row_i: typing.Optional[int] = None,
@@ -39,20 +40,25 @@ class StuffLib:
         exclude_used_as: bool = False,
         only_columns: typing.Optional[typing.List[Column]] = None,
     ) -> Query:
-        if world_row_i or world_col_i:
-            assert world_row_i and world_col_i
-        if zone_row_i or zone_col_i:
-            assert zone_row_i and zone_col_i
+        if world_row_i is not None or world_col_i is not None:
+            assert world_row_i is not None and world_col_i is not None
+        if zone_row_i is not None or zone_col_i is not None:
+            assert zone_row_i is not None and zone_col_i is not None
 
         if only_columns is not None:
             query = self._kernel.server_db_session.query(*only_columns)
         else:
             query = self._kernel.server_db_session.query(StuffDocument)
 
+        if shared_with_affinity_id is not None:
+            assert not exclude_shared_with_affinity
+            query = query.filter(StuffDocument.shared_with_affinity_id == shared_with_affinity_id)
+
+        if exclude_shared_with_affinity:
+            query = query.filter(StuffDocument.shared_with_affinity_id == None)
+
         query = query.filter(
-            StuffDocument.shared_with_affinity_id == shared_with_affinity_id,
-            StuffDocument.carried_by_id == carried_by_id,
-            StuffDocument.in_built_id == in_built_id,
+            StuffDocument.carried_by_id == carried_by_id, StuffDocument.in_built_id == in_built_id
         )
 
         if exclude_crafting:
@@ -222,12 +228,18 @@ class StuffLib:
         self,
         character_id: str,
         exclude_crafting: bool = True,
+        shared_with_affinity_id: typing.Optional[int] = None,
+        exclude_shared_with_affinity: bool = False,
         stuff_id: typing.Optional[str] = None,
     ) -> typing.List[StuffModel]:
         return [
             self.stuff_model_from_doc(doc)
             for doc in self.get_base_query(
-                carried_by_id=character_id, exclude_crafting=exclude_crafting, stuff_id=stuff_id
+                carried_by_id=character_id,
+                exclude_crafting=exclude_crafting,
+                stuff_id=stuff_id,
+                exclude_shared_with_affinity=exclude_shared_with_affinity,
+                shared_with_affinity_id=shared_with_affinity_id,
             ).all()
         ]
 
@@ -241,6 +253,22 @@ class StuffLib:
     def set_carried_by(self, stuff_id: int, character_id: str, commit: bool = True) -> None:
         stuff_doc = self.get_stuff_doc(stuff_id)
         self.set_carried_by__from_doc(stuff_doc, character_id=character_id, commit=commit)
+
+    def set_shared_with_affinity(
+        self, stuff_id: int, affinity_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        stuff_doc.shared_with_affinity_id = affinity_id
+        if commit:
+            self._kernel.server_db_session.commit()
+
+    def unshare_with_affinity(
+        self, stuff_id: int, commit: bool = True
+    ) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        stuff_doc.shared_with_affinity_id = None
+        if commit:
+            self._kernel.server_db_session.commit()
 
     def set_carried_by__from_doc(
         self, stuff_doc: StuffDocument, character_id: str, commit: bool = True
@@ -437,10 +465,19 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def get_stuff_count(
-        self, character_id: str, stuff_id: str, exclude_crafting: bool = True
+        self,
+        character_id: str,
+        stuff_id: str,
+        exclude_crafting: bool = True,
+        shared_with_affinity_id: typing.Optional[int] = None,
+        exclude_shared_with_affinity: bool = False,
     ) -> int:
         return self.get_base_query(
-            carried_by_id=character_id, stuff_id=stuff_id, exclude_crafting=exclude_crafting
+            carried_by_id=character_id,
+            stuff_id=stuff_id,
+            exclude_crafting=exclude_crafting,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_id=shared_with_affinity_id,
         ).count()
 
     def get_first_carried_stuff(
@@ -457,3 +494,13 @@ class StuffLib:
             exclude_used_as=exclude_used_as,
         )
         return self.stuff_model_from_doc(query.limit(1).one())
+
+    def get_shared_with_affinity(
+        self, character_id: str, affinity_id: int
+    ) -> typing.List[StuffModel]:
+        return [
+            self.stuff_model_from_doc(doc)
+            for doc in self.get_base_query(
+                carried_by_id=character_id, shared_with_affinity_id=affinity_id
+            ).all()
+        ]
