@@ -351,7 +351,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             character_id=self._character.id,
             resource_id=resource_id,
             quantity=quantity,
-            shared_with_affinity_id=self._affinity.id,
+            shared_with_affinity_ids=[self._affinity.id],
         ):
             raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
 
@@ -360,7 +360,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             character_id=self._character.id,
             resource_id=resource_id,
             quantity=quantity,
-            shared_with_affinity_id=self._affinity.id,
+            shared_with_affinity_ids=[self._affinity.id],
         )
         self._kernel.resource_lib.add_resource_to(
             character_id=self._character.id,
