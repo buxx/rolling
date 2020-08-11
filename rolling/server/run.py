@@ -57,6 +57,10 @@ def run(args: argparse.Namespace) -> None:
     hapic.set_context(context)
     hapic.add_documentation_view("/doc")
 
+    if args.sentry:
+        import sentry_sdk
+        sentry_sdk.init(args.sentry)
+
     kernel.init()
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
     web.run_app(app, host=args.host, port=args.port, access_log=server_logger)
@@ -70,6 +74,7 @@ def main() -> None:
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--sentry", type=str, help="Sentry address to use", default=None)
     parser.add_argument("--server-db-path", type=str, help="path of server.db", default="server.db")
 
     args = parser.parse_args()
