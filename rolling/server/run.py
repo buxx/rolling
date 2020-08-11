@@ -59,7 +59,11 @@ def run(args: argparse.Namespace) -> None:
 
     if args.sentry:
         import sentry_sdk
-        sentry_sdk.init(args.sentry)
+        from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        sentry_sdk.init(
+            dsn=args.sentry, integrations=[AioHttpIntegration(), SqlalchemyIntegration()]
+        )
 
     kernel.init()
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
