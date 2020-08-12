@@ -17,6 +17,11 @@ def run(args: argparse.Namespace) -> None:
     else:
         configure_logging(logging.INFO)
 
+    if args.sentry:
+        import sentry_sdk
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        sentry_sdk.init(dsn=args.sentry, integrations=[SqlalchemyIntegration()])
+
     kernel = get_kernel(args.world_map_source, args.tile_maps_folder, args.game_config_folder)
     character_lib = CharacterLib(kernel)
     stuff_lib = StuffLib(kernel)
@@ -30,6 +35,7 @@ def main() -> None:
     parser.add_argument("tile_maps_folder", type=str, help="Tile maps sources files folder path")
     parser.add_argument("game_config_folder", type=str, help="Directory path with game configs")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--sentry", type=str, help="Sentry address to use", default=None)
 
     args = parser.parse_args()
     run(args)
