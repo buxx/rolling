@@ -22,18 +22,23 @@ class EmptyModel:
     pass
 
 
-def get_on_and_around_coordinates(x: int, y: int) -> typing.List[typing.Tuple[int, int]]:
-    return [
-        (x, y),
-        (x - 1, y - 1),
-        (x, y - 1),
-        (x + 1, y - 1),
-        (x - 1, y),
-        (x + 1, y),
-        (x - 1, y + 1),
-        (x, y + 1),
-        (x + 1, y + 1),
-    ]
+def get_on_and_around_coordinates(x: int, y: int, distance: int = 1, exclude_on: bool = False) -> typing.List[typing.Tuple[int, int]]:
+    positions = []
+    if not exclude_on:
+        positions.append((x, y))
+
+    positions.extend([
+        (x - distance, y - distance),
+        (x, y - distance),
+        (x + distance, y - distance),
+        (x - distance, y),
+        (x + distance, y),
+        (x - distance, y + distance),
+        (x, y + distance),
+        (x + distance, y + distance),
+    ])
+
+    return positions
 
 
 def is_there_resource_id_in_zone(

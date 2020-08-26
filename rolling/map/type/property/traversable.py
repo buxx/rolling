@@ -5,7 +5,7 @@ from rolling.model.meta import TransportType
 # FIXME BS 2019-03-06: transport types are str because serpyco bug, see
 # rolling.model.zone.ZoneTileTypeModel
 traversable_properties = {
-    zone.Nothing: {},
+    zone.Nothing: {TransportType.WALKING.value: False},
     zone.Sand: {TransportType.WALKING.value: True},
     zone.DryBush: {TransportType.WALKING.value: True},
     zone.Rock: {TransportType.WALKING.value: False},

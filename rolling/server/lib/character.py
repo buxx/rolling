@@ -10,6 +10,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 
+from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
@@ -17,6 +18,7 @@ from rolling.action.eat import EatResourceModel
 from rolling.action.eat import EatStuffModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
 from rolling.model.character import FIGHT_AP_CONSUME
@@ -447,6 +449,38 @@ class CharacterLib:
             zone_width=new_zone_geography.width,
             zone_height=new_zone_geography.height,
         )
+
+        # FIXME BS NOW: walking or something else
+        def get_walking_coordinates(origin_new_zone_row_i: int, origin_new_zone_col_i: int):
+            if traversable_properties[
+                new_zone_geography.rows[origin_new_zone_row_i][origin_new_zone_col_i]
+            ].get(TransportType.WALKING.value):
+                return origin_new_zone_row_i, origin_new_zone_col_i
+
+            distances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # after 10 of distance ... it is a fail
+            for distance in distances:
+                for new_zone_row_i_, new_zone_col_i_ in util.get_on_and_around_coordinates(
+                    origin_new_zone_row_i,
+                    origin_new_zone_col_i,
+                    distance=distance,
+                    exclude_on=True,
+                ):
+                    if new_zone_row_i_ < 0:
+                        new_zone_row_i_ = 0
+                    if new_zone_col_i_ < 0:
+                        new_zone_col_i_ = 0
+
+                    try:
+                        if traversable_properties[
+                            new_zone_geography.rows[new_zone_row_i_][new_zone_col_i_]
+                        ].get(TransportType.WALKING.value):
+                            return new_zone_row_i_, new_zone_col_i_
+                    except KeyError:
+                        pass
+
+            return origin_new_zone_row_i, origin_new_zone_col_i
+
+        new_zone_row_i, new_zone_col_i = get_walking_coordinates(new_zone_row_i, new_zone_col_i)
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
 
