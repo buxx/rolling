@@ -1,8 +1,12 @@
 # coding: utf-8
+import random
 import typing
 from unittest.mock import patch
 
 import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import random_module, randoms
+from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.fight import AttackCharacterAction
@@ -541,3 +545,51 @@ class TestFightAction:
 
             assert france_warlord_doc.alive
             assert not england_warlord_doc.alive
+
+    # @pytest.mark.timeout(10.0)
+    @pytest.mark.usefixtures("initial_universe_state")
+    @given(randoms(note_method_calls=True))
+    @settings(deadline=None)
+    def test_fight_to_death__one_vs_one(
+        self,
+        france_affinity: AffinityDocument,
+        france_warlord: CharacterModel,
+        england_warlord: CharacterModel,
+        worldmapc_kernel: Kernel,
+        attack_action: AttackCharacterAction,
+        random_,
+    ) -> None:
+        random_.seed()
+        while True:
+            try:
+                france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+                france_warlord = worldmapc_kernel.character_lib.get(france_warlord.id)
+                if not france_warlord.is_attack_ready():
+                    return
+            except NoResultFound:
+                worldmapc_kernel.character_lib.get_document(france_warlord.id, dead=True)
+                return
+
+            try:
+                england_warlord_doc = worldmapc_kernel.character_lib.get_document(england_warlord.id)
+                england_warlord = worldmapc_kernel.character_lib.get(england_warlord.id)
+                if not england_warlord.is_attack_ready():
+                    return
+            except NoResultFound:
+                worldmapc_kernel.character_lib.get_document(england_warlord.id, dead=True)
+                return
+
+            france_warlord_doc.action_points = 24.0
+            england_warlord_doc.action_points = 24.0
+            france_warlord_doc.tiredness = 0.0
+            england_warlord_doc.tiredness = 0.0
+
+            worldmapc_kernel.server_db_session.add(france_warlord_doc)
+            worldmapc_kernel.server_db_session.add(england_warlord_doc)
+            worldmapc_kernel.server_db_session.commit()
+
+            attack_action.perform(
+                france_warlord,
+                with_character=england_warlord,
+                input_=AttackModel(lonely=1, confirm=1),
+            )
