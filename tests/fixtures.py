@@ -69,27 +69,26 @@ def worldmapsourcec_txt() -> str:
 
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
-    return Kernel(worldmapsourcea_txt, loop=loop)
+    return Kernel(worldmapsourcea_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop)
+    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop)
+    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
-    server_db_path = tmp_path / "server.db"
     kernel = Kernel(
         worldmapsourcec_txt,
         tile_maps_folder="tests/src/worldmapc_zones",
         game_config_folder="tests/src/game1",
-        server_db_path=server_db_path,
+        server_db_path=":memory:",
         loop=loop,
     )
     kernel.init_server_db_session()
