@@ -1,4 +1,5 @@
 # coding: utf-8
+import itertools
 import random
 import typing
 from unittest.mock import patch
@@ -16,6 +17,7 @@ from rolling.rolling_types import ActionType
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from tests.fixtures import create_stuff
 
 
 @pytest.fixture
@@ -544,9 +546,21 @@ class TestFightAction:
             assert france_warlord_doc.alive
             assert not england_warlord_doc.alive
 
-    @pytest.mark.timeout(10.0)
+    # @pytest.mark.timeout(10.0)
     @pytest.mark.usefixtures("initial_universe_state")
-    @pytest.mark.parametrize("seed", [random.randint(1, 1_000_000) for _ in range(10)])
+    @pytest.mark.parametrize(
+        "seed,frw_weapon,frw_shield,frw_armor,enw_weapon,enw_shield,enw_armor",
+        itertools.chain(
+            *[
+                [
+                    (seed, "", "", "", "", "", ""),
+                    (seed, "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET", "", "", ""),
+                    (seed, "", "", "", "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET"),
+                    (seed, "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET", "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET")
+                ] for seed in [random.randint(1, 1000) for _ in range(3)]
+            ]
+        )
+    )
     def test_fight_to_death__one_vs_one(
         self,
         france_affinity: AffinityDocument,
@@ -555,9 +569,45 @@ class TestFightAction:
         worldmapc_kernel: Kernel,
         attack_action: AttackCharacterAction,
         seed: int,
+        frw_weapon: str,
+        frw_shield: str,
+        frw_armor: str,
+        enw_weapon: str,
+        enw_shield: str,
+        enw_armor: str,
     ) -> None:
-        # Implant seed
+        kernel = worldmapc_kernel
         random.seed(seed)
+
+        if frw_weapon:
+            stuff = create_stuff(kernel, frw_weapon)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_weapon(france_warlord.id, stuff.id)
+
+        if frw_shield:
+            stuff = create_stuff(kernel, frw_shield)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_shield(france_warlord.id, stuff.id)
+
+        if frw_armor:
+            stuff = create_stuff(kernel, frw_armor)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_armor(france_warlord.id, stuff.id)
+
+        if enw_weapon:
+            stuff = create_stuff(kernel, enw_weapon)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_weapon(england_warlord.id, stuff.id)
+
+        if enw_shield:
+            stuff = create_stuff(kernel, enw_shield)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_shield(england_warlord.id, stuff.id)
+
+        if enw_armor:
+            stuff = create_stuff(kernel, enw_armor)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_armor(england_warlord.id, stuff.id)
 
         while True:
             try:
