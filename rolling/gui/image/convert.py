@@ -3,7 +3,6 @@ from PIL import Image
 
 from rolling.gui.image.colortrans import rgb2short
 
-
 """
 THIS CODE HAVE BEEN COPIED FROM https://github.com/hit9/img2txt/blob/gh-pages/LICENSE THEN HAVE
 BEEN MODIFIED FOR ROLLING CODE ADAPTATION.

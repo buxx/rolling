@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 from hapic.processor.serpyco import SerpycoProcessor
+import typing
 
 from guilang.description import Description
 

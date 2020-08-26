@@ -1,6 +1,4 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -8,6 +6,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
+import typing
 
 from rolling.server.document.base import SqliteNumeric
 from rolling.server.document.resource import ResourceDocument

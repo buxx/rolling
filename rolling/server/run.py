@@ -1,13 +1,12 @@
 # coding: utf-8
-import argparse
-import logging
-
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+import argparse
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
+import logging
 
 from rolling.exception import UserDisplayError
 from rolling.log import configure_logging
@@ -61,6 +60,7 @@ def run(args: argparse.Namespace) -> None:
         import sentry_sdk
         from sentry_sdk.integrations.aiohttp import AioHttpIntegration
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
         sentry_sdk.init(
             dsn=args.sentry, integrations=[AioHttpIntegration(), SqlalchemyIntegration()]
         )

@@ -1,9 +1,8 @@
 # coding: utf-8
 import contextlib
+import pytest
 import typing
 from unittest.mock import patch
-
-import pytest
 
 from rolling.action.utils import AroundPercent
 from rolling.kernel import Kernel
@@ -12,9 +11,9 @@ from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
 from rolling.model.fight import Weapon
 from rolling.model.stuff import StuffModel
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
 
 
 def make_fake_get_attack_weapon(params: typing.Dict[str, Weapon]):

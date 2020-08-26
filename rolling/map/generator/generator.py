@@ -1,8 +1,7 @@
 # coding: utf-8
 from enum import Enum
-import typing
-
 from pip._internal.utils.misc import enum
+import typing
 
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
@@ -11,7 +10,8 @@ from rolling.map.source import ZoneMap
 from rolling.map.source import ZoneMapSource
 
 if typing.TYPE_CHECKING:
-    from rolling.map.generator.filler import TileMapFiller, FillerFactory
+    from rolling.map.generator.filler import FillerFactory
+    from rolling.map.generator.filler import TileMapFiller
 
 
 class Border(Enum):

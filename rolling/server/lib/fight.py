@@ -2,10 +2,11 @@
 import random
 import typing
 
+from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import FIGHT_TIREDNESS_INCREASE
-from rolling.model.character import CharacterModel
-from rolling.model.fight import AttackDescription, DEFAULT_WEAPON_DAMAGE
+from rolling.model.fight import AttackDescription
+from rolling.model.fight import DEFAULT_WEAPON_DAMAGE
 from rolling.model.fight import DefendDescription
 from rolling.model.fight import Weapon
 from rolling.server.document.affinity import AffinityDocument

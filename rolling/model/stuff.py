@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit

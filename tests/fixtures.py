@@ -1,14 +1,13 @@
 # coding: utf-8
-import datetime
-import os
-import typing
-
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_exceptions import HTTPNotFound
+import datetime
 from hapic.ext.aiohttp.context import AiohttpContext
+import os
 import pytest
 import serpyco
+import typing
 
 from guilang.description import Description
 from rolling.gui.map.object import DisplayObjectManager
@@ -23,10 +22,10 @@ from rolling.map.type.zone import SeaWater
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.server.application import get_application
-from rolling.server.document.affinity import MEMBER_STATUS
-from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.extension import hapic

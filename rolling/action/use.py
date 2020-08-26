@@ -1,6 +1,5 @@
-import typing
-
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -12,9 +11,9 @@ from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:
+    from rolling.game.base import GameConfig
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
-    from rolling.game.base import GameConfig
 
 
 class NotUseAsBagAction(WithStuffAction):

@@ -1,6 +1,5 @@
 # coding: utf-8
 from decimal import Decimal as D
-
 from sqlalchemy import Binary
 from sqlalchemy import Column
 from sqlalchemy import Integer

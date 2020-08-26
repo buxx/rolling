@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -16,9 +16,9 @@ from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
+from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
-from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.link import CharacterActionLink
 

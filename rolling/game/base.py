@@ -1,8 +1,7 @@
 # coding: utf-8
 from os import path
-import typing
-
 import toml
+import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.game.stuff import StuffManager

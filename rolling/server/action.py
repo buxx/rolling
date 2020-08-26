@@ -53,8 +53,8 @@ from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
     from rolling.action.base import ActionDescriptionModel
+    from rolling.kernel import Kernel
 
 
 class ActionFactory:

@@ -1,9 +1,8 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import and_
 from sqlalchemy import or_
 from sqlalchemy.orm import Query
+import typing
 
 from rolling.exception import RollingError
 from rolling.server.document.business import OfferDocument

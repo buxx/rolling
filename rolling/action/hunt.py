@@ -1,8 +1,7 @@
 # coding: utf-8
 import random
-import typing
-
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -18,8 +17,8 @@ from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
+    from rolling.model.character import CharacterModel
 
 HUNTING_AND_GATHERING_SKILL_ID = "hunting_gathering"
 

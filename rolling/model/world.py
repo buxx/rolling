@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 from serpyco import nested_field
+import typing
 
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.zone import WorldTileTypeModel

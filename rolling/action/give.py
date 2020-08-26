@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -19,8 +19,8 @@ from rolling.server.transfer import TransferStuffOrResources
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.model.character import CharacterModel
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 class GiveStuffOrResources(TransferStuffOrResources):

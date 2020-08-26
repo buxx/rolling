@@ -1,8 +1,7 @@
 # coding: utf-8
 import abc
-import typing
-
 from aiohttp import web
+import typing
 
 from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
@@ -28,8 +27,8 @@ from rolling.server.lib.character import CharacterLib
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
-    from rolling.server.zone.websocket import ZoneEventsManager
     from rolling.kernel import Kernel
+    from rolling.server.zone.websocket import ZoneEventsManager
 
 
 class EventProcessor(metaclass=abc.ABCMeta):

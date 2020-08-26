@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -37,9 +37,9 @@ from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:

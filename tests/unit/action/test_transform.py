@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 import pytest
+import typing
 
 from rolling.action.transform import QuantityModel
 from rolling.action.transform import TransformResourcesIntoResourcesAction

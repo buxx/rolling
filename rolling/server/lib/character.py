@@ -2,13 +2,12 @@
 import datetime
 import math
 import os
-import typing
-import uuid
-
 import sqlalchemy
 from sqlalchemy import and_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
+import typing
+import uuid
 
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
@@ -21,10 +20,10 @@ from rolling.exception import ImpossibleAction
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
-from rolling.model.character import FIGHT_AP_CONSUME
-from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
+from rolling.model.character import FIGHT_AP_CONSUME
+from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.consume import Consumeable
 from rolling.model.eat import EatResourceFromCharacterInventory
 from rolling.model.eat import EatStuffFromCharacterInventory
@@ -45,10 +44,10 @@ from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
-from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
@@ -460,10 +459,7 @@ class CharacterLib:
             distances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # after 10 of distance ... it is a fail
             for distance in distances:
                 for new_zone_row_i_, new_zone_col_i_ in util.get_on_and_around_coordinates(
-                    origin_new_zone_row_i,
-                    origin_new_zone_col_i,
-                    distance=distance,
-                    exclude_on=True,
+                    origin_new_zone_row_i, origin_new_zone_col_i, distance=distance, exclude_on=True
                 ):
                     if new_zone_row_i_ < 0:
                         new_zone_row_i_ = 0

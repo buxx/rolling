@@ -1,13 +1,12 @@
 #  coding: utf-8
-import json
-from json import JSONDecodeError
-import typing
-import urllib
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic import HapicData
+import json
+from json import JSONDecodeError
+import typing
+import urllib
 
 from guilang.description import Description
 from guilang.description import Part
@@ -24,10 +23,10 @@ from rolling.model.character import ManageAffinityRelationQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
 from rolling.rolling_types import ActionType
 from rolling.server.controller.base import BaseController
-from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic

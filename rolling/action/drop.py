@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -19,10 +19,10 @@ from rolling.server.util import with_multiple_carried_stuffs
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
-    from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass

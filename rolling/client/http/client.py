@@ -1,9 +1,8 @@
 # coding: utf-8
-import typing
-
 import requests
 from requests import Response
 import serpyco
+import typing
 
 from guilang.description import Description
 from rolling.exception import CantChangeZone

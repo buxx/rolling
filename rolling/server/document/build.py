@@ -1,6 +1,4 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Enum
@@ -8,6 +6,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
+import typing
 
 from rolling.server.extension import ServerSideDocument as Document
 

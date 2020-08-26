@@ -1,9 +1,8 @@
 # coding: utf-8
 import json
+import serpyco
 import typing
 from urllib.parse import urlencode
-
-import serpyco
 import urwid
 
 from guilang.description import Description

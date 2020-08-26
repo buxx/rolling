@@ -1,8 +1,7 @@
 # coding: utf-8
-import typing
-
 from aiohttp.test_utils import TestClient
 import pytest
+import typing
 
 from rolling.action.knowledge import LearnKnowledgeAction
 from rolling.action.knowledge import LearnKnowledgeModel

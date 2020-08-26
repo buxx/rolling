@@ -1,6 +1,5 @@
 # coding: utf-8
 import typing
-
 import urwid
 
 from rolling.model.character import CreateCharacterModel

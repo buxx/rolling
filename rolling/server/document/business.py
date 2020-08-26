@@ -1,7 +1,5 @@
 # coding: utf-8
 import enum
-import typing
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Enum
@@ -10,6 +8,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
 from sqlalchemy.orm import relationship
+import typing
 
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import ServerSideDocument as Document

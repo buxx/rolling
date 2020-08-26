@@ -1,6 +1,5 @@
 # coding: utf-8
 import typing
-
 import urwid
 
 if typing.TYPE_CHECKING:

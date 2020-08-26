@@ -1,19 +1,18 @@
 # coding: utf-8
-import urllib
-
 from aiohttp.test_utils import TestClient
 import pytest
 import serpyco
+import urllib
 
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
-from rolling.server.document.affinity import CHIEF_STATUS
-from rolling.server.document.affinity import MEMBER_STATUS
-from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.affinity import statuses
 

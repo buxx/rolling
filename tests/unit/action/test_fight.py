@@ -1,11 +1,10 @@
 # coding: utf-8
 import itertools
+import pytest
 import random
+from sqlalchemy.orm.exc import NoResultFound
 import typing
 from unittest.mock import patch
-
-import pytest
-from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.fight import AttackCharacterAction
@@ -14,9 +13,9 @@ from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
 from tests.fixtures import create_stuff
 
 
@@ -556,10 +555,19 @@ class TestFightAction:
                     (seed, "", "", "", "", "", ""),
                     (seed, "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET", "", "", ""),
                     (seed, "", "", "", "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET"),
-                    (seed, "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET", "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET")
-                ] for seed in [random.randint(1, 1000) for _ in range(3)]
+                    (
+                        seed,
+                        "STONE_HAXE",
+                        "WOOD_SHIELD",
+                        "LEATHER_JACKET",
+                        "STONE_HAXE",
+                        "WOOD_SHIELD",
+                        "LEATHER_JACKET",
+                    ),
+                ]
+                for seed in [random.randint(1, 1000) for _ in range(3)]
             ]
-        )
+        ),
     )
     def test_fight_to_death__one_vs_one(
         self,
@@ -620,7 +628,9 @@ class TestFightAction:
                 return
 
             try:
-                england_warlord_doc = worldmapc_kernel.character_lib.get_document(england_warlord.id)
+                england_warlord_doc = worldmapc_kernel.character_lib.get_document(
+                    england_warlord.id
+                )
                 england_warlord = worldmapc_kernel.character_lib.get(england_warlord.id)
                 if not england_warlord.is_attack_ready():
                     return

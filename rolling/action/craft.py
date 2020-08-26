@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -25,9 +25,9 @@ from rolling.server.link import CharacterActionLink
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
+    from rolling.game.base import GameConfig
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
-    from rolling.game.base import GameConfig
 
 
 @dataclasses.dataclass

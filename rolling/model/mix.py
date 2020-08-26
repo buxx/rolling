@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 from functools import lru_cache
 import typing
 

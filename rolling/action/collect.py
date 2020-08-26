@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -18,10 +18,10 @@ from rolling.server.link import CharacterActionLink
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
-    from rolling.server.document.character import CharacterDocument
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.server.document.character import CharacterDocument
 
 
 @dataclasses.dataclass

@@ -1,9 +1,8 @@
 # coding: utf-8
-import contextlib
-import unittest
-
 from aiohttp.test_utils import TestClient
+import contextlib
 import pytest
+import unittest
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.follow import FollowCharacterAction

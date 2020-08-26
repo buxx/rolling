@@ -1,14 +1,13 @@
 #  coding: utf-8
-import datetime
-import typing
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+import datetime
 from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part

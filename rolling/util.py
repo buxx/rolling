@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import enum
 import typing
 
@@ -12,9 +13,9 @@ from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
-    from rolling.model.stuff import StuffModel
-    from rolling.model.character import CharacterModel
     from rolling.map.source import ZoneMapSource
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -22,21 +23,25 @@ class EmptyModel:
     pass
 
 
-def get_on_and_around_coordinates(x: int, y: int, distance: int = 1, exclude_on: bool = False) -> typing.List[typing.Tuple[int, int]]:
+def get_on_and_around_coordinates(
+    x: int, y: int, distance: int = 1, exclude_on: bool = False
+) -> typing.List[typing.Tuple[int, int]]:
     positions = []
     if not exclude_on:
         positions.append((x, y))
 
-    positions.extend([
-        (x - distance, y - distance),
-        (x, y - distance),
-        (x + distance, y - distance),
-        (x - distance, y),
-        (x + distance, y),
-        (x - distance, y + distance),
-        (x, y + distance),
-        (x + distance, y + distance),
-    ])
+    positions.extend(
+        [
+            (x - distance, y - distance),
+            (x, y - distance),
+            (x + distance, y - distance),
+            (x - distance, y),
+            (x + distance, y),
+            (x - distance, y + distance),
+            (x, y + distance),
+            (x + distance, y + distance),
+        ]
+    )
 
     return positions
 

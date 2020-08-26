@@ -1,10 +1,9 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import Column
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.elements import and_
+import typing
 
 from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource

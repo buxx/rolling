@@ -1,11 +1,10 @@
 #  coding: utf-8
-from collections import namedtuple
-import typing
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
+from collections import namedtuple
 from hapic import HapicData
+import typing
 
 from guilang.description import Description
 from guilang.description import Part

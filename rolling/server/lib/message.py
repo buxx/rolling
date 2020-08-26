@@ -1,8 +1,7 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from rolling.model.character import CharacterModel
 from rolling.server.document.character import CharacterDocument

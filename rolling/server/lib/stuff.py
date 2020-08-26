@@ -1,9 +1,8 @@
 # coding: utf-8
-import typing
-
 import sqlalchemy
 from sqlalchemy import Column
 from sqlalchemy.orm import Query
+import typing
 
 from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel

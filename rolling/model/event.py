@@ -1,6 +1,7 @@
 # coding: utf-8
-import abc
 import dataclasses
+
+import abc
 from enum import Enum
 import typing
 

@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import datetime as datetime_
-import typing
 
+import datetime as datetime_
 import serpyco
+import typing
 
 from rolling.exception import RollingError
 from rolling.model.knowledge import KnowledgeDescription

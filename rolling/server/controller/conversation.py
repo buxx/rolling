@@ -1,10 +1,9 @@
 #  coding: utf-8
-from json import JSONDecodeError
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic.data import HapicData
+from json import JSONDecodeError
 
 from guilang.description import Description
 from guilang.description import Part

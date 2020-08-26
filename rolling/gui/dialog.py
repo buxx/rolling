@@ -1,11 +1,10 @@
 # coding: utf-8
 import typing
-
 import urwid
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
     from rolling.gui.controller import Controller
+    from rolling.kernel import Kernel
 
 
 class FullContentDialog(urwid.WidgetWrap):

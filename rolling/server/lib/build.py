@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import and_
+import typing
 
 from rolling.model.character import CharacterModel
 from rolling.server.document.build import BuildDocument

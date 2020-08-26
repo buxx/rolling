@@ -1,12 +1,11 @@
 # coding: utf-8
+import aiohttp
+from aiohttp import web
+from aiohttp.web_request import Request
 import asyncio
 from concurrent.futures._base import CancelledError
 import json
 import typing
-
-import aiohttp
-from aiohttp import web
-from aiohttp.web_request import Request
 
 from rolling.exception import DisconnectClient
 from rolling.exception import UnableToProcessEvent
