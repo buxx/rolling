@@ -197,6 +197,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ **De quoi manger/boire: prendre en compte ce qui est au sol**
   * ☐ De quoi manger/boire: prendre en compte ce qui est partagé par les affinités
   * ☐ Signaler (au sein d'une affinité) un perso comme recherché (mort/vif) genre voleur
+  * ☐ Attaque: pouvoir voir l'état des troupes (fatigue, santé, etc))
 
 * Univers
   * ☑ Décors de base
