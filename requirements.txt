@@ -16,7 +16,7 @@ idna==2.10
 importlib-metadata==1.7.0
 iniconfig==1.0.1
 isort==5.4.2
-marshmallow==2.21.0
+marshmallow==3.7.1
 more-itertools==8.4.0
 multidict==4.7.6
 mypy==0.782
