@@ -92,19 +92,7 @@ class ConversationController(BaseController):
                 if not selected_character_ids:
                     return Description(
                         title="Démarrer une nouvelle conversation",
-                        items=[
-                            Part(text="Vous devez choisir au moins un personnage"),
-                            Part(
-                                is_link=True,
-                                label="Retour",
-                                form_action=f"/conversation/{hapic_data.path.character_id}/start",
-                            ),
-                            Part(
-                                is_link=True,
-                                go_back_zone=True,
-                                label="Retourner à l'écran de déplacements",
-                            ),
-                        ],
+                        items=[Part(text="Vous devez choisir au moins un personnage")],
                     )
 
                 conversation_id = self._kernel.message_lib.add_conversation_message(
@@ -125,9 +113,6 @@ class ConversationController(BaseController):
                 title="Démarrer une nouvelle conversation",
                 items=[
                     Part(text="Il n'y a personne ici avec qui converser"),
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
                     Part(
                         is_link=True,
                         label="Retourner aux conversations",
@@ -166,12 +151,11 @@ class ConversationController(BaseController):
                 ),
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux conversations",
                     form_action=f"/conversation/{hapic_data.path.character_id}",
-                ),
+                )
             ],
         )
 
@@ -221,13 +205,12 @@ class ConversationController(BaseController):
             ]
             + message_parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux conversations",
                     form_action=f"/conversation/{hapic_data.path.character_id}",
                     classes=["primary"],
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -308,7 +291,7 @@ class ConversationController(BaseController):
     #             )
     #         ],
     #         footer_links=[
-    #             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+    #
     #             Part(
     #                 is_link=True,
     #                 label="Retourner aux conversations",

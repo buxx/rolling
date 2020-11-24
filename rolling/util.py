@@ -251,8 +251,7 @@ def get_description_for_not_enough_ap(
             Part(
                 text=f"{character.name} ne possède plus assez de points d'actions "
                 f"({character.action_points} restant et {cost} nécessaires)"
-            ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+            )
         ],
         can_be_back_url=can_be_back_url,
     )

@@ -87,14 +87,13 @@ class GiveStuffOrResources(TransferStuffOrResources):
             return []
 
         return [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
             Part(
                 is_link=True,
                 label="Retourner à la fiche personnage",
                 form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                     character_id=self._from_character.id, with_character_id=self._to_character.id
                 ),
-            ),
+            )
         ]
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:

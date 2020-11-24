@@ -118,12 +118,7 @@ class DrinkResourceAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
 
-        return Description(
-            title="Action effectué",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title="Action effectué")
 
 
 class DrinkStuffAction(WithStuffAction):
@@ -207,9 +202,4 @@ class DrinkStuffAction(WithStuffAction):
         self._kernel.character_lib.drink_stuff(character.id, stuff.id)
         self._kernel.server_db_session.commit()
 
-        return Description(
-            title="Vous avez bu",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title="Vous avez bu")

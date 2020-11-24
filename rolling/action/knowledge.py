@@ -127,12 +127,7 @@ class LearnKnowledgeAction(CharacterAction):
             title = "Apprentissage effectué"
         self._kernel.character_lib.reduce_action_points(character.id, cost=input_.ap)
 
-        return Description(
-            title=title,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title=title)
 
 
 @dataclasses.dataclass
@@ -264,12 +259,7 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
             pending_action_id=pending_action_document.id, authorized_character_id=with_character.id
         )
 
-        return Description(
-            title="Proposition effectué",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title="Proposition effectué")
 
 
 @dataclasses.dataclass
@@ -331,12 +321,7 @@ class TeachKnowledgeAction(WithCharacterAction):
         self._kernel.character_lib.reduce_action_points(character.id, cost=input_.ap)
         self._kernel.character_lib.reduce_action_points(with_character.id, cost=input_.ap)
 
-        return Description(
-            title=title,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title=title)
 
     # FIXME BS NOW: Afficher dans les actions (ou ailleurs) les actions proposés par les autres
     # puis a tarvers une vue qui propose d'éxecuter cette action

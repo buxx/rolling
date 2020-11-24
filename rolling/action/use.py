@@ -60,13 +60,12 @@ class NotUseAsBagAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -119,13 +118,12 @@ class UseAsBagAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -178,13 +176,12 @@ class UseAsWeaponAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -233,13 +230,12 @@ class NotUseAsWeaponAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -292,13 +288,12 @@ class UseAsShieldAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -347,13 +342,12 @@ class NotUseAsShieldAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -406,13 +400,12 @@ class UseAsArmorAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -461,12 +454,11 @@ class NotUseAsArmorAction(WithStuffAction):
         return Description(
             title="Action effectué",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )

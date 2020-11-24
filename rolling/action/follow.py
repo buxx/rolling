@@ -92,14 +92,13 @@ class FollowCharacterAction(WithCharacterAction):
             ),
             items=[],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
-                ),
+                )
             ],
         )
 
@@ -165,13 +164,12 @@ class StopFollowCharacterAction(WithCharacterAction):
             title=f"Vous ne suivez plus {with_character.name}",
             items=[],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
-                ),
+                )
             ],
         )

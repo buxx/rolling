@@ -94,7 +94,6 @@ class FillStuffAction(WithStuffAction):
                 ),
                 classes=["primary"],
             ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
 
         try:

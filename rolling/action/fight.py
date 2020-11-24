@@ -115,7 +115,6 @@ class AttackCharacterAction(WithCharacterAction):
             ]
             + parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
@@ -123,7 +122,7 @@ class AttackCharacterAction(WithCharacterAction):
                         character_id=character.id, with_character_id=with_character.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -211,7 +210,6 @@ class AttackCharacterAction(WithCharacterAction):
             title=f"Attaquer {with_character.name} seul",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
@@ -219,7 +217,7 @@ class AttackCharacterAction(WithCharacterAction):
                         character_id=character.id, with_character_id=with_character.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -302,16 +300,12 @@ class AttackCharacterAction(WithCharacterAction):
                 ],
                 footer_links=[
                     Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
                         is_link=True,
                         label="Retourner à la fiche personnage",
                         form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                             character_id=character.id, with_character_id=with_character.id
                         ),
-                    ),
-                    Part(is_link=True, form_action=here_url, label="Retour", classes=["primary"]),
+                    )
                 ],
             )
         except NoResultFound:
@@ -342,17 +336,13 @@ class AttackCharacterAction(WithCharacterAction):
                 items=parts,
                 footer_links=[
                     Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
                         is_link=True,
                         label="Retourner à la fiche personnage",
                         form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                             character_id=character.id, with_character_id=with_character.id
                         ),
                         classes=["primary"],
-                    ),
-                    Part(is_link=True, form_action=here_url, label="Retour"),
+                    )
                 ],
             )
 
@@ -407,15 +397,13 @@ class AttackCharacterAction(WithCharacterAction):
                 ),
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=with_character.id
                     ),
-                ),
-                Part(is_link=True, form_action=here_url, label=f"Retour", classes=["Primary"]),
+                )
             ],
         )
 
@@ -458,7 +446,6 @@ class AttackCharacterAction(WithCharacterAction):
             title=title,
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner à la fiche personnage",
@@ -466,7 +453,7 @@ class AttackCharacterAction(WithCharacterAction):
                         character_id=character.id, with_character_id=with_character.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
         )
 

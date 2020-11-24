@@ -113,16 +113,15 @@ class BeginBuildAction(CharacterAction):
         return Description(
             title=f"{build_description.name} commencé",
             items=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Voir le batiment",
                     is_link=True,
                     form_action=DESCRIBE_BUILD.format(
                         build_id=build_doc.id, character_id=character.id
                     ),
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -296,16 +295,15 @@ class BringResourcesOnBuild(WithBuildAction):
         return Description(
             title=f"{quantity_str} {resource_description.name} déposé pour {build_description.name}",
             items=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Voir le batiment",
                     is_link=True,
                     form_action=DESCRIBE_BUILD.format(
                         build_id=build_doc.id, character_id=character.id
                     ),
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -447,9 +445,8 @@ class ConstructBuildAction(WithBuildAction):
 
         return Description(
             title=f"Travail effectué",
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            back_url=f"/_describe/character/{character.id}/build_actions",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Voir le batiment",
                     is_link=True,
@@ -457,7 +454,7 @@ class ConstructBuildAction(WithBuildAction):
                         build_id=build_doc.id, character_id=character.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
         )
 

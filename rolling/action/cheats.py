@@ -94,21 +94,7 @@ class CheatsCharacterAction(CharacterAction):
             character_doc.action_points = 24.0
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
-            return Description(
-                title="Points d'actions rechargés",
-                footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    )
-                ],
-            )
+            return Description(title="Points d'actions rechargés")
         if input_.cheat_id == "reduce_tiredness":
             self._kernel.character_lib.reduce_tiredness(character.id, 100)
-            return Description(
-                title="Plus de fatigue",
-                footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    )
-                ],
-            )
+            return Description(title="Plus de fatigue")

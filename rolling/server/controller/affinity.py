@@ -151,9 +151,6 @@ class AffinityController(BaseController):
                 items=[Part(text="Et vous en êtes le chef")],
                 footer_links=[
                     Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
                         is_link=True,
                         label=f"Voir la fiche de {affinity_doc.name}",
                         form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity_doc.id}",
@@ -176,13 +173,7 @@ class AffinityController(BaseController):
                     items=[Part(label="Nom", name="name", type_=Type.STRING)],
                 )
             ],
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retour aux affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                )
-            ],
+            back_url=f"/affinity/{hapic_data.path.character_id}",
         )
 
     @hapic.with_api_doc()
@@ -349,13 +340,7 @@ class AffinityController(BaseController):
                 ),
             ]
             + parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retour aux affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                )
-            ],
+            back_url=f"/affinity/{hapic_data.path.character_id}",
             can_be_back_url=True,
         )
 
@@ -439,11 +424,6 @@ class AffinityController(BaseController):
                 return Description(
                     title=title,
                     footer_links=[
-                        Part(
-                            is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
                         Part(
                             is_link=True,
                             label=f"Voir la fiche de {affinity.name}",
@@ -572,7 +552,6 @@ class AffinityController(BaseController):
             title=affinity.name,
             items=items,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label=f"Voir la fiche de {affinity.name}",
@@ -718,12 +697,11 @@ class AffinityController(BaseController):
             ]
             + parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir les affinités",
                     form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -795,7 +773,6 @@ class AffinityController(BaseController):
                 )
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label=f"Voir la fiche de {affinity.name}",
@@ -849,7 +826,6 @@ class AffinityController(BaseController):
             title=f"Membre(s) de {affinity.name}",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label=f"Voir la fiche de {affinity.name}",
@@ -927,7 +903,6 @@ class AffinityController(BaseController):
                 ),
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label=f"Voir la fiche de {affinity.name}",

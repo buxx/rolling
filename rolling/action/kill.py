@@ -62,6 +62,5 @@ class KillCharacterAction(WithCharacterAction):
     ) -> Description:
         self._kernel.character_lib.kill(with_character.id)
         return Description(
-            title=f"Vous avez tué {with_character.name}",
-            footer_links=[Part(is_link=True, go_back_zone=True)],
+            title=f"Vous avez tué {with_character.name}", footer_links=[Part(is_link=True)]
         )

@@ -122,13 +122,12 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             do_for_one_func=do_for_one,
             title="Transformation effectué",
             success_parts=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -314,12 +313,11 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             title=f"Effectué",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )

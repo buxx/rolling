@@ -241,15 +241,14 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return Description(
             title="Action effectué avec succès",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
+            back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -355,15 +354,14 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         return Description(
             title="Action effectué avec succès",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
+            back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -537,7 +535,6 @@ class BeginStuffConstructionAction(CharacterAction):
         return Description(
             title=f"{stuff_properties.name} commencé",
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'objet commencé",
@@ -545,9 +542,9 @@ class BeginStuffConstructionAction(CharacterAction):
                         character_id=character.id, stuff_id=stuff_doc.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
+            back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
 
@@ -654,7 +651,6 @@ class ContinueStuffConstructionAction(WithStuffAction):
         return Description(
             title=title,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'objet commencé",
@@ -662,7 +658,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                         character_id=character.id, stuff_id=stuff_doc.id
                     ),
                     classes=["primary"],
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/on_place_actions",
+            back_url=f"/_describe/character/{character.id}/on_place_actions",
         )

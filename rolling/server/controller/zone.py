@@ -245,9 +245,6 @@ class ZoneController(BaseController):
                 Part(label=""),
             ]
             + message_parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
             can_be_back_url=True,
         )
 

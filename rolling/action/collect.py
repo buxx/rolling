@@ -179,8 +179,5 @@ class CollectResourceAction(CharacterAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
+            title=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré"
         )

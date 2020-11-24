@@ -60,7 +60,6 @@ class EmptyStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         footer_links = [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
             Part(
                 is_link=True,
                 label="Voir l'inventaire",

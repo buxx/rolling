@@ -157,7 +157,6 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
                 label="Retourner a l'inventaire",
                 form_action=f"/_describe/character/{self._character.id}/inventory",
             ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
@@ -308,7 +307,6 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
                 label="Retourner a l'inventaire",
                 form_action=f"/_describe/character/{self._character.id}/inventory",
             ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
@@ -603,12 +601,11 @@ class CharacterController(BaseController):
             title=f"Caractéristiques et compétences de {character.name}",
             items=items,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Fiche personnage",
                     is_link=True,
                     form_action=f"/_describe/character/{character.id}/card",
-                ),
+                )
             ],
         )
 
@@ -667,10 +664,6 @@ class CharacterController(BaseController):
                 )
             )
 
-        footer_links.append(
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-        )
-
         return Description(
             title="Inventory",
             items=[
@@ -694,9 +687,6 @@ class CharacterController(BaseController):
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         items = []
-        footer_links = [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-        ]
 
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character_id=character.id
@@ -717,10 +707,7 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Inventaire partagé avec des affinités",
-            items=items,
-            footer_links=footer_links,
-            can_be_back_url=True,
+            title="Inventaire partagé avec des affinités", items=items, can_be_back_url=True
         )
 
     @hapic.with_api_doc()
@@ -847,8 +834,7 @@ class CharacterController(BaseController):
                     form_action=form_action,
                     form_values_in_query=True,
                     items=form_parts,
-                ),
-                Part(label="Retour", is_link=True, form_action=hapic_data.query.cancel_url),
+                )
             ],
             can_be_back_url=can_be_back_url,
         )
@@ -1004,14 +990,9 @@ class CharacterController(BaseController):
                     footer_links=[
                         Part(
                             is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
-                        Part(
-                            is_link=True,
                             label="Retourner aux propositions d'actions",
                             form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
-                        ),
+                        )
                     ],
                 )
 
@@ -1025,12 +1006,11 @@ class CharacterController(BaseController):
                 )
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux propositions d'actions",
                     form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
-                ),
+                )
             ],
         )
 
@@ -1211,9 +1191,7 @@ class CharacterController(BaseController):
         )
         ground_resource_ids = [r.id for r in ground_resources]
         if hapic_data.path.resource_id not in ground_resource_ids:
-            return Description(
-                title="Cette ressource n'est plus là", items=[Part(is_link=True, go_back_zone=True)]
-            )
+            return Description(title="Cette ressource n'est plus là", items=[Part(is_link=True)])
         ground_resource = next(r for r in ground_resources if r.id == hapic_data.path.resource_id)
 
         available_str = quantity_to_str(
@@ -1264,7 +1242,7 @@ class CharacterController(BaseController):
 
         return Description(
             title=f"{resource_description.name} récupéré",
-            items=[Part(is_link=True, go_back_zone=True)],
+            items=[Part(is_link=True)],
             can_be_back_url=True,
         )
 
@@ -1337,7 +1315,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1345,8 +1323,7 @@ class CharacterController(BaseController):
             action.check_request_is_possible(character_model, input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(character_model, input_)
@@ -1376,7 +1353,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1384,8 +1361,7 @@ class CharacterController(BaseController):
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(character=character_model, stuff=stuff, input_=input_)
@@ -1417,8 +1393,7 @@ class CharacterController(BaseController):
             return get_description_for_not_enough_ap(character_model, exc.cost)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
@@ -1429,8 +1404,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
     @hapic.with_api_doc()
@@ -1456,7 +1430,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1466,8 +1440,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(
@@ -1498,7 +1471,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1508,8 +1481,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(
@@ -1582,7 +1554,7 @@ class CharacterController(BaseController):
         )
         return Description(
             title="Pret a commencer l'aventure !",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            items=[Part(label="Continuer")],
             new_character_id=character_id,
         )
 
@@ -1627,7 +1599,7 @@ class CharacterController(BaseController):
             world_col_i=hapic_data.path.world_col_i,
         )
 
-        buttons = [Part(label="Rester ici", go_back_zone=True)]
+        buttons = [Part(label="Rester ici")]
         travel_url = (
             f"/_describe/character/{hapic_data.path.character_id}/move"
             f"?to_world_row={hapic_data.path.world_row_i}"
@@ -1727,8 +1699,7 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Effectuer un voyage ...",
-            items=[Part(text=message) for message in messages] + [Part(go_back_zone=True)],
+            title="Effectuer un voyage ...", items=[Part(text=message) for message in messages]
         )
 
     @hapic.with_api_doc()
@@ -1738,7 +1709,7 @@ class CharacterController(BaseController):
         self._character_lib.take_stuff(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
-        return Description(title="Objet récupéré", items=[Part(go_back_zone=True)])
+        return Description(title="Objet récupéré", items=[])
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -1862,12 +1833,11 @@ class CharacterController(BaseController):
             title=f"Personnages suivis",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Fiche personnage",
                     is_link=True,
                     form_action=f"/_describe/character/{character.id}/card",
-                ),
+                )
             ],
         )
 

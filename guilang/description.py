@@ -32,7 +32,6 @@ class Part:
     label: typing.Optional[str] = None
     name: typing.Optional[str] = None
     is_link: bool = False
-    go_back_zone: bool = False
     default_value: typing.Optional[str] = None
     link_group_name: typing.Optional[str] = None
     align: typing.Optional[str] = None
@@ -71,12 +70,13 @@ class Description:
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     footer_links: typing.List[Part] = dataclasses.field(default_factory=list)
+    back_url: typing.Optional[str] = None
+    back_to_zone: bool = True
     image: typing.Optional[str] = None
     image_id: typing.Optional[int] = None
     image_extension: typing.Optional[str] = None  # used by client to cache image
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
     redirect: typing.Optional[str] = None
-    force_back_url: typing.Optional[str] = None
     can_be_back_url: bool = False
     request_clicks: typing.Optional[RequestClicks] = None
