@@ -385,7 +385,8 @@ class CharacterController(BaseController):
     @hapic.output_body(Description)
     async def _describe_create_character(self, request: Request) -> Description:
         maximum_points = self._kernel.game.config.create_character_max_points
-        parts = [Part(text="Traits physionomiques")]
+        parts = [Part(text="Traits physionomiques", classes=["h2"])]
+
         for skill_id in base_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
             parts.append(
@@ -397,7 +398,7 @@ class CharacterController(BaseController):
                 )
             )
 
-        parts.append(Part(text="Spécialisations"))
+        parts.append(Part(text="Spécialisations", classes=["h2"]))
 
         for skill_id in self._kernel.game.config.create_character_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
@@ -415,7 +416,7 @@ class CharacterController(BaseController):
             create_character_knowledges
             and self._kernel.game.config.create_character_knowledges_count
         ):
-            parts.append(Part(text="Connaissances"))
+            parts.append(Part(text="Connaissances", classes=["h2"]))
             for knowledge_id in create_character_knowledges:
                 knowledge_description = self._kernel.game.config.knowledge[knowledge_id]
                 parts.append(
@@ -437,7 +438,8 @@ class CharacterController(BaseController):
                         f"répartir jusqu'à {maximum_points} points de compétences et choisir "
                         f"{self._kernel.game.config.create_character_knowledges_count} "
                         f"connaissance(s)."
-                    )
+                    ),
+                    classes=["p"],
                 ),
                 Part(
                     is_form=True,
