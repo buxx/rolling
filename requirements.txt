@@ -1,6 +1,6 @@
 aiohttp==3.7.3
 aioresponses==0.7.1
-apispec==2.0.2
+apispec==4.0.0
 apispec-marshmallow-advanced==0.4
 apispec-serpyco==0.17
 appdirs==1.4.4
