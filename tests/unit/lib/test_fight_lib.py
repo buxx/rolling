@@ -785,7 +785,7 @@ class TestFightLib:
                     "FranceSoldier1 attaque EnglandSoldier1 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier1.",
                     "EnglandSoldier1 attaque FranceSoldier1 avec Main nue. Peau nue n'a en rien protégé FranceSoldier1. Le coup à été fatal pour FranceSoldier1.",
                     "FranceSoldier2 attaque EnglandSoldier2 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier2.",
-                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue. Peau nue n'a en rien protégé FranceSoldier2.",
+                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue. Peau nue à protégé FranceSoldier2.",
                     "FranceSoldier3 attaque EnglandSoldier3 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier3. Le coup à été fatal pour EnglandSoldier3.",
                     "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver.",
                     "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver.",
