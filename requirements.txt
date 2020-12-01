@@ -14,7 +14,7 @@ click==7.1.2
 hapic==0.84
 idna==2.10
 importlib-metadata==3.1.0
-iniconfig==1.0.1
+iniconfig==1.1.1
 isort==5.3.2
 marshmallow==2.21.0
 more-itertools==8.4.0
