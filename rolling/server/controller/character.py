@@ -444,7 +444,7 @@ class CharacterController(BaseController):
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[Part(label="Nom du personnage", type_=Type.NUMBER, name="name")] + parts,
+                    items=[Part(label="Nom du personnage", type_=Type.STRING, name="name")] + parts,
                 ),
             ],
         )
