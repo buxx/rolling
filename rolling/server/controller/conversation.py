@@ -79,7 +79,7 @@ class ConversationController(BaseController):
     @hapic.output_body(Description)
     async def start(self, request: Request, hapic_data: HapicData) -> Description:
         character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
-        zone_characters = self._kernel.character_lib.get_zone_players(
+        zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=character_doc.world_row_i,
             col_i=character_doc.world_col_i,
             exclude_ids=[hapic_data.path.character_id],
@@ -262,7 +262,7 @@ class ConversationController(BaseController):
     #         .limit(1)
     #         .one()
     #     )
-    #     zone_characters = self._kernel.character_lib.get_zone_players(
+    #     zone_characters = self._kernel.character_lib.get_zone_characters(
     #         row_i=character_doc.world_row_i,
     #         col_i=character_doc.world_col_i,
     #         exclude_ids=[hapic_data.path.character_id],

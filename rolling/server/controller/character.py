@@ -1843,6 +1843,64 @@ class CharacterController(BaseController):
             ],
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_items(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_stuff_actions(
+            character
+        ) + self._kernel.character_lib.get_on_place_resource_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Objet et ressources autour", items=parts, can_be_back_url=True)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_builds(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_build_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Bâtiments autour", items=parts, can_be_back_url=True)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_characters(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_character_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Personnages autour", items=parts, can_be_back_url=True)
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -1935,5 +1993,19 @@ class CharacterController(BaseController):
                     "/character/{character_id}/skills_and_knowledge", self.skills_and_knowledge
                 ),
                 web.post("/character/{character_id}/followed", self.followed),
+                web.post(
+                    "/character/{character_id}/describe_around_items", self.describe_around_items
+                ),
+                web.post(
+                    "/character/{character_id}/describe_around_characters",
+                    self.describe_around_characters,
+                ),
+                web.post(
+                    "/character/{character_id}/describe_around_builds", self.describe_around_builds
+                ),
+                # web.post(
+                #     "/character/{character_id}/pickup_around_items",
+                #     self.pickup_around_items
+                # ),
             ]
         )

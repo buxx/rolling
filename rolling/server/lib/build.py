@@ -1,5 +1,6 @@
 # coding: utf-8
 from sqlalchemy import and_
+from sqlalchemy.orm import Query
 import typing
 
 from rolling.model.character import CharacterModel
@@ -64,6 +65,20 @@ class BuildLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
     ) -> typing.List[BuildDocument]:
+        return self._get_zone_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).all()
+
+    def _get_zone_query(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> Query:
         filters = [
             BuildDocument.world_row_i == world_row_i,
             BuildDocument.world_col_i == world_col_i,
@@ -74,7 +89,21 @@ class BuildLib:
                 [BuildDocument.zone_row_i == zone_row_i, BuildDocument.zone_col_i == zone_col_i]
             )
 
-        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).all()
+        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters))
+
+    def count_zone_build(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self._get_zone_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).count()
 
     def progress_build(
         self,

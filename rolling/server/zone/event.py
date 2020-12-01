@@ -108,98 +108,60 @@ class ThereIsAroundProcessor(EventProcessor):
             x=character.zone_row_i, y=character.zone_col_i
         )
 
-        stuffs: typing.List[StuffModel] = []
+        stuff_count = 0
         for row_i, col_i in around_character:
             # FIXME BS: Optimisation here (give all coordinates and make only one query)
             # And only id/name
-            stuffs.extend(
-                self._kernel.stuff_lib.get_zone_stuffs(
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=row_i,
-                    zone_col_i=col_i,
-                )
+            stuff_count += self._kernel.stuff_lib.count_zone_stuffs(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
             )
 
-        resources: typing.List[CarriedResourceDescriptionModel] = []
+        resource_count = 0
         for row_i, col_i in around_character:
             # FIXME BS: Optimisation here (give all coordinates and make only one query)
             # And only id/name
-            resources.extend(
-                self._kernel.resource_lib.get_ground_resource(
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=row_i,
-                    zone_col_i=col_i,
-                )
+            resource_count += self._kernel.resource_lib.count_ground_resource(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
             )
 
-        builds: typing.List[BuildDocument] = []
+        build_count = 0
         for row_i, col_i in around_character:
             # FIXME BS: Optimisation here (give all coordinates and make only one query)
             # And only id/name
-            builds.extend(
-                self._kernel.build_lib.get_zone_build(
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=row_i,
-                    zone_col_i=col_i,
-                )
+            build_count += self._kernel.build_lib.count_zone_build(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
             )
 
-        characters: typing.List[CharacterModel] = []
+        character_count = 0
         for row_i, col_i in around_character:
             # FIXME BS: Optimisation here (give all coordinates and make only one query)
             # And only id/name
-            characters.extend(
-                self._kernel.character_lib.get_zone_players(
-                    row_i=character.world_row_i,
-                    col_i=character.world_col_i,
-                    zone_row_i=row_i,
-                    zone_col_i=col_i,
-                    exclude_ids=[character.id],
-                )
+            character_count += self._kernel.character_lib.count_zone_characters(
+                row_i=character.world_row_i,
+                col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
+                exclude_ids=[character.id],
             )
 
-        items: typing.List[typing.Tuple[str, typing.Optional[str]]] = []
-        for stuff in stuffs:
-            items.append(
-                (
-                    stuff.name,
-                    DESCRIBE_LOOK_AT_STUFF_URL.format(character_id=character.id, stuff_id=stuff.id),
-                )
-            )
-        for resource in resources:
-            items.append(
-                (
-                    resource.name,
-                    DESCRIBE_LOOK_AT_RESOURCE_URL.format(
-                        character_id=character.id,
-                        resource_id=resource.id,
-                        row_i=resource.ground_row_i,
-                        col_i=resource.ground_col_i,
-                    ),
-                )
-            )
-        for build in builds:
-            build_properties = self._kernel.game.config.builds[build.build_id]
-            items.append(
-                (
-                    build_properties.name,
-                    DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
-                )
-            )
-        for character_ in characters:
-            items.append(
-                (
-                    character_.name,
-                    DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=character_.id
-                    ),
-                )
-            )
-
-        around_event = ZoneEvent(type=ZoneEventType.THERE_IS_AROUND, data=ThereIsAroundData(items))
+        around_event = ZoneEvent(
+            type=ZoneEventType.THERE_IS_AROUND,
+            data=ThereIsAroundData(
+                stuff_count=stuff_count,
+                resource_count=resource_count,
+                build_count=build_count,
+                character_count=character_count,
+            ),
+        )
         event_str = self._event_serializer_factory.get_serializer(
             ZoneEventType.THERE_IS_AROUND
         ).dump_json(around_event)

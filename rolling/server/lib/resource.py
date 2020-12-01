@@ -192,6 +192,20 @@ class ResourceLib:
         ).all()
         return [self._carried_resource_model_from_doc([doc]) for doc in carried]
 
+    def count_ground_resource(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).count()
+
     def get_one_carried_by(
         self,
         character_id: str,

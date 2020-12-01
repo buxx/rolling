@@ -59,7 +59,9 @@ class StuffLib:
             query = query.filter(StuffDocument.shared_with_affinity_id == None)
 
         query = query.filter(
-            StuffDocument.carried_by_id == carried_by_id, StuffDocument.in_built_id == in_built_id
+            # Note: When carried_by_id is None, it exclude carried stuff
+            StuffDocument.carried_by_id == carried_by_id,
+            StuffDocument.in_built_id == in_built_id,
         )
 
         if exclude_crafting:
@@ -186,6 +188,20 @@ class StuffLib:
             zone_col_i=zone_col_i,
         ).all()
         return [self.stuff_model_from_doc(doc) for doc in stuff_docs]
+
+    def count_zone_stuffs(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).count()
 
     def get_stuff(self, stuff_id: int) -> StuffModel:
         doc = self.get_stuff_doc(stuff_id)
