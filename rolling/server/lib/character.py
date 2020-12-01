@@ -527,14 +527,14 @@ class CharacterLib:
             clutter=total_clutter,
         )
 
-    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
-        character = self.get(character_id)
+    def _get_on_place_item_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
-        # Actions with near items
         for around_row_i, around_col_i in around_character:
             on_same_position_items = self._stuff_lib.get_zone_stuffs(
                 world_row_i=character.world_row_i,
@@ -547,12 +547,21 @@ class CharacterLib:
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {item.name}",
                         link=DESCRIBE_LOOK_AT_STUFF_URL.format(
-                            character_id=character_id, stuff_id=item.id
+                            character_id=character.id, stuff_id=item.id
                         ),
                     )
                 )
 
-        # Actions with near ground resources
+        return character_actions_
+
+    def _get_on_place_resource_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
+        character_actions_: typing.List[CharacterActionLink] = []
+
         for around_row_i, around_col_i in around_character:
             on_same_position_resources = self._kernel.resource_lib.get_ground_resource(
                 world_row_i=character.world_row_i,
@@ -565,7 +574,7 @@ class CharacterLib:
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {resource.name}",
                         link=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
-                            character_id=character_id,
+                            character_id=character.id,
                             resource_id=resource.id,
                             row_i=resource.ground_row_i,
                             col_i=resource.ground_col_i,
@@ -573,7 +582,16 @@ class CharacterLib:
                     )
                 )
 
-        # Actions with near build
+        return character_actions_
+
+    def _get_on_place_build_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
+        character_actions_: typing.List[CharacterActionLink] = []
+
         for around_row_i, around_col_i in around_character:
             on_same_position_builds = self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
@@ -586,9 +604,19 @@ class CharacterLib:
                 character_actions_.append(
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {build_description.name}",
-                        link=DESCRIBE_BUILD.format(character_id=character_id, build_id=build.id),
+                        link=DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
                     )
                 )
+
+        return character_actions_
+
+    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
+        character = self.get(character_id)
+        character_actions_: typing.List[CharacterActionLink] = []
+
+        character_actions_.extend(self._get_on_place_item_actions(character))
+        character_actions_.extend(self._get_on_place_resource_actions(character))
+        character_actions_.extend(self._get_on_place_build_actions(character))
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
