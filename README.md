@@ -195,6 +195,7 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Pouvoir se cacher
   * ☐ Accords: non aggression, échange de valeurs (produits vs PA), etc
   * ☐ **De quoi manger/boire: prendre en compte ce qui est au sol**
+  * ☐ **Feu: zone de confort (+xPV +xMoral)**
   * ☐ De quoi manger/boire: prendre en compte ce qui est partagé par les affinités
   * ☐ Signaler (au sein d'une affinité) un perso comme recherché (mort/vif) genre voleur
   * ☐ Attaque: pouvoir voir l'état des troupes (fatigue, santé, etc))
