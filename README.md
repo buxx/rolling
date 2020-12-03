@@ -141,7 +141,9 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Ranger/Stocker des objets dans un batiment
   * ☑ Tuer un personnage
   * ☑ Donner des objets/ressources à un autre personnage
-  * ☑ Prendre des objets/ressources d'un autre personnage
+  * ☑ Prendre des objets/ressources d'un autre personnage (a sa mercie)
+  * **☐ Prendre des objets/ressources d'un autre personnage (si partagé avec affinité)**
+  * **☐ Partager tout son inventaire (non utilisé comme armes) avec une/des affinités**
   * ☐ Voler un autre personnage
   * ☐ Voler dans un batiment (si protégé)
   * ☐ Tenter d'assassiner un autre personnage (tenter d'échaper a la défense de groupe)
