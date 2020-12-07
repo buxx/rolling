@@ -8,6 +8,7 @@ import typing
 from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
+from rolling.log import server_logger
 from rolling.model.character import CharacterModel
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.measure import Unit
@@ -91,6 +92,22 @@ class ResourceLib:
         exclude_shared_with_affinity: bool = False,
         commit: bool = True,
     ) -> CarriedResourceDescriptionModel:
+        server_logger.debug(
+            f"add_resource_to ("
+            f"resource_id:{resource_id} "
+            f"quantity:{quantity} "
+            f"character_id:{character_id} "
+            f"build_id:{build_id} "
+            f"ground:{ground} "
+            f"world_row_i:{world_row_i} "
+            f"world_col_i:{world_col_i} "
+            f"zone_row_i:{zone_row_i} "
+            f"zone_col_i:{zone_col_i} "
+            f"shared_with_affinity_id:{shared_with_affinity_id} "
+            f"exclude_shared_with_affinity:{exclude_shared_with_affinity} "
+            f")"
+        )
+
         assert character_id or build_id or ground
         assert (
             world_row_i is not None
@@ -284,6 +301,16 @@ class ResourceLib:
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
         commit: bool = True,
     ) -> None:
+        server_logger.debug(
+            f"reduce_carried_by ("
+            f"character_id:{character_id} "
+            f"resource_id:{resource_id} "
+            f"quantity:{quantity} "
+            f"exclude_shared_with_affinity:{exclude_shared_with_affinity} "
+            f"shared_with_affinity_ids:{shared_with_affinity_ids} "
+            f")"
+        )
+
         if exclude_shared_with_affinity:
             assert shared_with_affinity_ids is None
 
@@ -370,6 +397,17 @@ class ResourceLib:
         zone_col_i: int,
         commit: bool = True,
     ) -> None:
+        server_logger.debug(
+            f"drop resource ("
+            f"character_id:{character_id} "
+            f"resource_id:{resource_id} "
+            f"quantity:{quantity} "
+            f"world_row_i:{world_row_i} "
+            f"world_col_i:{world_col_i} "
+            f"zone_row_i:{zone_row_i} "
+            f"zone_col_i:{zone_col_i} "
+            f")"
+        )
         self.reduce_carried_by(character_id, resource_id, quantity, commit=commit)
         self.add_resource_to(
             ground=True,
