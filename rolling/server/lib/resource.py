@@ -136,6 +136,10 @@ class ResourceLib:
                 ResourceDocument.carried_by_id == None,
                 ResourceDocument.in_built_id == None,
                 ResourceDocument.resource_id == resource_id,
+                ResourceDocument.world_row_i == world_row_i,
+                ResourceDocument.world_col_i == world_col_i,
+                ResourceDocument.zone_row_i == zone_row_i,
+                ResourceDocument.zone_col_i == zone_col_i,
             ]
         else:
             raise NotImplementedError()
@@ -152,8 +156,8 @@ class ResourceLib:
         except NoResultFound:
             resource = ResourceDocument(
                 resource_id=resource_id,
-                carried_by_id=character_id,
-                in_built_id=build_id,
+                carried_by_id=character_id if not ground else None,
+                in_built_id=build_id if not ground else None,
                 quantity=0.0,
                 unit=resource_description.unit.value,
                 world_row_i=world_row_i,
