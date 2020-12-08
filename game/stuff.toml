@@ -45,7 +45,7 @@
 [TRAVOIS]
   name = "Travois"
   weight = 10000.0
-  clutter = 10.0
+  clutter = 0.0
   clutter_capacity = 12.0
   actions = ["DROP_STUFF","USE_AS_BAG","NOT_USE_AS_BAG", "CONTINUE_STUFF_CONSTRUCTION"]
   material_type = "OBJECT"
