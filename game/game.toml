@@ -526,6 +526,10 @@ reduce_tiredness_per_turn = 50
     actions = ["KILL_CHARACTER"]
     cost = 0.0
 
+  [ACTIONS.TRAVEL]
+    actions = ["TRAVEL"]
+    cost = 0.0
+
   [ACTIONS.TAKE_FROM_CHARACTER]
     actions = ["TAKE_FROM_CHARACTER"]
     cost = 0.0
