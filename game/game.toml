@@ -804,7 +804,7 @@ reduce_tiredness_per_turn = 50
     cost = 4.0
 
   [ACTIONS.CRAFT_STONE_HAXE]
-    name = "Fabriquer une hache de bois"
+    name = "Fabriquer une hache de pierre"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
