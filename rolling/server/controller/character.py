@@ -849,12 +849,12 @@ class CharacterController(BaseController):
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
-        inventory_parts = self._get_inventory_parts(with_character, inventory)
+        inventory_parts = self._get_inventory_parts(with_character, inventory, disable_stuff_link=True)
 
         return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
-        self, character: CharacterModel, inventory: CharacterInventoryModel
+        self, character: CharacterModel, inventory: CharacterInventoryModel, disable_stuff_link: bool = False
     ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
@@ -882,37 +882,52 @@ class CharacterController(BaseController):
                 text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
             else:
                 text = f"{name}{description}"
+
+            form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                character_id=character.id, stuff_id=stuff.id
+            )
+            is_link = True
+
+            if disable_stuff_link:
+                form_action = None
+                is_link = False
+
             stuff_items.append(
                 Part(
                     text=text,
-                    is_link=True,
+                    is_link=is_link,
                     align="left",
-                    form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                        character_id=character.id, stuff_id=stuff.id
-                    ),
+                    form_action=form_action,
                 )
             )
             stuff_displayed[stuff.stuff_id] = True
 
         for resource in inventory.resource:
+            form_action = DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
+                character_id=character.id, resource_id=resource.id
+            )
+            is_link = True
+
+            if disable_stuff_link:
+                form_action = None
+                is_link = False
+
             resource_items.append(
                 Part(
                     text=f"{resource.get_full_description(self._kernel)}",
-                    is_link=True,
+                    is_link=is_link,
                     align="left",
-                    form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
-                        character_id=character.id, resource_id=resource.id
-                    ),
+                    form_action=form_action,
                 )
             )
 
         return [
-            Part(text=f"Sac(s): {bags_string}"),
+            Part(text=f"Sac(s): {bags_string}", classes=["h2"]),
             Part(text=" "),
-            Part(text="Items:"),
+            Part(text="Objets", classes=["h2"]),
             *stuff_items,
             Part(text=" "),
-            Part(text="Resources:"),
+            Part(text="Resources", classes=["h2"]),
             *resource_items,
         ]
 
