@@ -71,6 +71,7 @@ class Description:
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     footer_links: typing.List[Part] = dataclasses.field(default_factory=list)
     back_url: typing.Optional[str] = None
+    back_url_is_zone: bool = False
     back_to_zone: bool = True
     image: typing.Optional[str] = None
     image_id: typing.Optional[int] = None
