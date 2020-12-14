@@ -44,7 +44,7 @@ class TestFollowAction:
         kernel = worldmapc_kernel
 
         follow_action.perform(arthur, xena, input_=FollowModel())
-        follow_action.perform(franck, xena, input_=FollowModel(discreetly=True))
+        follow_action.perform(franck, xena, input_=FollowModel(discreetly=1))
 
         resp = await web.post(f"/_describe/character/{xena.id}/move-to-zone/{1}/{2}")
         assert 200 == resp.status
