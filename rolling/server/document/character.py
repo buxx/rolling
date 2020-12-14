@@ -75,6 +75,8 @@ class CharacterDocument(Document):
 
     @effect_ids.setter
     def effect_ids(self, value: typing.List[str]) -> None:
+        value = [v for v in value if v]
+        value = list(set(value))
         self._effect_ids = ",".join(value)
 
 
