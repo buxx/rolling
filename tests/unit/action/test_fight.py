@@ -409,7 +409,7 @@ class TestFightAction:
         attack_action: AttackCharacterAction,
     ) -> None:
         france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
-        france_warlord.tiredness = 100
+        france_warlord_doc.tiredness = 100
         worldmapc_kernel.server_db_session.add(france_warlord_doc)
         worldmapc_kernel.server_db_session.commit()
 
