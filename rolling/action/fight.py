@@ -16,7 +16,7 @@ from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
-from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import AffinityDocument, CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.event import StoryPageDocument
@@ -280,7 +280,7 @@ class AttackCharacterAction(WithCharacterAction):
         character_relation = self._kernel.affinity_lib.get_active_relation(
             character_id=character.id, affinity_id=as_affinity.id
         )
-        if character_relation.status_id not in (MEMBER_STATUS[0], WARLORD_STATUS[0]):
+        if character_relation.status_id not in (MEMBER_STATUS[0], WARLORD_STATUS[0], CHIEF_STATUS[0]):
             raise ImpossibleAction(
                 "Vous ne pouvez impliquer cette affinité qu'avec le role de Chef ou Chef de guerre"
             )

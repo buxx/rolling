@@ -1,6 +1,6 @@
 # coding: utf-8
 from decimal import Decimal as D
-from sqlalchemy import Binary
+from sqlalchemy import Binary, cast, Float
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -20,6 +20,9 @@ class SqliteNumeric(types.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return D(value)
+
+    def column_expression(self, col):
+        return cast(col, Float)
 
 
 class ImageDocument(Document):

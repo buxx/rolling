@@ -3,7 +3,7 @@ import datetime
 import math
 import os
 import sqlalchemy
-from sqlalchemy import and_
+from sqlalchemy import and_, cast, Float
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -1062,8 +1062,8 @@ class CharacterLib:
     ) -> sqlalchemy.orm.Query:
         return self._kernel.character_lib.alive_query.filter(
             CharacterDocument.id.in_(character_ids),
-            CharacterDocument.tiredness <= int(MINIMUM_BEFORE_EXHAUSTED),
-            CharacterDocument.action_points >= int(FIGHT_AP_CONSUME),
+            cast(CharacterDocument.tiredness, Float) <= int(MINIMUM_BEFORE_EXHAUSTED),
+            cast(CharacterDocument.action_points, Float) >= int(FIGHT_AP_CONSUME),
             CharacterDocument.world_row_i == world_row_i,
             CharacterDocument.world_col_i == world_col_i,
         )
