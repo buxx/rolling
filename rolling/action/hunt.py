@@ -80,6 +80,7 @@ class SearchFoodAction(CharacterAction):
             world_row_i=character.world_row_i, world_col_i=character.world_col_i
         )
         minimum_by_skill = 10 * character.get_skill_value(HUNTING_AND_GATHERING_SKILL_ID)
+        found_something = False
 
         for production in productions:
             if "resource" in production:
@@ -172,9 +173,23 @@ class SearchFoodAction(CharacterAction):
 
         parts = []
         for result_resource_str in result_resource_strs:
+            found_something = True
             parts.append(Part(text=result_resource_str))
 
         for result_stuff_str in result_stuff_strs:
+            found_something = True
             parts.append(Part(text=result_stuff_str))
+
+        if not found_something:
+            parts.append(
+                Part(
+                    text=
+                    (
+                        "Vous n'avez rien trouvé ! Cela peut s'expliquer par de la malchance, "
+                        "de l'incompétence, ou de l'intelligence (si vous avez cherché quelque "
+                        "chose que l'on ne trouve pas dans cette zone ...)"
+                    )
+                )
+            )
 
         return Description(title="Vous avez trouvé", items=parts)
