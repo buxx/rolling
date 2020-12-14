@@ -548,7 +548,7 @@ class CharacterLib:
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
 
-        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter])
+        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter and not stuff.used_by])
         total_clutter += sum([r.clutter for r in carried_resources if r.clutter])
 
         return CharacterInventoryModel(

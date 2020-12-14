@@ -83,6 +83,7 @@ class StuffModel:
     protect_sharp: int = 0
     damages: float = 0.0
     classes: typing.List[str] = serpyco.field(default_factory=list)
+    used_by: typing.Optional[str] = None
 
     @property
     def ready_for_use(self) -> bool:

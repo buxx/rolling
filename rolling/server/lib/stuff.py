@@ -239,6 +239,12 @@ class StuffLib:
             protect_blunt=stuff_properties.protect_blunt,
             protect_sharp=stuff_properties.protect_sharp,
             classes=stuff_properties.classes,
+            used_by=(
+                doc.used_as_weapon_by_id or
+                doc.used_as_shield_by_id or
+                doc.used_as_bag_by_id or
+                doc.used_as_armor_by_id
+            )
         )
 
     def get_carried_by(
