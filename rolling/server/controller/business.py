@@ -732,6 +732,18 @@ class BusinessController(BaseController):
                 redirect=f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
             )
 
+        parts = []
+        if not quantity and (resource_id or stuff_id):
+            parts.append(
+                Part(
+                    text=(
+                        "Vous devez choisir une quantité ! "
+                        "(Veuillez saisir à nouveau l'objet ou la ressource)"
+                    ),
+                    classes=["error"],
+                )
+            )
+
         return Description(
             title=title,
             items=[
@@ -739,7 +751,7 @@ class BusinessController(BaseController):
                     is_form=True,
                     form_action=here_url,
                     form_values_in_query=True,
-                    items=[
+                    items=parts + [
                         Part(
                             label="Sélectionnez une ressource ou un object",
                             name="value",
