@@ -69,7 +69,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return have_with_affinity_ids
 
     def can_take_by_force(self, raise_: bool = True) -> bool:
-        if self._from_character.vulnerable and self._character.is_attack_ready():
+        if self._from_character.vulnerable:
             return True
 
         if raise_:
@@ -135,13 +135,13 @@ class TakeStuffOrResources(TransferStuffOrResources):
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
-            return f"Prendre {stuff.name} de {self._character.name}"
+            return f"Prendre {stuff.name} de {self._from_character.name}"
 
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
-            return f"Prendre {resource_description.name} de {self._character.name}"
+            return f"Prendre {resource_description.name} de {self._from_character.name}"
 
-        return f"Prendre de {self._character.name}"
+        return f"Prendre de {self._from_character.name}"
 
     def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
         return [

@@ -74,13 +74,13 @@ class GiveStuffOrResources(TransferStuffOrResources):
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
-            return f"Donner {stuff.name} à {self._from_character.name}"
+            return f"Donner {stuff.name} à {self._to_character.name}"
 
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
-            return f"Donner {resource_description.name} à {self._from_character.name}"
+            return f"Donner {resource_description.name} à {self._to_character.name}"
 
-        return f"Donner à {self._from_character.name}"
+        return f"Donner à {self._to_character.name}"
 
     def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
         if sizing_up_quantity:
