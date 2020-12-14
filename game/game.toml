@@ -1203,7 +1203,7 @@ reduce_tiredness_per_turn = 50
   name = "Mur de terre"
   char = "-"
   building_char = "x"
-  build_require_resources = [{resource="DIRT", quantity=0.1}]
+  build_require_resources = [{resource="DIRT", quantity=100.0}]
   turn_require_resources = []
   power_on_require_resources = []
   abilities = []
