@@ -847,7 +847,7 @@ class CharacterController(BaseController):
     async def with_inventory(self, request: Request, hapic_data: HapicData) -> Description:
         # TODO: check same zone
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        with_character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
         inventory_parts = self._get_inventory_parts(with_character, inventory)
 
