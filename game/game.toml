@@ -873,6 +873,22 @@ reduce_tiredness_per_turn = 50
     cost_per_unit = 0.05
     cost = 3.0
 
+  [ACTIONS.MAKE_COOKED_MEAT]
+    name = "Cuire de la viande"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="COOKED_MEAT", coeff=0.7}
+    ]
+    required_resource_id = "RAW_MEAT"
+    cost_per_unit = 0.0005
+    cost = 1.0
+
   [ACTIONS.MAKE_LEATHER_PIECE]
     name = "Produire une pièce de cuir"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
