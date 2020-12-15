@@ -1,9 +1,10 @@
 # coding: utf-8
 from decimal import Decimal as D
-from sqlalchemy import cast, Float
 from sqlalchemy import Column
+from sqlalchemy import Float
 from sqlalchemy import Integer
 from sqlalchemy import String
+from sqlalchemy import cast
 import sqlalchemy.types as types
 
 from rolling.server.extension import ServerSideDocument as Document

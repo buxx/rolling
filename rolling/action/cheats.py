@@ -6,8 +6,9 @@ import typing
 
 from guilang.description import Description
 from guilang.description import Part
-from rolling.action.base import CharacterAction, get_character_actions_url
+from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
+from rolling.action.base import get_character_actions_url
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
