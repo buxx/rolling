@@ -46,7 +46,11 @@ class TransferStuffOrResources(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        pass
+
+    @abc.abstractmethod
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
         pass
 
     @abc.abstractmethod
@@ -112,7 +116,8 @@ class TransferStuffOrResources(abc.ABC):
         return Description(
             title=self._get_title(),
             items=parts,
-            footer_links=self._get_footer_links(False),
+            footer_with_character_id=self._get_footer_character_id(False),
+            footer_with_affinity_id=self._get_footer_affinity_id(False),
             can_be_back_url=True,
         )
 

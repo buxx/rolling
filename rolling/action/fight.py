@@ -114,16 +114,7 @@ class AttackCharacterAction(WithCharacterAction):
                 ),
             ]
             + parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                )
-            ],
+            footer_with_character_id=character.id,
             can_be_back_url=True,
         )
 
@@ -150,19 +141,13 @@ class AttackCharacterAction(WithCharacterAction):
             )
         return Description(
             title=f"Attaquer {with_character.name} seul",
+            footer_with_character_id=character.id,
             items=[
                 Part(text=text),
                 Part(
                     is_link=True,
                     form_action=here_url + "&lonely=1&confirm=1",
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
-                ),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
                 ),
             ],
         )
@@ -208,17 +193,8 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Attaquer {with_character.name} seul",
+            footer_with_character_id=character.id,
             items=parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                )
-            ],
         )
 
     def _proceed_events(
@@ -291,20 +267,12 @@ class AttackCharacterAction(WithCharacterAction):
             )
             return Description(
                 title=title,
+                footer_with_character_id=character.id,
                 items=[
                     Part(
                         text=f"Vous ne pouvez pas attaquer {with_character.name} "
                         f"en tant que {as_affinity.name} car il/elle est affilié à "
                         f"{as_affinity.name}"
-                    )
-                ],
-                footer_links=[
-                    Part(
-                        is_link=True,
-                        label="Retourner à la fiche personnage",
-                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                            character_id=character.id, with_character_id=with_character.id
-                        ),
                     )
                 ],
             )
@@ -334,16 +302,7 @@ class AttackCharacterAction(WithCharacterAction):
             return Description(
                 title=title,
                 items=parts,
-                footer_links=[
-                    Part(
-                        is_link=True,
-                        label="Retourner à la fiche personnage",
-                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                            character_id=character.id, with_character_id=with_character.id
-                        ),
-                        classes=["primary"],
-                    )
-                ],
+                footer_with_character_id=character.id,
             )
 
     def _get_attack_as_affinity_description(
@@ -396,15 +355,7 @@ class AttackCharacterAction(WithCharacterAction):
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
             ],
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                )
-            ],
+            footer_with_character_id=character.id,
         )
 
     def _perform_attack_as_affinity(
@@ -445,16 +396,7 @@ class AttackCharacterAction(WithCharacterAction):
         return Description(
             title=title,
             items=parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                )
-            ],
+            footer_with_character_id=character.id,
         )
 
     def perform(

@@ -112,15 +112,7 @@ class BeginBuildAction(CharacterAction):
         )
         return Description(
             title=f"{build_description.name} commencé",
-            items=[
-                Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
-                    ),
-                )
-            ],
+            footer_with_build_id=build_doc.id,
             back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
@@ -249,6 +241,7 @@ class BringResourcesOnBuild(WithBuildAction):
                 title=f"Cette construction nécessite encore {left_str} "
                 f"de {resource_description.name} (soit {round(left_percent)}%)",
                 can_be_back_url=True,
+                footer_with_build_id=build_doc.id,
                 items=[
                     Part(
                         is_form=True,
@@ -293,17 +286,19 @@ class BringResourcesOnBuild(WithBuildAction):
         )
 
         return Description(
-            title=f"{quantity_str} {resource_description.name} déposé pour {build_description.name}",
+            title=build_description.name,
             items=[
                 Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
+                    text=(
+                        f"{quantity_str} {resource_description.name} "
+                        f"déposé pour {build_description.name}"
                     ),
                 )
             ],
-            back_url=f"/_describe/character/{character.id}/build_actions",
+            footer_with_build_id=build_doc.id,
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 
@@ -396,6 +391,7 @@ class ConstructBuildAction(WithBuildAction):
             )
             return Description(
                 title=title,
+                footer_with_build_id=build_doc.id,
                 items=[
                     Part(
                         is_form=True,
@@ -409,7 +405,7 @@ class ConstructBuildAction(WithBuildAction):
                         ),
                         items=[
                             Part(
-                                label=f"Y passer combien de temps (point d'actions) ?",
+                                label=f"Y passer combien de temps (Point d'Actions) ?",
                                 type_=Type.NUMBER,
                                 name="cost_to_spent",
                             )
@@ -445,17 +441,10 @@ class ConstructBuildAction(WithBuildAction):
 
         return Description(
             title=f"Travail effectué",
-            back_url=f"/_describe/character/{character.id}/build_actions",
-            footer_links=[
-                Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
-                    ),
-                    classes=["primary"],
-                )
-            ],
+            footer_with_build_id=build_doc.id,
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 

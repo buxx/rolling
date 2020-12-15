@@ -181,6 +181,7 @@ class DropResourceAction(WithResourceAction):
                         ],
                     )
                 ],
+                back_url=f"/_describe/character/{character.id}/inventory"
             )
 
         self._kernel.resource_lib.drop(
@@ -194,12 +195,5 @@ class DropResourceAction(WithResourceAction):
         )
         return Description(
             title=f"Action effectué",
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
+            back_url=f"/_describe/character/{character.id}/inventory",
         )

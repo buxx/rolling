@@ -112,6 +112,10 @@ def get_with_character_action_url(
     return f"{base_url}?{urlencode(query_params)}"
 
 
+def get_character_actions_url(character: "CharacterModel") -> str:
+    return f"/_describe/character/{character.id}/on_place_actions"
+
+
 @dataclasses.dataclass
 class ActionDescriptionModel:
     id: str

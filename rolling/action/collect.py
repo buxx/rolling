@@ -179,5 +179,6 @@ class CollectResourceAction(CharacterAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré"
+            title=f"Récupérer du {resource.name}",
+            items=[Part(text=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré")]
         )

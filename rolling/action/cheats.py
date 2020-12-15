@@ -6,7 +6,7 @@ import typing
 
 from guilang.description import Description
 from guilang.description import Part
-from rolling.action.base import CharacterAction
+from rolling.action.base import CharacterAction, get_character_actions_url
 from rolling.action.base import get_character_action_url
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
@@ -94,7 +94,13 @@ class CheatsCharacterAction(CharacterAction):
             character_doc.action_points = 24.0
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
-            return Description(title="Points d'actions rechargés")
+            return Description(
+                title="Points d'actions rechargés",
+                back_url=get_character_actions_url(character),
+            )
         if input_.cheat_id == "reduce_tiredness":
             self._kernel.character_lib.reduce_tiredness(character.id, 100)
-            return Description(title="Plus de fatigue")
+            return Description(
+                title="Plus de fatigue",
+                back_url=get_character_actions_url(character),
+            )

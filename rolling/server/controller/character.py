@@ -142,22 +142,13 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
 
         return f"Partager avec {self._affinity.name}"
 
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
-        if sizing_up_quantity:
-            return []
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return None
 
-        return [
-            Part(
-                is_link=True,
-                label="Retourner a la fiche de l'affinité",
-                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a l'inventaire",
-                form_action=f"/_describe/character/{self._character.id}/inventory",
-            ),
-        ]
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        if sizing_up_quantity:
+            return None
+        return self._affinity.id
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -488,8 +479,6 @@ class CharacterController(BaseController):
             title="Fiche de personnage",
             can_be_back_url=True,
             items=[
-                Part(text="Personnage"),
-                Part(text="------------"),
                 Part(label="Nom", text=character.name),
                 Part(
                     label="Points d'actions restants", text=f"{str(character.action_points)}/24.0"
@@ -667,7 +656,7 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Inventory",
+            title="Inventaire",
             items=[
                 Part(
                     text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"

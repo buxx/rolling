@@ -312,12 +312,4 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         return Description(
             title=f"Effectué",
             items=parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
         )

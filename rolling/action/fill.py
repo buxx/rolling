@@ -83,11 +83,6 @@ class FillStuffAction(WithStuffAction):
         footer_links = [
             Part(
                 is_link=True,
-                label="Voir l'inventaire",
-                form_action=f"/_describe/character/{character.id}/inventory",
-            ),
-            Part(
-                is_link=True,
                 label="Voir l'objet",
                 form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                     character_id=character.id, stuff_id=stuff.id

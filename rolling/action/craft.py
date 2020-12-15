@@ -240,14 +240,6 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
             back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
@@ -353,14 +345,6 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         )
         return Description(
             title="Action effectué avec succès",
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
             back_url=f"/_describe/character/{character.id}/on_place_actions",
         )
 
@@ -634,6 +618,16 @@ class ContinueStuffConstructionAction(WithStuffAction):
                         ],
                     )
                 ],
+                footer_links=[
+                    Part(
+                        is_link=True,
+                        label="Voir l'objet",
+                        form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                            character_id=character.id, stuff_id=stuff.id
+                        ),
+                        classes=["primary"],
+                    )
+                ],
             )
 
         consume_ap = min(remain_ap, input_.ap * bonus_divider)
@@ -653,7 +647,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
             footer_links=[
                 Part(
                     is_link=True,
-                    label="Voir l'objet commencé",
+                    label="Voir l'objet",
                     form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                         character_id=character.id, stuff_id=stuff_doc.id
                     ),

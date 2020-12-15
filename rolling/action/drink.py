@@ -118,7 +118,7 @@ class DrinkResourceAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
 
-        return Description(title="Action effectué")
+        return Description(title="Vous avez bu")
 
 
 class DrinkStuffAction(WithStuffAction):

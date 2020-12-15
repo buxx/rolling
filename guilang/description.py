@@ -81,3 +81,8 @@ class Description:
     redirect: typing.Optional[str] = None
     can_be_back_url: bool = False
     request_clicks: typing.Optional[RequestClicks] = None
+    footer_with_character_id: typing.Optional[str] = None
+    footer_actions: bool = True
+    footer_inventory: bool = True
+    footer_with_build_id: typing.Optional[int] = None
+    footer_with_affinity_id: typing.Optional[int] = None

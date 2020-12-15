@@ -180,12 +180,5 @@ class MixResourcesAction(WithResourceAction):
         return Description(
             title=f"{input_.quantity} "
             f"{resource_mix_description.produce_resource.name} {unit_name} produits",
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
+            back_url=f"/_describe/character/{character.id}/inventory",
         )

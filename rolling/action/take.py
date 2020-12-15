@@ -143,16 +143,11 @@ class TakeStuffOrResources(TransferStuffOrResources):
 
         return f"Prendre de {self._from_character.name}"
 
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
-        return [
-            Part(
-                is_link=True,
-                label="Retourner à la fiche personnage",
-                form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                    character_id=self._character.id, with_character_id=self._from_character.id
-                ),
-            )
-        ]
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return self._character.id
+
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        return None
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
