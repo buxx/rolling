@@ -1,6 +1,7 @@
 # coding: utf-8
-import abc
 import dataclasses
+
+import abc
 from enum import Enum
 import typing
 
@@ -62,7 +63,10 @@ class ClientRequireAroundData(ZoneEventData):
 
 @dataclasses.dataclass
 class ThereIsAroundData(ZoneEventData):
-    items: typing.List[typing.Tuple[str, typing.Optional[str]]]
+    stuff_count: int
+    resource_count: int
+    build_count: int
+    character_count: int
 
 
 @dataclasses.dataclass

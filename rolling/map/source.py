@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import random
 import typing
 
@@ -135,10 +136,21 @@ class ZoneMapSource(MapSource):
         self, world_row_i: int, world_col_i: int
     ) -> typing.Tuple[int, int]:
         available_coordinates: typing.List[typing.Tuple[int, int]] = []
+        build_docs = self._kernel.build_lib.get_zone_build(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )
+        not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
+        for build_doc in build_docs:
+            build_description = self._kernel.game.config.builds[build_doc.build_id]
+            # TODO: traversable to update here
+            if not build_description.traversable.get(TransportType.WALKING.value, True):
+                not_traversable_by_builds.append((build_doc.zone_row_i, build_doc.zone_col_i))
 
         for row_i, row in enumerate(self.geography.rows):
             for col_i, map_tile_type in enumerate(row):
-                if traversable_properties[map_tile_type].get(TransportType.WALKING.value):
+                # TODO: traversable to update here
+                if traversable_properties[map_tile_type].get(TransportType.WALKING.value) and (row_i, col_i) not in not_traversable_by_builds:
                     available_coordinates.append((row_i, col_i))
 
         if not available_coordinates:

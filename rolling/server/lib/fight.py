@@ -2,10 +2,11 @@
 import random
 import typing
 
+from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import FIGHT_TIREDNESS_INCREASE
-from rolling.model.character import CharacterModel
 from rolling.model.fight import AttackDescription
+from rolling.model.fight import DEFAULT_WEAPON_DAMAGE
 from rolling.model.fight import DefendDescription
 from rolling.model.fight import Weapon
 from rolling.server.document.affinity import AffinityDocument
@@ -230,7 +231,7 @@ class FightLib:
                     opponent_equipment, pass_damages = self.opponent_equipment_protect(
                         opponent, from_=fighter, weapon=attacker_weapon, damage=damage
                     )
-                    if pass_damages == damage:
+                    if damage and pass_damages == damage:
                         story_sentences.append(
                             f"{opponent_equipment.name} n'a en rien protégé {opponent.name}."
                         )
@@ -299,7 +300,7 @@ class FightLib:
     def get_damage(self, fighter: CharacterModel, weapon: Weapon) -> float:
         damages = (
             fighter.force_weapon_multiplier
-            * weapon.base_damage
+            * max(weapon.base_damage, DEFAULT_WEAPON_DAMAGE)
             * fighter.get_with_weapon_coeff(weapon, self._kernel)
         ) * (random.randrange(8, 12, 1) / 10)
         return round(damages, 2)

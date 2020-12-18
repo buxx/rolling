@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -16,10 +16,10 @@ from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
-    from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -118,12 +118,7 @@ class DrinkResourceAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
 
-        return Description(
-            title="Action effectué",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title="Vous avez bu")
 
 
 class DrinkStuffAction(WithStuffAction):
@@ -207,9 +202,4 @@ class DrinkStuffAction(WithStuffAction):
         self._kernel.character_lib.drink_stuff(character.id, stuff.id)
         self._kernel.server_db_session.commit()
 
-        return Description(
-            title="Vous avez bu",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
-        )
+        return Description(title="Vous avez bu")

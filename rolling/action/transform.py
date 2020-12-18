@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -23,8 +23,8 @@ from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
+    from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
 
 
@@ -122,13 +122,12 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             do_for_one_func=do_for_one,
             title="Transformation effectué",
             success_parts=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -313,13 +312,4 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         return Description(
             title=f"Effectué",
             items=parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                ),
-            ],
         )

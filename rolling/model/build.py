@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from rolling.model.meta import TransportType
 from rolling.server.document.build import BuildDocument

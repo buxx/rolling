@@ -8,8 +8,8 @@ from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
     from rolling.gui.controller import Controller
+    from rolling.kernel import Kernel
 
 
 class EventProcessor(metaclass=abc.ABCMeta):

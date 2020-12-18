@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 import serpyco
+import typing
 
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType

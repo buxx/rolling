@@ -7,10 +7,10 @@ from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownStuffError
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
-    from rolling.model.character import CharacterModel
     from rolling.action.base import ActionDescriptionModel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 def check_common_is_possible(

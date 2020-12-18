@@ -1,7 +1,6 @@
 # coding: utf-8
-from unittest import mock
-
 import pytest
+from unittest import mock
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.build import ConstructBuildAction

@@ -2,9 +2,8 @@ import hashlib
 from mimetypes import guess_extension
 from mimetypes import guess_type
 import os
-import typing
-
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -13,10 +12,10 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.server.document.base import ImageDocument
 
 if typing.TYPE_CHECKING:
+    from rolling.action.base import WithStuffAction
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
-    from rolling.action.base import WithStuffAction
     from rolling.rolling_types import ActionType
 
 

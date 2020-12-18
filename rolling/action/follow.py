@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -74,7 +74,7 @@ class FollowCharacterAction(WithCharacterAction):
             ),
             CharacterActionLink(
                 name=f"Suivre {with_character.name} discrètement",
-                link=self._get_url(character, with_character, input_=FollowModel(discreetly=True)),
+                link=self._get_url(character, with_character, input_=FollowModel(discreetly=1)),
             ),
         ]
 
@@ -90,17 +90,7 @@ class FollowCharacterAction(WithCharacterAction):
                 f"Vous suivez {with_character.name}"
                 + (" discrètement" if input_.discreetly else "")
             ),
-            items=[],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                ),
-            ],
+            footer_with_character_id=character.id,
         )
 
 
@@ -163,15 +153,5 @@ class StopFollowCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Vous ne suivez plus {with_character.name}",
-            items=[],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                ),
-            ],
+            footer_with_character_id=character.id,
         )

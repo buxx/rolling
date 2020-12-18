@@ -1,10 +1,9 @@
 #  coding: utf-8
-from json import JSONDecodeError
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic.data import HapicData
+from json import JSONDecodeError
 
 from guilang.description import Description
 from guilang.description import Part
@@ -80,7 +79,7 @@ class ConversationController(BaseController):
     @hapic.output_body(Description)
     async def start(self, request: Request, hapic_data: HapicData) -> Description:
         character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
-        zone_characters = self._kernel.character_lib.get_zone_players(
+        zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=character_doc.world_row_i,
             col_i=character_doc.world_col_i,
             exclude_ids=[hapic_data.path.character_id],
@@ -93,19 +92,7 @@ class ConversationController(BaseController):
                 if not selected_character_ids:
                     return Description(
                         title="Démarrer une nouvelle conversation",
-                        items=[
-                            Part(text="Vous devez choisir au moins un personnage"),
-                            Part(
-                                is_link=True,
-                                label="Retour",
-                                form_action=f"/conversation/{hapic_data.path.character_id}/start",
-                            ),
-                            Part(
-                                is_link=True,
-                                go_back_zone=True,
-                                label="Retourner à l'écran de déplacements",
-                            ),
-                        ],
+                        items=[Part(text="Vous devez choisir au moins un personnage")],
                     )
 
                 conversation_id = self._kernel.message_lib.add_conversation_message(
@@ -126,9 +113,6 @@ class ConversationController(BaseController):
                 title="Démarrer une nouvelle conversation",
                 items=[
                     Part(text="Il n'y a personne ici avec qui converser"),
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
                     Part(
                         is_link=True,
                         label="Retourner aux conversations",
@@ -167,12 +151,11 @@ class ConversationController(BaseController):
                 ),
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux conversations",
                     form_action=f"/conversation/{hapic_data.path.character_id}",
-                ),
+                )
             ],
         )
 
@@ -222,13 +205,12 @@ class ConversationController(BaseController):
             ]
             + message_parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux conversations",
                     form_action=f"/conversation/{hapic_data.path.character_id}",
                     classes=["primary"],
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -280,7 +262,7 @@ class ConversationController(BaseController):
     #         .limit(1)
     #         .one()
     #     )
-    #     zone_characters = self._kernel.character_lib.get_zone_players(
+    #     zone_characters = self._kernel.character_lib.get_zone_characters(
     #         row_i=character_doc.world_row_i,
     #         col_i=character_doc.world_col_i,
     #         exclude_ids=[hapic_data.path.character_id],
@@ -309,7 +291,7 @@ class ConversationController(BaseController):
     #             )
     #         ],
     #         footer_links=[
-    #             Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+    #
     #             Part(
     #                 is_link=True,
     #                 label="Retourner aux conversations",

@@ -1,9 +1,8 @@
 # coding: utf-8
 import contextlib
+import pytest
 import typing
 from unittest.mock import patch
-
-import pytest
 
 from rolling.action.utils import AroundPercent
 from rolling.kernel import Kernel
@@ -12,9 +11,9 @@ from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
 from rolling.model.fight import Weapon
 from rolling.model.stuff import StuffModel
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
 
 
 def make_fake_get_attack_weapon(params: typing.Dict[str, Weapon]):
@@ -786,7 +785,7 @@ class TestFightLib:
                     "FranceSoldier1 attaque EnglandSoldier1 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier1.",
                     "EnglandSoldier1 attaque FranceSoldier1 avec Main nue. Peau nue n'a en rien protégé FranceSoldier1. Le coup à été fatal pour FranceSoldier1.",
                     "FranceSoldier2 attaque EnglandSoldier2 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier2.",
-                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue. Peau nue n'a en rien protégé FranceSoldier2.",
+                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue. Peau nue à protégé FranceSoldier2.",
                     "FranceSoldier3 attaque EnglandSoldier3 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier3. Le coup à été fatal pour EnglandSoldier3.",
                     "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver.",
                     "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver.",

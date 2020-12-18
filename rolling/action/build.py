@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -37,9 +37,9 @@ from rolling.util import EmptyModel
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:
@@ -112,17 +112,8 @@ class BeginBuildAction(CharacterAction):
         )
         return Description(
             title=f"{build_description.name} commencé",
-            items=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
-                    ),
-                ),
-            ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            footer_with_build_id=build_doc.id,
+            back_url=f"/_describe/character/{character.id}/build_actions",
         )
 
 
@@ -250,6 +241,7 @@ class BringResourcesOnBuild(WithBuildAction):
                 title=f"Cette construction nécessite encore {left_str} "
                 f"de {resource_description.name} (soit {round(left_percent)}%)",
                 can_be_back_url=True,
+                footer_with_build_id=build_doc.id,
                 items=[
                     Part(
                         is_form=True,
@@ -294,18 +286,19 @@ class BringResourcesOnBuild(WithBuildAction):
         )
 
         return Description(
-            title=f"{quantity_str} {resource_description.name} déposé pour {build_description.name}",
+            title=build_description.name,
             items=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
+                    text=(
+                        f"{quantity_str} {resource_description.name} "
+                        f"déposé pour {build_description.name}"
                     ),
-                ),
+                )
             ],
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
+            footer_with_build_id=build_doc.id,
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 
@@ -398,6 +391,7 @@ class ConstructBuildAction(WithBuildAction):
             )
             return Description(
                 title=title,
+                footer_with_build_id=build_doc.id,
                 items=[
                     Part(
                         is_form=True,
@@ -411,7 +405,7 @@ class ConstructBuildAction(WithBuildAction):
                         ),
                         items=[
                             Part(
-                                label=f"Y passer combien de temps (point d'actions) ?",
+                                label=f"Y passer combien de temps (Point d'Actions) ?",
                                 type_=Type.NUMBER,
                                 name="cost_to_spent",
                             )
@@ -447,18 +441,10 @@ class ConstructBuildAction(WithBuildAction):
 
         return Description(
             title=f"Travail effectué",
-            force_back_url=f"/_describe/character/{character.id}/build_actions",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    label="Voir le batiment",
-                    is_link=True,
-                    form_action=DESCRIBE_BUILD.format(
-                        build_id=build_doc.id, character_id=character.id
-                    ),
-                    classes=["primary"],
-                ),
-            ],
+            footer_with_build_id=build_doc.id,
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 

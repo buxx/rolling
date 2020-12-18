@@ -4,13 +4,12 @@ import datetime
 import glob
 import ntpath
 import os
-import typing
-
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError

@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -19,10 +19,10 @@ from rolling.server.util import with_multiple_carried_stuffs
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
-    from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -96,13 +96,12 @@ class DropStuffAction(WithStuffAction):
             do_for_one_func=do_for_one,
             title="Laisser quelque-chose ici",
             success_parts=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -182,6 +181,7 @@ class DropResourceAction(WithResourceAction):
                         ],
                     )
                 ],
+                back_url=f"/_describe/character/{character.id}/inventory"
             )
 
         self._kernel.resource_lib.drop(
@@ -195,13 +195,5 @@ class DropResourceAction(WithResourceAction):
         )
         return Description(
             title=f"Action effectué",
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                ),
-            ],
+            back_url=f"/_describe/character/{character.id}/inventory",
         )

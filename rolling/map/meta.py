@@ -11,8 +11,8 @@ from rolling.exception import SourceLoadError
 from rolling.map.type.world import WorldMapTileType
 
 if typing.TYPE_CHECKING:
-    from rolling.map.source import WorldMapSource
     from rolling.kernel import Kernel
+    from rolling.map.source import WorldMapSource
 
 
 SPAWN_LINE_NAME = "SPAWN"

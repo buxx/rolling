@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from serpyco import number_field
+import typing
 
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType

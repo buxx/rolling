@@ -1,11 +1,10 @@
 #  coding: utf-8
-import typing
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic.data import HapicData
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -163,13 +162,12 @@ class BusinessController(BaseController):
             title="Commerce: vos transaction avec des personnes",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
                     classes=["primary"],
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -226,13 +224,12 @@ class BusinessController(BaseController):
             ]
             + parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
                     classes=["primary"],
-                ),
+                )
             ],
         )
 
@@ -282,13 +279,12 @@ class BusinessController(BaseController):
             title=title,
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
                     classes=["primary"],
-                ),
+                )
             ],
             can_be_back_url=True,
         )
@@ -316,9 +312,6 @@ class BusinessController(BaseController):
                 items=[Part(text=f"{offer_owner.name} ne peut pas assurer cette opération")],
                 footer_links=[
                     Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
                         is_link=True,
                         label="Retourner sur la page Commerce",
                         form_action=f"/business/{hapic_data.path.character_id}",
@@ -342,9 +335,6 @@ class BusinessController(BaseController):
                 title=offer.title,
                 items=[Part(text="Vous ne possédez pas ce qu'il faut pour faire ce marché")],
                 footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
                     Part(
                         is_link=True,
                         label="Retourner sur la page Commerce",
@@ -375,11 +365,6 @@ class BusinessController(BaseController):
                     footer_links=[
                         Part(
                             is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
-                        Part(
-                            is_link=True,
                             label="Retourner sur la page Commerce",
                             form_action=f"/business/{hapic_data.path.character_id}",
                         ),
@@ -403,9 +388,6 @@ class BusinessController(BaseController):
                     )
                 ],
                 footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
                     Part(
                         is_link=True,
                         label="Retourner sur la page Commerce",
@@ -440,11 +422,6 @@ class BusinessController(BaseController):
                     title=offer.title,
                     items=parts,
                     footer_links=[
-                        Part(
-                            is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
                         Part(
                             is_link=True,
                             label="Retourner sur la page Commerce",
@@ -485,9 +462,6 @@ class BusinessController(BaseController):
                 items=parts,
                 footer_links=[
                     Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
                         is_link=True,
                         label="Retourner sur la page Commerce",
                         form_action=f"/business/{hapic_data.path.character_id}",
@@ -511,13 +485,12 @@ class BusinessController(BaseController):
         )
 
         footer_links = [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
             Part(
                 is_link=True,
                 label="Retourner sur la page Commerce",
                 form_action=f"/business/{hapic_data.path.character_id}",
                 classes=["primary"],
-            ),
+            )
         ]
 
         if not offer.permanent:
@@ -582,12 +555,11 @@ class BusinessController(BaseController):
                 )
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",
                     form_action=f"/business/{hapic_data.path.character_id}",
-                ),
+                )
             ],
         )
 
@@ -760,6 +732,18 @@ class BusinessController(BaseController):
                 redirect=f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
             )
 
+        parts = []
+        if not quantity and (resource_id or stuff_id):
+            parts.append(
+                Part(
+                    text=(
+                        "Vous devez choisir une quantité ! "
+                        "(Veuillez saisir à nouveau l'objet ou la ressource)"
+                    ),
+                    classes=["error"],
+                )
+            )
+
         return Description(
             title=title,
             items=[
@@ -767,7 +751,7 @@ class BusinessController(BaseController):
                     is_form=True,
                     form_action=here_url,
                     form_values_in_query=True,
-                    items=[
+                    items=parts + [
                         Part(
                             label="Sélectionnez une ressource ou un object",
                             name="value",
@@ -791,7 +775,6 @@ class BusinessController(BaseController):
                 ),
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner sur la page Commerce",

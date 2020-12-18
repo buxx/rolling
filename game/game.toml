@@ -526,6 +526,10 @@ reduce_tiredness_per_turn = 50
     actions = ["KILL_CHARACTER"]
     cost = 0.0
 
+  [ACTIONS.TRAVEL]
+    actions = ["TRAVEL"]
+    cost = 0.0
+
   [ACTIONS.TAKE_FROM_CHARACTER]
     actions = ["TAKE_FROM_CHARACTER"]
     cost = 0.0
@@ -804,7 +808,7 @@ reduce_tiredness_per_turn = 50
     cost = 4.0
 
   [ACTIONS.CRAFT_STONE_HAXE]
-    name = "Fabriquer une hache de bois"
+    name = "Fabriquer une hache de pierre"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -868,6 +872,22 @@ reduce_tiredness_per_turn = 50
     required_resource_id = "GRAMINEAE"
     cost_per_unit = 0.05
     cost = 3.0
+
+  [ACTIONS.MAKE_COOKED_MEAT]
+    name = "Cuire de la viande"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="COOKED_MEAT", coeff=0.7}
+    ]
+    required_resource_id = "RAW_MEAT"
+    cost_per_unit = 0.0005
+    cost = 1.0
 
   [ACTIONS.MAKE_LEATHER_PIECE]
     name = "Produire une pièce de cuir"
@@ -1183,7 +1203,7 @@ reduce_tiredness_per_turn = 50
   name = "Mur de terre"
   char = "-"
   building_char = "x"
-  build_require_resources = [{resource="DIRT", quantity=0.1}]
+  build_require_resources = [{resource="DIRT", quantity=100.0}]
   turn_require_resources = []
   power_on_require_resources = []
   abilities = []

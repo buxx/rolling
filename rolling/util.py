@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import enum
 import typing
 
@@ -12,9 +13,9 @@ from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
-    from rolling.model.stuff import StuffModel
-    from rolling.model.character import CharacterModel
     from rolling.map.source import ZoneMapSource
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
@@ -22,18 +23,27 @@ class EmptyModel:
     pass
 
 
-def get_on_and_around_coordinates(x: int, y: int) -> typing.List[typing.Tuple[int, int]]:
-    return [
-        (x, y),
-        (x - 1, y - 1),
-        (x, y - 1),
-        (x + 1, y - 1),
-        (x - 1, y),
-        (x + 1, y),
-        (x - 1, y + 1),
-        (x, y + 1),
-        (x + 1, y + 1),
-    ]
+def get_on_and_around_coordinates(
+    x: int, y: int, distance: int = 1, exclude_on: bool = False
+) -> typing.List[typing.Tuple[int, int]]:
+    positions = []
+    if not exclude_on:
+        positions.append((x, y))
+
+    positions.extend(
+        [
+            (x - distance, y - distance),
+            (x, y - distance),
+            (x + distance, y - distance),
+            (x - distance, y),
+            (x + distance, y),
+            (x - distance, y + distance),
+            (x, y + distance),
+            (x + distance, y + distance),
+        ]
+    )
+
+    return positions
 
 
 def is_there_resource_id_in_zone(
@@ -241,8 +251,7 @@ def get_description_for_not_enough_ap(
             Part(
                 text=f"{character.name} ne possède plus assez de points d'actions "
                 f"({character.action_points} restant et {cost} nécessaires)"
-            ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
+            )
         ],
         can_be_back_url=can_be_back_url,
     )

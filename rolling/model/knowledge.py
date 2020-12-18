@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import typing
 
 DEFAULT_INSTRUCTOR_COEFF = 2.0

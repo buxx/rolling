@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -16,9 +16,10 @@ from rolling.model.fight import AttackDescription
 from rolling.model.fight import DefendDescription
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
+from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
-from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.link import CharacterActionLink
 
@@ -114,17 +115,7 @@ class AttackCharacterAction(WithCharacterAction):
                 ),
             ]
             + parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                ),
-            ],
+            footer_with_character_id=character.id,
             can_be_back_url=True,
         )
 
@@ -151,19 +142,13 @@ class AttackCharacterAction(WithCharacterAction):
             )
         return Description(
             title=f"Attaquer {with_character.name} seul",
+            footer_with_character_id=character.id,
             items=[
                 Part(text=text),
                 Part(
                     is_link=True,
                     form_action=here_url + "&lonely=1&confirm=1",
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
-                ),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
                 ),
             ],
         )
@@ -209,18 +194,8 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Attaquer {with_character.name} seul",
+            footer_with_character_id=character.id,
             items=parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                ),
-            ],
         )
 
     def _proceed_events(
@@ -282,7 +257,7 @@ class AttackCharacterAction(WithCharacterAction):
         character_relation = self._kernel.affinity_lib.get_active_relation(
             character_id=character.id, affinity_id=as_affinity.id
         )
-        if character_relation.status_id not in (MEMBER_STATUS[0], WARLORD_STATUS[0]):
+        if character_relation.status_id not in (MEMBER_STATUS[0], WARLORD_STATUS[0], CHIEF_STATUS[0]):
             raise ImpossibleAction(
                 "Vous ne pouvez impliquer cette affinité qu'avec le role de Chef ou Chef de guerre"
             )
@@ -293,25 +268,13 @@ class AttackCharacterAction(WithCharacterAction):
             )
             return Description(
                 title=title,
+                footer_with_character_id=character.id,
                 items=[
                     Part(
                         text=f"Vous ne pouvez pas attaquer {with_character.name} "
                         f"en tant que {as_affinity.name} car il/elle est affilié à "
                         f"{as_affinity.name}"
                     )
-                ],
-                footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
-                        is_link=True,
-                        label="Retourner à la fiche personnage",
-                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                            character_id=character.id, with_character_id=with_character.id
-                        ),
-                    ),
-                    Part(is_link=True, form_action=here_url, label="Retour", classes=["primary"]),
                 ],
             )
         except NoResultFound:
@@ -340,20 +303,7 @@ class AttackCharacterAction(WithCharacterAction):
             return Description(
                 title=title,
                 items=parts,
-                footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
-                        is_link=True,
-                        label="Retourner à la fiche personnage",
-                        form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                            character_id=character.id, with_character_id=with_character.id
-                        ),
-                        classes=["primary"],
-                    ),
-                    Part(is_link=True, form_action=here_url, label="Retour"),
-                ],
+                footer_with_character_id=character.id,
             )
 
     def _get_attack_as_affinity_description(
@@ -406,17 +356,7 @@ class AttackCharacterAction(WithCharacterAction):
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
             ],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                ),
-                Part(is_link=True, form_action=here_url, label=f"Retour", classes=["Primary"]),
-            ],
+            footer_with_character_id=character.id,
         )
 
     def _perform_attack_as_affinity(
@@ -457,17 +397,7 @@ class AttackCharacterAction(WithCharacterAction):
         return Description(
             title=title,
             items=parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Retourner à la fiche personnage",
-                    form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                        character_id=character.id, with_character_id=with_character.id
-                    ),
-                    classes=["primary"],
-                ),
-            ],
+            footer_with_character_id=character.id,
         )
 
     def perform(

@@ -1,7 +1,5 @@
 # coding: utf-8
 import json
-import typing
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Enum
@@ -10,6 +8,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
 from sqlalchemy import Text
+import typing
 
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
@@ -17,8 +16,8 @@ from rolling.model.measure import Unit
 from rolling.server.extension import ServerSideDocument as Document
 
 if typing.TYPE_CHECKING:
-    from rolling.model.stuff import StuffProperties
     from rolling.kernel import Kernel
+    from rolling.model.stuff import StuffProperties
 
 
 class StuffDocument(Document):

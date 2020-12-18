@@ -1,9 +1,8 @@
 # coding: utf-8
 import asyncio
 from queue import Queue
-import typing
-
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 import urwid
 
 from rolling.client.http.client import HttpClient

@@ -1,20 +1,19 @@
 # coding: utf-8
-import argparse
-import logging
-
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+import argparse
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
+import logging
+from serpyco import ValidationError
 
 from rolling.exception import UserDisplayError
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
 from rolling.server.base import get_kernel
-from rolling.server.document.build import BuildDocument
 from rolling.server.extension import hapic
 from rolling.server.processor import RollingSerpycoProcessor
 
@@ -23,12 +22,26 @@ class ErrorBuilder(SerpycoDefaultErrorBuilder):
     def build_from_exception(
         self, exception: Exception, include_traceback: bool = False
     ) -> DefaultErrorSchema:
+        if isinstance(exception, UserDisplayError):
+            return DefaultErrorSchema(message=str(exception))
+        elif isinstance(exception, ValueError):
+            server_logger.exception(exception)
+            return DefaultErrorSchema(
+                message=(
+                    "Une erreur serveur est survenue. Une erreur de saisie peut en être la cause"
+                )
+            )
+        elif isinstance(exception, ValidationError):
+            server_logger.exception(exception)
+            return DefaultErrorSchema(message=(f"Il y a une erreur de saisie: {exception.args[0]}"))
+
         server_logger.exception(exception)
-        return super().build_from_exception(exception, include_traceback)
+        return DefaultErrorSchema(message="Une erreur serveur est survenue")
 
     def build_from_validation_error(self, error: ProcessValidationError) -> DefaultErrorSchema:
         server_logger.debug(str(error))
-        return super().build_from_validation_error(error)
+        err = super().build_from_validation_error(error)
+        return err
 
 
 def run(args: argparse.Namespace) -> None:
@@ -61,6 +74,7 @@ def run(args: argparse.Namespace) -> None:
         import sentry_sdk
         from sentry_sdk.integrations.aiohttp import AioHttpIntegration
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
         sentry_sdk.init(
             dsn=args.sentry, integrations=[AioHttpIntegration(), SqlalchemyIntegration()]
         )

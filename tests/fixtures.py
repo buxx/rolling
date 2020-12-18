@@ -1,14 +1,13 @@
 # coding: utf-8
-import datetime
-import os
-import typing
-
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_exceptions import HTTPNotFound
+import datetime
 from hapic.ext.aiohttp.context import AiohttpContext
+import os
 import pytest
 import serpyco
+import typing
 
 from guilang.description import Description
 from rolling.gui.map.object import DisplayObjectManager
@@ -23,10 +22,10 @@ from rolling.map.type.zone import SeaWater
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.server.application import get_application
-from rolling.server.document.affinity import MEMBER_STATUS
-from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.extension import hapic
@@ -69,27 +68,26 @@ def worldmapsourcec_txt() -> str:
 
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
-    return Kernel(worldmapsourcea_txt, loop=loop)
+    return Kernel(worldmapsourcea_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop)
+    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop)
+    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
 
 
 @pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
-    server_db_path = tmp_path / "server.db"
     kernel = Kernel(
         worldmapsourcec_txt,
         tile_maps_folder="tests/src/worldmapc_zones",
         game_config_folder="tests/src/game1",
-        server_db_path=server_db_path,
+        server_db_path=":memory:",
         loop=loop,
     )
     kernel.init_server_db_session()

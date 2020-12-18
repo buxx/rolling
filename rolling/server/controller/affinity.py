@@ -1,13 +1,12 @@
 #  coding: utf-8
-import json
-from json import JSONDecodeError
-import typing
-import urllib
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic import HapicData
+import json
+from json import JSONDecodeError
+import typing
+import urllib
 
 from guilang.description import Description
 from guilang.description import Part
@@ -24,10 +23,10 @@ from rolling.model.character import ManageAffinityRelationQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
 from rolling.rolling_types import ActionType
 from rolling.server.controller.base import BaseController
-from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
@@ -150,22 +149,7 @@ class AffinityController(BaseController):
             return Description(
                 title="Affinités créée",
                 items=[Part(text="Et vous en êtes le chef")],
-                footer_links=[
-                    Part(
-                        is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"
-                    ),
-                    Part(
-                        is_link=True,
-                        label=f"Voir la fiche de {affinity_doc.name}",
-                        form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity_doc.id}",
-                        classes=["primary"],
-                    ),
-                    Part(
-                        is_link=True,
-                        label="Voir les affinités",
-                        form_action=f"/affinity/{hapic_data.path.character_id}",
-                    ),
-                ],
+                footer_with_affinity_id=affinity_doc.id,
             )
 
         return Description(
@@ -177,13 +161,7 @@ class AffinityController(BaseController):
                     items=[Part(label="Nom", name="name", type_=Type.STRING)],
                 )
             ],
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retour aux affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                )
-            ],
+            back_url=f"/affinity/{hapic_data.path.character_id}",
         )
 
     @hapic.with_api_doc()
@@ -350,14 +328,16 @@ class AffinityController(BaseController):
                 ),
             ]
             + parts,
+            back_url=f"/affinity/{hapic_data.path.character_id}",
+            can_be_back_url=True,
+            footer_with_affinity_id=affinity.id,
             footer_links=[
                 Part(
                     is_link=True,
-                    label="Retour aux affinités",
+                    label="Voir les affinités",
                     form_action=f"/affinity/{hapic_data.path.character_id}",
-                )
-            ],
-            can_be_back_url=True,
+                ),
+            ]
         )
 
     @hapic.with_api_doc()
@@ -439,24 +419,7 @@ class AffinityController(BaseController):
                 self._kernel.server_db_session.commit()
                 return Description(
                     title=title,
-                    footer_links=[
-                        Part(
-                            is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
-                        Part(
-                            is_link=True,
-                            label=f"Voir la fiche de {affinity.name}",
-                            form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                            classes=["primary"],
-                        ),
-                        Part(
-                            is_link=True,
-                            label="Voir les affinités",
-                            form_action=f"/affinity/{hapic_data.path.character_id}",
-                        ),
-                    ],
+                    footer_with_affinity_id=affinity.id,
                 )
 
         items = []
@@ -573,7 +536,6 @@ class AffinityController(BaseController):
             title=affinity.name,
             items=items,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label=f"Voir la fiche de {affinity.name}",
@@ -633,6 +595,7 @@ class AffinityController(BaseController):
                             f"/manage/{affinity.id}",
                         ),
                     ],
+                    footer_with_affinity_id=affinity.id,
                 )
 
         # proceed submited data
@@ -718,14 +681,7 @@ class AffinityController(BaseController):
                 )
             ]
             + parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ],
+            footer_with_affinity_id=affinity.id,
             can_be_back_url=True,
         )
 
@@ -795,20 +751,7 @@ class AffinityController(BaseController):
                     items=form_parts,
                 )
             ],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label=f"Voir la fiche de {affinity.name}",
-                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                    classes=["primary"],
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ],
+            footer_with_affinity_id=affinity.id,
             can_be_back_url=True,
         )
 
@@ -849,20 +792,7 @@ class AffinityController(BaseController):
         return Description(
             title=f"Membre(s) de {affinity.name}",
             items=parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label=f"Voir la fiche de {affinity.name}",
-                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                    classes=["primary"],
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ],
+            footer_with_affinity_id=affinity.id,
             can_be_back_url=True,
         )
 
@@ -927,20 +857,7 @@ class AffinityController(BaseController):
                     ],
                 ),
             ],
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-                Part(
-                    is_link=True,
-                    label=f"Voir la fiche de {affinity.name}",
-                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                    classes=["primary"],
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ],
+            footer_with_affinity_id=affinity.id,
             can_be_back_url=True,
         )
 

@@ -1,9 +1,8 @@
 # coding: utf-8
-import typing
-
 import sqlalchemy
 from sqlalchemy import Column
 from sqlalchemy.orm import Query
+import typing
 
 from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel
@@ -60,7 +59,9 @@ class StuffLib:
             query = query.filter(StuffDocument.shared_with_affinity_id == None)
 
         query = query.filter(
-            StuffDocument.carried_by_id == carried_by_id, StuffDocument.in_built_id == in_built_id
+            # Note: When carried_by_id is None, it exclude carried stuff
+            StuffDocument.carried_by_id == carried_by_id,
+            StuffDocument.in_built_id == in_built_id,
         )
 
         if exclude_crafting:
@@ -188,6 +189,20 @@ class StuffLib:
         ).all()
         return [self.stuff_model_from_doc(doc) for doc in stuff_docs]
 
+    def count_zone_stuffs(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> int:
+        return self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).count()
+
     def get_stuff(self, stuff_id: int) -> StuffModel:
         doc = self.get_stuff_doc(stuff_id)
         return self.stuff_model_from_doc(doc)
@@ -224,6 +239,12 @@ class StuffLib:
             protect_blunt=stuff_properties.protect_blunt,
             protect_sharp=stuff_properties.protect_sharp,
             classes=stuff_properties.classes,
+            used_by=(
+                doc.used_as_weapon_by_id or
+                doc.used_as_shield_by_id or
+                doc.used_as_bag_by_id or
+                doc.used_as_armor_by_id
+            )
         )
 
     def get_carried_by(

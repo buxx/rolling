@@ -1,10 +1,9 @@
 # coding: utf-8
-import logging
-import unittest
-
 from aiohttp.test_utils import TestClient
+import logging
 import pytest
 import serpyco
+import unittest
 
 from rolling.kernel import Kernel
 from rolling.server.document.affinity import AffinityDocument

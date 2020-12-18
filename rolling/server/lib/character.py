@@ -2,14 +2,16 @@
 import datetime
 import math
 import os
+import sqlalchemy
+from sqlalchemy import Float
+from sqlalchemy import and_
+from sqlalchemy import cast
+from sqlalchemy.orm import Query
+from sqlalchemy.orm.exc import NoResultFound
 import typing
 import uuid
 
-import sqlalchemy
-from sqlalchemy import and_
-from sqlalchemy.orm import Query
-from sqlalchemy.orm.exc import NoResultFound
-
+from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
@@ -17,12 +19,13 @@ from rolling.action.eat import EatResourceModel
 from rolling.action.eat import EatStuffModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
-from rolling.model.character import FIGHT_AP_CONSUME
-from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
+from rolling.model.character import FIGHT_AP_CONSUME
+from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.consume import Consumeable
 from rolling.model.eat import EatResourceFromCharacterInventory
 from rolling.model.eat import EatStuffFromCharacterInventory
@@ -38,15 +41,16 @@ from rolling.model.zone import MoveZoneInfos
 from rolling.rolling_types import ActionType
 from rolling.server.action import ActionFactory
 from rolling.server.controller.url import DESCRIBE_BUILD
+from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
-from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
@@ -395,15 +399,14 @@ class CharacterLib:
 
         return character_document
 
-    # TODO BS: rename into get_zone_characters
-    def get_zone_players(
+    def _get_zone_characters_query(
         self,
         row_i: int,
         col_i: int,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         exclude_ids: typing.Optional[typing.List[str]] = None,
-    ) -> typing.List[CharacterModel]:
+    ) -> Query:
         exclude_ids = exclude_ids or []
         filters = [CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i]
 
@@ -418,11 +421,42 @@ class CharacterLib:
                 ]
             )
 
-        character_documents = self.alive_query.filter(and_(*filters)).all()
+        return self.alive_query.filter(and_(*filters))
 
+    def get_zone_characters(
+        self,
+        row_i: int,
+        col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        exclude_ids: typing.Optional[typing.List[str]] = None,
+    ) -> typing.List[CharacterModel]:
+        character_documents = self._get_zone_characters_query(
+            row_i=row_i,
+            col_i=col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+            exclude_ids=exclude_ids,
+        ).all()
         return [
             self.document_to_model(character_document) for character_document in character_documents
         ]
+
+    def count_zone_characters(
+        self,
+        row_i: int,
+        col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+        exclude_ids: typing.Optional[typing.List[str]] = None,
+    ) -> int:
+        return self._get_zone_characters_query(
+            row_i=row_i,
+            col_i=col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+            exclude_ids=exclude_ids,
+        ).count()
 
     def move(
         self, character: CharacterModel, to_world_row: int, to_world_col: int
@@ -447,6 +481,35 @@ class CharacterLib:
             zone_width=new_zone_geography.width,
             zone_height=new_zone_geography.height,
         )
+
+        # FIXME BS NOW: walking or something else
+        def get_walking_coordinates(origin_new_zone_row_i: int, origin_new_zone_col_i: int):
+            if traversable_properties[
+                new_zone_geography.rows[origin_new_zone_row_i][origin_new_zone_col_i]
+            ].get(TransportType.WALKING.value):
+                return origin_new_zone_row_i, origin_new_zone_col_i
+
+            distances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # after 10 of distance ... it is a fail
+            for distance in distances:
+                for new_zone_row_i_, new_zone_col_i_ in util.get_on_and_around_coordinates(
+                    origin_new_zone_row_i, origin_new_zone_col_i, distance=distance, exclude_on=True
+                ):
+                    if new_zone_row_i_ < 0:
+                        new_zone_row_i_ = 0
+                    if new_zone_col_i_ < 0:
+                        new_zone_col_i_ = 0
+
+                    try:
+                        if traversable_properties[
+                            new_zone_geography.rows[new_zone_row_i_][new_zone_col_i_]
+                        ].get(TransportType.WALKING.value):
+                            return new_zone_row_i_, new_zone_col_i_
+                    except KeyError:
+                        pass
+
+            return origin_new_zone_row_i, origin_new_zone_col_i
+
+        new_zone_row_i, new_zone_col_i = get_walking_coordinates(new_zone_row_i, new_zone_col_i)
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
 
@@ -487,7 +550,7 @@ class CharacterLib:
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
 
-        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter])
+        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter and not stuff.used_by])
         total_clutter += sum([r.clutter for r in carried_resources if r.clutter])
 
         return CharacterInventoryModel(
@@ -497,14 +560,14 @@ class CharacterLib:
             clutter=total_clutter,
         )
 
-    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
-        character = self.get(character_id)
+    def get_on_place_stuff_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
-        # Actions with near items
         for around_row_i, around_col_i in around_character:
             on_same_position_items = self._stuff_lib.get_zone_stuffs(
                 world_row_i=character.world_row_i,
@@ -517,12 +580,21 @@ class CharacterLib:
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {item.name}",
                         link=DESCRIBE_LOOK_AT_STUFF_URL.format(
-                            character_id=character_id, stuff_id=item.id
+                            character_id=character.id, stuff_id=item.id
                         ),
                     )
                 )
 
-        # Actions with near ground resources
+        return character_actions_
+
+    def get_on_place_resource_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
+        character_actions_: typing.List[CharacterActionLink] = []
+
         for around_row_i, around_col_i in around_character:
             on_same_position_resources = self._kernel.resource_lib.get_ground_resource(
                 world_row_i=character.world_row_i,
@@ -535,7 +607,7 @@ class CharacterLib:
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {resource.name}",
                         link=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
-                            character_id=character_id,
+                            character_id=character.id,
                             resource_id=resource.id,
                             row_i=resource.ground_row_i,
                             col_i=resource.ground_col_i,
@@ -543,7 +615,16 @@ class CharacterLib:
                     )
                 )
 
-        # Actions with near build
+        return character_actions_
+
+    def get_on_place_build_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
+        character_actions_: typing.List[CharacterActionLink] = []
+
         for around_row_i, around_col_i in around_character:
             on_same_position_builds = self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
@@ -556,9 +637,48 @@ class CharacterLib:
                 character_actions_.append(
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {build_description.name}",
-                        link=DESCRIBE_BUILD.format(character_id=character_id, build_id=build.id),
+                        link=DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
                     )
                 )
+
+        return character_actions_
+
+    def get_on_place_character_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        around_character = get_on_and_around_coordinates(
+            x=character.zone_row_i, y=character.zone_col_i
+        )
+        character_actions_: typing.List[CharacterActionLink] = []
+
+        for around_row_i, around_col_i in around_character:
+            on_same_position_characters = self.get_zone_characters(
+                row_i=character.world_row_i,
+                col_i=character.world_col_i,
+                zone_row_i=around_row_i,
+                zone_col_i=around_col_i,
+                exclude_ids=[character.id],
+            )
+            for item in on_same_position_characters:
+                character_actions_.append(
+                    CharacterActionLink(
+                        name=f"{item.name}",
+                        link=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
+                            character_id=character.id, with_character_id=item.id
+                        ),
+                    )
+                )
+
+        return character_actions_
+
+    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
+        character = self.get(character_id)
+        character_actions_: typing.List[CharacterActionLink] = []
+
+        character_actions_.extend(self.get_on_place_stuff_actions(character))
+        character_actions_.extend(self.get_on_place_resource_actions(character))
+        character_actions_.extend(self.get_on_place_build_actions(character))
+        character_actions_.extend(self.get_on_place_character_actions(character))
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
@@ -944,8 +1064,8 @@ class CharacterLib:
     ) -> sqlalchemy.orm.Query:
         return self._kernel.character_lib.alive_query.filter(
             CharacterDocument.id.in_(character_ids),
-            CharacterDocument.tiredness <= int(MINIMUM_BEFORE_EXHAUSTED),
-            CharacterDocument.action_points >= int(FIGHT_AP_CONSUME),
+            cast(CharacterDocument.tiredness, Float) <= int(MINIMUM_BEFORE_EXHAUSTED),
+            cast(CharacterDocument.action_points, Float) >= int(FIGHT_AP_CONSUME),
             CharacterDocument.world_row_i == world_row_i,
             CharacterDocument.world_col_i == world_col_i,
         )

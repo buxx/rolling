@@ -1,10 +1,10 @@
 # coding: utf-8
-from sqlalchemy import JSON
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
+from sqlalchemy import JSON
 from sqlalchemy import String
 
 from rolling.rolling_types import ActionScope

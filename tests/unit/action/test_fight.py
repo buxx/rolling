@@ -1,8 +1,10 @@
 # coding: utf-8
+import itertools
+import pytest
+import random
+from sqlalchemy.orm.exc import NoResultFound
 import typing
 from unittest.mock import patch
-
-import pytest
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.fight import AttackCharacterAction
@@ -11,9 +13,10 @@ from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import MEMBER_STATUS
+from tests.fixtures import create_stuff
 
 
 @pytest.fixture
@@ -406,7 +409,7 @@ class TestFightAction:
         attack_action: AttackCharacterAction,
     ) -> None:
         france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
-        france_warlord.tiredness = 100
+        france_warlord_doc.tiredness = 100
         worldmapc_kernel.server_db_session.add(france_warlord_doc)
         worldmapc_kernel.server_db_session.commit()
 
@@ -541,3 +544,111 @@ class TestFightAction:
 
             assert france_warlord_doc.alive
             assert not england_warlord_doc.alive
+
+    # @pytest.mark.timeout(10.0)
+    @pytest.mark.usefixtures("initial_universe_state")
+    @pytest.mark.parametrize(
+        "seed,frw_weapon,frw_shield,frw_armor,enw_weapon,enw_shield,enw_armor",
+        itertools.chain(
+            *[
+                [
+                    (seed, "", "", "", "", "", ""),
+                    (seed, "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET", "", "", ""),
+                    (seed, "", "", "", "STONE_HAXE", "WOOD_SHIELD", "LEATHER_JACKET"),
+                    (
+                        seed,
+                        "STONE_HAXE",
+                        "WOOD_SHIELD",
+                        "LEATHER_JACKET",
+                        "STONE_HAXE",
+                        "WOOD_SHIELD",
+                        "LEATHER_JACKET",
+                    ),
+                ]
+                for seed in [random.randint(1, 1000) for _ in range(3)]
+            ]
+        ),
+    )
+    def test_fight_to_death__one_vs_one(
+        self,
+        france_affinity: AffinityDocument,
+        france_warlord: CharacterModel,
+        england_warlord: CharacterModel,
+        worldmapc_kernel: Kernel,
+        attack_action: AttackCharacterAction,
+        seed: int,
+        frw_weapon: str,
+        frw_shield: str,
+        frw_armor: str,
+        enw_weapon: str,
+        enw_shield: str,
+        enw_armor: str,
+    ) -> None:
+        kernel = worldmapc_kernel
+        random.seed(seed)
+
+        if frw_weapon:
+            stuff = create_stuff(kernel, frw_weapon)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_weapon(france_warlord.id, stuff.id)
+
+        if frw_shield:
+            stuff = create_stuff(kernel, frw_shield)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_shield(france_warlord.id, stuff.id)
+
+        if frw_armor:
+            stuff = create_stuff(kernel, frw_armor)
+            kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
+            kernel.stuff_lib.set_as_used_as_armor(france_warlord.id, stuff.id)
+
+        if enw_weapon:
+            stuff = create_stuff(kernel, enw_weapon)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_weapon(england_warlord.id, stuff.id)
+
+        if enw_shield:
+            stuff = create_stuff(kernel, enw_shield)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_shield(england_warlord.id, stuff.id)
+
+        if enw_armor:
+            stuff = create_stuff(kernel, enw_armor)
+            kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
+            kernel.stuff_lib.set_as_used_as_armor(england_warlord.id, stuff.id)
+
+        while True:
+            try:
+                france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+                france_warlord = worldmapc_kernel.character_lib.get(france_warlord.id)
+                if not france_warlord.is_attack_ready():
+                    return
+            except NoResultFound:
+                worldmapc_kernel.character_lib.get_document(france_warlord.id, dead=True)
+                return
+
+            try:
+                england_warlord_doc = worldmapc_kernel.character_lib.get_document(
+                    england_warlord.id
+                )
+                england_warlord = worldmapc_kernel.character_lib.get(england_warlord.id)
+                if not england_warlord.is_attack_ready():
+                    return
+            except NoResultFound:
+                worldmapc_kernel.character_lib.get_document(england_warlord.id, dead=True)
+                return
+
+            france_warlord_doc.action_points = 24.0
+            england_warlord_doc.action_points = 24.0
+            france_warlord_doc.tiredness = 0.0
+            england_warlord_doc.tiredness = 0.0
+
+            worldmapc_kernel.server_db_session.add(france_warlord_doc)
+            worldmapc_kernel.server_db_session.add(england_warlord_doc)
+            worldmapc_kernel.server_db_session.commit()
+
+            attack_action.perform(
+                france_warlord,
+                with_character=england_warlord,
+                input_=AttackModel(lonely=1, confirm=1),
+            )

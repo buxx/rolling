@@ -1,18 +1,17 @@
 # coding: utf-8
-import typing
-
 import sqlalchemy
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from rolling.model.character import CharacterModel
-from rolling.server.document.affinity import CHIEF_STATUS
-from rolling.server.document.affinity import MEMBER_STATUS
-from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
 from rolling.server.document.affinity import AffinityRelationDocument
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
 
 if typing.TYPE_CHECKING:

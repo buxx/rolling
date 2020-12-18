@@ -1,8 +1,8 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -63,5 +63,5 @@ class KillCharacterAction(WithCharacterAction):
         self._kernel.character_lib.kill(with_character.id)
         return Description(
             title=f"Vous avez tué {with_character.name}",
-            footer_links=[Part(is_link=True, go_back_zone=True)],
+            back_url_is_zone=True,
         )

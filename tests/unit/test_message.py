@@ -1,8 +1,7 @@
 # coding: utf-8
-import typing
-
 from aiohttp.test_utils import TestClient
 import serpyco
+import typing
 
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel

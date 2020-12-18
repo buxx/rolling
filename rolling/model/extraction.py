@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import typing
 
 from rolling.map.type.zone import ZoneMapTileType

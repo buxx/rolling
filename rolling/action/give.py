@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -19,8 +19,8 @@ from rolling.server.transfer import TransferStuffOrResources
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.model.character import CharacterModel
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 class GiveStuffOrResources(TransferStuffOrResources):
@@ -74,28 +74,21 @@ class GiveStuffOrResources(TransferStuffOrResources):
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
-            return f"Donner {stuff.name} à {self._from_character.name}"
+            return f"Donner {stuff.name} à {self._to_character.name}"
 
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
-            return f"Donner {resource_description.name} à {self._from_character.name}"
+            return f"Donner {resource_description.name} à {self._to_character.name}"
 
-        return f"Donner à {self._from_character.name}"
+        return f"Donner à {self._to_character.name}"
 
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
         if sizing_up_quantity:
-            return []
+            return None
+        return self._from_character.id
 
-        return [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-            Part(
-                is_link=True,
-                label="Retourner à la fiche personnage",
-                form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                    character_id=self._from_character.id, with_character_id=self._to_character.id
-                ),
-            ),
-        ]
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        return None
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)

@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 from requests import Response
+import typing
 
 from rolling.model.event import ZoneEvent
 

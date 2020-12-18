@@ -1,12 +1,11 @@
 # coding: utf-8
-import json
-from queue import Queue
-import typing
-
 import aiohttp
 from aiohttp import WSMessage
 from aiohttp.client import _WSRequestContextManager
+import json
+from queue import Queue
 import serpyco
+import typing
 
 from rolling.client.http.client import HttpClient
 from rolling.client.lib.zone import ZoneLib

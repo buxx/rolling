@@ -1,9 +1,9 @@
 # coding: utf-8
 import dataclasses
-import typing
 
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -20,8 +20,8 @@ from rolling.server.transfer import TransferStuffOrResources
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.model.character import CharacterModel
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
 
 
 @dataclasses.dataclass
@@ -69,7 +69,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return have_with_affinity_ids
 
     def can_take_by_force(self, raise_: bool = True) -> bool:
-        if self._from_character.vulnerable and self._character.is_attack_ready():
+        if self._from_character.vulnerable:
             return True
 
         if raise_:
@@ -135,25 +135,19 @@ class TakeStuffOrResources(TransferStuffOrResources):
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
-            return f"Prendre {stuff.name} de {self._character.name}"
+            return f"Prendre {stuff.name} de {self._from_character.name}"
 
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
-            return f"Prendre {resource_description.name} de {self._character.name}"
+            return f"Prendre {resource_description.name} de {self._from_character.name}"
 
-        return f"Prendre de {self._character.name}"
+        return f"Prendre de {self._from_character.name}"
 
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
-        return [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-            Part(
-                is_link=True,
-                label="Retourner à la fiche personnage",
-                form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
-                    character_id=self._character.id, with_character_id=self._from_character.id
-                ),
-            ),
-        ]
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return self._character.id
+
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        return None
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)

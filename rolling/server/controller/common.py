@@ -1,10 +1,9 @@
 # coding: utf-8
-import os
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_request import Request
+import os
 from sqlalchemy.orm.exc import NoResultFound
 
 from rolling.kernel import Kernel

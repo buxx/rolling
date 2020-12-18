@@ -1,10 +1,10 @@
 # coding: utf-8
-import abc
 import dataclasses
+
+import abc
+import serpyco
 import typing
 from urllib.parse import urlencode
-
-import serpyco
 
 from guilang.description import Description
 from rolling.model.event import ZoneEvent
@@ -18,8 +18,8 @@ from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
     from rolling.game.base import GameConfig
+    from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
 
@@ -110,6 +110,10 @@ def get_with_character_action_url(
         action_description_id=action_description_id,
     )
     return f"{base_url}?{urlencode(query_params)}"
+
+
+def get_character_actions_url(character: "CharacterModel") -> str:
+    return f"/_describe/character/{character.id}/on_place_actions"
 
 
 @dataclasses.dataclass

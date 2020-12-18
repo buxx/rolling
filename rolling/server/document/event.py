@@ -1,6 +1,5 @@
 # coding: utf-8
 import datetime
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime

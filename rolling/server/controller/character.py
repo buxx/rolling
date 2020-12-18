@@ -1,14 +1,13 @@
 #  coding: utf-8
-import datetime
-import typing
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+import datetime
 from hapic import HapicData
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -143,23 +142,13 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
 
         return f"Partager avec {self._affinity.name}"
 
-    def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
-        if sizing_up_quantity:
-            return []
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return None
 
-        return [
-            Part(
-                is_link=True,
-                label="Retourner a la fiche de l'affinité",
-                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a l'inventaire",
-                form_action=f"/_describe/character/{self._character.id}/inventory",
-            ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
-        ]
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        if sizing_up_quantity:
+            return None
+        return self._affinity.id
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -309,7 +298,6 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
                 label="Retourner a l'inventaire",
                 form_action=f"/_describe/character/{self._character.id}/inventory",
             ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
@@ -388,7 +376,8 @@ class CharacterController(BaseController):
     @hapic.output_body(Description)
     async def _describe_create_character(self, request: Request) -> Description:
         maximum_points = self._kernel.game.config.create_character_max_points
-        parts = [Part(text="Traits physionomiques")]
+        parts = [Part(text="Traits physionomiques", classes=["h2"])]
+
         for skill_id in base_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
             parts.append(
@@ -400,7 +389,7 @@ class CharacterController(BaseController):
                 )
             )
 
-        parts.append(Part(text="Spécialisations"))
+        parts.append(Part(text="Spécialisations", classes=["h2"]))
 
         for skill_id in self._kernel.game.config.create_character_skills:
             skill_description = self._kernel.game.config.skills[skill_id]
@@ -418,7 +407,7 @@ class CharacterController(BaseController):
             create_character_knowledges
             and self._kernel.game.config.create_character_knowledges_count
         ):
-            parts.append(Part(text="Connaissances"))
+            parts.append(Part(text="Connaissances", classes=["h2"]))
             for knowledge_id in create_character_knowledges:
                 knowledge_description = self._kernel.game.config.knowledge[knowledge_id]
                 parts.append(
@@ -440,12 +429,13 @@ class CharacterController(BaseController):
                         f"répartir jusqu'à {maximum_points} points de compétences et choisir "
                         f"{self._kernel.game.config.create_character_knowledges_count} "
                         f"connaissance(s)."
-                    )
+                    ),
+                    classes=["p"],
                 ),
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[Part(label="Nom du personnage", type_=Type.NUMBER, name="name")] + parts,
+                    items=[Part(label="Nom du personnage", type_=Type.STRING, name="name")] + parts,
                 ),
             ],
         )
@@ -489,8 +479,6 @@ class CharacterController(BaseController):
             title="Fiche de personnage",
             can_be_back_url=True,
             items=[
-                Part(text="Personnage"),
-                Part(text="------------"),
                 Part(label="Nom", text=character.name),
                 Part(
                     label="Points d'actions restants", text=f"{str(character.action_points)}/24.0"
@@ -604,12 +592,11 @@ class CharacterController(BaseController):
             title=f"Caractéristiques et compétences de {character.name}",
             items=items,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Fiche personnage",
                     is_link=True,
                     form_action=f"/_describe/character/{character.id}/card",
-                ),
+                )
             ],
         )
 
@@ -668,12 +655,8 @@ class CharacterController(BaseController):
                 )
             )
 
-        footer_links.append(
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-        )
-
         return Description(
-            title="Inventory",
+            title="Inventaire",
             items=[
                 Part(
                     text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
@@ -695,9 +678,6 @@ class CharacterController(BaseController):
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         items = []
-        footer_links = [
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-        ]
 
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character_id=character.id
@@ -718,10 +698,7 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Inventaire partagé avec des affinités",
-            items=items,
-            footer_links=footer_links,
-            can_be_back_url=True,
+            title="Inventaire partagé avec des affinités", items=items, can_be_back_url=True
         )
 
     @hapic.with_api_doc()
@@ -848,8 +825,7 @@ class CharacterController(BaseController):
                     form_action=form_action,
                     form_values_in_query=True,
                     items=form_parts,
-                ),
-                Part(label="Retour", is_link=True, form_action=hapic_data.query.cancel_url),
+                )
             ],
             can_be_back_url=can_be_back_url,
         )
@@ -860,14 +836,14 @@ class CharacterController(BaseController):
     async def with_inventory(self, request: Request, hapic_data: HapicData) -> Description:
         # TODO: check same zone
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        with_character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
-        inventory_parts = self._get_inventory_parts(with_character, inventory)
+        inventory_parts = self._get_inventory_parts(with_character, inventory, disable_stuff_link=True)
 
         return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
-        self, character: CharacterModel, inventory: CharacterInventoryModel
+        self, character: CharacterModel, inventory: CharacterInventoryModel, disable_stuff_link: bool = False
     ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
@@ -895,37 +871,52 @@ class CharacterController(BaseController):
                 text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
             else:
                 text = f"{name}{description}"
+
+            form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                character_id=character.id, stuff_id=stuff.id
+            )
+            is_link = True
+
+            if disable_stuff_link:
+                form_action = None
+                is_link = False
+
             stuff_items.append(
                 Part(
                     text=text,
-                    is_link=True,
+                    is_link=is_link,
                     align="left",
-                    form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                        character_id=character.id, stuff_id=stuff.id
-                    ),
+                    form_action=form_action,
                 )
             )
             stuff_displayed[stuff.stuff_id] = True
 
         for resource in inventory.resource:
+            form_action = DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
+                character_id=character.id, resource_id=resource.id
+            )
+            is_link = True
+
+            if disable_stuff_link:
+                form_action = None
+                is_link = False
+
             resource_items.append(
                 Part(
                     text=f"{resource.get_full_description(self._kernel)}",
-                    is_link=True,
+                    is_link=is_link,
                     align="left",
-                    form_action=DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
-                        character_id=character.id, resource_id=resource.id
-                    ),
+                    form_action=form_action,
                 )
             )
 
         return [
-            Part(text=f"Sac(s): {bags_string}"),
+            Part(text=f"Sac(s): {bags_string}", classes=["h2"]),
             Part(text=" "),
-            Part(text="Items:"),
+            Part(text="Objets", classes=["h2"]),
             *stuff_items,
             Part(text=" "),
-            Part(text="Resources:"),
+            Part(text="Resources", classes=["h2"]),
             *resource_items,
         ]
 
@@ -1005,14 +996,9 @@ class CharacterController(BaseController):
                     footer_links=[
                         Part(
                             is_link=True,
-                            go_back_zone=True,
-                            label="Retourner à l'écran de déplacements",
-                        ),
-                        Part(
-                            is_link=True,
                             label="Retourner aux propositions d'actions",
                             form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
-                        ),
+                        )
                     ],
                 )
 
@@ -1026,12 +1012,11 @@ class CharacterController(BaseController):
                 )
             ],
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     is_link=True,
                     label="Retourner aux propositions d'actions",
                     form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
-                ),
+                )
             ],
         )
 
@@ -1212,9 +1197,7 @@ class CharacterController(BaseController):
         )
         ground_resource_ids = [r.id for r in ground_resources]
         if hapic_data.path.resource_id not in ground_resource_ids:
-            return Description(
-                title="Cette ressource n'est plus là", items=[Part(is_link=True, go_back_zone=True)]
-            )
+            return Description(title="Cette ressource n'est plus là", items=[Part(is_link=True)])
         ground_resource = next(r for r in ground_resources if r.id == hapic_data.path.resource_id)
 
         available_str = quantity_to_str(
@@ -1265,7 +1248,7 @@ class CharacterController(BaseController):
 
         return Description(
             title=f"{resource_description.name} récupéré",
-            items=[Part(is_link=True, go_back_zone=True)],
+            items=[Part(is_link=True)],
             can_be_back_url=True,
         )
 
@@ -1338,7 +1321,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1346,8 +1329,7 @@ class CharacterController(BaseController):
             action.check_request_is_possible(character_model, input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(character_model, input_)
@@ -1377,7 +1359,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1385,8 +1367,7 @@ class CharacterController(BaseController):
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(character=character_model, stuff=stuff, input_=input_)
@@ -1418,8 +1399,7 @@ class CharacterController(BaseController):
             return get_description_for_not_enough_ap(character_model, exc.cost)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
@@ -1430,8 +1410,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
     @hapic.with_api_doc()
@@ -1457,7 +1436,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1467,8 +1446,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(
@@ -1499,7 +1477,7 @@ class CharacterController(BaseController):
                         text=f"{character_model.name} ne possède plus assez de points d'actions "
                         f"({character_model.action_points} restant et {cost} nécessaires)"
                     ),
-                    Part(label="Continue", go_back_zone=True),
+                    Part(label="Continue"),
                 ],
             )
 
@@ -1509,8 +1487,7 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible",
-                items=[Part(text=str(exc)), Part(label="Continuer", go_back_zone=True)],
+                title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
 
         return action.perform(
@@ -1583,7 +1560,7 @@ class CharacterController(BaseController):
         )
         return Description(
             title="Pret a commencer l'aventure !",
-            items=[Part(label="Continuer", go_back_zone=True)],
+            items=[Part(label="Continuer")],
             new_character_id=character_id,
         )
 
@@ -1628,7 +1605,7 @@ class CharacterController(BaseController):
             world_col_i=hapic_data.path.world_col_i,
         )
 
-        buttons = [Part(label="Rester ici", go_back_zone=True)]
+        buttons = [Part(label="Rester ici")]
         travel_url = (
             f"/_describe/character/{hapic_data.path.character_id}/move"
             f"?to_world_row={hapic_data.path.world_row_i}"
@@ -1728,8 +1705,7 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Effectuer un voyage ...",
-            items=[Part(text=message) for message in messages] + [Part(go_back_zone=True)],
+            title="Effectuer un voyage ...", items=[Part(text=message) for message in messages]
         )
 
     @hapic.with_api_doc()
@@ -1739,7 +1715,7 @@ class CharacterController(BaseController):
         self._character_lib.take_stuff(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
-        return Description(title="Objet récupéré", items=[Part(go_back_zone=True)])
+        return Description(title="Objet récupéré", items=[])
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -1863,14 +1839,71 @@ class CharacterController(BaseController):
             title=f"Personnages suivis",
             items=parts,
             footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
                 Part(
                     label="Fiche personnage",
                     is_link=True,
                     form_action=f"/_describe/character/{character.id}/card",
-                ),
+                )
             ],
         )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_items(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_stuff_actions(
+            character
+        ) + self._kernel.character_lib.get_on_place_resource_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Objet et ressources autour", items=parts, can_be_back_url=True)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_builds(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_build_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Bâtiments autour", items=parts, can_be_back_url=True)
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def describe_around_characters(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        character_actions = self._kernel.character_lib.get_on_place_character_actions(character)
+        parts = [
+            Part(
+                text=action.get_as_str(),
+                form_action=action.link,
+                is_link=True,
+                link_group_name=action.group_name,
+            )
+            for action in character_actions
+        ]
+
+        return Description(title=f"Personnages autour", items=parts, can_be_back_url=True)
 
     def bind(self, app: Application) -> None:
         app.add_routes(
@@ -1964,5 +1997,19 @@ class CharacterController(BaseController):
                     "/character/{character_id}/skills_and_knowledge", self.skills_and_knowledge
                 ),
                 web.post("/character/{character_id}/followed", self.followed),
+                web.post(
+                    "/character/{character_id}/describe_around_items", self.describe_around_items
+                ),
+                web.post(
+                    "/character/{character_id}/describe_around_characters",
+                    self.describe_around_characters,
+                ),
+                web.post(
+                    "/character/{character_id}/describe_around_builds", self.describe_around_builds
+                ),
+                # web.post(
+                #     "/character/{character_id}/pickup_around_items",
+                #     self.pickup_around_items
+                # ),
             ]
         )

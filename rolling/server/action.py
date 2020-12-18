@@ -39,6 +39,7 @@ from rolling.action.search import SearchMaterialAction
 from rolling.action.take import TakeFromCharacterAction
 from rolling.action.transform import TransformResourcesIntoResourcesAction
 from rolling.action.transform import TransformStuffIntoResourcesAction
+from rolling.action.travel import TravelAction
 from rolling.action.use import NotUseAsArmorAction
 from rolling.action.use import NotUseAsBagAction
 from rolling.action.use import NotUseAsShieldAction
@@ -53,8 +54,8 @@ from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
 
 if typing.TYPE_CHECKING:
-    from rolling.kernel import Kernel
     from rolling.action.base import ActionDescriptionModel
+    from rolling.kernel import Kernel
 
 
 class ActionFactory:
@@ -101,6 +102,7 @@ class ActionFactory:
         ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
         ActionType.PROPOSE_TEACH_KNOWLEDGE: ProposeTeachKnowledgeAction,
         ActionType.TEACH_KNOWLEDGE: TeachKnowledgeAction,
+        ActionType.TRAVEL: TravelAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -148,6 +150,7 @@ class ActionFactory:
             ActionType.SEARCH_MATERIAL: SearchMaterialAction,
             ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
             ActionType.CHEATS: CheatsCharacterAction,
+            ActionType.TRAVEL: TravelAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.BEGIN_BUILD: BeginBuildAction,

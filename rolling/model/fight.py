@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+
 import random
 import typing
 
@@ -11,6 +12,8 @@ from rolling.server.document.affinity import AffinityDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+
+DEFAULT_WEAPON_DAMAGE = 0.5
 
 
 @dataclasses.dataclass
@@ -54,7 +57,7 @@ class Weapon:
     def base_damage(self) -> float:
         if self.stuff:
             return self.stuff.damages
-        return 0.5
+        return DEFAULT_WEAPON_DAMAGE
 
     @property
     def sharp(self) -> int:

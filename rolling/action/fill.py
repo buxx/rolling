@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 import serpyco
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -15,10 +14,10 @@ from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
-    from rolling.model.stuff import StuffModel
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
+    from rolling.model.character import CharacterModel
+    from rolling.model.stuff import StuffModel
 
 
 class FillStuffAction(WithStuffAction):
@@ -84,18 +83,12 @@ class FillStuffAction(WithStuffAction):
         footer_links = [
             Part(
                 is_link=True,
-                label="Voir l'inventaire",
-                form_action=f"/_describe/character/{character.id}/inventory",
-            ),
-            Part(
-                is_link=True,
                 label="Voir l'objet",
                 form_action=DESCRIBE_LOOK_AT_STUFF_URL.format(
                     character_id=character.id, stuff_id=stuff.id
                 ),
                 classes=["primary"],
             ),
-            Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements"),
         ]
 
         try:

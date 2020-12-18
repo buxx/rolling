@@ -1,8 +1,7 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from rolling.model.character import CharacterModel
 from rolling.server.document.character import CharacterDocument
@@ -61,7 +60,7 @@ class MessageLib:
         self, character_id: str, message: str, zone_row_i: int, zone_col_i: int, commit: bool = True
     ) -> None:
         author_doc = self._kernel.character_lib.get_document(character_id)
-        zone_characters = self._kernel.character_lib.get_zone_players(
+        zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=zone_row_i, col_i=zone_col_i
         )
         zone_characters_ids = [c.id for c in zone_characters]

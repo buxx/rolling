@@ -1,11 +1,10 @@
 #  coding: utf-8
-from collections import namedtuple
-import typing
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
+from collections import namedtuple
 from hapic import HapicData
+import typing
 
 from guilang.description import Description
 from guilang.description import Part
@@ -70,7 +69,7 @@ class ZoneController(BaseController):
     async def get_characters(
         self, request: Request, hapic_data: HapicData
     ) -> typing.List[CharacterModel]:
-        return self._character_lib.get_zone_players(
+        return self._character_lib.get_zone_characters(
             row_i=request.match_info["row_i"], col_i=request.match_info["col_i"]
         )
 
@@ -126,7 +125,7 @@ class ZoneController(BaseController):
         tile_type: MapTileType = world_rows[hapic_data.path.row_i][hapic_data.path.col_i]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(tile_type)
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        characters = self._kernel.character_lib.get_zone_players(
+        characters = self._kernel.character_lib.get_zone_characters(
             hapic_data.path.row_i, hapic_data.path.col_i
         )
         characters_parts: typing.List[Part] = []
@@ -246,9 +245,6 @@ class ZoneController(BaseController):
                 Part(label=""),
             ]
             + message_parts,
-            footer_links=[
-                Part(is_link=True, go_back_zone=True, label="Retourner à l'écran de déplacements")
-            ],
             can_be_back_url=True,
         )
 

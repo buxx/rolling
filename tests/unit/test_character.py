@@ -1,9 +1,8 @@
 # coding: utf-8
-import typing
-
 from aiohttp.test_utils import TestClient
 import pytest
 import serpyco
+import typing
 
 from guilang.description import Part
 from rolling.action.base import get_with_stuff_action_url
@@ -11,10 +10,10 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
-from rolling.server.document.affinity import CHIEF_STATUS
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
 from tests.fixtures import description_serializer
 
 

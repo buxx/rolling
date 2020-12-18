@@ -1,7 +1,6 @@
 # coding: utf-8
-import typing
-
 import pytest
+import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take import TakeFromCharacterAction
@@ -11,10 +10,10 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
-from rolling.server.document.affinity import CHIEF_STATUS
-from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
 
 
 @pytest.fixture

@@ -1,6 +1,4 @@
 # coding: utf-8
-import typing
-
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -8,6 +6,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
+import typing
 
 from rolling.server.document.base import SqliteNumeric
 from rolling.server.document.resource import ResourceDocument
@@ -76,6 +75,8 @@ class CharacterDocument(Document):
 
     @effect_ids.setter
     def effect_ids(self, value: typing.List[str]) -> None:
+        value = [v for v in value if v]
+        value = list(set(value))
         self._effect_ids = ",".join(value)
 
 
