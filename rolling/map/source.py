@@ -137,8 +137,7 @@ class ZoneMapSource(MapSource):
     ) -> typing.Tuple[int, int]:
         available_coordinates: typing.List[typing.Tuple[int, int]] = []
         build_docs = self._kernel.build_lib.get_zone_build(
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
+            world_row_i=world_row_i, world_col_i=world_col_i
         )
         not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
         for build_doc in build_docs:
@@ -150,7 +149,10 @@ class ZoneMapSource(MapSource):
         for row_i, row in enumerate(self.geography.rows):
             for col_i, map_tile_type in enumerate(row):
                 # TODO: traversable to update here
-                if traversable_properties[map_tile_type].get(TransportType.WALKING.value) and (row_i, col_i) not in not_traversable_by_builds:
+                if (
+                    traversable_properties[map_tile_type].get(TransportType.WALKING.value)
+                    and (row_i, col_i) not in not_traversable_by_builds
+                ):
                     available_coordinates.append((row_i, col_i))
 
         if not available_coordinates:

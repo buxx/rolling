@@ -29,7 +29,6 @@ class ActionType(enum.Enum):
     DROP_RESOURCE = "DROP_RESOURCE"
     MIX_RESOURCES = "MIX_RESOURCES"
     EAT_RESOURCE = "EAT_RESOURCE"
-    EAT_STUFF = "EAT_STUFF"
     SEARCH_FOOD = "SEARCH_FOOD"
     BEGIN_BUILD = "BEGIN_BUILD"
     BRING_RESOURCE_ON_BUILD = "BRING_RESOURCE_ON_BUILD"
@@ -55,6 +54,7 @@ class ActionType(enum.Enum):
     TRAVEL = "TRAVEL"
 
 
+# FIXME BS NOW: delete me
 class TurnMode(enum.Enum):
     DAY = "DAY"
     HOUR = "HOUR"

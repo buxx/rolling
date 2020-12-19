@@ -57,9 +57,7 @@ class NotUseAsBagAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_bag(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class UseAsBagAction(WithStuffAction):
@@ -107,9 +105,7 @@ class UseAsBagAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_bag(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class UseAsWeaponAction(WithStuffAction):
@@ -157,9 +153,7 @@ class UseAsWeaponAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class NotUseAsWeaponAction(WithStuffAction):
@@ -203,9 +197,7 @@ class NotUseAsWeaponAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class UseAsShieldAction(WithStuffAction):
@@ -253,9 +245,7 @@ class UseAsShieldAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class NotUseAsShieldAction(WithStuffAction):
@@ -299,9 +289,7 @@ class NotUseAsShieldAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class UseAsArmorAction(WithStuffAction):
@@ -349,9 +337,7 @@ class UseAsArmorAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")
 
 
 class NotUseAsArmorAction(WithStuffAction):
@@ -395,6 +381,4 @@ class NotUseAsArmorAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)
-        return Description(
-            title="Action effectué",
-        )
+        return Description(title="Action effectué")

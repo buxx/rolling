@@ -1,4 +1,25 @@
-action_points_per_turn = 24
+# turn config
+action_points_per_tick = 1.0
+life_point_points_per_tick = 0.05
+thirst_change_per_tick = 2.0
+thirst_life_point_loss_per_tick = 0.2
+hunger_change_per_tick = 1.0
+hunger_life_point_loss_per_tick = 0.1
+start_hunger_life_point_loss = 100.0
+start_thirst_life_point_loss = 100.0
+limit_hunger_increase_life_point = 80.0
+limit_thirst_increase_life_point = 80.0
+limit_thirst_reduce_tiredness = 80.0
+limit_hunger_reduce_tiredness = 80.0
+tick_every = 3600
+default_maximum_ap = 36.0
+reduce_tiredness_per_tick = 4
+start_thirst = 50.0
+start_hunger = 50
+start_action_points = 24.0
+stop_auto_drink_thirst = 20.0
+stop_auto_eat_hunger = 20.0
+
 create_character_event_title = "You wake up on a beach"
 create_character_event_story_text = """hello"""
 fresh_water_resource_id = "FRESH_WATER"
@@ -6,8 +27,6 @@ liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]
 default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
-turn_mode = "DAY"
-day_turn_every = 3600
 create_character_skills = ["crafts", "hunting_gathering", "tannery"]
 create_character_knowledges = ["blacksmith"]
 create_character_knowledges_count = 1
@@ -91,6 +110,13 @@ reduce_tiredness_per_turn = 50
     attributes_to_false = ["starved", "feel_hungry"]
 
 [resources]
+  [resources.FRESH_WATER]
+    name = "Eau potable"
+    weight=1000.0
+    material="LIQUID"
+    unit = "L"
+    clutter = 1.0
+    actions = []
   [resources.RED_WINE]
     name = "Vin rouge"
     weight=1000.0
@@ -135,6 +161,13 @@ reduce_tiredness_per_turn = 50
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
   [resources.VEGETAL_FOOD_FRESH]
     name = "Nourriture végétale fraiche"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 1.0
+    actions = ["EAT_RESOURCE"]
+  [resources.VEGETAL_FOOD_FRESH2]
+    name = "Nourriture végétale fraiche2"
     weight=1000.0
     material="MIDDLE_PIECE"
     unit = "L"
@@ -220,13 +253,15 @@ reduce_tiredness_per_turn = 50
     cost = 0.0
   [ACTIONS.EAT_FRESH_FRUITS]
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["VEGETAL_FOOD_FRESH"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 1.0
+    accept_resources = ["VEGETAL_FOOD_FRESH", "VEGETAL_FOOD_FRESH2"]
+    consume_per_tick = 0.04  # litters (0.04 * 24 hours = ~1 litter)
+    character_effects = []
     cost = 0.0
-  [ACTIONS.EAT_APPLE]
-    actions = ["EAT_STUFF"]
-    accept_stuffs = ["APPLE"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 1.0
+
+  [ACTIONS.DRINK_FRESH_WATER]
+    actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
+    accept_resources = ["FRESH_WATER"]
+    consume_per_tick = 0.04  # litters (0.04 * 24 hours = ~1 litter)
+    character_effects = []
+    like_water = true
     cost = 0.0

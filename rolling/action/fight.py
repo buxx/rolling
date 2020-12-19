@@ -257,7 +257,11 @@ class AttackCharacterAction(WithCharacterAction):
         character_relation = self._kernel.affinity_lib.get_active_relation(
             character_id=character.id, affinity_id=as_affinity.id
         )
-        if character_relation.status_id not in (MEMBER_STATUS[0], WARLORD_STATUS[0], CHIEF_STATUS[0]):
+        if character_relation.status_id not in (
+            MEMBER_STATUS[0],
+            WARLORD_STATUS[0],
+            CHIEF_STATUS[0],
+        ):
             raise ImpossibleAction(
                 "Vous ne pouvez impliquer cette affinité qu'avec le role de Chef ou Chef de guerre"
             )
@@ -300,11 +304,7 @@ class AttackCharacterAction(WithCharacterAction):
             for in_conflict_str in in_conflict_strs:
                 parts.append(Part(text=f"- {in_conflict_str}"))
 
-            return Description(
-                title=title,
-                items=parts,
-                footer_with_character_id=character.id,
-            )
+            return Description(title=title, items=parts, footer_with_character_id=character.id)
 
     def _get_attack_as_affinity_description(
         self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int
@@ -394,11 +394,7 @@ class AttackCharacterAction(WithCharacterAction):
         )
         self._kill_deads(attack_description.all_fighters + defense_description.all_fighters)
 
-        return Description(
-            title=title,
-            items=parts,
-            footer_with_character_id=character.id,
-        )
+        return Description(title=title, items=parts, footer_with_character_id=character.id)
 
     def perform(
         self, character: "CharacterModel", with_character: "CharacterModel", input_: AttackModel

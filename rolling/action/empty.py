@@ -67,7 +67,7 @@ class EmptyStuffAction(WithStuffAction):
                     character_id=character.id, stuff_id=stuff.id
                 ),
                 classes=["primary"],
-            ),
+            )
         ]
 
         try:

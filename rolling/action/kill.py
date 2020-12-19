@@ -61,7 +61,4 @@ class KillCharacterAction(WithCharacterAction):
         self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
     ) -> Description:
         self._kernel.character_lib.kill(with_character.id)
-        return Description(
-            title=f"Vous avez tué {with_character.name}",
-            back_url_is_zone=True,
-        )
+        return Description(title=f"Vous avez tué {with_character.name}", back_url_is_zone=True)

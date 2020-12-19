@@ -26,14 +26,10 @@ class TravelAction(CharacterAction):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel"
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel") -> None:
         pass  # always authorize display travel description page
 
-    def check_request_is_possible(
-        self, character: "CharacterModel", input_: typing.Any
-    ) -> None:
+    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
         self.check_is_possible(character)
 
     def get_character_actions(
@@ -73,7 +69,5 @@ class TravelAction(CharacterAction):
 
         return action_links
 
-    def perform(
-        self, character: "CharacterModel", input_: typing.Any
-    ) -> Description:
+    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
         pass  # action links are descriptions

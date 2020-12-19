@@ -324,11 +324,9 @@ class CharacterModel:
     zone_col_i: int = None
     zone_row_i: int = None
 
-    feel_thirsty: bool = True
-    dehydrated: bool = False
-    feel_hungry: bool = True
-    starved: bool = False
     tiredness: int = 0
+    thirst: float = 0  # %
+    hunger: float = 0  # %
 
     _display_object = None
 

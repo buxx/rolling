@@ -7,10 +7,10 @@
 
 [LITTLE_SKIN_CANTEEN]
   name = "Petite gourde de peau"
-  filled_at = 0.0
+  filled_value = 0.0
   filled_unity = "L"
   filled_capacity = 1.0
-  weight = 0.1
+  weight = 1000.0
   clutter = 1.0
   actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
@@ -155,67 +155,67 @@
   name = "Lièvre"
   weight = 3500.0
   clutter = 1.2
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "RABBIT"]
 [PHEASANT]
   name = "Faisan"
   weight = 1500.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
 [RABBIT]
   name = "Lapin"
   weight = 2700.0
   clutter = 1.1
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "RABBIT"]
 [PADRIDGE]
   name = "Perdrix"
   weight = 1500.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
 [DUCK]
   name = "Canard"
   weight = 2000.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
 [MOORHEN]
   name = "Poule d'eau"
   weight = 600.0
   clutter = 0.5
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
 [RAVEN]
   name = "Corbeau"
   weight = 650.0
   clutter = 0.5
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
 [FOX]
   name = "Renard"
   weight = 5500.0
   clutter = 2.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "LITTLE_PREDATOR"]
 [MARTEN]
   name = "Fouine"
   weight = 2700.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "LITTLE_PREDATOR"]
 [BOAR]
   name = "Sanglier"
   weight = 20000.0
   clutter = 10.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
 [DEER]
   name = "Chevreuil"
   weight = 18000.0
   clutter = 10.0
-  actions = ["DROP_STUFF", "EAT_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
 [LITTLE_STATUETTE]
   name = "Petite statuette"

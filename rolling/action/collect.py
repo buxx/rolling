@@ -180,5 +180,9 @@ class CollectResourceAction(CharacterAction):
 
         return Description(
             title=f"Récupérer du {resource.name}",
-            items=[Part(text=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré")]
+            items=[
+                Part(
+                    text=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré"
+                )
+            ],
         )

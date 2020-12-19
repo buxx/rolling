@@ -35,7 +35,7 @@ def empty_plastic_bottle(
 ) -> StuffDocument:
     stuff = StuffDocument(
         stuff_id="PLASTIC_BOTTLE_1L",
-        filled_at=0.0,
+        filled_value=0.0,
         filled_unity=Unit.LITTER.value,
         weight=0.0,
         clutter=1.0,
@@ -54,7 +54,7 @@ def half_filled_plastic_bottle(
 ) -> StuffDocument:
     stuff = StuffDocument(
         stuff_id="PLASTIC_BOTTLE_1L",
-        filled_at=50.0,
+        filled_value=50.0,
         filled_unity=Unit.LITTER.value,
         weight=0.50,
         clutter=1.0,

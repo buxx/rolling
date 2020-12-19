@@ -248,6 +248,9 @@ class ResourceLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
     ) -> CarriedResourceDescriptionModel:
+        if not docs:
+            raise NoCarriedResource()
+
         resource_description = self._kernel.game.config.resources[docs[0].resource_id]
         quantity = sum([float(doc.quantity) for doc in docs])
         clutter = quantity * resource_description.clutter

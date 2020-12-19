@@ -36,14 +36,12 @@ class CharacterDocument(Document):
 
     # role game play
     action_points = Column(SqliteNumeric(10, 2), nullable=False)
+    max_action_points = Column(SqliteNumeric(10, 2), nullable=False)
     life_points = Column(SqliteNumeric(10, 2), default=1.0)
-    feel_thirsty = Column(Boolean, default=True)
-    dehydrated = Column(Boolean, default=False)
+    thirst = Column(SqliteNumeric(10, 2), nullable=False)
+    hunger = Column(SqliteNumeric(10, 2), nullable=False)
     _effect_ids = Column(Text, default="")
-    feel_hungry = Column(Boolean, default=True)
-    starved = Column(Boolean, default=False)
-    # FIXME BS: add sleep action
-    tiredness = Column(Integer, nullable=False, default=0)  # /100
+    tiredness = Column(Integer, nullable=False, default=0)  # %
 
     # transport
     shipped_stuff = relationship(

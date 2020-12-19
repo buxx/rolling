@@ -10,6 +10,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_stuff_action_url
+from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.rolling_types import ActionType
@@ -20,6 +21,8 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
+    from rolling.server.document.character import CharacterDocument
+    from rolling.server.document.stuff import StuffDocument
 
 
 @dataclasses.dataclass
@@ -30,6 +33,7 @@ class DrinkResourceModel:
 @dataclasses.dataclass
 class DrinkStuffModel:
     stuff_id: int = serpyco.field(cast_on_load=True)
+    all_possible: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=0)
 
 
 class DrinkResourceAction(CharacterAction):
@@ -45,6 +49,8 @@ class DrinkResourceAction(CharacterAction):
             "effects": [
                 game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
+            "like_water": action_config_raw["like_water"],
+            "consume_per_tick": action_config_raw["consume_per_tick"],
         }
 
     def check_is_possible(self, character: "CharacterModel") -> None:
@@ -94,7 +100,7 @@ class DrinkResourceAction(CharacterAction):
                 query_params = self.input_model(resource_id=resource.id)
                 character_actions.append(
                     CharacterActionLink(
-                        name=f"Drink {resource.name}",
+                        name=f"Boire {resource.name}",
                         link=get_character_action_url(
                             character_id=character.id,
                             action_type=ActionType.DRINK_RESOURCE,
@@ -115,8 +121,11 @@ class DrinkResourceAction(CharacterAction):
 
         for effect in effects:
             self._effect_manager.enable_effect(character_doc, effect)
-            self._kernel.server_db_session.add(character_doc)
-            self._kernel.server_db_session.commit()
+
+        # NOTE: consider here infinite resource
+        character_doc.thirst = 0.0
+        self._kernel.server_db_session.add(character_doc)
+        self._kernel.server_db_session.commit()
 
         return Description(title="Vous avez bu")
 
@@ -134,6 +143,8 @@ class DrinkStuffAction(WithStuffAction):
             "effects": [
                 game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
+            "like_water": action_config_raw["like_water"],
+            "consume_per_tick": action_config_raw["consume_per_tick"],
         }
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
@@ -151,15 +162,10 @@ class DrinkStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-07-31: check is owned stuff
-        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
+        self.check_is_possible(character, stuff)
 
-        if (
-            stuff.filled_with_resource is not None
-            and stuff.filled_with_resource in accept_resources_ids
-        ):
-            return
-
-        raise ImpossibleAction(f"Il n'y a pas de quoi boire la dedans")
+        if stuff.filled_value < self._description.properties["consume_per_tick"]:
+            raise ImpossibleAction(f"Pas assez pour boire")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -169,37 +175,88 @@ class DrinkStuffAction(WithStuffAction):
             stuff.filled_with_resource is not None
             and stuff.filled_with_resource in accept_resources_ids
         ):
-            query_params = self.input_model(stuff_id=stuff.id)
             resource_description = self._kernel.game.config.resources[stuff.filled_with_resource]
             return [
                 CharacterActionLink(
                     name=f"Boire {resource_description.name}",
-                    link=get_with_stuff_action_url(
-                        character.id,
-                        ActionType.DRINK_STUFF,
-                        query_params=self.input_model_serializer.dump(query_params),
-                        stuff_id=stuff.id,
-                        action_description_id=self._description.id,
-                    ),
+                    link=self._get_url(character, stuff, all_possible=False),
                     cost=self.get_cost(character, stuff),
                 )
             ]
 
         return []
 
+    def _get_url(self, character: "CharacterModel", stuff: "StuffModel", all_possible: bool) -> str:
+        return get_with_stuff_action_url(
+            character.id,
+            ActionType.DRINK_STUFF,
+            query_params={"stuff_id": stuff.id, "all_possible": 1 if all_possible else 0},
+            stuff_id=stuff.id,
+            action_description_id=self._description.id,
+        )
+
+    @classmethod
+    def drink(
+        cls,
+        kernel: "Kernel",
+        character_doc: "CharacterDocument",
+        stuff_doc: "StuffDocument",
+        all_possible: bool,
+        consume_per_tick: float,
+    ) -> None:
+        while True:
+            try:
+                stuff_doc.empty(kernel, remove_value=consume_per_tick)
+            except CantEmpty:
+                break
+
+            character_doc.thirst = max(
+                0.0, float(character_doc.thirst) - kernel.game.config.thirst_change_per_tick
+            )
+            kernel.server_db_session.add(stuff_doc)
+            kernel.server_db_session.add(character_doc)
+            kernel.server_db_session.commit()
+
+            if (
+                not all_possible
+                or float(character_doc.thirst) <= kernel.game.config.stop_auto_drink_thirst
+            ):
+                break
+
     def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
-            "effects"
-        ]
 
-        for effect in effects:
-            self._effect_manager.enable_effect(character_doc, effect)
-            self._kernel.server_db_session.add(character_doc)
+        stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff.id)
+        self.drink(
+            self._kernel,
+            character_doc,
+            stuff_doc,
+            all_possible=bool(input_.all_possible),
+            consume_per_tick=self._description.properties["consume_per_tick"],
+        )
 
-        self._kernel.character_lib.drink_stuff(character.id, stuff.id)
-        self._kernel.server_db_session.commit()
-
-        return Description(title="Vous avez bu")
+        return Description(
+            title="Boire",
+            items=[
+                Part(
+                    text=(
+                        f"Etat de votre soif: "
+                        f"{self._kernel.character_lib.get_thirst_sentence(character_doc.thirst)}"
+                    )
+                ),
+                Part(
+                    label="Boire encore",
+                    is_link=True,
+                    form_values_in_query=True,
+                    form_action=self._get_url(character, stuff, all_possible=False),
+                ),
+                Part(
+                    label="Boire jusqu'à plus soif",
+                    is_link=True,
+                    form_values_in_query=True,
+                    form_action=self._get_url(character, stuff, all_possible=True),
+                ),
+            ],
+        )

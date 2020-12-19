@@ -181,7 +181,7 @@ class DropResourceAction(WithResourceAction):
                         ],
                     )
                 ],
-                back_url=f"/_describe/character/{character.id}/inventory"
+                back_url=f"/_describe/character/{character.id}/inventory",
             )
 
         self._kernel.resource_lib.drop(
@@ -194,6 +194,5 @@ class DropResourceAction(WithResourceAction):
             zone_col_i=character.zone_col_i,
         )
         return Description(
-            title=f"Action effectué",
-            back_url=f"/_describe/character/{character.id}/inventory",
+            title=f"Action effectué", back_url=f"/_describe/character/{character.id}/inventory"
         )

@@ -183,8 +183,7 @@ class SearchFoodAction(CharacterAction):
         if not found_something:
             parts.append(
                 Part(
-                    text=
-                    (
+                    text=(
                         "Vous n'avez rien trouvé ! Cela peut s'expliquer par de la malchance, "
                         "de l'incompétence, ou de l'intelligence (si vous avez cherché quelque "
                         "chose que l'on ne trouve pas dans cette zone ...)"

@@ -67,24 +67,18 @@ def is_there_resource_id_in_zone(
 
 
 def get_stuffs_filled_with_resource_id(
-    kernel: "Kernel", character_id: str, resource_id: str
+    kernel: "Kernel",
+    character_id: str,
+    resource_id: str,
+    exclude_stuff_ids: typing.Optional[typing.List[int]] = None,
 ) -> typing.Iterator["StuffModel"]:
     from rolling.server.lib.stuff import StuffLib
 
     stuff_lib = StuffLib(kernel=kernel)
     character_stuffs = stuff_lib.get_carried_by(character_id)
     for stuff in character_stuffs:
-        # FIXME BS 2019-07-10: case where not 100% ?
-        if stuff.filled_with_resource == resource_id:
+        if stuff.filled_with_resource == resource_id and stuff.id not in exclude_stuff_ids:
             yield stuff
-
-
-def get_stuffs_eatable(kernel: "Kernel", character_id: str) -> typing.Iterator["StuffModel"]:
-    for stuff in kernel.stuff_lib.get_carried_by(character_id):
-        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(stuff.stuff_id)
-        for description in stuff_properties.descriptions:
-            if description.action_type == ActionType.EAT_STUFF:
-                yield stuff
 
 
 class CornerEnum(enum.Enum):
@@ -269,12 +263,15 @@ def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel
 
 
 def get_character_stuff_filled_with_water(
-    kernel: "Kernel", character_id: str
+    kernel: "Kernel", character_id: str, exclude_stuff_ids: typing.Optional[typing.List[int]] = None
 ) -> typing.Optional["StuffModel"]:
     try:
         return next(
             get_stuffs_filled_with_resource_id(
-                kernel, character_id, kernel.game.config.fresh_water_resource_id
+                kernel,
+                character_id,
+                kernel.game.config.fresh_water_resource_id,
+                exclude_stuff_ids=exclude_stuff_ids,
             )
         )
     except StopIteration:

@@ -287,18 +287,16 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
                     f"/_describe/character/{self._character.id}"
                     f"/shared-inventory/add?affinity_id={self._affinity.id}"
                 ),
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a la fiche de l'affinité",
-                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a l'inventaire",
-                form_action=f"/_describe/character/{self._character.id}/inventory",
-            ),
+            )
         ]
+
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return None
+
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        if sizing_up_quantity:
+            return None
+        return self._affinity.id
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -487,8 +485,8 @@ class CharacterController(BaseController):
                     label="Points de vie",
                     text=f"{str(character.life_points)}/{str(character.max_life_comp)}",
                 ),
-                Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
-                Part(label="Faim", text="oui" if character.feel_hungry else "non"),
+                Part(label="Soif", text=str(round(character.thirst, 0))),
+                Part(label="Faim", text=str(round(character.hunger, 0))),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
                 Part(label="Exténué", text="oui" if character.is_exhausted() else "non"),
                 Part(
@@ -838,12 +836,17 @@ class CharacterController(BaseController):
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
-        inventory_parts = self._get_inventory_parts(with_character, inventory, disable_stuff_link=True)
+        inventory_parts = self._get_inventory_parts(
+            with_character, inventory, disable_stuff_link=True
+        )
 
         return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
-        self, character: CharacterModel, inventory: CharacterInventoryModel, disable_stuff_link: bool = False
+        self,
+        character: CharacterModel,
+        inventory: CharacterInventoryModel,
+        disable_stuff_link: bool = False,
     ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
@@ -882,12 +885,7 @@ class CharacterController(BaseController):
                 is_link = False
 
             stuff_items.append(
-                Part(
-                    text=text,
-                    is_link=is_link,
-                    align="left",
-                    form_action=form_action,
-                )
+                Part(text=text, is_link=is_link, align="left", form_action=form_action)
             )
             stuff_displayed[stuff.stuff_id] = True
 
@@ -1799,16 +1797,15 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def describe_turn(self, request: Request, hapic_data: HapicData) -> Description:
-        next_turn_in_str = self._kernel.character_lib.get_next_turn_str_value()
         return Description(
-            title=f"Passage de tour",
+            title=f"Ecoulement du temps",
             items=[
                 Part(
-                    text=f"Dans exactement {next_turn_in_str}, le passage de tour sera effectué. "
-                    f"Cela signifie que le temps passe dans le jeu: l'herbe pousse, "
-                    f"l'eau coule, les feux s'éteignent s'il n'ont plus de bois à bruler ... "
-                    f"Mais cela signifie aussi que les personnages perdent des points de vie "
-                    f"s'il n'ont pas a boire ou a manger par exemple !"
+                    # FIXME: to do ...
+                    text=(
+                        """TODO
+                        """
+                    )
                 )
             ],
             can_be_back_url=True,

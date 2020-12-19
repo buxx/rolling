@@ -4,6 +4,7 @@ import toml
 import typing
 
 from rolling.action.base import ActionDescriptionModel
+from rolling.exception import ConfigurationError
 from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
@@ -36,7 +37,6 @@ from rolling.model.zone import ZoneResource
 from rolling.model.zone import ZoneStuff
 from rolling.model.zone import ZoneTileProperties
 from rolling.rolling_types import ActionType
-from rolling.rolling_types import TurnMode
 from rolling.server.action import ActionFactory
 
 if typing.TYPE_CHECKING:
@@ -47,7 +47,32 @@ class GameConfig:
     def __init__(self, kernel: "Kernel", config_dict: dict, folder_path: str) -> None:
         self._folder_path = folder_path
         self._kernel = kernel
-        self.action_points_per_turn: int = config_dict["action_points_per_turn"]
+
+        self.action_points_per_tick: float = config_dict["action_points_per_tick"]
+        self.life_point_points_per_tick: float = config_dict["life_point_points_per_tick"]
+        self.thirst_change_per_tick: float = config_dict["thirst_change_per_tick"]  # percent
+        self.thirst_life_point_loss_per_tick: float = config_dict["thirst_life_point_loss_per_tick"]
+        self.hunger_change_per_tick: float = config_dict["hunger_change_per_tick"]  # percent
+        self.hunger_life_point_loss_per_tick: float = config_dict["hunger_life_point_loss_per_tick"]
+        self.tick_every: int = config_dict["tick_every"]  # seconds
+        self.default_maximum_ap: float = config_dict["default_maximum_ap"]
+        self.reduce_tiredness_per_tick: int = config_dict["reduce_tiredness_per_tick"]
+        self.start_thirst: float = config_dict["start_thirst"]
+        self.start_hunger: float = config_dict["start_hunger"]
+        self.start_action_points: float = config_dict["start_action_points"]
+        self.start_hunger_life_point_loss: float = config_dict["start_hunger_life_point_loss"]
+        self.start_thirst_life_point_loss: float = config_dict["start_thirst_life_point_loss"]
+        self.limit_hunger_increase_life_point: float = config_dict[
+            "limit_hunger_increase_life_point"
+        ]
+        self.limit_thirst_increase_life_point: float = config_dict[
+            "limit_thirst_increase_life_point"
+        ]
+        self.limit_hunger_reduce_tiredness: float = config_dict["limit_hunger_reduce_tiredness"]
+        self.limit_thirst_reduce_tiredness: float = config_dict["limit_thirst_reduce_tiredness"]
+        self.stop_auto_drink_thirst: float = config_dict["stop_auto_drink_thirst"]
+        self.stop_auto_eat_hunger: float = config_dict["stop_auto_eat_hunger"]
+
         self.create_character_event_title: str = config_dict["create_character_event_title"]
         self.create_character_event_story_image: str = config_dict.get(
             "create_character_event_story_image"
@@ -60,7 +85,6 @@ class GameConfig:
         self.fill_with_material_ids: typing.List[str] = config_dict["fill_with_material_ids"]
         self.default_weight_capacity: float = config_dict["default_weight_capacity"]
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
-        self.turn_mode: TurnMode = TurnMode(config_dict["turn_mode"])
         self.cheats: typing.Dict[str, typing.List[str]] = config_dict.get("cheats")
         self.create_character_skills: typing.List[str] = config_dict["create_character_skills"]
         self.create_character_knowledges: typing.List[str] = config_dict[
@@ -70,12 +94,8 @@ class GameConfig:
             "create_character_knowledges_count"
         ]
         self.create_character_max_points: float = config_dict["create_character_max_points"]
+        # FIXME BS NOW: passer les écrans en heure (en fonction de tick_every)
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
-        self.reduce_tiredness_per_turn: int = config_dict["reduce_tiredness_per_turn"]
-
-        self.day_turn_every = None
-        if self.turn_mode == TurnMode.DAY:
-            self.day_turn_every = config_dict["day_turn_every"]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
@@ -470,3 +490,11 @@ class Game:
                 maximum=resource_raw["maximum"],
                 regeneration=resource_raw["regeneration"],
             )
+
+    def get_drink_water_action_description(self) -> ActionDescriptionModel:
+        for action_description in self.config.actions[ActionType.DRINK_RESOURCE]:
+            if "FRESH_WATER" in [
+                r.id for r in action_description.properties.get("accept_resources", [])
+            ]:
+                return action_description
+        raise ConfigurationError("Unable to find drink water action")

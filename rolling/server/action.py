@@ -22,7 +22,6 @@ from rolling.action.drink import DrinkStuffAction
 from rolling.action.drop import DropResourceAction
 from rolling.action.drop import DropStuffAction
 from rolling.action.eat import EatResourceAction
-from rolling.action.eat import EatStuffAction
 from rolling.action.empty import EmptyStuffAction
 from rolling.action.fight import AttackCharacterAction
 from rolling.action.fill import FillStuffAction
@@ -78,7 +77,6 @@ class ActionFactory:
         ActionType.DROP_STUFF: DropStuffAction,
         ActionType.DROP_RESOURCE: DropResourceAction,
         ActionType.MIX_RESOURCES: MixResourcesAction,
-        ActionType.EAT_STUFF: EatStuffAction,
         ActionType.EAT_RESOURCE: EatResourceAction,
         ActionType.SEARCH_FOOD: SearchFoodAction,
         ActionType.BEGIN_BUILD: BeginBuildAction,
@@ -114,7 +112,6 @@ class ActionFactory:
             ActionType.USE_AS_BAG: UseAsBagAction,
             ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
             ActionType.DROP_STUFF: DropStuffAction,
-            ActionType.EAT_STUFF: EatStuffAction,
             ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
             ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
             ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
