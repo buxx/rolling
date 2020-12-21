@@ -5,7 +5,8 @@ import typing
 
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.eat import EatResourceAction
-from rolling.exception import ErrorWhenConsume, NoCarriedResource
+from rolling.exception import ErrorWhenConsume
+from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
 from rolling.kernel import Kernel
 from rolling.log import server_logger

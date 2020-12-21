@@ -22,6 +22,7 @@ from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildRequireResourceDescription
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.data import ListOfItemModel
 from rolling.model.event import ClickActionData
 from rolling.model.event import NewBuildData
 from rolling.model.event import NewResumeTextData
@@ -568,7 +569,9 @@ class BuildAction(CharacterAction):
                 ZoneEvent(
                     type=ZoneEventType.NEW_RESUME_TEXT,
                     data=NewResumeTextData(
-                        resume=self._kernel.character_lib.get_resume_text(character.id)
+                        resume=ListOfItemModel(
+                            self._kernel.character_lib.get_resume_text(character.id)
+                        )
                     ),
                 )
             ],

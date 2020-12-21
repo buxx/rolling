@@ -24,6 +24,7 @@ from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
+from rolling.model.data import ItemModel
 from rolling.model.event import StoryPage
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
@@ -1132,9 +1133,7 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def get_resume_text(
-        self, character_id: str
-    ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
+    def get_resume_text(self, character_id: str) -> typing.List[ItemModel]:
         character = self.get(character_id)
         followers_count = self.get_follower_count(
             character_id, row_i=character.world_row_i, col_i=character.world_col_i
@@ -1157,17 +1156,39 @@ class CharacterLib:
 
         fighter_with_him = self._kernel.character_lib.get_with_fighters_count(character_id)
 
+        hunger_class = "green"
+        thirst_class = "green"
+
+        if character.hunger >= self._kernel.game.config.limit_hunger_increase_life_point:
+            hunger_class = "red"
+        elif character.hunger >= self._kernel.game.config.stop_auto_eat_hunger:
+            hunger_class = "yellow"
+
+        if character.thirst >= self._kernel.game.config.limit_thirst_increase_life_point:
+            thirst_class = "red"
+        elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
+            thirst_class = "yellow"
+
         return [
-            (f"PV: {round(character.life_points, 1)}", None),
-            (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
-            (f"Faim: {round(character.hunger, 0)}", None),
-            (f"Soif: {round(character.thirst, 0)}", None),
-            ("", None),
-            (f"De quoi boire: {can_drink_str}", None),
-            (f"De quoi manger: {can_eat_str}", None),
-            (f"Suivis: {following_count}", None),
-            (f"Suiveurs: {followers_count}", None),
-            (f"Combattants: {fighter_with_him}", None),
+            ItemModel("PV", value_is_float=True, value_float=round(character.life_points, 1)),
+            ItemModel("PA", value_is_float=True, value_float=round(character.action_points, 1)),
+            ItemModel(
+                "Faim",
+                value_is_float=True,
+                value_float=round(character.hunger, 0),
+                classes=["inverted_percent", hunger_class],
+            ),
+            ItemModel(
+                "Soif",
+                value_is_float=True,
+                value_float=round(character.thirst, 0),
+                classes=["inverted_percent", thirst_class],
+            ),
+            ItemModel("A boire", value_is_str=True, value_str=can_drink_str),
+            ItemModel("A manger", value_is_str=True, value_str=can_eat_str),
+            ItemModel("Suivis", value_is_float=True, value_float=float(following_count)),
+            ItemModel("Suiveurs", value_is_float=True, value_float=float(followers_count)),
+            ItemModel("Combattants", value_is_float=True, value_float=float(fighter_with_him)),
         ]
 
     def is_following(

@@ -33,7 +33,6 @@ from rolling.model.character import GetLookInventoryResourceModel
 from rolling.model.character import GetLookResourceModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import GetMoveZoneInfosModel
-from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PendingActionQueryModel
 from rolling.model.character import PickFromInventoryQueryModel
@@ -45,6 +44,7 @@ from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithCharacterActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
+from rolling.model.data import ListOfItemModel
 from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
@@ -1731,9 +1731,9 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(ListOfStrModel)
-    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfStrModel:
-        return ListOfStrModel(
+    @hapic.output_body(ListOfItemModel)
+    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfItemModel:
+        return ListOfItemModel(
             self._kernel.character_lib.get_resume_text(hapic_data.path.character_id)
         )
 

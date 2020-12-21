@@ -415,8 +415,3 @@ class CharacterEventModel:
     turn: int
     text: str
     unread: bool
-
-
-@dataclasses.dataclass
-class ListOfStrModel:
-    items: typing.List[typing.Tuple[str, typing.Optional[str]]]
