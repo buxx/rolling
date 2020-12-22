@@ -73,6 +73,10 @@ class GameConfig:
         self.stop_auto_drink_thirst: float = config_dict["stop_auto_drink_thirst"]
         self.stop_auto_eat_hunger: float = config_dict["stop_auto_eat_hunger"]
 
+        self.less_than_is_health2: float = config_dict["less_than_is_health2"]
+        self.less_than_is_health3: float = config_dict["less_than_is_health3"]
+        self.less_than_is_health4: float = config_dict["less_than_is_health4"]
+
         self.create_character_event_title: str = config_dict["create_character_event_title"]
         self.create_character_event_story_image: str = config_dict.get(
             "create_character_event_story_image"

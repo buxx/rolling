@@ -1133,6 +1133,16 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+    def get_health_text(self, character: CharacterModel) -> str:
+        health = "Ok"
+        if character.life_points < self._kernel.game.config.less_than_is_health2:
+            health = "Moyen"
+        if character.life_points < self._kernel.game.config.less_than_is_health3:
+            health = "Mauvais"
+        if character.life_points < self._kernel.game.config.less_than_is_health4:
+            health = "Critique"
+        return health
+
     def get_resume_text(self, character_id: str) -> typing.List[ItemModel]:
         character = self.get(character_id)
         followers_count = self.get_follower_count(
@@ -1170,7 +1180,7 @@ class CharacterLib:
             thirst_class = "yellow"
 
         return [
-            ItemModel("PV", value_is_float=True, value_float=round(character.life_points, 1)),
+            ItemModel("PV", value_is_str=True, value_str=self.get_health_text(character)),
             ItemModel("PA", value_is_float=True, value_float=round(character.action_points, 1)),
             ItemModel(
                 "Faim",

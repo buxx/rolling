@@ -20,6 +20,10 @@ start_action_points = 24.0
 stop_auto_eat_hunger = 20.0
 stop_auto_drink_thirst = 20.0
 
+less_than_is_health2 = 3.0
+less_than_is_health3 = 2.0
+less_than_is_health4 = 1.0
+
 create_character_event_title = "You wake up on a beach"
 create_character_event_story_image = "beach_intro.png"
 create_character_event_story_text = """Quel mal de crâne !
