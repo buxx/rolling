@@ -483,7 +483,7 @@ class CharacterController(BaseController):
                 ),
                 Part(
                     label="Points de vie",
-                    text=f"{str(character.life_points)}/{str(character.max_life_comp)}",
+                    text=self._kernel.character_lib.get_health_text(character),
                 ),
                 Part(label="Soif", text=str(round(character.thirst, 0))),
                 Part(label="Faim", text=str(round(character.hunger, 0))),
