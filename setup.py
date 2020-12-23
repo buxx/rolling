@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=["urwid", "aiohttp==3.7.3", "serpyco==0.17.4", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
-                      'click', "multidict==4.7.6", "aiohttp-jinja2==1.4.2"],
+                      'click', "multidict==4.7.6", "aiohttp-jinja2==1.4.2", "aiohttp-basicauth-middleware==1.1.2"],
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={
         "console_scripts": [
