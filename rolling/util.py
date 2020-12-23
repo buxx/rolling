@@ -74,6 +74,8 @@ def get_stuffs_filled_with_resource_id(
 ) -> typing.Iterator["StuffModel"]:
     from rolling.server.lib.stuff import StuffLib
 
+    exclude_stuff_ids = exclude_stuff_ids or []
+
     stuff_lib = StuffLib(kernel=kernel)
     character_stuffs = stuff_lib.get_carried_by(character_id)
     for stuff in character_stuffs:
@@ -260,22 +262,6 @@ def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel
     return is_there_resource_id_in_zone(
         kernel, kernel.game.config.fresh_water_resource_id, zone_source
     )
-
-
-def get_character_stuff_filled_with_water(
-    kernel: "Kernel", character_id: str, exclude_stuff_ids: typing.Optional[typing.List[int]] = None
-) -> typing.Optional["StuffModel"]:
-    try:
-        return next(
-            get_stuffs_filled_with_resource_id(
-                kernel,
-                character_id,
-                kernel.game.config.fresh_water_resource_id,
-                exclude_stuff_ids=exclude_stuff_ids,
-            )
-        )
-    except StopIteration:
-        pass
 
 
 clamp = lambda n, minn, maxn: max(min(maxn, n), minn)

@@ -19,6 +19,8 @@ start_hunger = 50
 start_action_points = 24.0
 stop_auto_eat_hunger = 20.0
 stop_auto_drink_thirst = 20.0
+limit_warning_drink_left_tick = 15
+limit_warning_eat_left_tick = 15
 
 less_than_is_health2 = 3.0
 less_than_is_health3 = 2.0
@@ -431,7 +433,6 @@ max_action_propose_turns = 3
   [ACTIONS.DRINK_FRESH_WATER]
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
     accept_resources = ["FRESH_WATER"]
-    # FIXME BS NOW: change action code for resources AND for stuff (see tests)
     consume_per_tick = 0.04  # litters (0.04 * 24 hours = ~1 litter)
     character_effects = []
     like_water = true

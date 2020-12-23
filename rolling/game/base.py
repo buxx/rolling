@@ -72,6 +72,8 @@ class GameConfig:
         self.limit_thirst_reduce_tiredness: float = config_dict["limit_thirst_reduce_tiredness"]
         self.stop_auto_drink_thirst: float = config_dict["stop_auto_drink_thirst"]
         self.stop_auto_eat_hunger: float = config_dict["stop_auto_eat_hunger"]
+        self.limit_warning_drink_left_tick: int = config_dict["limit_warning_drink_left_tick"]
+        self.limit_warning_eat_left_tick: int = config_dict["limit_warning_eat_left_tick"]
 
         self.less_than_is_health2: float = config_dict["less_than_is_health2"]
         self.less_than_is_health3: float = config_dict["less_than_is_health3"]

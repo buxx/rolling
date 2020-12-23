@@ -15,7 +15,7 @@ from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import character_can_drink_in_its_zone
-from rolling.util import get_character_stuff_filled_with_water
+from rolling.util import get_stuffs_filled_with_resource_id
 
 
 class TurnLib:
@@ -137,9 +137,18 @@ class TurnLib:
 
             drink_in = []
             while character_document.thirst > self._kernel.game.config.stop_auto_drink_thirst:
-                stuff_with_fresh_water = get_character_stuff_filled_with_water(
-                    self._kernel, character_id, exclude_stuff_ids=[s.id for s in drink_in]
-                )
+                stuff_with_fresh_water = None
+                try:
+                    stuff_with_fresh_water = next(
+                        get_stuffs_filled_with_resource_id(
+                            self._kernel,
+                            character_id,
+                            self._kernel.game.config.fresh_water_resource_id,
+                            exclude_stuff_ids=[s.id for s in drink_in],
+                        )
+                    )
+                except StopIteration:
+                    pass
 
                 have_drink = False
                 if zone_contains_fresh_water:

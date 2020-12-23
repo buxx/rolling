@@ -62,10 +62,10 @@ from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
-from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_coming_from
 from rolling.util import get_on_and_around_coordinates
 from rolling.util import get_opposite_zone_place
+from rolling.util import get_stuffs_filled_with_resource_id
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -1153,16 +1153,36 @@ class CharacterLib:
         )
 
         can_drink_str = "Non"
-        if character_can_drink_in_its_zone(
-            self._kernel, character
-        ) or get_character_stuff_filled_with_water(self._kernel, character.id):
+        if character_can_drink_in_its_zone(self._kernel, character):
             can_drink_str = "Oui"
+        else:
+            drinkable_stuffs = get_stuffs_filled_with_resource_id(
+                self._kernel, character_id, self._kernel.game.config.fresh_water_resource_id
+            )
+            total_drinkable_value = sum(s.filled_value or 0.0 for s in drinkable_stuffs)
+            if total_drinkable_value:
+                drink_action_description = self._kernel.game.get_drink_water_action_description()
+                drinkable_ticks = (
+                    total_drinkable_value // drink_action_description.properties["consume_per_tick"]
+                )
+                if drinkable_ticks > self._kernel.game.config.limit_warning_drink_left_tick:
+                    can_drink_str = "Oui"
+                else:
+                    can_drink_str = "Faible"
 
-        try:
-            next(self.get_eatables(character))
-            can_eat_str = "Oui"
-        except StopIteration:
-            can_eat_str = "Non"
+        can_eat_str = "Non"
+        eatables = self.get_eatables(character)
+        eatables_total_ticks = 0
+        for carried_eatable, carried_action_description in eatables:
+            eatable_total_ticks = (
+                carried_eatable.quantity
+                // carried_action_description.properties["consume_per_tick"]
+            )
+            eatables_total_ticks += eatable_total_ticks
+        if eatables_total_ticks:
+            can_eat_str = "Faible"
+            if eatables_total_ticks > self._kernel.game.config.limit_warning_eat_left_tick:
+                can_eat_str = "Oui"
 
         fighter_with_him = self._kernel.character_lib.get_with_fighters_count(character_id)
 
