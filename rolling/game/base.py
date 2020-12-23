@@ -387,6 +387,9 @@ class Game:
         )
         self._world = self._create_world_manager(path.join(config_folder, "world.toml"))
 
+    def replace_config(self, config: GameConfig) -> None:
+        self._config = config
+
     @property
     def config(self) -> GameConfig:
         return self._config

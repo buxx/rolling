@@ -84,6 +84,12 @@ To run server:
 
     docker run -v <local path containing world.txt>:/world -v <local path containing zones>:/zones -v <local path containing game config>:/game -v -v <local path for db>:/db rolling:latest
 
+## Reload configuration without stop server
+
+    kill -SIGHUP <pid>
+
+Look at server logs to ensure everything is ok. If config produce error at load, config is not replaced.
+
 # Roadmap (fr)
 
 Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/home/rolling-117/bricks).
