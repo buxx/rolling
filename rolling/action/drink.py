@@ -12,6 +12,7 @@ from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughResource
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -205,17 +206,28 @@ class DrinkStuffAction(WithStuffAction):
         consume_per_tick: float,
     ) -> None:
         while True:
+            not_enough_resource_exc = None
+
             try:
-                stuff_doc.empty(kernel, remove_value=consume_per_tick)
+                stuff_doc.empty(kernel, remove_value=consume_per_tick, force_before_raise=True)
             except CantEmpty:
                 break
+            except NotEnoughResource as exc:
+                not_enough_resource_exc = exc
 
-            character_doc.thirst = max(
-                0.0, float(character_doc.thirst) - kernel.game.config.thirst_change_per_tick
-            )
+            reduce_thirst_by = kernel.game.config.thirst_change_per_tick
+            if not_enough_resource_exc:
+                reduce_thirst_by = reduce_thirst_by * (
+                    not_enough_resource_exc.available_quantity / consume_per_tick
+                )
+
+            character_doc.thirst = max(0.0, float(character_doc.thirst) - reduce_thirst_by)
             kernel.server_db_session.add(stuff_doc)
             kernel.server_db_session.add(character_doc)
             kernel.server_db_session.commit()
+
+            if not_enough_resource_exc:
+                break
 
             if (
                 not all_possible

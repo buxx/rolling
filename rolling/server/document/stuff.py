@@ -12,6 +12,7 @@ import typing
 
 from rolling.exception import CantEmpty
 from rolling.exception import CantFill
+from rolling.exception import NotEnoughResource
 from rolling.model.measure import Unit
 from rolling.server.extension import ServerSideDocument as Document
 
@@ -70,11 +71,25 @@ class StuffDocument(Document):
             resource_description.weight * float(self.filled_value)
         ) + stuff_properties.weight
 
-    def empty(self, kernel: "Kernel", remove_value: float) -> None:
-        if float(self.filled_value or 0.0) - remove_value < 0.0:
-            raise CantEmpty("Pas assez pour vider ça")
+    def empty(
+        self, kernel: "Kernel", remove_value: float, force_before_raise: bool = False
+    ) -> None:
+        raise_not_enough_exc = None
 
-        self.filled_value = float(self.filled_value or 0.0) - remove_value
+        if not self.filled_value:
+            raise CantEmpty("Vide")
+
+        if float(self.filled_value or 0.0) - remove_value < 0.0:
+            raise_not_enough_exc = NotEnoughResource(
+                resource_id=self.filled_with_resource,
+                required_quantity=remove_value,
+                available_quantity=float(self.filled_value) or 0.0,
+            )
+
+            if not force_before_raise:
+                raise raise_not_enough_exc
+
+        self.filled_value = max(0.0, float(self.filled_value or 0.0) - remove_value)
         resource_description = kernel.game.config.resources[self.filled_with_resource]
         stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(self.stuff_id)
         self.weight = (
@@ -84,3 +99,6 @@ class StuffDocument(Document):
         if not self.filled_value:
             self.filled_with_resource = None
             self.filled_value = None
+
+        if raise_not_enough_exc:
+            raise raise_not_enough_exc

@@ -307,6 +307,7 @@ class ResourceLib:
         exclude_shared_with_affinity: bool = False,
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
         commit: bool = True,
+        force_before_raise: bool = False,
     ) -> None:
         server_logger.debug(
             f"reduce_carried_by ("
@@ -332,7 +333,13 @@ class ResourceLib:
         if shared_with_affinity_ids:
             filters.append(ResourceDocument.shared_with_affinity_id.in_(shared_with_affinity_ids))
 
-        self._reduce(and_(*filters), quantity=quantity, commit=commit)
+        self._reduce(
+            resource_id,
+            and_(*filters),
+            quantity=quantity,
+            commit=commit,
+            force_before_raise=force_before_raise,
+        )
 
     def reduce_on_ground(
         self,
@@ -354,7 +361,7 @@ class ResourceLib:
             ResourceDocument.zone_row_i == zone_row_i,
             ResourceDocument.zone_col_i == zone_col_i,
         )
-        self._reduce(filter_, quantity=quantity, commit=commit)
+        self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
 
     def reduce_stored_in(
         self, build_id: int, resource_id: str, quantity: float, commit: bool = True
@@ -362,17 +369,33 @@ class ResourceLib:
         filter_ = and_(
             ResourceDocument.in_built_id == build_id, ResourceDocument.resource_id == resource_id
         )
-        self._reduce(filter_, quantity=quantity, commit=commit)
+        self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
 
-    def _reduce(self, filter_, quantity: float, commit: bool = True) -> None:
+    def _reduce(
+        self,
+        resource_id: str,
+        filter_,
+        quantity: float,
+        commit: bool = True,
+        force_before_raise: bool = False,
+    ) -> None:
         resource_docs = self._kernel.server_db_session.query(ResourceDocument).filter(filter_).all()
 
         if not resource_docs:
             raise NoCarriedResource()
 
+        raise_not_enough = False
         total_quantity = sum([float(d.quantity) for d in resource_docs])
         if total_quantity < quantity:
-            raise NotEnoughResource()
+            raise_exception = NotEnoughResource(
+                resource_id=resource_id,
+                required_quantity=quantity,
+                available_quantity=total_quantity,
+            )
+            if force_before_raise:
+                raise_not_enough = True
+            else:
+                raise raise_exception
 
         to_reduce = quantity
 
@@ -392,6 +415,9 @@ class ResourceLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        if raise_not_enough:
+            raise raise_exception
 
     def drop(
         self,

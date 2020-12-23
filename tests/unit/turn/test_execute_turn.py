@@ -207,11 +207,11 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert xena.life_points == 1.05
-        assert xena.thirst == 26.0
+        assert xena.thirst == 25.0
         stuff_doc = kernel.stuff_lib.get_stuff_doc(stuff_doc.id)
         assert stuff_doc.filled_value is None
         stuff_doc2 = kernel.stuff_lib.get_stuff_doc(stuff_doc2.id)
-        assert float(stuff_doc2.filled_value) == 0.02
+        assert stuff_doc2.filled_value is None
 
     def test_drink__ok__drink_in_zone(
         self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument
@@ -296,7 +296,7 @@ class TestExecuteTurn:
         # With
         kernel = worldmapc_kernel
         kernel.resource_lib.add_resource_to(
-            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=1.0
+            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=1.01
         )
         kernel.resource_lib.add_resource_to(
             character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH2", quantity=100.0
@@ -312,7 +312,7 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert xena.life_points == 1.05
-        assert xena.hunger == 20.0
+        assert xena.hunger == 19.75
         with pytest.raises(NoCarriedResource):
             kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
         r = kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH2")

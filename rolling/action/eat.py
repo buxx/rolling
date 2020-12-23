@@ -123,18 +123,31 @@ class EatResourceAction(WithResourceAction):
         consume_per_tick: float,
     ) -> None:
         while True:
+            not_enough_resource_exc = None
+
             try:
                 kernel.resource_lib.reduce_carried_by(
-                    character_doc.id, resource_id, quantity=consume_per_tick, commit=False
+                    character_doc.id,
+                    resource_id,
+                    quantity=consume_per_tick,
+                    commit=False,
+                    force_before_raise=True,
                 )
-            except NotEnoughResource:
-                break
+            except NotEnoughResource as exc:
+                not_enough_resource_exc = exc
 
-            character_doc.hunger = max(
-                0.0, float(character_doc.hunger) - kernel.game.config.hunger_change_per_tick
-            )
+            reduce_hunger_by = kernel.game.config.hunger_change_per_tick
+            if not_enough_resource_exc:
+                reduce_hunger_by = reduce_hunger_by * (
+                    not_enough_resource_exc.available_quantity / consume_per_tick
+                )
+
+            character_doc.hunger = max(0.0, float(character_doc.hunger) - reduce_hunger_by)
             kernel.server_db_session.add(character_doc)
             kernel.server_db_session.commit()
+
+            if not_enough_resource_exc:
+                break
 
             if (
                 not all_possible
