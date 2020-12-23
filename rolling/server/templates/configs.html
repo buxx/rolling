@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin: configs</title>
+</head>
+<body>
+  <form enctype="multipart/form-data" method="post" action="/admin/configs">
+    {% if error %}
+      <h2 style="color: red;">ERROR !</h2>
+      <pre>
+        {{ error }}
+      </pre>
+    {% endif %}
+
+    {% if updated %}
+      <h2 style="color: green;">Mise à jour OK !</h2>
+    {% endif %}
+
+    <h2>Game config</h2>
+
+    <textarea rows="50" cols="200" name="game_content">{{ game_content }}</textarea>
+
+    <p>
+      {% for game_backup in game_backups %}
+        <a href="/admin/config/{{ game_backup }}">{{ game_backup }}</a>
+      {% endfor %}
+    </p>
+
+    <h2>Stuff config</h2>
+
+    <textarea rows="50" cols="200" name="stuff_content">{{ stuff_content }}</textarea>
+
+    <p>
+      {% for stuff_backup in stuff_backups %}
+        <a href="/admin/config/{{ stuff_backup }}">{{ stuff_backup }}</a>
+      {% endfor %}
+    </p>
+
+    <h2>World config</h2>
+
+    <textarea rows="50" cols="200" name="world_content">{{ world_content }}</textarea>
+
+    <p>
+      {% for world_backup in world_backups %}
+        <a href="/admin/config/{{ world_backup }}">{{ world_backup }}</a>
+      {% endfor %}
+    </p>
+
+    <input type="submit" value="ENREGISTRER ET DEPLOYER">
+
+  </form>
+</body>
+</html>

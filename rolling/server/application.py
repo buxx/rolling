@@ -3,6 +3,7 @@ from aiohttp import web
 from aiohttp.web_app import Application
 
 from rolling.kernel import Kernel
+from rolling.server.controller.admin import AdminController
 from rolling.server.controller.affinity import AffinityController
 from rolling.server.controller.build import BuildController
 from rolling.server.controller.business import BusinessController
@@ -25,5 +26,7 @@ def get_application(kernel: Kernel) -> Application:
     ConversationController(kernel).bind(app)
     AffinityController(kernel).bind(app)
     BusinessController(kernel).bind(app)
+    BusinessController(kernel).bind(app)
+    AdminController(kernel).bind(app)
 
     return app

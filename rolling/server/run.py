@@ -1,12 +1,15 @@
 # coding: utf-8
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+import aiohttp_jinja2
 import argparse
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
+import jinja2
 import logging
+import os
 from serpyco import ValidationError
 import signal
 
@@ -60,6 +63,12 @@ def run(args: argparse.Namespace) -> None:
     )
     server_logger.info("Create web application")
     app = get_application(kernel)
+    aiohttp_jinja2.setup(
+        app,
+        loader=jinja2.FileSystemLoader(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
+        ),
+    )
 
     # Configure hapic
     server_logger.info("Configure web api")

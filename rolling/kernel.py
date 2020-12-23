@@ -326,14 +326,10 @@ class Kernel:
     def on_sighup_signal(self, signum, frame) -> None:
         kernel_logger.info("Reload configuration ...")
         try:
-            config = GameConfig(
-                self,
-                toml.load(path.join(self.game.config.folder_path, "game.toml")),
-                folder_path=self.game.config.folder_path,
-            )
+            game = Game(self, self.game.config.folder_path)
         except Exception as exc:
             kernel_logger.exc(f"Reload configuration fail: {str(exc)}")
             return
 
-        self._game.replace_config(config)
+        self._game = game
         kernel_logger.info("Reload configuration OK")
