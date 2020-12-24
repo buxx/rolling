@@ -219,6 +219,12 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
+class ChooseBetweenStuffInventoryStuffModelModel:
+    character_id: str
+    stuff_id: str
+
+
+@dataclasses.dataclass
 class GetLookCharacterModel:
     character_id: str
     with_character_id: str

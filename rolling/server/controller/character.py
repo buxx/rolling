@@ -24,6 +24,7 @@ from rolling.exception import UserDisplayError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
+from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterAndPendingActionPathModel
 from rolling.model.character import GetCharacterPathModel
@@ -853,10 +854,13 @@ class CharacterController(BaseController):
         bags = self._character_lib.get_used_bags(character.id)
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
         stuff_count: typing.Dict[str, int] = {}
+        stuff_by_stuff_ids: typing.Dict[str, typing.List[StuffModel]] = {}
 
         for stuff in inventory.stuff:
             stuff_count.setdefault(stuff.stuff_id, 0)
+            stuff_by_stuff_ids.setdefault(stuff.stuff_id, [])
             stuff_count[stuff.stuff_id] += 1
+            stuff_by_stuff_ids[stuff.stuff_id].append(stuff)
 
         stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
         for stuff in inventory.stuff:
@@ -864,20 +868,33 @@ class CharacterController(BaseController):
                 continue
 
             name = stuff.get_name()
-            descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
+            if stuff_count[stuff.stuff_id] > 1:
+                total_weight = sum(s.weight for s in stuff_by_stuff_ids[stuff.stuff_id])
+                total_clutter = sum(s.clutter for s in stuff_by_stuff_ids[stuff.stuff_id])
+                description = (
+                    f" ({display_g_or_kg(total_weight)}, "
+                    f"{round(total_clutter, 2)} encombrement)"
+                )
+            else:
+                descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
 
-            description = ""
-            if descriptions:
-                description = " (" + ", ".join(descriptions) + ")"
+                description = ""
+                if descriptions:
+                    description = " (" + ", ".join(descriptions) + ")"
 
             if stuff_count[stuff.stuff_id] > 1:
                 text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
             else:
                 text = f"{name}{description}"
 
-            form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                character_id=character.id, stuff_id=stuff.id
-            )
+            if stuff_count[stuff.stuff_id] > 1:
+                form_action = "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}".format(
+                    character_id=character.id, stuff_id=stuff.stuff_id
+                )
+            else:
+                form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                    character_id=character.id, stuff_id=stuff.id
+                )
             is_link = True
 
             if disable_stuff_link:
@@ -1248,6 +1265,35 @@ class CharacterController(BaseController):
             title=f"{resource_description.name} récupéré",
             items=[Part(is_link=True)],
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(ChooseBetweenStuffInventoryStuffModelModel)
+    @hapic.output_body(Description)
+    async def _choose_between_stuff(self, request: Request, hapic_data: HapicData) -> Description:
+        stuffs = self._kernel.stuff_lib.get_carried_by(
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
+        )
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            hapic_data.path.stuff_id
+        )
+
+        parts = []
+        for stuff in stuffs:
+            description_str = ", ".join(stuff.get_full_description(self._kernel))
+            label = f"{stuff_properties.name} ({description_str})"
+            parts.append(
+                Part(
+                    label=label,
+                    is_link=True,
+                    form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                        character_id=hapic_data.path.character_id, stuff_id=stuff.id
+                    ),
+                )
+            )
+
+        return Description(
+            title=f"Choix de {stuff_properties.name}", items=parts, can_be_back_url=True
         )
 
     @hapic.with_api_doc()
@@ -1914,6 +1960,10 @@ class CharacterController(BaseController):
                 ),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post(
+                    "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}",
+                    self._choose_between_stuff,
+                ),
                 web.post(
                     "/_describe/character/{character_id}/inventory/shared-with",
                     self._describe_shared_with_inventory,
