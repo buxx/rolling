@@ -3,7 +3,11 @@ from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
+from rolling.log import server_logger
 from rolling.model.character import CharacterModel
+from rolling.model.event import NewChatMessageData
+from rolling.model.event import ZoneEvent
+from rolling.model.event import ZoneEventType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.message import MessageDocument
 
@@ -27,12 +31,14 @@ class MessageLib:
 
         return query
 
-    def get_character_zone_messages(self, character_id: str) -> typing.List[MessageDocument]:
-        return (
+    def get_character_zone_messages(self, character_id: str,  message_count: typing.Optional[int] = None) -> typing.List[MessageDocument]:
+        query = (
             self._get_character_messages_query(character_id, zone=True)
             .order_by(MessageDocument.datetime.desc())
-            .all()
         )
+        if message_count is not None:
+            query = query.limit(message_count)
+        return query.all()
 
     def mark_character_zone_messages_as_read(self, character_id: str) -> None:
         self._get_character_messages_query(character_id, zone=True).filter(
@@ -56,7 +62,7 @@ class MessageLib:
             .one()
         )
 
-    def add_zone_message(
+    async def add_zone_message(
         self, character_id: str, message: str, zone_row_i: int, zone_col_i: int, commit: bool = True
     ) -> None:
         author_doc = self._kernel.character_lib.get_document(character_id)
@@ -81,6 +87,23 @@ class MessageLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        event_str = self._kernel.event_serializer_factory.get_serializer(
+            ZoneEventType.NEW_CHAT_MESSAGE).dump_json(
+            ZoneEvent(
+                type=ZoneEventType.NEW_CHAT_MESSAGE,
+                data=NewChatMessageData(
+                    character_id=character_id,
+                    message=message,
+                )
+            )
+        )
+        for socket in self._kernel.server_zone_events_manager.get_sockets(zone_row_i, zone_col_i):
+            server_logger.debug(f"Send event on socket: {event_str}")
+            try:
+                await socket.send_str(event_str)
+            except Exception as exc:
+                server_logger.exception(exc)
 
     def add_conversation_message(
         self,

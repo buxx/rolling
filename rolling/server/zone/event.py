@@ -10,7 +10,9 @@ from rolling.log import server_logger
 from rolling.model.character import CharacterModel
 from rolling.model.event import ClickActionData
 from rolling.model.event import ClientRequireAroundData
+from rolling.model.event import NewChatMessageData
 from rolling.model.event import PlayerMoveData
+from rolling.model.event import RequestChatData
 from rolling.model.event import ThereIsAroundData
 from rolling.model.event import ZoneEvent
 from rolling.model.event import ZoneEventType
@@ -35,7 +37,6 @@ class EventProcessor(metaclass=abc.ABCMeta):
     def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._zone_events_manager = zone_events_manager
         self._kernel = kernel
-        self._event_serializer_factory = ZoneEventSerializerFactory()
 
     async def process(
         self, row_i: int, col_i: int, event: ZoneEvent, sender_socket: web.WebSocketResponse
@@ -74,7 +75,10 @@ class PlayerMoveProcessor(EventProcessor):
             character, to_row_i=event.data.to_row_i, to_col_i=event.data.to_col_i
         )
 
-        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        # FIXME BS NOW: refact
+        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
+            event
+        )
         for socket in self._zone_events_manager.get_sockets(row_i, col_i):
             server_logger.debug(f"Send event on socket: {event_str}")
 
@@ -162,7 +166,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 character_count=character_count,
             ),
         )
-        event_str = self._event_serializer_factory.get_serializer(
+        event_str = self._kernel.event_serializer_factory.get_serializer(
             ZoneEventType.THERE_IS_AROUND
         ).dump_json(around_event)
         await sender_socket.send_str(event_str)
@@ -200,9 +204,9 @@ class ClickActionProcessor(EventProcessor):
             return
 
         for zone_event in zone_events:
-            event_str = self._event_serializer_factory.get_serializer(zone_event.type).dump_json(
-                zone_event
-            )
+            event_str = self._kernel.event_serializer_factory.get_serializer(
+                zone_event.type
+            ).dump_json(zone_event)
             for socket in self._zone_events_manager.get_sockets(row_i, col_i):
                 server_logger.debug(f"Send event on socket: {event_str}")
 
@@ -212,11 +216,55 @@ class ClickActionProcessor(EventProcessor):
                     server_logger.exception(exc)
 
         for sender_event in sender_events:
-            event_str = self._event_serializer_factory.get_serializer(sender_event.type).dump_json(
-                sender_event
-            )
+            event_str = self._kernel.event_serializer_factory.get_serializer(
+                sender_event.type
+            ).dump_json(sender_event)
             server_logger.debug(f"Send event on socket: {event_str}")
             await sender_socket.send_str(event_str)
+
+
+class RequestChatProcessor(EventProcessor):
+    async def _process(
+        self,
+        row_i: int,
+        col_i: int,
+        event: ZoneEvent[RequestChatData],
+        sender_socket: web.WebSocketResponse,
+    ) -> None:
+        if event.data.conversation_id is None:
+            messages = self._kernel.message_lib.get_character_zone_messages(
+                event.data.character_id, message_count=event.data.message_count
+            )
+            for message in messages:
+                new_chat_message_event = ZoneEvent(
+                    type=ZoneEventType.NEW_CHAT_MESSAGE,
+                    data=NewChatMessageData(
+                        conversation_id=None, character_id=message.author_id, message=message.text
+                    ),
+                )
+                event_str = self._kernel.event_serializer_factory.get_serializer(
+                    ZoneEventType.NEW_CHAT_MESSAGE
+                ).dump_json(new_chat_message_event)
+                await sender_socket.send_str(event_str)
+
+
+class NewChatMessageProcessor(EventProcessor):
+    async def _process(
+        self,
+        row_i: int,
+        col_i: int,
+        event: ZoneEvent[NewChatMessageData],
+        sender_socket: web.WebSocketResponse,
+    ) -> None:
+        if event.data.conversation_id is None:
+            await self._kernel.message_lib.add_zone_message(
+                character_id=event.data.character_id,
+                message=event.data.message,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
+            )
+
+        # FIXME BS NOW: cas des conversations
 
 
 class EventProcessorFactory:
@@ -228,6 +276,8 @@ class EventProcessorFactory:
             (ZoneEventType.CLIENT_WANT_CLOSE, ClientWantCloseProcessor),
             (ZoneEventType.CLIENT_REQUIRE_AROUND, ThereIsAroundProcessor),
             (ZoneEventType.CLICK_ACTION_EVENT, ClickActionProcessor),
+            (ZoneEventType.REQUEST_CHAT, RequestChatProcessor),
+            (ZoneEventType.NEW_CHAT_MESSAGE, NewChatMessageProcessor),
         ]:
             self._processors[zone_event_type] = processor_type(kernel, zone_events_manager)
 

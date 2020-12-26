@@ -255,7 +255,7 @@ class ZoneController(BaseController):
     @hapic.output_body(Description)
     async def add_message(self, request: Request, hapic_data: HapicData) -> Description:
         post_content = await request.json()
-        self._kernel.message_lib.add_zone_message(
+        await self._kernel.message_lib.add_zone_message(
             hapic_data.query.character_id,
             message=post_content["message"],
             zone_row_i=hapic_data.path.row_i,
