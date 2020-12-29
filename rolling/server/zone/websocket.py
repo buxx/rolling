@@ -24,13 +24,17 @@ if typing.TYPE_CHECKING:
 class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
         self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[web.WebSocketResponse]] = {}
+        self._sockets_character_id: typing.Dict[web.WebSocketResponse, str] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
         self._kernel = kernel
 
+    def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
+        return self._sockets_character_id[socket]
+
     async def get_new_socket(
-        self, request: Request, row_i: int, col_i: int
+        self, request: Request, row_i: int, col_i: int, character_id: str
     ) -> web.WebSocketResponse:
         server_logger.info(f"Create websocket for zone {row_i},{col_i}")
 
@@ -44,6 +48,7 @@ class ZoneEventsManager:
 
         # Make it available for send job
         self._sockets.setdefault((row_i, col_i), []).append(socket)
+        self._sockets_character_id[socket] = character_id
 
         # Start to listen client messages
         try:
@@ -54,6 +59,7 @@ class ZoneEventsManager:
         # If this code reached: ws is disconnected
         server_logger.debug(f"remove websocket ({row_i},{col_i})")
         self._sockets[(row_i, col_i)].remove(socket)
+        del self._sockets_character_id[socket]
 
         return socket
 

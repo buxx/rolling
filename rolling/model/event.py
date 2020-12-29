@@ -87,12 +87,14 @@ class ClickActionData(ZoneEventData):
 class RequestChatData(ZoneEventData):
     character_id: str
     message_count: int
-    conversation_id: typing.Optional[int] = None
+    next: bool
+    previous: bool
+    previous_conversation_id: typing.Optional[int] = None
 
     # TODO BS: use automatic compiled serpyco serializer
     def to_dict(self) -> dict:
         return {
-            "conversation_id": self.conversation_id,
+            "previous_conversation_id": self.previous_conversation_id,
             "character_id": self.character_id,
             "message_count": self.message_count,
         }
@@ -103,6 +105,7 @@ class NewChatMessageData(ZoneEventData):
     character_id: str
     message: str
     conversation_id: typing.Optional[int] = None
+    conversation_title: typing.Optional[str] = None
 
     # TODO BS: use automatic compiled serpyco serializer
     def to_dict(self) -> dict:

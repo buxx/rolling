@@ -31,7 +31,7 @@ class MessageLib:
 
         return query
 
-    def get_character_zone_messages(self, character_id: str,  message_count: typing.Optional[int] = None) -> typing.List[MessageDocument]:
+    def get_character_zone_messages(self, character_id: str,  message_count: typing.Optional[int] = typing.List[MessageDocument]) -> typing.List[MessageDocument]:
         query = (
             self._get_character_messages_query(character_id, zone=True)
             .order_by(MessageDocument.datetime.desc())
@@ -65,6 +65,9 @@ class MessageLib:
     async def add_zone_message(
         self, character_id: str, message: str, zone_row_i: int, zone_col_i: int, commit: bool = True
     ) -> None:
+        if not message.strip():
+            return
+
         author_doc = self._kernel.character_lib.get_document(character_id)
         zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=zone_row_i, col_i=zone_col_i
@@ -94,7 +97,7 @@ class MessageLib:
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
                 data=NewChatMessageData(
                     character_id=character_id,
-                    message=message,
+                    message=f"{author_doc.name}: {message}",
                 )
             )
         )
@@ -105,7 +108,16 @@ class MessageLib:
             except Exception as exc:
                 server_logger.exception(exc)
 
-    def add_conversation_message(
+    def get_last_conversation_message(self, conversation_id: int) -> MessageDocument:
+        return (
+            self._kernel.server_db_session.query(MessageDocument)
+                .filter(MessageDocument.first_message == conversation_id)
+                .order_by(MessageDocument.datetime.desc())
+                .limit(1)
+                .one()
+        )
+
+    async def add_conversation_message(
         self,
         author_id: str,
         subject: str,
@@ -136,36 +148,70 @@ class MessageLib:
         if not conversation_id:
             first_message = messages[0]
 
-            for message in messages:
-                message.first_message = first_message.id
+            for message_ in messages:
+                message_.first_message = first_message.id
 
             self._kernel.server_db_session.commit()
-            return first_message.id
+            conversation_id = first_message.id
+
+        event_str = self._kernel.event_serializer_factory.get_serializer(
+            ZoneEventType.NEW_CHAT_MESSAGE).dump_json(
+            ZoneEvent(
+                type=ZoneEventType.NEW_CHAT_MESSAGE,
+                data=NewChatMessageData(
+                    character_id=author_id,
+                    message=f"{author_doc.name}: {message}",
+                    conversation_id=conversation_id,
+                )
+            )
+        )
+        zone_row_i = author_doc.world_row_i
+        zone_col_i = author_doc.world_col_i
+        for socket in self._kernel.server_zone_events_manager.get_sockets(zone_row_i, zone_col_i):
+            if self._kernel.server_zone_events_manager.get_character_id_for_socket(socket) in concerned:
+                server_logger.debug(f"Send event on socket: {event_str}")
+                try:
+                    await socket.send_str(event_str)
+                except Exception as exc:
+                    server_logger.exception(exc)
+
         return conversation_id
 
     def get_conversation_first_messages(
         self, character_id: str, with_character_id: typing.Optional[str] = None
     ) -> typing.List[MessageDocument]:
+        return self.get_conversation_first_messages_query(
+            character_id=character_id,
+            with_character_id=with_character_id
+        ).all()
+
+    def get_conversation_first_messages_query(
+        self, character_id: str,
+        with_character_id: typing.Optional[str] = None,
+        order_by=MessageDocument.datetime.asc(),
+    ) -> Query:
         query = (
             self._get_character_messages_query(character_id, zone=False)
             .group_by(MessageDocument.first_message)
-            .order_by(MessageDocument.datetime.asc())
+            .order_by(order_by)
         )
 
         if with_character_id:
             query = query.filter(MessageDocument.concerned.contains(with_character_id))
 
-        return query.all()
+        return query
 
     def get_conversation_messages(
-        self, character_id: str, conversation_id: int
+        self, character_id: str, conversation_id: int,  message_count: typing.Optional[int] = None
     ) -> typing.List[MessageDocument]:
-        return (
+        query = (
             self._get_character_messages_query(character_id, zone=False)
             .filter(MessageDocument.first_message == conversation_id)
             .order_by(MessageDocument.datetime.desc())
-            .all()
         )
+        if message_count is not None:
+            query = query.limit(message_count)
+        return query.all()
 
     def send_messages_due_to_move(
         self,
@@ -296,3 +342,25 @@ class MessageLib:
                         subject=subject,
                     )
                 )
+
+    def get_next_conversation_id(self, character_id: str, conversation_id: typing.Optional[int]) -> int:
+        query = self.get_conversation_first_messages_query(
+            character_id=character_id,
+            order_by=MessageDocument.datetime.asc(),
+        )
+
+        if conversation_id is not None:
+            query = query.filter(MessageDocument.first_message > conversation_id)
+
+        return query.limit(1).one().first_message
+
+    def get_previous_conversation_id(self, character_id: str, conversation_id: typing.Optional[int]) -> int:
+        query = self.get_conversation_first_messages_query(
+            character_id=character_id,
+            order_by=MessageDocument.datetime.desc(),
+        )
+
+        if conversation_id is not None:
+            query = query.filter(MessageDocument.first_message < conversation_id)
+
+        return query.limit(1).one().first_message

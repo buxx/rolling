@@ -3,6 +3,8 @@ import abc
 from aiohttp import web
 import typing
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
@@ -25,6 +27,7 @@ from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.document.build import BuildDocument
+from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.util import get_on_and_around_coordinates
 
@@ -231,21 +234,58 @@ class RequestChatProcessor(EventProcessor):
         event: ZoneEvent[RequestChatData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        if event.data.conversation_id is None:
+        conversation_id = None
+        conversation_title = None
+        if event.data.previous_conversation_id is None and not event.data.next and not event.data.previous:
             messages = self._kernel.message_lib.get_character_zone_messages(
                 event.data.character_id, message_count=event.data.message_count
             )
-            for message in messages:
-                new_chat_message_event = ZoneEvent(
-                    type=ZoneEventType.NEW_CHAT_MESSAGE,
-                    data=NewChatMessageData(
-                        conversation_id=None, character_id=message.author_id, message=message.text
-                    ),
+            conversation_title = "Chat de la zone"
+        else:
+            try:
+                if event.data.next:
+                    conversation_id = self._kernel.message_lib.get_next_conversation_id(
+                        character_id=event.data.character_id,
+                        conversation_id=event.data.previous_conversation_id,
+                    )
+                else:
+                    conversation_id = self._kernel.message_lib.get_previous_conversation_id(
+                        character_id=event.data.character_id,
+                        conversation_id=event.data.previous_conversation_id,
+                    )
+                messages = self._kernel.message_lib.get_conversation_messages(
+                    character_id=event.data.character_id,
+                    conversation_id=conversation_id,
+                    message_count=event.data.message_count,
                 )
-                event_str = self._kernel.event_serializer_factory.get_serializer(
-                    ZoneEventType.NEW_CHAT_MESSAGE
-                ).dump_json(new_chat_message_event)
-                await sender_socket.send_str(event_str)
+            except NoResultFound:
+                messages = self._kernel.message_lib.get_character_zone_messages(
+                    event.data.character_id, message_count=event.data.message_count
+                )
+                conversation_title = "Chat de la zone"
+
+        if not messages:
+            messages.append(
+                MessageDocument(
+                    text="",
+                    author_id=event.data.character_id,
+                )
+            )
+
+        for message in reversed(messages):
+            new_chat_message_event = ZoneEvent(
+                type=ZoneEventType.NEW_CHAT_MESSAGE,
+                data=NewChatMessageData(
+                    character_id=message.author_id,
+                    message=f"{message.author_name}: {message.text}",
+                    conversation_id=conversation_id,
+                    conversation_title=conversation_title or message.subject,
+                ),
+            )
+            event_str = self._kernel.event_serializer_factory.get_serializer(
+                ZoneEventType.NEW_CHAT_MESSAGE
+            ).dump_json(new_chat_message_event)
+            await sender_socket.send_str(event_str)
 
 
 class NewChatMessageProcessor(EventProcessor):
@@ -263,8 +303,17 @@ class NewChatMessageProcessor(EventProcessor):
                 zone_row_i=row_i,
                 zone_col_i=col_i,
             )
-
-        # FIXME BS NOW: cas des conversations
+        else:
+            last_message = self._kernel.message_lib.get_last_conversation_message(
+                event.data.conversation_id
+            )
+            await self._kernel.message_lib.add_conversation_message(
+                author_id=event.data.character_id,
+                concerned=last_message.concerned,
+                message=event.data.message,
+                subject=last_message.subject,
+                conversation_id=event.data.conversation_id,
+            )
 
 
 class EventProcessorFactory:
