@@ -22,6 +22,7 @@ from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildRequireResourceDescription
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.data import ListOfItemModel
 from rolling.model.event import ClickActionData
 from rolling.model.event import NewBuildData
 from rolling.model.event import NewResumeTextData
@@ -292,13 +293,11 @@ class BringResourcesOnBuild(WithBuildAction):
                     text=(
                         f"{quantity_str} {resource_description.name} "
                         f"déposé pour {build_description.name}"
-                    ),
+                    )
                 )
             ],
             footer_with_build_id=build_doc.id,
-            back_url=DESCRIBE_BUILD.format(
-                build_id=build_doc.id, character_id=character.id
-            ),
+            back_url=DESCRIBE_BUILD.format(build_id=build_doc.id, character_id=character.id),
         )
 
 
@@ -442,9 +441,7 @@ class ConstructBuildAction(WithBuildAction):
         return Description(
             title=f"Travail effectué",
             footer_with_build_id=build_doc.id,
-            back_url=DESCRIBE_BUILD.format(
-                build_id=build_doc.id, character_id=character.id
-            ),
+            back_url=DESCRIBE_BUILD.format(build_id=build_doc.id, character_id=character.id),
         )
 
 
@@ -572,7 +569,9 @@ class BuildAction(CharacterAction):
                 ZoneEvent(
                     type=ZoneEventType.NEW_RESUME_TEXT,
                     data=NewResumeTextData(
-                        resume=self._kernel.character_lib.get_resume_text(character.id)
+                        resume=ListOfItemModel(
+                            self._kernel.character_lib.get_resume_text(character.id)
+                        )
                     ),
                 )
             ],

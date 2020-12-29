@@ -309,7 +309,4 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         self._kernel.server_db_session.commit()
 
         parts = [Part(text=txt) for txt in produced_resources_txts]
-        return Description(
-            title=f"Effectué",
-            items=parts,
-        )
+        return Description(title=f"Effectué", items=parts)

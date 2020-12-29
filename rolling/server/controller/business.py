@@ -751,7 +751,8 @@ class BusinessController(BaseController):
                     is_form=True,
                     form_action=here_url,
                     form_values_in_query=True,
-                    items=parts + [
+                    items=parts
+                    + [
                         Part(
                             label="Sélectionnez une ressource ou un object",
                             name="value",

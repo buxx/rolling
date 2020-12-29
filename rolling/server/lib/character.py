@@ -14,9 +14,7 @@ import uuid
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
-from rolling.action.base import WithStuffAction
 from rolling.action.eat import EatResourceModel
-from rolling.action.eat import EatStuffModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.map.type.property.traversable import traversable_properties
@@ -26,14 +24,13 @@ from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
-from rolling.model.consume import Consumeable
-from rolling.model.eat import EatResourceFromCharacterInventory
-from rolling.model.eat import EatStuffFromCharacterInventory
+from rolling.model.data import ItemModel
 from rolling.model.event import StoryPage
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
 from rolling.model.meta import TransportType
+from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
@@ -65,10 +62,10 @@ from rolling.server.link import CharacterActionLink
 from rolling.server.util import register_image
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
-from rolling.util import get_character_stuff_filled_with_water
 from rolling.util import get_coming_from
 from rolling.util import get_on_and_around_coordinates
 from rolling.util import get_opposite_zone_place
+from rolling.util import get_stuffs_filled_with_resource_id
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -119,7 +116,10 @@ class CharacterLib:
         character.name = name
         character.max_life_comp = STARING_LIFE_POINTS + skills["endurance"]
         character.life_points = float(character.max_life_comp)
-        character.action_points = self._kernel.game.config.action_points_per_turn
+        character.action_points = self._kernel.game.config.start_action_points
+        character.max_action_points = self._kernel.game.config.default_maximum_ap
+        character.thirst = self._kernel.game.config.start_thirst
+        character.hunger = self._kernel.game.config.start_hunger
 
         # Place on zone
         world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
@@ -263,10 +263,8 @@ class CharacterLib:
             max_life_comp=float(character_document.max_life_comp),
             hunting_and_collecting_comp=float(character_document.hunting_and_collecting_comp),
             find_water_comp=float(character_document.find_water_comp),
-            feel_thirsty=character_document.feel_thirsty,
-            feel_hungry=character_document.feel_hungry,
-            dehydrated=character_document.dehydrated,
-            starved=character_document.starved,
+            thirst=character_document.thirst,
+            hunger=character_document.hunger,
             tiredness=character_document.tiredness,
             action_points=float(character_document.action_points),
             bags=[
@@ -550,7 +548,9 @@ class CharacterLib:
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
 
-        total_clutter = sum([stuff.clutter for stuff in carried_stuff if stuff.clutter and not stuff.used_by])
+        total_clutter = sum(
+            [stuff.clutter for stuff in carried_stuff if stuff.clutter and not stuff.used_by]
+        )
         total_clutter += sum([r.clutter for r in carried_resources if r.clutter])
 
         return CharacterInventoryModel(
@@ -723,42 +723,6 @@ class CharacterLib:
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
         self._stuff_lib.set_carried_by(stuff_id=stuff_id, character_id=character_id)
-
-    def drink_material(self, character_id: str, resource_id: str) -> str:
-        character_doc = self.get_document(character_id)
-
-        if not character_doc.feel_thirsty:
-            return "Vous n'avez pas soif"
-
-        if resource_id == self._kernel.game.config.fresh_water_resource_id:
-            character_doc.dehydrated = False
-            character_doc.feel_thirsty = False
-            self._kernel.server_db_session.add(character_doc)
-            self._kernel.server_db_session.commit()
-            return "Vous n'avez plus soif"
-
-        # TODO BS 2019-09-02: drink wine etc ?
-        return "Vous ne pouvez pas boire ça"
-
-    def drink_stuff(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        character_doc = self.get_document(character_id)
-        stuff_doc = self._stuff_lib.get_stuff_doc(stuff_id)
-        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-            stuff_doc.stuff_id
-        )
-
-        # TODO BS 2019-07-09: manage case where not 100% filled
-        if float(stuff_doc.filled_at) == 100.0:
-            stuff_doc.empty(stuff_properties)
-            self._kernel.server_db_session.add(stuff_doc)
-
-            character_doc.feel_thirsty = False
-            character_doc.dehydrated = False
-
-            if commit:
-                self._kernel.server_db_session.commit()
-
-        raise ImpossibleAction("pas encore codé")
 
     def mark_event_as_read(self, event_ids: typing.List[int]) -> None:
         self._kernel.server_db_session.query(EventDocument).filter(
@@ -1047,7 +1011,7 @@ class CharacterLib:
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
 
-    def reduce_tiredness(self, character_id: str, value: int, commit: bool = True) -> None:
+    def reduce_tiredness(self, character_id: str, value: int, commit: bool = True) -> int:
         doc = self.get_document(character_id)
 
         new_tiredness = doc.tiredness - value
@@ -1058,6 +1022,8 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
+
+        return new_tiredness
 
     def _get_ready_to_fight_query(
         self, character_ids: typing.List[str], world_row_i: int, world_col_i: int
@@ -1167,17 +1133,17 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def get_next_turn_str_value(self) -> str:
-        last_state = self._kernel.universe_lib.get_last_state()
-        last_turn_since = datetime.datetime.utcnow() - last_state.turned_at
-        next_turn_in_seconds = self._kernel.game.config.day_turn_every - last_turn_since.seconds
-        m, s = divmod(next_turn_in_seconds, 60)
-        h, m = divmod(m, 60)
-        return f"{h}h{m}m"
+    def get_health_text(self, character: CharacterModel) -> str:
+        health = "Ok"
+        if character.life_points < self._kernel.game.config.less_than_is_health2:
+            health = "Moyen"
+        if character.life_points < self._kernel.game.config.less_than_is_health3:
+            health = "Mauvais"
+        if character.life_points < self._kernel.game.config.less_than_is_health4:
+            health = "Critique"
+        return health
 
-    def get_resume_text(
-        self, character_id: str
-    ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
+    def get_resume_text(self, character_id: str) -> typing.List[ItemModel]:
         character = self.get(character_id)
         followers_count = self.get_follower_count(
             character_id, row_i=character.world_row_i, col_i=character.world_col_i
@@ -1186,36 +1152,73 @@ class CharacterLib:
             character_id, row_i=character.world_row_i, col_i=character.world_col_i
         )
 
-        hungry = "oui" if character.feel_hungry else "non"
-        thirsty = "oui" if character.feel_thirsty else "non"
-        next_turn_in_str = self.get_next_turn_str_value()
-
         can_drink_str = "Non"
-        if character_can_drink_in_its_zone(
-            self._kernel, character
-        ) or get_character_stuff_filled_with_water(self._kernel, character.id):
+        if character_can_drink_in_its_zone(self._kernel, character):
             can_drink_str = "Oui"
+        else:
+            drinkable_stuffs = get_stuffs_filled_with_resource_id(
+                self._kernel, character_id, self._kernel.game.config.fresh_water_resource_id
+            )
+            total_drinkable_value = sum(s.filled_value or 0.0 for s in drinkable_stuffs)
+            if total_drinkable_value:
+                drink_action_description = self._kernel.game.get_drink_water_action_description()
+                drinkable_ticks = (
+                    total_drinkable_value // drink_action_description.properties["consume_per_tick"]
+                )
+                if drinkable_ticks > self._kernel.game.config.limit_warning_drink_left_tick:
+                    can_drink_str = "Oui"
+                else:
+                    can_drink_str = "Faible"
 
-        try:
-            next(self.get_eatables(character))
-            can_eat_str = "Oui"
-        except StopIteration:
-            can_eat_str = "Non"
+        can_eat_str = "Non"
+        eatables = self.get_eatables(character)
+        eatables_total_ticks = 0
+        for carried_eatable, carried_action_description in eatables:
+            eatable_total_ticks = (
+                carried_eatable.quantity
+                // carried_action_description.properties["consume_per_tick"]
+            )
+            eatables_total_ticks += eatable_total_ticks
+        if eatables_total_ticks:
+            can_eat_str = "Faible"
+            if eatables_total_ticks > self._kernel.game.config.limit_warning_eat_left_tick:
+                can_eat_str = "Oui"
 
         fighter_with_him = self._kernel.character_lib.get_with_fighters_count(character_id)
 
+        hunger_class = "green"
+        thirst_class = "green"
+
+        if character.hunger >= self._kernel.game.config.limit_hunger_increase_life_point:
+            hunger_class = "red"
+        elif character.hunger >= self._kernel.game.config.stop_auto_eat_hunger:
+            hunger_class = "yellow"
+
+        if character.thirst >= self._kernel.game.config.limit_thirst_increase_life_point:
+            thirst_class = "red"
+        elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
+            thirst_class = "yellow"
+
         return [
-            (f"PV: {round(character.life_points, 1)}", None),
-            (f"PA: {round(character.action_points, 1)}", f"/character/{character.id}/AP"),
-            (f"Faim: {hungry}", None),
-            (f"Soif: {thirsty}", None),
-            ("", None),
-            (f"Passage: {next_turn_in_str}", f"/character/{character.id}/turn"),
-            (f"De quoi boire: {can_drink_str}", None),
-            (f"De quoi manger: {can_eat_str}", None),
-            (f"Suivis: {following_count}", None),
-            (f"Suiveurs: {followers_count}", None),
-            (f"Combattants: {fighter_with_him}", None),
+            ItemModel("PV", value_is_str=True, value_str=self.get_health_text(character)),
+            ItemModel("PA", value_is_float=True, value_float=round(character.action_points, 1)),
+            ItemModel(
+                "Faim",
+                value_is_float=True,
+                value_float=round(character.hunger, 0),
+                classes=["inverted_percent", hunger_class],
+            ),
+            ItemModel(
+                "Soif",
+                value_is_float=True,
+                value_float=round(character.thirst, 0),
+                classes=["inverted_percent", thirst_class],
+            ),
+            ItemModel("A boire", value_is_str=True, value_str=can_drink_str),
+            ItemModel("A manger", value_is_str=True, value_str=can_eat_str),
+            ItemModel("Suivis", value_is_float=True, value_float=float(following_count)),
+            ItemModel("Suiveurs", value_is_float=True, value_float=float(followers_count)),
+            ItemModel("Combattants", value_is_float=True, value_float=float(fighter_with_him)),
         ]
 
     def is_following(
@@ -1478,49 +1481,28 @@ class CharacterLib:
             .one()
         )
 
-    def get_eatables(self, character: CharacterModel) -> typing.Generator[Consumeable, None, None]:
+    def get_eatables(
+        self,
+        character: CharacterModel,
+        exclude_resource_ids: typing.Optional[typing.List[str]] = None,
+    ) -> typing.Generator[
+        typing.Tuple[CarriedResourceDescriptionModel, ActionDescriptionModel], None, None
+    ]:
+        exclude_resource_ids = exclude_resource_ids or []
         # With inventory resources
         for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
             resource_properties = self._kernel.game.config.resources[carried_resource.id]
-            for description in resource_properties.descriptions:
-                if description.action_type == ActionType.EAT_RESOURCE:
-                    eat_resource_action: WithResourceAction = self._kernel.action_factory.create_action(
-                        action_type=ActionType.EAT_RESOURCE, action_description_id=description.id
-                    )
-                    try:
-                        eat_resource_action.check_request_is_possible(
-                            character=character,
-                            resource_id=carried_resource.id,
-                            input_=EatResourceModel(),
-                        )
-                        yield EatResourceFromCharacterInventory(
-                            character,
-                            action=eat_resource_action,
-                            resource_id=carried_resource.id,
-                            input_=EatResourceModel(),
-                        )
-                    except ImpossibleAction:
-                        pass
 
-        # With inventory stuffs
-        for stuff in self._kernel.stuff_lib.get_carried_by(character.id):
-            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                stuff.stuff_id
-            )
-            for description in stuff_properties.descriptions:
-                if description.action_type == ActionType.EAT_STUFF:
-                    eat_stuff_action: WithStuffAction = self._kernel.action_factory.create_action(
-                        action_type=ActionType.EAT_STUFF, action_description_id=description.id
-                    )
-                    try:
-                        eat_stuff_action.check_request_is_possible(
-                            character=character, stuff=stuff, input_=EatStuffModel()
-                        )
-                        yield EatStuffFromCharacterInventory(
-                            character, stuff=stuff, action=eat_stuff_action, input_=EatStuffModel()
-                        )
-                    except ImpossibleAction:
-                        pass
+            if resource_properties.id in exclude_resource_ids:
+                continue
+
+            for description in resource_properties.descriptions:
+                if (
+                    description.action_type == ActionType.EAT_RESOURCE
+                    and resource_properties.id
+                    in [rd.id for rd in description.properties.get("accept_resources", [])]
+                ):
+                    yield carried_resource, description
 
     def get_with_fighters_count(self, character_id: str) -> int:
         here_ids = []
@@ -1538,3 +1520,25 @@ class CharacterLib:
             )
 
         return len(set(here_ids))
+
+    def get_thirst_sentence(self, percent: float) -> str:
+        if percent >= self._kernel.game.config.start_thirst_life_point_loss:
+            return "Complètement désydraté !"
+        if percent >= 70.0:
+            return "Extrêment soif !"
+        if percent >= 50.0:
+            return "Assoiffé!"
+        if percent >= 30.0:
+            return "Un peu soif"
+        return "Ok"
+
+    def get_hunger_sentence(self, percent: float) -> str:
+        if percent >= self._kernel.game.config.start_hunger_life_point_loss:
+            return "Complètement affamé !"
+        if percent >= 70.0:
+            return "Affamé !"
+        if percent >= 50.0:
+            return "Très faim"
+        if percent >= 30.0:
+            return "Faim"
+        return "Ok"

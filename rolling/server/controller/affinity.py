@@ -336,8 +336,8 @@ class AffinityController(BaseController):
                     is_link=True,
                     label="Voir les affinités",
                     form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ]
+                )
+            ],
         )
 
     @hapic.with_api_doc()
@@ -417,10 +417,7 @@ class AffinityController(BaseController):
 
             if return_:
                 self._kernel.server_db_session.commit()
-                return Description(
-                    title=title,
-                    footer_with_affinity_id=affinity.id,
-                )
+                return Description(title=title, footer_with_affinity_id=affinity.id)
 
         items = []
 

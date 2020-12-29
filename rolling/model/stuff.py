@@ -18,7 +18,7 @@ class StuffProperties:
     id: str
     name: str
     is_bag: bool = False
-    filled_at: typing.Optional[float] = None
+    filled_value: typing.Optional[float] = None
     filled_with_resource: typing.Optional[str] = None
     filled_unity: typing.Optional[Unit] = None
     filled_capacity: typing.Optional[float] = None
@@ -59,7 +59,7 @@ class StuffModel:
     zone_col_i: typing.Optional[int] = None
     zone_row_i: typing.Optional[int] = None
     is_bag: bool = False
-    filled_at: typing.Optional[float] = None
+    filled_value: typing.Optional[float] = None
     filled_unity: typing.Optional[Unit] = None
     filled_with_resource: typing.Optional[str] = None
     weight: typing.Optional[float] = None
@@ -96,12 +96,14 @@ class StuffModel:
         if self.weight:
             descriptions.append(display_g_or_kg(self.weight))
 
-        if self.filled_at is not None:
-            descriptions.append(f"{self.filled_at}%")
+        if self.filled_value is not None:
+            descriptions.append(str(round(self.filled_value, 2)))
 
         if self.filled_with_resource is not None:
             resource_description = kernel.game.config.resources[self.filled_with_resource]
-            descriptions.append(f"{resource_description.name}")
+            unit_str = kernel.translation.get(resource_description.unit)
+            descriptions.append(unit_str)
+            descriptions.append(resource_description.name)
 
         if self.clutter:
             descriptions.append(f"{round(self.clutter, 3)} d'encombrement")
@@ -111,11 +113,13 @@ class StuffModel:
     def get_light_description(self, kernel: "Kernel") -> typing.List[str]:
         descriptions: typing.List[str] = []
 
-        if self.filled_at is not None:
-            descriptions.append(f"{self.filled_at}%")
+        if self.filled_value is not None:
+            descriptions.append(str(round(self.filled_value, 2)))
 
         if self.filled_with_resource is not None:
             resource_description = kernel.game.config.resources[self.filled_with_resource]
+            unit_str = kernel.translation.get(resource_description.unit)
+            descriptions.append(unit_str)
             descriptions.append(f"{resource_description.name}")
 
         return descriptions

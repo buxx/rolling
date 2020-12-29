@@ -219,6 +219,12 @@ class GetLookStuffModelModel:
 
 
 @dataclasses.dataclass
+class ChooseBetweenStuffInventoryStuffModelModel:
+    character_id: str
+    stuff_id: str
+
+
+@dataclasses.dataclass
 class GetLookCharacterModel:
     character_id: str
     with_character_id: str
@@ -324,11 +330,9 @@ class CharacterModel:
     zone_col_i: int = None
     zone_row_i: int = None
 
-    feel_thirsty: bool = True
-    dehydrated: bool = False
-    feel_hungry: bool = True
-    starved: bool = False
     tiredness: int = 0
+    thirst: float = 0  # %
+    hunger: float = 0  # %
 
     _display_object = None
 
@@ -417,8 +421,3 @@ class CharacterEventModel:
     turn: int
     text: str
     unread: bool
-
-
-@dataclasses.dataclass
-class ListOfStrModel:
-    items: typing.List[typing.Tuple[str, typing.Optional[str]]]

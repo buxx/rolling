@@ -96,12 +96,10 @@ class CheatsCharacterAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
             return Description(
-                title="Points d'actions rechargés",
-                back_url=get_character_actions_url(character),
+                title="Points d'actions rechargés", back_url=get_character_actions_url(character)
             )
         if input_.cheat_id == "reduce_tiredness":
             self._kernel.character_lib.reduce_tiredness(character.id, 100)
             return Description(
-                title="Plus de fatigue",
-                back_url=get_character_actions_url(character),
+                title="Plus de fatigue", back_url=get_character_actions_url(character)
             )

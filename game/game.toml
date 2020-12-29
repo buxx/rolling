@@ -1,4 +1,31 @@
-action_points_per_turn = 24
+# turn config
+action_points_per_tick = 1.0
+life_point_points_per_tick = 0.05
+thirst_change_per_tick = 2.0
+thirst_life_point_loss_per_tick = 0.5
+hunger_change_per_tick = 1.0
+hunger_life_point_loss_per_tick = 0.1
+start_hunger_life_point_loss = 100.0
+start_thirst_life_point_loss = 100.0
+limit_hunger_increase_life_point = 80.0
+limit_thirst_increase_life_point = 80.0
+limit_thirst_reduce_tiredness = 80.0
+limit_hunger_reduce_tiredness = 80.0
+tick_every = 3600
+default_maximum_ap = 36.0
+reduce_tiredness_per_tick = 4
+start_thirst = 50.0
+start_hunger = 50
+start_action_points = 24.0
+stop_auto_eat_hunger = 20.0
+stop_auto_drink_thirst = 20.0
+limit_warning_drink_left_tick = 15
+limit_warning_eat_left_tick = 15
+
+less_than_is_health2 = 3.0
+less_than_is_health3 = 2.0
+less_than_is_health4 = 1.0
+
 create_character_event_title = "You wake up on a beach"
 create_character_event_story_image = "beach_intro.png"
 create_character_event_story_text = """Quel mal de crâne !
@@ -8,15 +35,12 @@ liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]
 default_weight_capacity = 20000.0
 default_clutter_capacity = 5.0
-turn_mode = "DAY"
-day_turn_every = 86400  # 24 hours
 cheats = {"*"=["increase_ap", "reduce_tiredness"]}
 create_character_skills = ["crafts", "hunting_gathering", "tannery", "pottery", "basketry"]
 create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith", "leatherwork"]
 create_character_knowledges_count = 1
 create_character_max_points = 13.0
 max_action_propose_turns = 3
-reduce_tiredness_per_turn = 50
 
 [materials]
   [materials.LIQUID]
@@ -181,12 +205,6 @@ reduce_tiredness_per_turn = 50
   name = "Tissage"
 
 [character_effects]
-  [character_effects.THIRSTY_SATISFIED]
-    attributes_to_false = ["dehydrated", "feel_thirsty"]
-
-  [character_effects.HUNGRY_SATISFIED]
-    attributes_to_false = ["starved", "feel_hungry"]
-
   [character_effects.DRUNK]
     factors = [{"attribute"="bravery", "factor"=1.1}]
 
@@ -415,55 +433,51 @@ reduce_tiredness_per_turn = 50
   [ACTIONS.DRINK_FRESH_WATER]
     actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
     accept_resources = ["FRESH_WATER"]
-    character_effects = ["THIRSTY_SATISFIED"]
+    consume_per_tick = 0.04  # litters (0.04 * 24 hours = ~1 litter)
+    character_effects = []
+    like_water = true
     cost = 0.0
 
   [ACTIONS.EAT_FRESH_FRUITS]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["VEGETAL_FOOD_FRESH"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 1.0
+    consume_per_tick = 0.04  # litters (0.04 * 24 hours = ~1 litter)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.EAT_SHELLFISH_FRESH]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["SHELLFISH_FRESH"]
-    character_effects = ["HUNGRY_SATISFIED"]
-    require = 1.0
+    consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.EAT_RAW_MEAT]
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["RAW_MEAT"]  # g !
-    require = 500.0
-    character_effects = ["HUNGRY_SATISFIED"]
+    accept_resources = ["RAW_MEAT"]  # g
+    consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.EAT_COOKED_MEAT]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["COOKED_MEAT"]
-    require = 400.0
-    character_effects = ["HUNGRY_SATISFIED"]
+    consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.EAT_SMOKED_MEAT]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["SMOKED_MEAT"]
-    require = 250.0
-    character_effects = ["HUNGRY_SATISFIED"]
+    consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.EAT_BREAD]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["BREAD"]
-    require = 500.0
-    character_effects = ["HUNGRY_SATISFIED"]
-    cost = 0.0
-
-  [ACTIONS.DRINK_WINE]
-    actions = ["DRINK_RESOURCE", "DRINK_STUFF"]
-    accept_resources = ["WINE"]
-    character_effects = ["DRUNK"]
+    consume_per_tick = 40.0  # g (40.0 * 24 hours = ~1000g)
+    character_effects = []
     cost = 0.0
 
   [ACTIONS.FILL_STUFF]

@@ -1,13 +1,18 @@
 # coding: utf-8
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp_basicauth_middleware import basic_auth_middleware
+import aiohttp_jinja2
 import argparse
 from hapic.error.serpyco import DefaultErrorSchema
 from hapic.error.serpyco import SerpycoDefaultErrorBuilder
 from hapic.ext.aiohttp.context import AiohttpContext
 from hapic.processor.main import ProcessValidationError
+import jinja2
 import logging
+import os
 from serpyco import ValidationError
+import signal
 
 from rolling.exception import UserDisplayError
 from rolling.log import configure_logging
@@ -59,6 +64,15 @@ def run(args: argparse.Namespace) -> None:
     )
     server_logger.info("Create web application")
     app = get_application(kernel)
+    aiohttp_jinja2.setup(
+        app,
+        loader=jinja2.FileSystemLoader(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
+        ),
+    )
+    app.middlewares.append(
+        basic_auth_middleware(("/admin",), {args.admin_login: args.admin_password})
+    )
 
     # Configure hapic
     server_logger.info("Configure web api")
@@ -81,6 +95,7 @@ def run(args: argparse.Namespace) -> None:
 
     kernel.init()
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
+    signal.signal(signal.SIGHUP, kernel.on_sighup_signal)
     web.run_app(app, host=args.host, port=args.port, access_log=server_logger)
 
 
@@ -94,6 +109,8 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--sentry", type=str, help="Sentry address to use", default=None)
     parser.add_argument("--server-db-path", type=str, help="path of server.db", default="server.db")
+    parser.add_argument("--admin-login", type=str, default="adminRoll")
+    parser.add_argument("--admin-password", type=str, default="RollNRoll42")
 
     args = parser.parse_args()
     run(args)

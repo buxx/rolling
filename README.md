@@ -8,7 +8,7 @@ Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [ro
 
 A python3.7+ is required. If you use debian, debian 10 is required if you want to use OS python packaged. But you can compile python3.7 on your system.
 
-Following documentation assume you use debian 10 or simial OS. You will need:
+Following documentation assume you use debian 10 or similar OS. You will need:
 
     apt-get install git python3 python3-venv build-essential python3-dev
 
@@ -83,6 +83,12 @@ To build docker image:
 To run server:
 
     docker run -v <local path containing world.txt>:/world -v <local path containing zones>:/zones -v <local path containing game config>:/game -v -v <local path for db>:/db rolling:latest
+
+## Reload configuration without stop server
+
+    kill -SIGHUP <pid>
+
+Look at server logs to ensure everything is ok. If config produce error at load, config is not replaced.
 
 # Roadmap (fr)
 

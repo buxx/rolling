@@ -24,6 +24,7 @@ from rolling.exception import UserDisplayError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
+from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
 from rolling.model.character import DescribeStoryQueryModel
 from rolling.model.character import GetCharacterAndPendingActionPathModel
 from rolling.model.character import GetCharacterPathModel
@@ -33,7 +34,6 @@ from rolling.model.character import GetLookInventoryResourceModel
 from rolling.model.character import GetLookResourceModel
 from rolling.model.character import GetLookStuffModelModel
 from rolling.model.character import GetMoveZoneInfosModel
-from rolling.model.character import ListOfStrModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PendingActionQueryModel
 from rolling.model.character import PickFromInventoryQueryModel
@@ -45,6 +45,7 @@ from rolling.model.character import WithBuildActionModel
 from rolling.model.character import WithCharacterActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
+from rolling.model.data import ListOfItemModel
 from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import ZoneEvent
@@ -287,18 +288,16 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
                     f"/_describe/character/{self._character.id}"
                     f"/shared-inventory/add?affinity_id={self._affinity.id}"
                 ),
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a la fiche de l'affinité",
-                form_action=f"/affinity/{self._character.id}/see/{self._affinity.id}",
-            ),
-            Part(
-                is_link=True,
-                label="Retourner a l'inventaire",
-                form_action=f"/_describe/character/{self._character.id}/inventory",
-            ),
+            )
         ]
+
+    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+        return None
+
+    def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        if sizing_up_quantity:
+            return None
+        return self._affinity.id
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -485,10 +484,10 @@ class CharacterController(BaseController):
                 ),
                 Part(
                     label="Points de vie",
-                    text=f"{str(character.life_points)}/{str(character.max_life_comp)}",
+                    text=self._kernel.character_lib.get_health_text(character),
                 ),
-                Part(label="Soif", text="oui" if character.feel_thirsty else "non"),
-                Part(label="Faim", text="oui" if character.feel_hungry else "non"),
+                Part(label="Soif", text=str(round(character.thirst, 0))),
+                Part(label="Faim", text=str(round(character.hunger, 0))),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
                 Part(label="Exténué", text="oui" if character.is_exhausted() else "non"),
                 Part(
@@ -838,22 +837,30 @@ class CharacterController(BaseController):
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
-        inventory_parts = self._get_inventory_parts(with_character, inventory, disable_stuff_link=True)
+        inventory_parts = self._get_inventory_parts(
+            with_character, inventory, disable_stuff_link=True
+        )
 
         return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
-        self, character: CharacterModel, inventory: CharacterInventoryModel, disable_stuff_link: bool = False
+        self,
+        character: CharacterModel,
+        inventory: CharacterInventoryModel,
+        disable_stuff_link: bool = False,
     ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
         bags = self._character_lib.get_used_bags(character.id)
         bags_string = "Aucun" if not bags else ", ".join([bag.name for bag in bags])
         stuff_count: typing.Dict[str, int] = {}
+        stuff_by_stuff_ids: typing.Dict[str, typing.List[StuffModel]] = {}
 
         for stuff in inventory.stuff:
             stuff_count.setdefault(stuff.stuff_id, 0)
+            stuff_by_stuff_ids.setdefault(stuff.stuff_id, [])
             stuff_count[stuff.stuff_id] += 1
+            stuff_by_stuff_ids[stuff.stuff_id].append(stuff)
 
         stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
         for stuff in inventory.stuff:
@@ -861,20 +868,33 @@ class CharacterController(BaseController):
                 continue
 
             name = stuff.get_name()
-            descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
+            if stuff_count[stuff.stuff_id] > 1:
+                total_weight = sum(s.weight for s in stuff_by_stuff_ids[stuff.stuff_id])
+                total_clutter = sum(s.clutter for s in stuff_by_stuff_ids[stuff.stuff_id])
+                description = (
+                    f" ({display_g_or_kg(total_weight)}, "
+                    f"{round(total_clutter, 2)} encombrement)"
+                )
+            else:
+                descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
 
-            description = ""
-            if descriptions:
-                description = " (" + ", ".join(descriptions) + ")"
+                description = ""
+                if descriptions:
+                    description = " (" + ", ".join(descriptions) + ")"
 
             if stuff_count[stuff.stuff_id] > 1:
                 text = f"{stuff_count[stuff.stuff_id]} {name}{description}"
             else:
                 text = f"{name}{description}"
 
-            form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
-                character_id=character.id, stuff_id=stuff.id
-            )
+            if stuff_count[stuff.stuff_id] > 1:
+                form_action = "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}".format(
+                    character_id=character.id, stuff_id=stuff.stuff_id
+                )
+            else:
+                form_action = DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                    character_id=character.id, stuff_id=stuff.id
+                )
             is_link = True
 
             if disable_stuff_link:
@@ -882,12 +902,7 @@ class CharacterController(BaseController):
                 is_link = False
 
             stuff_items.append(
-                Part(
-                    text=text,
-                    is_link=is_link,
-                    align="left",
-                    form_action=form_action,
-                )
+                Part(text=text, is_link=is_link, align="left", form_action=form_action)
             )
             stuff_displayed[stuff.stuff_id] = True
 
@@ -1250,6 +1265,35 @@ class CharacterController(BaseController):
             title=f"{resource_description.name} récupéré",
             items=[Part(is_link=True)],
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(ChooseBetweenStuffInventoryStuffModelModel)
+    @hapic.output_body(Description)
+    async def _choose_between_stuff(self, request: Request, hapic_data: HapicData) -> Description:
+        stuffs = self._kernel.stuff_lib.get_carried_by(
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
+        )
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            hapic_data.path.stuff_id
+        )
+
+        parts = []
+        for stuff in stuffs:
+            description_str = ", ".join(stuff.get_full_description(self._kernel))
+            label = f"{stuff_properties.name} ({description_str})"
+            parts.append(
+                Part(
+                    label=label,
+                    is_link=True,
+                    form_action=DESCRIBE_INVENTORY_STUFF_ACTION.format(
+                        character_id=hapic_data.path.character_id, stuff_id=stuff.id
+                    ),
+                )
+            )
+
+        return Description(
+            title=f"Choix de {stuff_properties.name}", items=parts, can_be_back_url=True
         )
 
     @hapic.with_api_doc()
@@ -1733,9 +1777,9 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(ListOfStrModel)
-    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfStrModel:
-        return ListOfStrModel(
+    @hapic.output_body(ListOfItemModel)
+    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfItemModel:
+        return ListOfItemModel(
             self._kernel.character_lib.get_resume_text(hapic_data.path.character_id)
         )
 
@@ -1799,16 +1843,15 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def describe_turn(self, request: Request, hapic_data: HapicData) -> Description:
-        next_turn_in_str = self._kernel.character_lib.get_next_turn_str_value()
         return Description(
-            title=f"Passage de tour",
+            title=f"Ecoulement du temps",
             items=[
                 Part(
-                    text=f"Dans exactement {next_turn_in_str}, le passage de tour sera effectué. "
-                    f"Cela signifie que le temps passe dans le jeu: l'herbe pousse, "
-                    f"l'eau coule, les feux s'éteignent s'il n'ont plus de bois à bruler ... "
-                    f"Mais cela signifie aussi que les personnages perdent des points de vie "
-                    f"s'il n'ont pas a boire ou a manger par exemple !"
+                    # FIXME: to do ...
+                    text=(
+                        """TODO
+                        """
+                    )
                 )
             ],
             can_be_back_url=True,
@@ -1917,6 +1960,10 @@ class CharacterController(BaseController):
                 ),
                 web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
                 web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.post(
+                    "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}",
+                    self._choose_between_stuff,
+                ),
                 web.post(
                     "/_describe/character/{character_id}/inventory/shared-with",
                     self._describe_shared_with_inventory,

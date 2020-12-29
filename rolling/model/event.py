@@ -6,6 +6,7 @@ from enum import Enum
 import typing
 
 from rolling.model.build import ZoneBuildModel
+from rolling.model.data import ListOfItemModel
 
 
 class ZoneEventType(Enum):
@@ -82,7 +83,7 @@ class ClickActionData(ZoneEventData):
 
 @dataclasses.dataclass
 class NewResumeTextData(ZoneEventData):
-    resume: typing.List[typing.Tuple[str, typing.Optional[str]]]
+    resume: ListOfItemModel
 
 
 @dataclasses.dataclass

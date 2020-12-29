@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.3
 aioresponses==0.6.4
 apispec==2.0.2
 apispec-marshmallow-advanced==0.4
@@ -46,3 +46,7 @@ urllib3==1.25.10
 urwid==2.0.1
 yarl==1.5.1
 zipp==3.1.0
+MarkupSafe==1.1.1
+aiohttp-jinja2==1.4.2
+jinja2==2.11.2
+aiohttp-basicauth-middleware==1.1.2

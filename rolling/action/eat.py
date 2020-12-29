@@ -7,10 +7,9 @@ import typing
 from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithResourceAction
-from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
-from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughResource
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -19,17 +18,13 @@ if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
-    from rolling.model.stuff import StuffModel
+    from rolling.server.document.character import CharacterDocument
+    from rolling.server.document.stuff import StuffDocument
 
 
 @dataclasses.dataclass
 class EatResourceModel:
-    pass
-
-
-@dataclasses.dataclass
-class EatStuffModel:
-    pass
+    all_possible: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=0)
 
 
 class EatResourceAction(WithResourceAction):
@@ -45,7 +40,7 @@ class EatResourceAction(WithResourceAction):
             "effects": [
                 game_config.character_effects[e] for e in action_config_raw["character_effects"]
             ],
-            "require": action_config_raw["require"],
+            "consume_per_tick": action_config_raw["consume_per_tick"],
         }
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
@@ -60,7 +55,7 @@ class EatResourceAction(WithResourceAction):
     ) -> None:
         self.check_is_possible(character, resource_id)
 
-        # TODO BS 2019-09-14: perf
+        # FIXME BS 2019-09-14: perf
         carried_resource = next(
             (
                 cr
@@ -69,14 +64,14 @@ class EatResourceAction(WithResourceAction):
             )
         )
 
-        require = self._description.properties["require"]
-        if carried_resource.quantity >= require:
+        consume_per_tick = self._description.properties["consume_per_tick"]
+        if carried_resource.quantity >= consume_per_tick:
             return
 
         unit_name = self._kernel.translation.get(carried_resource.unit)
         raise ImpossibleAction(
-            f"Vous ne possédez pas assez de {carried_resource.name} "
-            f"({require} {unit_name} requis)"
+            f"Vous ne possédez pas/plus assez de {carried_resource.name} "
+            f"({consume_per_tick} {unit_name} requis)"
         )
 
     def get_character_actions(
@@ -100,12 +95,8 @@ class EatResourceAction(WithResourceAction):
                 # description_id. Voir les conséquences.
                 CharacterActionLink(
                     name=f"Manger {carried_resource.name}",
-                    link=get_with_resource_action_url(
-                        character_id=character.id,
-                        action_type=ActionType.EAT_RESOURCE,
-                        resource_id=resource_id,
-                        query_params={},
-                        action_description_id=self._description.id,
+                    link=self._get_url(
+                        character=character, resource_id=resource_id, all_possible=False
                     ),
                     cost=None,
                 )
@@ -113,94 +104,95 @@ class EatResourceAction(WithResourceAction):
 
         return []
 
-    def perform(
-        self, character: "CharacterModel", resource_id: str, input_: input_model
-    ) -> Description:
-        character_doc = self._character_lib.get_document(character.id)
-        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
-            "effects"
-        ]
-
-        self._kernel.resource_lib.reduce_carried_by(
-            character.id,
-            resource_id,
-            quantity=self._description.properties["require"],
-            commit=False,
+    def _get_url(self, character: "CharacterModel", resource_id: str, all_possible: bool) -> str:
+        return get_with_resource_action_url(
+            character_id=character.id,
+            action_type=ActionType.EAT_RESOURCE,
+            resource_id=resource_id,
+            query_params={"all_possible": 1 if all_possible else 0},
+            action_description_id=self._description.id,
         )
-        for effect in effects:
-            self._effect_manager.enable_effect(character_doc, effect)
-
-        self._kernel.server_db_session.add(character_doc)
-        self._kernel.server_db_session.commit()
-
-        return Description(
-            title="Action effectué",
-            back_url=f"/_describe/character/{character.id}/inventory",
-        )
-
-
-class EatStuffAction(WithStuffAction):
-    input_model: typing.Type[EatStuffModel] = EatStuffModel
-    input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        a = 1
-        return {
-            "accept_stuff_ids": action_config_raw["accept_stuffs"],
-            "effects": [
-                game_config.character_effects[e] for e in action_config_raw["character_effects"]
-            ],
-        }
-
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        # TODO BS 2019-07-31: check is owned stuff
-        if stuff.stuff_id in self._description.properties["accept_stuff_ids"]:
-            return
-
-        raise ImpossibleAction(f"Vous ne pouvez pas le manger")
-
-    def check_request_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+    def eat(
+        cls,
+        kernel: "Kernel",
+        character_doc: "CharacterDocument",
+        resource_id: str,
+        all_possible: bool,
+        consume_per_tick: float,
     ) -> None:
-        self.check_is_possible(character, stuff)
+        while True:
+            not_enough_resource_exc = None
 
-    def get_character_actions(
-        self, character: "CharacterModel", stuff: "StuffModel"
-    ) -> typing.List[CharacterActionLink]:
-        if stuff.stuff_id in self._description.properties["accept_stuff_ids"]:
-            return [
-                CharacterActionLink(
-                    name=f"Manger {stuff.name}",
-                    link=get_with_stuff_action_url(
-                        character.id,
-                        ActionType.EAT_STUFF,
-                        query_params={},
-                        stuff_id=stuff.id,
-                        action_description_id=self._description.id,
-                    ),
-                    cost=self.get_cost(character, stuff),
+            try:
+                kernel.resource_lib.reduce_carried_by(
+                    character_doc.id,
+                    resource_id,
+                    quantity=consume_per_tick,
+                    commit=False,
+                    force_before_raise=True,
                 )
-            ]
+            except NotEnoughResource as exc:
+                not_enough_resource_exc = exc
 
-        return []
+            reduce_hunger_by = kernel.game.config.hunger_change_per_tick
+            if not_enough_resource_exc:
+                reduce_hunger_by = reduce_hunger_by * (
+                    not_enough_resource_exc.available_quantity / consume_per_tick
+                )
+
+            character_doc.hunger = max(0.0, float(character_doc.hunger) - reduce_hunger_by)
+            kernel.server_db_session.add(character_doc)
+            kernel.server_db_session.commit()
+
+            if not_enough_resource_exc:
+                break
+
+            if (
+                not all_possible
+                or float(character_doc.hunger) <= kernel.game.config.stop_auto_eat_hunger
+            ):
+                break
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
+        self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
-        effects: typing.List[CharacterEffectDescriptionModel] = self._description.properties[
-            "effects"
-        ]
 
-        self._kernel.stuff_lib.destroy(stuff.id, commit=False)
-        for effect in effects:
-            self._effect_manager.enable_effect(character_doc, effect)
-
-        self._kernel.server_db_session.add(character_doc)
-        self._kernel.server_db_session.commit()
+        self.eat(
+            self._kernel,
+            character_doc=character_doc,
+            resource_id=resource_id,
+            all_possible=bool(input_.all_possible),
+            consume_per_tick=self._description.properties["consume_per_tick"],
+        )
 
         return Description(
             title="Action effectué",
+            items=[
+                Part(
+                    text=(
+                        f"Etat de votre faim: "
+                        f"{self._kernel.character_lib.get_hunger_sentence(character_doc.hunger)}"
+                    )
+                ),
+                Part(
+                    label="Manger encore",
+                    is_link=True,
+                    form_values_in_query=True,
+                    form_action=self._get_url(
+                        character=character, resource_id=resource_id, all_possible=False
+                    ),
+                ),
+                Part(
+                    label="Manger jusqu'à plus faim",
+                    is_link=True,
+                    form_values_in_query=True,
+                    form_action=self._get_url(
+                        character=character, resource_id=resource_id, all_possible=True
+                    ),
+                ),
+            ],
             back_url=f"/_describe/character/{character.id}/inventory",
         )

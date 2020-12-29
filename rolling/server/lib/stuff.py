@@ -107,8 +107,8 @@ class StuffLib:
             zone_col_i=zone_col_i,
             zone_row_i=zone_row_i,
             # properties
-            filled_at=stuff_generation_properties.meta.get("filled_at")
-            or stuff_generation_properties.stuff.filled_at,
+            filled_value=stuff_generation_properties.meta.get("filled_value")
+            or stuff_generation_properties.stuff.filled_value,
             filled_with_resource=stuff_generation_properties.meta.get("filled_with_resource")
             or stuff_generation_properties.stuff.filled_with_resource,
             filled_unity=stuff_generation_properties.stuff.filled_unity,
@@ -159,7 +159,7 @@ class StuffLib:
             zone_col_i=zone_col_i,
             zone_row_i=zone_row_i,
             # properties
-            filled_at=properties.filled_at,
+            filled_value=properties.filled_value,
             filled_unity=properties.filled_unity,
             filled_with_resource=properties.filled_with_resource,
             filled_capacity=properties.filled_capacity,
@@ -215,7 +215,7 @@ class StuffLib:
             is_bag=stuff_properties.is_bag,
             zone_col_i=doc.zone_col_i,
             zone_row_i=doc.zone_row_i,
-            filled_at=float(doc.filled_at) if doc.filled_at else None,
+            filled_value=float(doc.filled_value) if doc.filled_value else None,
             filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
             filled_with_resource=doc.filled_with_resource if doc.filled_with_resource else None,
             weight=float(doc.weight) if doc.weight else None,
@@ -240,11 +240,11 @@ class StuffLib:
             protect_sharp=stuff_properties.protect_sharp,
             classes=stuff_properties.classes,
             used_by=(
-                doc.used_as_weapon_by_id or
-                doc.used_as_shield_by_id or
-                doc.used_as_bag_by_id or
-                doc.used_as_armor_by_id
-            )
+                doc.used_as_weapon_by_id
+                or doc.used_as_shield_by_id
+                or doc.used_as_bag_by_id
+                or doc.used_as_armor_by_id
+            ),
         )
 
     def get_carried_by(
@@ -322,7 +322,7 @@ class StuffLib:
     # FIXME: exclude crafting stuff
     def fill_stuff_with_resource(self, stuff: StuffModel, resource_id: str) -> None:
         doc = self.get_stuff_doc(stuff.id)
-        doc.fill(self._kernel, resource_id, at=100.0)
+        doc.fill(self._kernel, resource_id, add_value=float(doc.filled_capacity))
 
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()
@@ -330,10 +330,7 @@ class StuffLib:
     # FIXME: exclude crafting stuff
     def empty_stuff(self, stuff: StuffModel) -> None:
         doc = self.get_stuff_doc(stuff.id)
-        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-            stuff.stuff_id
-        )
-        doc.empty(stuff_properties)
+        doc.empty(self._kernel, remove_value=float(doc.filled_value))
 
         self._kernel.server_db_session.add(doc)
         self._kernel.server_db_session.commit()

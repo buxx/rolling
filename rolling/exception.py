@@ -130,7 +130,12 @@ class NoCarriedResource(GamePlayError):
 
 
 class NotEnoughResource(GamePlayError):
-    pass
+    def __init__(
+        self, resource_id: str, required_quantity: float, available_quantity: float
+    ) -> None:
+        self.resource_id = resource_id
+        self.required_quantity = required_quantity
+        self.available_quantity = available_quantity
 
 
 class MissingResource(GamePlayError):

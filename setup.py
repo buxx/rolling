@@ -6,15 +6,15 @@ dev_require = ["black", "isort", "pip-utils", "mypy"] + test_require
 
 setup(
     name="rolling",
-    version="0.1",
+    version="0.3.0",
     description="Role game engine",
     author="Bastien Sevajol",
     author_email="sevajol.bastien@gmail.com",
     url="https://github.com/buxx/rolling",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["urwid", "aiohttp==3.6.2", "serpyco==0.17.4", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
-                      'click', "multidict==4.7.6"],
+    install_requires=["urwid", "aiohttp==3.7.3", "serpyco==0.17.4", "hapic[serpyco]", "sqlalchemy", "requests", "toml", "Pillow",
+                      'click', "multidict==4.7.6", "aiohttp-jinja2==1.4.2", "aiohttp-basicauth-middleware==1.1.2"],
     extras_require={"dev": dev_require, "test": test_require},
     entry_points={
         "console_scripts": [

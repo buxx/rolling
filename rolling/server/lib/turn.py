@@ -3,21 +3,19 @@ from logging import Logger
 import random
 import typing
 
+from rolling.action.drink import DrinkStuffAction
+from rolling.action.eat import EatResourceAction
 from rolling.exception import ErrorWhenConsume
-from rolling.exception import ServerTurnError
+from rolling.exception import NoCarriedResource
+from rolling.exception import NotEnoughResource
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
-from rolling.rolling_types import TurnMode
-from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import character_can_drink_in_its_zone
-from rolling.util import get_character_stuff_filled_with_water
-from rolling.util import get_stuffs_eatable
 from rolling.util import get_stuffs_filled_with_resource_id
-from rolling.util import is_there_resource_id_in_zone
 
 
 class TurnLib:
@@ -34,21 +32,16 @@ class TurnLib:
         self._logger = logger or server_logger
 
     def execute_turn(self) -> None:
-        # For now, only manager DAY turn mode
-        turn_mode = self._kernel.game.config.turn_mode
-        if not turn_mode == TurnMode.DAY:
-            raise ServerTurnError(f"Turn mode '{turn_mode}' not yet implemented")
-
-        self._generate_stuff()
+        # FIXME: update stuff generation for hour ticks
+        # self._generate_stuff()
         self._provide_for_natural_needs()
         self._improve_conditions()
         self._increment_age()
         self._kill()
-        self._reset_characters_props()
+        self._manage_characters_props()
         self._universe_turn()
 
         # FIXME BS NOW: remove pending actions and authorizations
-
         self._kernel.server_db_session.commit()
 
     def _generate_stuff(self) -> None:
@@ -130,77 +123,126 @@ class TurnLib:
             if not character_document.is_alive:
                 continue
 
-            self._logger.info(f"Provide natural needs of {character_document.name}")
-
-            zone_contains_fresh_water = character_can_drink_in_its_zone(self._kernel, character)
-            stuff_with_fresh_water = get_character_stuff_filled_with_water(
-                self._kernel, character_id
+            self._logger.info(
+                f"Provide natural needs of {character_document.name} {character_document.id}"
             )
+            zone_contains_fresh_water = character_can_drink_in_its_zone(self._kernel, character)
 
-            # Need drink
-            if character_document.feel_thirsty or character_document.dehydrated:
-                # Fresh water in zone
+            # DRINKING
+            character_document.thirst = min(
+                100.0,
+                float(character_document.thirst) + self._kernel.game.config.thirst_change_per_tick,
+            )
+            self._logger.info(f"Increase thirst to {character_document.thirst}")
+
+            drink_in = []
+            while character_document.thirst > self._kernel.game.config.stop_auto_drink_thirst:
+                stuff_with_fresh_water = None
+                try:
+                    stuff_with_fresh_water = next(
+                        get_stuffs_filled_with_resource_id(
+                            self._kernel,
+                            character_id,
+                            self._kernel.game.config.fresh_water_resource_id,
+                            exclude_stuff_ids=[s.id for s in drink_in],
+                        )
+                    )
+                except StopIteration:
+                    pass
+
+                have_drink = False
                 if zone_contains_fresh_water:
-                    self._logger.info(
-                        f"{character_document.name} need to drink: fresh water in zone"
-                    )
-                    character_document.dehydrated = False
-                # Fresh water in carried stuff
+                    self._logger.info(f"Drink in zone")
+                    have_drink = True
+                    character_document.thirst = self._kernel.game.config.stop_auto_drink_thirst
+
                 elif stuff_with_fresh_water is not None:
-                    self._logger.info(
-                        f"{character_document.name} need to drink: fresh water in stuff {stuff_with_fresh_water.id}"
-                    )
-                    stuff_doc = self._stuff_lib.get_stuff_doc(stuff_with_fresh_water.id)
-                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                        stuff_doc.stuff_id
-                    )
-                    stuff_doc.empty(stuff_properties)
-                    character_document.dehydrated = False
+                    self._logger.info(f"Drink in stuff {stuff_with_fresh_water.id}")
+                    have_drink = True
 
-            # Dehydrated !
-            if character_document.dehydrated:
-                character_document.life_points -= 1
-                self._kernel.character_lib.add_event(
-                    character_id, f"{character_document.name} est déshydraté !"
+                    stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff_with_fresh_water.id)
+                    drink_water_action_description = (
+                        self._kernel.game.get_drink_water_action_description()
+                    )
+                    DrinkStuffAction.drink(
+                        self._kernel,
+                        character_document,
+                        stuff_doc,
+                        all_possible=True,
+                        consume_per_tick=drink_water_action_description.properties[
+                            "consume_per_tick"
+                        ],
+                    )
+                    drink_in.append(stuff_doc)
+                    self._logger.info(f"Now thirst to {character_document.thirst}")
+                else:
+                    self._logger.info(f"No drink")
+
+                if not have_drink:
+                    break
+
+            # Dehydrated ! Losing LP
+            if (
+                float(character_document.thirst)
+                >= self._kernel.game.config.start_thirst_life_point_loss
+            ):
+                character_document.life_points = max(
+                    0.0,
+                    float(character_document.life_points)
+                    - self._kernel.game.config.thirst_life_point_loss_per_tick,
                 )
                 self._logger.info(
-                    f"{character_document.name} need to drink but no water ! let {character_document.life_points} life points"
+                    f"Losing LP because dehydrated for {character_document.life_points}"
                 )
-            # Only thirsty
-            elif character_document.feel_thirsty:
-                self._logger.info(
-                    f"{character_document.name} need to drink but no water, now dehydrated"
-                )
-                character_document.dehydrated = True
 
-            # Need to eat
-            if character_document.feel_hungry or character_document.starved:
+            # EATING
+            character_document.hunger = min(
+                100.0,
+                float(character_document.hunger) + self._kernel.game.config.hunger_change_per_tick,
+            )
+            self._logger.info(f"Increase hunger to {character_document.hunger}")
+
+            eat_resource_ids = []
+            while character_document.hunger > self._kernel.game.config.stop_auto_eat_hunger:
                 have_eat = False
 
-                for eatable in self._kernel.character_lib.get_eatables(character):
+                try:
+                    carried_resource, action_description = next(
+                        self._kernel.character_lib.get_eatables(
+                            character, exclude_resource_ids=eat_resource_ids
+                        )
+                    )
+                    have_eat = True
                     try:
-                        eatable.consume()
-                        have_eat = True
-                        break
-                    except ErrorWhenConsume as exc:
-                        server_logger.error(f"{character.name} can't eat because {str(exc)}")
-
-                if have_eat:
+                        EatResourceAction.eat(
+                            self._kernel,
+                            character_doc=character_document,
+                            resource_id=carried_resource.id,
+                            all_possible=True,
+                            consume_per_tick=action_description.properties["consume_per_tick"],
+                        )
+                    except NoCarriedResource:
+                        pass
+                    self._logger.info(f"Have eat with {carried_resource.id}")
+                    eat_resource_ids.append(carried_resource.id)
+                except StopIteration:
                     pass
-                elif character_document.starved:
-                    character_document.life_points -= 1
-                    self._kernel.character_lib.add_event(
-                        character_id, f"{character_document.name} est affamé !"
-                    )
-                    self._logger.info(
-                        f"{character_document.name} need to eat but no eatable ! "
-                        f"let {character_document.life_points} life points"
-                    )
-                else:
-                    self._logger.info(
-                        f"{character_document.name} need to eat but no eatable stuff, now starved"
-                    )
-                    character_document.starved = True
+
+                if not have_eat:
+                    self._logger.info("Have no eat")
+                    break
+
+            # Hungry ! Losing LP
+            if (
+                float(character_document.hunger)
+                >= self._kernel.game.config.start_hunger_life_point_loss
+            ):
+                character_document.life_points = max(
+                    0.0,
+                    float(character_document.life_points)
+                    - self._kernel.game.config.hunger_life_point_loss_per_tick,
+                )
+                self._logger.info(f"Losing LP because hungry for {character_document.life_points}")
 
             self._character_lib.update(character_document)
 
@@ -214,26 +256,35 @@ class TurnLib:
             if not character_document.is_alive:
                 continue
 
-            self._character_lib.reduce_tiredness(
-                character_id, self._kernel.game.config.reduce_tiredness_per_turn
+            self._logger.info(
+                f"Provide conditions of {character_document.name} {character_document.id}"
             )
 
             if (
-                not character_document.dehydrated
-                and not character_document.starved
-                and not character_document.feel_hungry
-                and not character_document.feel_thirsty
+                float(character_document.hunger)
+                <= self._kernel.game.config.limit_hunger_increase_life_point
+                and float(character_document.thirst)
+                <= self._kernel.game.config.limit_thirst_increase_life_point
             ):
-                before_life_points = character_document.life_points
-                character_document.life_points = min(
-                    before_life_points + 1, character_document.max_life_comp
+                new_tiredness = self._character_lib.reduce_tiredness(
+                    character_id, self._kernel.game.config.reduce_tiredness_per_tick
                 )
+                self._logger.info(f"Reduce tiredness for {new_tiredness}")
 
-                if before_life_points != character_document.life_points:
-                    self._kernel.character_lib.add_event(
-                        character_id, f"{character_document.name} se sent plus en forme"
-                    )
-                    self._character_lib.update(character_document)
+            if (
+                float(character_document.hunger)
+                <= self._kernel.game.config.limit_hunger_reduce_tiredness
+                and float(character_document.thirst)
+                <= self._kernel.game.config.limit_thirst_reduce_tiredness
+            ):
+                character_document.life_points = min(
+                    character_document.max_life_comp,
+                    float(character_document.life_points)
+                    + self._kernel.game.config.life_point_points_per_tick,
+                )
+                self._logger.info(f"Increase life points for {character_document.life_points}")
+
+            self._character_lib.update(character_document)
 
     def _increment_age(self) -> None:
         # In future, increment role play age
@@ -245,25 +296,30 @@ class TurnLib:
             if not character_document.is_alive:
                 continue
 
-            self._logger.debug(
+            self._logger.info(
                 f'Compute age of "{character_document.name}" ({character_document.id})'
             )
             character_document.alive_since += 1
+            self._logger.info(f"New age: {character_document.alive_since}")
             self._character_lib.update(character_document)
 
-    def _reset_characters_props(self) -> None:
+    def _manage_characters_props(self) -> None:
         character_ids = list(self._character_lib.get_all_character_ids())
-        self._logger.info(f"Reset action points of {len(character_ids)} characters")
+        self._logger.info(f"Manage props of {len(character_ids)} characters")
 
         for character_id in character_ids:
             character_doc = self._kernel.character_lib.get_document(character_id)
             if not character_doc.is_alive:
                 continue
 
-            character_doc.action_points = 24.0
-            character_doc.feel_thirsty = True  # Always need to drink after turn
-            character_doc.feel_hungry = True  # Always need to eat after turn
+            self._logger.info(f"Manage props of {character_doc.name} {character_doc.id}")
 
+            character_doc.action_points = min(
+                float(character_doc.max_action_points),
+                float(character_doc.action_points)
+                + self._kernel.game.config.action_points_per_tick,
+            )
+            server_logger.info(f"New AP: {character_doc.action_points}")
             self._kernel.server_db_session.add(character_doc)
 
         self._kernel.server_db_session.commit()

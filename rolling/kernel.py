@@ -4,16 +4,19 @@ import datetime
 import glob
 import ntpath
 import os
+from os import path
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+import toml
 import typing
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.game.base import Game
+from rolling.game.base import GameConfig
 from rolling.log import kernel_logger
 from rolling.map.legend import WorldMapLegend
 from rolling.map.legend import ZoneMapLegend
@@ -319,3 +322,14 @@ class Kernel:
                 await socket.send_str(event_str)
             except Exception as exc:
                 kernel_logger.exception(exc)
+
+    def on_sighup_signal(self, signum, frame) -> None:
+        kernel_logger.info("Reload configuration ...")
+        try:
+            game = Game(self, self.game.config.folder_path)
+        except Exception as exc:
+            kernel_logger.exc(f"Reload configuration fail: {str(exc)}")
+            return
+
+        self._game = game
+        kernel_logger.info("Reload configuration OK")
