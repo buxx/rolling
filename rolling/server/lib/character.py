@@ -456,7 +456,7 @@ class CharacterLib:
             exclude_ids=exclude_ids,
         ).count()
 
-    def move(
+    async def move(
         self, character: CharacterModel, to_world_row: int, to_world_col: int
     ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
@@ -511,7 +511,7 @@ class CharacterLib:
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
 
-        self._kernel.message_lib.send_messages_due_to_move(
+        await self._kernel.message_lib.send_messages_due_to_move(
             character=character,
             from_world_row_i=from_world_row_i,
             from_world_col_i=from_world_col_i,

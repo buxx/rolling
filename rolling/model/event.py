@@ -112,6 +112,7 @@ class NewChatMessageData(ZoneEventData):
         return {
             "character_id": self.character_id,
             "conversation_id": self.conversation_id,
+            "conversation_title": self.conversation_title,
             "message": self.message,
         }
 

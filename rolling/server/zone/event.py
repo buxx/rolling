@@ -277,7 +277,7 @@ class RequestChatProcessor(EventProcessor):
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
                 data=NewChatMessageData(
                     character_id=message.author_id,
-                    message=f"{message.author_name}: {message.text}",
+                    message=f"{message.author_name}: {message.text}" if message.author_name else message.text,
                     conversation_id=conversation_id,
                     conversation_title=conversation_title or message.subject,
                 ),

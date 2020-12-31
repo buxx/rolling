@@ -221,7 +221,7 @@ class ConversationController(BaseController):
     async def add(self, request: Request, hapic_data: HapicData) -> Description:
         data = await request.json()
         add_message = data["message"]
-        last_message = self._kernel.get_last_conversation_message(
+        last_message = self._kernel.message_lib.get_last_conversation_message(
             hapic_data.path.conversation_id
         )
         await self._kernel.message_lib.add_conversation_message(

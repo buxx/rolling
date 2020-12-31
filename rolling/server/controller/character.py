@@ -1718,7 +1718,7 @@ class CharacterController(BaseController):
                 ),
             )
 
-            character_doc = self._character_lib.move(
+            character_doc = await self._character_lib.move(
                 character_,
                 to_world_row=hapic_data.query.to_world_row,
                 to_world_col=hapic_data.query.to_world_col,

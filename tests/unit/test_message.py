@@ -125,7 +125,7 @@ class TestMessage:
         )
 
         # Move xena, arthur don' see new xena message
-        xena_doc = kernel.character_lib.move(character=xena, to_world_row=0, to_world_col=0)
+        xena_doc = await kernel.character_lib.move(character=xena, to_world_row=0, to_world_col=0)
         await self._assert_messages(
             web,
             xena.id,
@@ -333,7 +333,7 @@ class TestMessage:
             available=[arthur, franck],
         )
         c = kernel.server_db_session.query(MessageDocument).limit(1).one()
-        arthur_doc = kernel.character_lib.move(arthur, to_world_row=0, to_world_col=0)
+        await kernel.character_lib.move(arthur, to_world_row=0, to_world_col=0)
 
         await self._assert_conversation(
             web,
@@ -363,7 +363,7 @@ class TestMessage:
             between=[xena, arthur, franck],
         )
 
-        franck_doc = kernel.character_lib.move(franck, to_world_row=0, to_world_col=0)
+        await kernel.character_lib.move(franck, to_world_row=0, to_world_col=0)
         await self._assert_conversation(
             web,
             xena,
