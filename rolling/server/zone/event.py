@@ -242,6 +242,7 @@ class RequestChatProcessor(EventProcessor):
             )
             conversation_title = "Chat de la zone"
         elif event.data.previous_conversation_id is not None and not event.data.next and not event.data.previous:
+            conversation_id = event.data.previous_conversation_id
             messages = self._kernel.message_lib.get_conversation_messages(
                 character_id=event.data.character_id,
                 conversation_id=event.data.previous_conversation_id,
