@@ -11,7 +11,7 @@ black==20.8b1
 certifi==2020.12.5
 chardet==4.0.0
 click==7.1.2
-hapic==0.77
+hapic==0.84
 idna==2.10
 importlib-metadata==1.7.0
 iniconfig==1.0.1
