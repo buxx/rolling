@@ -33,7 +33,7 @@ python-dateutil==2.8.1
 python-rapidjson==1.0
 PyYAML==5.3.1
 requests==2.25.1
-sentry-sdk==0.16.3
+sentry-sdk==0.19.5
 serpyco==0.17.4
 shiv==0.2.0
 six==1.15.0
