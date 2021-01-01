@@ -115,7 +115,7 @@ class Kernel:
         self._business_lib: typing.Optional[BusinessLib] = None
         self._fight_lib: typing.Optional[FightLib] = None
 
-        self._event_serializer_factory = ZoneEventSerializerFactory()
+        self.event_serializer_factory = ZoneEventSerializerFactory()
 
     @property
     def universe_lib(self) -> UniverseLib:
@@ -315,7 +315,7 @@ class Kernel:
         self.server_db_session.commit()
 
     async def send_to_zone_sockets(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
-        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        event_str = self.event_serializer_factory.get_serializer(event.type).dump_json(event)
         for socket in self.server_zone_events_manager.get_sockets(row_i, col_i):
             try:
                 kernel_logger.debug(event_str)
