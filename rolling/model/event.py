@@ -20,6 +20,8 @@ class ZoneEventType(Enum):
     CLICK_ACTION_EVENT = "CLICK_ACTION_EVENT"
     NEW_RESUME_TEXT = "NEW_RESUME_TEXT"
     NEW_BUILD = "NEW_BUILD"
+    REQUEST_CHAT = "REQUEST_CHAT"
+    NEW_CHAT_MESSAGE = "NEW_CHAT_MESSAGE"
 
 
 T = typing.TypeVar("T")
@@ -82,6 +84,40 @@ class ClickActionData(ZoneEventData):
 
 
 @dataclasses.dataclass
+class RequestChatData(ZoneEventData):
+    character_id: str
+    message_count: int
+    next: bool
+    previous: bool
+    previous_conversation_id: typing.Optional[int] = None
+
+    # TODO BS: use automatic compiled serpyco serializer
+    def to_dict(self) -> dict:
+        return {
+            "previous_conversation_id": self.previous_conversation_id,
+            "character_id": self.character_id,
+            "message_count": self.message_count,
+        }
+
+
+@dataclasses.dataclass
+class NewChatMessageData(ZoneEventData):
+    character_id: str
+    message: str
+    conversation_id: typing.Optional[int] = None
+    conversation_title: typing.Optional[str] = None
+
+    # TODO BS: use automatic compiled serpyco serializer
+    def to_dict(self) -> dict:
+        return {
+            "character_id": self.character_id,
+            "conversation_id": self.conversation_id,
+            "conversation_title": self.conversation_title,
+            "message": self.message,
+        }
+
+
+@dataclasses.dataclass
 class NewResumeTextData(ZoneEventData):
     resume: ListOfItemModel
 
@@ -107,6 +143,8 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[ZoneEventData]] = 
     ZoneEventType.CLICK_ACTION_EVENT: ClickActionData,
     ZoneEventType.NEW_RESUME_TEXT: NewResumeTextData,
     ZoneEventType.NEW_BUILD: NewBuildData,
+    ZoneEventType.REQUEST_CHAT: RequestChatData,
+    ZoneEventType.NEW_CHAT_MESSAGE: NewChatMessageData,
 }
 
 

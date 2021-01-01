@@ -1611,7 +1611,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(CharacterModel)
+    @hapic.output_body(CharacterMinimal)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
         return self._character_lib.get(
             hapic_data.path.character_id,
@@ -1718,7 +1718,7 @@ class CharacterController(BaseController):
                 ),
             )
 
-            character_doc = self._character_lib.move(
+            character_doc = await self._character_lib.move(
                 character_,
                 to_world_row=hapic_data.query.to_world_row,
                 to_world_col=hapic_data.query.to_world_col,
