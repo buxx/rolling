@@ -1611,7 +1611,7 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(CharacterMinimal)
+    @hapic.output_body(CharacterModel)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
         return self._character_lib.get(
             hapic_data.path.character_id,
