@@ -48,7 +48,7 @@ from rolling.model.character import WithStuffActionModel
 from rolling.model.data import ListOfItemModel
 from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import CharacterInventoryModel
@@ -1593,7 +1593,7 @@ class CharacterController(BaseController):
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
             character_doc.world_col_i,
-            event=ZoneEvent(
+            event=WebSocketEvent(
                 type=ZoneEventType.CHARACTER_ENTER_ZONE,
                 data=CharacterEnterZoneData(
                     character_id=character_id,
@@ -1712,7 +1712,7 @@ class CharacterController(BaseController):
             await self._kernel.send_to_zone_sockets(
                 character_.world_row_i,
                 character_.world_col_i,
-                event=ZoneEvent(
+                event=WebSocketEvent(
                     type=ZoneEventType.CHARACTER_EXIT_ZONE,
                     data=CharacterExitZoneData(character_id=character_.id),
                 ),
@@ -1726,7 +1726,7 @@ class CharacterController(BaseController):
             await self._kernel.send_to_zone_sockets(
                 hapic_data.query.to_world_row,
                 hapic_data.query.to_world_col,
-                event=ZoneEvent(
+                event=WebSocketEvent(
                     type=ZoneEventType.CHARACTER_ENTER_ZONE,
                     data=CharacterEnterZoneData(
                         character_id=character_.id,

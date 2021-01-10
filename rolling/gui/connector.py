@@ -6,7 +6,7 @@ from rolling.exception import MoveToOtherZoneError
 from rolling.exception import SameZoneError
 from rolling.map.source import ZoneMapSource
 from rolling.model.event import PlayerMoveData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.physics import Physics
 from rolling.util import CornerEnum
@@ -61,7 +61,7 @@ class ZoneMapConnector:
 
         # Add move to event send queue
         self._controller.to_send_zone_queue.put(
-            ZoneEvent(
+            WebSocketEvent(
                 type=ZoneEventType.PLAYER_MOVE,
                 data=PlayerMoveData(
                     to_row_i=current_player.row_i,

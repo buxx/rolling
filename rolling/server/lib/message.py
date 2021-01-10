@@ -6,7 +6,7 @@ import typing
 from rolling.log import server_logger
 from rolling.model.character import CharacterModel
 from rolling.model.event import NewChatMessageData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.message import MessageDocument
@@ -172,7 +172,7 @@ class MessageLib:
     ) -> None:
         event_str = self._kernel.event_serializer_factory.get_serializer(
             ZoneEventType.NEW_CHAT_MESSAGE).dump_json(
-            ZoneEvent(
+            WebSocketEvent(
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
                 data=NewChatMessageData(
                     character_id=author_id,

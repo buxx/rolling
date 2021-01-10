@@ -16,31 +16,24 @@ from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.event import EventProcessorFactory
-from rolling.server.base import ZoneEventSocketWrapper
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
-class ZoneEventsManager:
+class WorldEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
-        self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[ZoneEventSocketWrapper]] = {}
-        self._sockets_character_id: typing.Dict[ZoneEventSocketWrapper, str] = {}
+        self._sockets: typing.List[web.WebSocketResponse] = []
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
         self._kernel = kernel
 
-    def get_character_id_for_socket(self, socket: ZoneEventSocketWrapper) -> str:
-        return self._sockets_character_id[socket]
-
-    async def get_new_socket(
-        self, request: Request, row_i: int, col_i: int, character_id: str
-    ) -> ZoneEventSocketWrapper:
-        server_logger.info(f"Create websocket for zone {row_i},{col_i}")
+    async def get_new_socket(self, request: Request) -> web.WebSocketResponse:
+        server_logger.info(f"Create websocket for world")
 
         # Create socket
-        socket = ZoneEventSocketWrapper(self._kernel, web.WebSocketResponse(), row_i, col_i)
+        socket = web.WebSocketResponse()
         await socket.prepare(request)
 
         # TODO BS 2019-01-23: Implement a heartbeat to close sockets where client disapear
@@ -48,32 +41,30 @@ class ZoneEventsManager:
         # Something lik asyncio.ensure_future(self._heartbeat(ws))
 
         # Make it available for send job
-        self._sockets.setdefault((row_i, col_i), []).append(socket)
-        self._sockets_character_id[socket] = character_id
+        self._sockets.append(socket)
 
         # Start to listen client messages
         try:
-            await self._listen(socket, row_i, col_i)
+            await self._listen(socket)
         except CancelledError:
-            server_logger.debug(f"websocket ({row_i},{col_i}) seems cancelled")
+            server_logger.debug(f"world websocket seems cancelled")
 
         # If this code reached: ws is disconnected
-        server_logger.debug(f"remove websocket ({row_i},{col_i})")
-        self._sockets[(row_i, col_i)].remove(socket)
-        del self._sockets_character_id[socket]
+        server_logger.debug(f"remove world websocket")
+        self._sockets.remove(socket)
 
         return socket
 
-    async def _listen(self, socket: ZoneEventSocketWrapper, row_i: int, col_i: int) -> None:
-        server_logger.info(f"Listen websocket for zone {row_i},{col_i}")
-        async for msg in socket.iter():
-            server_logger.debug(f"Receive message on websocket for zone {row_i},{col_i}: {msg}")
+    async def _listen(self, socket: web.WebSocketResponse) -> None:
+        server_logger.info(f"Listen websocket for world")
+        async for msg in socket:
+            server_logger.debug(f"Receive message on websocket for world: {msg}")
 
             if msg.type == aiohttp.WSMsgType.ERROR:
-                server_logger.error(f"Zone websocket closed with exception {socket.exception()}")
+                server_logger.error(f"World websocket closed with exception {socket.exception()}")
             else:
                 try:
-                    await self._process_msg(row_i, col_i, msg, socket)
+                    await self._process_msg(msg, socket)
                 except DisconnectClient:
                     await socket.send_str(
                         self._event_serializer_factory.get_serializer(
@@ -84,18 +75,18 @@ class ZoneEventsManager:
                     )
                     return
 
-        server_logger.info(f"Websocket of zone {row_i},{col_i} closed")
+        server_logger.info(f"Websocket of world closed")
 
     async def _process_msg(
-        self, row_i: int, col_i: int, msg, socket: ZoneEventSocketWrapper
+        self, msg, socket: web.WebSocketResponse
     ) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
         event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
-        await self._process_event(row_i, col_i, event, socket)
+        await self._process_event(event, socket)
 
     async def _process_event(
-        self, row_i: int, col_i: int, event: WebSocketEvent, socket: ZoneEventSocketWrapper
+        self, event: WebSocketEvent, socket: web.WebSocketResponse
     ) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
@@ -104,7 +95,7 @@ class ZoneEventsManager:
             return
 
         try:
-            await event_processor.process(row_i, col_i, event, sender_socket=socket)
+            await event_processor.process(event, sender_socket=socket)
         except UnableToProcessEvent as exc:
             server_logger.debug(f"Unable to process event {event.type}: {str(exc)}")
 
@@ -116,12 +107,6 @@ class ZoneEventsManager:
             # FIXME: do kept this feature ?
             await socket.send_str(exception_event_str)
 
-    def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[ZoneEventSocketWrapper]:
-        for socket in self._sockets.get((row_i, col_i), []):
+    def get_sockets(self) -> typing.Iterable[web.WebSocketResponse]:
+        for socket in self._sockets:
             yield socket
-
-    def get_active_zone_characters_ids(self, world_row_i: int, world_col_i: int) -> typing.List[str]:
-        return [
-            self.get_character_id_for_socket(socket)
-            for socket in self.get_sockets(world_row_i, world_col_i)
-        ]

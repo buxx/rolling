@@ -16,17 +16,10 @@ from rolling.model.event import NewChatMessageData
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import RequestChatData
 from rolling.model.event import ThereIsAroundData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
-from rolling.model.resource import CarriedResourceDescriptionModel
-from rolling.model.serializer import ZoneEventSerializerFactory
-from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
-from rolling.server.controller.url import DESCRIBE_BUILD
-from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
-from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
-from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
-from rolling.server.document.build import BuildDocument
+from rolling.server.base import BaseEventSocketWrapper
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.util import get_on_and_around_coordinates
@@ -42,21 +35,23 @@ class EventProcessor(metaclass=abc.ABCMeta):
         self._kernel = kernel
 
     async def process(
-        self, row_i: int, col_i: int, event: ZoneEvent, sender_socket: web.WebSocketResponse
+        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: BaseEventSocketWrapper
     ) -> None:
         self._check(row_i, col_i, event)
         await self._process(row_i, col_i, event, sender_socket=sender_socket)
 
-    def _check(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
+    def _check(self, row_i: int, col_i: int, event: WebSocketEvent) -> None:
         pass
 
     @abc.abstractmethod
     async def _process(
-        self, row_i: int, col_i: int, event: ZoneEvent, sender_socket: web.WebSocketResponse
+        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: BaseEventSocketWrapper
     ) -> None:
         pass
 
 
+# FIXME BS NOW EVENT: type of zone_events_manager must be a base abstract class
+# FIXME BS NOW EVENT: world event manager must add zone coordinates to sent event
 class PlayerMoveProcessor(EventProcessor):
     def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         super().__init__(kernel, zone_events_manager)
@@ -66,8 +61,8 @@ class PlayerMoveProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[PlayerMoveData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[PlayerMoveData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         # FIXME BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
         # TODO BS 2019-01-23: Check given character id is authenticated used (security)
@@ -96,8 +91,8 @@ class ClientWantCloseProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[PlayerMoveData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[PlayerMoveData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         raise DisconnectClient()
 
@@ -107,8 +102,8 @@ class ThereIsAroundProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[ClientRequireAroundData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[ClientRequireAroundData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         character = self._kernel.character_lib.get_document(event.data.character_id)
         around_character = get_on_and_around_coordinates(
@@ -160,7 +155,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 exclude_ids=[character.id],
             )
 
-        around_event = ZoneEvent(
+        around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,
             data=ThereIsAroundData(
                 stuff_count=stuff_count,
@@ -180,8 +175,8 @@ class ClickActionProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[ClickActionData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[ClickActionData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         # FIXME Experimental way to identify action ...for now, only manage build ...
         path = event.data.base_url.split("?")[0]
@@ -231,8 +226,8 @@ class RequestChatProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[RequestChatData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[RequestChatData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         conversation_id = None
         conversation_title = None
@@ -280,7 +275,7 @@ class RequestChatProcessor(EventProcessor):
             )
 
         for message in reversed(messages):
-            new_chat_message_event = ZoneEvent(
+            new_chat_message_event = WebSocketEvent(
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
                 data=NewChatMessageData(
                     character_id=message.author_id,
@@ -300,8 +295,8 @@ class NewChatMessageProcessor(EventProcessor):
         self,
         row_i: int,
         col_i: int,
-        event: ZoneEvent[NewChatMessageData],
-        sender_socket: web.WebSocketResponse,
+        event: WebSocketEvent[NewChatMessageData],
+        sender_socket: BaseEventSocketWrapper,
     ) -> None:
         if event.data.conversation_id is None:
             await self._kernel.message_lib.add_zone_message(
@@ -324,6 +319,7 @@ class NewChatMessageProcessor(EventProcessor):
 
 
 class EventProcessorFactory:
+    # FIXME BS NOW EVENT: type of zone_events_manager must be a base abstract class
     def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 

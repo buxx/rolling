@@ -26,7 +26,7 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.action import ActionFactory
 from rolling.server.document.character import CharacterDocument
@@ -43,6 +43,7 @@ from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 
@@ -78,8 +79,9 @@ class Kernel:
         self._server_db_session: typing.Optional[Session] = None
         self._server_db_engine: typing.Optional[Engine] = None
 
-        # Zone websocket
+        # Websocket managers
         self._server_zone_events_manager = ZoneEventsManager(self, loop=loop)
+        self._server_world_events_manager = WorldEventsManager(self, loop=loop)
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
@@ -199,10 +201,19 @@ class Kernel:
     def server_zone_events_manager(self) -> ZoneEventsManager:
         if self._server_zone_events_manager is None:
             raise ComponentNotPrepared(
-                "self._server_zone_events_manager must be prepared before usage"
+                "self._server_world_events_manager must be prepared before usage"
             )
 
         return self._server_zone_events_manager
+
+    @property
+    def server_world_events_manager(self) -> WorldEventsManager:
+        if self._server_world_events_manager is None:
+            raise ComponentNotPrepared(
+                "self._server_zone_events_manager must be prepared before usage"
+            )
+
+        return self._server_world_events_manager
 
     @property
     def world_map_source(self) -> WorldMapSource:
@@ -314,7 +325,7 @@ class Kernel:
                 self.character_lib.ensure_skills_for_character(row[0])
         self.server_db_session.commit()
 
-    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
+    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: WebSocketEvent) -> None:
         event_str = self.event_serializer_factory.get_serializer(event.type).dump_json(event)
         for socket in self.server_zone_events_manager.get_sockets(row_i, col_i):
             try:
