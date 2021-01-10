@@ -31,6 +31,8 @@ T = typing.TypeVar("T")
 @dataclasses.dataclass
 class WebSocketEvent(typing.Generic[T]):
     type: ZoneEventType
+    world_row_i: int
+    world_col_i: int
     data: typing.Optional[T] = dataclasses.field(default=None)
 
 

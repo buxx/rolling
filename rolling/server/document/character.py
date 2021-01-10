@@ -18,6 +18,7 @@ from rolling.server.extension import ServerSideDocument as Document
 class CharacterDocument(CorpseMixin, Document):
     __tablename__ = "character"
     id = Column(String(255), primary_key=True)
+    name = Column(String(255), nullable=False)
 
     # role play characteristics
     background_story = Column(Text, nullable=False, default="")

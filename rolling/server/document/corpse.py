@@ -1,11 +1,20 @@
 # coding: utf-8
-from sqlalchemy import Boolean
+import enum
+
+from sqlalchemy import Boolean, Enum
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy.ext.declarative import declared_attr
 
+from rolling.server.extension import ServerSideDocument as Document
 
-class CorpseMixin(object):
+
+class AnimatedCorpseType(enum.Enum):
+    CHARACTER = "CHARACTER"
+    HARE = "HARE"
+
+
+class CorpseMixin:
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -18,3 +27,10 @@ class CorpseMixin(object):
     zone_col_i = Column(Integer, nullable=True)
     zone_row_i = Column(Integer, nullable=True)
     alive = Column(Boolean, default=True)
+    type_ = Column(Enum(*[t.value for t in AnimatedCorpseType]), nullable=False)
+
+
+class AnimatedCorpseDocument(CorpseMixin, Document):
+    __tablename__ = "animated_corpse"
+    id = Column(Integer, primary_key=True)
+

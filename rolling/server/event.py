@@ -157,6 +157,8 @@ class ThereIsAroundProcessor(EventProcessor):
 
         around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
             data=ThereIsAroundData(
                 stuff_count=stuff_count,
                 resource_count=resource_count,
@@ -277,6 +279,8 @@ class RequestChatProcessor(EventProcessor):
         for message in reversed(messages):
             new_chat_message_event = WebSocketEvent(
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
+                world_row_i=row_i,
+                world_col_i=col_i,
                 data=NewChatMessageData(
                     character_id=message.author_id,
                     message=f"{message.author_name}: {message.text}" if message.author_name else message.text,

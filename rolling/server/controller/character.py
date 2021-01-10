@@ -1595,6 +1595,8 @@ class CharacterController(BaseController):
             character_doc.world_col_i,
             event=WebSocketEvent(
                 type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
                 data=CharacterEnterZoneData(
                     character_id=character_id,
                     zone_row_i=character_doc.zone_row_i,
@@ -1713,6 +1715,8 @@ class CharacterController(BaseController):
                 character_.world_row_i,
                 character_.world_col_i,
                 event=WebSocketEvent(
+                    world_row_i=character_.world_row_i,
+                    world_col_i=character_.world_col_i,
                     type=ZoneEventType.CHARACTER_EXIT_ZONE,
                     data=CharacterExitZoneData(character_id=character_.id),
                 ),
@@ -1728,6 +1732,8 @@ class CharacterController(BaseController):
                 hapic_data.query.to_world_col,
                 event=WebSocketEvent(
                     type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                    world_row_i=character_doc.world_row_i,
+                    world_col_i=character_doc.world_col_i,
                     data=CharacterEnterZoneData(
                         character_id=character_.id,
                         zone_row_i=character_doc.zone_row_i,

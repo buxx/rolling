@@ -38,6 +38,7 @@ from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.corpse import AnimatedCorpseLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
@@ -116,6 +117,7 @@ class Kernel:
         self._affinity_lib: typing.Optional[AffinityLib] = None
         self._business_lib: typing.Optional[BusinessLib] = None
         self._fight_lib: typing.Optional[FightLib] = None
+        self._animated_corpse_lib: typing.Optional[AnimatedCorpseLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -176,6 +178,12 @@ class Kernel:
         if self._build_lib is None:
             self._build_lib = BuildLib(self)
         return self._build_lib
+
+    @property
+    def animated_corpse_lib(self) -> AnimatedCorpseLib:
+        if self._animated_corpse_lib is None:
+            self._animated_corpse_lib = AnimatedCorpseLib(self)
+        return self._animated_corpse_lib
 
     @property
     def action_factory(self) -> ActionFactory:

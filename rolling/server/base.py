@@ -42,41 +42,64 @@ def get_kernel(
 
 
 class BaseEventSocketWrapper:
-
-    async def send_to_zone_str(self, message: str) -> None:
-        await self._socket.send_str(message)
+    async def send_str(self, message: str) -> None:
+        await self.socket.send_str(message)
 
     async def prepare(self, request: Request) -> None:
-        await self._socket.prepare(request)
+        await self.socket.prepare(request)
 
-    def iter(self) -> typing.AsyncIterable[WSMessage]:
-        for msg in self._socket:
+    async def iter(self) -> typing.AsyncIterable[WSMessage]:
+        async for msg in self.socket:
             yield msg
 
     def exception(self) -> typing.Optional[BaseException]:
-        return self._socket.exception()
+        return self.socket.exception()
+
+    async def write_eof(self) -> None:
+        await self.socket.write_eof()
+
+    @property
+    def socket(self) -> web.WebSocketResponse:
+        raise NotImplementedError()
+
+    async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
+        raise NotImplementedError()
+
+    async def send_to_world_str(
+        self, message: str, zone_row_i: int, zone_col_i: int, repeat_to_zone: bool = True
+    ) -> None:
+        raise NotImplementedError()
 
 
 class ZoneEventSocketWrapper(BaseEventSocketWrapper):
     def __init__(
-        self, kernel: "Kernel", socket: web.WebSocketResponse, zone_row_i: int, zone_col_i: int
+        self, kernel: "Kernel", socket: web.WebSocketResponse, world_row_i: int, world_col_i: int
     ) -> None:
         self._kernel = kernel
         self._socket = socket
-        self._zone_row_i = zone_row_i
-        self._zone_col_i = zone_col_i
+        self.world_row_i = world_row_i
+        self.world_col_i = world_col_i
+
+    @property
+    def socket(self) -> web.WebSocketResponse:
+        raise self._socket
 
     async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
-        await super().send_to_zone_str(message)
+        await super().send_str(message)
         if repeat_to_world:
             # Replicate message on world websockets
             for socket in self._kernel.server_world_events_manager.get_sockets():
                 await socket.send_to_world_str(
                     message,
-                    zone_row_i=self._zone_row_i,
-                    zone_col_i=self._zone_col_i,
+                    world_row_i=self.world_row_i,
+                    world_col_i=self.world_col_i,
                     repeat_to_zone=False,
                 )
+
+    async def send_to_world_str(
+        self, message: str, zone_row_i: int, zone_col_i: int, repeat_to_zone: bool = True
+    ) -> None:
+        raise NotImplementedError("not concerned")
 
 
 class WorldEventSocketWrapper(BaseEventSocketWrapper):
@@ -87,12 +110,15 @@ class WorldEventSocketWrapper(BaseEventSocketWrapper):
         self._socket = socket
 
     async def send_to_world_str(
-        self, message: str, zone_row_i: int, zone_col_i: int, repeat_to_zone: bool = True
+        self, message: str, world_row_i: int, world_col_i: int, repeat_to_zone: bool = True
     ) -> None:
-        await super().send_to_zone_str(message)
+        await super().send_str(message)
         if repeat_to_zone:
             # Replicate message on concerned zone websockets
             for socket in self._kernel.server_zone_events_manager.get_sockets(
-                row_i=zone_row_i, col_i=zone_col_i
+                row_i=world_row_i, col_i=world_col_i
             ):
                 await socket.send_to_zone_str(message, repeat_to_world=False)
+
+    async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
+        raise NotImplementedError("not concerned")

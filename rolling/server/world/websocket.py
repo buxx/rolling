@@ -58,7 +58,7 @@ class WorldEventsManager:
 
     async def _listen(self, socket: WorldEventSocketWrapper) -> None:
         server_logger.info(f"Listen websocket for world")
-        async for msg in socket:
+        async for msg in socket.iter():
             server_logger.debug(f"Receive message on websocket for world: {msg}")
 
             if msg.type == aiohttp.WSMsgType.ERROR:
@@ -71,7 +71,12 @@ class WorldEventsManager:
                         self._event_serializer_factory.get_serializer(
                             ZoneEventType.SERVER_PERMIT_CLOSE
                         ).dump_json(
-                            WebSocketEvent(type=ZoneEventType.SERVER_PERMIT_CLOSE, data=EmptyData())
+                            WebSocketEvent(
+                                world_row_i=0,
+                                world_col_i=0,
+                                type=ZoneEventType.SERVER_PERMIT_CLOSE,
+                                data=EmptyData(),
+                            )
                         )
                     )
                     return

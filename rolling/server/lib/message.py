@@ -174,6 +174,8 @@ class MessageLib:
             ZoneEventType.NEW_CHAT_MESSAGE).dump_json(
             WebSocketEvent(
                 type=ZoneEventType.NEW_CHAT_MESSAGE,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
                 data=NewChatMessageData(
                     character_id=author_id,
                     message=message,

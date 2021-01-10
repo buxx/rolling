@@ -75,11 +75,16 @@ class ZoneEventsManager:
                 try:
                     await self._process_msg(row_i, col_i, msg, socket)
                 except DisconnectClient:
-                    await socket.send_to_zone_str(
+                    await socket.send_str(
                         self._event_serializer_factory.get_serializer(
                             ZoneEventType.SERVER_PERMIT_CLOSE
                         ).dump_json(
-                            WebSocketEvent(type=ZoneEventType.SERVER_PERMIT_CLOSE, data=EmptyData())
+                            WebSocketEvent(
+                                world_row_i=0,
+                                world_col_i=0,
+                                type=ZoneEventType.SERVER_PERMIT_CLOSE,
+                                data=EmptyData(),
+                            )
                         )
                     )
                     return
@@ -91,6 +96,9 @@ class ZoneEventsManager:
     ) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
+        # Event zone coordinate is mandatory
+        event_dict["world_row_i"] = socket.world_row_i
+        event_dict["world_col_i"] = socket.world_col_i
         event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
         await self._process_event(row_i, col_i, event, socket)
 

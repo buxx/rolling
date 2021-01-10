@@ -27,6 +27,7 @@ from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
@@ -172,6 +173,7 @@ _default_character_competences = {
     "action_points": 24.0,
     "attack_allowed_loss_rate": 30.0,
     "defend_allowed_loss_rate": 30.0,
+    "type_": AnimatedCorpseType.CHARACTER.value,
 }
 
 

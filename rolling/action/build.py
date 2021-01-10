@@ -560,6 +560,8 @@ class BuildAction(CharacterAction):
             [
                 WebSocketEvent(
                     type=ZoneEventType.NEW_BUILD,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
                     data=NewBuildData(
                         build=ZoneBuildModelContainer(doc=build_doc, desc=build_description)
                     ),
@@ -568,6 +570,8 @@ class BuildAction(CharacterAction):
             [
                 WebSocketEvent(
                     type=ZoneEventType.NEW_RESUME_TEXT,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
                     data=NewResumeTextData(
                         resume=ListOfItemModel(
                             self._kernel.character_lib.get_resume_text(character.id)

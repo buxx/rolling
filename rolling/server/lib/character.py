@@ -52,6 +52,7 @@ from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.character import FollowCharacterDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.document.knowledge import CharacterKnowledgeDocument
@@ -114,6 +115,7 @@ class CharacterLib:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = name
+        character.type_ = AnimatedCorpseType.CHARACTER.value
         character.max_life_comp = STARING_LIFE_POINTS + skills["endurance"]
         character.life_points = float(character.max_life_comp)
         character.action_points = self._kernel.game.config.start_action_points
