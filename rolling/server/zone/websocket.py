@@ -75,7 +75,7 @@ class ZoneEventsManager:
                 try:
                     await self._process_msg(row_i, col_i, msg, socket)
                 except DisconnectClient:
-                    await socket.send_str(
+                    await socket.send_to_zone_str(
                         self._event_serializer_factory.get_serializer(
                             ZoneEventType.SERVER_PERMIT_CLOSE
                         ).dump_json(
@@ -114,7 +114,7 @@ class ZoneEventsManager:
             ).dump_json(exception_event)
 
             # FIXME: do kept this feature ?
-            await socket.send_str(exception_event_str)
+            await socket.send_to_zone_str(exception_event_str)
 
     def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[ZoneEventSocketWrapper]:
         for socket in self._sockets.get((row_i, col_i), []):

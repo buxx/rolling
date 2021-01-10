@@ -42,15 +42,8 @@ def get_kernel(
 
 
 class BaseEventSocketWrapper:
-    def __init__(
-        self, kernel: "Kernel", socket: web.WebSocketResponse, zone_row_i: int, zone_col_i: int
-    ) -> None:
-        self._kernel = kernel
-        self._socket = socket
-        self._zone_row_i = zone_row_i
-        self._zone_col_i = zone_col_i
 
-    async def send_str(self, message: str) -> None:
+    async def send_to_zone_str(self, message: str) -> None:
         await self._socket.send_str(message)
 
     async def prepare(self, request: Request) -> None:
@@ -65,8 +58,41 @@ class BaseEventSocketWrapper:
 
 
 class ZoneEventSocketWrapper(BaseEventSocketWrapper):
-    async def send_str(self, message: str) -> None:
-        await super().send_str(message)
-        # Replicate message on world websockets
-        for socket in self._kernel.server_world_events_manager.get_sockets():
-            await socket.send_str(message)
+    def __init__(
+        self, kernel: "Kernel", socket: web.WebSocketResponse, zone_row_i: int, zone_col_i: int
+    ) -> None:
+        self._kernel = kernel
+        self._socket = socket
+        self._zone_row_i = zone_row_i
+        self._zone_col_i = zone_col_i
+
+    async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
+        await super().send_to_zone_str(message)
+        if repeat_to_world:
+            # Replicate message on world websockets
+            for socket in self._kernel.server_world_events_manager.get_sockets():
+                await socket.send_to_world_str(
+                    message,
+                    zone_row_i=self._zone_row_i,
+                    zone_col_i=self._zone_col_i,
+                    repeat_to_zone=False,
+                )
+
+
+class WorldEventSocketWrapper(BaseEventSocketWrapper):
+    def __init__(
+        self, kernel: "Kernel", socket: web.WebSocketResponse
+    ) -> None:
+        self._kernel = kernel
+        self._socket = socket
+
+    async def send_to_world_str(
+        self, message: str, zone_row_i: int, zone_col_i: int, repeat_to_zone: bool = True
+    ) -> None:
+        await super().send_to_zone_str(message)
+        if repeat_to_zone:
+            # Replicate message on concerned zone websockets
+            for socket in self._kernel.server_zone_events_manager.get_sockets(
+                row_i=zone_row_i, col_i=zone_col_i
+            ):
+                await socket.send_to_zone_str(message, repeat_to_world=False)

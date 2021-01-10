@@ -185,7 +185,7 @@ class MessageLib:
             if concerned is None or self._kernel.server_zone_events_manager.get_character_id_for_socket(socket) in concerned:
                 server_logger.debug(f"Send event on socket: {event_str}")
                 try:
-                    await socket.send_str(event_str)
+                    await socket.send_to_zone_str(event_str)
                 except Exception as exc:
                     server_logger.exception(exc)
 

@@ -81,7 +81,7 @@ class PlayerMoveProcessor(EventProcessor):
             server_logger.debug(f"Send event on socket: {event_str}")
 
             try:
-                await socket.send_str(event_str)
+                await socket.send_to_zone_str(event_str)
             except Exception as exc:
                 server_logger.exception(exc)
 
@@ -167,7 +167,7 @@ class ThereIsAroundProcessor(EventProcessor):
         event_str = self._kernel.event_serializer_factory.get_serializer(
             ZoneEventType.THERE_IS_AROUND
         ).dump_json(around_event)
-        await sender_socket.send_str(event_str)
+        await sender_socket.send_to_zone_str(event_str)
 
 
 class ClickActionProcessor(EventProcessor):
@@ -209,7 +209,7 @@ class ClickActionProcessor(EventProcessor):
                 server_logger.debug(f"Send event on socket: {event_str}")
 
                 try:
-                    await socket.send_str(event_str)
+                    await socket.send_to_zone_str(event_str)
                 except Exception as exc:
                     server_logger.exception(exc)
 
@@ -218,7 +218,7 @@ class ClickActionProcessor(EventProcessor):
                 sender_event.type
             ).dump_json(sender_event)
             server_logger.debug(f"Send event on socket: {event_str}")
-            await sender_socket.send_str(event_str)
+            await sender_socket.send_to_zone_str(event_str)
 
 
 class RequestChatProcessor(EventProcessor):
@@ -287,7 +287,7 @@ class RequestChatProcessor(EventProcessor):
             event_str = self._kernel.event_serializer_factory.get_serializer(
                 ZoneEventType.NEW_CHAT_MESSAGE
             ).dump_json(new_chat_message_event)
-            await sender_socket.send_str(event_str)
+            await sender_socket.send_to_zone_str(event_str)
 
 
 class NewChatMessageProcessor(EventProcessor):

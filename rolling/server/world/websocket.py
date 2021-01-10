@@ -15,6 +15,7 @@ from rolling.model.event import EmptyData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
+from rolling.server.base import WorldEventSocketWrapper
 from rolling.server.event import EventProcessorFactory
 
 if typing.TYPE_CHECKING:
@@ -23,17 +24,17 @@ if typing.TYPE_CHECKING:
 
 class WorldEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
-        self._sockets: typing.List[web.WebSocketResponse] = []
+        self._sockets: typing.List[WorldEventSocketWrapper] = []
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
         self._kernel = kernel
 
-    async def get_new_socket(self, request: Request) -> web.WebSocketResponse:
+    async def get_new_socket(self, request: Request) -> WorldEventSocketWrapper:
         server_logger.info(f"Create websocket for world")
 
         # Create socket
-        socket = web.WebSocketResponse()
+        socket = WorldEventSocketWrapper(self._kernel, web.WebSocketResponse())
         await socket.prepare(request)
 
         # TODO BS 2019-01-23: Implement a heartbeat to close sockets where client disapear
@@ -55,7 +56,7 @@ class WorldEventsManager:
 
         return socket
 
-    async def _listen(self, socket: web.WebSocketResponse) -> None:
+    async def _listen(self, socket: WorldEventSocketWrapper) -> None:
         server_logger.info(f"Listen websocket for world")
         async for msg in socket:
             server_logger.debug(f"Receive message on websocket for world: {msg}")
@@ -78,7 +79,7 @@ class WorldEventsManager:
         server_logger.info(f"Websocket of world closed")
 
     async def _process_msg(
-        self, msg, socket: web.WebSocketResponse
+        self, msg, socket: WorldEventSocketWrapper
     ) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
@@ -86,7 +87,7 @@ class WorldEventsManager:
         await self._process_event(event, socket)
 
     async def _process_event(
-        self, event: WebSocketEvent, socket: web.WebSocketResponse
+        self, event: WebSocketEvent, socket: WorldEventSocketWrapper
     ) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
@@ -105,8 +106,8 @@ class WorldEventsManager:
             ).dump_json(exception_event)
 
             # FIXME: do kept this feature ?
-            await socket.send_str(exception_event_str)
+            await socket.send_to_world_str(exception_event_str)
 
-    def get_sockets(self) -> typing.Iterable[web.WebSocketResponse]:
+    def get_sockets(self) -> typing.Iterable[WorldEventSocketWrapper]:
         for socket in self._sockets:
             yield socket
