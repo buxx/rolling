@@ -22,6 +22,7 @@ class ZoneEventType(Enum):
     NEW_BUILD = "NEW_BUILD"
     REQUEST_CHAT = "REQUEST_CHAT"
     NEW_CHAT_MESSAGE = "NEW_CHAT_MESSAGE"
+    ANIMATED_CORPSE_MOVE = "ANIMATED_CORPSE_MOVE"
 
 
 T = typing.TypeVar("T")
@@ -29,43 +30,45 @@ T = typing.TypeVar("T")
 
 
 @dataclasses.dataclass
-class ZoneEvent(typing.Generic[T]):
+class WebSocketEvent(typing.Generic[T]):
     type: ZoneEventType
+    world_row_i: int
+    world_col_i: int
     data: typing.Optional[T] = dataclasses.field(default=None)
 
 
-class ZoneEventData(metaclass=abc.ABCMeta):
+class WebSocketEventData(metaclass=abc.ABCMeta):
     pass
 
 
 @dataclasses.dataclass
-class EmptyData(ZoneEventData):
+class EmptyData(WebSocketEventData):
     pass
 
 
 @dataclasses.dataclass
-class PlayerMoveData(ZoneEventData):
+class PlayerMoveData(WebSocketEventData):
     to_row_i: int
     to_col_i: int
     character_id: str
 
 
 @dataclasses.dataclass
-class CharacterEnterZoneData(ZoneEventData):
+class CharacterEnterZoneData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
     character_id: str
 
 
 @dataclasses.dataclass
-class ClientRequireAroundData(ZoneEventData):
+class ClientRequireAroundData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
     character_id: str
 
 
 @dataclasses.dataclass
-class ThereIsAroundData(ZoneEventData):
+class ThereIsAroundData(WebSocketEventData):
     stuff_count: int
     resource_count: int
     build_count: int
@@ -73,7 +76,7 @@ class ThereIsAroundData(ZoneEventData):
 
 
 @dataclasses.dataclass
-class ClickActionData(ZoneEventData):
+class ClickActionData(WebSocketEventData):
     base_url: str
     row_i: int
     col_i: int
@@ -84,7 +87,7 @@ class ClickActionData(ZoneEventData):
 
 
 @dataclasses.dataclass
-class RequestChatData(ZoneEventData):
+class RequestChatData(WebSocketEventData):
     character_id: str
     message_count: int
     next: bool
@@ -101,7 +104,7 @@ class RequestChatData(ZoneEventData):
 
 
 @dataclasses.dataclass
-class NewChatMessageData(ZoneEventData):
+class NewChatMessageData(WebSocketEventData):
     character_id: str
     message: str
     conversation_id: typing.Optional[int] = None
@@ -118,21 +121,36 @@ class NewChatMessageData(ZoneEventData):
 
 
 @dataclasses.dataclass
-class NewResumeTextData(ZoneEventData):
+class AnimatedCorpseMoveData(WebSocketEventData):
+    animated_corpse_id: int
+    to_row_i: int
+    to_col_i: int
+
+    # TODO BS: use automatic compiled serpyco serializer
+    def to_dict(self) -> dict:
+        return {
+            "animated_corpse_id": self.animated_corpse_id,
+            "to_row_i": self.to_row_i,
+            "to_col_i": self.to_col_i,
+        }
+
+
+@dataclasses.dataclass
+class NewResumeTextData(WebSocketEventData):
     resume: ListOfItemModel
 
 
 @dataclasses.dataclass
-class NewBuildData(ZoneEventData):
+class NewBuildData(WebSocketEventData):
     build: ZoneBuildModel
 
 
 @dataclasses.dataclass
-class CharacterExitZoneData(ZoneEventData):
+class CharacterExitZoneData(WebSocketEventData):
     character_id: str
 
 
-zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[ZoneEventData]] = {
+zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData]] = {
     ZoneEventType.PLAYER_MOVE: PlayerMoveData,
     ZoneEventType.CLIENT_WANT_CLOSE: EmptyData,
     ZoneEventType.SERVER_PERMIT_CLOSE: EmptyData,
@@ -145,6 +163,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[ZoneEventData]] = 
     ZoneEventType.NEW_BUILD: NewBuildData,
     ZoneEventType.REQUEST_CHAT: RequestChatData,
     ZoneEventType.NEW_CHAT_MESSAGE: NewChatMessageData,
+    ZoneEventType.ANIMATED_CORPSE_MOVE: AnimatedCorpseMoveData,
 }
 
 

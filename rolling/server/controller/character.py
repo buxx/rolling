@@ -48,7 +48,7 @@ from rolling.model.character import WithStuffActionModel
 from rolling.model.data import ListOfItemModel
 from rolling.model.event import CharacterEnterZoneData
 from rolling.model.event import CharacterExitZoneData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import CharacterInventoryModel
@@ -1593,8 +1593,10 @@ class CharacterController(BaseController):
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
             character_doc.world_col_i,
-            event=ZoneEvent(
+            event=WebSocketEvent(
                 type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
                 data=CharacterEnterZoneData(
                     character_id=character_id,
                     zone_row_i=character_doc.zone_row_i,
@@ -1712,7 +1714,9 @@ class CharacterController(BaseController):
             await self._kernel.send_to_zone_sockets(
                 character_.world_row_i,
                 character_.world_col_i,
-                event=ZoneEvent(
+                event=WebSocketEvent(
+                    world_row_i=character_.world_row_i,
+                    world_col_i=character_.world_col_i,
                     type=ZoneEventType.CHARACTER_EXIT_ZONE,
                     data=CharacterExitZoneData(character_id=character_.id),
                 ),
@@ -1726,8 +1730,10 @@ class CharacterController(BaseController):
             await self._kernel.send_to_zone_sockets(
                 hapic_data.query.to_world_row,
                 hapic_data.query.to_world_col,
-                event=ZoneEvent(
+                event=WebSocketEvent(
                     type=ZoneEventType.CHARACTER_ENTER_ZONE,
+                    world_row_i=character_doc.world_row_i,
+                    world_col_i=character_doc.world_col_i,
                     data=CharacterEnterZoneData(
                         character_id=character_.id,
                         zone_row_i=character_doc.zone_row_i,

@@ -2,6 +2,7 @@
 import datetime
 import math
 import os
+import random
 import sqlalchemy
 from sqlalchemy import Float
 from sqlalchemy import and_
@@ -17,6 +18,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.eat import EatResourceModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
@@ -52,6 +54,7 @@ from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.character import FollowCharacterDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.document.knowledge import CharacterKnowledgeDocument
@@ -114,6 +117,7 @@ class CharacterLib:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = name
+        character.type_ = AnimatedCorpseType.CHARACTER.value
         character.max_life_comp = STARING_LIFE_POINTS + skills["endurance"]
         character.life_points = float(character.max_life_comp)
         character.action_points = self._kernel.game.config.start_action_points
@@ -125,10 +129,10 @@ class CharacterLib:
         world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
             self._kernel.world_map_source
         )
-        start_zone_source = self._kernel.tile_maps_by_position[world_row_i, world_col_i].source
-        zone_row_i, zone_col_i = start_zone_source.get_start_zone_coordinates(
-            world_row_i, world_col_i
-        )
+        traversable_coordinates = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        if not traversable_coordinates:
+            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
+        zone_row_i, zone_col_i = random.choice(traversable_coordinates)
 
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i

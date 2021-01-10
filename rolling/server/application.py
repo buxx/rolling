@@ -10,6 +10,7 @@ from rolling.server.controller.business import BusinessController
 from rolling.server.controller.character import CharacterController
 from rolling.server.controller.common import CommonController
 from rolling.server.controller.conversation import ConversationController
+from rolling.server.controller.corpse import AnimatedCorpseController
 from rolling.server.controller.system import SystemController
 from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
@@ -30,5 +31,6 @@ def get_application(kernel: Kernel) -> Application:
     BusinessController(kernel).bind(app)
     AdminController(kernel).bind(app)
     SystemController(kernel).bind(app)
+    AnimatedCorpseController(kernel).bind(app)
 
     return app

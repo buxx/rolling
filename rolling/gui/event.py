@@ -4,7 +4,7 @@ import typing
 
 from rolling.log import gui_logger
 from rolling.model.event import PlayerMoveData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 
 if typing.TYPE_CHECKING:
@@ -17,20 +17,20 @@ class EventProcessor(metaclass=abc.ABCMeta):
         self._kernel = kernel
         self._controller = controller
 
-    async def process(self, event: ZoneEvent) -> None:
+    async def process(self, event: WebSocketEvent) -> None:
         self._check(event)
         await self._process(event)
 
-    def _check(self, event: ZoneEvent) -> None:
+    def _check(self, event: WebSocketEvent) -> None:
         pass
 
     @abc.abstractmethod
-    async def _process(self, event: ZoneEvent) -> None:
+    async def _process(self, event: WebSocketEvent) -> None:
         pass
 
 
 class PlayerMoveProcessor(EventProcessor):
-    async def _process(self, event: ZoneEvent[PlayerMoveData]) -> None:
+    async def _process(self, event: WebSocketEvent[PlayerMoveData]) -> None:
         gui_logger.debug(f"Receive {event.type} event for character {event.data.character_id}")
 
         if self._controller.player_character.id == event.data.character_id:

@@ -59,7 +59,10 @@ class ZoneController(BaseController):
     async def events(self, request: Request):
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
         return await self._kernel.server_zone_events_manager.get_new_socket(
-            request, row_i=int(request.match_info["row_i"]), col_i=int(request.match_info["col_i"]), character_id=request.query["character_id"]
+            request,
+            row_i=int(request.match_info["row_i"]),
+            col_i=int(request.match_info["col_i"]),
+            character_id=request.query["character_id"],
         )
 
     @hapic.with_api_doc()

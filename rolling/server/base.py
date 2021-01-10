@@ -1,9 +1,14 @@
 # coding: utf-8
+from aiohttp import WSMessage
+from aiohttp import web
+from aiohttp.web_request import Request
 import asyncio
 import typing
 
-from rolling.kernel import Kernel
 from rolling.log import server_logger
+
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
 
 
 def get_kernel(
@@ -11,7 +16,9 @@ def get_kernel(
     tile_maps_folder_path: typing.Optional[str] = None,
     game_config_folder: typing.Optional[str] = None,
     server_db_path: str = "server.db",
-) -> Kernel:
+) -> "Kernel":
+    from rolling.kernel import Kernel
+
     world_map_source_raw = None
 
     if world_map_source_path:

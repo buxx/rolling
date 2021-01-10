@@ -2,7 +2,7 @@
 from requests import Response
 import typing
 
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 
 if typing.TYPE_CHECKING:
     from rolling.util import CornerEnum
@@ -53,12 +53,12 @@ class UnknownEvent(EventError):
 
 
 class UnableToProcessEvent(EventError):
-    def __init__(self, msg: str, event: ZoneEvent) -> None:
+    def __init__(self, msg: str, event: WebSocketEvent) -> None:
         super().__init__(msg)
         self._event = event
 
     @property
-    def event(self) -> ZoneEvent:
+    def event(self) -> WebSocketEvent:
         return self._event
 
 
@@ -91,7 +91,11 @@ class GamePlayError(RollingError):
     pass
 
 
-class CantMoveCharacter(GamePlayError):
+class CantMove(GamePlayError):
+    pass
+
+
+class CantMoveCharacter(CantMove):
     pass
 
 
