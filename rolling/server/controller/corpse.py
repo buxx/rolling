@@ -1,8 +1,8 @@
 # coding: utf-8
-import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
+import typing
 
 from rolling.kernel import Kernel
 from rolling.model.corpse import AnimatedCorpseModel
@@ -17,15 +17,9 @@ class AnimatedCorpseController(BaseController):
         super().__init__(kernel)
 
     def bind(self, app: Application) -> None:
-        app.add_routes(
-            [
-                web.get("/ac/", self.get_animated_corpses),
-            ]
-        )
+        app.add_routes([web.get("/ac/", self.get_animated_corpses)])
 
     @hapic.with_api_doc()
     @hapic.output_body(AnimatedCorpseModel, processor=RollingSerpycoProcessor(many=True))
-    async def get_animated_corpses(
-        self, request: Request
-    ) -> typing.List[AnimatedCorpseDocument]:
+    async def get_animated_corpses(self, request: Request) -> typing.List[AnimatedCorpseDocument]:
         return self._kernel.animated_corpse_lib.get_all()

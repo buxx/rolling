@@ -22,6 +22,7 @@ class ZoneEventType(Enum):
     NEW_BUILD = "NEW_BUILD"
     REQUEST_CHAT = "REQUEST_CHAT"
     NEW_CHAT_MESSAGE = "NEW_CHAT_MESSAGE"
+    ANIMATED_CORPSE_MOVE = "ANIMATED_CORPSE_MOVE"
 
 
 T = typing.TypeVar("T")
@@ -120,6 +121,21 @@ class NewChatMessageData(WebSocketEventData):
 
 
 @dataclasses.dataclass
+class AnimatedCorpseMoveData(WebSocketEventData):
+    animated_corpse_id: int
+    to_row_i: int
+    to_col_i: int
+
+    # TODO BS: use automatic compiled serpyco serializer
+    def to_dict(self) -> dict:
+        return {
+            "animated_corpse_id": self.animated_corpse_id,
+            "to_row_i": self.to_row_i,
+            "to_col_i": self.to_col_i,
+        }
+
+
+@dataclasses.dataclass
 class NewResumeTextData(WebSocketEventData):
     resume: ListOfItemModel
 
@@ -147,6 +163,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.NEW_BUILD: NewBuildData,
     ZoneEventType.REQUEST_CHAT: RequestChatData,
     ZoneEventType.NEW_CHAT_MESSAGE: NewChatMessageData,
+    ZoneEventType.ANIMATED_CORPSE_MOVE: AnimatedCorpseMoveData,
 }
 
 

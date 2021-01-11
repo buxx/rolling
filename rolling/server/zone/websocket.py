@@ -15,8 +15,8 @@ from rolling.model.event import EmptyData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
-from rolling.server.event import EventProcessorFactory
 from rolling.server.base import ZoneEventSocketWrapper
+from rolling.server.event import EventProcessorFactory
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -128,7 +128,9 @@ class ZoneEventsManager:
         for socket in self._sockets.get((row_i, col_i), []):
             yield socket
 
-    def get_active_zone_characters_ids(self, world_row_i: int, world_col_i: int) -> typing.List[str]:
+    def get_active_zone_characters_ids(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[str]:
         return [
             self.get_character_id_for_socket(socket)
             for socket in self.get_sockets(world_row_i, world_col_i)

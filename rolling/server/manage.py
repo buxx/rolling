@@ -1,6 +1,5 @@
 # coding: utf-8
 import asyncio
-
 import click
 
 from rolling.server.base import get_kernel

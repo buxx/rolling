@@ -83,17 +83,13 @@ class WorldEventsManager:
 
         server_logger.info(f"Websocket of world closed")
 
-    async def _process_msg(
-        self, msg, socket: WorldEventSocketWrapper
-    ) -> None:
+    async def _process_msg(self, msg, socket: WorldEventSocketWrapper) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
         event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
         await self._process_event(event, socket)
 
-    async def _process_event(
-        self, event: WebSocketEvent, socket: WorldEventSocketWrapper
-    ) -> None:
+    async def _process_event(self, event: WebSocketEvent, socket: WorldEventSocketWrapper) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
         except UnknownEvent:
@@ -101,7 +97,9 @@ class WorldEventsManager:
             return
 
         try:
-            await event_processor.process(event, sender_socket=socket)
+            await event_processor.process(
+                event=event, sender_socket=socket, row_i=event.world_row_i, col_i=event.world_col_i
+            )
         except UnableToProcessEvent as exc:
             server_logger.debug(f"Unable to process event {event.type}: {str(exc)}")
 

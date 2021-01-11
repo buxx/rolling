@@ -23,10 +23,12 @@ from rolling.map.legend import ZoneMapLegend
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMap
 from rolling.map.source import ZoneMapSource
+from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.event import WebSocketEvent
+from rolling.model.meta import TransportType
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.action import ActionFactory
 from rolling.server.document.character import CharacterDocument
@@ -352,3 +354,27 @@ class Kernel:
 
         self._game = game
         kernel_logger.info("Reload configuration OK")
+
+    def get_traversable_coordinates(self, world_row_i: int, world_col_i: int) -> typing.List[typing.Tuple[int, int]]:
+        available_coordinates: typing.List[typing.Tuple[int, int]] = []
+        build_docs = self.build_lib.get_zone_build(
+            world_row_i=world_row_i, world_col_i=world_col_i
+        )
+        not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
+        for build_doc in build_docs:
+            build_description = self.game.config.builds[build_doc.build_id]
+            # TODO: traversable to update here
+            if not build_description.traversable.get(TransportType.WALKING.value, True):
+                not_traversable_by_builds.append((build_doc.zone_row_i, build_doc.zone_col_i))
+
+        geography = self.tile_maps_by_position[world_row_i, world_col_i].source.geography
+        for row_i, row in enumerate(geography.rows):
+            for col_i, map_tile_type in enumerate(row):
+                # TODO: traversable to update here
+                if (
+                    traversable_properties[map_tile_type].get(TransportType.WALKING.value)
+                    and (row_i, col_i) not in not_traversable_by_builds
+                ):
+                    available_coordinates.append((row_i, col_i))
+
+        return available_coordinates

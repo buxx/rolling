@@ -1,9 +1,9 @@
 # coding: utf-8
+from aiohttp import WSMessage
+from aiohttp import web
+from aiohttp.web_request import Request
 import asyncio
 import typing
-
-from aiohttp import web, WSMessage
-from aiohttp.web_request import Request
 
 from rolling.log import server_logger
 
@@ -18,6 +18,7 @@ def get_kernel(
     server_db_path: str = "server.db",
 ) -> "Kernel":
     from rolling.kernel import Kernel
+
     world_map_source_raw = None
 
     if world_map_source_path:
@@ -62,6 +63,18 @@ class BaseEventSocketWrapper:
     def socket(self) -> web.WebSocketResponse:
         raise NotImplementedError()
 
+    @property
+    def status(self) -> int:
+        return self.socket.status
+
+    @property
+    def body_length(self) -> int:
+        return self.socket.body_length
+
+    @property
+    def keep_alive(self) -> typing.Optional[bool]:
+        return self.socket.keep_alive
+
     async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
         raise NotImplementedError()
 
@@ -82,7 +95,7 @@ class ZoneEventSocketWrapper(BaseEventSocketWrapper):
 
     @property
     def socket(self) -> web.WebSocketResponse:
-        raise self._socket
+        return self._socket
 
     async def send_to_zone_str(self, message: str, repeat_to_world: bool = True) -> None:
         await super().send_str(message)
@@ -103,11 +116,13 @@ class ZoneEventSocketWrapper(BaseEventSocketWrapper):
 
 
 class WorldEventSocketWrapper(BaseEventSocketWrapper):
-    def __init__(
-        self, kernel: "Kernel", socket: web.WebSocketResponse
-    ) -> None:
+    def __init__(self, kernel: "Kernel", socket: web.WebSocketResponse) -> None:
         self._kernel = kernel
         self._socket = socket
+
+    @property
+    def socket(self) -> web.WebSocketResponse:
+        return self._socket
 
     async def send_to_world_str(
         self, message: str, world_row_i: int, world_col_i: int, repeat_to_zone: bool = True

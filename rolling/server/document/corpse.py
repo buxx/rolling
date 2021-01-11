@@ -1,8 +1,8 @@
 # coding: utf-8
 import enum
-
-from sqlalchemy import Boolean, Enum
+from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import Enum
 from sqlalchemy import Integer
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -19,7 +19,7 @@ class CorpseMixin:
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    __mapper_args__ = {'always_refresh': True}
+    __mapper_args__ = {"always_refresh": True}
 
     alive_since = Column(Integer, server_default="0", nullable=False)
     world_col_i = Column(Integer, nullable=True)
@@ -33,4 +33,3 @@ class CorpseMixin:
 class AnimatedCorpseDocument(CorpseMixin, Document):
     __tablename__ = "animated_corpse"
     id = Column(Integer, primary_key=True)
-

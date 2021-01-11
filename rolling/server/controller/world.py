@@ -21,7 +21,6 @@ class WorldController(BaseController):
         return await self._kernel.server_world_events_manager.get_new_socket(request)
 
     def bind(self, app: Application) -> None:
-        app.add_routes([
-            web.get("/world/source", self.get_world_source),
-            web.get("/world/events", self.events),
-        ])
+        app.add_routes(
+            [web.get("/world/source", self.get_world_source), web.get("/world/events", self.events)]
+        )

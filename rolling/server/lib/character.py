@@ -2,6 +2,8 @@
 import datetime
 import math
 import os
+import random
+
 import sqlalchemy
 from sqlalchemy import Float
 from sqlalchemy import and_
@@ -15,7 +17,7 @@ from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
 from rolling.action.eat import EatResourceModel
-from rolling.exception import CannotMoveToZoneError
+from rolling.exception import CannotMoveToZoneError, RollingError
 from rolling.exception import ImpossibleAction
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
@@ -127,10 +129,10 @@ class CharacterLib:
         world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
             self._kernel.world_map_source
         )
-        start_zone_source = self._kernel.tile_maps_by_position[world_row_i, world_col_i].source
-        zone_row_i, zone_col_i = start_zone_source.get_start_zone_coordinates(
-            world_row_i, world_col_i
-        )
+        traversable_coordinates = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        if not traversable_coordinates:
+            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
+        zone_row_i, zone_col_i = random.choice(traversable_coordinates)
 
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i

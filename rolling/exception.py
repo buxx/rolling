@@ -91,7 +91,11 @@ class GamePlayError(RollingError):
     pass
 
 
-class CantMoveCharacter(GamePlayError):
+class CantMove(GamePlayError):
+    pass
+
+
+class CantMoveCharacter(CantMove):
     pass
 
 
