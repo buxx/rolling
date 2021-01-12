@@ -135,10 +135,15 @@ class ZoneEventsManager:
         repeat_to_world: bool = True,
         character_ids: typing.Optional[typing.List[str]] = None,
     ) -> str:
-        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(event)
+        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
+            event
+        )
 
         for socket in self.get_sockets(world_row_i, world_col_i):
-            if character_ids is not None and self.get_character_id_for_socket(socket) not in character_ids:
+            if (
+                character_ids is not None
+                and self.get_character_id_for_socket(socket) not in character_ids
+            ):
                 continue
 
             try:

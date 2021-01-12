@@ -3,7 +3,6 @@ import datetime
 import math
 import os
 import random
-
 import sqlalchemy
 from sqlalchemy import Float
 from sqlalchemy import and_
@@ -17,8 +16,9 @@ from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
 from rolling.action.eat import EatResourceModel
-from rolling.exception import CannotMoveToZoneError, RollingError
+from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility

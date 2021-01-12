@@ -117,7 +117,9 @@ class WorldEventsManager:
     async def send_to_sockets(
         self, event: WebSocketEvent, world_row_i: int, world_col_i: int, repeat_to_zone: bool = True
     ) -> str:
-        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(event)
+        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
+            event
+        )
 
         for socket in self.get_sockets():
             try:
@@ -129,10 +131,7 @@ class WorldEventsManager:
         # Replicate message on concerned zone websockets
         if repeat_to_zone:
             await self._kernel.server_zone_events_manager.send_to_sockets(
-                event,
-                world_row_i=world_row_i,
-                world_col_i=world_col_i,
-                repeat_to_world=False,
+                event, world_row_i=world_row_i, world_col_i=world_col_i, repeat_to_world=False
             )
 
         return event_str

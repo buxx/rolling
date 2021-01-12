@@ -349,11 +349,11 @@ class Kernel:
         self._game = game
         kernel_logger.info("Reload configuration OK")
 
-    def get_traversable_coordinates(self, world_row_i: int, world_col_i: int) -> typing.List[typing.Tuple[int, int]]:
+    def get_traversable_coordinates(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[typing.Tuple[int, int]]:
         available_coordinates: typing.List[typing.Tuple[int, int]] = []
-        build_docs = self.build_lib.get_zone_build(
-            world_row_i=world_row_i, world_col_i=world_col_i
-        )
+        build_docs = self.build_lib.get_zone_build(world_row_i=world_row_i, world_col_i=world_col_i)
         not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
         for build_doc in build_docs:
             build_description = self.game.config.builds[build_doc.build_id]

@@ -136,7 +136,6 @@ class ZoneMapSource(MapSource):
         self, world_row_i: int, world_col_i: int
     ) -> typing.Tuple[int, int]:
 
-
         if not available_coordinates:
             raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
 

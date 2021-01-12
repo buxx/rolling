@@ -182,10 +182,7 @@ class MessageLib:
         )
 
         await self._kernel.server_zone_events_manager.send_to_sockets(
-            event,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-            character_ids=concerned,
+            event, world_row_i=world_row_i, world_col_i=world_col_i, character_ids=concerned
         )
 
     def get_conversation_first_messages(
