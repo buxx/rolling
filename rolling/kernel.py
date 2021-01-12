@@ -336,13 +336,7 @@ class Kernel:
         self.server_db_session.commit()
 
     async def send_to_zone_sockets(self, row_i: int, col_i: int, event: WebSocketEvent) -> None:
-        event_str = self.event_serializer_factory.get_serializer(event.type).dump_json(event)
-        for socket in self.server_zone_events_manager.get_sockets(row_i, col_i):
-            try:
-                kernel_logger.debug(event_str)
-                await socket.send_to_zone_str(event_str)
-            except Exception as exc:
-                kernel_logger.exception(exc)
+        await self.server_zone_events_manager.send_to_sockets(event, row_i, col_i)
 
     def on_sighup_signal(self, signum, frame) -> None:
         kernel_logger.info("Reload configuration ...")

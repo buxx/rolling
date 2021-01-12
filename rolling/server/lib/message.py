@@ -172,29 +172,21 @@ class MessageLib:
         conversation_id: typing.Optional[int] = None,
         concerned: typing.Optional[typing.List[str]] = None,
     ) -> None:
-        event_str = self._kernel.event_serializer_factory.get_serializer(
-            ZoneEventType.NEW_CHAT_MESSAGE
-        ).dump_json(
-            WebSocketEvent(
-                type=ZoneEventType.NEW_CHAT_MESSAGE,
-                world_row_i=world_row_i,
-                world_col_i=world_col_i,
-                data=NewChatMessageData(
-                    character_id=author_id, message=message, conversation_id=conversation_id
-                ),
-            )
+        event = WebSocketEvent(
+            type=ZoneEventType.NEW_CHAT_MESSAGE,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            data=NewChatMessageData(
+                character_id=author_id, message=message, conversation_id=conversation_id
+            ),
         )
-        for socket in self._kernel.server_zone_events_manager.get_sockets(world_row_i, world_col_i):
-            if (
-                concerned is None
-                or self._kernel.server_zone_events_manager.get_character_id_for_socket(socket)
-                in concerned
-            ):
-                server_logger.debug(f"Send event on socket: {event_str}")
-                try:
-                    await socket.send_to_zone_str(event_str)
-                except Exception as exc:
-                    server_logger.exception(exc)
+
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            event,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            character_ids=concerned,
+        )
 
     def get_conversation_first_messages(
         self, character_id: str, with_character_id: typing.Optional[str] = None

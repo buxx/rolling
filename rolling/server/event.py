@@ -9,7 +9,6 @@ from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
 from rolling.log import server_logger
-from rolling.model.character import CharacterModel
 from rolling.model.event import AnimatedCorpseMoveData
 from rolling.model.event import ClickActionData
 from rolling.model.event import ClientRequireAroundData
@@ -20,7 +19,6 @@ from rolling.model.event import ThereIsAroundData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
-from rolling.server.base import BaseEventSocketWrapper
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.util import get_on_and_around_coordinates
@@ -36,7 +34,7 @@ class EventProcessor(metaclass=abc.ABCMeta):
         self._kernel = kernel
 
     async def process(
-        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: BaseEventSocketWrapper
+        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: web.WebSocketResponse
     ) -> None:
         self._check(row_i, col_i, event)
         await self._process(row_i, col_i, event, sender_socket=sender_socket)
@@ -46,7 +44,7 @@ class EventProcessor(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def _process(
-        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: BaseEventSocketWrapper
+        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: web.WebSocketResponse
     ) -> None:
         pass
 
@@ -63,7 +61,7 @@ class PlayerMoveProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[PlayerMoveData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         # FIXME BS 2019-01-23: Check what move is possible (tile can be a rock, or water ...)
         # TODO BS 2019-01-23: Check given character id is authenticated used (security)
@@ -74,17 +72,7 @@ class PlayerMoveProcessor(EventProcessor):
             character, to_row_i=event.data.to_row_i, to_col_i=event.data.to_col_i
         )
 
-        # FIXME BS NOW: refact
-        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
-            event
-        )
-        for socket in self._zone_events_manager.get_sockets(row_i, col_i):
-            server_logger.debug(f"Send event on socket: {event_str}")
-
-            try:
-                await socket.send_to_zone_str(event_str)
-            except Exception as exc:
-                server_logger.exception(exc)
+        await self._zone_events_manager.send_to_sockets(event, row_i, col_i)
 
 
 class ClientWantCloseProcessor(EventProcessor):
@@ -93,7 +81,7 @@ class ClientWantCloseProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[PlayerMoveData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         raise DisconnectClient()
 
@@ -104,7 +92,7 @@ class ThereIsAroundProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[ClientRequireAroundData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         character = self._kernel.character_lib.get_document(event.data.character_id)
         around_character = get_on_and_around_coordinates(
@@ -170,7 +158,7 @@ class ThereIsAroundProcessor(EventProcessor):
         event_str = self._kernel.event_serializer_factory.get_serializer(
             ZoneEventType.THERE_IS_AROUND
         ).dump_json(around_event)
-        await sender_socket.send_to_zone_str(event_str)
+        await sender_socket.send_str(event_str)
 
 
 class ClickActionProcessor(EventProcessor):
@@ -179,7 +167,7 @@ class ClickActionProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[ClickActionData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         # FIXME Experimental way to identify action ...for now, only manage build ...
         path = event.data.base_url.split("?")[0]
@@ -204,24 +192,15 @@ class ClickActionProcessor(EventProcessor):
             server_logger.error(f"impossible action {build_description_id}: {str(exc)}")
             return
 
-        for zone_event in zone_events:
-            event_str = self._kernel.event_serializer_factory.get_serializer(
-                zone_event.type
-            ).dump_json(zone_event)
-            for socket in self._zone_events_manager.get_sockets(row_i, col_i):
-                server_logger.debug(f"Send event on socket: {event_str}")
-
-                try:
-                    await socket.send_to_zone_str(event_str)
-                except Exception as exc:
-                    server_logger.exception(exc)
+        for event in zone_events:
+            await self._zone_events_manager.send_to_sockets(event, row_i, col_i)
 
         for sender_event in sender_events:
             event_str = self._kernel.event_serializer_factory.get_serializer(
                 sender_event.type
             ).dump_json(sender_event)
             server_logger.debug(f"Send event on socket: {event_str}")
-            await sender_socket.send_to_zone_str(event_str)
+            await sender_socket.send_str(event_str)
 
 
 class RequestChatProcessor(EventProcessor):
@@ -230,7 +209,7 @@ class RequestChatProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[RequestChatData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         conversation_id = None
         conversation_title = None
@@ -297,7 +276,7 @@ class RequestChatProcessor(EventProcessor):
             event_str = self._kernel.event_serializer_factory.get_serializer(
                 ZoneEventType.NEW_CHAT_MESSAGE
             ).dump_json(new_chat_message_event)
-            await sender_socket.send_to_zone_str(event_str)
+            await sender_socket.send_str(event_str)
 
 
 class NewChatMessageProcessor(EventProcessor):
@@ -306,7 +285,7 @@ class NewChatMessageProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[NewChatMessageData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         if event.data.conversation_id is None:
             await self._kernel.message_lib.add_zone_message(
@@ -334,16 +313,14 @@ class AnimatedCorpseMoveProcessor(EventProcessor):
         row_i: int,
         col_i: int,
         event: WebSocketEvent[AnimatedCorpseMoveData],
-        sender_socket: BaseEventSocketWrapper,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
-        server_logger.debug("move ?")
         try:
             animated_corpse = self._kernel.animated_corpse_lib.get(event.data.animated_corpse_id)
         except NoResultFound:
             server_logger.error(f"No animated corpse found for id {event.data.animated_corpse_id}")
             return
 
-        server_logger.debug("move on")
         new_zone_row_i = animated_corpse.zone_row_i
         new_zone_col_i = animated_corpse.zone_col_i
 
@@ -359,28 +336,21 @@ class AnimatedCorpseMoveProcessor(EventProcessor):
             server_logger.debug("cant move")
             pass
 
-        server_logger.debug("move on2")
-        event = WebSocketEvent(
-            type=ZoneEventType.ANIMATED_CORPSE_MOVE,
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.ANIMATED_CORPSE_MOVE,
+                world_row_i=animated_corpse.world_row_i,
+                world_col_i=animated_corpse.world_col_i,
+                data=AnimatedCorpseMoveData(
+                    animated_corpse_id=animated_corpse.id,
+                    to_row_i=new_zone_row_i,
+                    to_col_i=new_zone_col_i,
+                ),
+            ),
             world_row_i=animated_corpse.world_row_i,
             world_col_i=animated_corpse.world_col_i,
-            data=AnimatedCorpseMoveData(
-                animated_corpse_id=animated_corpse.id,
-                to_row_i=new_zone_row_i,
-                to_col_i=new_zone_col_i,
-            ),
         )
-        event_str = self._kernel.event_serializer_factory.get_serializer(
-            ZoneEventType.ANIMATED_CORPSE_MOVE
-        ).dump_json(event)
-        for socket in self._kernel.server_zone_events_manager.get_sockets(
-            row_i=animated_corpse.world_row_i, col_i=animated_corpse.world_col_i
-        ):
-            await socket.send_to_zone_str(event_str)
 
-        # FIXME BS NOW HERE NOWEUH: ça marche pas: si pas de socket dans la zone on envoie rien
-        # FIXME BS NOW HERE NOWEUH: ça marche pas: quand on envoie a 10 sockets dans la zone,
-        #  on envoie 10x aux sockets du world ...
 
 class EventProcessorFactory:
     # FIXME BS NOW EVENT: type of zone_events_manager must be a base abstract class

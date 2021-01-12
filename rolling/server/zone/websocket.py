@@ -15,7 +15,6 @@ from rolling.model.event import EmptyData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
-from rolling.server.base import ZoneEventSocketWrapper
 from rolling.server.event import EventProcessorFactory
 
 if typing.TYPE_CHECKING:
@@ -24,23 +23,23 @@ if typing.TYPE_CHECKING:
 
 class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
-        self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[ZoneEventSocketWrapper]] = {}
-        self._sockets_character_id: typing.Dict[ZoneEventSocketWrapper, str] = {}
+        self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[web.WebSocketResponse]] = {}
+        self._sockets_character_id: typing.Dict[web.WebSocketResponse, str] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
         self._kernel = kernel
 
-    def get_character_id_for_socket(self, socket: ZoneEventSocketWrapper) -> str:
+    def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
         return self._sockets_character_id[socket]
 
     async def get_new_socket(
         self, request: Request, row_i: int, col_i: int, character_id: str
-    ) -> ZoneEventSocketWrapper:
+    ) -> web.WebSocketResponse:
         server_logger.info(f"Create websocket for zone {row_i},{col_i}")
 
         # Create socket
-        socket = ZoneEventSocketWrapper(self._kernel, web.WebSocketResponse(), row_i, col_i)
+        socket = web.WebSocketResponse()
         await socket.prepare(request)
 
         # TODO BS 2019-01-23: Implement a heartbeat to close sockets where client disapear
@@ -64,9 +63,9 @@ class ZoneEventsManager:
 
         return socket
 
-    async def _listen(self, socket: ZoneEventSocketWrapper, row_i: int, col_i: int) -> None:
+    async def _listen(self, socket: web.WebSocketResponse, row_i: int, col_i: int) -> None:
         server_logger.info(f"Listen websocket for zone {row_i},{col_i}")
-        async for msg in socket.iter():
+        async for msg in socket:
             server_logger.debug(f"Receive message on websocket for zone {row_i},{col_i}: {msg}")
 
             if msg.type == aiohttp.WSMsgType.ERROR:
@@ -92,18 +91,18 @@ class ZoneEventsManager:
         server_logger.info(f"Websocket of zone {row_i},{col_i} closed")
 
     async def _process_msg(
-        self, row_i: int, col_i: int, msg, socket: ZoneEventSocketWrapper
+        self, row_i: int, col_i: int, msg, socket: web.WebSocketResponse
     ) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
         # Event zone coordinate is mandatory
-        event_dict["world_row_i"] = socket.world_row_i
-        event_dict["world_col_i"] = socket.world_col_i
+        event_dict["world_row_i"] = row_i
+        event_dict["world_col_i"] = col_i
         event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
         await self._process_event(row_i, col_i, event, socket)
 
     async def _process_event(
-        self, row_i: int, col_i: int, event: WebSocketEvent, socket: ZoneEventSocketWrapper
+        self, row_i: int, col_i: int, event: WebSocketEvent, socket: web.WebSocketResponse
     ) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
@@ -122,11 +121,39 @@ class ZoneEventsManager:
             ).dump_json(exception_event)
 
             # FIXME: do kept this feature ?
-            await socket.send_to_zone_str(exception_event_str)
+            await socket.send_str(exception_event_str)
 
-    def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[ZoneEventSocketWrapper]:
+    def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[web.WebSocketResponse]:
         for socket in self._sockets.get((row_i, col_i), []):
-            yield socket
+            yield
+
+    async def send_to_sockets(
+        self,
+        event: WebSocketEvent,
+        world_row_i: int,
+        world_col_i: int,
+        repeat_to_world: bool = True,
+        character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> str:
+        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(event)
+
+        for socket in self.get_sockets(world_row_i, world_col_i):
+            if character_ids is not None and self.get_character_id_for_socket(socket) not in character_ids:
+                continue
+
+            try:
+                server_logger.debug(event_str)
+                await socket.send_str(event_str)
+            except Exception as exc:
+                server_logger.exception(exc)
+
+        # Replicate message on world websockets
+        if repeat_to_world:
+            await self._kernel.server_world_events_manager.send_to_sockets(
+                event, world_row_i=world_row_i, world_col_i=world_col_i, repeat_to_zone=False
+            )
+
+        return event_str
 
     def get_active_zone_characters_ids(
         self, world_row_i: int, world_col_i: int
