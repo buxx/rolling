@@ -10,9 +10,6 @@ import serpyco
 import typing
 
 from guilang.description import Description
-from rolling.gui.map.object import DisplayObjectManager
-from rolling.gui.map.render import TileMapRenderEngine
-from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.kernel import Kernel
 from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
@@ -104,59 +101,6 @@ def worldmapc_with_zones_server_character_lib(worldmapc_kernel: Kernel) -> Chara
 def worldmapc_full_sea_tile_map_source(worldmapc_kernel: Kernel) -> ZoneMapSource:
     generator = TileMapGenerator(worldmapc_kernel, DummyTileMapFiller(SeaWater))
     return generator.generate(11)
-
-
-@pytest.fixture
-def display_object_manager__empty() -> DisplayObjectManager:
-    return DisplayObjectManager([])
-
-
-@pytest.fixture
-def worldmapa_render_engine(
-    worldmapsourcea_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapa_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapa_kernel, raw_source=worldmapsourceb_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def tilemapa_render_engine(
-    tilemapsourcea_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb_kernel: Kernel,
-) -> TileMapRenderEngine:
-    return TileMapRenderEngine(
-        world_map_source=ZoneMapSource(kernel=worldmapb_kernel, raw_source=tilemapsourcea_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def worldmapb_render_engine(
-    worldmapsourceb_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapb_kernel, raw_source=worldmapsourceb_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def worldmapb2_render_engine(
-    worldmapsourceb2_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb2_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapb2_kernel, raw_source=worldmapsourceb2_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
 
 
 @pytest.fixture
