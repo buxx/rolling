@@ -330,7 +330,7 @@ class CharacterModel:
     zone_col_i: int = None
     zone_row_i: int = None
 
-    tiredness: int = 0
+    tiredness: int = 0  # %
     thirst: float = 0  # %
     hunger: float = 0  # %
 

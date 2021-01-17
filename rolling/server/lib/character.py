@@ -1192,6 +1192,7 @@ class CharacterLib:
 
         hunger_class = "green"
         thirst_class = "green"
+        tiredness_class = "green"
 
         if character.hunger >= self._kernel.game.config.limit_hunger_increase_life_point:
             hunger_class = "red"
@@ -1202,6 +1203,11 @@ class CharacterLib:
             thirst_class = "red"
         elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
             thirst_class = "yellow"
+
+        if character.is_exhausted():
+            tiredness_class = "red"
+        elif character.tired:
+            tiredness_class = "yellow"
 
         return [
             ItemModel("PV", value_is_str=True, value_str=self.get_health_text(character)),
@@ -1217,6 +1223,12 @@ class CharacterLib:
                 value_is_float=True,
                 value_float=round(character.thirst, 0),
                 classes=["inverted_percent", thirst_class],
+            ),
+            ItemModel(
+                "Fatigue",
+                value_is_float=True,
+                value_float=round(character.tiredness, 0),
+                classes=["inverted_percent", tiredness_class],
             ),
             ItemModel("A boire", value_is_str=True, value_str=can_drink_str),
             ItemModel("A manger", value_is_str=True, value_str=can_eat_str),
