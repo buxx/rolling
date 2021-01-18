@@ -100,6 +100,7 @@ class ConversationController(BaseController):
                     subject=data.get("subject", "Une conversation"),
                     message=data["message"],
                     concerned=selected_character_ids,
+                    is_first_message=True,
                 )
                 return Description(
                     redirect=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}"

@@ -119,6 +119,7 @@ class MessageLib:
         message: str,
         concerned: typing.List[str],
         conversation_id: typing.Optional[int] = None,
+        is_first_message: bool = False,
     ) -> int:
         author_doc = self._kernel.character_lib.get_document(author_id)
         concerned = [author_id] + concerned
@@ -137,6 +138,7 @@ class MessageLib:
                 zone=False,
                 concerned=concerned,
                 first_message=conversation_id,
+                is_first_message=is_first_message,
             )
             messages.append(message_obj)
             self._kernel.server_db_session.add(message_obj)
@@ -200,7 +202,7 @@ class MessageLib:
     ) -> Query:
         query = (
             self._get_character_messages_query(character_id, zone=False)
-            .group_by(MessageDocument.first_message)
+            .filter(MessageDocument.is_first_message == True)
             .order_by(order_by)
         )
 
@@ -283,7 +285,8 @@ class MessageLib:
             )
             .filter(MessageDocument.concerned.contains(character.id))
             .filter(MessageDocument.first_message != None)
-            .group_by(MessageDocument.first_message)
+            .filter(MessageDocument.is_first_message == True)
+            .distinct(MessageDocument.first_message)
             .all()
         ):
             left_names = []
