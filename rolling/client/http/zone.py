@@ -11,7 +11,7 @@ from rolling.client.http.client import HttpClient
 from rolling.client.lib.zone import ZoneLib
 from rolling.gui.event import EventProcessorFactory
 from rolling.log import gui_logger
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.event import zone_event_data_types
 from rolling.model.serializer import ZoneEventSerializerFactory
@@ -67,7 +67,7 @@ class ZoneWebSocketClient:
         processor = self._event_processor_factory.get_processor(event.type)
         await processor.process(event)
 
-    async def send_event(self, event: ZoneEvent) -> None:
+    async def send_event(self, event: WebSocketEvent) -> None:
         event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
         gui_logger.debug("Send str version of event over zone write websocket")
         await self._ws.send_str(event_str)

@@ -95,7 +95,7 @@ class ConversationController(BaseController):
                         items=[Part(text="Vous devez choisir au moins un personnage")],
                     )
 
-                conversation_id = self._kernel.message_lib.add_conversation_message(
+                conversation_id = await self._kernel.message_lib.add_conversation_message(
                     author_id=hapic_data.path.character_id,
                     subject=data.get("subject", "Une conversation"),
                     message=data["message"],
@@ -221,14 +221,10 @@ class ConversationController(BaseController):
     async def add(self, request: Request, hapic_data: HapicData) -> Description:
         data = await request.json()
         add_message = data["message"]
-        last_message = (
-            self._kernel.server_db_session.query(MessageDocument)
-            .filter(MessageDocument.first_message == hapic_data.path.conversation_id)
-            .order_by(MessageDocument.datetime.desc())
-            .limit(1)
-            .one()
+        last_message = self._kernel.message_lib.get_last_conversation_message(
+            hapic_data.path.conversation_id
         )
-        self._kernel.message_lib.add_conversation_message(
+        await self._kernel.message_lib.add_conversation_message(
             author_id=hapic_data.path.character_id,
             conversation_id=hapic_data.path.conversation_id,
             subject=last_message.subject,

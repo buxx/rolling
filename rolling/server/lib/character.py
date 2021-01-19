@@ -2,6 +2,7 @@
 import datetime
 import math
 import os
+import random
 import sqlalchemy
 from sqlalchemy import Float
 from sqlalchemy import and_
@@ -17,6 +18,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.eat import EatResourceModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
 from rolling.model.ability import HaveAbility
@@ -52,6 +54,7 @@ from rolling.server.document.base import ImageDocument
 from rolling.server.document.business import OfferDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.character import FollowCharacterDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.event import EventDocument
 from rolling.server.document.event import StoryPageDocument
 from rolling.server.document.knowledge import CharacterKnowledgeDocument
@@ -114,6 +117,7 @@ class CharacterLib:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
         character.name = name
+        character.type_ = AnimatedCorpseType.CHARACTER.value
         character.max_life_comp = STARING_LIFE_POINTS + skills["endurance"]
         character.life_points = float(character.max_life_comp)
         character.action_points = self._kernel.game.config.start_action_points
@@ -125,10 +129,10 @@ class CharacterLib:
         world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
             self._kernel.world_map_source
         )
-        start_zone_source = self._kernel.tile_maps_by_position[world_row_i, world_col_i].source
-        zone_row_i, zone_col_i = start_zone_source.get_start_zone_coordinates(
-            world_row_i, world_col_i
-        )
+        traversable_coordinates = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        if not traversable_coordinates:
+            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
+        zone_row_i, zone_col_i = random.choice(traversable_coordinates)
 
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i
@@ -456,7 +460,7 @@ class CharacterLib:
             exclude_ids=exclude_ids,
         ).count()
 
-    def move(
+    async def move(
         self, character: CharacterModel, to_world_row: int, to_world_col: int
     ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
@@ -511,7 +515,7 @@ class CharacterLib:
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
 
-        self._kernel.message_lib.send_messages_due_to_move(
+        await self._kernel.message_lib.send_messages_due_to_move(
             character=character,
             from_world_row_i=from_world_row_i,
             from_world_col_i=from_world_col_i,
@@ -1188,6 +1192,7 @@ class CharacterLib:
 
         hunger_class = "green"
         thirst_class = "green"
+        tiredness_class = "green"
 
         if character.hunger >= self._kernel.game.config.limit_hunger_increase_life_point:
             hunger_class = "red"
@@ -1198,6 +1203,11 @@ class CharacterLib:
             thirst_class = "red"
         elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
             thirst_class = "yellow"
+
+        if character.is_exhausted():
+            tiredness_class = "red"
+        elif character.tired:
+            tiredness_class = "yellow"
 
         return [
             ItemModel("PV", value_is_str=True, value_str=self.get_health_text(character)),
@@ -1213,6 +1223,12 @@ class CharacterLib:
                 value_is_float=True,
                 value_float=round(character.thirst, 0),
                 classes=["inverted_percent", thirst_class],
+            ),
+            ItemModel(
+                "Fatigue",
+                value_is_float=True,
+                value_float=round(character.tiredness, 0),
+                classes=["inverted_percent", tiredness_class],
             ),
             ItemModel("A boire", value_is_str=True, value_str=can_drink_str),
             ItemModel("A manger", value_is_str=True, value_str=can_eat_str),

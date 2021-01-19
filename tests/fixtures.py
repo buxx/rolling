@@ -10,9 +10,6 @@ import serpyco
 import typing
 
 from guilang.description import Description
-from rolling.gui.map.object import DisplayObjectManager
-from rolling.gui.map.render import TileMapRenderEngine
-from rolling.gui.map.render import WorldMapRenderEngine
 from rolling.kernel import Kernel
 from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
@@ -27,6 +24,7 @@ from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
@@ -106,59 +104,6 @@ def worldmapc_full_sea_tile_map_source(worldmapc_kernel: Kernel) -> ZoneMapSourc
 
 
 @pytest.fixture
-def display_object_manager__empty() -> DisplayObjectManager:
-    return DisplayObjectManager([])
-
-
-@pytest.fixture
-def worldmapa_render_engine(
-    worldmapsourcea_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapa_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapa_kernel, raw_source=worldmapsourceb_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def tilemapa_render_engine(
-    tilemapsourcea_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb_kernel: Kernel,
-) -> TileMapRenderEngine:
-    return TileMapRenderEngine(
-        world_map_source=ZoneMapSource(kernel=worldmapb_kernel, raw_source=tilemapsourcea_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def worldmapb_render_engine(
-    worldmapsourceb_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapb_kernel, raw_source=worldmapsourceb_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
-def worldmapb2_render_engine(
-    worldmapsourceb2_txt: str,
-    display_object_manager__empty: DisplayObjectManager,
-    worldmapb2_kernel: Kernel,
-) -> WorldMapRenderEngine:
-    return WorldMapRenderEngine(
-        world_map_source=WorldMapSource(kernel=worldmapb2_kernel, raw_source=worldmapsourceb2_txt),
-        display_objects_manager=display_object_manager__empty,
-    )
-
-
-@pytest.fixture
 def worldmapc_with_zones_stuff_lib(worldmapc_kernel: Kernel) -> StuffLib:
     return StuffLib(worldmapc_kernel)
 
@@ -172,6 +117,7 @@ _default_character_competences = {
     "action_points": 24.0,
     "attack_allowed_loss_rate": 30.0,
     "defend_allowed_loss_rate": 30.0,
+    "type_": AnimatedCorpseType.CHARACTER.value,
 }
 
 

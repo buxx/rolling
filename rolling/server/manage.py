@@ -1,4 +1,5 @@
 # coding: utf-8
+import asyncio
 import click
 
 from rolling.server.base import get_kernel
@@ -83,7 +84,7 @@ def move(game_config_dir: str, character_name: str, world_row_i: int, world_col_
     character_ = kernel.character_lib.get_by_name(character_name)
 
     click.echo("Move")
-    kernel.character_lib.move(character_, world_row_i, world_col_i)
+    asyncio.run(kernel.character_lib.move(character_, world_row_i, world_col_i))
 
 
 @character.command()

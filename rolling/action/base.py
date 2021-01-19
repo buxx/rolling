@@ -7,8 +7,8 @@ import typing
 from urllib.parse import urlencode
 
 from guilang.description import Description
-from rolling.model.event import ZoneEvent
-from rolling.model.event import ZoneEventData
+from rolling.model.event import WebSocketEvent
+from rolling.model.event import WebSocketEventData
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_BUILD_ACTION
@@ -259,7 +259,7 @@ class CharacterAction(Action):
 
     def perform_from_event(
         self, character: "CharacterModel", input_: typing.Any
-    ) -> typing.Tuple[typing.List[ZoneEvent], typing.List[ZoneEvent]]:
+    ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         """
         return: [0]: all zone websockets; [1]: sender socket
         """

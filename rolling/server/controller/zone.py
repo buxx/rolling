@@ -59,7 +59,10 @@ class ZoneController(BaseController):
     async def events(self, request: Request):
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
         return await self._kernel.server_zone_events_manager.get_new_socket(
-            request, row_i=int(request.match_info["row_i"]), col_i=int(request.match_info["col_i"])
+            request,
+            row_i=int(request.match_info["row_i"]),
+            col_i=int(request.match_info["col_i"]),
+            character_id=request.query["character_id"],
         )
 
     @hapic.with_api_doc()
@@ -255,7 +258,7 @@ class ZoneController(BaseController):
     @hapic.output_body(Description)
     async def add_message(self, request: Request, hapic_data: HapicData) -> Description:
         post_content = await request.json()
-        self._kernel.message_lib.add_zone_message(
+        await self._kernel.message_lib.add_zone_message(
             hapic_data.query.character_id,
             message=post_content["message"],
             zone_row_i=hapic_data.path.row_i,

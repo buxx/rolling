@@ -26,7 +26,7 @@ from rolling.model.data import ListOfItemModel
 from rolling.model.event import ClickActionData
 from rolling.model.event import NewBuildData
 from rolling.model.event import NewResumeTextData
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
@@ -521,7 +521,7 @@ class BuildAction(CharacterAction):
 
     def perform_from_event(
         self, character: "CharacterModel", input_: BuildModel
-    ) -> typing.Tuple[typing.List[ZoneEvent], typing.List[ZoneEvent]]:
+    ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         assert input_.row_i
         assert input_.col_i
         build_id = self._description.properties["build_id"]
@@ -558,16 +558,20 @@ class BuildAction(CharacterAction):
 
         return (
             [
-                ZoneEvent(
+                WebSocketEvent(
                     type=ZoneEventType.NEW_BUILD,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
                     data=NewBuildData(
                         build=ZoneBuildModelContainer(doc=build_doc, desc=build_description)
                     ),
                 )
             ],
             [
-                ZoneEvent(
+                WebSocketEvent(
                     type=ZoneEventType.NEW_RESUME_TEXT,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
                     data=NewResumeTextData(
                         resume=ListOfItemModel(
                             self._kernel.character_lib.get_resume_text(character.id)

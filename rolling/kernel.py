@@ -23,10 +23,12 @@ from rolling.map.legend import ZoneMapLegend
 from rolling.map.source import WorldMapSource
 from rolling.map.source import ZoneMap
 from rolling.map.source import ZoneMapSource
+from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
-from rolling.model.event import ZoneEvent
+from rolling.model.event import WebSocketEvent
+from rolling.model.meta import TransportType
 from rolling.model.serializer import ZoneEventSerializerFactory
 from rolling.server.action import ActionFactory
 from rolling.server.document.character import CharacterDocument
@@ -38,11 +40,13 @@ from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
 from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.corpse import AnimatedCorpseLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 
@@ -78,8 +82,9 @@ class Kernel:
         self._server_db_session: typing.Optional[Session] = None
         self._server_db_engine: typing.Optional[Engine] = None
 
-        # Zone websocket
+        # Websocket managers
         self._server_zone_events_manager = ZoneEventsManager(self, loop=loop)
+        self._server_world_events_manager = WorldEventsManager(self, loop=loop)
 
         # Generate tile maps if tile map folder given
         if tile_maps_folder is not None:
@@ -114,8 +119,9 @@ class Kernel:
         self._affinity_lib: typing.Optional[AffinityLib] = None
         self._business_lib: typing.Optional[BusinessLib] = None
         self._fight_lib: typing.Optional[FightLib] = None
+        self._animated_corpse_lib: typing.Optional[AnimatedCorpseLib] = None
 
-        self._event_serializer_factory = ZoneEventSerializerFactory()
+        self.event_serializer_factory = ZoneEventSerializerFactory()
 
     @property
     def universe_lib(self) -> UniverseLib:
@@ -176,6 +182,12 @@ class Kernel:
         return self._build_lib
 
     @property
+    def animated_corpse_lib(self) -> AnimatedCorpseLib:
+        if self._animated_corpse_lib is None:
+            self._animated_corpse_lib = AnimatedCorpseLib(self)
+        return self._animated_corpse_lib
+
+    @property
     def action_factory(self) -> ActionFactory:
         if self._action_factory is None:
             self._action_factory = ActionFactory(self)
@@ -199,10 +211,19 @@ class Kernel:
     def server_zone_events_manager(self) -> ZoneEventsManager:
         if self._server_zone_events_manager is None:
             raise ComponentNotPrepared(
-                "self._server_zone_events_manager must be prepared before usage"
+                "self._server_world_events_manager must be prepared before usage"
             )
 
         return self._server_zone_events_manager
+
+    @property
+    def server_world_events_manager(self) -> WorldEventsManager:
+        if self._server_world_events_manager is None:
+            raise ComponentNotPrepared(
+                "self._server_zone_events_manager must be prepared before usage"
+            )
+
+        return self._server_world_events_manager
 
     @property
     def world_map_source(self) -> WorldMapSource:
@@ -314,14 +335,8 @@ class Kernel:
                 self.character_lib.ensure_skills_for_character(row[0])
         self.server_db_session.commit()
 
-    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: ZoneEvent) -> None:
-        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
-        for socket in self.server_zone_events_manager.get_sockets(row_i, col_i):
-            try:
-                kernel_logger.debug(event_str)
-                await socket.send_str(event_str)
-            except Exception as exc:
-                kernel_logger.exception(exc)
+    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: WebSocketEvent) -> None:
+        await self.server_zone_events_manager.send_to_sockets(event, row_i, col_i)
 
     def on_sighup_signal(self, signum, frame) -> None:
         kernel_logger.info("Reload configuration ...")
@@ -333,3 +348,27 @@ class Kernel:
 
         self._game = game
         kernel_logger.info("Reload configuration OK")
+
+    def get_traversable_coordinates(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[typing.Tuple[int, int]]:
+        available_coordinates: typing.List[typing.Tuple[int, int]] = []
+        build_docs = self.build_lib.get_zone_build(world_row_i=world_row_i, world_col_i=world_col_i)
+        not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
+        for build_doc in build_docs:
+            build_description = self.game.config.builds[build_doc.build_id]
+            # TODO: traversable to update here
+            if not build_description.traversable.get(TransportType.WALKING.value, True):
+                not_traversable_by_builds.append((build_doc.zone_row_i, build_doc.zone_col_i))
+
+        geography = self.tile_maps_by_position[world_row_i, world_col_i].source.geography
+        for row_i, row in enumerate(geography.rows):
+            for col_i, map_tile_type in enumerate(row):
+                # TODO: traversable to update here
+                if (
+                    traversable_properties[map_tile_type].get(TransportType.WALKING.value)
+                    and (row_i, col_i) not in not_traversable_by_builds
+                ):
+                    available_coordinates.append((row_i, col_i))
+
+        return available_coordinates
