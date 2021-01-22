@@ -24,7 +24,7 @@ Then activate it in current terminal with:
 
 To install required python packages:
 
-    pip install --upgrade pip setuptools
+    pip install --upgrade pip setuptools wheel
     pip install -r requirements.txt
     python setup.py develop
 
