@@ -15,19 +15,14 @@ from rolling.server.document.resource import ResourceDocument
 @pytest.fixture
 def worldmapc_mock_build_document(worldmapc_kernel: Kernel,) -> BuildDocument:
     kernel = worldmapc_kernel
-    build_document = BuildDocument(
-        id=42,
+    return kernel.build_lib.place_build(
         world_col_i=0,
         world_row_i=0,
         zone_col_i=0,
         zone_row_i=0,
         build_id="TEST_BUILD_1",
-        ap_spent=0.0,
         under_construction=True,
     )
-
-    with mock.patch.object(kernel.build_lib, "get_build_doc", return_value=build_document):
-        yield build_document
 
 
 @pytest.fixture
@@ -60,7 +55,7 @@ class TestBringResourcesOnBuild:
         character_action = character_actions.pop()
         assert (
             "/character/xena/with-build-action/"
-            "BRING_RESOURCE_ON_BUILD/42/ACTION_ID"
+            f"BRING_RESOURCE_ON_BUILD/{build.id}/ACTION_ID"
             "?resource_id=BRANCHES" == character_action.link
         )
         assert (
@@ -95,7 +90,7 @@ class TestBringResourcesOnBuild:
         character_action = character_actions.pop()
         assert (
             "/character/xena/with-build-action/"
-            "BRING_RESOURCE_ON_BUILD/42/ACTION_ID"
+            f"BRING_RESOURCE_ON_BUILD/{build.id}/ACTION_ID"
             "?resource_id=BRANCHES" == character_action.link
         )
         assert (
@@ -132,7 +127,7 @@ class TestBringResourcesOnBuild:
         character_action = character_actions.pop()
         assert (
             "/character/xena/with-build-action/"
-            "BRING_RESOURCE_ON_BUILD/42/ACTION_ID"
+            f"BRING_RESOURCE_ON_BUILD/{build.id}/ACTION_ID"
             "?resource_id=BRANCHES" == character_action.link
         )
         assert (

@@ -21,8 +21,8 @@ class ResourceDocument(Document):
     zone_row_i = Column(Integer, nullable=True)
 
     # properties
-    unit = Column(Enum(*[u.value for u in Unit]), nullable=True)
-    quantity = Column(Numeric(12, 6), nullable=False)
+    unit = Column(Enum(*[u.value for u in Unit], name="resource__unit"), nullable=True)
+    quantity = Column(Numeric(12, 6, asdecimal=False), nullable=False)
 
     # relations
     carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)

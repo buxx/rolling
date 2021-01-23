@@ -49,10 +49,10 @@ class AffinityDocument(Document):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=False, default="")
     join_type = Column(
-        Enum(*[j.value for j in AffinityJoinType]), default=AffinityJoinType.ONE_CHIEF_ACCEPT.value
+        Enum(*[j.value for j in AffinityJoinType], name="join_type"), default=AffinityJoinType.ONE_CHIEF_ACCEPT.value
     )
     direction_type = Column(
-        Enum(*[j.value for j in AffinityDirectionType]),
+        Enum(*[j.value for j in AffinityDirectionType], name="direction_type"),
         default=AffinityDirectionType.ONE_DIRECTOR.value,
     )
     statuses = Column(JSON, nullable=False, default=json.dumps(statuses))
@@ -62,7 +62,7 @@ class AffinityDocument(Document):
 class AffinityRelationDocument(Document):
     __tablename__ = "character_affinity"
     character_id = Column(String(255), ForeignKey("character.id"), primary_key=True)
-    affinity_id = Column(Integer, ForeignKey("character.id"), primary_key=True)
+    affinity_id = Column(Integer, ForeignKey("affinity.id"), primary_key=True)
     request = Column(Boolean, nullable=False, default=False)
     accepted = Column(Boolean, nullable=False, default=False)
     disallowed = Column(Boolean, nullable=False, default=False)  # disallowed by affinity

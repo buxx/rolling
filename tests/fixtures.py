@@ -10,6 +10,7 @@ import serpyco
 import typing
 
 from guilang.description import Description
+from rolling import kernel
 from rolling.kernel import Kernel
 from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
@@ -26,7 +27,7 @@ from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.universe import UniverseStateDocument
-from rolling.server.extension import hapic
+from rolling.server.extension import ServerSideDocument, hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
@@ -64,19 +65,37 @@ def worldmapsourcec_txt() -> str:
         return f.read()
 
 
+def _erase_db(kernel: Kernel) -> Kernel:
+    kernel.init_server_db_session()
+    for table in reversed(ServerSideDocument.metadata.sorted_tables):
+        kernel.server_db_session.execute(table.delete())
+    kernel.server_db_session.commit()
+    for row in kernel.server_db_session.execute(
+        "SELECT c.relname FROM pg_class c WHERE c.relkind = 'S';"
+    ):
+        kernel.server_db_session.execute(f"ALTER SEQUENCE {row[0]} RESTART WITH 1")
+    return kernel
+
+
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
-    return Kernel(worldmapsourcea_txt, loop=loop, server_db_path=":memory:")
+    kernel = _erase_db(Kernel(worldmapsourcea_txt, loop=loop))
+    yield kernel
+    kernel.server_db_session.close()
 
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
+    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop))
+    yield kernel
+    kernel.server_db_session.close()
 
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    return Kernel(worldmapsourceb2_txt, loop=loop, server_db_path=":memory:")
+    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop))
+    yield kernel
+    kernel.server_db_session.close()
 
 
 @pytest.fixture
@@ -85,11 +104,11 @@ def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
         worldmapsourcec_txt,
         tile_maps_folder="tests/src/worldmapc_zones",
         game_config_folder="tests/src/game1",
-        server_db_path=":memory:",
         loop=loop,
     )
-    kernel.init_server_db_session()
-    return kernel
+    _erase_db(kernel)
+    yield kernel
+    kernel.server_db_session.close()
 
 
 @pytest.fixture
@@ -110,6 +129,10 @@ def worldmapc_with_zones_stuff_lib(worldmapc_kernel: Kernel) -> StuffLib:
 
 _default_character_competences = {
     "background_story": "",
+    "thirst": 20.0,
+    "hunger": 20.0,
+    "tiredness": 20.0,
+    "max_action_points": 32.0,
     "max_life_comp": 5.0,
     "life_points": 5.0,
     "hunting_and_collecting_comp": 2.0,

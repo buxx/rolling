@@ -16,37 +16,26 @@ from rolling.server.document.resource import ResourceDocument
 @pytest.fixture
 def worldmapc_mock_build_document(worldmapc_kernel: Kernel,) -> BuildDocument:
     kernel = worldmapc_kernel
-    build_document = BuildDocument(
-        id=42,
+    return kernel.build_lib.place_build(
         world_col_i=0,
         world_row_i=0,
         zone_col_i=0,
         zone_row_i=0,
         build_id="TEST_BUILD_1",
-        ap_spent=0.0,
         under_construction=True,
     )
-
-    with mock.patch.object(kernel.build_lib, "get_build_doc", return_value=build_document):
-        yield build_document
-
 
 @pytest.fixture
 def worldmapc_mock_build_document2(worldmapc_kernel: Kernel,) -> BuildDocument:
     kernel = worldmapc_kernel
-    build_document = BuildDocument(
-        id=43,
+    return kernel.build_lib.place_build(
         world_col_i=0,
         world_row_i=0,
         zone_col_i=0,
         zone_row_i=0,
         build_id="TEST_BUILD_2",
-        ap_spent=0.0,
         under_construction=True,
     )
-
-    with mock.patch.object(kernel.build_lib, "get_build_doc", return_value=build_document):
-        yield build_document
 
 
 @pytest.fixture
@@ -90,7 +79,7 @@ class TestConstructBuildAction:
         assert actions
         assert 1 == len(actions)
         action = actions.pop()
-        assert "/character/xena/with-build-action" "/CONSTRUCT_BUILD/42/ACTION_ID?" == action.link
+        assert f"/character/xena/with-build-action/CONSTRUCT_BUILD/{build.id}/ACTION_ID?" == action.link
         assert "Faire avancer la construction" == action.name
 
     def test__perform_some_hours__build_not_started_no_resources(

@@ -160,8 +160,8 @@ class TestExecuteTurn:
 
         # Then
         xena = kernel.character_lib.get_document(xena.id)
-        assert xena.life_points == after_lp
-        assert xena.thirst == after_thirst
+        assert float(xena.life_points) == after_lp
+        assert float(xena.thirst) == after_thirst
         if after_bottle_filled == 0.0:
             pass
         else:
@@ -206,8 +206,8 @@ class TestExecuteTurn:
 
         # Then
         xena = kernel.character_lib.get_document(xena.id)
-        assert xena.life_points == 1.05
-        assert xena.thirst == 25.0
+        assert float(xena.life_points) == 1.05
+        assert float(xena.thirst) == 25.0
         stuff_doc = kernel.stuff_lib.get_stuff_doc(stuff_doc.id)
         assert stuff_doc.filled_value is None
         stuff_doc2 = kernel.stuff_lib.get_stuff_doc(stuff_doc2.id)
@@ -230,8 +230,8 @@ class TestExecuteTurn:
 
         # Then
         xena = kernel.character_lib.get_document(xena.id)
-        assert xena.life_points == 1.05
-        assert xena.thirst == 20.0
+        assert float(xena.life_points) == 1.05
+        assert float(xena.thirst) == 20.0
 
     # This test depend on game1 config !
     @pytest.mark.parametrize(
@@ -279,7 +279,7 @@ class TestExecuteTurn:
 
         # Then
         xena = kernel.character_lib.get_document(xena.id)
-        assert xena.life_points == after_lp
+        assert float(xena.life_points) == after_lp
         assert xena.hunger == after_hunger
         if after_vegetal_food_quantity == 0.0:
             with pytest.raises(NoCarriedResource):
@@ -311,7 +311,7 @@ class TestExecuteTurn:
 
         # Then
         xena = kernel.character_lib.get_document(xena.id)
-        assert xena.life_points == 1.05
+        assert float(xena.life_points) == 1.05
         assert xena.hunger == 19.75
         with pytest.raises(NoCarriedResource):
             kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
@@ -332,6 +332,6 @@ class TestExecuteTurn:
             turn_lib.execute_turn()
 
         assert kernel.resource_lib.have_resource(
-            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.5
+            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.46
         )
         assert not fake_enable_effect.called

@@ -31,16 +31,16 @@ class StuffDocument(Document):
     zone_row_i = Column(Integer, nullable=True)
 
     # properties
-    filled_value = Column(Numeric(10, 2), nullable=True)
-    filled_unity = Column(Enum(*[u.value for u in Unit]), nullable=True)
+    filled_value = Column(Numeric(10, 2, asdecimal=False), nullable=True)
+    filled_unity = Column(Enum(*[u.value for u in Unit], name="stuff__filled_unity"), nullable=True)
     filled_with_resource = Column(String(255), nullable=True)
-    filled_capacity = Column(Numeric(10, 2), nullable=True)
-    weight = Column(Numeric(10, 2), nullable=True)  # grams
-    clutter = Column(Numeric(10, 2), nullable=True)
+    filled_capacity = Column(Numeric(10, 2, asdecimal=False), nullable=True)
+    weight = Column(Numeric(10, 2, asdecimal=False), nullable=True)  # grams
+    clutter = Column(Numeric(10, 2, asdecimal=False), nullable=True)
 
     # crafting
-    ap_required = Column(Numeric(10, 4), nullable=False, default=0.0)
-    ap_spent = Column(Numeric(10, 4), nullable=False, default=0.0)
+    ap_required = Column(Numeric(10, 4, asdecimal=False), nullable=False, default=0.0)
+    ap_spent = Column(Numeric(10, 4, asdecimal=False), nullable=False, default=0.0)
     under_construction = Column(Boolean(), nullable=False, default=False)
     description = Column(String, nullable=False, default="")
 
@@ -53,7 +53,7 @@ class StuffDocument(Document):
     used_as_weapon_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     used_as_shield_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     used_as_armor_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
-    in_built_id = Column(String(255), ForeignKey("build.id"), nullable=True)
+    in_built_id = Column(Integer(), ForeignKey("build.id"), nullable=True)
     shared_with_affinity_id = Column(Integer, ForeignKey("affinity.id"), nullable=True)
 
     def fill(self, kernel: "Kernel", with_resource: str, add_value: float) -> None:

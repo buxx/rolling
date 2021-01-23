@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Boolean
+from sqlalchemy import Boolean, Numeric
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
@@ -8,7 +8,6 @@ from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 import typing
 
-from rolling.server.document.base import SqliteNumeric
 from rolling.server.document.corpse import CorpseMixin
 from rolling.server.document.resource import ResourceDocument
 from rolling.server.document.stuff import StuffDocument
@@ -22,19 +21,19 @@ class CharacterDocument(CorpseMixin, Document):
 
     # role play characteristics
     background_story = Column(Text, nullable=False, default="")
-    max_life_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
-    hunting_and_collecting_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
-    find_water_comp = Column(SqliteNumeric(10, 2), nullable=False, default=1.0)
+    max_life_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
+    hunting_and_collecting_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
+    find_water_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
     # percent of injured/died fighter before retreat
     attack_allowed_loss_rate = Column(Integer, nullable=False, default=30)
     defend_allowed_loss_rate = Column(Integer, nullable=False, default=30)
 
     # role game play
-    action_points = Column(SqliteNumeric(10, 2), nullable=False)
-    max_action_points = Column(SqliteNumeric(10, 2), nullable=False)
-    life_points = Column(SqliteNumeric(10, 2), default=1.0)
-    thirst = Column(SqliteNumeric(10, 2), nullable=False)
-    hunger = Column(SqliteNumeric(10, 2), nullable=False)
+    action_points = Column(Numeric(10, 2, asdecimal=False), nullable=False)
+    max_action_points = Column(Numeric(10, 2, asdecimal=False), nullable=False)
+    life_points = Column(Numeric(10, 2, asdecimal=False), default=1.0)
+    thirst = Column(Numeric(10, 2, asdecimal=False), nullable=False)
+    hunger = Column(Numeric(10, 2, asdecimal=False), nullable=False)
     _effect_ids = Column(Text, default="")
     tiredness = Column(Integer, nullable=False, default=0)  # %
 

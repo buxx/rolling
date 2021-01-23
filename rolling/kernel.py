@@ -59,7 +59,6 @@ class Kernel:
         tile_maps_folder: typing.Optional[str] = None,
         game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
-        server_db_path: str = "server.db",
     ) -> None:
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
@@ -74,7 +73,6 @@ class Kernel:
 
         # Database stuffs
         self._client_db_path = client_db_path
-        self._server_db_path = server_db_path
 
         self._client_db_session: typing.Optional[Session] = None
         self._client_db_engine: typing.Optional[Engine] = None
@@ -315,8 +313,8 @@ class Kernel:
         ClientSideDocument.metadata.create_all(self._client_db_engine)
 
     def init_server_db_session(self) -> None:
-        kernel_logger.info('Initialize database connection to "server.db"')
-        self._server_db_engine = create_engine(f"sqlite:///{self._server_db_path}")
+        kernel_logger.info('Initialize database connection to server database')
+        self._server_db_engine = create_engine("postgresql+psycopg2://rolling:rolling@127.0.0.1:5432/rolling")
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
 

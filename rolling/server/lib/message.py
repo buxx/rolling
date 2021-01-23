@@ -1,4 +1,5 @@
 # coding: utf-8
+from sqlalchemy import String, cast
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -207,7 +208,7 @@ class MessageLib:
         )
 
         if with_character_id:
-            query = query.filter(MessageDocument.concerned.contains(with_character_id))
+            query = query.filter(cast(MessageDocument.concerned, String).contains(with_character_id))
 
         return query
 
@@ -283,7 +284,7 @@ class MessageLib:
             self._kernel.server_db_session.query(
                 MessageDocument.first_message, MessageDocument.concerned, MessageDocument.subject
             )
-            .filter(MessageDocument.concerned.contains(character.id))
+            .filter(cast(MessageDocument.concerned, String).contains(character.id))
             .filter(MessageDocument.first_message != None)
             .filter(MessageDocument.is_first_message == True)
             .distinct(MessageDocument.first_message)
