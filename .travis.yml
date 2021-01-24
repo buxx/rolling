@@ -8,5 +8,6 @@ python:
 install:
   - "python setup.py develop"
   - "pip install -e '.[dev]'"
-  - "./install_database.sh"
+before_script:
+  - psql -c 'create database rolling;' -U postgres
 script: pytest tests --disable-pytest-warnings
