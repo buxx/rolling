@@ -1,9 +1,12 @@
 language: python
 dist: xenial
+services:
+  - postgresql
 python:
   - "3.7"
 #  - "3.8"
 install:
   - "python setup.py develop"
   - "pip install -e '.[dev]'"
+  - "./install_database.sh"
 script: pytest tests --disable-pytest-warnings
