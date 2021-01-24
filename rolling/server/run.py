@@ -60,7 +60,6 @@ def run(args: argparse.Namespace) -> None:
         args.world_map_source,
         args.tile_maps_folder,
         args.game_config_folder,
-        server_db_path=args.server_db_path,
     )
     server_logger.info("Create web application")
     app = get_application(kernel)

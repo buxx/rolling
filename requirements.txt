@@ -50,3 +50,4 @@ MarkupSafe==1.1.1
 aiohttp-jinja2==1.4.2
 jinja2==2.11.2
 aiohttp-basicauth-middleware==1.1.2
+psycopg2==2.8.6

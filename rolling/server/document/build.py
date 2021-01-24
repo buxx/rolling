@@ -1,12 +1,9 @@
 # coding: utf-8
 from sqlalchemy import Boolean
 from sqlalchemy import Column
-from sqlalchemy import Enum
-from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
-import typing
 
 from rolling.server.extension import ServerSideDocument as Document
 
@@ -20,5 +17,5 @@ class BuildDocument(Document):
     zone_row_i = Column(Integer, nullable=False)
 
     build_id = Column(String(255), nullable=False)
-    ap_spent = Column(Numeric(10, 4), nullable=False, default=0.0)
+    ap_spent = Column(Numeric(10, 4, asdecimal=False), nullable=False, default=0.0)
     under_construction = Column(Boolean(), nullable=False, default=True)
