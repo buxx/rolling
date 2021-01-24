@@ -10,7 +10,7 @@ A python3.7+ is required. If you use debian, debian 10 is required if you want t
 
 Following documentation assume you use debian 10 or similar OS. You will need:
 
-    apt-get install git python3 python3-venv build-essential python3-dev
+    apt-get install git python3 python3-venv build-essential python3-dev postgresql postgresql-server-dev-9.6
 
 ## Python environment require
 
