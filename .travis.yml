@@ -9,5 +9,7 @@ install:
   - "python setup.py develop"
   - "pip install -e '.[dev]'"
 before_script:
-  - psql -c 'create database rolling;' -U postgres
+  - psql -c 'CREATE DATABASE rolling;' -U postgres
+  - psql -c "CREATE USER rolling WITH PASSWORD 'rolling';" -U postgres
+  - psql -c 'GRANT ALL PRIVILEGES ON DATABASE rolling TO rolling;' -U postgres
 script: pytest tests --disable-pytest-warnings
