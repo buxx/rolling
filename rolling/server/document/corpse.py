@@ -12,6 +12,10 @@ from rolling.server.extension import ServerSideDocument as Document
 class AnimatedCorpseType(enum.Enum):
     CHARACTER = "CHARACTER"
     HARE = "HARE"
+    PIG = "PIG"
+    CRAB = "CRAB"
+    MOORHEN = "MOORHEN"
+    GOAT = "GOAT"
 
 
 class CorpseMixin:
