@@ -16,6 +16,8 @@ from rolling.model.event import NewChatMessageData
 from rolling.model.event import PlayerMoveData
 from rolling.model.event import RequestChatData
 from rolling.model.event import ThereIsAroundData
+from rolling.model.event import TopBarMessageData
+from rolling.model.event import TopBarMessageType
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
@@ -188,8 +190,21 @@ class ClickActionProcessor(EventProcessor):
             action.check_request_is_possible(character, input_)
             zone_events, sender_events = action.perform_from_event(character, input_)
         except ImpossibleAction as exc:
-            # TODO BS: send event error
-            server_logger.error(f"impossible action {build_description_id}: {str(exc)}")
+            await sender_socket.send_str(
+                self._kernel.event_serializer_factory.get_serializer(
+                    ZoneEventType.TOP_BAR_MESSAGE
+                ).dump_json(
+                    WebSocketEvent(
+                        type=ZoneEventType.TOP_BAR_MESSAGE,
+                        world_row_i=row_i,
+                        world_col_i=col_i,
+                        data=TopBarMessageData(
+                            message=str(exc),
+                            type_=TopBarMessageType.ERROR,
+                        ),
+                    )
+                )
+            )
             return
 
         for event in zone_events:

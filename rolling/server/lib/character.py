@@ -1124,12 +1124,14 @@ class CharacterLib:
     def increase_skill(
         self, character_id: str, skill_id: str, increment: int, commit: bool = True
     ) -> None:
-        skill_doc: CharacterSkillDocument = self._kernel.server_db_session.query(
-            CharacterSkillDocument
-        ).filter(
-            CharacterSkillDocument.character_id == character_id,
-            CharacterSkillDocument.skill_id == skill_id,
-        ).one()
+        skill_doc: CharacterSkillDocument = (
+            self._kernel.server_db_session.query(CharacterSkillDocument)
+            .filter(
+                CharacterSkillDocument.character_id == character_id,
+                CharacterSkillDocument.skill_id == skill_id,
+            )
+            .one()
+        )
         skill_doc.counter += increment
         skill_doc.value = math.log(skill_doc.counter, DEFAULT_LOG_BASE)
 

@@ -27,7 +27,8 @@ from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.universe import UniverseStateDocument
-from rolling.server.extension import ServerSideDocument, hapic
+from rolling.server.extension import ServerSideDocument
+from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib

@@ -1,8 +1,9 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Numeric
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
+from sqlalchemy import Numeric
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
@@ -22,7 +23,9 @@ class CharacterDocument(CorpseMixin, Document):
     # role play characteristics
     background_story = Column(Text, nullable=False, default="")
     max_life_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
-    hunting_and_collecting_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
+    hunting_and_collecting_comp = Column(
+        Numeric(10, 2, asdecimal=False), nullable=False, default=1.0
+    )
     find_water_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
     # percent of injured/died fighter before retreat
     attack_allowed_loss_rate = Column(Integer, nullable=False, default=30)

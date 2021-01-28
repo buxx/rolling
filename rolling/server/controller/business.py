@@ -627,29 +627,35 @@ class BusinessController(BaseController):
             )
 
         if editing:
-            parts: typing.List[Part] = [
-                Part(text="Eléments que vous demandez"),
-                Part(
-                    name="request_operand",
-                    choices=[ONE_OF_THEM, ALL_OF_THEM],
-                    value=operand_enum_to_str[OfferOperand(offer.request_operand)],
-                ),
-            ] + request_item_parts + [
-                Part(text="Eléments que vous donnez"),
-                Part(
-                    name="offer_operand",
-                    choices=[ONE_OF_THEM, ALL_OF_THEM],
-                    value=operand_enum_to_str[OfferOperand(offer.offer_operand)],
-                ),
-            ] + offer_item_parts
+            parts: typing.List[Part] = (
+                [
+                    Part(text="Eléments que vous demandez"),
+                    Part(
+                        name="request_operand",
+                        choices=[ONE_OF_THEM, ALL_OF_THEM],
+                        value=operand_enum_to_str[OfferOperand(offer.request_operand)],
+                    ),
+                ]
+                + request_item_parts
+                + [
+                    Part(text="Eléments que vous donnez"),
+                    Part(
+                        name="offer_operand",
+                        choices=[ONE_OF_THEM, ALL_OF_THEM],
+                        value=operand_enum_to_str[OfferOperand(offer.offer_operand)],
+                    ),
+                ]
+                + offer_item_parts
+            )
         else:
             request_operand_str = operand_enum_to_str[OfferOperand(offer.request_operand)]
             offer_operand_str = operand_enum_to_str[OfferOperand(offer.offer_operand)]
-            parts: typing.List[Part] = [
-                Part(text=f"Eléments demandé(s) ({request_operand_str})")
-            ] + request_item_parts + [
-                Part(text=f"Eléments donné(s) ({offer_operand_str})")
-            ] + offer_item_parts
+            parts: typing.List[Part] = (
+                [Part(text=f"Eléments demandé(s) ({request_operand_str})")]
+                + request_item_parts
+                + [Part(text=f"Eléments donné(s) ({offer_operand_str})")]
+                + offer_item_parts
+            )
 
         return parts
 

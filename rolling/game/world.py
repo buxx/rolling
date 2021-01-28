@@ -97,7 +97,7 @@ class WorldManager:
         raise RollingError(f"No zone properties for zone {zone_type}")
 
     def get_generation_stuff_by_zone_type(
-        self
+        self,
     ) -> typing.Dict[typing.Type[MapTileType], typing.List["ZoneGenerationStuff"]]:
         generation_stuff_by_zone_type = {}
         for zone_property in self.world.zones_properties:
@@ -107,7 +107,7 @@ class WorldManager:
         return generation_stuff_by_zone_type
 
     def get_zone_properties_by_zone_type(
-        self
+        self,
     ) -> typing.Dict[typing.Type[MapTileType], ZoneProperties]:
         return dict(((zp.zone_type, zp) for zp in self._world.zones_properties))
 

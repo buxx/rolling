@@ -90,7 +90,9 @@ class TransferStuffOrResources(abc.ABC):
     def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
         return resource.name
 
-    def _get_choose_something_description(self,) -> Description:
+    def _get_choose_something_description(
+        self,
+    ) -> Description:
         parts = []
         carried_stuffs = self._get_available_stuffs()
         carried_resources = self._get_available_resources()

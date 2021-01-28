@@ -128,7 +128,10 @@ class SearchMaterialAction(CharacterAction):
                 resource_id, check_from_absolute=False, check_from_tiles=True
             ):
                 zone_geography = zone_state.zone_map.source.geography
-                extract_from_row_i, extract_from_col_i = zone_geography.get_random_tile_position_containing_resource(
+                (
+                    extract_from_row_i,
+                    extract_from_col_i,
+                ) = zone_geography.get_random_tile_position_containing_resource(
                     resource_id, self._kernel
                 )
                 zone_state.reduce_resource_from_tile(

@@ -208,7 +208,7 @@ def get_corner(
 
 
 def filter_action_links(
-    links: typing.List[CharacterActionLink]
+    links: typing.List[CharacterActionLink],
 ) -> typing.List[CharacterActionLink]:
     new_links: typing.List[CharacterActionLink] = []
     found_merge_type: typing.List[typing.Any] = []

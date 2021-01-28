@@ -345,9 +345,11 @@ class StuffLib:
 
     # FIXME: exclude crafting stuff
     def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_bag_by_id = character_id
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -357,9 +359,11 @@ class StuffLib:
     # FIXME: exclude crafting stuff
     def set_as_used_as_weapon(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_weapon_by_id = character_id
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -369,9 +373,11 @@ class StuffLib:
     # FIXME: exclude crafting stuff
     def set_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_armor_by_id = character_id
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -381,9 +387,11 @@ class StuffLib:
     # FIXME: exclude crafting stuff
     def set_as_used_as_shield(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_shield_by_id = character_id
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -391,9 +399,11 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def unset_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_bag_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -403,9 +413,11 @@ class StuffLib:
     def unset_as_used_as_weapon(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_weapon_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -415,9 +427,11 @@ class StuffLib:
     def unset_as_used_as_shield(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_shield_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 
@@ -425,9 +439,11 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def unset_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
-        stuff_doc: StuffDocument = self._kernel.server_db_session.query(StuffDocument).filter(
-            StuffDocument.id == stuff_id
-        ).one()
+        stuff_doc: StuffDocument = (
+            self._kernel.server_db_session.query(StuffDocument)
+            .filter(StuffDocument.id == stuff_id)
+            .one()
+        )
         stuff_doc.used_as_armor_by_id = None
         self._kernel.server_db_session.add(stuff_doc)
 

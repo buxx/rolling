@@ -691,13 +691,15 @@ class AffinityController(BaseController):
         relation = self._kernel.affinity_lib.get_character_relation(
             affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
         )
-        requests: typing.List[AffinityRelationDocument] = self._kernel.server_db_session.query(
-            AffinityRelationDocument
-        ).filter(
-            AffinityRelationDocument.affinity_id == affinity.id,
-            AffinityRelationDocument.accepted == False,
-            AffinityRelationDocument.request == True,
-        ).all()
+        requests: typing.List[AffinityRelationDocument] = (
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.accepted == False,
+                AffinityRelationDocument.request == True,
+            )
+            .all()
+        )
 
         data = {}
         try:

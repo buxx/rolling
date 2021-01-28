@@ -49,7 +49,8 @@ class AffinityDocument(Document):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=False, default="")
     join_type = Column(
-        Enum(*[j.value for j in AffinityJoinType], name="join_type"), default=AffinityJoinType.ONE_CHIEF_ACCEPT.value
+        Enum(*[j.value for j in AffinityJoinType], name="join_type"),
+        default=AffinityJoinType.ONE_CHIEF_ACCEPT.value,
     )
     direction_type = Column(
         Enum(*[j.value for j in AffinityDirectionType], name="direction_type"),

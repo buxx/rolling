@@ -23,6 +23,7 @@ class ZoneEventType(Enum):
     REQUEST_CHAT = "REQUEST_CHAT"
     NEW_CHAT_MESSAGE = "NEW_CHAT_MESSAGE"
     ANIMATED_CORPSE_MOVE = "ANIMATED_CORPSE_MOVE"
+    TOP_BAR_MESSAGE = "TOP_BAR_MESSAGE"
 
 
 T = typing.TypeVar("T")
@@ -73,6 +74,17 @@ class ThereIsAroundData(WebSocketEventData):
     resource_count: int
     build_count: int
     character_count: int
+
+
+class TopBarMessageType(Enum):
+    NORMAL = "NORMAL"
+    ERROR = "ERROR"
+
+
+@dataclasses.dataclass
+class TopBarMessageData(WebSocketEventData):
+    message: str
+    type_: TopBarMessageType
 
 
 @dataclasses.dataclass
@@ -164,6 +176,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.REQUEST_CHAT: RequestChatData,
     ZoneEventType.NEW_CHAT_MESSAGE: NewChatMessageData,
     ZoneEventType.ANIMATED_CORPSE_MOVE: AnimatedCorpseMoveData,
+    ZoneEventType.TOP_BAR_MESSAGE: TopBarMessageData,
 }
 
 

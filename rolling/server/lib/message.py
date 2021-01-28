@@ -1,5 +1,6 @@
 # coding: utf-8
-from sqlalchemy import String, cast
+from sqlalchemy import String
+from sqlalchemy import cast
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -74,8 +75,10 @@ class MessageLib:
         zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=zone_row_i, col_i=zone_col_i
         )
-        active_zone_characters_ids = self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
-            author_doc.world_row_i, author_doc.world_col_i
+        active_zone_characters_ids = (
+            self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
+                author_doc.world_row_i, author_doc.world_col_i
+            )
         )
         zone_characters_ids = [c.id for c in zone_characters]
         for zone_character in zone_characters:
@@ -125,8 +128,10 @@ class MessageLib:
         author_doc = self._kernel.character_lib.get_document(author_id)
         concerned = [author_id] + concerned
         messages = []
-        active_zone_characters_ids = self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
-            author_doc.world_row_i, author_doc.world_col_i
+        active_zone_characters_ids = (
+            self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
+                author_doc.world_row_i, author_doc.world_col_i
+            )
         )
         for character_id in set(concerned):
             message_obj = MessageDocument(
@@ -208,7 +213,9 @@ class MessageLib:
         )
 
         if with_character_id:
-            query = query.filter(cast(MessageDocument.concerned, String).contains(with_character_id))
+            query = query.filter(
+                cast(MessageDocument.concerned, String).contains(with_character_id)
+            )
 
         return query
 

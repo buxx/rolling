@@ -40,7 +40,9 @@ class OfferItemDocument(Document):
     __tablename__ = "offer_item"
     id = Column(Integer, autoincrement=True, primary_key=True)
     offer_id = Column(Integer, ForeignKey("offer.id"))
-    position = Column(Enum(*[p.value for p in OfferItemPosition], name="offer_item__position"), nullable=False)
+    position = Column(
+        Enum(*[p.value for p in OfferItemPosition], name="offer_item__position"), nullable=False
+    )
     resource_id = Column(String(255), nullable=True)
     stuff_id = Column(String(255), nullable=True)
     quantity = Column(Numeric(12, 6, asdecimal=False), nullable=False, default=0.0)
@@ -69,15 +71,21 @@ class OfferDocument(Document):
     title = Column(String(255), nullable=False)
     read = Column(Boolean, default=False)
     request_operand = Column(
-        Enum(*[o.value for o in OfferOperand], name="request_operand"), nullable=False, default=OfferOperand.OR.value
+        Enum(*[o.value for o in OfferOperand], name="request_operand"),
+        nullable=False,
+        default=OfferOperand.OR.value,
     )
     offer_operand = Column(
-        Enum(*[o.value for o in OfferOperand], name="offer_operand"), nullable=False, default=OfferOperand.OR.value
+        Enum(*[o.value for o in OfferOperand], name="offer_operand"),
+        nullable=False,
+        default=OfferOperand.OR.value,
     )
     permanent = Column(Boolean, nullable=False, default=False)
     with_character_id = Column(String(255), ForeignKey("character.id"))
     status = Column(
-        Enum(*[s.value for s in OfferStatus], name="status"), nullable=False, default=OfferStatus.DRAFT.value
+        Enum(*[s.value for s in OfferStatus], name="status"),
+        nullable=False,
+        default=OfferStatus.DRAFT.value,
     )
 
     from_character = relationship(

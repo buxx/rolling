@@ -20,6 +20,7 @@ def run(args: argparse.Namespace) -> None:
     if args.sentry:
         import sentry_sdk
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
         sentry_sdk.init(dsn=args.sentry, integrations=[SqlalchemyIntegration()])
 
     kernel = get_kernel(args.world_map_source, args.tile_maps_folder, args.game_config_folder)

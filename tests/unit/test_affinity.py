@@ -243,12 +243,14 @@ class TestAffinity:
         resp = await web.post(f"/affinity/{arthur.id}/edit-relation/{affinity.id}?request=1")
         assert 200 == resp.status
 
-        arthur_relation: AffinityRelationDocument = kernel.server_db_session.query(
-            AffinityRelationDocument
-        ).filter(
-            AffinityRelationDocument.affinity_id == affinity.id,
-            AffinityRelationDocument.character_id == arthur.id,
-        ).one()
+        arthur_relation: AffinityRelationDocument = (
+            kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.character_id == arthur.id,
+            )
+            .one()
+        )
         assert not arthur_relation.accepted
 
     @pytest.mark.parametrize("fighter", [True, False])
@@ -627,12 +629,14 @@ class TestAffinity:
         descr = descr_serializer.load(await resp.json())
         assert not descr.items[0].items
 
-        arthur_relation: AffinityRelationDocument = kernel.server_db_session.query(
-            AffinityRelationDocument
-        ).filter(
-            AffinityRelationDocument.affinity_id == affinity.id,
-            AffinityRelationDocument.character_id == arthur.id,
-        ).one()
+        arthur_relation: AffinityRelationDocument = (
+            kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(
+                AffinityRelationDocument.affinity_id == affinity.id,
+                AffinityRelationDocument.character_id == arthur.id,
+            )
+            .one()
+        )
         assert accept == arthur_relation.accepted
         assert not arthur_relation.request
 

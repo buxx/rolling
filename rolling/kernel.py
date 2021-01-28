@@ -62,9 +62,9 @@ class Kernel:
     ) -> None:
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
-        self._world_map_source: typing.Optional[WorldMapSource] = WorldMapSource(
-            self, world_map_str
-        ) if world_map_str else None
+        self._world_map_source: typing.Optional[WorldMapSource] = (
+            WorldMapSource(self, world_map_str) if world_map_str else None
+        )
         # TODO: rename in zone
         self._tile_maps_by_position: typing.Optional[
             typing.Dict[typing.Tuple[int, int], ZoneMap]
@@ -313,8 +313,10 @@ class Kernel:
         ClientSideDocument.metadata.create_all(self._client_db_engine)
 
     def init_server_db_session(self) -> None:
-        kernel_logger.info('Initialize database connection to server database')
-        self._server_db_engine = create_engine("postgresql+psycopg2://rolling:rolling@127.0.0.1:5432/rolling")
+        kernel_logger.info("Initialize database connection to server database")
+        self._server_db_engine = create_engine(
+            "postgresql+psycopg2://rolling:rolling@127.0.0.1:5432/rolling"
+        )
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)
 

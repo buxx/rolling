@@ -13,7 +13,9 @@ from rolling.server.document.resource import ResourceDocument
 
 
 @pytest.fixture
-def worldmapc_mock_build_document(worldmapc_kernel: Kernel,) -> BuildDocument:
+def worldmapc_mock_build_document(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
     kernel = worldmapc_kernel
     return kernel.build_lib.place_build(
         world_col_i=0,

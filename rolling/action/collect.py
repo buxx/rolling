@@ -113,9 +113,9 @@ class CollectResourceAction(CharacterAction):
         extractable_resources: typing.Dict[
             str, ExtractableResourceDescriptionModel
         ] = self._kernel.game.config.extractions[tile_type.id].resources
-        resource_extraction_description: ExtractableResourceDescriptionModel = extractable_resources[
-            input_.resource_id
-        ]
+        resource_extraction_description: ExtractableResourceDescriptionModel = (
+            extractable_resources[input_.resource_id]
+        )
         resource: ResourceDescriptionModel = self._kernel.game.config.resources[input_.resource_id]
         # TODO BS 2019-08-29: cost per unit modified by competence / stuff
         cost_per_unit = resource_extraction_description.cost_per_unit

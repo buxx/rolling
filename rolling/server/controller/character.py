@@ -641,8 +641,10 @@ class CharacterController(BaseController):
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character_id=character.id
         ):
-            count_things_shared_withs += self._kernel.affinity_lib.count_things_shared_with_affinity(
-                character_id=character.id, affinity_id=affinity_relation.affinity_id
+            count_things_shared_withs += (
+                self._kernel.affinity_lib.count_things_shared_with_affinity(
+                    character_id=character.id, affinity_id=affinity_relation.affinity_id
+                )
             )
 
         if count_things_shared_withs:

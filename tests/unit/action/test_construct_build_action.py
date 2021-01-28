@@ -14,7 +14,9 @@ from rolling.server.document.resource import ResourceDocument
 
 
 @pytest.fixture
-def worldmapc_mock_build_document(worldmapc_kernel: Kernel,) -> BuildDocument:
+def worldmapc_mock_build_document(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
     kernel = worldmapc_kernel
     return kernel.build_lib.place_build(
         world_col_i=0,
@@ -25,8 +27,11 @@ def worldmapc_mock_build_document(worldmapc_kernel: Kernel,) -> BuildDocument:
         under_construction=True,
     )
 
+
 @pytest.fixture
-def worldmapc_mock_build_document2(worldmapc_kernel: Kernel,) -> BuildDocument:
+def worldmapc_mock_build_document2(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
     kernel = worldmapc_kernel
     return kernel.build_lib.place_build(
         world_col_i=0,
@@ -79,7 +84,10 @@ class TestConstructBuildAction:
         assert actions
         assert 1 == len(actions)
         action = actions.pop()
-        assert f"/character/xena/with-build-action/CONSTRUCT_BUILD/{build.id}/ACTION_ID?" == action.link
+        assert (
+            f"/character/xena/with-build-action/CONSTRUCT_BUILD/{build.id}/ACTION_ID?"
+            == action.link
+        )
         assert "Faire avancer la construction" == action.name
 
     def test__perform_some_hours__build_not_started_no_resources(

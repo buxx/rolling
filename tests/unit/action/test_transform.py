@@ -10,7 +10,9 @@ from rolling.rolling_types import ActionType
 
 
 @pytest.fixture
-def transform_rtr_action(worldmapc_kernel: Kernel,) -> TransformResourcesIntoResourcesAction:
+def transform_rtr_action(
+    worldmapc_kernel: Kernel,
+) -> TransformResourcesIntoResourcesAction:
     return typing.cast(
         TransformResourcesIntoResourcesAction,
         worldmapc_kernel.action_factory.create_action(

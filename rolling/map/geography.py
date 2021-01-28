@@ -70,7 +70,7 @@ class MapGeography:
 
     @property
     def tile_type_positions(
-        self
+        self,
     ) -> typing.Dict[typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]]:
         return self._tile_type_positions
 
