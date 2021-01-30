@@ -514,7 +514,7 @@ class BuildAction(CharacterAction):
         return Description(
             request_clicks=RequestClicks(
                 base_url=self.get_base_url(character),
-                cursor_classes=build_description.classes,
+                cursor_classes=build_description.classes + [build_id],
                 many=build_description.many,
             )
         )
