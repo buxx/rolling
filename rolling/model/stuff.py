@@ -41,6 +41,7 @@ class StuffProperties:
     damages: float = 0.0
     classes: typing.List[str] = serpyco.field(default_factory=list)
     skills_bonus: typing.List[str] = serpyco.field(default_factory=list)
+    illustration: typing.Optional[str] = None
 
     def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
         for ability in abilities:
@@ -84,6 +85,7 @@ class StuffModel:
     damages: float = 0.0
     classes: typing.List[str] = serpyco.field(default_factory=list)
     used_by: typing.Optional[str] = None
+    illustration: typing.Optional[str] = None
 
     @property
     def ready_for_use(self) -> bool:

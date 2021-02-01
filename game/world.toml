@@ -1,5 +1,6 @@
 [ZONE_PROPERTIES]
   [ZONE_PROPERTIES.BEACH]
+    illustration = "beach.png"
     move_cost = 4.0
     description = """Sur une plage, vous devriez trouver des crustacés. Ainsi que des poissons si vous avez de quoi les attraper."""
 
@@ -33,6 +34,7 @@
         regeneration = 1.0
 
   [ZONE_PROPERTIES.PLAIN]
+    illustration = "plain.png"
     move_cost = 4.0
     description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits, des graminés et de la fibre végétale."""
 
@@ -91,6 +93,7 @@
       count = 0
 
   [ZONE_PROPERTIES.MOUNTAIN]
+    illustration = "mountain.png"
     move_cost = 8.0
     description = "En montagne, vous devriez pouvoir trouver des animaux de petit et moyen gabarits."
 
@@ -127,6 +130,7 @@
       count = 0
 
   [ZONE_PROPERTIES.JUNGLE]
+    illustration = "jungle.png"
     move_cost = 8.0
     description = """Dans la jungle, vous devriez pouvoir trouver des fruits et baies en tout genre, des animaux de moyen et gros gabarits et de la fibre végétale."""
 
@@ -175,6 +179,7 @@
       count = 0
 
   [ZONE_PROPERTIES.HILL]
+    illustration = "hill.png"
     move_cost = 5.0
     description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des graminés et de la fibre végétale."""
 

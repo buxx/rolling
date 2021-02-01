@@ -245,6 +245,7 @@ class StuffLib:
                 or doc.used_as_bag_by_id
                 or doc.used_as_armor_by_id
             ),
+            illustration=stuff_properties.illustration,
         )
 
     def get_carried_by(

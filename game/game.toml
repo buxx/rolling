@@ -219,6 +219,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "fresh_water.png"
 
   [resources.SALTED_WATER]
     name = "Eau salée"
@@ -227,6 +228,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "salted_water.png"
 
   [resources.WINE]
     name = "Vin"
@@ -243,6 +245,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "sand.png"
 
   [resources.DIRT]
     name = "Terre"
@@ -260,6 +263,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
+    illustration = "mud.png"
 
   [resources.WOOD]
     name = "Bois"
@@ -268,6 +272,7 @@ max_action_propose_turns = 3
     unit = "M3"
     clutter = 500.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
+    illustration = "wood.png"
 
   [resources.VEGETAL_FOOD_FRESH]
     name = "Nourriture végétale fraiche"
@@ -276,6 +281,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "fruits.png"
 
   [resources.SHELLFISH_FRESH]
     name = "Fruits de mers frais"
@@ -284,6 +290,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "shellfish.png"
 
   [resources.RAW_MEAT]
     name = "Viande crue"
@@ -292,6 +299,7 @@ max_action_propose_turns = 3
     unit = "G"
     clutter = 0.0005
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "meat.png"
 
   [resources.COOKED_MEAT]
     name = "Viande cuite"
@@ -300,6 +308,7 @@ max_action_propose_turns = 3
     unit = "G"
     clutter = 0.0005
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "cooked_meat.png"
 
   [resources.SMOKED_MEAT]
     name = "Viande fumée"

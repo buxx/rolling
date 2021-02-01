@@ -151,18 +151,21 @@
   sharp = 10
   damages = 1.0
   classes = ["WEAPON", "HAXE"]
+  illustration = "stone_axe.png"
 [HARE]
   name = "Lièvre"
   weight = 3500.0
   clutter = 1.2
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "RABBIT"]
+  illustration = "hare.png"
 [PHEASANT]
   name = "Faisan"
   weight = 1500.0
   clutter = 1.0
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
+  illustration = "pheasant.png"
 [RABBIT]
   name = "Lapin"
   weight = 2700.0
@@ -187,6 +190,7 @@
   clutter = 0.5
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "BIRD"]
+  illustration = "moorhen.png"
 [RAVEN]
   name = "Corbeau"
   weight = 650.0
@@ -211,12 +215,14 @@
   clutter = 10.0
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
+  illustration = "boar.png"
 [DEER]
   name = "Chevreuil"
   weight = 18000.0
   clutter = 10.0
   actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_RESOURCES"]
   classes = ["ANIMAL", "MEDIUM_HERBIVORE"]
+  illustration = "deer.png"
 [LITTLE_STATUETTE]
   name = "Petite statuette"
   weight = 700.0

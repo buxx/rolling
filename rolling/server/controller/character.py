@@ -1310,6 +1310,7 @@ class CharacterController(BaseController):
         )
         return Description(
             title=stuff.get_name_and_light_description(self._kernel),
+            illustration_name=stuff.illustration,
             items=[
                 Part(
                     text=action.get_as_str(),

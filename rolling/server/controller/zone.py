@@ -192,6 +192,7 @@ class ZoneController(BaseController):
 
         return Description(
             title=tile_type.get_name(),
+            illustration_name=zone_properties.illustration,
             items=[
                 Part(text=f"Vous vous trouvez sur {tile_type.get_name()}."),
                 Part(text=zone_properties.description),

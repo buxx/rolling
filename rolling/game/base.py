@@ -424,6 +424,11 @@ class Game:
 
             if "actions" in full_info:
                 del full_info["actions"]
+
+            illustration: str = full_info.get("illustration", None)
+            if illustration:
+                generate_background_media(illustration, self._config.folder_path)
+
             items.append(StuffProperties(**full_info))
 
         return StuffManager(self._kernel, items)
@@ -440,6 +445,11 @@ class Game:
             stuffs = list(self._get_zone_stuffs(zone_data))
 
             world_map_tile_type = WorldMapTileType.get_for_id(zone_type_str)
+
+            illustration = zone_data.get("illustration", None)
+            if illustration:
+                generate_background_media(illustration, self.config.folder_path)
+
             zones_properties.append(
                 ZoneProperties(
                     world_map_tile_type,
@@ -449,6 +459,7 @@ class Game:
                     stuffs=stuffs,
                     description=zone_data.get("description", ""),
                     require_transport_type=world_map_tile_type.require_transport_type,
+                    illustration=illustration,
                 )
             )
 
@@ -470,6 +481,7 @@ class Game:
             self._kernel,
             World(zones_properties=zones_properties, tiles_properties=tiles_properties),
         )
+
 
     def _get_generation_info(self, zone_data: dict) -> GenerationInfo:
         generation_data = zone_data["GENERATION"]

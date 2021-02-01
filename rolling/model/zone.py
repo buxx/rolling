@@ -91,6 +91,7 @@ class ZoneProperties:
     stuffs: typing.List[ZoneStuff]
     description: str
     require_transport_type: typing.List[TransportType] = serpyco.field(default_factory=list)
+    illustration: typing.Optional[str] = None
 
     @property
     def resource_ids(self) -> typing.Iterator[str]:
