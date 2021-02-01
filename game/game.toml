@@ -310,13 +310,14 @@ max_action_propose_turns = 3
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "cooked_meat.png"
 
-  [resources.SMOKED_MEAT]
-    name = "Viande fumée"
+  [resources.DRIED_MEAT]
+    name = "Viande séché"
     weight=1.0
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.0004
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "dried_meat.png"
 
   [resources.ANIMAL_SKIN]
     name = "Peau animale"
@@ -476,9 +477,9 @@ max_action_propose_turns = 3
     character_effects = []
     cost = 0.0
 
-  [ACTIONS.EAT_SMOKED_MEAT]
+  [ACTIONS.EAT_DRIED_MEAT]
     actions = ["EAT_RESOURCE"]
-    accept_resources = ["SMOKED_MEAT"]
+    accept_resources = ["DRIED_MEAT"]
     consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
     character_effects = []
     cost = 0.0
@@ -865,8 +866,8 @@ max_action_propose_turns = 3
     ]
     cost = 6.0
 
-  [ACTIONS.MAKE_SMOKED_MEAT]
-    name = "Faire de la viande fumée"
+  [ACTIONS.MAKE_DRIED_MEAT]
+    name = "Faire de la viande séché"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -875,10 +876,10 @@ max_action_propose_turns = 3
     required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
     required_all_ability_ids = []
     produce = [
-      {resource="SMOKED_MEAT", coeff=0.9}
+      {resource="DRIED_MEAT", coeff=0.4}
     ]
     required_resource_id = "RAW_MEAT"
-    cost_per_unit = 0.0001
+    cost_per_unit = 0.0005
     cost = 3.0
 
   [ACTIONS.MAKE_BREAD]

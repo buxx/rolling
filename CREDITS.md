@@ -19,3 +19,4 @@
 * shellfish.png by Virginia Sea Grant is licensed with CC BY-ND 2.0
 * meat.png by ornello_pics is licensed with CC BY 2.0
 * cooked_meat.png by Let Ideas Compete is marked under CC PDM 1.0
+* dried_meat.png by https://pixy.org/4783058/
