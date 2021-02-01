@@ -21,6 +21,7 @@ class ResourceDescriptionModel:
     unit: Unit
     clutter: float
     descriptions: typing.List[ActionDescriptionModel]
+    illustration: typing.Optional[str]
 
 
 # FIXME BS: rename (can be in build)

@@ -210,6 +210,7 @@ class GameConfig:
                 unit=Unit(resource_raw["unit"]),
                 clutter=resource_raw["clutter"],
                 descriptions=[],  # filled after
+                illustration=resource_raw.get("illustration", None),
             )
 
         return resources
