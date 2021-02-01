@@ -1,14 +1,17 @@
 # coding: utf-8
 import dataclasses
 
+from PIL import Image
 import enum
+from os import path
+from pathlib import Path
 import typing
 
 from guilang.description import Description
 from guilang.description import Part
+from rolling.log import server_logger
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
-from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 
 if typing.TYPE_CHECKING:
@@ -265,3 +268,15 @@ def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel
 
 
 clamp = lambda n, minn, maxn: max(min(maxn, n), minn)
+
+
+def generate_background_media(media_name: str, folder_path: str) -> None:
+    illustration_bg_path = Path(path.join(folder_path, "media", "bg", media_name))
+    if not illustration_bg_path.exists():
+        Path(folder_path, "media", "bg").mkdir(parents=True, exist_ok=True)
+        # Make background illustration
+        server_logger.info(f"Generate background image for {media_name}")
+        image = Image.open(path.join(folder_path, "media", media_name))
+        alpha = Image.new("L", image.size, 10)
+        image.putalpha(alpha)
+        image.save(illustration_bg_path)

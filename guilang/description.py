@@ -73,9 +73,7 @@ class Description:
     back_url: typing.Optional[str] = None
     back_url_is_zone: bool = False
     back_to_zone: bool = True
-    image: typing.Optional[str] = None
-    image_id: typing.Optional[int] = None
-    image_extension: typing.Optional[str] = None  # used by client to cache image
+    illustration_name: typing.Optional[str] = None
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
     redirect: typing.Optional[str] = None

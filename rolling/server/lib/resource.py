@@ -273,6 +273,7 @@ class ResourceLib:
             descriptions=resource_description.descriptions,
             ground_row_i=docs[0].zone_row_i,
             ground_col_i=docs[0].zone_col_i,
+            illustration=resource_description.illustration,
         )
 
     def have_resource(

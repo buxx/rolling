@@ -21,4 +21,10 @@ class SystemController(BaseController):
         return Response(status=200, body=version)
 
     def bind(self, app: Application) -> None:
-        app.add_routes([web.get("/system/version", self.version)])
+        app.add_routes(
+            [
+                web.get("/system/version", self.version),
+                web.static("/media", "game/media"),
+                web.static("/media_bg", "game/media/bg"),
+            ]
+        )

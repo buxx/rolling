@@ -251,6 +251,7 @@ max_action_propose_turns = 3
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "dirt.png"
 
   [resources.WET_DIRT]
     name = "Terre crue"

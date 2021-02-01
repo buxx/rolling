@@ -1,0 +1,1 @@
+* dirt.jpg by kqedquest is licensed with CC BY-NC 2.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc/2.0/

@@ -1334,6 +1334,7 @@ class CharacterController(BaseController):
         )
         return Description(
             title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
+            illustration_name=resource_description.illustration,
             items=[
                 Part(
                     text=action.get_as_str(),

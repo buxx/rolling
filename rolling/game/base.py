@@ -38,6 +38,7 @@ from rolling.model.zone import ZoneStuff
 from rolling.model.zone import ZoneTileProperties
 from rolling.rolling_types import ActionType
 from rolling.server.action import ActionFactory
+from rolling.util import generate_background_media
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -202,6 +203,11 @@ class GameConfig:
         resources: typing.Dict[str, ResourceDescriptionModel] = {}
 
         for resource_id, resource_raw in config_dict.get("resources", {}).items():
+
+            illustration = resource_raw.get("illustration", None)
+            if illustration:
+                generate_background_media(illustration, self._folder_path)
+
             resources[resource_id] = ResourceDescriptionModel(
                 id=resource_id,
                 weight=resource_raw["weight"],
@@ -210,6 +216,7 @@ class GameConfig:
                 unit=Unit(resource_raw["unit"]),
                 clutter=resource_raw["clutter"],
                 descriptions=[],  # filled after
+                illustration=illustration,
             )
 
         return resources
