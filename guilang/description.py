@@ -74,6 +74,7 @@ class Description:
     back_url_is_zone: bool = False
     back_to_zone: bool = True
     illustration_name: typing.Optional[str] = None
+    disable_illustration_row: bool = False
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
     redirect: typing.Optional[str] = None

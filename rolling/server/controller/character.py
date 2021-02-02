@@ -947,6 +947,11 @@ class CharacterController(BaseController):
         pending_actions_count = self._kernel.character_lib.get_pending_actions_count(
             hapic_data.path.character_id
         )
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        zone_properties = self._kernel.game.world_manager.get_zone_properties_by_coordinates(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+        )
 
         parts = []
         if pending_actions_count:
@@ -960,6 +965,8 @@ class CharacterController(BaseController):
 
         return Description(
             title="Que voulez-vous faire ?",
+            illustration_name=zone_properties.illustration,
+            disable_illustration_row=True,
             items=parts
             + [
                 Part(
