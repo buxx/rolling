@@ -46,6 +46,7 @@ class BuildDescription:
     classes: typing.List[str] = serpyco.field(default_factory=list)
     many: bool = False
     traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
+    illustration: typing.Optional[str] = None
 
 
 @dataclasses.dataclass

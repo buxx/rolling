@@ -22,3 +22,7 @@
 * dried_meat.png by https://pixy.org/4783058/
 * raw_brick.png by https://et.wikipedia.org/wiki/Fail:Mudbricks_in_Palestine_2011.jpg
 * fired_brick.png by https://commons.wikimedia.org/wiki/File:Fallen_bricks.jpg
+* campire.png by https://commons.wikimedia.org/wiki/File:Montana_16_bg_062406.jpg
+* dirt_kiln.png by A.Davey is licensed with CC BY 2.0
+* raw_brick_kiln.png by Lon&Queta is licensed with CC BY-NC-SA 2.0
+* fired_brick_kiln.png by djwtwo is licensed with CC BY-NC-SA 2.0

@@ -324,6 +324,10 @@ class GameConfig:
         builds: typing.Dict[str, BuildDescription] = {}
 
         for build_id, build_raw in config_dict.get("build", {}).items():
+            illustration = build_raw.get("illustration", None)
+            if illustration:
+                generate_background_media(illustration, self._folder_path)
+
             builds[build_id] = BuildDescription(
                 id=build_id,
                 name=build_raw["name"],
@@ -354,6 +358,7 @@ class GameConfig:
                 traversable={
                     TransportType(k): v for k, v in build_raw.get("traversable", {}).items()
                 },
+                illustration=illustration,
             )
 
         return builds

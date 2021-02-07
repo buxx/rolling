@@ -62,7 +62,10 @@ class BuildController(BaseController):
         )
 
         return Description(
-            title=f"{build_description.name}{on_construction}", items=parts, can_be_back_url=True
+            title=f"{build_description.name}{on_construction}",
+            illustration_name=build_description.illustration,
+            items=parts,
+            can_be_back_url=True,
         )
 
     def bind(self, app: Application) -> None:

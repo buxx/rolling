@@ -1269,6 +1269,7 @@ max_action_propose_turns = 3
   abilities = ["HEAT_UP_LOW_TEMP"]
   cost = 2.0
   classes = ["CAMPFIRE"]
+  illustration = "campfire.png"
   many = false
 [build.DIRT_KILN]
   name = "Four de terre"
@@ -1281,6 +1282,7 @@ max_action_propose_turns = 3
   cost = 24.0
   classes = ["KILN"]
   many = false
+  illustration = "dirt_kiln.png"
 [build.RAW_BRICK_KILN]
   name = "Four de brique crues"
   char = "%"
@@ -1292,6 +1294,7 @@ max_action_propose_turns = 3
   cost = 20.0
   classes = ["KILN"]
   many = false
+  illustration = "raw_brick_kiln.png"
 [build.FIRED_BRICK_KILN]
   name = "Four de brique cuites"
   char = "%"
@@ -1303,6 +1306,7 @@ max_action_propose_turns = 3
   cost = 20.0
   classes = ["KILN"]
   many = false
+  illustration = "fired_brick_kiln.png"
 [build.LOOM]
   name = "Métier à tisser"
   char = "$"
