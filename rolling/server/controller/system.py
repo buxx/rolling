@@ -21,6 +21,7 @@ class SystemController(BaseController):
         return Response(status=200, body=version)
 
     def bind(self, app: Application) -> None:
+        Path("game/media/bg").mkdir(parents=True, exist_ok=True)
         app.add_routes(
             [
                 web.get("/system/version", self.version),
