@@ -20,3 +20,5 @@
 * meat.png by ornello_pics is licensed with CC BY 2.0
 * cooked_meat.png by Let Ideas Compete is marked under CC PDM 1.0
 * dried_meat.png by https://pixy.org/4783058/
+* raw_brick.png by https://et.wikipedia.org/wiki/Fail:Mudbricks_in_Palestine_2011.jpg
+* fired_brick.png by https://commons.wikimedia.org/wiki/File:Fallen_bricks.jpg

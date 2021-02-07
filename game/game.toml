@@ -184,7 +184,11 @@ max_action_propose_turns = 3
 
 [ability]
 [ability.HEAT_UP_LOW_TEMP]
-  name = "Cuisson"
+  name = "Cuisson basse température"
+[ability.HEAT_UP_MIDDLE_TEMP]
+  name = "Cuisson moyenne température"
+[ability.HEAT_UP_HIGH_TEMP]
+  name = "Cuisson haute température"
 [ability.FIGHT]
   name = "Se battre"
 [ability.HUNT_SMALL_GAME]
@@ -374,6 +378,24 @@ max_action_propose_turns = 3
     unit = "U"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+  [resources.RAW_BRICK]
+    name = "Brique crue"
+    weight=3500.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE"]
+    illustration = "raw_brick.png"
+
+  [resources.FIRED_BRICK]
+    name = "Brique cuite"
+    weight=3000.0
+    material="MIDDLE_PIECE"
+    unit = "U"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE"]
+    illustration = "fired_brick.png"
 
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
@@ -687,6 +709,21 @@ max_action_propose_turns = 3
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
 
+  [ACTIONS.BUILD_DIRT_KILN]
+    actions = ["BEGIN_BUILD"]
+    build = "DIRT_KILN"
+    cost = 0.1  # start build cost
+
+  [ACTIONS.BUILD_FIRED_BRICK_KILN]
+    actions = ["BEGIN_BUILD"]
+    build = "FIRED_BRICK_KILN"
+    cost = 0.1  # start build cost
+
+  [ACTIONS.BUILD_RAW_BRICK_KILN]
+    actions = ["BEGIN_BUILD"]
+    build = "RAW_BRICK_KILN"
+    cost = 0.1  # start build cost
+
   [ACTIONS.BUILD_LOOM]
     actions = ["BEGIN_BUILD"]
     build = "LOOM"
@@ -734,6 +771,28 @@ max_action_propose_turns = 3
     required_all_ability_ids = []
     actions = ["BUILD"]
     build = "DIRT_WALL"
+    cost = 2.0
+
+  [ACTIONS.BUILD_RAW_BRICK_WALL]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "RAW_BRICK_WALL"
+    cost = 2.0
+
+  [ACTIONS.BUILD_FIRED_BRICK_WALL]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BUILD"]
+    build = "FIRED_BRICK_WALL"
     cost = 2.0
 
   [ACTIONS.HUNT_CRUSTACEANS]
@@ -944,6 +1003,38 @@ max_action_propose_turns = 3
     ]
     required_resource_id = "VEGETAL_FIBER"
     cost_per_unit = 5
+    cost = 0.0
+
+  [ACTIONS.MAKE_RAW_BRICK]
+    name = "Produire brique de terre crue"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_BRICK", coeff=1}
+    ]
+    required_resource_id = "WET_DIRT"
+    cost_per_unit = 0.05
+    cost = 0.0
+
+  [ACTIONS.MAKE_FIRED_BRICK]
+    name = "Produire brique de terre cuite"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="FIRED_BRICK", coeff=1}
+    ]
+    required_resource_id = "WET_DIRT"
+    cost_per_unit = 0.01
     cost = 0.0
 
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
@@ -1179,6 +1270,39 @@ max_action_propose_turns = 3
   cost = 2.0
   classes = ["CAMPFIRE"]
   many = false
+[build.DIRT_KILN]
+  name = "Four de terre"
+  char = "%"
+  building_char = "x"
+  build_require_resources = [{resource="WET_DIRT", quantity=200.0}]
+  turn_require_resources = [{resource="WOOD", quantity=0.4}]
+  power_on_require_resources = [{resource="WOOD", quantity=0.5}]
+  abilities = ["HEAT_UP_MIDDLE_TEMP"]
+  cost = 24.0
+  classes = ["KILN"]
+  many = false
+[build.RAW_BRICK_KILN]
+  name = "Four de brique crues"
+  char = "%"
+  building_char = "x"
+  build_require_resources = [{resource="RAW_BRICK", quantity=300}]
+  turn_require_resources = [{resource="WOOD", quantity=0.4}]
+  power_on_require_resources = [{resource="WOOD", quantity=0.5}]
+  abilities = ["HEAT_UP_MIDDLE_TEMP"]
+  cost = 20.0
+  classes = ["KILN"]
+  many = false
+[build.FIRED_BRICK_KILN]
+  name = "Four de brique cuites"
+  char = "%"
+  building_char = "x"
+  build_require_resources = [{resource="FIRED_BRICK", quantity=300}]
+  turn_require_resources = [{resource="WOOD", quantity=0.6}]
+  power_on_require_resources = [{resource="WOOD", quantity=0.7}]
+  abilities = ["HEAT_UP_HIGH_TEMP"]
+  cost = 20.0
+  classes = ["KILN"]
+  many = false
 [build.LOOM]
   name = "Métier à tisser"
   char = "$"
@@ -1229,6 +1353,30 @@ max_action_propose_turns = 3
   char = "-"
   building_char = "x"
   build_require_resources = [{resource="DIRT", quantity=100.0}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["WALL"]
+  many = true
+  traversable = {"WALKING"=false}
+[build.RAW_BRICK_WALL]
+  name = "Mur de brique crue"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="RAW_BRICK", quantity=250.0}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["WALL"]
+  many = true
+  traversable = {"WALKING"=false}
+[build.FIRED_BRICK_WALL]
+  name = "Mur de brique cuite"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="FIRED_BRICK", quantity=250.0}]
   turn_require_resources = []
   power_on_require_resources = []
   abilities = []
