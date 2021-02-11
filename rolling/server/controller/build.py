@@ -39,15 +39,15 @@ class BuildController(BaseController):
         parts = []
 
         if build_description.abilities_if_is_on:
-            parts.append(
-                Part(text=f"En fonctionnement: " + ("Oui" if build_doc.is_on else "Non"))
-            )
+            parts.append(Part(text=f"En fonctionnement: " + ("Oui" if build_doc.is_on else "Non")))
 
         carried_resources = self._kernel.resource_lib.get_stored_in_build(hapic_data.path.build_id)
         if carried_resources:
-            parts.extend([
-                Part(text="Contient des resources:"),
-            ])
+            parts.extend(
+                [
+                    Part(text="Contient des resources:"),
+                ]
+            )
             for carried_resource in carried_resources:
                 resource_description = self._kernel.game.config.resources[carried_resource.id]
                 quantity_str = quantity_to_str(

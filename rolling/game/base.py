@@ -361,6 +361,8 @@ class GameConfig:
                 illustration=illustration,
                 default_is_on=build_raw.get("default_is_on", True),
                 abilities_if_is_on=build_raw.get("abilities_if_is_on", False),
+                allow_deposit=build_raw.get("allow_deposit", False),
+                allow_deposit_limited=build_raw.get("allow_deposit_limited", False),
             )
 
         return builds
@@ -488,7 +490,6 @@ class Game:
             self._kernel,
             World(zones_properties=zones_properties, tiles_properties=tiles_properties),
         )
-
 
     def _get_generation_info(self, zone_data: dict) -> GenerationInfo:
         generation_data = zone_data["GENERATION"]

@@ -406,7 +406,9 @@ class BeginStuffConstructionAction(CharacterAction):
                 stuff_id = consume["stuff"]
                 quantity = consume["quantity"]
                 if (
-                    self._kernel.stuff_lib.get_stuff_count(character_id=character.id, stuff_id=stuff_id)
+                    self._kernel.stuff_lib.get_stuff_count(
+                        character_id=character.id, stuff_id=stuff_id
+                    )
                     < quantity
                 ):
                     stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(

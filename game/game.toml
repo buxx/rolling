@@ -1282,7 +1282,6 @@ max_action_propose_turns = 3
   default_is_on = true
   abilities_if_is_on = true
   allow_deposit = true
-  # FIXME BS NOW: implement
   allow_deposit_limited = true
 [build.DIRT_KILN]
   name = "Four de terre"

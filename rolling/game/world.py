@@ -90,7 +90,9 @@ class WorldManager:
     def world(self) -> World:
         return self._world
 
-    def get_zone_properties_by_coordinates(self, world_row_i: int, world_col_i: int) -> ZoneProperties:
+    def get_zone_properties_by_coordinates(
+        self, world_row_i: int, world_col_i: int
+    ) -> ZoneProperties:
         zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
         zone_type = typing.cast(ZoneMapTileType, zone_type)
         return self.get_zone_properties(zone_type)

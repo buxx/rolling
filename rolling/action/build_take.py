@@ -6,7 +6,8 @@ from sqlalchemy.orm.exc import NoResultFound
 import typing
 
 from guilang.description import Description
-from rolling.action.base import WithBuildAction, get_with_build_action_url
+from rolling.action.base import WithBuildAction
+from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
@@ -17,8 +18,8 @@ from rolling.server.transfer import TransferStuffOrResources
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
-    from rolling.model.character import CharacterModel
     from rolling.model.build import BuildDocument
+    from rolling.model.character import CharacterModel
 
 
 class TakeStuffOrResources(TransferStuffOrResources):
@@ -43,9 +44,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return self.__kernel
 
     def _get_available_stuffs(self) -> typing.List[StuffModel]:
-        return self._kernel.stuff_lib.get_from_build(
-            self._from_build.id
-        )
+        return self._kernel.stuff_lib.get_from_build(self._from_build.id)
 
     def _get_available_resources(self) -> typing.List[CarriedResourceDescriptionModel]:
         return self._kernel.resource_lib.get_stored_in_build(self._from_build.id)
@@ -95,9 +94,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return self._kernel.stuff_lib.get_stuff(stuff_id)
 
     def _get_likes_this_stuff(self, stuff_id: str) -> typing.List[StuffModel]:
-        return self._kernel.stuff_lib.get_from_build(
-            self._from_build.id, stuff_id=stuff_id
-        )
+        return self._kernel.stuff_lib.get_from_build(self._from_build.id, stuff_id=stuff_id)
 
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.set_carried_by(stuff_id, self._from_character.id)
@@ -114,13 +111,13 @@ class TakeStuffOrResources(TransferStuffOrResources):
         if quantity > self._kernel.stuff_lib.get_stuff_count(
             build_id=self._from_build.id, stuff_id=stuff.stuff_id
         ):
-            raise ImpossibleAction(f"Il n'y en à pas assez")
+            raise ImpossibleAction(f"Il n'y en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
             build_id=self._from_build.id, resource_id=resource_id, quantity=quantity
         ):
-            raise ImpossibleAction(f"Il n'y en à pas assez")
+            raise ImpossibleAction(f"Il n'y en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_stored_in(
@@ -151,9 +148,11 @@ class TakeFromBuildAction(WithBuildAction):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel", build_id: int
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
+        if not build_description.allow_deposit and not build_doc.under_construction:
+            raise ImpossibleAction("Ce batiment ne permet pas de prendre")
         pass  # TODO: check build is accessible
 
     def check_request_is_possible(

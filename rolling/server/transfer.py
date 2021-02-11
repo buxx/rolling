@@ -95,7 +95,8 @@ class TransferStuffOrResources(abc.ABC):
         return resource.name
 
     def _get_choose_something_description(
-        self, can_be_back_url: bool = False,
+        self,
+        can_be_back_url: bool = False,
     ) -> Description:
         parts = []
         carried_stuffs = self._get_available_stuffs()

@@ -277,7 +277,7 @@ def generate_background_media(media_name: str, folder_path: str) -> None:
         # Make background illustration
         server_logger.info(f"Generate background image for {media_name}")
         image = Image.open(path.join(folder_path, "media", media_name))
-        image = image.convert('RGB')
+        image = image.convert("RGB")
         alpha = Image.new("L", image.size, 10)
         image.putalpha(alpha)
         image.save(illustration_bg_path)

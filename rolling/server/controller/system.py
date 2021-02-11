@@ -1,10 +1,9 @@
 # coding: utf-8
-from pathlib import Path
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from pathlib import Path
 import pkg_resources
 
 from rolling.kernel import Kernel

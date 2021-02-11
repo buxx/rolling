@@ -5,8 +5,14 @@ from unittest import mock
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.build import BringResourceModel
 from rolling.action.build import BringResourcesOnBuild
+from rolling.action.build_deposit import DepositToBuildAction
+from rolling.action.build_deposit import DepositToModel
+from rolling.action.build_take import TakeFromBuildAction
+from rolling.action.build_take import TakeFromModel
+from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
+from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
 from rolling.server.document.build import BuildDocument
 from rolling.server.document.resource import ResourceDocument
@@ -28,6 +34,51 @@ def worldmapc_mock_build_document(
 
 
 @pytest.fixture
+def build4(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
+    kernel = worldmapc_kernel
+    return kernel.build_lib.place_build(
+        world_col_i=0,
+        world_row_i=0,
+        zone_col_i=0,
+        zone_row_i=0,
+        build_id="TEST_BUILD_4",
+        under_construction=True,
+    )
+
+
+@pytest.fixture
+def build5(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
+    kernel = worldmapc_kernel
+    return kernel.build_lib.place_build(
+        world_col_i=0,
+        world_row_i=0,
+        zone_col_i=0,
+        zone_row_i=0,
+        build_id="TEST_BUILD_5",
+        under_construction=True,
+    )
+
+
+@pytest.fixture
+def build6(
+    worldmapc_kernel: Kernel,
+) -> BuildDocument:
+    kernel = worldmapc_kernel
+    return kernel.build_lib.place_build(
+        world_col_i=0,
+        world_row_i=0,
+        zone_col_i=0,
+        zone_row_i=0,
+        build_id="TEST_BUILD_6",
+        under_construction=True,
+    )
+
+
+@pytest.fixture
 def action(worldmapc_kernel: Kernel) -> BringResourcesOnBuild:
     action = BringResourcesOnBuild(
         worldmapc_kernel,
@@ -39,6 +90,32 @@ def action(worldmapc_kernel: Kernel) -> BringResourcesOnBuild:
         ),
     )
     yield action
+
+
+@pytest.fixture
+def deposit_action(worldmapc_kernel: Kernel) -> DepositToBuildAction:
+    return DepositToBuildAction(
+        worldmapc_kernel,
+        description=ActionDescriptionModel(
+            id="DEPOSIT_ON_BUILD",
+            action_type=ActionType.DEPOSIT_ON_BUILD,
+            base_cost=1.0,
+            properties={},
+        ),
+    )
+
+
+@pytest.fixture
+def take_action(worldmapc_kernel: Kernel) -> TakeFromBuildAction:
+    return TakeFromBuildAction(
+        worldmapc_kernel,
+        description=ActionDescriptionModel(
+            id="TAKE_FROM_BUILD",
+            action_type=ActionType.TAKE_FROM_BUILD,
+            base_cost=1.0,
+            properties={},
+        ),
+    )
 
 
 class TestBringResourcesOnBuild:
@@ -191,3 +268,260 @@ class TestBringResourcesOnBuild:
         resource = resources.pop()
         assert resource.id == "BRANCHES"
         assert 0.00025 == resource.quantity
+
+    @pytest.mark.usefixtures("worldmapc_xena_wood")
+    def test_deposit_resource_on_build_allowing_it_because_allow_all(
+        self,
+        worldmapc_kernel: Kernel,
+        build5: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build5.id)
+
+        # When
+        deposit_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=DepositToModel(
+                deposit_resource_id="WOOD",
+                deposit_resource_quantity=0.2,
+            ),
+        )
+
+        # Then
+        assert kernel.resource_lib.get_stored_in_build(build5.id)
+        assert 1 == len(kernel.resource_lib.get_stored_in_build(build5.id))
+        assert kernel.resource_lib.get_stored_in_build(build5.id)[0].id == "WOOD"
+
+    @pytest.mark.usefixtures("worldmapc_xena_wood")
+    @pytest.mark.usefixtures("worldmapc_xena_stone")
+    def test_deposit_resource_on_build_allowing_it_because_allow_limit(
+        self,
+        worldmapc_kernel: Kernel,
+        build6: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build6.id)
+
+        # When
+        with pytest.raises(ImpossibleAction):
+            deposit_action.perform(
+                character=xena,
+                build_id=build6.id,
+                input_=DepositToModel(
+                    deposit_resource_id="WOOD",
+                    deposit_resource_quantity=0.2,
+                ),
+            )
+        deposit_action.perform(
+            character=xena,
+            build_id=build6.id,
+            input_=DepositToModel(
+                deposit_resource_id="STONE",
+                deposit_resource_quantity=2,
+            ),
+        )
+
+        # Then
+        assert kernel.resource_lib.get_stored_in_build(build6.id)
+        assert 1 == len(kernel.resource_lib.get_stored_in_build(build6.id))
+        assert kernel.resource_lib.get_stored_in_build(build6.id)[0].id == "STONE"
+
+    @pytest.mark.usefixtures("worldmapc_xena_stone")
+    def test_deposit_resource_on_build_refusing_it_because_not_allow(
+        self,
+        worldmapc_kernel: Kernel,
+        build4: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build4.id)
+
+        # When
+        with pytest.raises(ImpossibleAction):
+            deposit_action.perform(
+                character=xena,
+                build_id=build4.id,
+                input_=DepositToModel(
+                    deposit_resource_id="STONE",
+                    deposit_resource_quantity=2,
+                ),
+            )
+
+        # Then
+        assert not kernel.resource_lib.get_stored_in_build(build4.id)
+
+    def test_deposit_stuff_on_build_allowing_it_because_allow_all(
+        self,
+        worldmapc_kernel: Kernel,
+        build5: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+        worldmapc_xena_haxe_weapon: StuffModel,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+        haxe = worldmapc_xena_haxe_weapon
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build5.id)
+
+        # When
+        deposit_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=DepositToModel(
+                deposit_stuff_id=haxe.id,
+                deposit_resource_quantity=1,
+            ),
+        )
+
+        # Then
+        assert kernel.stuff_lib.get_from_build(build5.id)
+        assert 1 == len(kernel.stuff_lib.get_from_build(build5.id))
+        assert kernel.stuff_lib.get_from_build(build5.id)[0].id == haxe.id
+
+    def test_deposit_stuff_on_build_refusing_it_because_allow_limit(
+        self,
+        worldmapc_kernel: Kernel,
+        build6: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+        worldmapc_xena_haxe_weapon: StuffModel,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+        haxe = worldmapc_xena_haxe_weapon
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build6.id)
+
+        # When
+        with pytest.raises(ImpossibleAction):
+            deposit_action.perform(
+                character=xena,
+                build_id=build6.id,
+                input_=DepositToModel(
+                    deposit_stuff_id=haxe.id,
+                    deposit_stuff_quantity=1,
+                ),
+            )
+
+        # Then
+        assert not kernel.stuff_lib.get_from_build(build6.id)
+
+    def test_deposit_stuff_on_build_refusing_it_because_not_allow(
+        self,
+        worldmapc_kernel: Kernel,
+        build4: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+        worldmapc_xena_haxe_weapon: StuffModel,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+        haxe = worldmapc_xena_haxe_weapon
+
+        # Given
+        assert not kernel.resource_lib.get_stored_in_build(build4.id)
+
+        # When
+        with pytest.raises(ImpossibleAction):
+            deposit_action.perform(
+                character=xena,
+                build_id=build4.id,
+                input_=DepositToModel(
+                    deposit_stuff_id=haxe.id,
+                    deposit_stuff_quantity=1,
+                ),
+            )
+
+        # Then
+        assert not kernel.stuff_lib.get_from_build(build4.id)
+
+    @pytest.mark.usefixtures("worldmapc_xena_wood")
+    def test_take_resource_from_build(
+        self,
+        worldmapc_kernel: Kernel,
+        build5: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+        take_action: TakeFromBuildAction,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+
+        # Given
+        deposit_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=DepositToModel(
+                deposit_resource_id="WOOD",
+                deposit_resource_quantity=0.2,
+            ),
+        )
+        assert kernel.resource_lib.get_stored_in_build(build5.id)
+
+        # When
+        take_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=TakeFromModel(
+                take_resource_id="WOOD",
+                take_resource_quantity=0.2,
+            ),
+        )
+
+        # Then
+        assert not kernel.resource_lib.get_stored_in_build(build5.id)
+
+    def test_take_stuff_from_build(
+        self,
+        worldmapc_kernel: Kernel,
+        build5: BuildDocument,
+        worldmapc_xena_model: CharacterModel,
+        deposit_action: DepositToBuildAction,
+        take_action: TakeFromBuildAction,
+        worldmapc_xena_haxe_weapon: StuffModel,
+    ) -> None:
+        kernel = worldmapc_kernel
+        xena = worldmapc_xena_model
+        haxe = worldmapc_xena_haxe_weapon
+
+        # Given
+        deposit_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=DepositToModel(
+                deposit_stuff_id=haxe.id,
+                deposit_stuff_quantity=1,
+            ),
+        )
+        assert kernel.stuff_lib.get_from_build(build5.id)
+
+        # When
+        take_action.perform(
+            character=xena,
+            build_id=build5.id,
+            input_=TakeFromModel(
+                take_stuff_id=haxe.id,
+                take_stuff_quantity=1,
+            ),
+        )
+
+        # Then
+        assert not kernel.stuff_lib.get_from_build(build5.id)

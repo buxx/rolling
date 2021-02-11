@@ -209,7 +209,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
             shared_with_affinity_ids=shared_with_affinity_ids,
         )
         if carried_count < (quantity or 1):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         shared_with_affinity_ids = self.get_can_take_from_affinity_relation_ids()
@@ -225,7 +225,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
             shared_with_affinity_ids=shared_with_affinity_ids,
         ):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         shared_with_affinity_ids = self.get_can_take_from_affinity_relation_ids()

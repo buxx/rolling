@@ -30,7 +30,9 @@ class MixResourcesAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        if not self._kernel.resource_lib.have_resource(character_id=character.id, resource_id=resource_id):
+        if not self._kernel.resource_lib.have_resource(
+            character_id=character.id, resource_id=resource_id
+        ):
             raise ImpossibleAction("Vous ne possedez pas cette resource")
 
         # TODO BS 2019-09-10: manage more than two resource mix

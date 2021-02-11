@@ -6,7 +6,8 @@ from sqlalchemy.orm.exc import NoResultFound
 import typing
 
 from guilang.description import Description
-from rolling.action.base import WithBuildAction, get_with_build_action_url
+from rolling.action.base import WithBuildAction
+from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
@@ -17,8 +18,8 @@ from rolling.server.transfer import TransferStuffOrResources
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
-    from rolling.model.character import CharacterModel
     from rolling.model.build import BuildDocument
+    from rolling.model.character import CharacterModel
 
 
 class DepositStuffOrResources(TransferStuffOrResources):
@@ -43,12 +44,25 @@ class DepositStuffOrResources(TransferStuffOrResources):
         return self.__kernel
 
     def _get_available_stuffs(self) -> typing.List[StuffModel]:
+        if self._kernel.game.config.builds[self._to_build.build_id].allow_deposit_limited:
+            return []
+
         return self._kernel.stuff_lib.get_carried_by(
             self._from_character.id, exclude_crafting=False
         )
 
     def _get_available_resources(self) -> typing.List[CarriedResourceDescriptionModel]:
-        return self._kernel.resource_lib.get_carried_by(self._from_character.id)
+        carried_resources = self._kernel.resource_lib.get_carried_by(self._from_character.id)
+
+        build_description = self._kernel.game.config.builds[self._to_build.build_id]
+        if build_description.allow_deposit_limited:
+            return [
+                carried_resource
+                for carried_resource in carried_resources
+                if carried_resource.id in build_description.allowed_resource_ids
+            ]
+
+        return carried_resources
 
     def _get_url(
         self,
@@ -106,6 +120,10 @@ class DepositStuffOrResources(TransferStuffOrResources):
         return self._kernel.resource_lib.get_one_carried_by(self._from_character.id, resource_id)
 
     def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
+        build_description = self._kernel.game.config.builds[self._to_build.build_id]
+        if not build_description.allow_deposit or build_description.allow_deposit_limited:
+            raise ImpossibleAction("Vous ne pouvez pas déposer ça ici")
+
         try:
             stuff: StuffModel = self._kernel.stuff_lib.get_stuff(stuff_id)
         except NoResultFound:
@@ -114,13 +132,21 @@ class DepositStuffOrResources(TransferStuffOrResources):
         if quantity > self._kernel.stuff_lib.get_stuff_count(
             character_id=self._from_character.id, stuff_id=stuff.stuff_id
         ):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
+        build_description = self._kernel.game.config.builds[self._to_build.build_id]
+        if not build_description.allow_deposit or (
+            build_description.allow_deposit_limited
+            and resource_id
+            not in self._kernel.game.config.builds[self._to_build.build_id].allowed_resource_ids
+        ):
+            raise ImpossibleAction("Vous ne pouvez pas déposer de cela ici")
+
         if not self._kernel.resource_lib.have_resource(
             character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
         ):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(
@@ -137,7 +163,9 @@ class DepositToModel:
     deposit_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    deposit_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
+    deposit_resource_id: typing.Optional[str] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     deposit_resource_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
@@ -151,9 +179,11 @@ class DepositToBuildAction(WithBuildAction):
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
-    def check_is_possible(
-        self, character: "CharacterModel", build_id: int
-    ) -> None:
+    def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
+        if not build_description.allow_deposit:
+            raise ImpossibleAction("Ce batiment ne permet pas de déposer")
         pass  # TODO: check build is accessible
 
     def check_request_is_possible(

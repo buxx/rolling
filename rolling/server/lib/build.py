@@ -56,8 +56,6 @@ class BuildLib:
         for action in self._kernel.action_factory.get_all_with_build_actions():
             actions.extend(action.get_character_actions(character, build_id=build_id))
 
-
-
         return actions
 
     def get_zone_build(

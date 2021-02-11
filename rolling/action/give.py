@@ -114,13 +114,13 @@ class GiveStuffOrResources(TransferStuffOrResources):
         if quantity > self._kernel.stuff_lib.get_stuff_count(
             character_id=self._from_character.id, stuff_id=stuff.stuff_id
         ):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
             character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
         ):
-            raise ImpossibleAction(f"{self._from_character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(

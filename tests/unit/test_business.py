@@ -701,14 +701,24 @@ class TestBusiness:
         jacket = create_stuff(kernel, "LEATHER_JACKET")
         kernel.stuff_lib.set_carried_by(jacket.id, character_id=xena.id)
 
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD", quantity=0.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD", quantity=0.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="LEATHER_JACKET")
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
 
-        assert not kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.5)
-        assert not kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="LEATHER_JACKET")
-        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="WOOD", quantity=0.5
+        )
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="LEATHER_JACKET"
+        )
+        assert kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
 
         resp = await web.post(
@@ -730,14 +740,22 @@ class TestBusiness:
         item_labels = [i.label or i.text for i in descr.items]
         assert "Marché effectué" in item_labels
 
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD", quantity=0.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD", quantity=0.5
+        )
         assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="LEATHER_JACKET")
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
 
-        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="WOOD", quantity=0.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="LEATHER_JACKET")
-        assert not kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert not kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
 
     async def test_read_offer__make_transaction__missing_all_request_or(
@@ -791,12 +809,20 @@ class TestBusiness:
         haxe = create_stuff(kernel, "STONE_HAXE")
         kernel.stuff_lib.set_carried_by(haxe.id, character_id=arthur.id)
 
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD", quantity=0.5)
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD", quantity=0.5
+        )
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
 
-        assert not kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.5)
-        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="WOOD", quantity=0.5
+        )
+        assert kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
 
         resp = await web.post(
@@ -839,12 +865,20 @@ class TestBusiness:
         resp = await web.post(take_wood_url)
         assert 200 == resp.status
 
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD", quantity=0.5)
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD", quantity=0.5
+        )
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
 
-        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.5)
-        assert not kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
+        assert kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="WOOD", quantity=0.5
+        )
+        assert not kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
 
     async def test_create_with_character_transaction(
@@ -911,11 +945,19 @@ class TestBusiness:
         bottle = create_stuff(kernel, "PLASTIC_BOTTLE_1L")
         kernel.stuff_lib.set_carried_by(bottle.id, character_id=arthur.id)
 
-        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
-        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="PLASTIC_BOTTLE_1L")
+        assert kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="PLASTIC_BOTTLE_1L"
+        )
 
-        assert not kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
-        assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="PLASTIC_BOTTLE_1L")
+        assert not kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="PLASTIC_BOTTLE_1L"
+        )
 
         await self._assert_read_offer(
             kernel,
@@ -970,11 +1012,17 @@ class TestBusiness:
 
         assert (await web.post(go_url)).status == 200
 
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="RED_WINE", quantity=1.5)
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="RED_WINE", quantity=1.5
+        )
         assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="PLASTIC_BOTTLE_1L")
 
-        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="RED_WINE", quantity=1.5)
-        assert not kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="PLASTIC_BOTTLE_1L")
+        assert kernel.resource_lib.have_resource(
+            character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
+        )
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="PLASTIC_BOTTLE_1L"
+        )
 
         # xena main page
         resp: ClientResponse = await web.post(f"/business/{xena.id}")

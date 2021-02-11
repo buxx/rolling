@@ -1,9 +1,8 @@
 # coding: utf-8
 from logging import Logger
 import random
-import typing
-
 from sqlalchemy.orm.exc import NoResultFound
+import typing
 
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.eat import EatResourceAction

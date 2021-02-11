@@ -214,6 +214,30 @@ reduce_tiredness_per_turn = 50
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = []
   cost = 2.0
+[build.TEST_BUILD_4]  # no allow deposit
+  name = "Test build 4"
+  char = "L"
+  building_char = "l"
+  abilities = []
+  cost = 1.0
+[build.TEST_BUILD_5]  # allow deposit
+  name = "Test build 5"
+  char = "L"
+  building_char = "l"
+  build_require_resources = [{resource="STONE", quantity=10.0}]
+  abilities = []
+  cost = 1.0
+  allow_deposit = true
+
+[build.TEST_BUILD_6]  # allow deposit limited
+  name = "Test build 6"
+  char = "L"
+  building_char = "l"
+  build_require_resources = [{resource="STONE", quantity=10.0}]
+  abilities = []
+  cost = 1.0
+  allow_deposit = true
+  allow_deposit_limited = true
 
 [ACTIONS]
   [ACTIONS.USE_AS_WEAPON]
@@ -250,6 +274,14 @@ reduce_tiredness_per_turn = 50
 
   [ACTIONS.TEACH_KNOWLEDGE]  # ID must be keeped if action keeped
     actions = ["TEACH_KNOWLEDGE"]
+    cost = 0.0
+
+  [ACTIONS.DEPOSIT_ON_BUILD]  # ID must be keeped if action keeped
+    actions = ["DEPOSIT_ON_BUILD"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_FROM_BUILD]  # ID must be keeped if action keeped
+    actions = ["TAKE_FROM_BUILD"]
     cost = 0.0
 
   [ACTIONS.MAKE_CLOTH]

@@ -104,6 +104,9 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
             character_id=self._character.id, exclude_shared_with_affinity=True
         )
 
+    def _get_footer_build_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        pass
+
     def _get_url(
         self,
         stuff_id: typing.Optional[int] = None,
@@ -183,7 +186,7 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
             stuff_id=stuff.stuff_id,
             exclude_shared_with_affinity=True,
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
@@ -192,7 +195,7 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
             exclude_shared_with_affinity=True,
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(
@@ -334,7 +337,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             stuff_id=stuff.stuff_id,
             shared_with_affinity_ids=[self._affinity.id],
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
@@ -343,7 +346,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
             shared_with_affinity_ids=[self._affinity.id],
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en à pas assez")
+            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(

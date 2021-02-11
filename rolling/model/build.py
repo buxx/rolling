@@ -49,6 +49,18 @@ class BuildDescription:
     illustration: typing.Optional[str] = None
     default_is_on: bool = True
     abilities_if_is_on: bool = False
+    allow_deposit: bool = False
+    allow_deposit_limited: bool = False
+
+    @property
+    def allowed_resource_ids(self) -> typing.List[str]:
+        return list(
+            set(
+                [rd.resource_id for rd in self.build_require_resources]
+                + [rd.resource_id for rd in self.turn_require_resources]
+                + [rd.resource_id for rd in self.power_on_require_resources]
+            )
+        )
 
 
 @dataclasses.dataclass

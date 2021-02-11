@@ -107,7 +107,9 @@ class BusinessLib:
                 character_id=character_id, resource_id=item.resource_id, quantity=item.quantity
             )
         return (
-            self._kernel.stuff_lib.get_stuff_count(character_id=character_id, stuff_id=item.stuff_id)
+            self._kernel.stuff_lib.get_stuff_count(
+                character_id=character_id, stuff_id=item.stuff_id
+            )
             >= item.quantity
         )
 

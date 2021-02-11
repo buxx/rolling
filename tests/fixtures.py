@@ -420,6 +420,14 @@ def worldmapc_xena_wood(worldmapc_xena_model: CharacterModel, worldmapc_kernel: 
 
 
 @pytest.fixture
+def worldmapc_xena_stone(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel) -> None:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    kernel.resource_lib.add_resource_to("STONE", 10, xena.id)
+
+
+@pytest.fixture
 def worldmapc_xena_haxe_weapon(
     worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel, worldmapc_xena_haxe: StuffModel
 ) -> StuffModel:
