@@ -47,6 +47,8 @@ class BuildDescription:
     many: bool = False
     traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
     illustration: typing.Optional[str] = None
+    default_is_on: bool = True
+    abilities_if_is_on: bool = False
 
 
 @dataclasses.dataclass

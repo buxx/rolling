@@ -32,6 +32,7 @@ class BuildLib:
             zone_col_i=zone_col_i,
             build_id=build_id,
             under_construction=under_construction,
+            is_on=False,
         )
         self._kernel.server_db_session.add(build_doc)
 
@@ -50,11 +51,12 @@ class BuildLib:
     def get_on_build_actions(
         self, character: CharacterModel, build_id: int
     ) -> typing.List[CharacterActionLink]:
-        build_doc = self.get_build_doc(build_id)
         actions: typing.List[CharacterActionLink] = []
 
         for action in self._kernel.action_factory.get_all_with_build_actions():
             actions.extend(action.get_character_actions(character, build_id=build_id))
+
+
 
         return actions
 
@@ -128,8 +130,18 @@ class BuildLib:
 
         if build_doc.ap_spent >= build_description.cost:
             build_doc.under_construction = False
+            if build_description.default_is_on:
+                build_doc.is_on = True
 
         self._kernel.server_db_session.add(build_doc)
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def get_all(self, is_on: typing.Optional[bool]) -> typing.List[BuildDocument]:
+        query = self._kernel.server_db_session.query(BuildDocument)
+
+        if is_on is not None:
+            query = query.filter(BuildDocument.is_on == is_on)
+
+        return query.all()

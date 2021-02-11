@@ -956,8 +956,7 @@ class CharacterLib:
                 zone_col_i=around_col_i,
             ):
                 build_description = self._kernel.game.config.builds[build.build_id]
-                # FIXME BS 20200220: implement "is working" (with turn consumtion)
-                if not build.under_construction:
+                if not build.under_construction and (build_description.abilities_if_is_on and build.is_on):
                     for ability in abilities:
                         if ability.id in build_description.ability_ids:
                             # TODO BS 20200220: implement risks

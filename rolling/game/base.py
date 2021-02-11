@@ -359,6 +359,8 @@ class GameConfig:
                     TransportType(k): v for k, v in build_raw.get("traversable", {}).items()
                 },
                 illustration=illustration,
+                default_is_on=build_raw.get("default_is_on", True),
+                abilities_if_is_on=build_raw.get("abilities_if_is_on", False),
             )
 
         return builds

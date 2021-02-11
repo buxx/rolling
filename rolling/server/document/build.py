@@ -19,3 +19,4 @@ class BuildDocument(Document):
     build_id = Column(String(255), nullable=False)
     ap_spent = Column(Numeric(10, 4, asdecimal=False), nullable=False, default=0.0)
     under_construction = Column(Boolean(), nullable=False, default=True)
+    is_on = Column(Boolean(), nullable=False)

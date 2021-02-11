@@ -192,6 +192,7 @@ class TestConstructBuildAction:
         kernel = worldmapc_kernel
         build = worldmapc_mock_build_document2
         xena = worldmapc_xena_model
+        assert not build.is_on
 
         # Missing branches (and stone)
         with pytest.raises(ImpossibleAction) as exc:
@@ -266,3 +267,4 @@ class TestConstructBuildAction:
         assert not build.under_construction
         assert 2.0 == float(build.ap_spent)
         assert not kernel.resource_lib.get_stored_in_build(build_id=build.id)
+        assert build.is_on

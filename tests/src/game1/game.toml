@@ -204,6 +204,16 @@ reduce_tiredness_per_turn = 50
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = []
   cost = 2.0
+  default_is_on = true
+[build.TEST_BUILD_3]
+  name = "Test build 3"
+  char = "L"
+  building_char = "l"
+  build_require_resources = [{resource="BRANCHES", quantity=0.001}, {resource="STONE", quantity=10.0}]
+  turn_require_resources = [{resource="BRANCHES", quantity=0.01}]
+  power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
+  abilities = []
+  cost = 2.0
 
 [ACTIONS]
   [ACTIONS.USE_AS_WEAPON]

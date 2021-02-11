@@ -11,6 +11,7 @@ from rolling.kernel import Kernel
 from rolling.model.measure import Unit
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.build import BuildDocument
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
@@ -30,6 +31,38 @@ def turn_lib(
         stuff_lib=worldmapc_with_zones_stuff_lib,
         logger=logging.getLogger("tests"),
     )
+
+
+@pytest.fixture
+def build_a_on(worldmapc_kernel: Kernel) -> BuildDocument:
+    build_doc = BuildDocument(
+        world_row_i=1,
+        world_col_i=1,
+        zone_row_i=1,
+        zone_col_i=1,
+        build_id="TEST_BUILD_3",
+        under_construction=False,
+        is_on=True
+    )
+    worldmapc_kernel.server_db_session.add(build_doc)
+    worldmapc_kernel.server_db_session.commit()
+    return build_doc
+
+
+@pytest.fixture
+def build_a_off(worldmapc_kernel: Kernel) -> BuildDocument:
+    build_doc = BuildDocument(
+        world_row_i=1,
+        world_col_i=1,
+        zone_row_i=1,
+        zone_col_i=1,
+        build_id="TEST_BUILD_3",
+        under_construction=False,
+        is_on=False
+    )
+    worldmapc_kernel.server_db_session.add(build_doc)
+    worldmapc_kernel.server_db_session.commit()
+    return build_doc
 
 
 @pytest.mark.usefixtures("initial_universe_state")
@@ -335,3 +368,67 @@ class TestExecuteTurn:
             character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.46
         )
         assert not fake_enable_effect.called
+
+    def test_turn_build_consume_to_keep_on(
+        self, worldmapc_kernel: Kernel, turn_lib: TurnLib, build_a_on: BuildDocument
+    ) -> None:
+        # Given
+        worldmapc_kernel.resource_lib.add_resource_to(
+            resource_id="BRANCHES",
+            quantity=10.0,
+            build_id=build_a_on.id,
+        )
+        resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_on.id)
+        assert resources_on_build
+        assert len(resources_on_build) == 1
+        assert resources_on_build[0].id == "BRANCHES"
+        assert resources_on_build[0].quantity == 10.0
+        assert build_a_on.is_on is True
+
+        # When
+        turn_lib.execute_turn()
+
+        # Then
+        build_a_on = worldmapc_kernel.build_lib.get_build_doc(build_a_on.id)
+        resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_on.id)
+        assert resources_on_build
+        assert len(resources_on_build) == 1
+        assert resources_on_build[0].id == "BRANCHES"
+        assert resources_on_build[0].quantity == 9.99
+        assert build_a_on.is_on is True
+
+    def test_turn_build_consume_but_keep_off_because_not_enough(self, worldmapc_kernel: Kernel, turn_lib: TurnLib, build_a_on: BuildDocument):
+        # Given
+        worldmapc_kernel.resource_lib.add_resource_to(
+            resource_id="BRANCHES",
+            quantity=0.001,  # not enough
+            build_id=build_a_on.id,
+        )
+        resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_on.id)
+        assert resources_on_build
+        assert len(resources_on_build) == 1
+        assert resources_on_build[0].id == "BRANCHES"
+        assert resources_on_build[0].quantity == 0.001
+        assert build_a_on.is_on is True
+
+        # When
+        turn_lib.execute_turn()
+
+        # Then
+        build_a_on = worldmapc_kernel.build_lib.get_build_doc(build_a_on.id)
+        resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_on.id)
+        assert resources_on_build
+        assert len(resources_on_build) == 1
+        assert resources_on_build[0].id == "BRANCHES"
+        assert resources_on_build[0].quantity == 0.001
+        assert build_a_on.is_on is False
+
+    def test_turn_build_not_consume_because_off(self, worldmapc_kernel: Kernel, turn_lib: TurnLib, build_a_off: BuildDocument):
+        # Given
+        assert not worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_off.id)
+
+        # When
+        turn_lib.execute_turn()
+
+        # Then
+        assert build_a_off.is_on is False

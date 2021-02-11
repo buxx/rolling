@@ -3,6 +3,8 @@ from logging import Logger
 import random
 import typing
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.eat import EatResourceAction
 from rolling.exception import ErrorWhenConsume
@@ -39,6 +41,7 @@ class TurnLib:
         self._increment_age()
         self._kill()
         self._manage_characters_props()
+        self._builds_consumptions()
         self._universe_turn()
 
         # FIXME BS NOW: remove pending actions and authorizations
@@ -335,6 +338,35 @@ class TurnLib:
                     f"'{character_doc.name}' have '{character_doc.life_points}' life point. kill it."
                 )
                 self._kernel.character_lib.kill(character_doc.id)
+
+    def _builds_consumptions(self) -> None:
+        self._logger.info("Build consumptions")
+        builds = self._kernel.build_lib.get_all(is_on=True)
+        self._logger.info(f"Found {len(builds)} builds")
+        for build_doc in builds:
+            build_description = self._kernel.game.config.builds[build_doc.build_id]
+            if build_description.turn_require_resources:
+                have_all_resources = True
+                for turn_require_resource in build_description.turn_require_resources:
+                    try:
+                        self._kernel.resource_lib.get_one_stored_in_build(
+                            build_doc.id,
+                            resource_id=turn_require_resource.resource_id,
+                            quantity=turn_require_resource.quantity,
+                        )
+                    except NoResultFound:
+                        have_all_resources = False
+                if have_all_resources:
+                    for turn_require_resource in build_description.turn_require_resources:
+                        self._kernel.resource_lib.reduce_stored_in(
+                            build_id=build_doc.id,
+                            resource_id=turn_require_resource.resource_id,
+                            quantity=turn_require_resource.quantity,
+                            commit=False,
+                        )
+                else:
+                    build_doc.is_on = False
+            self._kernel.server_db_session.commit()
 
     def _universe_turn(self) -> None:
         self._kernel.universe_lib.add_new_state()

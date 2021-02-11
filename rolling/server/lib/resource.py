@@ -483,3 +483,13 @@ class ResourceLib:
                 carried_by_id=character_id, shared_with_affinity_ids=[affinity_id]
             ).all()
         ]
+
+    def get_one_stored_in_build(
+        self, build_id: int, resource_id: str, quantity: typing.Optional[float] = None,
+    ) -> CarriedResourceDescriptionModel:
+        query = self.get_base_query(in_built_id=build_id, resource_id=resource_id)
+
+        if quantity is not None:
+            query = query.filter(ResourceDocument.quantity >= quantity)
+
+        return query.one()

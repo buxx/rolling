@@ -17,6 +17,7 @@ def worldmapc_test_build_1(worldmapc_kernel: Kernel) -> BuildDocument:
         build_id="TEST_BUILD_1",
         ap_spent=0.0,
         under_construction=True,
+        is_on=False,
     )
     worldmapc_kernel.server_db_session.add(doc)
     worldmapc_kernel.server_db_session.commit()

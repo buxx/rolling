@@ -27,6 +27,7 @@ class BuildController(BaseController):
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         build_doc = self._kernel.build_lib.get_build_doc(hapic_data.path.build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
+        # FIXME BS NOW: ajouter action de démarrer, aouter / récup ressources
         character_actions = self._kernel.build_lib.get_on_build_actions(
             character, hapic_data.path.build_id
         )
@@ -35,20 +36,25 @@ class BuildController(BaseController):
         if build_doc.under_construction:
             on_construction = " (en construction)"
 
-        carried_resources = self._kernel.resource_lib.get_stored_in_build(hapic_data.path.build_id)
-        carried_in = []
-        for carried_resource in carried_resources:
-            resource_description = self._kernel.game.config.resources[carried_resource.id]
-            quantity_str = quantity_to_str(
-                carried_resource.quantity, unit=resource_description.unit, kernel=self._kernel
-            )
-            carried_in.append(Part(text=f"- {resource_description.name} ({quantity_str})"))
-        if carried_in:
-            carried_in.insert(0, Part(text="Contient des resources:"))
-            carried_in.insert(1, Part(text=""))
-            carried_in.append(Part(text=" "))
+        parts = []
 
-        parts = carried_in
+        if build_description.abilities_if_is_on:
+            parts.append(
+                Part(text=f"En fonctionnement: " + ("Oui" if build_doc.is_on else "Non"))
+            )
+
+        carried_resources = self._kernel.resource_lib.get_stored_in_build(hapic_data.path.build_id)
+        if carried_resources:
+            parts.extend([
+                Part(text="Contient des resources:"),
+            ])
+            for carried_resource in carried_resources:
+                resource_description = self._kernel.game.config.resources[carried_resource.id]
+                quantity_str = quantity_to_str(
+                    carried_resource.quantity, unit=resource_description.unit, kernel=self._kernel
+                )
+                parts.append(Part(text=f"- {resource_description.name} ({quantity_str})"))
+
         parts.extend(
             [
                 Part(

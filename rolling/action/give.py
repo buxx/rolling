@@ -6,14 +6,12 @@ from sqlalchemy.orm.exc import NoResultFound
 import typing
 
 from guilang.description import Description
-from guilang.description import Part
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_with_character_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
-from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.link import CharacterActionLink
 from rolling.server.transfer import TransferStuffOrResources
 
