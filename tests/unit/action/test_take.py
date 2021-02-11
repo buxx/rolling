@@ -292,14 +292,14 @@ class TestTakeAction:
         take_action.perform(
             arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity=0.1)
         )
-        assert kernel.resource_lib.have_resource(arthur.id, resource_id="WOOD", quantity=0.1)
-        assert kernel.resource_lib.have_resource(xena.id, resource_id="WOOD", quantity=0.1)
+        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.1)
+        assert kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD", quantity=0.1)
 
         take_action.perform(
             arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity=0.1)
         )
-        assert kernel.resource_lib.have_resource(arthur.id, resource_id="WOOD", quantity=0.2)
-        assert not kernel.resource_lib.have_resource(xena.id, resource_id="WOOD")
+        assert kernel.resource_lib.have_resource(character_id=arthur.id, resource_id="WOOD", quantity=0.2)
+        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD")
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_wood__err__require_more(

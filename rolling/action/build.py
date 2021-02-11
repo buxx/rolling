@@ -476,7 +476,7 @@ class BuildAction(CharacterAction):
 
         for require in build_description.build_require_resources:
             if not self._kernel.resource_lib.have_resource(
-                character.id, resource_id=require.resource_id, quantity=require.quantity
+                character_id=character.id, resource_id=require.resource_id, quantity=require.quantity
             ):
                 resource_properties = self._kernel.game.config.resources[require.resource_id]
                 required_quantity_str = quantity_to_str(

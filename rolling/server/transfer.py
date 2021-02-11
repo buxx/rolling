@@ -57,6 +57,10 @@ class TransferStuffOrResources(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def _get_footer_build_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        pass
+
+    @abc.abstractmethod
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         pass
 
@@ -91,7 +95,7 @@ class TransferStuffOrResources(abc.ABC):
         return resource.name
 
     def _get_choose_something_description(
-        self,
+        self, can_be_back_url: bool = False,
     ) -> Description:
         parts = []
         carried_stuffs = self._get_available_stuffs()
@@ -123,8 +127,9 @@ class TransferStuffOrResources(abc.ABC):
             items=parts,
             footer_with_character_id=self._get_footer_character_id(False),
             footer_with_affinity_id=self._get_footer_affinity_id(False),
+            footer_with_build_id=self._get_footer_build_id(False),
             footer_links=self._get_footer_links(False),
-            can_be_back_url=True,
+            can_be_back_url=can_be_back_url,
         )
 
     def get_description(
@@ -134,6 +139,8 @@ class TransferStuffOrResources(abc.ABC):
         resource_id: typing.Optional[str] = None,
         resource_quantity: typing.Optional[float] = None,
     ) -> Description:
+        can_be_back_url = True
+
         if stuff_id is not None:
             stuff = self._get_stuff(stuff_id)
             likes_this_stuff = self._get_likes_this_stuff(stuff.stuff_id)
@@ -158,11 +165,16 @@ class TransferStuffOrResources(abc.ABC):
                                 ],
                             )
                         ],
+                        footer_with_character_id=self._get_footer_character_id(False),
+                        footer_with_affinity_id=self._get_footer_affinity_id(False),
+                        footer_with_build_id=self._get_footer_build_id(False),
+                        footer_links=self._get_footer_links(False),
                         can_be_back_url=True,
                     )
                 stuff_quantity = 1
 
             for i in range(stuff_quantity):
+                can_be_back_url = False
                 self.check_can_transfer_stuff(likes_this_stuff[i].id)
                 self._transfer_stuff(likes_this_stuff[i].id)
 
@@ -190,9 +202,14 @@ class TransferStuffOrResources(abc.ABC):
                             ],
                         )
                     ],
+                    footer_with_character_id=self._get_footer_character_id(False),
+                    footer_with_affinity_id=self._get_footer_affinity_id(False),
+                    footer_with_build_id=self._get_footer_build_id(False),
+                    footer_links=self._get_footer_links(False),
                     can_be_back_url=True,
                 )
             self.check_can_transfer_resource(resource_id=resource_id, quantity=resource_quantity)
             self._transfer_resource(resource_id=resource_id, quantity=resource_quantity)
+            can_be_back_url = False
 
-        return self._get_choose_something_description()
+        return self._get_choose_something_description(can_be_back_url=can_be_back_url)

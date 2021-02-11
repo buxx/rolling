@@ -278,14 +278,17 @@ class ResourceLib:
 
     def have_resource(
         self,
-        character_id: str,
         resource_id: str,
+        character_id: typing.Optional[str] = None,
+        build_id: typing.Optional[int] = None,
         quantity: typing.Optional[float] = None,
         exclude_shared_with_affinity: bool = False,
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
     ) -> bool:
+        assert character_id is not None or build_id is not None
         resource_docs = self.get_base_query(
             carried_by_id=character_id,
+            in_built_id=build_id,
             resource_id=resource_id,
             exclude_shared_with_affinity=exclude_shared_with_affinity,
             shared_with_affinity_ids=shared_with_affinity_ids,

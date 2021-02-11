@@ -111,14 +111,14 @@ class DropResourceAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        if not self._kernel.resource_lib.have_resource(character.id, resource_id):
+        if not self._kernel.resource_lib.have_resource(character_id=character.id, resource_id=resource_id):
             raise ImpossibleAction("Vous ne possedez pas cette resource")
 
     def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> None:
         if not self._kernel.resource_lib.have_resource(
-            character.id, resource_id, quantity=input_.quantity
+            character_id=character.id, resource_id=resource_id, quantity=input_.quantity
         ):
             raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
 

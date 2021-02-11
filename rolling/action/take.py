@@ -149,6 +149,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
         return None
 
+    def _get_footer_build_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        return None
+
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
 

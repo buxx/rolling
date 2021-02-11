@@ -6,8 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import typing
 
 from guilang.description import Description
-from rolling.action.base import WithCharacterAction
-from rolling.action.base import get_with_character_action_url
+from rolling.action.base import WithBuildAction, get_with_build_action_url
 from rolling.exception import ImpossibleAction
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
@@ -19,23 +18,24 @@ if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
+    from rolling.model.build import BuildDocument
 
 
-class GiveStuffOrResources(TransferStuffOrResources):
-    stuff_quantity_parameter_name = "give_stuff_quantity"
-    resource_quantity_parameter_name = "give_resource_quantity"
+class DepositStuffOrResources(TransferStuffOrResources):
+    stuff_quantity_parameter_name = "deposit_stuff_quantity"
+    resource_quantity_parameter_name = "deposit_resource_quantity"
 
     def __init__(
         self,
         kernel: "Kernel",
         from_character: "CharacterModel",
-        to_character: "CharacterModel",
+        to_build: "BuildDocument",
         description_id: str,
     ) -> None:
         super().__init__()
         self.__kernel = kernel
         self._from_character = from_character
-        self._to_character = to_character
+        self._to_build = to_build
         self._description_id = description_id
 
     @property
@@ -57,12 +57,12 @@ class GiveStuffOrResources(TransferStuffOrResources):
         resource_id: typing.Optional[str] = None,
         resource_quantity: typing.Optional[float] = None,
     ) -> str:
-        return get_with_character_action_url(
+        return get_with_build_action_url(
             character_id=self._from_character.id,
-            with_character_id=self._to_character.id,
-            action_type=ActionType.GIVE_TO_CHARACTER,
-            query_params=GiveToCharacterAction.input_model_serializer.dump(
-                GiveToModel(give_stuff_id=stuff_id, give_resource_id=resource_id)
+            build_id=self._to_build.id,
+            action_type=ActionType.DEPOSIT_ON_BUILD,
+            query_params=DepositToBuildAction.input_model_serializer.dump(
+                DepositToModel(deposit_stuff_id=stuff_id, deposit_resource_id=resource_id)
             ),
             action_description_id=self._description_id,
         )
@@ -70,26 +70,26 @@ class GiveStuffOrResources(TransferStuffOrResources):
     def _get_title(
         self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
     ) -> str:
+        build_name = self._kernel.game.config.builds[self._to_build.build_id].name
+
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
-            return f"Donner {stuff.name} à {self._to_character.name}"
+            return f"Déposer {stuff.name} sur {build_name}"
 
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
-            return f"Donner {resource_description.name} à {self._to_character.name}"
+            return f"Déposer {resource_description.name} sur {build_name}"
 
-        return f"Donner à {self._to_character.name}"
+        return f"Déposer sur {build_name}"
 
     def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
-        if sizing_up_quantity:
-            return None
-        return self._from_character.id
+        return None
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
         return None
 
     def _get_footer_build_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
-        return None
+        return self._to_build.id
 
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -100,7 +100,7 @@ class GiveStuffOrResources(TransferStuffOrResources):
         )
 
     def _transfer_stuff(self, stuff_id: int) -> None:
-        self._kernel.stuff_lib.set_carried_by(stuff_id, self._to_character.id)
+        self._kernel.stuff_lib.place_in_build(stuff_id, self._to_build.id)
 
     def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
         return self._kernel.resource_lib.get_one_carried_by(self._from_character.id, resource_id)
@@ -127,90 +127,92 @@ class GiveStuffOrResources(TransferStuffOrResources):
             character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
         )
         self._kernel.resource_lib.add_resource_to(
-            character_id=self._to_character.id, resource_id=resource_id, quantity=quantity
+            build_id=self._to_build.id, resource_id=resource_id, quantity=quantity
         )
 
 
 @dataclasses.dataclass
-class GiveToModel:
-    give_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    give_stuff_quantity: typing.Optional[int] = serpyco.number_field(
+class DepositToModel:
+    deposit_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    deposit_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    give_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
-    give_resource_quantity: typing.Optional[float] = serpyco.number_field(
+    deposit_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
+    deposit_resource_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
 
 
-class GiveToCharacterAction(WithCharacterAction):
-    input_model = GiveToModel
-    input_model_serializer = serpyco.Serializer(GiveToModel)
+class DepositToBuildAction(WithBuildAction):
+    input_model = DepositToModel
+    input_model_serializer = serpyco.Serializer(DepositToModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel"
+        self, character: "CharacterModel", build_id: int
     ) -> None:
-        pass  # TODO: user config to refuse receiving ?
+        pass  # TODO: check build is accessible
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: GiveToModel
+        self, character: "CharacterModel", build_id: int, input_: DepositToModel
     ) -> None:
-        self.check_is_possible(character, with_character)
+        self.check_is_possible(character, build_id)
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
 
-        if input_.give_resource_id is not None and input_.give_resource_quantity:
-            GiveStuffOrResources(
+        if input_.deposit_resource_id is not None and input_.deposit_resource_quantity:
+            DepositStuffOrResources(
                 self._kernel,
                 from_character=character,
-                to_character=with_character,
+                to_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_resource(
-                resource_id=input_.give_resource_id, quantity=input_.give_resource_quantity
+                resource_id=input_.deposit_resource_id, quantity=input_.deposit_resource_quantity
             )
 
-        if input_.give_stuff_id and input_.give_stuff_quantity:
-            GiveStuffOrResources(
+        if input_.deposit_stuff_id and input_.deposit_stuff_quantity:
+            DepositStuffOrResources(
                 self._kernel,
                 from_character=character,
-                to_character=with_character,
+                to_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_stuff(
-                stuff_id=input_.give_stuff_id, quantity=input_.give_stuff_quantity
+                stuff_id=input_.deposit_stuff_id, quantity=input_.deposit_stuff_quantity
             )
 
     def get_character_actions(
-        self, character: "CharacterModel", with_character: "CharacterModel"
+        self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
-        return [CharacterActionLink(name="Donner", link=self._get_url(character, with_character))]
+        return [CharacterActionLink(name="Déposer", link=self._get_url(character, build_id))]
 
     def _get_url(
         self,
         character: "CharacterModel",
-        with_character: "CharacterModel",
-        input_: typing.Optional[GiveToModel] = None,
+        build_id: int,
+        input_: typing.Optional[DepositToModel] = None,
     ) -> str:
-        return get_with_character_action_url(
+        return get_with_build_action_url(
             character_id=character.id,
-            with_character_id=with_character.id,
-            action_type=ActionType.GIVE_TO_CHARACTER,
+            build_id=build_id,
+            action_type=ActionType.DEPOSIT_ON_BUILD,
             query_params=self.input_model_serializer.dump(input_) if input_ else {},
             action_description_id=self._description.id,
         )
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: GiveToModel
+        self, character: "CharacterModel", build_id: int, input_: DepositToModel
     ) -> Description:
-        return GiveStuffOrResources(
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        return DepositStuffOrResources(
             self._kernel,
             from_character=character,
-            to_character=with_character,
+            to_build=build_doc,
             description_id=self._description.id,
         ).get_description(
-            stuff_id=input_.give_stuff_id,
-            stuff_quantity=input_.give_stuff_quantity,
-            resource_id=input_.give_resource_id,
-            resource_quantity=input_.give_resource_quantity,
+            stuff_id=input_.deposit_stuff_id,
+            stuff_quantity=input_.deposit_stuff_quantity,
+            resource_id=input_.deposit_resource_id,
+            resource_quantity=input_.deposit_resource_quantity,
         )

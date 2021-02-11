@@ -299,6 +299,9 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             return None
         return self._affinity.id
 
+    def _get_footer_build_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
+        return None
+
     def _get_stuff(self, stuff_id: int) -> StuffModel:
         return self._kernel.stuff_lib.get_stuff(stuff_id)
 
@@ -804,7 +807,7 @@ class CharacterController(BaseController):
             else:
                 form_action = f"{form_action}&stuff_id={hapic_data.query.stuff_id}"
                 default_value = self._kernel.stuff_lib.get_stuff_count(
-                    character.id, stuff_id=hapic_data.query.stuff_id
+                    character_id=character.id, stuff_id=hapic_data.query.stuff_id
                 )
                 unit_str = "unité"
                 quantity_prefix = "stuff_"

@@ -299,6 +299,7 @@ class StuffLib:
         stuff_doc.used_as_shield_by_id = None
         stuff_doc.used_as_armor_by_id = None
         stuff_doc.used_as_weapon_by_id = None
+        stuff_doc.in_built_id = None
         if commit:
             self._kernel.server_db_session.commit()
 
@@ -501,15 +502,18 @@ class StuffLib:
 
     def get_stuff_count(
         self,
-        character_id: str,
         stuff_id: str,
+        character_id: typing.Optional[str] = None,
+        build_id: typing.Optional[int] = None,
         exclude_crafting: bool = True,
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
         exclude_shared_with_affinity: bool = False,
     ) -> int:
+        assert character_id is not None or build_id is not None
         return self.get_base_query(
             carried_by_id=character_id,
             stuff_id=stuff_id,
+            in_built_id=build_id,
             exclude_crafting=exclude_crafting,
             exclude_shared_with_affinity=exclude_shared_with_affinity,
             shared_with_affinity_ids=shared_with_affinity_ids,
@@ -538,4 +542,25 @@ class StuffLib:
             for doc in self.get_base_query(
                 carried_by_id=character_id, shared_with_affinity_ids=[affinity_id]
             ).all()
+        ]
+
+    def place_in_build(self, stuff_id: int, build_id: int, commit: bool = True) -> None:
+        stuff_doc = self.get_stuff_doc(stuff_id)
+        self.un_use_stuff_doc(stuff_doc)
+        stuff_doc.carried_by_id = None
+        stuff_doc.in_built_id = build_id
+
+        if commit:
+            self._kernel.server_db_session.add(stuff_doc)
+            self._kernel.server_db_session.commit()
+
+    def get_from_build(self, build_id: int, stuff_id: typing.Optional[str] = None) -> typing.List[StuffModel]:
+        query = self.get_base_query(in_built_id=build_id)
+
+        if stuff_id is not None:
+            query = query.filter(StuffDocument.stuff_id == stuff_id)
+
+        return [
+            self.stuff_model_from_doc(doc)
+            for doc in query.all()
         ]

@@ -395,7 +395,7 @@ class BeginStuffConstructionAction(CharacterAction):
                 quantity = consume["quantity"]
                 quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
                 if not self._kernel.resource_lib.have_resource(
-                    character.id, resource_id=resource_id, quantity=quantity
+                    character_id=character.id, resource_id=resource_id, quantity=quantity
                 ):
                     resource_description = self._kernel.game.config.resources[resource_id]
                     raise ImpossibleAction(
@@ -406,7 +406,7 @@ class BeginStuffConstructionAction(CharacterAction):
                 stuff_id = consume["stuff"]
                 quantity = consume["quantity"]
                 if (
-                    self._kernel.stuff_lib.get_stuff_count(character.id, stuff_id=stuff_id)
+                    self._kernel.stuff_lib.get_stuff_count(character_id=character.id, stuff_id=stuff_id)
                     < quantity
                 ):
                     stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(

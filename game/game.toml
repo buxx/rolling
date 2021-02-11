@@ -605,6 +605,14 @@ max_action_propose_turns = 3
     actions = ["TEACH_KNOWLEDGE"]
     cost = 0.0
 
+  [ACTIONS.DEPOSIT_ON_BUILD]  # ID must be keeped if action keeped
+    actions = ["DEPOSIT_ON_BUILD"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_FROM_BUILD]  # ID must be keeped if action keeped
+    actions = ["TAKE_FROM_BUILD"]
+    cost = 0.0
+
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
     required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
@@ -1273,6 +1281,9 @@ max_action_propose_turns = 3
   many = false
   default_is_on = true
   abilities_if_is_on = true
+  allow_deposit = true
+  # FIXME BS NOW: implement
+  allow_deposit_limited = true
 [build.DIRT_KILN]
   name = "Four de terre"
   char = "%"
@@ -1287,6 +1298,8 @@ max_action_propose_turns = 3
   illustration = "dirt_kiln.png"
   default_is_on = false
   abilities_if_is_on = true
+  allow_deposit = true
+  allow_deposit_limited = true
 [build.RAW_BRICK_KILN]
   name = "Four de brique crues"
   char = "%"
@@ -1301,6 +1314,8 @@ max_action_propose_turns = 3
   illustration = "raw_brick_kiln.png"
   default_is_on = false
   abilities_if_is_on = true
+  allow_deposit = true
+  allow_deposit_limited = true
 [build.FIRED_BRICK_KILN]
   name = "Four de brique cuites"
   char = "%"
@@ -1315,6 +1330,8 @@ max_action_propose_turns = 3
   illustration = "fired_brick_kiln.png"
   default_is_on = false
   abilities_if_is_on = true
+  allow_deposit = true
+  allow_deposit_limited = true
 [build.LOOM]
   name = "Métier à tisser"
   char = "$"

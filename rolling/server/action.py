@@ -11,6 +11,8 @@ from rolling.action.build import BeginBuildAction
 from rolling.action.build import BringResourcesOnBuild
 from rolling.action.build import BuildAction
 from rolling.action.build import ConstructBuildAction
+from rolling.action.build_deposit import DepositToBuildAction
+from rolling.action.build_take import TakeFromBuildAction
 from rolling.action.cheats import CheatsCharacterAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.craft import BeginStuffConstructionAction
@@ -101,6 +103,8 @@ class ActionFactory:
         ActionType.PROPOSE_TEACH_KNOWLEDGE: ProposeTeachKnowledgeAction,
         ActionType.TEACH_KNOWLEDGE: TeachKnowledgeAction,
         ActionType.TRAVEL: TravelAction,
+        ActionType.DEPOSIT_ON_BUILD: DepositToBuildAction,
+        ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -156,6 +160,8 @@ class ActionFactory:
         self._with_build_actions: typing.Dict[ActionType, typing.Type[WithBuildAction]] = {
             ActionType.BRING_RESOURCE_ON_BUILD: BringResourcesOnBuild,
             ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
+            ActionType.DEPOSIT_ON_BUILD: DepositToBuildAction,
+            ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
         }
 
     def get_with_stuff_action(
