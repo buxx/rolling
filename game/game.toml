@@ -331,7 +331,7 @@ max_action_propose_turns = 3
     clutter = 0.2
     actions = ["DROP_RESOURCE", "CRAFT_STUFF_WITH_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.GRAMINEAE]
+  [resources.CEREAL]
     name = "Graminés"
     weight=1000.0
     material="MIDDLE_PIECE"
@@ -851,8 +851,8 @@ max_action_propose_turns = 3
     ]
     cost = 6.0
 
-  [ACTIONS.GRAMINEAE_HARVEST]
-    name = "Récolter des graminés"
+  [ACTIONS.CEREAL_HARVEST]
+    name = "Récolter des céréales"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -861,7 +861,7 @@ max_action_propose_turns = 3
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="GRAMINEAE", quantity=5.0, probability=100.0},
+      {resource="CEREAL", quantity=5.0, probability=100.0},
     ]
     cost = 6.0
 
@@ -961,7 +961,7 @@ max_action_propose_turns = 3
     produce = [
       {resource="BREAD", coeff=1000.0}
     ]
-    required_resource_id = "GRAMINEAE"
+    required_resource_id = "CEREAL"
     cost_per_unit = 0.05
     cost = 3.0
 

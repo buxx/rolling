@@ -36,7 +36,7 @@
   [ZONE_PROPERTIES.PLAIN]
     illustration = "plain.png"
     move_cost = 4.0
-    description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits, des graminés et de la fibre végétale."""
+    description = """Sur la plaine, vous devriez pouvoir trouver des animaux de petit gabarits, des céréales et de la fibre végétale."""
 
     [ZONE_PROPERTIES.PLAIN.STUFFS]
       [ZONE_PROPERTIES.PLAIN.STUFFS.HARE]  # bernard l'hermite, u
@@ -69,7 +69,7 @@
         regeneration = 1.0
 
     [ZONE_PROPERTIES.PLAIN.RESOURCES]
-      [ZONE_PROPERTIES.PLAIN.RESOURCES.GRAMINEAE]
+      [ZONE_PROPERTIES.PLAIN.RESOURCES.CEREAL]
         probability = 100.0  # probability to be available on x,y zone at world init
         maximum = 10000.0  # maximum quantity on x,y zone
         regeneration = 100.0  # quatity generation per turn
@@ -181,10 +181,10 @@
   [ZONE_PROPERTIES.HILL]
     illustration = "hill.png"
     move_cost = 5.0
-    description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des graminés et de la fibre végétale."""
+    description = """Dans cette colline, voudevriez pouvoir trouver des animaux de moyens et gros gabarits ainsi que des céréales et de la fibre végétale."""
 
     [ZONE_PROPERTIES.HILL.RESOURCES]
-      [ZONE_PROPERTIES.HILL.RESOURCES.GRAMINEAE]
+      [ZONE_PROPERTIES.HILL.RESOURCES.CEREAL]
         probability = 100.0  # probability to be available on x,y zone at world init
         maximum = 50000.0  # maximum quantity on x,y zone
         regeneration = 10.0  # quatity generation per turn
