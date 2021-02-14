@@ -74,7 +74,7 @@ class SearchMaterialAction(CharacterAction):
                     query_params={},
                 ),
                 cost=self.get_cost(character),
-                group_name="Chercher du matériel",
+                group_name="Chercher du matériel/ressources",
             )
         ]
 

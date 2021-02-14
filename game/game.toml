@@ -251,6 +251,60 @@ max_action_propose_turns = 3
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "sand.png"
 
+  [resources.RAW_COPPER]
+    name = "Cuivre brut"
+    weight=1.0  # 8.9KG for pure copper
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.00025
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "raw_copper.png"
+
+  [resources.RAW_TIN]
+    name = "Etain brut"
+    weight=1.0  # 7.28KG for pure tin
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.00027
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "raw_tin.png"
+
+  [resources.RAW_IRON]
+    name = "Fer brut"
+    weight=1.0  # 7.8 for pure iron
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.00037
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "raw_iron.png"
+
+  [resources.COPPER]
+    name = "Cuivre"
+    weight=1.0  # 8.9KG for pure copper
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.00011
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "copper.png"
+
+  [resources.TIN]
+    name = "Etain"
+    weight=1.0  # 7.28KG for pure tin
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 0.00014
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "tin.png"
+
+  [resources.IRON]
+    name = "Fer brut"
+    weight=1.0  # 7.8 for pure iron
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.00013
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "iron.png"
+
   [resources.DIRT]
     name = "Terre"
     weight=1500.0
@@ -451,6 +505,18 @@ max_action_propose_turns = 3
   [extractions.SHORT_GRASS]
     tile="SHORT_GRASS"
     resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
+
+#  [extractions.COPPER_DEPOSIT]
+#    tile="COPPER_DEPOSIT"
+#    resources=[{resource_id="RAW_COPPER", cost_per_unit=0.001, default_quantity=1.0}]
+#
+#  [extractions.TIN_DEPOSIT]
+#    tile="TIN_DEPOSIT"
+#    resources=[{resource_id="RAW_TIN", cost_per_unit=0.001, default_quantity=1.0}]
+#
+#  [extractions.IRON_DEPOSIT]
+#    tile="IRON_DEPOSIT"
+#    resources=[{resource_id="RAW_IRON", cost_per_unit=0.001, default_quantity=1.0}]
 
 [ACTIONS]
   [ACTIONS.ATTACK_CHARACTER]
@@ -1045,6 +1111,54 @@ max_action_propose_turns = 3
     cost_per_unit = 0.01
     cost = 0.0
 
+  [ACTIONS.MAKE_COPPER]
+    name = "Produire du cuivre pur"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="COPPER", coeff=0.5}
+    ]
+    required_resource_id = "RAW_COPPER"
+    cost_per_unit = 0.00025
+    cost = 6.0
+
+  [ACTIONS.MAKE_tin]
+    name = "Produire de l'étain pur"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="TIN", coeff=0.5}
+    ]
+    required_resource_id = "RAW_TIN"
+    cost_per_unit = 0.00025
+    cost = 6.0
+
+  [ACTIONS.MAKE_IRON]
+    name = "Produire du fer pur"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="IRON", coeff=0.5}
+    ]
+    required_resource_id = "RAW_IRON"
+    cost_per_unit = 0.00025
+    cost = 6.0
+
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
     name = "Statuette de femme enceinte"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
@@ -1263,6 +1377,48 @@ max_action_propose_turns = 3
     required_all_ability_ids = []
     produce = [
       {resource="VEGETAL_FIBER", quantity_per_hour=0.5, random_loss=30.0},
+    ]
+    cost = 0.0
+
+  [ACTIONS.SEARCH_RAW_COPPER]
+    name = "Chercher du cuivre"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=50.0},
+    ]
+    cost = 0.0
+
+  [ACTIONS.SEARCH_RAW_TIN]
+    name = "Chercher de l'étain"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_TIN", quantity_per_hour=1000.0, random_loss=50.0},
+    ]
+    cost = 0.0
+
+  [ACTIONS.SEARCH_RAW_IRON]
+    name = "Chercher du fer"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="RAW_IRON", quantity_per_hour=1000.0, random_loss=50.0},
     ]
     cost = 0.0
 

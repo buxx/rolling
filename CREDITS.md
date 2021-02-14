@@ -26,3 +26,9 @@
 * dirt_kiln.png by A.Davey is licensed with CC BY 2.0
 * raw_brick_kiln.png by Lon&Queta is licensed with CC BY-NC-SA 2.0
 * fired_brick_kiln.png by djwtwo is licensed with CC BY-NC-SA 2.0
+* raw_copper.png by James St. John is licensed with CC BY 2.0
+* raw_tin.png by https://en.wikipedia.org/wiki/File:Cassiterite09.jpg
+* raw_iron.png by Gideon is licensed with CC BY-NC-SA 2.0
+* copper.png by https://en.wikipedia.org/wiki/File:NatCopper.jpg
+* tin.png by https://commons.wikimedia.org/wiki/File:Sn-Alpha-Beta.jpg
+* iron.png by https://commons.wikimedia.org/wiki/File:Widmanstatten_hand.jpg
