@@ -26,6 +26,9 @@ class ZoneMapTileType(MapTileType):
                 TropicalTree.id: TropicalTree,
                 DeadTree.id: DeadTree,
                 FreshWater.id: FreshWater,
+                CopperDeposit.id: CopperDeposit,
+                TinDeposit.id: TinDeposit,
+                IronDeposit.id: IronDeposit,
             }
 
         return cls._list_cache
@@ -105,4 +108,22 @@ class DeadTree(ZoneMapTileType):
 class FreshWater(ZoneMapTileType):
     id = "FRESH_WATER"
     name = "Eau fraiche"
+    foreground_high_color = "#08f"
+
+
+class CopperDeposit(ZoneMapTileType):
+    id = "COPPER_DEPOSIT"
+    name = "Gisement de cuivre"
+    foreground_high_color = "#08f"
+
+
+class TinDeposit(ZoneMapTileType):
+    id = "TIN_DEPOSIT"
+    name = "Gisement d'étain"
+    foreground_high_color = "#08f"
+
+
+class IronDeposit(ZoneMapTileType):
+    id = "IRON_DEPOSIT"
+    name = "Gisement de fer"
     foreground_high_color = "#08f"

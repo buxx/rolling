@@ -280,6 +280,9 @@ class Kernel:
                     "ፆ": "TROPICAL_TREE",
                     "آ": "DEAD_TREE",
                     "ގ": "FRESH_WATER",
+                    "c": "COPPER_DEPOSIT",
+                    "t": "TIN_DEPOSIT",
+                    "i": "IRON_DEPOSIT",
                 },
                 ZoneMapTileType,
             )

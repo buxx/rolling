@@ -18,4 +18,7 @@ traversable_properties = {
     zone.DeadTree: {TransportType.WALKING.value: True},
     zone.FreshWater: {TransportType.WALKING.value: True},
     zone.ShortGrass: {TransportType.WALKING.value: True},
+    zone.CopperDeposit: {TransportType.WALKING.value: True},
+    zone.TinDeposit: {TransportType.WALKING.value: True},
+    zone.IronDeposit: {TransportType.WALKING.value: True},
 }
