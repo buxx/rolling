@@ -186,14 +186,27 @@ class DropResourceAction(WithResourceAction):
                 back_url=f"/_describe/character/{character.id}/inventory",
             )
 
+        (
+            drop_to_row_i,
+            drop_to_col_i,
+        ) = self._kernel.game.world_manager.find_available_place_where_drop(
+            resource_id=resource_id,
+            quantity=input_.quantity,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            start_from_zone_row_i=character.zone_row_i,
+            start_from_zone_col_i=character.zone_col_i,
+            allow_fallback_on_start_coordinates=True,
+        )
+
         self._kernel.resource_lib.drop(
             character.id,
             resource_id,
             quantity=input_.quantity,
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
-            zone_row_i=character.zone_row_i,
-            zone_col_i=character.zone_col_i,
+            zone_row_i=drop_to_row_i,
+            zone_col_i=drop_to_col_i,
         )
         return Description(
             title=f"Action effectué", back_url=f"/_describe/character/{character.id}/inventory"
