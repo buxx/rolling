@@ -361,7 +361,9 @@ class Kernel:
         for build_doc in build_docs:
             build_description = self.game.config.builds[build_doc.build_id]
             # TODO: traversable to update here
-            if not build_description.traversable.get(TransportType.WALKING.value, True):
+            if not build_description.traversable.get(
+                TransportType.WALKING.value, True
+            ) or not build_description.traversable.get(TransportType.WALKING, True):
                 not_traversable_by_builds.append((build_doc.zone_row_i, build_doc.zone_col_i))
 
         geography = self.tile_maps_by_position[world_row_i, world_col_i].source.geography

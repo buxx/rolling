@@ -103,6 +103,7 @@ class GameConfig:
         self.create_character_max_points: float = config_dict["create_character_max_points"]
         # FIXME BS NOW: passer les écrans en heure (en fonction de tick_every)
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
+        self.tile_clutter_capacity: float = config_dict["tile_clutter_capacity"]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel

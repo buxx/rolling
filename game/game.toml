@@ -41,6 +41,7 @@ create_character_knowledges = ["basketry", "tannery", "pottery", "blacksmith", "
 create_character_knowledges_count = 1
 create_character_max_points = 13.0
 max_action_propose_turns = 3
+tile_clutter_capacity = 25.0
 
 [materials]
   [materials.LIQUID]

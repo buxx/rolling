@@ -189,3 +189,121 @@ class WorldManager:
             properties=zone_properties,
             zone_map=zone_map,
         )
+
+    def find_available_place_where_drop(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        start_from_zone_row_i: int,
+        start_from_zone_col_i: int,
+        allow_fallback_on_start_coordinates: bool,
+        resource_id: typing.Optional[str] = None,
+        resource_quantity: typing.Optional[float] = None,
+        stuff_id: typing.Optional[str] = None,
+    ) -> typing.List[typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]]:
+        assert (resource_id is not None and resource_quantity is not None) or stuff_id
+
+        if stuff_id is not None:
+            clutter_ref = 1.0
+            clutter_to_place = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                stuff_id
+            ).clutter
+            clutter_in_one_tile = True
+        else:
+            clutter_ref = self._kernel.game.config.resources[resource_id].clutter
+            clutter_to_place = clutter_ref * resource_quantity
+            clutter_in_one_tile = False
+
+        # FIXME BS NOW: get_traversable_coordinates return an enormous list Oo
+        zone_traversable_tiles = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        available_places: typing.List[typing.Tuple[typing.Tuple[int, int], float]] = []
+        place_visited: typing.Set[typing.Tuple[int, int]] = set()
+
+        tiles_to_explore = [
+            (start_from_zone_row_i, start_from_zone_col_i),
+        ] + get_on_and_around_coordinates(
+            start_from_zone_row_i, start_from_zone_col_i, exclude_on=True
+        )
+
+        while clutter_to_place:
+            try:
+                # Pick up on tile
+                test_tile_row_i, test_tile_col_i = tiles_to_explore.pop(0)
+            except IndexError:
+                if allow_fallback_on_start_coordinates:
+                    if available_places:
+                        return available_places + [
+                            (
+                                (start_from_zone_row_i, start_from_zone_col_i),
+                                clutter_to_place or resource_quantity,
+                            )
+                        ]
+                    return [((start_from_zone_row_i, start_from_zone_col_i), resource_quantity)]
+                raise IndexError("No place where drop !")
+
+            if (test_tile_row_i, test_tile_col_i) in place_visited:
+                continue
+
+            # Accept this tile only if can be walked
+            if (test_tile_row_i, test_tile_col_i) not in zone_traversable_tiles:
+                continue
+
+            place_visited.add((test_tile_row_i, test_tile_col_i))
+
+            # Extend list of tiles to explore with around tiles (to keep searching if needed)
+            tiles_to_explore.extend(
+                set(
+                    get_on_and_around_coordinates(test_tile_row_i, test_tile_col_i, exclude_on=True)
+                )
+                - place_visited
+            )
+            tiles_to_explore = list(set(tiles_to_explore))
+
+            # Compute available space on this tile
+            tile_used_clutter = 0.0
+
+            for tile_stuff in self._kernel.stuff_lib.get_zone_stuffs(
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                zone_row_i=test_tile_row_i,
+                zone_col_i=test_tile_col_i,
+            ):
+                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    tile_stuff.stuff_id
+                )
+                tile_used_clutter += stuff_properties.clutter
+
+            for carried_resource in self._kernel.resource_lib.get_ground_resource(
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                zone_row_i=test_tile_row_i,
+                zone_col_i=test_tile_col_i,
+            ):
+                resource_description = self._kernel.game.config.resources[carried_resource.id]
+                tile_used_clutter += resource_description.clutter * carried_resource.quantity
+
+            # Continue with this tile only if there is enough clutter here
+            tile_left_clutter = max(
+                self._kernel.game.config.tile_clutter_capacity - tile_used_clutter, 0.0
+            )
+            if not tile_left_clutter:
+                continue
+            if clutter_in_one_tile and tile_left_clutter < clutter_to_place:
+                continue
+
+            # there is space here for place
+            if clutter_in_one_tile:
+                clutter_to_place = 0
+                available_places.append(((test_tile_row_i, test_tile_col_i), 1.0))
+            else:
+                if clutter_to_place > tile_left_clutter:
+                    place_clutter = tile_left_clutter
+                else:
+                    place_clutter = clutter_to_place
+
+                clutter_to_place -= place_clutter
+                available_places.append(
+                    ((test_tile_row_i, test_tile_col_i), place_clutter / clutter_ref)
+                )
+
+        return available_places
