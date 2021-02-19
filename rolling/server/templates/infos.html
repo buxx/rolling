@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Information sur le serveur</title>
+</head>
+<body>
+  <h1>Information sur le serveur</h1>
+
+  <p>
+    Cette page liste la configuration game play du serveur.
+  </p>
+
+  <h2>Compétences</h2>
+
+  <ul>
+    {% for skill_id, skill_description in game.config.skills.items() %}
+      <li title="{{ skill_id }}">
+        <strong>{{ skill_description.name }}</strong> :
+        default: {{ skill_description.default }},
+        maximum: {{ skill_description.maximum }}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Abilités</h2>
+
+  <ul>
+    {% for ability_id, ability_description in game.config.abilities.items() %}
+      <li title="{{ ability_id }}">
+        <strong>{{ ability_description.name }}</strong>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Connaissances</h2>
+
+  <ul>
+    {% for knowledge_id, knowledge_description in game.config.knowledge.items() %}
+      <li title="{{ knowledge_id }}">
+        <strong>{{ knowledge_description.name }}</strong> :
+        AP requis: {{ knowledge_description.ap_required }},
+        Coefficient instructeur: {{ knowledge_description.instructor_coeff }},
+        Abilités fournis: {{ knowledge_description.abilities|join(" ") }},
+        Requiert: {{ knowledge_description.requires|join(" ") }}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Type de matériaux</h2>
+
+  <ul>
+    {% for material_id, material_description in game.config.materials.items() %}
+      <li title="{{ material_id }}">
+        <strong>{{ material_description.name }}</strong>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Type de ressources</h2>
+
+  <ul>
+    {% for resource_id, resource_description in game.config.resources.items() %}
+      <li title="{{ resource_id }}">
+        {% if resource_description.illustration %}
+          <a title="illustration" target="_blank" href="http://{{ base_url }}/media/{{ resource_description.illustration }}">🎨</a>
+        {% endif %}
+        <strong>{{ resource_description.name }}</strong> :
+        Unité: {{ resource_description.unit.value }},
+        Poids/unité: {{ resource_description.weight }}g,
+        Type: {{ resource_description.material_type.value }},
+        Encombrement/unité: {{ resource_description.clutter }}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Objets</h2>
+
+  <ul>
+    {% for stuff in game.stuff_manager.items %}
+      <li>
+        {% if stuff.illustration %}
+          <a title="illustration" target="_blank" href="http://{{ base_url }}/media/{{ stuff.illustration }}">🎨</a>
+        {% endif %}
+        <strong>{{ stuff.name }}</strong> :
+        Poids: {{ stuff.weight }}g,
+        Encombrement: {{ stuff.clutter }}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Actions</h2>
+
+  <h3>Mélange de ressources</h3>
+
+  {% for resource_mix_id, resource_mix_description in game.config.resource_mixs.items() %}
+    <h4>Pour obtenir "{{ resource_mix_description.produce_resource.name }}"</h4>
+
+    <ul>
+      {% for required_resource in resource_mix_description.required_resources %}
+        <li>
+          {{ required_resource.resource.name }}, coefficient de {{ required_resource.coeff }}/1
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+
+  <h3>Extraction de ressources</h3>
+
+  <ul>
+    {% for extraction_description in game.config.extractions.values() %}
+      <li>Depuis {{ extraction_description.zone_tile_type.id }}
+
+      <ul>
+        {% for resource in extraction_description.resources.values() %}
+          <li>
+            <strong>{{ resource.resource_id }}</strong> :
+            AP/unité: {{ resource.cost_per_unit }},
+            Quantité: {{ resource.default_quantity }}
+          </li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+  </ul>
+
+  {% for action_type, action_descriptions in game.config.actions.items() %}
+    <h3>{{ action_type.value }}</h3>
+
+    <ul>
+    {% for action_description in action_descriptions %}
+      <li>{{ action_description.id }}</li>
+    {% endfor %}
+    </ul>
+
+  {% endfor %}
+
+</body>

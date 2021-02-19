@@ -1,4 +1,5 @@
 # coding: utf-8
+import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -21,11 +22,21 @@ class SystemController(BaseController):
     async def version(self, request: Request) -> Response:
         return Response(status=200, body=version)
 
+    @hapic.with_api_doc()
+    @aiohttp_jinja2.template("infos.html")
+    async def infos(self, request: Request) -> dict:
+        a = 1
+        return {
+            "game": self._kernel.game,
+            "base_url": request.host,
+        }
+
     def bind(self, app: Application) -> None:
         Path("game/media/bg").mkdir(parents=True, exist_ok=True)
         app.add_routes(
             [
                 web.get("/system/version", self.version),
+                web.get("/infos", self.infos),
                 web.static("/media", "game/media"),
                 web.static("/media_bg", "game/media/bg"),
             ]

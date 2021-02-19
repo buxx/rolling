@@ -1128,7 +1128,7 @@ tile_clutter_capacity = 25.0
     cost_per_unit = 0.00025
     cost = 6.0
 
-  [ACTIONS.MAKE_tin]
+  [ACTIONS.MAKE_TIN]
     name = "Produire de l'étain pur"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
     required_one_of_stuff_ids = []
