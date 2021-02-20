@@ -63,7 +63,7 @@
     {% for resource_id, resource_description in game.config.resources.items() %}
       <li title="{{ resource_id }}">
         {% if resource_description.illustration %}
-          <a title="illustration" target="_blank" href="http://{{ base_url }}/media/{{ resource_description.illustration }}">🎨</a>
+          <a title="illustration" target="_blank" href="/media/{{ resource_description.illustration }}">🎨</a>
         {% endif %}
         <strong>{{ resource_description.name }}</strong> :
         Unité: {{ resource_description.unit.value }},
@@ -80,7 +80,7 @@
     {% for stuff in game.stuff_manager.items %}
       <li>
         {% if stuff.illustration %}
-          <a title="illustration" target="_blank" href="http://{{ base_url }}/media/{{ stuff.illustration }}">🎨</a>
+          <a title="illustration" target="_blank" href="/media/{{ stuff.illustration }}">🎨</a>
         {% endif %}
         <strong>{{ stuff.name }}</strong> :
         Poids: {{ stuff.weight }}g,

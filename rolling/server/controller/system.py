@@ -25,10 +25,8 @@ class SystemController(BaseController):
     @hapic.with_api_doc()
     @aiohttp_jinja2.template("infos.html")
     async def infos(self, request: Request) -> dict:
-        a = 1
         return {
             "game": self._kernel.game,
-            "base_url": request.host,
         }
 
     def bind(self, app: Application) -> None:
