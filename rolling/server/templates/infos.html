@@ -82,9 +82,28 @@
         {% if stuff.illustration %}
           <a title="illustration" target="_blank" href="/media/{{ stuff.illustration }}">🎨</a>
         {% endif %}
-        <strong>{{ stuff.name }}</strong> :
+        <strong>
+          {{ stuff.name }}
+          {% if stuff.weapon %}(arme){% endif %}
+          {% if stuff.shield %}(bouclier){% endif %}
+          {% if stuff.armor %}(armure){% endif %}
+        </strong> :
         Poids: {{ stuff.weight }}g,
-        Encombrement: {{ stuff.clutter }}
+        Encombrement: {{ stuff.clutter }},
+        {% if stuff.weapon %}
+          Estoc: {{ stuff.estoc }},
+          Choc: {{ stuff.blunt }},
+          Tranchant: {{ stuff.sharp }},
+          Dommages: {{ stuff.damages }},
+        {% endif %}
+        {% if stuff.shield or stuff.armor %}
+          Protection Estoc: {{ stuff.protect_estoc }},
+          Protection Choc: {{ stuff.protect_blunt }},
+          Protection Tranchant: {{ stuff.protect_sharp }},
+        {% endif %}
+        {% if stuff.filled_capacity %}
+          Capacité de liquide: {{ stuff.filled_capacity }}l
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
