@@ -15,7 +15,9 @@ if typing.TYPE_CHECKING:
 
 
 def check_common_is_possible(
-    kernel: "Kernel", description: typing.Union["ActionDescriptionModel", "ResourceMixDescription"], character: "CharacterModel"
+    kernel: "Kernel",
+    description: typing.Union["ActionDescriptionModel", "ResourceMixDescription"],
+    character: "CharacterModel",
 ) -> None:
     character_stuff_ids = [s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)]
     character_skill_ids = []  # TODO BS 2019-09-26: code it

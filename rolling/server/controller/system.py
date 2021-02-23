@@ -1,13 +1,14 @@
 # coding: utf-8
-import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+import aiohttp_jinja2
 from pathlib import Path
 import pkg_resources
 
-from guilang.description import Description, Part
+from guilang.description import Description
+from guilang.description import Part
 from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
@@ -43,7 +44,7 @@ class SystemController(BaseController):
                     # FIXME BS NOW: protocol
                     form_action=f"http://{request.host}/infos",
                 ),
-            ]
+            ],
         )
 
     def bind(self, app: Application) -> None:

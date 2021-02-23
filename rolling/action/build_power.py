@@ -1,10 +1,11 @@
 # coding: utf-8
+import serpyco
 import typing
 
-import serpyco
-
-from guilang.description import Description, Part
-from rolling.action.base import WithBuildAction, get_with_build_action_url
+from guilang.description import Description
+from guilang.description import Part
+from rolling.action.base import WithBuildAction
+from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -58,7 +59,7 @@ class PowerOnBuildAction(WithBuildAction):
                     action_type=ActionType.POWER_ON_BUILD,
                     query_params={},
                     action_description_id=self._description.id,
-                )
+                ),
             ),
         ]
 
@@ -150,7 +151,7 @@ class PowerOffBuildAction(WithBuildAction):
                     action_type=ActionType.POWER_OFF_BUILD,
                     query_params={},
                     action_description_id=self._description.id,
-                )
+                ),
             ),
         ]
 

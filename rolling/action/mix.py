@@ -10,7 +10,8 @@ from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.utils import check_common_is_possible
-from rolling.exception import ImpossibleAction, NoCarriedResource
+from rolling.exception import ImpossibleAction
+from rolling.exception import NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 
@@ -141,13 +142,13 @@ class MixResourcesAction(WithResourceAction):
             for required in resource_mix_description.required_resources:
                 unit_str = self._kernel.translation.get(required.resource.unit)
                 try:
-                    have_quantity = self._kernel.resource_lib.get_one_carried_by(character_id=character.id, resource_id=required.resource.id).quantity
+                    have_quantity = self._kernel.resource_lib.get_one_carried_by(
+                        character_id=character.id, resource_id=required.resource.id
+                    ).quantity
                 except NoCarriedResource:
                     have_quantity = 0.0
                 have_parts.append(
-                    Part(
-                        text=f"{required.resource.name} : {have_quantity} {unit_str}"
-                    )
+                    Part(text=f"{required.resource.name} : {have_quantity} {unit_str}")
                 )
             return Description(
                 title=f"Faire {resource_mix_description.produce_resource.name}",
@@ -175,7 +176,7 @@ class MixResourcesAction(WithResourceAction):
                                 label="Quantité ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
-                            )
+                            ),
                         ],
                     )
                 ],

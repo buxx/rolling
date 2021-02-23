@@ -2,7 +2,8 @@
 import pytest
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.build_power import PowerOffBuildAction, PowerOnBuildAction
+from rolling.action.build_power import PowerOffBuildAction
+from rolling.action.build_power import PowerOnBuildAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
