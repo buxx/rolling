@@ -9,6 +9,7 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
+from rolling.action.utils import check_common_is_possible
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -48,9 +49,10 @@ class MixResourcesAction(WithResourceAction):
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> None:
         self.check_is_possible(character, resource_id)
+        resource_mix = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
+        check_common_is_possible(self._kernel, character=character, description=resource_mix)
 
         if input_.quantity is not None:
-            resource_mix = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
 
             for required_resource in resource_mix.required_resources:

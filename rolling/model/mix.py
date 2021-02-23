@@ -22,6 +22,7 @@ class ResourceMixDescription:
     required_resources: typing.List[RequiredResourceForMix]
     produce_resource: ResourceDescriptionModel
     cost: float
+    properties: dict
 
     @property
     @lru_cache()

@@ -4,6 +4,7 @@ import toml
 import typing
 
 from rolling.action.base import ActionDescriptionModel
+from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ConfigurationError
 from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
@@ -117,9 +118,6 @@ class GameConfig:
         self._extractions: typing.Dict[
             typing.Type[ZoneMapTileType], ExtractableDescriptionModel
         ] = self._create_extractions(config_dict)
-        self._resource_mixs: typing.Dict[str, ResourceMixDescription] = self._create_resource_mixs(
-            config_dict
-        )
         self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(config_dict)
         self._builds: typing.Dict[str, BuildDescription] = self._create_builds(config_dict)
         self._action_descriptions: typing.Dict[
@@ -128,6 +126,9 @@ class GameConfig:
         self._fill_resource_actions(config_dict)
         self._skills: typing.Dict[str, SkillDescription] = self._create_skills(config_dict)
         self._knowledge: typing.Dict[str, KnowledgeDescription] = self._create_knowledges(
+            config_dict
+        )
+        self._resource_mixs: typing.Dict[str, ResourceMixDescription] = self._create_resource_mixs(
             config_dict
         )
 
@@ -234,12 +235,15 @@ class GameConfig:
                         coeff=required_resource_raw["coeff"],
                     )
                 )
+            properties = {}
+            fill_base_action_properties(RequiredResourceForMix, self, properties, mix_raw)
 
             resource_mixs[mix_id] = ResourceMixDescription(
                 id=mix_id,
                 required_resources=required_resources,
                 produce_resource=self.resources[mix_raw["produce"]],
                 cost=mix_raw["cost"],
+                properties=properties,
             )
 
         return resource_mixs

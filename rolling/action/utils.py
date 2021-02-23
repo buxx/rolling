@@ -11,10 +11,11 @@ if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
+    from rolling.model.mix import ResourceMixDescription
 
 
 def check_common_is_possible(
-    kernel: "Kernel", description: "ActionDescriptionModel", character: "CharacterModel"
+    kernel: "Kernel", description: typing.Union["ActionDescriptionModel", "ResourceMixDescription"], character: "CharacterModel"
 ) -> None:
     character_stuff_ids = [s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)]
     character_skill_ids = []  # TODO BS 2019-09-26: code it
