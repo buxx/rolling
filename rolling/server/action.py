@@ -13,6 +13,7 @@ from rolling.action.build import BuildAction
 from rolling.action.build import ConstructBuildAction
 from rolling.action.build_deposit import DepositToBuildAction
 from rolling.action.build_take import TakeFromBuildAction
+from rolling.action.build_power import PowerOffBuildAction, PowerOnBuildAction
 from rolling.action.cheats import CheatsCharacterAction
 from rolling.action.collect import CollectResourceAction
 from rolling.action.craft import BeginStuffConstructionAction
@@ -105,6 +106,8 @@ class ActionFactory:
         ActionType.TRAVEL: TravelAction,
         ActionType.DEPOSIT_ON_BUILD: DepositToBuildAction,
         ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
+        ActionType.POWER_ON_BUILD: PowerOnBuildAction,
+        ActionType.POWER_OFF_BUILD: PowerOffBuildAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -162,6 +165,8 @@ class ActionFactory:
             ActionType.CONSTRUCT_BUILD: ConstructBuildAction,
             ActionType.DEPOSIT_ON_BUILD: DepositToBuildAction,
             ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
+            ActionType.POWER_ON_BUILD: PowerOnBuildAction,
+            ActionType.POWER_OFF_BUILD: PowerOffBuildAction,
         }
 
     def get_with_stuff_action(

@@ -3,6 +3,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 import typing
 
+from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
@@ -54,7 +55,11 @@ class BuildLib:
         actions: typing.List[CharacterActionLink] = []
 
         for action in self._kernel.action_factory.get_all_with_build_actions():
-            actions.extend(action.get_character_actions(character, build_id=build_id))
+            try:
+                action.check_is_possible(character, build_id=build_id)
+                actions.extend(action.get_character_actions(character, build_id=build_id))
+            except ImpossibleAction:
+                pass
 
         return actions
 

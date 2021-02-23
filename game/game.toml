@@ -490,7 +490,7 @@ tile_clutter_capacity = 25.0
     required_all_skill_ids = []
     required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP"]
     required_all_ability_ids = []
-    cost = 1.0
+    cost = 0.001
 
 [extractions]
   [extractions.FRESH_WATER]
@@ -706,6 +706,14 @@ tile_clutter_capacity = 25.0
 
   [ACTIONS.TAKE_FROM_BUILD]  # ID must be keeped if action keeped
     actions = ["TAKE_FROM_BUILD"]
+    cost = 0.0
+
+  [ACTIONS.POWER_ON_BUILD]  # ID must be keeped if action keeped
+    actions = ["POWER_ON_BUILD"]
+    cost = 0.0
+
+  [ACTIONS.POWER_OFF_BUILD]  # ID must be keeped if action keeped
+    actions = ["POWER_OFF_BUILD"]
     cost = 0.0
 
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]

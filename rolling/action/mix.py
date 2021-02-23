@@ -10,7 +10,7 @@ from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.utils import check_common_is_possible
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 
@@ -131,12 +131,24 @@ class MixResourcesAction(WithResourceAction):
         cost_per_unit = resource_mix_description.cost
 
         if input_.quantity is None:
-            required = ", ".join(
+            required_str = ", ".join(
                 [
                     f"{round(r.coeff * 100)}% {r.resource.name}"
                     for r in resource_mix_description.required_resources
                 ]
             )
+            have_parts = [Part(text="Vous possédez :")]
+            for required in resource_mix_description.required_resources:
+                unit_str = self._kernel.translation.get(required.resource.unit)
+                try:
+                    have_quantity = self._kernel.resource_lib.get_one_carried_by(character_id=character.id, resource_id=required.resource.id).quantity
+                except NoCarriedResource:
+                    have_quantity = 0.0
+                have_parts.append(
+                    Part(
+                        text=f"{required.resource.name} : {have_quantity} {unit_str}"
+                    )
+                )
             return Description(
                 title=f"Faire {resource_mix_description.produce_resource.name}",
                 items=[
@@ -152,7 +164,15 @@ class MixResourcesAction(WithResourceAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité en {unit_name} (coût: {base_cost} + {cost_per_unit} par {unit_name}, avec {required}) ?",
+                                text=(
+                                    f"Quantité en {unit_name} "
+                                    f"(coût: {base_cost} + {cost_per_unit} par {unit_name}, "
+                                    f"avec {required_str}) ?"
+                                )
+                            ),
+                            *have_parts,
+                            Part(
+                                label="Quantité ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
                             )
@@ -182,7 +202,6 @@ class MixResourcesAction(WithResourceAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"{input_.quantity} "
-            f"{resource_mix_description.produce_resource.name} {unit_name} produits",
+            title=f"{input_.quantity} {unit_name} produits",
             back_url=f"/_describe/character/{character.id}/inventory",
         )
