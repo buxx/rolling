@@ -94,15 +94,21 @@
           Estoc: {{ stuff.estoc }},
           Choc: {{ stuff.blunt }},
           Tranchant: {{ stuff.sharp }},
-          Dommages: {{ stuff.damages }},
+          Dommages: {{ stuff.damages }}
         {% endif %}
         {% if stuff.shield or stuff.armor %}
-          Protection Estoc: {{ stuff.protect_estoc }},
+          , Protection Estoc: {{ stuff.protect_estoc }},
           Protection Choc: {{ stuff.protect_blunt }},
-          Protection Tranchant: {{ stuff.protect_sharp }},
+          Protection Tranchant: {{ stuff.protect_sharp }}
         {% endif %}
         {% if stuff.filled_capacity %}
-          Capacité de liquide: {{ stuff.filled_capacity }}l
+          , Capacité de liquide: {{ stuff.filled_capacity }}l
+        {% endif %}
+        {% if stuff.abilities %}
+          , Permet: {%  for ability in stuff.abilities %}"{{ game.config.abilities[ability].name }}" {% endfor %}
+        {% endif %}
+        {% if stuff.skills_bonus %}
+          , Bonus: {%  for skill in stuff.skills_bonus %}"{{ game.config.skills[skill].name }}" {% endfor %}
         {% endif %}
       </li>
     {% endfor %}
@@ -144,14 +150,46 @@
   </ul>
 
   {% for action_type, action_descriptions in game.config.actions.items() %}
-    <h3>{{ action_type.value }}</h3>
-
-    <ul>
     {% for action_description in action_descriptions %}
-      <li>{{ action_description.id }}</li>
+      {% if action_description.name %}
+        <h3>{{ action_description.name }}</h3>
+        <ul>
+          <li>Type d'action: {{ action_type.name }}</li>
+          {% if action_description.properties.required_one_of_stuff_ids %}
+            <li>
+              Requiert un des objets :
+              {% for required_stuff_id in action_description.properties.required_one_of_stuff_ids %}
+                {{ game.stuff_manager.get_stuff_properties_by_id(required_stuff_id).name }},
+              {% endfor %}
+            </li>
+          {% endif %}
+          {% if action_description.properties.required_all_stuff_ids %}
+            <li>
+              Requiert tous les objets :
+              {% for required_stuff_id in action_description.properties.required_all_stuff_ids %}
+                {{ game.stuff_manager.get_stuff_properties_by_id(required_stuff_id).name }},
+              {% endfor %}
+            </li>
+          {% endif %}
+          {% if action_description.properties.required_one_of_abilities %}
+            <li>
+              Requiert une des abilités :
+              {% for ability in action_description.properties.required_one_of_abilities %}
+                {{ ability.name }},
+              {% endfor %}
+            </li>
+          {% endif %}
+          {% if action_description.properties.required_all_abilities %}
+            <li>
+              Requiert les abilités :
+              {% for ability in action_description.properties.required_all_abilities %}
+                {{ ability.name }},
+              {% endfor %}
+            </li>
+          {% endif %}
+        </ul>
+      {% endif %}
     {% endfor %}
-    </ul>
-
   {% endfor %}
 
 </body>

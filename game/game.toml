@@ -146,6 +146,11 @@ tile_clutter_capacity = 25.0
   type = "3.Spécifique"
   default = 0.0
 
+[skill.dagger_fight]
+  name = "Combat a la dague"
+  type = "3.Spécifique"
+  default = 0.0
+
 
 [knowledge]
 [knowledge.basketry]
@@ -968,7 +973,7 @@ tile_clutter_capacity = 25.0
     ]
     cost = 6.0
 
-  [ACTIONS.CRAFT_WOOD_SPEAR]
+  [ACTIONS.CRAFT_STONE_SPEAR]
     name = "Fabriquer une lance de bois"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
@@ -978,7 +983,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {stuff="WOOD_SPEAR", quantity=1.0},
+      {stuff="STONE_SPEAR", quantity=1.0},
     ]
     require = [
       {resource="WOOD", quantity=0.002}
@@ -1215,7 +1220,7 @@ tile_clutter_capacity = 25.0
     link_group_name = "Artisanat d'art"
 
   [ACTIONS.CONSTRUCT_PRIMITIVE_WOOD_SHIELD]
-    name = "Coque de bois"
+    name = "Fabriquer une coque de bois"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1229,6 +1234,78 @@ tile_clutter_capacity = 25.0
       {resource="WOOD", quantity=0.05}  # FIXME: in action, accept stuff to as required
     ]
     craft_ap = 16.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_LEATHER_SHIELD]
+    name = "Fabriquer un bouclier de cuir"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["LEATHERWORK"]
+    required_all_ability_ids = []
+    produce_stuff_id = "LEATHER_SHIELD"
+    default_description = "En cuir repoussé et martelé"
+    consume = [
+      {resource="LEATHER_PIECE", quantity=7}
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_COPPER_SHIELD]
+    name = "Fabriquer un bouclier de cuivre"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "COPPER_SHIELD"
+    default_description = "Plusieurs couches de cuivres superposées"
+    consume = [
+      {resource="COPPER", quantity=2000.0}
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_BRONZE_SHIELD]
+    name = "Fabriquer un bouclier de bronze"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "COPPER_SHIELD"
+    default_description = "Bouclier fait de bronze"
+    consume = [
+      {resource="BRONZE", quantity=1900.0}
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_IRON_SHIELD_HEATER]
+    name = "Fabriquer un écu"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "IRON_SHIELD_HEATER"
+    default_description = "Bouclier triangulaire en fer"
+    consume = [
+      {resource="IRON", quantity=1700.0}
+    ]
+    craft_ap = 20.0
     cost = 2.0
     link_group_name = "Matériel de guerre"
 
@@ -1257,7 +1334,7 @@ tile_clutter_capacity = 25.0
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
-    required_one_of_ability_ids = []
+    required_one_of_ability_ids = ["LEATHERWORK"]
     required_all_ability_ids = []
     produce_stuff_id = "LEATHER_CLOTHES"
     default_description = "Fait de plusieurs pièces de cuir"
@@ -1284,7 +1361,43 @@ tile_clutter_capacity = 25.0
     ]
     craft_ap = 35.0
     cost = 1.0
-    link_group_name = "Vestimentaire"
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_BRONZE_CUIRASS]
+    name = "Faire une cuirasse de bronze"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "BRONZE_CUIRASS"
+    default_description = "Plastron et dossière de bronze"
+    consume = [
+      {resource="BRONZE", quantity=1900.0}
+    ]
+    craft_ap = 35.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_IRON_CUIRASS]
+    name = "Faire une cuirasse de fer"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "IRON_CUIRASS"
+    default_description = "Plastron et dossière de fer"
+    consume = [
+      {resource="IRON", quantity=1800.0}
+    ]
+    craft_ap = 38.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_BASKETRY_BAG]
     name = "Sac végétal"
@@ -1374,6 +1487,186 @@ tile_clutter_capacity = 25.0
     craft_ap = 15.0
     cost = 1.0
     link_group_name = "Utilitaire"
+
+  [ACTIONS.CONSTRUCT_CLUTTER_HAXE]
+    name = "Fabriquer une hache de cuivre"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "BRONZE_HAXE"
+    default_description = "Manche en bois et petite lame de cuivre"
+    consume = [
+      {resource="CLUTTER", quantity=900.0}
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_BRONZE_HAXE]
+    name = "Fabriquer une hache de bronze"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "BRONZE_HAXE"
+    default_description = "Manche en bois et petite lame de bronze"
+    consume = [
+      {resource="BRONZE", quantity=880.0}
+    ]
+    craft_ap = 20.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_IRON_HAXE]
+    name = "Fabriquer une hache de fer"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "IRON_HAXE"
+    default_description = "Manche en bois et lame de fer"
+    consume = [
+      {resource="IRON", quantity=700.0}
+    ]
+    craft_ap = 24.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_STONE_DAGGER]
+    name = "Fabriquer une dague de pierre"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "STONE_DAGGER"
+    default_description = "Taillé dans de la pierre"
+    consume = [
+      {resource="RAW_STONE", quantity=1}
+    ]
+    craft_ap = 3.0
+    cost = 1.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_COPPER_DAGGER]
+    name = "Fabriquer une dague de cuivre"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "COPPER_DAGGER"
+    default_description = "D'une pièce de cuivre"
+    consume = [
+      {resource="COPPER", quantity=500.0}
+    ]
+    craft_ap = 19.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_BRONZE_DAGGER]
+    name = "Fabriquer une dague de bronze"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "BRONZE_DAGGER"
+    default_description = "D'une pièce de bronze"
+    consume = [
+      {resource="BRONZE", quantity=450.0}
+    ]
+    craft_ap = 19.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_IRON_DAGGER]
+    name = "Fabriquer une dague de fer"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "IRON_DAGGER"
+    default_description = "D'une pièce de fer"
+    consume = [
+      {resource="IRON", quantity=400.0}
+    ]
+    craft_ap = 21.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_CLUTTER_SPEAR]
+    name = "Fabriquer une lance de cuivre"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "CLUTTER_SPEAR"
+    default_description = "Pointe de cuivre"
+    consume = [
+      {resource="CLUTTER", quantity=500.0}
+    ]
+    craft_ap = 19.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_BRONZE_SPEAR]
+    name = "Fabriquer une lance de bronze"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "BRONZE_SPEAR"
+    default_description = "Pointe de bronze"
+    consume = [
+      {resource="BRONZE", quantity=450.0}
+    ]
+    craft_ap = 19.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CONSTRUCT_IRON_SPEAR]
+    name = "Fabriquer une lance de fer"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
+    produce_stuff_id = "IRON_SPEAR"
+    default_description = "Pointe de fer"
+    consume = [
+      {resource="IRON", quantity=400.0}
+    ]
+    craft_ap = 21.0
+    cost = 2.0
+    link_group_name = "Matériel de guerre"
 
   [ACTIONS.SEARCH_WOOD]
     name = "Chercher du bois (construction/artisanat)"

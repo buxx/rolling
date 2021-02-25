@@ -32,3 +32,15 @@
 * copper.png by https://en.wikipedia.org/wiki/File:NatCopper.jpg
 * tin.png by https://commons.wikimedia.org/wiki/File:Sn-Alpha-Beta.jpg
 * iron.png by https://commons.wikimedia.org/wiki/File:Widmanstatten_hand.jpg
+* bronze_cuirass.png by mharrsch is licensed with CC BY 2.0
+* iron_cuirass.png by https://en.wikipedia.org/wiki/File:Indian_steel_cuirass_17th_to_18th_century.JPG
+* leather_shield.png by https://commons.wikimedia.org/wiki/File:Glagwa_shield.jpg?uselang=fr
+* copper_shield.png by https://commons.wikimedia.org/wiki/File:Amphora_phalanx_Staatliche_Antikensammlungen_1429.jpg?uselang=fr
+* bronze_shield.png by https://pt.wikipedia.org/wiki/%C3%81spide#/media/Ficheiro:Boucliers_grecs_Arverniales_2011.JPG
+* clutter_axe.png by https://fr.wikipedia.org/wiki/%C3%82ge_du_cuivre#/media/Fichier:ReconstructedOetziAxe.jpg
+* bronze_axe.png by https://fi.wikipedia.org/wiki/Putkikirves#/media/Tiedosto:Kultura_%C5%82u%C5%BCycka,_lusatian_culture.JPG
+* iron_axe.png by https://de.wikipedia.org/wiki/Streitaxt#/media/Datei:Dane_Axe.JPG
+* stone_dagger.png by https://commons.wikimedia.org/wiki/File:Poignard_0.188.1_2_fond.jpg?uselang=fr
+* copper_dagger.png by https://commons.wikimedia.org/wiki/File:Celtic_dagger,_scabbard_and_buckle.JPG?uselang=fr
+* bronze_dagger.png by https://commons.wikimedia.org/wiki/File:Celtic_dagger,_scabbard_and_buckle.JPG?uselang=fr
+* iron_dagger.png by https://commons.wikimedia.org/wiki/File:Pu%C3%B1al_%C3%ADbero_de_front%C3%B3n_(M.A.N.)_01.jpg?uselang=fr
