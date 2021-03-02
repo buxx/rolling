@@ -193,8 +193,9 @@ class ClickActionProcessor(EventProcessor):
             action.check_request_is_possible(character, input_)
             zone_events, sender_events = action.perform_from_event(character, input_)
         except ImpossibleAction as exc:
-            await sender_socket.send_str(
-                self._kernel.event_serializer_factory.get_serializer(
+            await self._kernel.server_zone_events_manager.respond_to_socket(
+                socket=sender_socket,
+                event_str=self._kernel.event_serializer_factory.get_serializer(
                     ZoneEventType.TOP_BAR_MESSAGE
                 ).dump_json(
                     WebSocketEvent(
@@ -206,7 +207,7 @@ class ClickActionProcessor(EventProcessor):
                             type_=TopBarMessageType.ERROR,
                         ),
                     )
-                )
+                ),
             )
             return
 
@@ -218,7 +219,10 @@ class ClickActionProcessor(EventProcessor):
                 sender_event.type
             ).dump_json(sender_event)
             server_logger.debug(f"Send event on socket: {event_str}")
-            await sender_socket.send_str(event_str)
+            await self._kernel.server_zone_events_manager.respond_to_socket(
+                socket=sender_socket,
+                event_str=event_str,
+            )
 
 
 class RequestChatProcessor(EventProcessor):
@@ -294,7 +298,10 @@ class RequestChatProcessor(EventProcessor):
             event_str = self._kernel.event_serializer_factory.get_serializer(
                 ZoneEventType.NEW_CHAT_MESSAGE
             ).dump_json(new_chat_message_event)
-            await sender_socket.send_str(event_str)
+            await self._kernel.server_zone_events_manager.respond_to_socket(
+                socket=sender_socket,
+                event_str=event_str,
+            )
 
 
 class NewChatMessageProcessor(EventProcessor):
