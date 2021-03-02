@@ -63,6 +63,8 @@ class ZoneController(BaseController):
             row_i=int(request.match_info["row_i"]),
             col_i=int(request.match_info["col_i"]),
             character_id=request.query["character_id"],
+            reader_token=request.query.get("reader_token"),
+            token=request.query.get("token"),
         )
 
     @hapic.with_api_doc()

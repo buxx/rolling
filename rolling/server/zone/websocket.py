@@ -25,6 +25,8 @@ class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
         self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[web.WebSocketResponse]] = {}
         self._sockets_character_id: typing.Dict[web.WebSocketResponse, str] = {}
+        self._sockets_associated_reader_token: typing.Dict[web.WebSocketResponse, str] = {}
+        self._sockets_by_token: typing.Dict[str, web.WebSocketResponse] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
         self._loop = loop or asyncio.get_event_loop()
@@ -34,9 +36,9 @@ class ZoneEventsManager:
         return self._sockets_character_id[socket]
 
     async def get_new_socket(
-        self, request: Request, row_i: int, col_i: int, character_id: str
+        self, request: Request, row_i: int, col_i: int, character_id: str, reader_token: typing.Optional[str] = None, token: typing.Optional[str] = None
     ) -> web.WebSocketResponse:
-        server_logger.info(f"Create websocket for zone {row_i},{col_i}")
+        server_logger.info(f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})")
 
         # Create socket
         socket = web.WebSocketResponse()
@@ -49,6 +51,12 @@ class ZoneEventsManager:
         # Make it available for send job
         self._sockets.setdefault((row_i, col_i), []).append(socket)
         self._sockets_character_id[socket] = character_id
+
+        if token:
+            self._sockets_by_token[token] = socket
+
+        if reader_token:
+            self._sockets_associated_reader_token[socket] = reader_token
 
         # Start to listen client messages
         try:
@@ -167,3 +175,17 @@ class ZoneEventsManager:
             self.get_character_id_for_socket(socket)
             for socket in self.get_sockets(world_row_i, world_col_i)
         ]
+
+    async def respond_to_socket(self, socket: web.WebSocketResponse, event_str: str) -> None:
+        associated_reader_token = self._sockets_associated_reader_token.get(socket)
+
+        if not associated_reader_token:
+            await socket.send_str(event_str)
+            return
+
+        associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
+        if not associated_reader_ws:
+            server_logger.warning("No associated reader ws for response !")
+            return
+
+        await associated_reader_ws.send_str(event_str)

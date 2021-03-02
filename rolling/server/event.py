@@ -160,7 +160,10 @@ class ThereIsAroundProcessor(EventProcessor):
         event_str = self._kernel.event_serializer_factory.get_serializer(
             ZoneEventType.THERE_IS_AROUND
         ).dump_json(around_event)
-        await sender_socket.send_str(event_str)
+        await self._kernel.server_zone_events_manager.respond_to_socket(
+            socket=sender_socket,
+            event_str=event_str,
+        )
 
 
 class ClickActionProcessor(EventProcessor):
