@@ -36,7 +36,8 @@ def get_application(kernel: Kernel) -> Application:
             "/account/generate_new_password",
             "/account/password_lost",
             "/world/events",
-        ):
+            "/world/source",
+        ) and not request.path.startswith("/ac/") and not request.path.startswith("/zones/"):
             try:
                 login, password = base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
             except (KeyError, IndexError, ValueError):
