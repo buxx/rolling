@@ -35,6 +35,7 @@ def get_application(kernel: Kernel) -> Application:
             "/media_bg",
             "/account/generate_new_password",
             "/account/password_lost",
+            "/world/events",
         ):
             try:
                 login, password = base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
