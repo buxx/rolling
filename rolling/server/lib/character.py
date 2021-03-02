@@ -281,6 +281,7 @@ class CharacterLib:
             skills=skills,
             knowledges=knowledges,
             ability_ids=ability_ids,
+            alive=character_document.alive,
         )
 
     def get_multiple(self, character_ids: typing.List[str]) -> typing.List[CharacterModel]:

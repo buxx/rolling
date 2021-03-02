@@ -78,6 +78,7 @@ class Description:
     disable_illustration_row: bool = False
     is_long_text: bool = False
     new_character_id: typing.Optional[str] = None
+    account_created: bool = False
     redirect: typing.Optional[str] = None
     can_be_back_url: bool = False
     request_clicks: typing.Optional[RequestClicks] = None

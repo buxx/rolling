@@ -311,6 +311,7 @@ class DescribeStoryQueryModel:
 class CharacterModel:
     id: str
     name: str
+    alive: bool
 
     background_story: str
     max_life_comp: float

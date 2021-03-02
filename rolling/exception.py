@@ -170,3 +170,28 @@ class WrongStrInput(RollingError):
 
 class ErrorWhenConsume(RollingError):
     pass
+
+
+class AccountError(UserDisplayError):
+    pass
+
+
+class AccountNotFound(AccountError):
+    pass
+
+
+class UsernameAlreadyUsed(AccountError):
+    pass
+
+
+class EmailAlreadyUsed(AccountError):
+    pass
+
+
+class EmailWrongFormat(AccountError):
+    pass
+
+
+class NotSamePassword(AccountError):
+    pass
+

@@ -1155,8 +1155,6 @@ class CharacterController(BaseController):
 
         return Description(
             title=event.text,
-            image_id=story_page.image_id,
-            image_extension=story_page.image_extension,
             is_long_text=True,
             items=items,
             footer_links=footer_links,
@@ -1606,6 +1604,10 @@ class CharacterController(BaseController):
 
         character_id = self._character_lib.create(data["name"], skills, knowledges)
         character_doc = self._kernel.character_lib.get_document(character_id)
+        account = self._kernel.account_lib.get_account_for_id(request["account_id"])
+        account.current_character_id = character_id
+        self._kernel.server_db_session.add(account)
+        self._kernel.server_db_session.commit()
 
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,

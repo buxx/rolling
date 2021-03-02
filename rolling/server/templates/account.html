@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rolling: Mon compte</title>
+</head>
+<body>
+  <h1>Mon compte sur Rolling</h1>
+
+  {% if message %}
+  <p style="color: {% if message_type == "error" %}darkred{% endif %}{% if message_type == "success" %}darkgreen{% endif %};">
+    {{ message }}
+  </p>
+  {% endif %}
+
+  <ul>
+    <li>Email: {{ account.email }}</li>
+    {% if character %}
+      <li>Personnage: {{ character.name }} {% if not character.alive %}(mort){% endif %}</li>
+    {% else %}
+      <li>Personnage: aucun</li>
+    {% endif %}
+  </ul>
+
+  <h2>Changer d'email</h2>
+
+  <p>Soyez extrêmement attentif à ne pas faire d'erreur dans l'email. Autrement vous ne pourrez plus réinitialiser votre mot de passe.</p>
+
+  <form method="post">
+    <label for="new_email">Nouvel email</label>
+    <input type="text" name="new_email" id="new_email" size="32">
+    <input type="submit" value="Changer mon email">
+  </form>
+
+  <h2>Changer de mot de passe</h2>
+
+  <form method="post">
+    <label for="current_password">Mot de passe actuel</label>
+    <input type="password" name="current_password" id="current_password" size="21">
+    <label for="new_password1">Nouveau mot de passe</label>
+    <input type="password" name="new_password1" id="new_password1" size="21">
+    <label for="new_password2">Répétez le nouveau mot de passe</label>
+    <input type="password" name="new_password2" id="new_password2" size="21">
+    <input type="submit" value="Changer mon mot de passe">
+  </form>
+
+</body>

@@ -15,6 +15,7 @@ def get_kernel(
     world_map_source_path: typing.Optional[str] = None,
     tile_maps_folder_path: typing.Optional[str] = None,
     game_config_folder: typing.Optional[str] = None,
+    server_config_file_path: str = "./server.ini",
 ) -> "Kernel":
     from rolling.kernel import Kernel
 
@@ -34,6 +35,7 @@ def get_kernel(
         loop=loop,
         tile_maps_folder=tile_maps_folder_path,
         game_config_folder=game_config_folder,
+        server_config_file_path=server_config_file_path,
     )
 
     kernel.init_server_db_session()

@@ -60,6 +60,7 @@ def run(args: argparse.Namespace) -> None:
         args.world_map_source,
         args.tile_maps_folder,
         args.game_config_folder,
+        args.server_config_file_path,
     )
     server_logger.info("Create web application")
     app = get_application(kernel)
@@ -103,6 +104,7 @@ def main() -> None:
     parser.add_argument("world_map_source", type=str, help="Raw world source map file path")
     parser.add_argument("tile_maps_folder", type=str, help="Tile maps sources files folder path")
     parser.add_argument("game_config_folder", type=str, help="Directory path with game configs")
+    parser.add_argument("server_config_file_path", type=str, help="server config file path", default="./server.ini")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")

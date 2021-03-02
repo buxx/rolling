@@ -1,8 +1,15 @@
 # coding: utf-8
+import base64
+
 from aiohttp import web
 from aiohttp.web_app import Application
+from aiohttp.web_middlewares import middleware
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 
+from rolling.exception import AccountNotFound
 from rolling.kernel import Kernel
+from rolling.server.controller.account import AccountController
 from rolling.server.controller.admin import AdminController
 from rolling.server.controller.affinity import AffinityController
 from rolling.server.controller.build import BuildController
@@ -17,7 +24,35 @@ from rolling.server.controller.zone import ZoneController
 
 
 def get_application(kernel: Kernel) -> Application:
-    app = web.Application()
+    @middleware
+    async def auth(request: Request, handler):
+        if request.path not in (
+            "/account/create",
+            "/system/version",
+            "/system/describe/infos",
+            "/infos",
+            "/media",
+            "/media_bg",
+            "/account/generate_new_password",
+            "/account/password_lost",
+        ):
+            try:
+                login, password = base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
+            except (KeyError, IndexError, ValueError):
+                return Response(status=401, headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'})
+            try:
+                account = kernel.account_lib.get_account_for_credentials(
+                    login=login, password=password,
+                )
+            except AccountNotFound:
+                return Response(status=401, headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'})
+
+            request["account_id"] = account.id
+            request["account_character_id"] = account.current_character_id
+
+        return await handler(request)
+
+    app = web.Application(middlewares=[auth])
 
     # Bind routes
     CommonController(kernel).bind(app)
@@ -32,5 +67,6 @@ def get_application(kernel: Kernel) -> Application:
     AdminController(kernel).bind(app)
     SystemController(kernel).bind(app)
     AnimatedCorpseController(kernel).bind(app)
+    AccountController(kernel).bind(app)
 
     return app

@@ -1,22 +1,21 @@
 # coding: utf-8
+import configparser
+import dataclasses
 from asyncio import AbstractEventLoop
 import datetime
 import glob
 import ntpath
 import os
-from os import path
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-import toml
 import typing
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
 from rolling.game.base import Game
-from rolling.game.base import GameConfig
 from rolling.log import kernel_logger
 from rolling.map.legend import WorldMapLegend
 from rolling.map.legend import ZoneMapLegend
@@ -36,6 +35,7 @@ from rolling.server.document.universe import UniverseStateDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import ClientSideDocument
 from rolling.server.extension import ServerSideDocument
+from rolling.server.lib.account import AccountLib
 from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
@@ -51,6 +51,16 @@ from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 
 
+@dataclasses.dataclass
+class ServerConfig:
+    base_url: str
+    sender_email: str
+    smtp_server: str
+    smtp_port: str
+    smtp_user: str
+    smtp_password: str
+
+
 class Kernel:
     def __init__(
         self,
@@ -59,6 +69,7 @@ class Kernel:
         tile_maps_folder: typing.Optional[str] = None,
         game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
+        server_config_file_path: str = "./server.ini",
     ) -> None:
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
@@ -70,6 +81,10 @@ class Kernel:
             typing.Dict[typing.Tuple[int, int], ZoneMap]
         ] = None
         self._game: typing.Optional[Game] = None
+
+        server_config_reader = configparser.ConfigParser()
+        server_config_reader.read(server_config_file_path)
+        self.server_config = ServerConfig(**server_config_reader["default"])
 
         # Database stuffs
         self._client_db_path = client_db_path
@@ -118,6 +133,7 @@ class Kernel:
         self._business_lib: typing.Optional[BusinessLib] = None
         self._fight_lib: typing.Optional[FightLib] = None
         self._animated_corpse_lib: typing.Optional[AnimatedCorpseLib] = None
+        self._account_lib: typing.Optional[AccountLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -184,6 +200,12 @@ class Kernel:
         if self._animated_corpse_lib is None:
             self._animated_corpse_lib = AnimatedCorpseLib(self)
         return self._animated_corpse_lib
+
+    @property
+    def account_lib(self) -> AccountLib:
+        if self._account_lib is None:
+            self._account_lib = AccountLib(self)
+        return self._account_lib
 
     @property
     def action_factory(self) -> ActionFactory:
