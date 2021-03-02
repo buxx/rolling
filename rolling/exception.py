@@ -41,7 +41,8 @@ class WebsocketError(RollingError):
 
 
 class DisconnectClient(WebsocketError):
-    pass
+    def __init__(self, socket) -> None:
+        self.socket = socket
 
 
 class EventError(RollingError):

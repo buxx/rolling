@@ -85,7 +85,7 @@ class ClientWantCloseProcessor(EventProcessor):
         event: WebSocketEvent[PlayerMoveData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        raise DisconnectClient()
+        raise DisconnectClient(sender_socket)
 
 
 class ThereIsAroundProcessor(EventProcessor):

@@ -81,8 +81,9 @@ class ZoneEventsManager:
             else:
                 try:
                     await self._process_msg(row_i, col_i, msg, socket)
-                except DisconnectClient:
-                    await socket.send_str(
+                except DisconnectClient as exc:
+                    await self.respond_to_socket(
+                        exc.socket,
                         self._event_serializer_factory.get_serializer(
                             ZoneEventType.SERVER_PERMIT_CLOSE
                         ).dump_json(
@@ -183,9 +184,11 @@ class ZoneEventsManager:
             await socket.send_str(event_str)
             return
 
-        associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
-        if not associated_reader_ws:
-            server_logger.warning("No associated reader ws for response !")
+        if associated_reader_token not in self._sockets_by_token:
+            server_logger.warning(f"No associated reader ws for toen '{associated_reader_token}' !")
             return
 
+        associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
         await associated_reader_ws.send_str(event_str)
+
+        # FIXME BS NOW: remove websockets (and from _sockets_by_token, _sockets_associated_reader_token, ...)
