@@ -63,7 +63,7 @@ def run(args: argparse.Namespace) -> None:
         args.server_config_file_path,
     )
     server_logger.info("Create web application")
-    app = get_application(kernel)
+    app = get_application(kernel, disable_auth=args.disable_auth)
     aiohttp_jinja2.setup(
         app,
         loader=jinja2.FileSystemLoader(
@@ -112,6 +112,7 @@ def main() -> None:
     parser.add_argument("--server-db-path", type=str, help="path of server.db", default="server.db")
     parser.add_argument("--admin-login", type=str, default="adminRoll")
     parser.add_argument("--admin-password", type=str, default="RollNRoll42")
+    parser.add_argument("--disable-auth", action="store_true", default=False)
 
     args = parser.parse_args()
     run(args)

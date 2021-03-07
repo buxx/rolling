@@ -240,7 +240,7 @@ def initial_universe_state(
 
 @pytest.fixture
 def worldmapc_web_app(worldmapc_kernel: Kernel, loop, aiohttp_client) -> TestClient:
-    app = get_application(worldmapc_kernel)
+    app = get_application(worldmapc_kernel, disable_auth=True)
     context = AiohttpContext(app, debug=True, default_error_builder=ErrorBuilder())
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(Exception, http_code=500)

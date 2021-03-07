@@ -23,9 +23,12 @@ from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
 
 
-def get_application(kernel: Kernel) -> Application:
+def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
     @middleware
     async def auth(request: Request, handler):
+        if disable_auth:
+            return await handler(request)
+
         if request.path not in (
             "/account/create",
             "/system/version",
