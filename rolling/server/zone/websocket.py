@@ -46,12 +46,12 @@ class ZoneEventsManager:
 
         try:
             del self._sockets_character_id[socket_to_remove]
-        except IndexError:
+        except KeyError:
             pass
 
         try:
             del self._sockets_associated_reader_token[socket_to_remove]
-        except IndexError:
+        except KeyError:
             pass
 
         for token, socket in self._sockets_by_token.items():
