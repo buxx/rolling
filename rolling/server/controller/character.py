@@ -1171,7 +1171,6 @@ class CharacterController(BaseController):
         )
         return Description(
             title=stuff.get_name_and_light_description(self._kernel),
-            image=stuff.image,
             items=[
                 Part(
                     text=action.get_as_str(),
