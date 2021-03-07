@@ -40,7 +40,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             "/account/password_lost",
             "/world/events",
             "/world/source",
-        ) and not request.path.startswith("/ac/") and not request.path.startswith("/zones/"):
+        ) and not request.path.startswith("/ac/") and not request.path.startswith("/zones/") and not request.path.startswith("/admin"):
             try:
                 login, password = base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
             except (KeyError, IndexError, ValueError):
