@@ -728,6 +728,7 @@ class AffinityController(BaseController):
         form_parts = []
         for request in requests:
             character = self._kernel.character_lib.get_document(request.character_id)
+            form_parts.append(Part(text=f"{character.name}"))
             form_parts.append(
                 Part(
                     label=f"{character.name}",
