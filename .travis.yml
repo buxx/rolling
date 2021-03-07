@@ -9,7 +9,7 @@ install:
   - "pip install -r requirements.txt"
   - "pip install -e '.[dev]'"
   - "python setup.py develop"
-  - "cp server.ini.tpl server.ini
+  - "cp server.ini.tpl server.ini"
 before_script:
   - psql -c 'CREATE DATABASE rolling;' -U postgres
   - psql -c "CREATE USER rolling WITH PASSWORD 'rolling';" -U postgres
