@@ -35,6 +35,29 @@ class ZoneEventsManager:
     def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
         return self._sockets_character_id[socket]
 
+    def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
+        socket_to_remove.close()
+
+        for sockets in self._sockets.values():
+            try:
+                sockets.remove(socket_to_remove)
+            except ValueError:
+                pass
+
+        try:
+            del self._sockets_character_id[socket_to_remove]
+        except IndexError:
+            pass
+
+        try:
+            del self._sockets_associated_reader_token[socket_to_remove]
+        except IndexError:
+            pass
+
+        for token, socket in self._sockets_by_token.items():
+            if socket == socket_to_remove:
+                del self._sockets_by_token[token]
+
     async def get_new_socket(
         self, request: Request, row_i: int, col_i: int, character_id: str, reader_token: typing.Optional[str] = None, token: typing.Optional[str] = None
     ) -> web.WebSocketResponse:
@@ -66,8 +89,7 @@ class ZoneEventsManager:
 
         # If this code reached: ws is disconnected
         server_logger.debug(f"remove websocket ({row_i},{col_i})")
-        self._sockets[(row_i, col_i)].remove(socket)
-        del self._sockets_character_id[socket]
+        self.close_websocket(socket)
 
         return socket
 
@@ -190,5 +212,3 @@ class ZoneEventsManager:
 
         associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
         await associated_reader_ws.send_str(event_str)
-
-        # FIXME BS NOW: remove websockets (and from _sockets_by_token, _sockets_associated_reader_token, ...)
