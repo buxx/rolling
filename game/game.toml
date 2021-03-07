@@ -357,10 +357,10 @@ tile_clutter_capacity = 25.0
 
   [resources.SHELLFISH_FRESH]
     name = "Fruits de mers frais"
-    weight=1000.0  # g
+    weight=1.0
     material="MIDDLE_PIECE"
-    unit = "L"
-    clutter = 1.0
+    unit = "G"
+    clutter = 0.001
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "shellfish.png"
 
@@ -921,7 +921,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="SHELLFISH_FRESH", quantity=5.0, probability=100.0},
+      {resource="SHELLFISH_FRESH", quantity=5000.0, probability=90.0},
     ]
     cost = 6.0
 
