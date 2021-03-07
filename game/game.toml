@@ -530,15 +530,15 @@ tile_clutter_capacity = 25.0
 
   [extractions.DIRT]
     tile="DIRT"
-    resources=[{resource_id="DIRT", cost_per_unit=0.1, default_quantity=1.0}]
+    resources=[{resource_id="DIRT", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.HIGH_GRASS]
     tile="HIGH_GRASS"
-    resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
+    resources=[{resource_id="DIRT", cost_per_unit=0.05, default_quantity=1.0}]
 
   [extractions.SHORT_GRASS]
     tile="SHORT_GRASS"
-    resources=[{resource_id="DIRT", cost_per_unit=0.15, default_quantity=1.0}]
+    resources=[{resource_id="DIRT", cost_per_unit=0.05, default_quantity=1.0}]
 
 #  [extractions.COPPER_DEPOSIT]
 #    tile="COPPER_DEPOSIT"
