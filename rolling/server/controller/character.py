@@ -1284,7 +1284,7 @@ class CharacterController(BaseController):
     @hapic.output_body(Description)
     async def _choose_between_stuff(self, request: Request, hapic_data: HapicData) -> Description:
         stuffs = self._kernel.stuff_lib.get_carried_by(
-            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
+            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id, exclude_crafting=False
         )
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             hapic_data.path.stuff_id
@@ -1293,7 +1293,8 @@ class CharacterController(BaseController):
         parts = []
         for stuff in stuffs:
             description_str = ", ".join(stuff.get_full_description(self._kernel))
-            label = f"{stuff_properties.name} ({description_str})"
+            under_construction_str = "*" if stuff.under_construction else ""
+            label = f"{under_construction_str}{stuff_properties.name} ({description_str})"
             parts.append(
                 Part(
                     label=label,
