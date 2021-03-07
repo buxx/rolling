@@ -38,11 +38,11 @@ class SystemController(BaseController):
             title="Informations sur le serveur",
             items=[
                 Part(
-                    label="Ouvrir la page des informations gameplay",
+                    label="Ouvrir la page des informations gameplay (web)",
                     is_link=True,
                     is_web_browser_link=True,
                     # FIXME BS NOW: protocol
-                    form_action=f"http://{request.host}/infos",
+                    form_action=f"{self._kernel.server_config.base_url}/infos",
                 ),
             ],
         )
