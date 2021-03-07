@@ -106,7 +106,7 @@ class BaseCraftStuff:
                         unit=carried_resource.unit,
                     )
                     raise ImpossibleAction(
-                        f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} nécessaire(s)"
+                        f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} de plus nécessaire(s)"
                     )
 
                 if not dry_run:
