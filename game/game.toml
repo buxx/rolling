@@ -500,15 +500,15 @@ tile_clutter_capacity = 25.0
 [extractions]
   [extractions.FRESH_WATER]
     tile="FRESH_WATER"
-    resources=[{resource_id="FRESH_WATER", cost_per_unit=0.1, default_quantity=1.0}]
+    resources=[{resource_id="FRESH_WATER", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.SEA_WATER]
     tile="SEA_WATER"
-    resources=[{resource_id="SALTED_WATER", cost_per_unit=0.1, default_quantity=1.0}]
+    resources=[{resource_id="SALTED_WATER", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.SAND]
     tile="SAND"
-    resources=[{resource_id="BEACH_SAND", cost_per_unit=0.1, default_quantity=1.0}]
+    resources=[{resource_id="BEACH_SAND", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.DEAD_TREE]
     tile="DEAD_TREE"
