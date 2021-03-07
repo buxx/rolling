@@ -68,6 +68,10 @@ def worldmapsourcec_txt() -> str:
 
 def _erase_db(kernel: Kernel) -> Kernel:
     kernel.init_server_db_session()
+
+    # To prevent foreign key error, delete some table fist
+    kernel.server_db_session.execute(ServerSideDocument.metadata.tables["character_skill"].delete())
+
     for table in reversed(ServerSideDocument.metadata.sorted_tables):
         kernel.server_db_session.execute(table.delete())
     kernel.server_db_session.commit()
