@@ -4,6 +4,8 @@ Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [ro
 
 ![Rollgui screenshot](https://redbricks.games/uploads/117/game/Coffee_231_illustration.png)
 
+To see information about how to play, please visit [this page](./pages)
+
 # Installation
 
 A python3.7+ is required. If you use debian, debian 10 is required if you want to use OS python packaged. But you can compile python3.7 on your system.
