@@ -185,7 +185,7 @@ class SearchFoodAction(CharacterAction):
                 Part(
                     text=(
                         "Vous n'avez rien trouvé ! Cela peut s'expliquer par de la malchance, "
-                        "de l'incompétence, ou de l'intelligence (si vous avez cherché quelque "
+                        "de l'incompétence, ou qu'il n'y en pas ici (si vous avez cherché quelque "
                         "chose que l'on ne trouve pas dans cette zone ...)"
                     )
                 )
