@@ -4,7 +4,7 @@ Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [ro
 
 ![Rollgui screenshot](https://redbricks.games/uploads/117/game/Coffee_231_illustration.png)
 
-To see information about how to play, please visit [this page](https://buxx.github.io/rolling/)
+To see information about how to play, please visit [this page](https://buxx.github.io/rolling/pages/)
 
 # Installation
 
