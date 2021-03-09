@@ -452,7 +452,7 @@ tile_clutter_capacity = 25.0
     weight=3500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 1.0
+    clutter = 0.1
     actions = ["DROP_RESOURCE"]
     illustration = "raw_brick.png"
 
@@ -461,7 +461,7 @@ tile_clutter_capacity = 25.0
     weight=3000.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 1.0
+    clutter = 0.1
     actions = ["DROP_RESOURCE"]
     illustration = "fired_brick.png"
 
