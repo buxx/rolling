@@ -1,11 +1,10 @@
 # coding: utf-8
-import base64
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_middlewares import middleware
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+import base64
 
 from rolling.exception import AccountNotFound
 from rolling.kernel import Kernel
@@ -29,28 +28,43 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         if disable_auth:
             return await handler(request)
 
-        if request.path not in (
-            "/account/create",
-            "/system/version",
-            "/system/describe/infos",
-            "/infos",
-            "/media",
-            "/media_bg",
-            "/account/generate_new_password",
-            "/account/password_lost",
-            "/world/events",
-            "/world/source",
-        ) and not request.path.startswith("/ac/") and not request.path.startswith("/zones/") and not request.path.startswith("/admin"):
+        if (
+            request.path
+            not in (
+                "/account/create",
+                "/system/version",
+                "/system/describe/infos",
+                "/infos",
+                "/media",
+                "/media_bg",
+                "/account/generate_new_password",
+                "/account/password_lost",
+                "/world/events",
+                "/world/source",
+            )
+            and not request.path.startswith("/ac/")
+            and not request.path.startswith("/zones/")
+            and not request.path.startswith("/admin")
+        ):
             try:
-                login, password = base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
+                login, password = (
+                    base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
+                )
             except (KeyError, IndexError, ValueError):
-                return Response(status=401, headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'})
+                return Response(
+                    status=401,
+                    headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'},
+                )
             try:
                 account = kernel.account_lib.get_account_for_credentials(
-                    login=login, password=password,
+                    login=login,
+                    password=password,
                 )
             except AccountNotFound:
-                return Response(status=401, headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'})
+                return Response(
+                    status=401,
+                    headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'},
+                )
 
             request["account_id"] = account.id
             request["account_character_id"] = account.current_character_id

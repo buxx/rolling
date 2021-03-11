@@ -91,7 +91,9 @@ class AffinityController(BaseController):
                     is_link=True,
                     form_action=f"/affinity/{hapic_data.path.character_id}/list",
                 ),
-                Part(text="Ci-dessous les affinités avec lesquelles vous etes ou avez été affiliés"),
+                Part(
+                    text="Ci-dessous les affinités avec lesquelles vous etes ou avez été affiliés"
+                ),
             ]
             + affiliated_parts,
             can_be_back_url=True,

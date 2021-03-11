@@ -59,7 +59,13 @@ class ZoneEventsManager:
                 del self._sockets_by_token[token]
 
     async def get_new_socket(
-        self, request: Request, row_i: int, col_i: int, character_id: str, reader_token: typing.Optional[str] = None, token: typing.Optional[str] = None
+        self,
+        request: Request,
+        row_i: int,
+        col_i: int,
+        character_id: str,
+        reader_token: typing.Optional[str] = None,
+        token: typing.Optional[str] = None,
     ) -> web.WebSocketResponse:
         server_logger.info(f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})")
 
@@ -115,7 +121,7 @@ class ZoneEventsManager:
                                 type=ZoneEventType.SERVER_PERMIT_CLOSE,
                                 data=EmptyData(),
                             )
-                        )
+                        ),
                     )
                     return
 

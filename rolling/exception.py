@@ -195,4 +195,3 @@ class EmailWrongFormat(AccountError):
 
 class NotSamePassword(AccountError):
     pass
-

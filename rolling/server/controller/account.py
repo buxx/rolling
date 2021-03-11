@@ -1,23 +1,26 @@
 # coding: utf-8
 from dataclasses import dataclass
 
-import typing
-from hashlib import sha256
-
-import serpyco
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 import aiohttp_jinja2
+from hapic.data import HapicData
+from hashlib import sha256
 from pathlib import Path
 import pkg_resources
-from hapic.data import HapicData
+import serpyco
+import typing
 
-from guilang.description import Description, Type
+from guilang.description import Description
 from guilang.description import Part
-from rolling.exception import AccountError, EmailAlreadyUsed, EmailWrongFormat, NotSamePassword, \
-    UsernameAlreadyUsed
+from guilang.description import Type
+from rolling.exception import AccountError
+from rolling.exception import EmailAlreadyUsed
+from rolling.exception import EmailWrongFormat
+from rolling.exception import NotSamePassword
+from rolling.exception import UsernameAlreadyUsed
 from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
@@ -51,7 +54,12 @@ class AccountController(BaseController):
     @hapic.input_body(CreateAccountBody)
     @hapic.output_body(Description)
     async def create_account(self, request: Request, hapic_data: HapicData) -> Description:
-        if hapic_data.body.username and hapic_data.body.email and hapic_data.body.raw_password and hapic_data.body.raw_password_repeat:
+        if (
+            hapic_data.body.username
+            and hapic_data.body.email
+            and hapic_data.body.raw_password
+            and hapic_data.body.raw_password_repeat
+        ):
             if "@" not in hapic_data.body.email:
                 raise EmailWrongFormat("Email incorrect")
             if hapic_data.body.raw_password.strip() != hapic_data.body.raw_password_repeat.strip():
@@ -68,7 +76,12 @@ class AccountController(BaseController):
             )
             # FIXME: redirect to create character
             return Description(account_created=True)
-        elif hapic_data.body.username or hapic_data.body.email or hapic_data.body.raw_password or hapic_data.body.raw_password_repeat:
+        elif (
+            hapic_data.body.username
+            or hapic_data.body.email
+            or hapic_data.body.raw_password
+            or hapic_data.body.raw_password_repeat
+        ):
             raise AccountError("Vous devez saisir toutes les informations")
 
         return Description(
@@ -100,7 +113,7 @@ class AccountController(BaseController):
                             type_=Type.STRING,
                             classes=["password"],
                         ),
-                    ]
+                    ],
                 )
             ],
             footer_inventory=False,
@@ -153,7 +166,7 @@ class AccountController(BaseController):
                             default_value=hapic_data.query.login,
                             type_=Type.STRING,
                         )
-                    ]
+                    ],
                 )
             ],
             footer_inventory=False,
@@ -195,18 +208,27 @@ class AccountController(BaseController):
                     message_type = "success"
                     message = "Email mis à jour"
 
-            if data.get("current_password") and data.get("new_password1") and data.get("new_password2"):
+            if (
+                data.get("current_password")
+                and data.get("new_password1")
+                and data.get("new_password2")
+            ):
                 current_password = data.get("current_password")
                 new_password1 = data.get("new_password1")
                 new_password2 = data.get("new_password2")
-                if sha256(f"{current_password}{account.password_salt}".encode()).hexdigest() != account.password_hash:
+                if (
+                    sha256(f"{current_password}{account.password_salt}".encode()).hexdigest()
+                    != account.password_hash
+                ):
                     message_type = "error"
                     message = "Mot de passe actuel incorrect"
                 elif new_password1 != new_password2:
                     message_type = "error"
                     message = "Nouveaux mot de passe différents"
                 else:
-                    account.password_hash = sha256(f"{new_password1}{account.password_salt}".encode()).hexdigest()
+                    account.password_hash = sha256(
+                        f"{new_password1}{account.password_salt}".encode()
+                    ).hexdigest()
                     self._kernel.server_db_session.add(account)
                     self._kernel.server_db_session.commit()
                     message_type = "success"
@@ -214,7 +236,9 @@ class AccountController(BaseController):
 
         return {
             "account": account,
-            "character": self._kernel.character_lib.get(request["account_character_id"]) if request["account_character_id"] else None,
+            "character": self._kernel.character_lib.get(request["account_character_id"])
+            if request["account_character_id"]
+            else None,
             "message": message,
             "message_type": message_type,
         }

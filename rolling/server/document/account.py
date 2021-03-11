@@ -1,5 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
 
 from rolling.server.extension import ServerSideDocument as Document
 
