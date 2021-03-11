@@ -36,7 +36,10 @@ class ZoneEventsManager:
         return self._sockets_character_id[socket]
 
     async def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
-        await socket_to_remove.close()
+        try:
+            await socket_to_remove.close()
+        except CancelledError:
+            pass  # consider ok if already closed
 
         for sockets in self._sockets.values():
             try:
