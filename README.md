@@ -72,7 +72,13 @@ Then, generate zones maps:
 
 ## Start server
 
-    rolling-server --host 127.0.0.1 --port 5002 --debug ./myworldmap.txt ./myzones ./game
+You need a server config file: Copy template with:
+
+    cp server.ini.tpl server.ini
+
+Then modify content with your configuration. Note: SMTP is only required for forgotten password.
+
+    rolling-server --host 127.0.0.1 --port 5002 --debug ./myworldmap.txt ./myzones ./game ./server.ini
 
 Where `./myworldmap.txt` is previously created world map text file, `./myzones` previously generated zones folder and `./game` the config folder (you can use [repository folder](https://github.com/buxx/rolling/tree/master/game) or copied and modified one).
 
