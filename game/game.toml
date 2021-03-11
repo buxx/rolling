@@ -400,7 +400,7 @@ tile_clutter_capacity = 25.0
     actions = ["DROP_RESOURCE", "CRAFT_STUFF_WITH_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.CEREAL]
-    name = "Graminés"
+    name = "Céréales"
     weight=1000.0
     material="MIDDLE_PIECE"
     unit = "L"
