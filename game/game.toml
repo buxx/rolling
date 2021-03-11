@@ -342,7 +342,7 @@ tile_clutter_capacity = 25.0
     weight=1000000.0
     material="BIG_PIECE"
     unit = "M3"
-    clutter = 500.0
+    clutter = 50.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "wood.png"
 
