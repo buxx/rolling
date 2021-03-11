@@ -163,4 +163,15 @@ class SearchMaterialAction(CharacterAction):
             quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
             parts.append(Part(text=f"{quantity_str} de {resource_description.name}"))
 
+        if not found:
+            parts.append(
+                Part(
+                    text=(
+                        "Vous n'avez rien trouvé ! Cela peut s'expliquer par de la malchance, "
+                        "de l'incompétence, ou qu'il n'y en pas ici (si vous avez cherché quelque "
+                        "chose que l'on ne trouve pas dans cette zone ...)"
+                    )
+                )
+            )
+
         return Description(title="Vous avez récupéré", items=parts)
