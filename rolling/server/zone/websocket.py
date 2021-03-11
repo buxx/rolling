@@ -35,7 +35,7 @@ class ZoneEventsManager:
     def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
         return self._sockets_character_id[socket]
 
-    def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
+    async def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
         await socket_to_remove.close()
 
         for sockets in self._sockets.values():
@@ -95,7 +95,7 @@ class ZoneEventsManager:
 
         # If this code reached: ws is disconnected
         server_logger.debug(f"remove websocket ({row_i},{col_i})")
-        self.close_websocket(socket)
+        await self.close_websocket(socket)
 
         return socket
 
