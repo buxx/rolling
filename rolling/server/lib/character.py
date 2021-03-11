@@ -958,7 +958,7 @@ class CharacterLib:
             ):
                 build_description = self._kernel.game.config.builds[build.build_id]
                 if not build.under_construction and (
-                    build_description.abilities_if_is_on and build.is_on
+                    (build_description.abilities_if_is_on and build.is_on) or (not build_description.abilities_if_is_on)
                 ):
                     for ability in abilities:
                         if ability.id in build_description.ability_ids:
