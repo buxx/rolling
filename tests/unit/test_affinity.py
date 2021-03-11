@@ -608,8 +608,8 @@ class TestAffinity:
         descr = descr_serializer.load(await resp.json())
 
         assert f"/affinity/{xena.id}/manage-requests/{affinity.id}" == descr.items[0].form_action
-        assert arthur.id == descr.items[0].items[0].name
-        assert ["Ne rien décider", "Accepter", "Refuser"] == descr.items[0].items[0].choices
+        assert arthur.id == descr.items[0].items[1].name
+        assert ["Ne rien décider", "Accepter", "Refuser"] == descr.items[0].items[1].choices
 
         # Accept arthur
         resp = await web.post(
