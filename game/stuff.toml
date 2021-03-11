@@ -192,7 +192,7 @@
   name = "Lance de cuivre"
   weight = 1000.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["spear_fight"]
@@ -205,7 +205,7 @@
   name = "Lance de bronze"
   weight = 1000.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["spear_fight"]
@@ -218,7 +218,7 @@
   name = "Lance de fer"
   weight = 800.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["spear_fight"]
@@ -258,7 +258,7 @@
   name = "Hache de cuivre"
   weight = 1000.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["haxe_fight"]
@@ -272,7 +272,7 @@
   name = "Hache de bronze"
   weight = 1000.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["haxe_fight"]
@@ -286,7 +286,7 @@
   name = "Hache de fer"
   weight = 900.0
   clutter = 1.0
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["haxe_fight"]
@@ -300,7 +300,7 @@
   name = "Dague de pierre"
   weight = 400.0
   clutter = 0.3
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["dagger_fight"]
@@ -314,7 +314,7 @@
   name = "Dague de cuivre"
   weight = 500.0
   clutter = 0.3
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["dagger_fight"]
@@ -328,7 +328,7 @@
   name = "Dague de bronze"
   weight = 500.0
   clutter = 0.3
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["dagger_fight"]
@@ -342,7 +342,7 @@
   name = "Dague de fer"
   weight = 400.0
   clutter = 0.3
-  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT"]
   weapon = true
   skills_bonus = ["dagger_fight"]
