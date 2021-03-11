@@ -36,7 +36,7 @@ class ZoneEventsManager:
         return self._sockets_character_id[socket]
 
     def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
-        socket_to_remove.close()
+        await socket_to_remove.close()
 
         for sockets in self._sockets.values():
             try:
