@@ -13,7 +13,7 @@
 * Windows : [télécharger](https://tracim.bux.fr/ui/guest-download/737b35b3-d3dc-477c-99ee-d25fdaa09f26)
 * Linux : [télécharger](https://tracim.bux.fr/ui/guest-download/81c83092-32c9-4df8-a5db-61dd69c6659c)
 
-2: Décompressez l'archive téléchargée, par exemple dans votre dossier "Téléchargements"
+2: [Décompressez](https://support.microsoft.com/fr-fr/windows/compresser-et-d%C3%A9compresser-des-fichiers-f6dde0a7-0fec-8294-e1d3-703ed85e7ebc) l'archive téléchargée, par exemple dans votre dossier "Téléchargements"
 
 ## Lancer le jeu
 
