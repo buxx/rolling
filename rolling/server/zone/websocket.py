@@ -54,7 +54,7 @@ class ZoneEventsManager:
         except KeyError:
             pass
 
-        for token, socket in self._sockets_by_token.items():
+        for token, socket in list(self._sockets_by_token.items()):
             if socket == socket_to_remove:
                 del self._sockets_by_token[token]
 
