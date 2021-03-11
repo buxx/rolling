@@ -1720,7 +1720,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=50.0},
+      {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=90.0},
     ]
     cost = 0.0
 
@@ -1734,7 +1734,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="RAW_TIN", quantity_per_hour=1000.0, random_loss=50.0},
+      {resource="RAW_TIN", quantity_per_hour=1000.0, random_loss=90.0},
     ]
     cost = 0.0
 
@@ -1748,7 +1748,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="RAW_IRON", quantity_per_hour=1000.0, random_loss=50.0},
+      {resource="RAW_IRON", quantity_per_hour=1000.0, random_loss=90.0},
     ]
     cost = 0.0
 
