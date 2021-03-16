@@ -303,7 +303,7 @@ tile_clutter_capacity = 25.0
     illustration = "tin.png"
 
   [resources.IRON]
-    name = "Fer brut"
+    name = "Fer"
     weight=1.0  # 7.8 for pure iron
     material="MIDDLE_PIECE"
     unit = "G"
