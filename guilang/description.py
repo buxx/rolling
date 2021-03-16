@@ -43,6 +43,8 @@ class Part:
     id: typing.Optional[int] = None
     classes: typing.List[str] = dataclasses.field(default_factory=list)
     is_web_browser_link: bool = False
+    is_column: bool = False
+    columns: int = 0
 
     @classmethod
     def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
