@@ -20,8 +20,11 @@ from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
-from rolling.util import EmptyModel, adapt_str_quantity, is_expect_kg, str_quantity_to_float
+from rolling.util import EmptyModel
+from rolling.util import adapt_str_quantity
+from rolling.util import is_expect_kg
 from rolling.util import quantity_to_str
+from rolling.util import str_quantity_to_float
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -138,7 +141,9 @@ class QuantityModel:
     quantity: typing.Optional[str] = None
 
 
-def adapt_quantity_model(input_: QuantityModel, carried_resource: CarriedResourceDescriptionModel) -> QuantityModel:
+def adapt_quantity_model(
+    input_: QuantityModel, carried_resource: CarriedResourceDescriptionModel
+) -> QuantityModel:
     if input_.quantity:
         expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
         default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
@@ -271,7 +276,11 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
         unit_name = "Kg" if expect_kg else unit_name
         cost_per_unit = cost_per_unit * 1000 if expect_kg else cost_per_unit
-        default_quantity = f"{carried_resource.quantity / 1000}{unit_name}" if expect_kg else carried_resource.quantity
+        default_quantity = (
+            f"{carried_resource.quantity / 1000}{unit_name}"
+            if expect_kg
+            else carried_resource.quantity
+        )
         adapt_quantity_model(input_, carried_resource)
 
         if input_.quantity is None:

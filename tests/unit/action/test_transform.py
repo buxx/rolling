@@ -94,14 +94,13 @@ class TestTransformAction:
         assert before_ap - float(franck_doc.action_points) == consumed_ap
 
     @pytest.mark.parametrize(
-        "initial_quantity,"
-        "reduce_and_after",
+        "initial_quantity," "reduce_and_after",
         [
             (5000.0, [("1500g", 3500.0), ("1,5kg", 2000.0), ("2000", 0.0)]),
             (5000.0, [("1500 g", 3500.0), ("1, 5 kg ", 2000.0), ("200 0", 0.0)]),
             (5000.0, [("1500 g", 3500.0), ("1.5 kg", 2000.0), ("2000", 0.0)]),
             (500.0, [("250", 250.0), ("0.250kg", 0)]),
-        ]
+        ],
     )
     def test_transform_with_kg_or_g_input(
         self,
