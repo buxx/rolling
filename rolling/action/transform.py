@@ -16,10 +16,11 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
+from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
-from rolling.util import EmptyModel
+from rolling.util import EmptyModel, adapt_str_quantity, is_expect_kg, str_quantity_to_float
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
@@ -134,7 +135,15 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
 
 @dataclasses.dataclass
 class QuantityModel:
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[str] = None
+
+
+def adapt_quantity_model(input_: QuantityModel, carried_resource: CarriedResourceDescriptionModel) -> QuantityModel:
+    if input_.quantity:
+        expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
+        default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
+        input_.quantity = adapt_str_quantity(input_.quantity, carried_resource.unit, default_unit)
+    return input_
 
 
 class TransformResourcesIntoResourcesAction(WithResourceAction):
@@ -172,7 +181,8 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             carried_resource = self._kernel.resource_lib.get_one_carried_by(
                 character.id, resource_id=required_resource_id
             )
-            if carried_resource.quantity < input_.quantity:
+            adapt_quantity_model(input_, carried_resource)
+            if carried_resource.quantity < str_quantity_to_float(input_.quantity):
                 raise ImpossibleAction(f"Vous n'en possédez pas assez")
             cost = self.get_cost(character, resource_id=resource_id, input_=input_)
             if character.action_points < cost:
@@ -218,7 +228,11 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         input_: typing.Optional[QuantityModel] = None,
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None:
-            real_quantity = self._adapt_quantity(input_.quantity)
+            carried_resource = self._kernel.resource_lib.get_one_carried_by(
+                character.id, resource_id=resource_id
+            )
+            adapt_quantity_model(input_, carried_resource)
+            real_quantity = self._adapt_quantity(str_quantity_to_float(input_.quantity))
             return self._description.base_cost + (
                 self._description.properties["cost_per_unit"] * real_quantity
             )
@@ -253,6 +267,12 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         carried_resource = self._kernel.resource_lib.get_one_carried_by(
             character.id, resource_id=required_resource_description.id
         )
+        expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
+        default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
+        unit_name = "Kg" if expect_kg else unit_name
+        cost_per_unit = cost_per_unit * 1000 if expect_kg else cost_per_unit
+        default_quantity = f"{carried_resource.quantity / 1000}{unit_name}" if expect_kg else carried_resource.quantity
+        adapt_quantity_model(input_, carried_resource)
 
         if input_.quantity is None:
             carried_quantity_str = quantity_to_str(
@@ -279,12 +299,13 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                                 label=f"Quantité en {unit_name} (coût: {base_cost} + {cost_per_unit} par {unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value=str(default_quantity),
                             ),
                         ],
                     )
                 ],
             )
-        real_quantity = self._adapt_quantity(input_.quantity)
+        real_quantity = self._adapt_quantity(str_quantity_to_float(input_.quantity))
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
         self._kernel.resource_lib.reduce_carried_by(
             character.id, carried_resource.id, quantity=real_quantity, commit=False

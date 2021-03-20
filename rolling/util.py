@@ -241,6 +241,41 @@ def quantity_to_str(quantity: float, unit: Unit, kernel: "Kernel") -> str:
     return f"{str(quantity)} {unit_str}"
 
 
+def is_expect_kg(quantity: float, unit: Unit) -> bool:
+    return unit == Unit.GRAM and quantity >= 1000
+
+
+def adapt_str_quantity(quantity: str, unit: Unit, default_unit: Unit, to_str_float: bool = False) -> str:
+    if unit == Unit.GRAM:
+        quantity = quantity.lower()
+        quantity = quantity.replace(' ', '')
+        if quantity.endswith("kg"):
+            if not to_str_float:
+                return f"{float(quantity[:-2]) * 1000}g"
+            return f"{float(quantity[:-2]) * 1000}"
+        if quantity.endswith("g"):
+            if not to_str_float:
+                return quantity
+            return quantity[:-1]
+        if default_unit == Unit.KILOGRAM:
+            if not to_str_float:
+                return f"{float(quantity) * 1000}g"
+            return f"{float(quantity) * 1000}"
+        return quantity
+    return quantity
+
+
+def str_quantity_to_float(quantity: str) -> float:
+    quantity = quantity.lower()
+    quantity = quantity.replace(' ', '')
+    quantity = quantity.replace(',', '.')
+    if quantity.endswith("kg"):
+        return float(quantity[:-2]) * 1000
+    if quantity.endswith("g"):
+        return float(quantity[:-1])
+    return float(quantity)
+
+
 def get_description_for_not_enough_ap(
     character: "CharacterModel", cost: float, can_be_back_url: bool = False
 ) -> Description:

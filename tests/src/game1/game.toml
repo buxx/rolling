@@ -313,6 +313,22 @@ tile_clutter_capacity = 10.0
     required_resource_id = "VEGETAL_FIBER"
     cost_per_unit = 5
     cost = 0.0
+
+  [ACTIONS.MAKE_VEGETAL_FOOD_FRESH2]
+    name = "Test"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="VEGETAL_FOOD_FRESH2", coeff=1}
+    ]
+    required_resource_id = "VEGETAL_FOOD_FRESH"
+    cost_per_unit = 0
+    cost = 0.0
   [ACTIONS.EAT_FRESH_FRUITS]
     actions = ["EAT_RESOURCE"]
     accept_resources = ["VEGETAL_FOOD_FRESH", "VEGETAL_FOOD_FRESH2"]
