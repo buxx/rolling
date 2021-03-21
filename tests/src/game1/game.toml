@@ -180,6 +180,20 @@ tile_clutter_capacity = 10.0
     unit = "L"
     clutter = 1.0
     actions = ["EAT_RESOURCE"]
+  [resources.RES1]
+    name = "Ressource1"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["EAT_RESOURCE"]
+  [resources.RES2]
+    name = "Ressource2"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["EAT_RESOURCE"]
 
 
 [resource_mix]
@@ -314,7 +328,7 @@ tile_clutter_capacity = 10.0
     cost_per_unit = 5
     cost = 0.0
 
-  [ACTIONS.MAKE_VEGETAL_FOOD_FRESH2]
+  [ACTIONS.MAKE_RES2]
     name = "Test"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
     required_one_of_stuff_ids = []
@@ -324,9 +338,9 @@ tile_clutter_capacity = 10.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="VEGETAL_FOOD_FRESH2", coeff=1}
+      {resource="RES2", coeff=1}
     ]
-    required_resource_id = "VEGETAL_FOOD_FRESH"
+    required_resource_id = "RES1"
     cost_per_unit = 0
     cost = 0.0
   [ACTIONS.EAT_FRESH_FRUITS]

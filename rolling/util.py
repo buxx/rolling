@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.map.source import ZoneMapSource
     from rolling.model.character import CharacterModel
+    from rolling.model.resource import CarriedResourceDescriptionModel
     from rolling.model.stuff import StuffModel
 
 
@@ -251,10 +252,15 @@ def adapt_str_quantity(
     if unit == Unit.GRAM:
         quantity = quantity.lower()
         quantity = quantity.replace(" ", "")
+        quantity = quantity.replace(",", ".")
         if quantity.endswith("kg"):
             if not to_str_float:
                 return f"{float(quantity[:-2]) * 1000}g"
             return f"{float(quantity[:-2]) * 1000}"
+        if quantity.endswith("k"):
+            if not to_str_float:
+                return f"{float(quantity[:-1]) * 1000}g"
+            return f"{float(quantity[:-1]) * 1000}"
         if quantity.endswith("g"):
             if not to_str_float:
                 return quantity
@@ -265,6 +271,16 @@ def adapt_str_quantity(
             return f"{float(quantity) * 1000}"
         return quantity
     return quantity
+
+
+def str_quantity_unit(quantity: str) -> typing.Optional[Unit]:
+    quantity = quantity.lower()
+    quantity = quantity.replace(" ", "")
+    if quantity.endswith("kg") or quantity.endswith("k"):
+        return Unit.KILOGRAM
+    if quantity.endswith("g"):
+        return Unit.GRAM
+    return None
 
 
 def str_quantity_to_float(quantity: str) -> float:
@@ -318,3 +334,72 @@ def generate_background_media(media_name: str, folder_path: str) -> None:
         alpha = Image.new("L", image.size, 10)
         image.putalpha(alpha)
         image.save(illustration_bg_path)
+
+
+@dataclasses.dataclass
+class ExpectedQuantityContext:
+    display_unit: Unit
+    display_unit_name: str
+    display_unit_short_name: str
+    real_unit: Unit
+    default_quantity: str
+    carried_quantity_str: str
+
+    @classmethod
+    def from_carried_resource(
+        cls,
+        kernel: "Kernel",
+        carried_resource: "CarriedResourceDescriptionModel",
+    ) -> "ExpectedQuantityContext":
+        expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
+        display_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
+        unit_name = kernel.translation.get(display_unit)
+        unit_short_name = kernel.translation.get(display_unit, short=True)
+        default_quantity = (
+            f"{carried_resource.quantity / 1000} {unit_short_name}"
+            if expect_kg
+            else f"{carried_resource.quantity} {unit_short_name}"
+        )
+        carried_quantity_str = quantity_to_str(
+            carried_resource.quantity, carried_resource.unit, kernel
+        )
+
+        return cls(
+            display_unit=display_unit,
+            display_unit_name=unit_name,
+            display_unit_short_name=unit_short_name,
+            real_unit=carried_resource.unit,
+            default_quantity=default_quantity,
+            carried_quantity_str=carried_quantity_str,
+        )
+
+    @property
+    def display_kg(self) -> bool:
+        return self.display_unit == Unit.KILOGRAM
+
+
+@dataclasses.dataclass
+class InputQuantityContext:
+    user_input: str
+    user_unit: Unit
+    real_quantity: float
+    real_unit: Unit
+
+    @classmethod
+    def from_carried_resource(
+        cls,
+        user_input: str,
+        carried_resource: "CarriedResourceDescriptionModel",
+    ) -> "InputQuantityContext":
+        expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
+        default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
+        user_input = adapt_str_quantity(user_input, carried_resource.unit, default_unit)
+        real_quantity = str_quantity_to_float(user_input)
+        user_unit = str_quantity_unit(user_input) or default_unit
+
+        return cls(
+            user_input=user_input,
+            user_unit=user_unit,
+            real_quantity=real_quantity,
+            real_unit=carried_resource.unit,
+        )

@@ -29,7 +29,7 @@ def transform_rtr_action2(
     return typing.cast(
         TransformResourcesIntoResourcesAction,
         worldmapc_kernel.action_factory.create_action(
-            ActionType.TRANSFORM_RESOURCES_TO_RESOURCES, "MAKE_VEGETAL_FOOD_FRESH2"
+            ActionType.TRANSFORM_RESOURCES_TO_RESOURCES, "MAKE_RES2"
         ),
     )
 
@@ -94,12 +94,12 @@ class TestTransformAction:
         assert before_ap - float(franck_doc.action_points) == consumed_ap
 
     @pytest.mark.parametrize(
-        "initial_quantity," "reduce_and_after",
+        "initial_quantity,expected_unit_sentence,expected_default_quantity,reduce_and_after",
         [
-            (5000.0, [("1500g", 3500.0), ("1,5kg", 2000.0), ("2000", 0.0)]),
-            (5000.0, [("1500 g", 3500.0), ("1, 5 kg ", 2000.0), ("200 0", 0.0)]),
-            (5000.0, [("1500 g", 3500.0), ("1.5 kg", 2000.0), ("2000", 0.0)]),
-            (500.0, [("250", 250.0), ("0.250kg", 0)]),
+            (5000.0, "5.0 kg", "5.0 kg", [("1500g", 3500.0), ("1,5kg", 2000.0), ("2", 0.0)]),
+            (5000.0, "5.0 kg", "5.0 kg", [("1500 g", 3500.0), ("1, 5 kg ", 2000.0), ("2.0", 0.0)]),
+            (5000.0, "5.0 kg", "5.0 kg", [("1500 g", 3500.0), ("1.5 kg", 2000.0), ("2", 0.0)]),
+            (500.0, "500.0 g", "500.0 g", [("250", 250.0), ("0.250kg", 0)]),
         ],
     )
     def test_transform_with_kg_or_g_input(
@@ -108,6 +108,8 @@ class TestTransformAction:
         worldmapc_franck_model: CharacterModel,
         transform_rtr_action2: TransformResourcesIntoResourcesAction,
         initial_quantity: float,
+        expected_unit_sentence: str,
+        expected_default_quantity: str,
         reduce_and_after: typing.List[typing.Tuple[str, float]],
     ):
         kernel = worldmapc_kernel
@@ -115,25 +117,34 @@ class TestTransformAction:
         action = transform_rtr_action2
 
         kernel.resource_lib.add_resource_to(
-            resource_id="VEGETAL_FOOD_FRESH", character_id=franck.id, quantity=initial_quantity
+            resource_id="RES1", character_id=franck.id, quantity=initial_quantity
         )
+
+        description = action.perform(
+            character=franck, resource_id="RES1", input_=QuantityModel(quantity=None)
+        )
+        assert (
+            description.items[0].items[0].text
+            == f"Vous possedez {expected_unit_sentence} de Ressource1"
+        )
+        assert description.items[0].items[1].default_value.lower() == expected_default_quantity
 
         for input_quantity, after_quantity in reduce_and_after:
             action.perform(
                 character=franck,
-                resource_id="VEGETAL_FOOD_FRESH",
+                resource_id="RES1",
                 input_=QuantityModel(quantity=input_quantity),
             )
 
             if not after_quantity:
                 with pytest.raises(NoCarriedResource):
                     kernel.resource_lib.get_one_carried_by(
-                        character_id=franck.id, resource_id="VEGETAL_FOOD_FRESH"
+                        character_id=franck.id, resource_id="RES1"
                     )
             else:
                 assert (
                     kernel.resource_lib.get_one_carried_by(
-                        character_id=franck.id, resource_id="VEGETAL_FOOD_FRESH"
+                        character_id=franck.id, resource_id="RES1"
                     ).quantity
                     == after_quantity
                 )
