@@ -35,6 +35,8 @@ from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
@@ -121,7 +123,7 @@ class BeginBuildAction(CharacterAction):
 @dataclasses.dataclass
 class BringResourceModel:
     resource_id: str
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[str] = None
 
 
 class BringResourcesOnBuild(WithBuildAction):
@@ -222,6 +224,14 @@ class BringResourcesOnBuild(WithBuildAction):
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        carried_resource = self._kernel.resource_lib.get_one_carried_by(
+            character_id=character.id,
+            resource_id=input_.resource_id,
+            empty_object_if_not=True,
+        )
+        expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
+            self._kernel, carried_resource
+        )
 
         if input_.quantity is None:
             build_description = self._kernel.game.config.builds[build_doc.build_id]
@@ -236,7 +246,6 @@ class BringResourcesOnBuild(WithBuildAction):
                 self._kernel, required_resource, build_doc=build_doc
             )
             left_str = quantity_to_str(left, resource_description.unit, kernel=self._kernel)
-            unit_str = self._kernel.translation.get(resource_description.unit)
 
             return Description(
                 title=f"Cette construction nécessite encore {left_str} "
@@ -256,7 +265,10 @@ class BringResourcesOnBuild(WithBuildAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité ({unit_str}) ?", type_=Type.NUMBER, name="quantity"
+                                label=f"Quantité ({expected_quantity_context.display_unit}) ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                                default_value=expected_quantity_context.default_quantity,
                             )
                         ],
                     )
@@ -264,9 +276,16 @@ class BringResourcesOnBuild(WithBuildAction):
             )
 
         resource_description = self._kernel.game.config.resources[input_.resource_id]
+        user_input_context = InputQuantityContext.from_carried_resource(
+            user_input=input_.quantity,
+            carried_resource=carried_resource,
+        )
         try:
             self._kernel.resource_lib.reduce_carried_by(
-                character.id, resource_id=input_.resource_id, quantity=input_.quantity, commit=False
+                character.id,
+                resource_id=input_.resource_id,
+                quantity=user_input_context.real_quantity,
+                commit=False,
             )
         except (NotEnoughResource, NoCarriedResource):
             raise ImpossibleAction(
@@ -276,14 +295,14 @@ class BringResourcesOnBuild(WithBuildAction):
         self._kernel.resource_lib.add_resource_to(
             build_id=build_doc.id,
             resource_id=input_.resource_id,
-            quantity=input_.quantity,
+            quantity=user_input_context.real_quantity,
             commit=False,
         )
         self._kernel.server_db_session.commit()
 
         build_description = self._kernel.game.config.builds[build_doc.build_id]
         quantity_str = quantity_to_str(
-            input_.quantity, resource_description.unit, kernel=self._kernel
+            user_input_context.real_quantity, resource_description.unit, kernel=self._kernel
         )
 
         return Description(

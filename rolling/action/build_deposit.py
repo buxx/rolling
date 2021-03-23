@@ -14,6 +14,8 @@ from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.transfer import TransferStuffOrResources
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -166,9 +168,7 @@ class DepositToModel:
     deposit_resource_id: typing.Optional[str] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    deposit_resource_quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    deposit_resource_quantity: typing.Optional[str] = None
 
 
 class DepositToBuildAction(WithBuildAction):
@@ -193,13 +193,21 @@ class DepositToBuildAction(WithBuildAction):
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
 
         if input_.deposit_resource_id is not None and input_.deposit_resource_quantity:
+            carried_resource = self._kernel.resource_lib.get_one_carried_by(
+                character_id=character.id,
+                resource_id=input_.deposit_resource_id,
+            )
+            user_input_context = InputQuantityContext.from_carried_resource(
+                user_input=input_.deposit_resource_quantity,
+                carried_resource=carried_resource,
+            )
             DepositStuffOrResources(
                 self._kernel,
                 from_character=character,
                 to_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_resource(
-                resource_id=input_.deposit_resource_id, quantity=input_.deposit_resource_quantity
+                resource_id=input_.deposit_resource_id, quantity=user_input_context.real_quantity
             )
 
         if input_.deposit_stuff_id and input_.deposit_stuff_quantity:

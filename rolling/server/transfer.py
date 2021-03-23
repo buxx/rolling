@@ -7,6 +7,8 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -97,8 +99,10 @@ class TransferStuffOrResources(abc.ABC):
     def _get_choose_something_description(
         self,
         can_be_back_url: bool = False,
+        text_parts: typing.Optional[typing.List[Part]] = None,
     ) -> Description:
-        parts = []
+        text_parts = text_parts or []
+        parts = text_parts
         carried_stuffs = self._get_available_stuffs()
         carried_resources = self._get_available_resources()
 
@@ -138,12 +142,16 @@ class TransferStuffOrResources(abc.ABC):
         stuff_id: typing.Optional[int] = None,
         stuff_quantity: typing.Optional[int] = None,
         resource_id: typing.Optional[str] = None,
-        resource_quantity: typing.Optional[float] = None,
+        resource_quantity: typing.Optional[str] = None,
     ) -> Description:
         can_be_back_url = True
+        text_parts: typing.List[Part] = []
 
         if stuff_id is not None:
             stuff = self._get_stuff(stuff_id)
+            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                stuff.stuff_id
+            )
             likes_this_stuff = self._get_likes_this_stuff(stuff.stuff_id)
 
             if stuff_quantity is None:
@@ -179,12 +187,18 @@ class TransferStuffOrResources(abc.ABC):
                 self.check_can_transfer_stuff(likes_this_stuff[i].id)
                 self._transfer_stuff(likes_this_stuff[i].id)
 
+            text_parts.append(
+                Part(text=(f"Vous avez transféré {stuff_quantity} {stuff_description.name}"))
+            )
+
         if resource_id is not None:
             resource_description = self._kernel.game.config.resources[resource_id]
             carried_resource = self._get_carried_resource(resource_id)
+            expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
+                self._kernel, carried_resource
+            )
 
             if resource_quantity is None:
-                unit_str = self._kernel.translation.get(resource_description.unit)
                 return Description(
                     title=self._get_title(resource_id=resource_id),
                     items=[
@@ -195,10 +209,10 @@ class TransferStuffOrResources(abc.ABC):
                             submit_label="Valider",
                             items=[
                                 Part(
-                                    label=f"Quantité ({unit_str}) ?",
+                                    label=f"Quantité ({expected_quantity_context.display_unit_name}) ?",
                                     type_=Type.NUMBER,
                                     name=self.resource_quantity_parameter_name,
-                                    default_value=str(carried_resource.quantity),
+                                    default_value=expected_quantity_context.default_quantity,
                                 )
                             ],
                         )
@@ -209,8 +223,29 @@ class TransferStuffOrResources(abc.ABC):
                     footer_links=self._get_footer_links(False),
                     can_be_back_url=True,
                 )
-            self.check_can_transfer_resource(resource_id=resource_id, quantity=resource_quantity)
-            self._transfer_resource(resource_id=resource_id, quantity=resource_quantity)
+
+            user_input_context = InputQuantityContext.from_carried_resource(
+                user_input=resource_quantity,
+                carried_resource=carried_resource,
+            )
+            self.check_can_transfer_resource(
+                resource_id=resource_id, quantity=user_input_context.real_quantity
+            )
+            self._transfer_resource(
+                resource_id=resource_id, quantity=user_input_context.real_quantity
+            )
             can_be_back_url = False
 
-        return self._get_choose_something_description(can_be_back_url=can_be_back_url)
+            user_unit_str = self._kernel.translation.get(user_input_context.user_unit)
+            text_parts.append(
+                Part(
+                    text=(
+                        f"Vous avez transféré {user_input_context.user_input} {user_unit_str} "
+                        f"{resource_description.name}"
+                    )
+                )
+            )
+
+        return self._get_choose_something_description(
+            can_be_back_url=can_be_back_url, text_parts=text_parts
+        )

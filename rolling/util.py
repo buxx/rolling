@@ -289,7 +289,9 @@ def str_quantity_to_float(quantity: str) -> float:
     quantity = quantity.replace(",", ".")
     if quantity.endswith("kg"):
         return float(quantity[:-2]) * 1000
-    if quantity.endswith("g"):
+    if quantity.endswith("m³"):
+        return float(quantity[:-2])
+    if quantity.endswith("g") or quantity.endswith("l") or quantity.endswith("u"):
         return float(quantity[:-1])
     return float(quantity)
 

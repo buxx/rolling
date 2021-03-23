@@ -31,6 +31,8 @@ from rolling.server.document.business import OfferItemPosition
 from rolling.server.document.business import OfferOperand
 from rolling.server.document.business import OfferStatus
 from rolling.server.extension import hapic
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 
 ALL_OF_THEM = "tous les éléments ci-dessous"
 ONE_OF_THEM = "un des éléments ci-dessous"

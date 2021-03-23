@@ -14,17 +14,18 @@ from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
 
 
 @dataclasses.dataclass
 class MixResourceModel:
     resource_mix_id: str
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[str] = None
 
 
 class MixResourcesAction(WithResourceAction):
@@ -60,7 +61,11 @@ class MixResourcesAction(WithResourceAction):
                 carried_resource = self._kernel.resource_lib.get_one_carried_by(
                     character_id=character.id, resource_id=required_resource.resource.id
                 )
-                required_quantity = required_resource.coeff * input_.quantity
+                user_input_context = InputQuantityContext.from_carried_resource(
+                    user_input=input_.quantity,
+                    carried_resource=carried_resource,
+                )
+                required_quantity = required_resource.coeff * user_input_context.real_quantity
                 if carried_resource.quantity < required_quantity:
                     raise ImpossibleAction(
                         f"Vous ne possédez pas assez de {required_resource.resource.name}: "
@@ -120,7 +125,14 @@ class MixResourcesAction(WithResourceAction):
             resource_mix_description = self._kernel.game.config.resource_mixs[
                 input_.resource_mix_id
             ]
-            return resource_mix_description.cost * input_.quantity
+            carried_resource = self._kernel.resource_lib.get_one_carried_by(
+                character.id, resource_id=resource_id
+            )
+            user_input_context = InputQuantityContext.from_carried_resource(
+                user_input=input_.quantity,
+                carried_resource=carried_resource,
+            )
+            return resource_mix_description.cost * user_input_context.real_quantity
         return self._description.base_cost
 
     def perform(
@@ -130,6 +142,13 @@ class MixResourcesAction(WithResourceAction):
         resource_mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
         unit_name = self._kernel.translation.get(resource_mix_description.produce_resource.unit)
         cost_per_unit = resource_mix_description.cost
+
+        carried_resource = self._kernel.resource_lib.get_one_carried_by(
+            character.id, resource_id=resource_id
+        )
+        expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
+            self._kernel, carried_resource
+        )
 
         if input_.quantity is None:
             required_str = ", ".join(
@@ -173,18 +192,24 @@ class MixResourcesAction(WithResourceAction):
                             ),
                             *have_parts,
                             Part(
-                                label="Quantité ?",
+                                label=f"Quantité {expected_quantity_context.display_unit_name} ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value=expected_quantity_context.default_quantity,
                             ),
                         ],
                     )
                 ],
             )
 
+        user_input_context = InputQuantityContext.from_carried_resource(
+            user_input=input_.quantity,
+            carried_resource=carried_resource,
+        )
+
         # Make mix
         for required_resource in resource_mix_description.required_resources:
-            required_quantity = required_resource.coeff * input_.quantity
+            required_quantity = required_resource.coeff * user_input_context.real_quantity
             self._kernel.resource_lib.reduce_carried_by(
                 character.id, required_resource.resource.id, required_quantity, commit=False
             )
@@ -192,7 +217,7 @@ class MixResourcesAction(WithResourceAction):
         self._kernel.resource_lib.add_resource_to(
             character_id=character.id,
             resource_id=resource_mix_description.produce_resource.id,
-            quantity=input_.quantity,
+            quantity=user_input_context.real_quantity,
             commit=False,
         )
         self._kernel.character_lib.reduce_action_points(

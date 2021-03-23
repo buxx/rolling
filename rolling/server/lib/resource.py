@@ -233,6 +233,7 @@ class ResourceLib:
         resource_id: str,
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
         exclude_shared_with_affinity: bool = False,
+        empty_object_if_not: bool = False,
     ) -> CarriedResourceDescriptionModel:
         docs = self.get_base_query(
             carried_by_id=character_id,
@@ -240,7 +241,24 @@ class ResourceLib:
             exclude_shared_with_affinity=exclude_shared_with_affinity,
             shared_with_affinity_ids=shared_with_affinity_ids,
         ).all()
-        return self._carried_resource_model_from_doc(docs)
+        try:
+            return self._carried_resource_model_from_doc(docs)
+        except NoCarriedResource:
+            if not empty_object_if_not:
+                raise
+
+            resource_description = self._kernel.game.config.resources[resource_id]
+            return CarriedResourceDescriptionModel(
+                id=resource_id,
+                name=resource_description.name,
+                weight=0.0,
+                material_type=resource_description.material_type,
+                unit=resource_description.unit,
+                clutter=0.0,
+                quantity=0.0,
+                descriptions=resource_description.descriptions,
+                illustration=resource_description.illustration,
+            )
 
     def _carried_resource_model_from_doc(
         self,
@@ -477,6 +495,12 @@ class ResourceLib:
         carried = self.get_base_query(in_built_id=build_id).all()
         return [self._carried_resource_model_from_doc([doc]) for doc in carried]
 
+    def get_one_stored_in_build(
+        self, build_id: int, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
+        carried = self.get_base_query(in_built_id=build_id, resource_id=resource_id).one()
+        return self._carried_resource_model_from_doc([carried])
+
     def get_shared_with_affinity(
         self, character_id: str, affinity_id: int
     ) -> typing.List[CarriedResourceDescriptionModel]:
@@ -498,4 +522,4 @@ class ResourceLib:
         if quantity is not None:
             query = query.filter(ResourceDocument.quantity >= quantity)
 
-        return query.one()
+        return self._carried_resource_model_from_doc([query.one()])

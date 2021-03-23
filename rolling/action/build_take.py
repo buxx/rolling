@@ -14,6 +14,7 @@ from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.transfer import TransferStuffOrResources
+from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -135,9 +136,7 @@ class TakeFromModel:
         cast_on_load=True, default=None
     )
     take_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
-    take_resource_quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    take_resource_quantity: typing.Optional[str] = None
 
 
 class TakeFromBuildAction(WithBuildAction):
@@ -162,13 +161,21 @@ class TakeFromBuildAction(WithBuildAction):
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
 
         if input_.take_resource_id is not None and input_.take_resource_quantity:
+            carried_resource = self._kernel.resource_lib.get_one_stored_in_build(
+                build_id=build_id,
+                resource_id=input_.take_resource_id,
+            )
+            user_input_context = InputQuantityContext.from_carried_resource(
+                user_input=input_.take_resource_quantity,
+                carried_resource=carried_resource,
+            )
             TakeStuffOrResources(
                 self._kernel,
                 from_character=character,
                 from_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_resource(
-                resource_id=input_.take_resource_id, quantity=input_.take_resource_quantity
+                resource_id=input_.take_resource_id, quantity=user_input_context.real_quantity
             )
 
         if input_.take_stuff_id and input_.take_stuff_quantity:

@@ -290,7 +290,7 @@ class TestTakeAction:
         )
 
         take_action.perform(
-            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity=0.1)
+            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.1
@@ -300,7 +300,7 @@ class TestTakeAction:
         )
 
         take_action.perform(
-            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity=0.1)
+            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.2
@@ -326,7 +326,7 @@ class TestTakeAction:
                 arthur,
                 xena,
                 TakeFromModel(
-                    take_resource_id="WOOD", take_resource_quantity=0.21  # 0.2 in fixtures
+                    take_resource_id="WOOD", take_resource_quantity="0.21"  # 0.2 in fixtures
                 ),
             )
 

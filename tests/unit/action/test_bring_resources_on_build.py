@@ -260,7 +260,7 @@ class TestBringResourcesOnBuild:
             xena,
             build_id=build.id,
             input_=BringResourceModel(
-                resource_id="BRANCHES", quantity=0.00025  # see src/game1/game.toml
+                resource_id="BRANCHES", quantity="0.00025"  # see src/game1/game.toml
             ),
         )
         resources = kernel.resource_lib.get_stored_in_build(build.id)
@@ -289,7 +289,7 @@ class TestBringResourcesOnBuild:
             build_id=build5.id,
             input_=DepositToModel(
                 deposit_resource_id="WOOD",
-                deposit_resource_quantity=0.2,
+                deposit_resource_quantity="0.2",
             ),
         )
 
@@ -320,7 +320,7 @@ class TestBringResourcesOnBuild:
                 build_id=build6.id,
                 input_=DepositToModel(
                     deposit_resource_id="WOOD",
-                    deposit_resource_quantity=0.2,
+                    deposit_resource_quantity="0.2",
                 ),
             )
         deposit_action.perform(
@@ -328,7 +328,7 @@ class TestBringResourcesOnBuild:
             build_id=build6.id,
             input_=DepositToModel(
                 deposit_resource_id="STONE",
-                deposit_resource_quantity=2,
+                deposit_resource_quantity="2",
             ),
         )
 
@@ -358,7 +358,7 @@ class TestBringResourcesOnBuild:
                 build_id=build4.id,
                 input_=DepositToModel(
                     deposit_resource_id="STONE",
-                    deposit_resource_quantity=2,
+                    deposit_resource_quantity="2",
                 ),
             )
 
@@ -386,7 +386,7 @@ class TestBringResourcesOnBuild:
             build_id=build5.id,
             input_=DepositToModel(
                 deposit_stuff_id=haxe.id,
-                deposit_resource_quantity=1,
+                deposit_resource_quantity="1",
             ),
         )
 
@@ -471,7 +471,7 @@ class TestBringResourcesOnBuild:
             build_id=build5.id,
             input_=DepositToModel(
                 deposit_resource_id="WOOD",
-                deposit_resource_quantity=0.2,
+                deposit_resource_quantity="0.2",
             ),
         )
         assert kernel.resource_lib.get_stored_in_build(build5.id)
@@ -482,7 +482,7 @@ class TestBringResourcesOnBuild:
             build_id=build5.id,
             input_=TakeFromModel(
                 take_resource_id="WOOD",
-                take_resource_quantity=0.2,
+                take_resource_quantity="0.2",
             ),
         )
 

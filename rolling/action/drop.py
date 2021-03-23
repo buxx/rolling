@@ -13,21 +13,23 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import ImpossibleAction
+from rolling.exception import NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
 from rolling.util import EmptyModel
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
     from rolling.model.stuff import StuffModel
 
 
 @dataclasses.dataclass
 class DropResourceModel:
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -130,10 +132,24 @@ class DropResourceAction(WithResourceAction):
     def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> None:
-        if not self._kernel.resource_lib.have_resource(
-            character_id=character.id, resource_id=resource_id, quantity=input_.quantity
-        ):
+        try:
+            carried_resource = self._kernel.resource_lib.get_one_carried_by(
+                character.id, resource_id=resource_id
+            )
+        except NoCarriedResource:
             raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
+
+        if input_.quantity:
+            user_input_context = InputQuantityContext.from_carried_resource(
+                user_input=input_.quantity,
+                carried_resource=carried_resource,
+            )
+            if not self._kernel.resource_lib.have_resource(
+                character_id=character.id,
+                resource_id=resource_id,
+                quantity=user_input_context.real_quantity,
+            ):
+                raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -170,7 +186,9 @@ class DropResourceAction(WithResourceAction):
         carried_resource = next((r for r in carried_resources if r.id == resource_id))
 
         if input_.quantity is None:
-            unit_trans = self._kernel.translation.get(carried_resource.unit)
+            expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
+                self._kernel, carried_resource
+            )
             return Description(
                 title=carried_resource.get_full_description(self._kernel),
                 items=[
@@ -186,10 +204,10 @@ class DropResourceAction(WithResourceAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité à laisser ici ({unit_trans}) ?",
+                                label=f"Quantité à laisser ici ({expected_quantity_context.display_unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
-                                default_value=str(carried_resource.quantity),
+                                default_value=expected_quantity_context.default_quantity,
                             )
                         ],
                     )
@@ -197,9 +215,13 @@ class DropResourceAction(WithResourceAction):
                 back_url=f"/_describe/character/{character.id}/inventory",
             )
 
+        user_input_context = InputQuantityContext.from_carried_resource(
+            user_input=input_.quantity,
+            carried_resource=carried_resource,
+        )
         places_to_drop = self._kernel.game.world_manager.find_available_place_where_drop(
             resource_id=resource_id,
-            resource_quantity=input_.quantity,
+            resource_quantity=user_input_context.real_quantity,
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             start_from_zone_row_i=character.zone_row_i,

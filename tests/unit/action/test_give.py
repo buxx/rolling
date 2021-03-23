@@ -195,7 +195,7 @@ class TestGiveAction:
         )
 
         give_action.perform(
-            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity=0.1)
+            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.1
@@ -205,7 +205,7 @@ class TestGiveAction:
         )
 
         give_action.perform(
-            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity=0.1)
+            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.2
@@ -229,7 +229,7 @@ class TestGiveAction:
                 xena,
                 arthur,
                 GiveToModel(
-                    give_resource_id="WOOD", give_resource_quantity=0.21  # 0.2 in fixtures
+                    give_resource_id="WOOD", give_resource_quantity="0.21"  # 0.2 in fixtures
                 ),
             )
 
