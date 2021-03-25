@@ -280,6 +280,8 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         if input_.quantity is None:
             return Description(
                 title=self._description.name,
+                can_be_back_url=False,
+                back_url=None,
                 items=[
                     Part(
                         is_form=True,
