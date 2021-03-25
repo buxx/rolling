@@ -1024,30 +1024,25 @@ class CharacterController(BaseController):
             except ImpossibleAction as exc:
                 return Description(
                     title="Action impossible",
+                    back_url=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}",
                     items=[Part(text=str(exc))],
                     footer_links=[
                         Part(
                             is_link=True,
                             label="Retourner aux propositions d'actions",
-                            form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
+                            form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions",
                         )
                     ],
                 )
 
         return Description(
             title=pending_action.name,
+            back_url=None,
             items=[
                 Part(
                     is_link=True,
                     label="Effectuer cette action",
                     form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}?do=1",
-                )
-            ],
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner aux propositions d'actions",
-                    form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/",
                 )
             ],
         )
@@ -1683,7 +1678,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Effectuer un voyage ...",
-                items=[Part(text="Voyage en dehors du monde impossible !")]
+                items=[Part(text="Voyage en dehors du monde impossible !")],
             )
 
         buttons = [Part(label="Rester ici")]
