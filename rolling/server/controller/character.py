@@ -508,6 +508,7 @@ class CharacterController(BaseController):
                     )
                     if character.weapon
                     else None,
+                    classes=["link"],
                 ),
                 Part(
                     label="Bouclier",
@@ -519,6 +520,7 @@ class CharacterController(BaseController):
                     )
                     if character.shield
                     else None,
+                    classes=["link"],
                 ),
                 Part(
                     label="Armure",
@@ -530,6 +532,7 @@ class CharacterController(BaseController):
                     )
                     if character.armor
                     else None,
+                    classes=["link"],
                 ),
                 Part(
                     label="Sac",
@@ -541,6 +544,7 @@ class CharacterController(BaseController):
                     )
                     if character.bags
                     else None,
+                    classes=["link"],
                 ),
                 Part(text=""),
                 Part(
