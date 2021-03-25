@@ -230,7 +230,7 @@ class GetLookCharacterModel:
 
 @dataclasses.dataclass
 class TakeResourceModel:
-    quantity: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[str] = None
 
 
 @dataclasses.dataclass

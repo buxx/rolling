@@ -74,6 +74,8 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.transfer import TransferStuffOrResources
+from rolling.util import ExpectedQuantityContext
+from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_description_for_not_enough_ap
@@ -1226,11 +1228,9 @@ class CharacterController(BaseController):
         if hapic_data.path.resource_id not in ground_resource_ids:
             return Description(title="Cette ressource n'est plus là", items=[Part(is_link=True)])
         ground_resource = next(r for r in ground_resources if r.id == hapic_data.path.resource_id)
-
-        available_str = quantity_to_str(
-            ground_resource.quantity, ground_resource.unit, self._kernel
+        expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
+            self._kernel, ground_resource
         )
-        unit_str = self._kernel.translation.get(ground_resource.unit)
         if not hapic_data.query.quantity:
             return Description(
                 title=resource_description.name,
@@ -1246,10 +1246,13 @@ class CharacterController(BaseController):
                         ),
                         items=[
                             Part(
-                                label=f"Récupérer quelle quantité ({unit_str}, {available_str} disponible)?",
+                                label=(
+                                    f"Récupérer quelle quantité "
+                                    f"({expected_quantity_context.display_unit_name} ?)"
+                                ),
                                 name="quantity",
                                 type_=Type.NUMBER,
-                                default_value=str(ground_resource.quantity),
+                                default_value=expected_quantity_context.default_quantity,
                             )
                         ],
                     )
@@ -1257,15 +1260,20 @@ class CharacterController(BaseController):
                 can_be_back_url=True,
             )
 
+        user_input_context = InputQuantityContext.from_carried_resource(
+            user_input=hapic_data.query.quantity,
+            carried_resource=ground_resource,
+        )
+
         self._kernel.resource_lib.add_resource_to(
             character_id=character.id,
             resource_id=hapic_data.path.resource_id,
-            quantity=hapic_data.query.quantity,
+            quantity=user_input_context.real_quantity,
             commit=False,
         )
         self._kernel.resource_lib.reduce_on_ground(
             resource_id=hapic_data.path.resource_id,
-            quantity=hapic_data.query.quantity,
+            quantity=user_input_context.real_quantity,
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=hapic_data.path.row_i,
