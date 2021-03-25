@@ -148,3 +148,19 @@ class BuildLib:
             query = query.filter(BuildDocument.is_on == is_on)
 
         return query.all()
+
+    def is_there_build_here(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+    ) -> bool:
+        return bool(
+            self.count_zone_build(
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                zone_row_i=zone_row_i,
+                zone_col_i=zone_col_i,
+            )
+        )

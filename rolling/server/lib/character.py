@@ -1563,3 +1563,23 @@ class CharacterLib:
         if percent >= 30.0:
             return "Faim"
         return "Ok"
+
+    def is_there_character_here(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        alive: bool,
+    ) -> bool:
+        return bool(
+            self.dont_care_alive_query.filter(
+                and_(
+                    CharacterDocument.alive == alive,
+                    CharacterDocument.world_row_i == world_row_i,
+                    CharacterDocument.world_col_i == world_col_i,
+                    CharacterDocument.zone_row_i == zone_row_i,
+                    CharacterDocument.zone_col_i == zone_col_i,
+                )
+            ).count()
+        )

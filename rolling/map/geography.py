@@ -7,6 +7,7 @@ from rolling.exception import TileTypeNotFound
 from rolling.map.legend import MapLegend
 from rolling.map.type.base import MapTileType
 from rolling.map.type.world import WorldMapTileType
+import rolling.map.type.zone as zone
 from rolling.map.type.zone import Nothing
 from rolling.model.zone import ZoneTileProperties
 
@@ -73,6 +74,18 @@ class MapGeography:
         self,
     ) -> typing.Dict[typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]]:
         return self._tile_type_positions
+
+    def get_tile_type(self, row_i: int, col_i: int) -> typing.Type[MapTileType]:
+        if row_i < 0 or col_i < 0:
+            return zone.Nothing
+        if row_i >= len(self.rows):
+            return zone.Nothing
+
+        cols = self.rows[row_i]
+        if col_i >= len(cols):
+            return zone.Nothing
+
+        return cols[col_i]
 
 
 class WorldMapGeography(MapGeography):

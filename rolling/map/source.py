@@ -132,15 +132,6 @@ class ZoneMapSource(MapSource):
         geography_lines = self._get_blocks(raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False)[0]
         return ZoneMapGeography(self.legend, geography_lines, missing_right_tile_str=" ")
 
-    def get_start_zone_coordinates(
-        self, world_row_i: int, world_col_i: int
-    ) -> typing.Tuple[int, int]:
-
-        if not available_coordinates:
-            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
-
-        return random.choice(available_coordinates)
-
 
 @dataclasses.dataclass(frozen=True)
 class ZoneMap:

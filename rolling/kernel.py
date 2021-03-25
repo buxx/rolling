@@ -26,6 +26,7 @@ from rolling.map.source import ZoneMapSource
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import Sea
 from rolling.map.type.world import WorldMapTileType
+import rolling.map.type.zone as zone
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.event import WebSocketEvent
 from rolling.model.meta import TransportType
@@ -374,6 +375,43 @@ class Kernel:
 
         self._game = game
         kernel_logger.info("Reload configuration OK")
+
+    def is_buildable_coordinate(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+    ) -> bool:
+        tile_type = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
+            zone_row_i, zone_col_i
+        )
+        # TODO: manage this at an other level
+        if tile_type in (
+            zone.Nothing,
+            zone.SeaWater,
+            zone.FreshWater,
+        ):
+            return False
+
+        if self.build_lib.is_there_build_here(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ):
+            return False
+
+        if self.character_lib.is_there_character_here(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+            alive=True,
+        ):
+            return False
+
+        return True
 
     def get_traversable_coordinates(
         self, world_row_i: int, world_col_i: int

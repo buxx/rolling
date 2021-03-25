@@ -548,13 +548,13 @@ class BuildAction(CharacterAction):
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
 
-        if self._kernel.build_lib.get_zone_build(
+        if not self._kernel.is_buildable_coordinate(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=input_.row_i,
             zone_col_i=input_.col_i,
         ):
-            return [], []
+            raise ImpossibleAction("Emplacement invalide")
 
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
