@@ -864,7 +864,10 @@ class CharacterLib:
     def get_move_to_zone_infos(
         self, character_id: str, world_row_i: int, world_col_i: int
     ) -> MoveZoneInfos:
-        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        try:
+            zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        except IndexError:
+            raise ImpossibleAction("Mouvement impossible (hors du monde)")
         move_cost = self._kernel.game.world_manager.get_zone_properties(zone_type).move_cost
         character = self.get(character_id)
         inventory = self.get_inventory(character_id)

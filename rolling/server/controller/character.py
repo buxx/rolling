@@ -1674,11 +1674,17 @@ class CharacterController(BaseController):
     async def describe_move_to_zone_infos(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        move_info = self._character_lib.get_move_to_zone_infos(
-            hapic_data.path.character_id,
-            world_row_i=hapic_data.path.world_row_i,
-            world_col_i=hapic_data.path.world_col_i,
-        )
+        try:
+            move_info = self._character_lib.get_move_to_zone_infos(
+                hapic_data.path.character_id,
+                world_row_i=hapic_data.path.world_row_i,
+                world_col_i=hapic_data.path.world_col_i,
+            )
+        except ImpossibleAction as exc:
+            return Description(
+                title="Effectuer un voyage ...",
+                items=[Part(text="Voyage en dehors du monde impossible !")]
+            )
 
         buttons = [Part(label="Rester ici")]
         travel_url = (
