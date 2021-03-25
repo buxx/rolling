@@ -723,7 +723,7 @@ tile_clutter_capacity = 25.0
 
   [ACTIONS.COOK_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
+    required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR"]
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
@@ -764,7 +764,7 @@ tile_clutter_capacity = 25.0
 
   [ACTIONS.BUTCHER_LITTLE_GAME_WITH_SKIN]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR", "DEER"]
+    required_one_of_stuff_ids = ["HARE", "RABBIT", "FOX", "MARTEN", "BOAR"]
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
