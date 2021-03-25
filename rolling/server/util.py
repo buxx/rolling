@@ -60,7 +60,9 @@ def with_multiple_carried_stuffs(
     title: str,
     success_parts: typing.List["Part"],
 ) -> Description:
-    all_carried = kernel.stuff_lib.get_carried_by(character.id, stuff_id=stuff.stuff_id)
+    all_carried = kernel.stuff_lib.get_carried_by(
+        character.id, stuff_id=stuff.stuff_id, exclude_crafting=False
+    )
     if len(all_carried) > 1 and input_.quantity is None:
         return Description(
             title=title,
