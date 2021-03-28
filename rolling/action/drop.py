@@ -30,11 +30,13 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class DropResourceModel:
     quantity: typing.Optional[str] = None
+    then_redirect_url: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
 class DropStuffModel:
     quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    then_redirect_url: typing.Optional[str] = None
 
 
 class DropStuffAction(WithStuffAction):
@@ -116,6 +118,7 @@ class DropStuffAction(WithStuffAction):
                     classes=["primary"],
                 )
             ],
+            redirect=input_.then_redirect_url,
         )
 
 
@@ -241,5 +244,7 @@ class DropResourceAction(WithResourceAction):
                 zone_col_i=drop_to_col_i,
             )
         return Description(
-            title=f"Action effectué", back_url=f"/_describe/character/{character.id}/inventory"
+            title=f"Action effectué",
+            back_url=f"/_describe/character/{character.id}/inventory",
+            redirect=input_.then_redirect_url,
         )

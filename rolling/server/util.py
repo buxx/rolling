@@ -59,6 +59,7 @@ def with_multiple_carried_stuffs(
     ],
     title: str,
     success_parts: typing.List["Part"],
+    redirect: typing.Optional[str] = None,
 ) -> Description:
     all_carried = kernel.stuff_lib.get_carried_by(
         character.id, stuff_id=stuff.stuff_id, exclude_crafting=False
@@ -100,4 +101,4 @@ def with_multiple_carried_stuffs(
     for i in range(do_it_count):
         parts.extend(do_for_one_func(character, all_carried[i], input_))
 
-    return Description(title=title, items=parts + success_parts)
+    return Description(title=title, items=parts + success_parts, redirect=redirect)

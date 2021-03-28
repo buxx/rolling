@@ -363,6 +363,20 @@ class ResourceLib:
             force_before_raise=force_before_raise,
         )
 
+        carried = self._kernel.resource_lib.get_one_carried_by(
+            character_id=character_id,
+            resource_id=resource_id,
+            empty_object_if_not=True,
+        )
+        if not carried.quantity:
+            resource_docs = (
+                self._kernel.server_db_session.query(ResourceDocument).filter(and_(*filters)).all()
+            )
+            for resource_doc in resource_docs:
+                self._kernel.server_db_session.delete(resource_doc)
+        if commit:
+            self._kernel.server_db_session.commit()
+
     def reduce_on_ground(
         self,
         world_row_i: int,

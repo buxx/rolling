@@ -5,6 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 import datetime
 from hapic import HapicData
+import math
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -17,6 +18,8 @@ from rolling.action.base import WithBuildAction
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
+from rolling.action.base import get_with_resource_action_url
+from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
@@ -55,6 +58,7 @@ from rolling.model.stuff import CharacterInventoryModel
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
+from rolling.rolling_types import ActionType
 from rolling.server.action import ActionFactory
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import CHARACTER_ACTION
@@ -630,7 +634,12 @@ class CharacterController(BaseController):
     async def _describe_inventory(self, request: Request, hapic_data: HapicData) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(character.id)
-        inventory_parts = self._get_inventory_parts(character, inventory)
+        inventory_parts = self._get_inventory_parts(
+            request,
+            character,
+            inventory,
+            then_redirect_url=f"/_describe/character/{character.id}/inventory",
+        )
 
         max_weight = character.get_weight_capacity(self._kernel)
         max_clutter = character.get_clutter_capacity(self._kernel)
@@ -852,16 +861,23 @@ class CharacterController(BaseController):
         with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
         inventory = self._character_lib.get_inventory(with_character.id)
         inventory_parts = self._get_inventory_parts(
-            with_character, inventory, disable_stuff_link=True
+            request,
+            with_character,
+            inventory,
+            disable_stuff_link=True,
+            disable_drop_links=True,
         )
 
         return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
 
     def _get_inventory_parts(
         self,
+        request: Request,
         character: CharacterModel,
         inventory: CharacterInventoryModel,
         disable_stuff_link: bool = False,
+        disable_drop_links: bool = False,
+        then_redirect_url: typing.Optional[str] = None,
     ) -> typing.List[Part]:
         stuff_items: typing.List[Part] = []
         resource_items: typing.List[Part] = []
@@ -915,11 +931,75 @@ class CharacterController(BaseController):
                 form_action = None
                 is_link = False
 
-            stuff_items.append(
-                Part(text=text, is_link=is_link, align="left", form_action=form_action)
-            )
+            if disable_drop_links:
+                stuff_items.append(
+                    Part(text=text, is_link=is_link, align="left", form_action=form_action)
+                )
+            else:
+                partial_drop_url = get_with_stuff_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.DROP_STUFF,
+                    stuff_id=stuff.id,
+                    query_params={
+                        "quantity": "1",
+                        "then_redirect_url": f"{then_redirect_url}",
+                    },
+                    action_description_id="DROP_STUFF",
+                )
+                drop_url = get_with_stuff_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.DROP_STUFF,
+                    stuff_id=stuff.id,
+                    query_params={
+                        "quantity": str(stuff_count[stuff.stuff_id]),
+                        "then_redirect_url": f"{then_redirect_url}",
+                    },
+                    action_description_id="DROP_STUFF",
+                )
+                stuff_items.append(
+                    Part(
+                        columns=15,
+                        items=[
+                            Part(
+                                is_column=True,
+                                colspan=13,
+                                items=[
+                                    Part(
+                                        text=text,
+                                        is_link=is_link,
+                                        align="left",
+                                        form_action=form_action,
+                                    )
+                                ],
+                            ),
+                            Part(
+                                is_column=True,
+                                items=[
+                                    Part(
+                                        label=drop_url,
+                                        is_link=is_link,
+                                        form_action=drop_url,
+                                        classes=["drop_item"],
+                                    )
+                                ],
+                            ),
+                            Part(
+                                is_column=True,
+                                items=[
+                                    Part(
+                                        label=partial_drop_url,
+                                        is_link=is_link,
+                                        form_action=partial_drop_url,
+                                        classes=["partial_drop_item"],
+                                    )
+                                ],
+                            ),
+                        ],
+                    )
+                )
             stuff_displayed[stuff.stuff_id] = True
 
+        resource: CarriedResourceDescriptionModel
         for resource in inventory.resource:
             form_action = DESCRIBE_INVENTORY_RESOURCE_ACTION.format(
                 character_id=character.id, resource_id=resource.id
@@ -930,14 +1010,83 @@ class CharacterController(BaseController):
                 form_action = None
                 is_link = False
 
-            resource_items.append(
-                Part(
-                    text=f"{resource.get_full_description(self._kernel)}",
-                    is_link=is_link,
-                    align="left",
-                    form_action=form_action,
+            if disable_drop_links:
+                resource_items.append(
+                    Part(
+                        text=f"{resource.get_full_description(self._kernel)}",
+                        is_link=is_link,
+                        align="left",
+                        form_action=form_action,
+                    )
                 )
-            )
+            else:
+                unit_str = self._kernel.translation.get(resource.unit, short=True)
+                partial_quantity: str = request.query.get(
+                    f"{resource.id}_partial_quantity",
+                    str(math.ceil((resource.quantity / 10) * 100) / 100) + unit_str,
+                )
+                partial_drop_url = get_with_resource_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.DROP_RESOURCE,
+                    resource_id=resource.id,
+                    query_params={
+                        "quantity": partial_quantity,
+                        "then_redirect_url": f"{then_redirect_url}"
+                        f"?{resource.id}_partial_quantity={partial_quantity}",
+                    },
+                    action_description_id="DROP_RESOURCE",
+                )
+                drop_url = get_with_resource_action_url(
+                    character_id=character.id,
+                    action_type=ActionType.DROP_RESOURCE,
+                    resource_id=resource.id,
+                    query_params={
+                        "quantity": str(resource.quantity) + unit_str,
+                        "then_redirect_url": then_redirect_url,
+                    },
+                    action_description_id="DROP_RESOURCE",
+                )
+                resource_items.append(
+                    Part(
+                        columns=15,
+                        items=[
+                            Part(
+                                is_column=True,
+                                colspan=13,
+                                items=[
+                                    Part(
+                                        text=f"{resource.get_full_description(self._kernel)}",
+                                        is_link=is_link,
+                                        align="left",
+                                        form_action=form_action,
+                                    )
+                                ],
+                            ),
+                            Part(
+                                is_column=True,
+                                items=[
+                                    Part(
+                                        label=drop_url,
+                                        is_link=is_link,
+                                        form_action=drop_url,
+                                        classes=["drop_item"],
+                                    )
+                                ],
+                            ),
+                            Part(
+                                is_column=True,
+                                items=[
+                                    Part(
+                                        label=partial_drop_url,
+                                        is_link=is_link,
+                                        form_action=partial_drop_url,
+                                        classes=["partial_drop_item"],
+                                    )
+                                ],
+                            ),
+                        ],
+                    )
+                )
 
         return [
             Part(text=f"Sac(s): {bags_string}", classes=["h2"]),
