@@ -324,7 +324,7 @@ tile_clutter_capacity = 25.0
     weight=1500.0
     material="SANDY"
     unit = "L"
-    clutter = 1.0
+    clutter = 0.25
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "dirt.png"
 
@@ -333,7 +333,7 @@ tile_clutter_capacity = 25.0
     weight=2000.0
     material="SANDY"
     unit = "L"
-    clutter = 1.0
+    clutter = 0.25
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "mud.png"
 
