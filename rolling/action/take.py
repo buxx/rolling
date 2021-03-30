@@ -143,7 +143,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return f"Prendre de {self._from_character.name}"
 
     def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
-        return self._character.id
+        return self._from_character.id
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
         return None

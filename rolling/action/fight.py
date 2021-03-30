@@ -115,7 +115,7 @@ class AttackCharacterAction(WithCharacterAction):
                 ),
             ]
             + parts,
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
             can_be_back_url=True,
         )
 
@@ -142,7 +142,7 @@ class AttackCharacterAction(WithCharacterAction):
             )
         return Description(
             title=f"Attaquer {with_character.name} seul",
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
             items=[
                 Part(text=text),
                 Part(
@@ -194,7 +194,7 @@ class AttackCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Attaquer {with_character.name} seul",
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
             items=parts,
         )
 
@@ -272,7 +272,7 @@ class AttackCharacterAction(WithCharacterAction):
             )
             return Description(
                 title=title,
-                footer_with_character_id=character.id,
+                footer_with_character_id=with_character.id,
                 items=[
                     Part(
                         text=f"Vous ne pouvez pas attaquer {with_character.name} "
@@ -304,7 +304,7 @@ class AttackCharacterAction(WithCharacterAction):
             for in_conflict_str in in_conflict_strs:
                 parts.append(Part(text=f"- {in_conflict_str}"))
 
-            return Description(title=title, items=parts, footer_with_character_id=character.id)
+            return Description(title=title, items=parts, footer_with_character_id=with_character.id)
 
     def _get_attack_as_affinity_description(
         self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int
@@ -356,7 +356,7 @@ class AttackCharacterAction(WithCharacterAction):
                     label=f"Je confirme, attaquer {with_character.name} maintenant !",
                 ),
             ],
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
         )
 
     def _perform_attack_as_affinity(
@@ -394,7 +394,7 @@ class AttackCharacterAction(WithCharacterAction):
         )
         self._kill_deads(attack_description.all_fighters + defense_description.all_fighters)
 
-        return Description(title=title, items=parts, footer_with_character_id=character.id)
+        return Description(title=title, items=parts, footer_with_character_id=with_character.id)
 
     def perform(
         self, character: "CharacterModel", with_character: "CharacterModel", input_: AttackModel

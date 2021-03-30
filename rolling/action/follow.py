@@ -90,7 +90,7 @@ class FollowCharacterAction(WithCharacterAction):
                 f"Vous suivez {with_character.name}"
                 + (" discrètement" if input_.discreetly else "")
             ),
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
         )
 
 
@@ -153,5 +153,5 @@ class StopFollowCharacterAction(WithCharacterAction):
 
         return Description(
             title=f"Vous ne suivez plus {with_character.name}",
-            footer_with_character_id=character.id,
+            footer_with_character_id=with_character.id,
         )
