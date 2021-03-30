@@ -130,6 +130,12 @@ class ImpossibleAction(GamePlayError):
     pass
 
 
+class ImpossibleAttack(ImpossibleAction):
+    def __init__(self, msg: str, msg_lines: typing.Optional[typing.List[str]] = None) -> None:
+        self.msg = msg
+        self.msg_lines = msg_lines
+
+
 class NoCarriedResource(GamePlayError):
     pass
 

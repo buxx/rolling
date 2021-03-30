@@ -1,4 +1,5 @@
 # coding: utf-8
+from operator import and_
 import sqlalchemy
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
@@ -112,13 +113,18 @@ class AffinityLib:
         return query.all()
 
     def get_with_relation(
-        self, character_id: str
+        self,
+        character_id: str,
+        active: typing.Optional[bool] = None,
     ) -> typing.Generator[typing.Tuple[AffinityRelationDocument, AffinityDocument], None, None]:
-        for relation in (
-            self._kernel.server_db_session.query(AffinityRelationDocument)
-            .filter(AffinityRelationDocument.character_id == character_id)
-            .all()
-        ):
+        query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.character_id == character_id
+        )
+
+        if active is not None:
+            query = query.filter(AffinityRelationDocument.accepted == active)
+
+        for relation in query.all():
             yield relation, self._kernel.server_db_session.query(AffinityDocument).filter(
                 AffinityDocument.id == relation.affinity_id
             ).one()

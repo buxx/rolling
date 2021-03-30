@@ -9,7 +9,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_with_character_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAttack
 from rolling.model.character import CharacterModel
 from rolling.model.event import StoryPage
 from rolling.model.fight import AttackDescription
@@ -52,13 +52,13 @@ class AttackCharacterAction(WithCharacterAction):
     ) -> None:
         # lonely attack when exhausted is not possible
         if input_.lonely is not None and input_.lonely and not character.is_attack_ready():
-            raise ImpossibleAction(f"{character.name} n'est pas en mesure de mener cette attaque !")
+            raise ImpossibleAttack(f"{character.name} n'est pas en mesure de mener cette attaque !")
 
         # with_character must not been part of attacking affinity
         if input_.as_affinity is not None and self._kernel.affinity_lib.character_is_in_affinity(
             affinity_id=input_.as_affinity, character_id=with_character.id
         ):
-            raise ImpossibleAction(f"Vous ne pouvez pas attaquer un membre d'une même affinités")
+            raise ImpossibleAttack(f"Vous ne pouvez pas attaquer un membre d'une même affinités")
 
         # It must have ready fighter to fight
         if input_.as_affinity is not None and not self._kernel.affinity_lib.count_ready_fighter(
@@ -66,7 +66,7 @@ class AttackCharacterAction(WithCharacterAction):
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
         ):
-            raise ImpossibleAction(f"Personne n'est en état de se battre actuellement")
+            raise ImpossibleAttack(f"Personne n'est en état de se battre actuellement")
 
     def get_character_actions(
         self, character: "CharacterModel", with_character: "CharacterModel"
@@ -157,14 +157,49 @@ class AttackCharacterAction(WithCharacterAction):
         self, character: CharacterModel, defense: DefendDescription, aff: str
     ) -> None:
         if not character.is_attack_ready():
-            raise ImpossibleAction("Vous n'etes pas en état de vous battre")
+            raise ImpossibleAttack("Vous n'etes pas en état de vous battre")
 
         # by affinities, character can be in defense side. In that case, don't permit the fight
         if character.id in [f.id for f in defense.all_fighters]:
-            raise ImpossibleAction(
+            raise ImpossibleAttack(
                 "Vous ne pouvez pas mener cette attaque car parmis les defenseur se trouve "
                 f"des personnes avec lesquelles vous etes affiliés. Affinités en défense: {aff}"
             )
+
+        conflicts = self._get_attackers_conflicts_str(
+            attackers=[character],
+            defense_description=defense,
+        )
+        if conflicts:
+            raise ImpossibleAttack(
+                "Vous ne pouvez pas mener cette attaque à cause du lien qui vous unis "
+                "aux personnages impliqués dans ce combat.",
+                conflicts,
+            )
+
+    def _get_attackers_conflicts_str(
+        self, attackers: typing.List[CharacterModel], defense_description: DefendDescription
+    ) -> typing.List[str]:
+        conflicts_str: typing.List[str] = []
+        attacker_fighter: CharacterModel
+        defense_fighter: CharacterModel
+
+        for attacker_fighter in attackers:
+            for defense_fighter in defense_description.all_fighters:
+                for _, defense_fighter_affinity in self._kernel.affinity_lib.get_with_relation(
+                    defense_fighter.id,
+                    active=True,
+                ):
+                    if self._kernel.affinity_lib.character_is_in_affinity(
+                        character_id=attacker_fighter.id,
+                        affinity_id=defense_fighter_affinity.id,
+                    ):
+                        conflicts_str.append(
+                            f"{attacker_fighter.name} est affilié à {defense_fighter.name} "
+                            f"({defense_fighter_affinity.name})"
+                        )
+
+        return conflicts_str
 
     def _perform_attack_lonely(
         self, character: "CharacterModel", with_character: "CharacterModel"
@@ -258,11 +293,10 @@ class AttackCharacterAction(WithCharacterAction):
             character_id=character.id, affinity_id=as_affinity.id
         )
         if character_relation.status_id not in (
-            MEMBER_STATUS[0],
             WARLORD_STATUS[0],
             CHIEF_STATUS[0],
         ):
-            raise ImpossibleAction(
+            raise ImpossibleAttack(
                 "Vous ne pouvez impliquer cette affinité qu'avec le role de Chef ou Chef de guerre"
             )
 
@@ -284,27 +318,24 @@ class AttackCharacterAction(WithCharacterAction):
         except NoResultFound:
             pass
 
-        parts = []
-        in_conflict_strs: typing.List[str] = []
-
-        for fighter in attack_description.all_fighters:
-            if fighter.id in defense_description.helpers:
-                affinities_str = ", ".join(
-                    [a.name for a in defense_description.helpers[fighter.id]]
-                )
-                in_conflict_strs.append(f"{fighter.name}, car affilié à: {affinities_str}")
-
-        if in_conflict_strs:
-            parts.append(
-                Part(
-                    text=f"Le combat ne peut avoir lieu car des membres de votre parti ont des "
-                    f"affinités avec les defenseurs:"
-                )
+        conflicts = self._get_attackers_conflicts_str(
+            attackers=attack_description.all_fighters,
+            defense_description=defense_description,
+        )
+        if conflicts:
+            return Description(
+                title="Action impossible",
+                items=[
+                    Part(
+                        text=(
+                            "Vous ne pouvez pas mener cette attaque car certains de vos "
+                            "combattants ont des liens d'affinités avec un ou des combattants "
+                            "de la défense."
+                        )
+                    )
+                ]
+                + [Part(text=f"- {msg_line}") for msg_line in conflicts],
             )
-            for in_conflict_str in in_conflict_strs:
-                parts.append(Part(text=f"- {in_conflict_str}"))
-
-            return Description(title=title, items=parts, footer_with_character_id=with_character.id)
 
     def _get_attack_as_affinity_description(
         self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int

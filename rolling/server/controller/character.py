@@ -22,6 +22,7 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAttack
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import UserDisplayError
 from rolling.kernel import Kernel
@@ -1544,12 +1545,11 @@ class CharacterController(BaseController):
 
         try:
             action.check_request_is_possible(character_model, input_)
+            return action.perform(character_model, input_)
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
-
-        return action.perform(character_model, input_)
 
     @hapic.with_api_doc()
     @hapic.input_path(WithStuffActionModel)
@@ -1582,12 +1582,11 @@ class CharacterController(BaseController):
 
         try:
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
+            return action.perform(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
-
-        return action.perform(character=character_model, stuff=stuff, input_=input_)
 
     @hapic.with_api_doc()
     @hapic.input_path(WithBuildActionModel)
@@ -1661,14 +1660,13 @@ class CharacterController(BaseController):
             action.check_request_is_possible(
                 character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
             )
+            return action.perform(
+                character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
+            )
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
-
-        return action.perform(
-            character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
-        )
 
     @hapic.with_api_doc()
     @hapic.input_path(WithCharacterActionModel)
@@ -1702,14 +1700,23 @@ class CharacterController(BaseController):
             action.check_request_is_possible(
                 character=character_model, with_character=with_character_model, input_=input_
             )
+            return action.perform(
+                character=character_model, with_character=with_character_model, input_=input_
+            )
+        except ImpossibleAttack as exc:
+            return Description(
+                title="Action impossible",
+                items=[Part(text=exc.msg)]
+                + (
+                    [Part(text=f"- {msg_line}") for msg_line in exc.msg_lines]
+                    if exc.msg_lines
+                    else []
+                ),
+            )
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible", items=[Part(text=str(exc)), Part(label="Continuer")]
             )
-
-        return action.perform(
-            character=character_model, with_character=with_character_model, input_=input_
-        )
 
     @hapic.with_api_doc()
     @hapic.output_body(Description)
@@ -1831,7 +1838,7 @@ class CharacterController(BaseController):
         except ImpossibleAction as exc:
             return Description(
                 title="Effectuer un voyage ...",
-                items=[Part(text="Voyage en dehors du monde impossible !")],
+                items=[Part(text=str(exc))],
             )
 
         buttons = [Part(label="Rester ici")]
