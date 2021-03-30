@@ -273,12 +273,12 @@ class TestFightAction:
             input_=AttackModel(as_affinity=france_affinity.id),
         )
 
-        assert (
-            "Vous ne pouvez pas mener cette attaque car certains de vos combattants ont des liens"
-            " d'affinités avec un ou des combattants de la défense." == descr.items[0].text
-        )
-        assert "- FranceSoldier0 est affilié à EnglandWarlord0 (England)" == descr.items[1].text
-        assert "- FranceSoldier0 est affilié à EnglandSoldier0 (England)" == descr.items[2].text
+        assert [
+            "Vous ne pouvez pas mener cette attaque car certains de vos combattants ont des"
+            " liens d'affinités avec un ou des combattants de la défense.",
+            "- FranceSoldier0 à cause de son lien avec England",
+            "- FranceSoldier1 à cause de son lien avec England",
+        ] == [item.text for item in descr.items]
 
     def test_unit__fight_description__ok__simple_armies_opposition_with_fighter_indirect_conflict(
         self,
@@ -308,14 +308,12 @@ class TestFightAction:
             input_=AttackModel(as_affinity=france_affinity.id),
         )
 
-        assert (
+        assert [
             "Vous ne pouvez pas mener cette attaque car certains de vos combattants ont des liens"
-            " d'affinités avec un ou des combattants de la défense." == descr.items[0].text
-        )
-        assert "- FranceSoldier0 est affilié à arthur (Burgundian)" == descr.items[1].text
-        assert (
-            "- FranceSoldier0 est affilié à BurgundianWarlord0 (Burgundian)" == descr.items[2].text
-        )
+            " d'affinités avec un ou des combattants de la défense.",
+            "- FranceSoldier0 à cause de son lien avec Burgundian",
+            "- FranceSoldier1 à cause de son lien avec Burgundian",
+        ] == [item.text for item in descr.items]
 
     def test_unit__fight_description__ok__one_armies_vs_alone_guy(
         self,

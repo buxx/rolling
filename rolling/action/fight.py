@@ -195,11 +195,11 @@ class AttackCharacterAction(WithCharacterAction):
                         affinity_id=defense_fighter_affinity.id,
                     ):
                         conflicts_str.append(
-                            f"{attacker_fighter.name} est affilié à {defense_fighter.name} "
-                            f"({defense_fighter_affinity.name})"
+                            f"{attacker_fighter.name} à cause de son lien "
+                            f"avec {defense_fighter_affinity.name}"
                         )
 
-        return conflicts_str
+        return list(sorted(set(conflicts_str)))
 
     def _perform_attack_lonely(
         self, character: "CharacterModel", with_character: "CharacterModel"
