@@ -299,7 +299,7 @@ class Kernel:
                     "፨": "ROCKY_GROUND",
                     "؛": "HIGH_GRASS",
                     "~": "SEA_WATER",
-                    "⁖": "DIRT",
+                    "⁖": "SOIL",
                     "߉": "LEAF_TREE",
                     "ፆ": "TROPICAL_TREE",
                     "آ": "DEAD_TREE",

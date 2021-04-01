@@ -21,7 +21,7 @@ class ZoneMapTileType(MapTileType):
                 ShortGrass.id: ShortGrass,
                 RockyGround.id: RockyGround,
                 HighGrass.id: HighGrass,
-                Dirt.id: Dirt,
+                Soil.id: Soil,
                 LeafTree.id: LeafTree,
                 TropicalTree.id: TropicalTree,
                 DeadTree.id: DeadTree,
@@ -81,8 +81,8 @@ class SeaWater(ZoneMapTileType):
     background_high_color = "#006"
 
 
-class Dirt(ZoneMapTileType):
-    id = "DIRT"
+class Soil(ZoneMapTileType):
+    id = "SOIL"
     name = "Terre"
     foreground_high_color = "#fd8"
 

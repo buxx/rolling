@@ -319,7 +319,7 @@ tile_clutter_capacity = 25.0
     clutter = 0.00011
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
-  [resources.DIRT]
+  [resources.SOIL]
     name = "Terre"
     weight=1500.0
     material="SANDY"
@@ -467,7 +467,7 @@ tile_clutter_capacity = 25.0
 
 [resource_mix]
   [resource_mix.WET_DIRT_WITH_FRESH_WATER]
-    require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
+    require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
     produce = "WET_DIRT"
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -477,7 +477,7 @@ tile_clutter_capacity = 25.0
     required_all_ability_ids = []
     cost = 0.05
   [resource_mix.WET_DIRT_WITH_SALTED_WATER]
-    require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="DIRT", coeff=0.75}]
+    require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
     produce = "WET_DIRT"
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -528,17 +528,17 @@ tile_clutter_capacity = 25.0
       {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
     ]
 
-  [extractions.DIRT]
-    tile="DIRT"
-    resources=[{resource_id="DIRT", cost_per_unit=0.01, default_quantity=1.0}]
+  [extractions.SOIL]
+    tile="SOIL"
+    resources=[{resource_id="SOIL", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.HIGH_GRASS]
     tile="HIGH_GRASS"
-    resources=[{resource_id="DIRT", cost_per_unit=0.05, default_quantity=1.0}]
+    resources=[{resource_id="SOIL", cost_per_unit=0.05, default_quantity=1.0}]
 
   [extractions.SHORT_GRASS]
     tile="SHORT_GRASS"
-    resources=[{resource_id="DIRT", cost_per_unit=0.05, default_quantity=1.0}]
+    resources=[{resource_id="SOIL", cost_per_unit=0.05, default_quantity=1.0}]
 
 #  [extractions.COPPER_DEPOSIT]
 #    tile="COPPER_DEPOSIT"
@@ -1866,7 +1866,7 @@ tile_clutter_capacity = 25.0
   name = "Mur de terre"
   char = "-"
   building_char = "x"
-  build_require_resources = [{resource="DIRT", quantity=100.0}]
+  build_require_resources = [{resource="SOIL", quantity=100.0}]
   turn_require_resources = []
   power_on_require_resources = []
   abilities = []
