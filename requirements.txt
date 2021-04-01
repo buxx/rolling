@@ -1,5 +1,5 @@
 aiohttp==3.7.4.post0
-aioresponses==0.7.1
+aioresponses==0.7.2
 apispec==2.0.2
 apispec-marshmallow-advanced==0.4
 apispec-serpyco==0.17
