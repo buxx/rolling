@@ -380,6 +380,18 @@ def worldmapc_xena_haxe(
 
 
 @pytest.fixture
+def worldmapc_xena_haxe2(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> StuffModel:
+    xena = worldmapc_xena_model
+    kernel = worldmapc_kernel
+
+    haxe = create_stuff(kernel, "STONE_HAXE")
+    kernel.stuff_lib.set_carried_by(haxe.id, xena.id)
+    return haxe
+
+
+@pytest.fixture
 def worldmapc_xena_leather_jacket(
     worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
 ) -> StuffModel:

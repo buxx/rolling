@@ -225,9 +225,7 @@ class BringResourcesOnBuild(WithBuildAction):
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         carried_resource = self._kernel.resource_lib.get_one_carried_by(
-            character_id=character.id,
-            resource_id=input_.resource_id,
-            empty_object_if_not=True,
+            character_id=character.id, resource_id=input_.resource_id, empty_object_if_not=True
         )
         expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
             self._kernel, carried_resource
@@ -277,8 +275,7 @@ class BringResourcesOnBuild(WithBuildAction):
 
         resource_description = self._kernel.game.config.resources[input_.resource_id]
         user_input_context = InputQuantityContext.from_carried_resource(
-            user_input=input_.quantity,
-            carried_resource=carried_resource,
+            user_input=input_.quantity, carried_resource=carried_resource
         )
         try:
             self._kernel.resource_lib.reduce_carried_by(

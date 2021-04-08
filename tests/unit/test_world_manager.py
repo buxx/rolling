@@ -45,9 +45,7 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            resource_id=resource_id,
-            resource_quantity=quantity,
+            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
         )
 
         # Then
@@ -85,9 +83,7 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            resource_id=resource_id,
-            resource_quantity=quantity,
+            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
         )
 
         # Then
@@ -120,33 +116,28 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            resource_id=resource_id,
-            resource_quantity=quantity,
+            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
         )
 
         # Then
         assert places == expected
 
     def test_find_available_place_where_drop_when_place_stuff_on_full_free_space(
-        self,
-        worldmapc_kernel: Kernel,
+        self, worldmapc_kernel: Kernel
     ) -> None:
         # Given
         kernel = worldmapc_kernel
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            stuff_id="STONE_HAXE",
+            kernel.game.world_manager, stuff_id="STONE_HAXE"
         )
 
         # Then
         assert places == [((69, 40), 1.0)]
 
     def test_find_available_place_where_drop_when_place_stuff_on_occupied_space(
-        self,
-        worldmapc_kernel: Kernel,
+        self, worldmapc_kernel: Kernel
     ) -> None:
         # Given
         kernel = worldmapc_kernel
@@ -162,16 +153,14 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            stuff_id="STONE_HAXE",
+            kernel.game.world_manager, stuff_id="STONE_HAXE"
         )
 
         # Then
         assert places == [((69, 40), 1.0)]
 
     def test_find_available_place_where_drop_when_place_stuff_on_walled_space(
-        self,
-        worldmapc_kernel: Kernel,
+        self, worldmapc_kernel: Kernel
     ) -> None:
         # Given
         kernel = worldmapc_kernel
@@ -186,8 +175,7 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager,
-            stuff_id="STONE_HAXE",
+            kernel.game.world_manager, stuff_id="STONE_HAXE"
         )
 
         # Then

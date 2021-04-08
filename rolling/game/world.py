@@ -220,7 +220,7 @@ class WorldManager:
         place_visited: typing.Set[typing.Tuple[int, int]] = set()
 
         tiles_to_explore = [
-            (start_from_zone_row_i, start_from_zone_col_i),
+            (start_from_zone_row_i, start_from_zone_col_i)
         ] + get_on_and_around_coordinates(
             start_from_zone_row_i, start_from_zone_col_i, exclude_on=True
         )

@@ -1,6 +1,5 @@
 # coding: utf-8
 POST_CHARACTER_URL = "/character"
-TAKE_STUFF_URL = "/character/{character_id}/take/{stuff_id}"
 DESCRIBE_LOOK_AT_STUFF_URL = "/_describe/character/{character_id}/look/{stuff_id}"
 DESCRIBE_LOOK_AT_RESOURCE_URL = (
     "/_describe/character/{character_id}/look/{resource_id}/{row_i},{col_i}"

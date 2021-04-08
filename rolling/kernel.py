@@ -377,21 +377,13 @@ class Kernel:
         kernel_logger.info("Reload configuration OK")
 
     def is_buildable_coordinate(
-        self,
-        world_row_i: int,
-        world_col_i: int,
-        zone_row_i: int,
-        zone_col_i: int,
+        self, world_row_i: int, world_col_i: int, zone_row_i: int, zone_col_i: int
     ) -> bool:
         tile_type = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
             zone_row_i, zone_col_i
         )
         # TODO: manage this at an other level
-        if tile_type in (
-            zone.Nothing,
-            zone.SeaWater,
-            zone.FreshWater,
-        ):
+        if tile_type in (zone.Nothing, zone.SeaWater, zone.FreshWater):
             return False
 
         if self.build_lib.is_there_build_here(

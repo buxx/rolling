@@ -665,6 +665,18 @@ tile_clutter_capacity = 25.0
     actions = ["DROP_STUFF"]
     cost = 0.0
 
+  [ACTIONS.TAKE_STUFF]
+    actions = ["TAKE_STUFF"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_RESOURCE]
+    actions = ["TAKE_RESOURCE"]
+    cost = 0.0
+
+  [ACTIONS.TRANSFER_GROUND]  # required by system !
+    actions = ["TRANSFER_GROUND"]
+    cost = 0.0
+
   [ACTIONS.BRING_RESOURCE_ON_BUILD]  # required by system !
     actions = ["BRING_RESOURCE_ON_BUILD"]
     cost = 0.0

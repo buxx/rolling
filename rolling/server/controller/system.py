@@ -27,9 +27,7 @@ class SystemController(BaseController):
     @hapic.with_api_doc()
     @aiohttp_jinja2.template("infos.html")
     async def infos(self, request: Request) -> dict:
-        return {
-            "game": self._kernel.game,
-        }
+        return {"game": self._kernel.game}
 
     @hapic.with_api_doc()
     @hapic.output_body(Description)
@@ -43,7 +41,7 @@ class SystemController(BaseController):
                     is_web_browser_link=True,
                     # FIXME BS NOW: protocol
                     form_action=f"{self._kernel.server_config.base_url}/infos",
-                ),
+                )
             ],
         )
 

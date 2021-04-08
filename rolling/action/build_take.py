@@ -162,12 +162,10 @@ class TakeFromBuildAction(WithBuildAction):
 
         if input_.take_resource_id is not None and input_.take_resource_quantity:
             carried_resource = self._kernel.resource_lib.get_one_stored_in_build(
-                build_id=build_id,
-                resource_id=input_.take_resource_id,
+                build_id=build_id, resource_id=input_.take_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.take_resource_quantity,
-                carried_resource=carried_resource,
+                user_input=input_.take_resource_quantity, carried_resource=carried_resource
             )
             TakeStuffOrResources(
                 self._kernel,

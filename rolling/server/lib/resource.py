@@ -3,6 +3,7 @@ from sqlalchemy import Column
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.elements import and_
+from sqlalchemy.sql.elements import or_
 import typing
 
 from rolling.exception import ImpossibleAction
@@ -10,7 +11,6 @@ from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
 from rolling.log import server_logger
 from rolling.model.character import CharacterModel
-from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
@@ -407,6 +407,30 @@ class ResourceLib:
         )
         self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
 
+    def reduce(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_coordinates: typing.List[typing.Tuple[int, int]],
+        resource_id: str,
+        quantity: float,
+        commit: bool = True,
+    ) -> float:
+        zone_coordinates_filters = [
+            and_(
+                ResourceDocument.zone_row_i == zone_row_i,
+                ResourceDocument.zone_col_i == zone_col_i,
+            )
+            for zone_row_i, zone_col_i in zone_coordinates
+        ]
+        filter_ = and_(
+            ResourceDocument.resource_id == resource_id,
+            ResourceDocument.world_row_i == world_row_i,
+            ResourceDocument.world_col_i == world_col_i,
+            or_(*zone_coordinates_filters),
+        )
+        return self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
+
     def _reduce(
         self,
         resource_id: str,
@@ -414,7 +438,7 @@ class ResourceLib:
         quantity: float,
         commit: bool = True,
         force_before_raise: bool = False,
-    ) -> None:
+    ) -> float:
         resource_docs = self._kernel.server_db_session.query(ResourceDocument).filter(filter_).all()
 
         if not resource_docs:
@@ -434,6 +458,7 @@ class ResourceLib:
                 raise raise_exception
 
         to_reduce = quantity
+        reduced_quantity = 0.0
 
         for resource_doc in resource_docs:
             if to_reduce <= 0:
@@ -441,12 +466,15 @@ class ResourceLib:
 
             if float(resource_doc.quantity) < to_reduce:
                 to_reduce -= float(resource_doc.quantity)
+                reduced_quantity += float(resource_doc.quantity)
                 self._kernel.server_db_session.delete(resource_doc)
             elif float(resource_doc.quantity) == to_reduce:
+                reduced_quantity += to_reduce
                 to_reduce = 0.0
                 self._kernel.server_db_session.delete(resource_doc)
             else:
                 resource_doc.quantity = float(resource_doc.quantity) - to_reduce
+                reduced_quantity += to_reduce
                 self._kernel.server_db_session.add(resource_doc)
 
         if commit:
@@ -454,6 +482,8 @@ class ResourceLib:
 
         if raise_not_enough:
             raise raise_exception
+
+        return reduced_quantity
 
     def drop(
         self,

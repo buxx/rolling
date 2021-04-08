@@ -194,12 +194,10 @@ class DepositToBuildAction(WithBuildAction):
 
         if input_.deposit_resource_id is not None and input_.deposit_resource_quantity:
             carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                character_id=character.id,
-                resource_id=input_.deposit_resource_id,
+                character_id=character.id, resource_id=input_.deposit_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.deposit_resource_quantity,
-                carried_resource=carried_resource,
+                user_input=input_.deposit_resource_quantity, carried_resource=carried_resource
             )
             DepositStuffOrResources(
                 self._kernel,

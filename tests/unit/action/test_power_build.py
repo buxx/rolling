@@ -31,10 +31,7 @@ def power_off_action(worldmapc_kernel: Kernel) -> PowerOffBuildAction:
     action = PowerOffBuildAction(
         worldmapc_kernel,
         description=ActionDescriptionModel(
-            id="ACTION_ID",
-            action_type=ActionType.POWER_OFF_BUILD,
-            base_cost=0.5,
-            properties={},
+            id="ACTION_ID", action_type=ActionType.POWER_OFF_BUILD, base_cost=0.5, properties={}
         ),
     )
     yield action
@@ -45,10 +42,7 @@ def power_on_action(worldmapc_kernel: Kernel) -> PowerOnBuildAction:
     action = PowerOnBuildAction(
         worldmapc_kernel,
         description=ActionDescriptionModel(
-            id="ACTION_ID",
-            action_type=ActionType.POWER_ON_BUILD,
-            base_cost=0.5,
-            properties={},
+            id="ACTION_ID", action_type=ActionType.POWER_ON_BUILD, base_cost=0.5, properties={}
         ),
     )
     yield action
@@ -67,9 +61,7 @@ class TestPowerBuild:
 
         # Given
         kernel.resource_lib.add_resource_to(
-            build_id=build1.id,
-            resource_id="BRANCHES",
-            quantity=0.002,  # power on require 0.001
+            build_id=build1.id, resource_id="BRANCHES", quantity=0.002  # power on require 0.001
         )
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
         assert kernel.resource_lib.have_resource(
@@ -97,9 +89,7 @@ class TestPowerBuild:
 
         # Given
         kernel.resource_lib.add_resource_to(
-            build_id=build1.id,
-            resource_id="BRANCHES",
-            quantity=0.0005,  # power on require 0.001
+            build_id=build1.id, resource_id="BRANCHES", quantity=0.0005  # power on require 0.001
         )
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
         assert kernel.resource_lib.have_resource(

@@ -57,8 +57,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                 )
             try:
                 account = kernel.account_lib.get_account_for_credentials(
-                    login=login,
-                    password=password,
+                    login=login, password=password
                 )
             except AccountNotFound:
                 return Response(
