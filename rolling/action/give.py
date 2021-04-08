@@ -165,8 +165,7 @@ class GiveToCharacterAction(WithCharacterAction):
                 character.id, resource_id=input_.give_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.give_resource_quantity,
-                carried_resource=carried_resource,
+                user_input=input_.give_resource_quantity, carried_resource=carried_resource
             )
             GiveStuffOrResources(
                 self._kernel,

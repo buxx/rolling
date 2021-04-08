@@ -167,8 +167,7 @@ class AttackCharacterAction(WithCharacterAction):
             )
 
         conflicts = self._get_attackers_conflicts_str(
-            attackers=[character],
-            defense_description=defense,
+            attackers=[character], defense_description=defense
         )
         if conflicts:
             raise ImpossibleAttack(
@@ -187,12 +186,10 @@ class AttackCharacterAction(WithCharacterAction):
         for attacker_fighter in attackers:
             for defense_fighter in defense_description.all_fighters:
                 for _, defense_fighter_affinity in self._kernel.affinity_lib.get_with_relation(
-                    defense_fighter.id,
-                    active=True,
+                    defense_fighter.id, active=True
                 ):
                     if self._kernel.affinity_lib.character_is_in_affinity(
-                        character_id=attacker_fighter.id,
-                        affinity_id=defense_fighter_affinity.id,
+                        character_id=attacker_fighter.id, affinity_id=defense_fighter_affinity.id
                     ):
                         conflicts_str.append(
                             f"{attacker_fighter.name} à cause de son lien "
@@ -292,10 +289,7 @@ class AttackCharacterAction(WithCharacterAction):
         character_relation = self._kernel.affinity_lib.get_active_relation(
             character_id=character.id, affinity_id=as_affinity.id
         )
-        if character_relation.status_id not in (
-            WARLORD_STATUS[0],
-            CHIEF_STATUS[0],
-        ):
+        if character_relation.status_id not in (WARLORD_STATUS[0], CHIEF_STATUS[0]):
             raise ImpossibleAttack(
                 "Vous ne pouvez impliquer cette affinité qu'avec le role de Chef ou Chef de guerre"
             )
@@ -319,8 +313,7 @@ class AttackCharacterAction(WithCharacterAction):
             pass
 
         conflicts = self._get_attackers_conflicts_str(
-            attackers=attack_description.all_fighters,
-            defense_description=defense_description,
+            attackers=attack_description.all_fighters, defense_description=defense_description
         )
         if conflicts:
             return Description(

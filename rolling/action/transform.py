@@ -16,17 +16,12 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
-from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
-from rolling.util import EmptyModel
 from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
-from rolling.util import adapt_str_quantity
-from rolling.util import is_expect_kg
 from rolling.util import quantity_to_str
-from rolling.util import str_quantity_to_float
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -179,8 +174,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 character.id, resource_id=required_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.quantity,
-                carried_resource=carried_resource,
+                user_input=input_.quantity, carried_resource=carried_resource
             )
             if carried_resource.quantity < user_input_context.real_quantity:
                 raise ImpossibleAction(f"Vous n'en possédez pas assez")
@@ -232,8 +226,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 character.id, resource_id=resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.quantity,
-                carried_resource=carried_resource,
+                user_input=input_.quantity, carried_resource=carried_resource
             )
             real_quantity = self._adapt_quantity(user_input_context.real_quantity)
             return self._description.base_cost + (
@@ -317,8 +310,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             )
 
         user_input_context = InputQuantityContext.from_carried_resource(
-            user_input=input_.quantity,
-            carried_resource=carried_resource,
+            user_input=input_.quantity, carried_resource=carried_resource
         )
         real_quantity = self._adapt_quantity(user_input_context.real_quantity)
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)

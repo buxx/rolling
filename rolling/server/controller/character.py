@@ -1,9 +1,8 @@
-#  coding: utf-8
+# coding: utf-8
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-import datetime
 from hapic import HapicData
 import math
 import serpyco
@@ -41,7 +40,6 @@ from rolling.model.character import GetMoveZoneInfosModel
 from rolling.model.character import MoveCharacterQueryModel
 from rolling.model.character import PendingActionQueryModel
 from rolling.model.character import PickFromInventoryQueryModel
-from rolling.model.character import PostTakeStuffModelModel
 from rolling.model.character import SharedInventoryQueryModel
 from rolling.model.character import TakeResourceModel
 from rolling.model.character import UpdateCharacterCardBodyModel
@@ -68,7 +66,6 @@ from rolling.server.controller.url import DESCRIBE_INVENTORY_STUFF_ACTION
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
-from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.controller.url import WITH_BUILD_ACTION
 from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
@@ -84,7 +81,6 @@ from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_description_for_not_enough_ap
-from rolling.util import quantity_to_str
 
 base_skills = ["strength", "perception", "endurance", "charism", "intelligence", "agility", "luck"]
 
@@ -1599,7 +1595,7 @@ class CharacterController(BaseController):
                 action_type, action_description_id=hapic_data.path.action_description_id
             ),
         )
-        input_ = action.input_model_serializer.load(dict(request.query))
+        input_ = action.input_model_from_request(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         # TODO BS 2019-07-04: Check character can action on build...
 
@@ -1640,7 +1636,7 @@ class CharacterController(BaseController):
                 action_type, action_description_id=hapic_data.path.action_description_id
             ),
         )
-        input_ = action.input_model_serializer.load(dict(request.query))
+        input_ = action.input_model_from_request(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
         cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
@@ -1679,7 +1675,7 @@ class CharacterController(BaseController):
                 action_type, action_description_id=hapic_data.path.action_description_id
             ),
         )
-        input_ = action.input_model_serializer.load(dict(request.query))
+        input_ = action.input_model_from_request(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         with_character_model = self._kernel.character_lib.get(hapic_data.path.with_character_id)
 
@@ -1949,15 +1945,6 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
-    @hapic.input_path(PostTakeStuffModelModel)
-    @hapic.output_body(Description)
-    async def take_stuff(self, request: Request, hapic_data: HapicData) -> Description:
-        self._character_lib.take_stuff(
-            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
-        )
-        return Description(title="Objet récupéré", items=[])
-
-    @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ZoneRequiredPlayerData)
     async def get_zone_data(
@@ -2217,7 +2204,6 @@ class CharacterController(BaseController):
                     self.pick_from_inventory,
                 ),
                 web.post("/_describe/character/{character_id}/move", self.describe_move),
-                web.post(TAKE_STUFF_URL, self.take_stuff),
                 web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),
                 web.post(DESCRIBE_LOOK_AT_RESOURCE_URL, self._describe_look_resource),
                 web.post(DESCRIBE_LOOK_AT_CHARACTER_URL, self._describe_look_character),

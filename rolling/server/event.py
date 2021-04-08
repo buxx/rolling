@@ -188,7 +188,7 @@ class ClickActionProcessor(EventProcessor):
             if ad.id == build_description_id
         )
         action = self._kernel.action_factory.get_build_action(description)
-        input_ = action.input_model_serializer.load(event.data.to_dict())
+        input_ = action.input_model_from_request(event.data.to_dict())
         try:
             action.check_request_is_possible(character, input_)
             zone_events, sender_events = action.perform_from_event(character, input_)

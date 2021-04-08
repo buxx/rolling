@@ -35,10 +35,7 @@ class PowerOnBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment est en construction")
 
     def check_request_is_possible(
-        self,
-        character: "CharacterModel",
-        build_id: int,
-        input_: EmptyModel,
+        self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, build_id)
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -46,9 +43,7 @@ class PowerOnBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment est déjà démarré")
 
     def get_character_actions(
-        self,
-        character: "CharacterModel",
-        build_id: int,
+        self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
         return [
             CharacterActionLink(
@@ -60,14 +55,11 @@ class PowerOnBuildAction(WithBuildAction):
                     query_params={},
                     action_description_id=self._description.id,
                 ),
-            ),
+            )
         ]
 
     def perform(
-        self,
-        character: "CharacterModel",
-        build_id: int,
-        input_: EmptyModel,
+        self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
@@ -77,9 +69,7 @@ class PowerOnBuildAction(WithBuildAction):
         for required in build_description.power_on_require_resources:
             resource_description = self._kernel.game.config.resources[required.resource_id]
             if not self._kernel.resource_lib.have_resource(
-                resource_id=required.resource_id,
-                build_id=build_id,
-                quantity=required.quantity,
+                resource_id=required.resource_id, build_id=build_id, quantity=required.quantity
             ):
                 unit_str = self._kernel.translation.get(resource_description.unit)
                 missing_parts.append(
@@ -87,7 +77,7 @@ class PowerOnBuildAction(WithBuildAction):
                         text=(
                             f"Pas assez de {resource_description.name} "
                             f"({required.quantity} {unit_str} requis)"
-                        ),
+                        )
                     )
                 )
 
@@ -127,10 +117,7 @@ class PowerOffBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment n'est pas en fonctionnement")
 
     def check_request_is_possible(
-        self,
-        character: "CharacterModel",
-        build_id: int,
-        input_: EmptyModel,
+        self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, build_id)
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -138,9 +125,7 @@ class PowerOffBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment n'est pas démarré")
 
     def get_character_actions(
-        self,
-        character: "CharacterModel",
-        build_id: int,
+        self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
         return [
             CharacterActionLink(
@@ -152,14 +137,11 @@ class PowerOffBuildAction(WithBuildAction):
                     query_params={},
                     action_description_id=self._description.id,
                 ),
-            ),
+            )
         ]
 
     def perform(
-        self,
-        character: "CharacterModel",
-        build_id: int,
-        input_: EmptyModel,
+        self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]

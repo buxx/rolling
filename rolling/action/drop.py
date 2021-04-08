@@ -144,8 +144,7 @@ class DropResourceAction(WithResourceAction):
 
         if input_.quantity:
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.quantity,
-                carried_resource=carried_resource,
+                user_input=input_.quantity, carried_resource=carried_resource
             )
             if not self._kernel.resource_lib.have_resource(
                 character_id=character.id,
@@ -219,8 +218,7 @@ class DropResourceAction(WithResourceAction):
             )
 
         user_input_context = InputQuantityContext.from_carried_resource(
-            user_input=input_.quantity,
-            carried_resource=carried_resource,
+            user_input=input_.quantity, carried_resource=carried_resource
         )
         places_to_drop = self._kernel.game.world_manager.find_available_place_where_drop(
             resource_id=resource_id,

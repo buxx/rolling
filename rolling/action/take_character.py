@@ -286,8 +286,7 @@ class TakeFromCharacterAction(WithCharacterAction):
                 with_character.id, resource_id=input_.take_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.take_resource_quantity,
-                carried_resource=carried_resource,
+                user_input=input_.take_resource_quantity, carried_resource=carried_resource
             )
             take.check_can_transfer_resource(
                 input_.take_resource_id, quantity=user_input_context.real_quantity

@@ -180,12 +180,14 @@ class StuffLib:
         world_col_i: int,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
+        stuff_id: typing.Optional[str] = None,
     ) -> typing.List[StuffModel]:
         stuff_docs = self.get_base_query(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
+            stuff_id=stuff_id,
         ).all()
         return [self.stuff_model_from_doc(doc) for doc in stuff_docs]
 

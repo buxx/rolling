@@ -8,7 +8,6 @@ from urllib.parse import urlencode
 
 from guilang.description import Description
 from rolling.model.event import WebSocketEvent
-from rolling.model.event import WebSocketEventData
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import CHARACTER_ACTION
 from rolling.server.controller.url import WITH_BUILD_ACTION
@@ -139,6 +138,10 @@ class Action(abc.ABC):
     @abc.abstractmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         pass
+
+    @classmethod
+    def input_model_from_request(cls, parameters: typing.Dict[str, typing.Any]) -> typing.Any:
+        return cls.input_model_serializer.load(parameters)
 
     @property
     def description(self) -> ActionDescriptionModel:

@@ -62,8 +62,7 @@ class MixResourcesAction(WithResourceAction):
                     character_id=character.id, resource_id=required_resource.resource.id
                 )
                 user_input_context = InputQuantityContext.from_carried_resource(
-                    user_input=input_.quantity,
-                    carried_resource=carried_resource,
+                    user_input=input_.quantity, carried_resource=carried_resource
                 )
                 required_quantity = required_resource.coeff * user_input_context.real_quantity
                 if carried_resource.quantity < required_quantity:
@@ -129,8 +128,7 @@ class MixResourcesAction(WithResourceAction):
                 character.id, resource_id=resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.quantity,
-                carried_resource=carried_resource,
+                user_input=input_.quantity, carried_resource=carried_resource
             )
             return resource_mix_description.cost * user_input_context.real_quantity
         return self._description.base_cost
@@ -203,8 +201,7 @@ class MixResourcesAction(WithResourceAction):
             )
 
         user_input_context = InputQuantityContext.from_carried_resource(
-            user_input=input_.quantity,
-            carried_resource=carried_resource,
+            user_input=input_.quantity, carried_resource=carried_resource
         )
 
         # Make mix

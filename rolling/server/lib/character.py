@@ -15,6 +15,7 @@ import uuid
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import WithResourceAction
+from rolling.action.base import get_with_stuff_action_url
 from rolling.action.eat import EatResourceModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
@@ -43,7 +44,6 @@ from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
-from rolling.server.controller.url import TAKE_STUFF_URL
 from rolling.server.document.action import AuthorizePendingActionDocument
 from rolling.server.document.action import PendingActionDocument
 from rolling.server.document.affinity import AffinityDirectionType
@@ -711,7 +711,13 @@ class CharacterLib:
             character_actions.append(
                 CharacterActionLink(
                     name=f"Prendre {stuff.get_name_and_light_description(self._kernel)}",
-                    link=TAKE_STUFF_URL.format(character_id=character_id, stuff_id=stuff.id),
+                    link=get_with_stuff_action_url(
+                        character_id=character_id,
+                        stuff_id=stuff_id,
+                        action_type=ActionType.TAKE_STUFF,
+                        action_description_id="TAKE_STUFF",
+                        query_params={},
+                    ),
                 )
             )
         elif stuff.carried_by == character_id:

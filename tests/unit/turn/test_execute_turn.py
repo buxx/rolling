@@ -374,9 +374,7 @@ class TestExecuteTurn:
     ) -> None:
         # Given
         worldmapc_kernel.resource_lib.add_resource_to(
-            resource_id="BRANCHES",
-            quantity=10.0,
-            build_id=build_a_on.id,
+            resource_id="BRANCHES", quantity=10.0, build_id=build_a_on.id
         )
         resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(
             build_id=build_a_on.id
@@ -406,9 +404,7 @@ class TestExecuteTurn:
     ):
         # Given
         worldmapc_kernel.resource_lib.add_resource_to(
-            resource_id="BRANCHES",
-            quantity=0.001,  # not enough
-            build_id=build_a_on.id,
+            resource_id="BRANCHES", quantity=0.001, build_id=build_a_on.id  # not enough
         )
         resources_on_build = worldmapc_kernel.resource_lib.get_stored_in_build(
             build_id=build_a_on.id

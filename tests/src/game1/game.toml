@@ -280,6 +280,22 @@ tile_clutter_capacity = 10.0
     actions = ["USE_AS_SHIELD"]
     cost = 0.0
 
+  [ACTIONS.TRANSFER_GROUND]
+    actions = ["TRANSFER_GROUND"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_RESOURCE]
+    actions = ["TAKE_RESOURCE"]
+    cost = 0.0
+
+  [ACTIONS.TAKE_STUFF]
+    actions = ["TAKE_STUFF"]
+    cost = 0.0
+
+  [ACTIONS.DROP_RESOURCE]
+    actions = ["DROP_RESOURCE"]
+    cost = 0.0
+
   [ACTIONS.NOT_USE_AS_SHIELD]
     actions = ["NOT_USE_AS_SHIELD"]
     cost = 0.0

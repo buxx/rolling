@@ -39,7 +39,10 @@ from rolling.action.knowledge import ProposeTeachKnowledgeAction
 from rolling.action.knowledge import TeachKnowledgeAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
-from rolling.action.take import TakeFromCharacterAction
+from rolling.action.take_character import TakeFromCharacterAction
+from rolling.action.take_resource import TakeResourceAction
+from rolling.action.take_stuff import TakeStuffAction
+from rolling.action.transfer_ground import TransfertGroundCharacterAction
 from rolling.action.transform import TransformResourcesIntoResourcesAction
 from rolling.action.transform import TransformStuffIntoResourcesAction
 from rolling.action.travel import TravelAction
@@ -109,6 +112,9 @@ class ActionFactory:
         ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
         ActionType.POWER_ON_BUILD: PowerOnBuildAction,
         ActionType.POWER_OFF_BUILD: PowerOffBuildAction,
+        ActionType.TRANSFER_GROUND: TransfertGroundCharacterAction,
+        ActionType.TAKE_STUFF: TakeStuffAction,
+        ActionType.TAKE_RESOURCE: TakeResourceAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -129,6 +135,7 @@ class ActionFactory:
             ActionType.NOT_USE_AS_SHIELD: NotUseAsShieldAction,
             ActionType.USE_AS_ARMOR: UseAsArmorAction,
             ActionType.NOT_USE_AS_ARMOR: NotUseAsArmorAction,
+            ActionType.TAKE_STUFF: TakeStuffAction,
         }
         self._with_resource_actions: typing.Dict[ActionType, typing.Type[WithResourceAction]] = {
             ActionType.DROP_RESOURCE: DropResourceAction,
@@ -136,6 +143,7 @@ class ActionFactory:
             ActionType.EAT_RESOURCE: EatResourceAction,
             ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
             ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
+            ActionType.TAKE_RESOURCE: TakeResourceAction,
         }
         self._with_character_actions: typing.Dict[ActionType, typing.Type[WithCharacterAction]] = {
             ActionType.ATTACK_CHARACTER: AttackCharacterAction,
@@ -156,6 +164,7 @@ class ActionFactory:
             ActionType.LEARN_KNOWLEDGE: LearnKnowledgeAction,
             ActionType.CHEATS: CheatsCharacterAction,
             ActionType.TRAVEL: TravelAction,
+            ActionType.TRANSFER_GROUND: TransfertGroundCharacterAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.BEGIN_BUILD: BeginBuildAction,
@@ -307,7 +316,7 @@ class ActionFactory:
         character = self._kernel.character_lib.get(pending_action.character_id)
         if pending_action.action_scope == ActionScope.WITH_CHARACTER.value:
             with_character = self._kernel.character_lib.get(pending_action.with_character_id)
-            input_ = action.input_model_serializer.load(pending_action.parameters)
+            input_ = action.input_model_from_request(pending_action.parameters)
             action.check_request_is_possible(character, with_character, input_=input_)
             description = action.perform(character, with_character, input_=input_)
         else:

@@ -3,8 +3,8 @@ import pytest
 import typing
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.take import TakeFromCharacterAction
-from rolling.action.take import TakeFromModel
+from rolling.action.take_character import TakeFromCharacterAction
+from rolling.action.take_character import TakeFromModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel

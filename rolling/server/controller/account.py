@@ -91,16 +91,8 @@ class AccountController(BaseController):
                     is_form=True,
                     form_action="/account/create",
                     items=[
-                        Part(
-                            name="username",
-                            label="Login/pseudo",
-                            type_=Type.STRING,
-                        ),
-                        Part(
-                            name="email",
-                            label="Email",
-                            type_=Type.STRING,
-                        ),
+                        Part(name="username", label="Login/pseudo", type_=Type.STRING),
+                        Part(name="email", label="Email", type_=Type.STRING),
                         Part(
                             name="raw_password",
                             label="Mot de passe",
@@ -144,8 +136,8 @@ class AccountController(BaseController):
                             "Si l'identifiant/email que vous avez saisi correspond à "
                             "un utilisateur existant, un email a été envoyé. Pensez à "
                             "bien vérifier votre boite de SPAM."
-                        ),
-                    ),
+                        )
+                    )
                 ],
                 back_to_zone=True,
                 footer_inventory=False,
