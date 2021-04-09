@@ -3,7 +3,7 @@ import dataclasses
 
 from aiohttp.test_utils import TestClient
 from collections import defaultdict
-from fixtures import create_stuff
+from tests.fixtures import create_stuff
 import pytest as pytest
 import typing
 import urllib.parse as urlparse
