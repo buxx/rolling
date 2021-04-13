@@ -1,6 +1,8 @@
 # coding: utf-8
+import json
 from operator import and_
 import sqlalchemy
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -112,11 +114,12 @@ class AffinityLib:
 
         return query.all()
 
-    def get_with_relation(
+    def get_with_relations(
         self,
         character_id: str,
         active: typing.Optional[bool] = None,
-    ) -> typing.Generator[typing.Tuple[AffinityRelationDocument, AffinityDocument], None, None]:
+        request: typing.Optional[bool] = None,
+    ) -> typing.List[AffinityRelationDocument]:
         query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
             AffinityRelationDocument.character_id == character_id
         )
@@ -124,22 +127,52 @@ class AffinityLib:
         if active is not None:
             query = query.filter(AffinityRelationDocument.accepted == active)
 
-        for relation in query.all():
-            yield relation, self._kernel.server_db_session.query(AffinityDocument).filter(
-                AffinityDocument.id == relation.affinity_id
-            ).one()
+        if request is not None:
+            query = query.filter(AffinityRelationDocument.request == request)
 
-    def get_without_relation(self, character_id: str) -> typing.List[AffinityDocument]:
-        character_affinity_ids = (
-            self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
-            .filter(AffinityRelationDocument.character_id == character_id)
+        return query.all()
+
+    def get_affinities_without_relations(
+        self,
+        character_id: str,
+        with_alive_character_in_world_row_i: typing.Optional[int] = None,
+        with_alive_character_in_world_col_i: typing.Optional[int] = None,
+    ) -> typing.List[AffinityDocument]:
+        current_character_affinity_ids = [
+            r[0]
+            for r in self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
+            .filter(
+                AffinityRelationDocument.character_id == character_id,
+                AffinityRelationDocument.accepted == True,
+            )
             .all()
-        ) or []
-        character_affinity_ids = character_affinity_ids[0] if character_affinity_ids else []
+        ]
 
+        query = self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id).filter(
+            AffinityRelationDocument.affinity_id.notin_(current_character_affinity_ids)
+        )
+
+        if (
+            with_alive_character_in_world_row_i is not None
+            and with_alive_character_in_world_col_i is not None
+        ):
+            here_alive_character_affinity_ids = [
+                r.affinity_id
+                for r in self.get_zone_relations(
+                    row_i=with_alive_character_in_world_row_i,
+                    col_i=with_alive_character_in_world_col_i,
+                    character_is_alive=True,
+                    exclude_character_ids=[character_id],
+                )
+            ]
+            query = query.filter(
+                AffinityRelationDocument.affinity_id.in_(here_alive_character_affinity_ids)
+            )
+
+        affinity_ids = [r.affinity_id for r in query.all()]
         return (
             self._kernel.server_db_session.query(AffinityDocument)
-            .filter(AffinityDocument.id.notin_(character_affinity_ids))
+            .filter(AffinityDocument.id.in_(affinity_ids))
             .all()
         )
 
@@ -303,7 +336,7 @@ class AffinityLib:
 
     def get_chief_or_warlord_of_affinity(
         self,
-        affinity_id: str,
+        affinity_id: int,
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> typing.List[CharacterModel]:
@@ -357,3 +390,25 @@ class AffinityLib:
                 carried_by_id=character_id, shared_with_affinity_ids=[affinity_id]
             ).count()
         )
+
+    def get_rel_str(self, relation: AffinityRelationDocument) -> str:
+        rel_str = ""
+
+        if relation.accepted:
+            rel_str = dict(json.loads(relation.affinity.statuses))[relation.status_id]
+        elif relation.rejected:
+            rel_str = "Quitté"
+        elif relation.disallowed:
+            rel_str = "Exclu"
+        elif relation.request:
+            rel_str = "Demandé"
+        elif not relation.accepted and not relation.request and not relation.fighter:
+            rel_str = "Plus de lien"
+
+        if relation.fighter:
+            if rel_str:
+                rel_str = f"{rel_str}, Combattant"
+            else:
+                rel_str = "Combattant"
+
+        return rel_str

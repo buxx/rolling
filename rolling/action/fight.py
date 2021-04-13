@@ -185,7 +185,8 @@ class AttackCharacterAction(WithCharacterAction):
 
         for attacker_fighter in attackers:
             for defense_fighter in defense_description.all_fighters:
-                for _, defense_fighter_affinity in self._kernel.affinity_lib.get_with_relation(
+                # FIXME BS NOW: j'ai changé la signature
+                for _, defense_fighter_affinity in self._kernel.affinity_lib.get_with_relations(
                     defense_fighter.id, active=True
                 ):
                     if self._kernel.affinity_lib.character_is_in_affinity(

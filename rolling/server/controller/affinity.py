@@ -40,9 +40,108 @@ class AffinityController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def main_page(self, request: Request, hapic_data: HapicData) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        active_relations = self._kernel.affinity_lib.get_with_relations(
+            character_id=character.id,
+            active=True,
+        )
+        requested_relation_ids = [
+            r.affinity_id
+            for r in self._kernel.affinity_lib.get_with_relations(
+                character_id=character.id,
+                request=True,
+            )
+        ]
+        other_here_affinities = self._kernel.affinity_lib.get_affinities_without_relations(
+            character_id=character.id,
+            with_alive_character_in_world_row_i=character.world_row_i,
+            with_alive_character_in_world_col_i=character.world_col_i,
+        )
+
+        character_affinities_parts: typing.List[Part] = []
+        character_other_affinities_parts: typing.List[Part] = []
+
+        for active_relation in active_relations:
+            rel_str = self._kernel.affinity_lib.get_rel_str(active_relation)
+            here_count = self._kernel.affinity_lib.count_members(
+                affinity_id=active_relation.affinity.id,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
+            total_count = self._kernel.affinity_lib.count_members(
+                affinity_id=active_relation.affinity.id,
+            )
+            character_affinities_parts.append(
+                Part(
+                    is_link=True,
+                    label=f"{active_relation.affinity.name} ({rel_str}) {here_count}|{total_count}",
+                    form_action=f"/affinity/{character.id}/see/{active_relation.affinity.id}",
+                )
+            )
+        if not active_relations:
+            character_affinities_parts.append(Part(text="Aucune affinité ..."))
+
+        for other_here_affinity in other_here_affinities:
+            suffix = ""
+            if other_here_affinity.id in requested_relation_ids:
+                suffix = " (Demandé)"
+            here_count = self._kernel.affinity_lib.count_members(
+                affinity_id=other_here_affinity.id,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
+            total_count = self._kernel.affinity_lib.count_members(
+                affinity_id=other_here_affinity.id,
+            )
+            character_other_affinities_parts.append(
+                Part(
+                    is_link=True,
+                    label=f"{other_here_affinity.name}{suffix} {here_count}|{total_count}",
+                    form_action=f"/affinity/{character.id}/see/{other_here_affinity.id}",
+                )
+            )
+        if not other_here_affinities:
+            character_other_affinities_parts.append(Part(text="Aucune affinité ..."))
+
+        return Description(
+            title="Affinités",
+            items=[
+                Part(
+                    text=(
+                        "Les affinités permettent d'exprimer à quelles communautés se rattache "
+                        "votre personnage."
+                    )
+                ),
+                Part(
+                    columns=2,
+                    items=[
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[Part(text="Vos affinités", classes=["h2"])]
+                            + character_affinities_parts,
+                        ),
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[Part(text="Autres affinités présentes", classes=["h2"])]
+                            + character_other_affinities_parts,
+                        ),
+                    ],
+                ),
+                Part(
+                    label="Créer une affinité",
+                    is_link=True,
+                    form_action=f"/affinity/{hapic_data.path.character_id}/new",
+                ),
+            ],
+            can_be_back_url=True,
+        )
+
         affiliated_parts = []
-        for relation, affinity in self._kernel.affinity_lib.get_with_relation(
-            character_id=hapic_data.path.character_id
+        for relation, affinity in self._kernel.affinity_lib.get_with_relations(
+            character_id=hapic_data.path.character_id,
+            active=True,
         ):
             rel_str = ""
             if relation.accepted:
@@ -104,7 +203,7 @@ class AffinityController(BaseController):
     @hapic.output_body(Description)
     async def list(self, request: Request, hapic_data: HapicData) -> Description:
         non_affiliated_parts = []
-        for affinity in self._kernel.affinity_lib.get_without_relation(
+        for affinity in self._kernel.affinity_lib.get_affinities_without_relations(
             character_id=hapic_data.path.character_id
         ):
             non_affiliated_parts.append(
@@ -147,6 +246,7 @@ class AffinityController(BaseController):
                 status_id=CHIEF_STATUS[0],
                 fighter=True,
                 commit=True,
+                request=True,  # creator is chief
             )
             return Description(
                 title="Affinités créée",
@@ -184,6 +284,7 @@ class AffinityController(BaseController):
         edit_relation_url = (
             f"/affinity/{hapic_data.path.character_id}/edit-relation/{hapic_data.path.affinity_id}"
         )
+
         if relation:
             fighter_str = ""
             if relation.fighter:
@@ -195,64 +296,22 @@ class AffinityController(BaseController):
                 else ""
             )
             if relation.accepted:
-                parts.append(
-                    Part(
-                        label=(
-                            f"Vous êtes membre de cette affinité et vous portez le status "
-                            f"de {status_str}{fighter_str}"
-                        ),
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
+                relation_str = (
+                    f"Vous êtes membre de cette affinité et vous portez le status "
+                    f"de {status_str}{fighter_str}"
                 )
             elif relation.request:
-                parts.append(
-                    Part(
-                        label=f"Vous avez demandé à être membre de cette affinité{fighter_str}",
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
-                )
+                relation_str = f"Vous avez demandé à être membre de cette affinité{fighter_str}"
             elif relation.rejected:
-                parts.append(
-                    Part(
-                        label=f"Vous avez renié cette affinité{fighter_str}",
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
-                )
+                relation_str = f"Vous avez renié cette affinité{fighter_str}"
             elif relation.disallowed:
-                parts.append(
-                    Part(
-                        label=f"Vous avez été rejeté de cette affinité{fighter_str}",
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
-                )
+                relation_str = f"Vous avez été rejeté de cette affinité{fighter_str}"
             elif relation.fighter:
-                parts.append(
-                    Part(
-                        label="Vous combattez pour cette affinité",
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
-                )
+                relation_str = "Vous combattez pour cette affinité"
             else:
-                parts.append(
-                    Part(
-                        label="Vous n'avez plus aucune relation avec cette affinité",
-                        is_link=True,
-                        form_action=edit_relation_url,
-                    )
-                )
+                relation_str = "Vous n'avez plus aucune relation avec cette affinité"
         else:
-            parts.append(
-                Part(
-                    label="Vous n'avez aucune relation avec cette affinité",
-                    is_link=True,
-                    form_action=edit_relation_url,
-                )
-            )
+            relation_str = "Vous n'avez aucune relation avec cette affinité"
 
         # can access management page ?
         if affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value:
@@ -272,40 +331,40 @@ class AffinityController(BaseController):
                     ]
                 )
 
-        if (
-            ActionType.FOLLOW_CHARACTER in self._kernel.game.config.actions
-            and ActionType.STOP_FOLLOW_CHARACTER in self._kernel.game.config.actions
-        ):
-            follow_action = self._kernel.action_factory.create_action(
-                ActionType.FOLLOW_CHARACTER, ActionType.FOLLOW_CHARACTER.name
-            )
-            stop_follow_action = self._kernel.action_factory.create_action(
-                ActionType.STOP_FOLLOW_CHARACTER, ActionType.STOP_FOLLOW_CHARACTER.name
-            )
-            for followable_character in self._kernel.affinity_lib.get_chief_or_warlord_of_affinity(
-                affinity.id, row_i=character.world_row_i, col_i=character.world_col_i
-            ):
-                if followable_character.id == character.id:
-                    break
-
-                for action in [follow_action, stop_follow_action]:
-                    try:
-                        action.check_is_possible(character, followable_character)
-                        parts.extend(
-                            [
-                                Part(
-                                    text=action_link.get_as_str(),
-                                    form_action=action_link.link,
-                                    is_link=True,
-                                    link_group_name=action_link.group_name,
-                                )
-                                for action_link in action.get_character_actions(
-                                    character, followable_character
-                                )
-                            ]
-                        )
-                    except ImpossibleAction:
-                        pass
+        # if (
+        #     ActionType.FOLLOW_CHARACTER in self._kernel.game.config.actions
+        #     and ActionType.STOP_FOLLOW_CHARACTER in self._kernel.game.config.actions
+        # ):
+        #     follow_action = self._kernel.action_factory.create_action(
+        #         ActionType.FOLLOW_CHARACTER, ActionType.FOLLOW_CHARACTER.name
+        #     )
+        #     stop_follow_action = self._kernel.action_factory.create_action(
+        #         ActionType.STOP_FOLLOW_CHARACTER, ActionType.STOP_FOLLOW_CHARACTER.name
+        #     )
+        #     for followable_character in self._kernel.affinity_lib.get_chief_or_warlord_of_affinity(
+        #         affinity.id, row_i=character.world_row_i, col_i=character.world_col_i
+        #     ):
+        #         if followable_character.id == character.id:
+        #             break
+        #
+        #         for action in [follow_action, stop_follow_action]:
+        #             try:
+        #                 action.check_is_possible(character, followable_character)
+        #                 parts.extend(
+        #                     [
+        #                         Part(
+        #                             text=action_link.get_as_str(),
+        #                             form_action=action_link.link,
+        #                             is_link=True,
+        #                             link_group_name=action_link.group_name,
+        #                         )
+        #                         for action_link in action.get_character_actions(
+        #                             character, followable_character
+        #                         )
+        #                     ]
+        #                 )
+        #             except ImpossibleAction:
+        #                 pass
 
         count_things_shared_with = self._kernel.affinity_lib.count_things_shared_with_affinity(
             character_id=character.id, affinity_id=affinity.id
@@ -328,18 +387,17 @@ class AffinityController(BaseController):
                     f"sur ces personnes dans la zone où se trouve votre personnage, "
                     f"rendez-vous sur la page de la zone."
                 ),
+                Part(text=relation_str),
+                Part(
+                    label=f"Modifier ma relation",
+                    is_link=True,
+                    form_action=edit_relation_url,
+                ),
             ]
             + parts,
             back_url=f"/affinity/{hapic_data.path.character_id}",
             can_be_back_url=True,
             footer_with_affinity_id=affinity.id,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                )
-            ],
         )
 
     @hapic.with_api_doc()
@@ -458,7 +516,7 @@ class AffinityController(BaseController):
             )
         else:
             if not relation.request:
-                if not relation.fighter:
+                if not relation.fighter and not relation.accepted:
                     items.append(
                         Part(
                             is_link=True,
@@ -470,7 +528,7 @@ class AffinityController(BaseController):
                             label="Exprimer le souhait de devenir membre et de me battre pour elle",
                         )
                     )
-                else:
+                elif not relation.accepted:
                     items.append(
                         Part(
                             is_link=True,
@@ -534,19 +592,7 @@ class AffinityController(BaseController):
         return Description(
             title=affinity.name,
             items=items,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label=f"Voir la fiche de {affinity.name}",
-                    form_action=f"/affinity/{hapic_data.path.character_id}/see/{affinity.id}",
-                    classes=["primary"],
-                ),
-                Part(
-                    is_link=True,
-                    label="Voir les affinités",
-                    form_action=f"/affinity/{hapic_data.path.character_id}",
-                ),
-            ],
+            footer_with_affinity_id=affinity.id,
         )
 
     @hapic.with_api_doc()

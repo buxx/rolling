@@ -3,7 +3,6 @@ import dataclasses
 
 from aiohttp.test_utils import TestClient
 from collections import defaultdict
-from tests.fixtures import create_stuff
 import pytest as pytest
 import typing
 import urllib.parse as urlparse
@@ -18,6 +17,7 @@ from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
 from rolling.util import get_on_and_around_coordinates
+from tests.fixtures import create_stuff
 
 
 class ButtonNotFound(Exception):
