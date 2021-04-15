@@ -96,6 +96,7 @@ class BeginBuildAction(CharacterAction):
                     query_params={},
                 ),
                 cost=self.get_cost(character, input_=None),
+                group_name=build_description.group_name,
             )
         ]
 
@@ -515,6 +516,7 @@ class BuildAction(CharacterAction):
                 name=build_description.name,
                 link=self.get_base_url(character),
                 cost=self.get_cost(character),
+                group_name=build_description.group_name,
             )
         ]
 

@@ -51,6 +51,7 @@ class BuildDescription:
     abilities_if_is_on: bool = False
     allow_deposit: bool = False
     allow_deposit_limited: bool = False
+    group_name: typing.Optional[str] = None
 
     @property
     def allowed_resource_ids(self) -> typing.List[str]:

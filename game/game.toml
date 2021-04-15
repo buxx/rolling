@@ -1781,6 +1781,7 @@ tile_clutter_capacity = 25.0
   abilities_if_is_on = true
   allow_deposit = true
   allow_deposit_limited = true
+  group_name = "Utilitaire"
 [build.DIRT_KILN]
   name = "Four de terre"
   char = "%"
@@ -1797,6 +1798,7 @@ tile_clutter_capacity = 25.0
   abilities_if_is_on = true
   allow_deposit = true
   allow_deposit_limited = true
+  group_name = "Four"
 [build.RAW_BRICK_KILN]
   name = "Four de brique crues"
   char = "%"
@@ -1813,6 +1815,7 @@ tile_clutter_capacity = 25.0
   abilities_if_is_on = true
   allow_deposit = true
   allow_deposit_limited = true
+  group_name = "Four"
 [build.FIRED_BRICK_KILN]
   name = "Four de brique cuites"
   char = "%"
@@ -1829,6 +1832,7 @@ tile_clutter_capacity = 25.0
   abilities_if_is_on = true
   allow_deposit = true
   allow_deposit_limited = true
+  group_name = "Four"
 [build.LOOM]
   name = "Métier à tisser"
   char = "$"
@@ -1838,6 +1842,7 @@ tile_clutter_capacity = 25.0
   cost = 50.0
   classes = ["LOOM"]
   many = false
+  group_name = "Utilitaire"
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"
@@ -1850,6 +1855,7 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=true}
+  group_name = "Mur"
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
@@ -1862,6 +1868,7 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=false}
+  group_name = "Mur"
 [build.STONE_WALL]
   name = "Mur de pierre"
   char = "§"
@@ -1874,6 +1881,7 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=false}
+  group_name = "Mur"
 [build.DIRT_WALL]
   name = "Mur de terre"
   char = "-"
@@ -1886,6 +1894,7 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=false}
+  group_name = "Mur"
 [build.RAW_BRICK_WALL]
   name = "Mur de brique crue"
   char = "-"
@@ -1898,6 +1907,7 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=false}
+  group_name = "Mur"
 [build.FIRED_BRICK_WALL]
   name = "Mur de brique cuite"
   char = "-"
@@ -1910,3 +1920,4 @@ tile_clutter_capacity = 25.0
   classes = ["WALL"]
   many = true
   traversable = {"WALKING"=false}
+  group_name = "Mur"
