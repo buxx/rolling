@@ -409,6 +409,7 @@ class CharacterLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         exclude_ids: typing.Optional[typing.List[str]] = None,
+        alive: typing.Optional[bool] = True,
     ) -> Query:
         exclude_ids = exclude_ids or []
         filters = [CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i]
@@ -424,7 +425,16 @@ class CharacterLib:
                 ]
             )
 
-        return self.alive_query.filter(and_(*filters))
+        if alive is None:
+            query = self.dont_care_alive_query
+
+        if alive:
+            query = self.alive_query
+
+        if not alive:
+            query = self.dead_query
+
+        return query.filter(and_(*filters))
 
     def get_zone_characters(
         self,
@@ -433,6 +443,7 @@ class CharacterLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         exclude_ids: typing.Optional[typing.List[str]] = None,
+        alive: typing.Optional[bool] = True,
     ) -> typing.List[CharacterModel]:
         character_documents = self._get_zone_characters_query(
             row_i=row_i,
@@ -440,6 +451,7 @@ class CharacterLib:
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
             exclude_ids=exclude_ids,
+            alive=alive,
         ).all()
         return [
             self.document_to_model(character_document) for character_document in character_documents
@@ -452,6 +464,7 @@ class CharacterLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         exclude_ids: typing.Optional[typing.List[str]] = None,
+        alive: typing.Optional[bool] = True,
     ) -> int:
         return self._get_zone_characters_query(
             row_i=row_i,
@@ -459,6 +472,7 @@ class CharacterLib:
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
             exclude_ids=exclude_ids,
+            alive=alive,
         ).count()
 
     async def move(
@@ -1398,7 +1412,11 @@ class CharacterLib:
             self._kernel.server_db_session.commit()
 
     def get_zone_character_ids(
-        self, row_i: int, col_i: int, alive: typing.Optional[bool] = None
+        self,
+        row_i: int,
+        col_i: int,
+        alive: typing.Optional[bool] = None,
+        exclude_ids: typing.Optional[typing.List[id]] = None,
     ) -> typing.List[str]:
         if alive is None:
             query = self._kernel.server_db_session.query(CharacterDocument.id)
@@ -1406,6 +1424,9 @@ class CharacterLib:
             query = self.alive_query_ids
         else:
             query = self.dead_query_ids
+
+        if exclude_ids is not None:
+            query = query.filter(CharacterDocument.id.notin_(exclude_ids))
 
         return [
             r[0]

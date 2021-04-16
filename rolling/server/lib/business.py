@@ -21,12 +21,20 @@ class BusinessLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
-    def get_offers_query(self, character_id: str, statuses: typing.List[OfferStatus]) -> Query:
-        return self._kernel.server_db_session.query(OfferDocument).filter(
-            OfferDocument.status.in_([s.value for s in statuses]),
+    def get_offers_query(
+        self,
+        character_ids: typing.List[str],
+        statuses: typing.Optional[typing.List[OfferStatus]] = None,
+    ) -> Query:
+        query = self._kernel.server_db_session.query(OfferDocument).filter(
             OfferDocument.permanent == True,
-            OfferDocument.character_id == character_id,
+            OfferDocument.character_id.in_(character_ids),
         )
+
+        if statuses is not None:
+            query = query.filter(OfferDocument.status.in_([s.value for s in statuses]))
+
+        return query
 
     def get_offer_query(self, offer_id: int) -> Query:
         return self._kernel.server_db_session.query(OfferDocument).filter(
@@ -53,6 +61,41 @@ class BusinessLib:
                     OfferDocument.status.in_((OfferStatus.OPEN.value,)),
                 ),
             ),
+        )
+
+    def get_transactions_query_from(
+        self,
+        character_id: str,
+        statuses: typing.List[OfferStatus],
+        alive_with_character_world_row_i: typing.Optional[int] = None,
+        alive_with_character_world_col_i: typing.Optional[int] = None,
+    ) -> Query:
+        query = self._kernel.server_db_session.query(OfferDocument).filter(
+            OfferDocument.permanent == False,
+            OfferDocument.character_id == character_id,
+            OfferDocument.status.in_([s.value for s in statuses]),
+        )
+
+        if (
+            alive_with_character_world_row_i is not None
+            and alive_with_character_world_col_i is not None
+        ):
+            here_character_ids = self._kernel.character_lib.get_zone_character_ids(
+                row_i=alive_with_character_world_row_i,
+                col_i=alive_with_character_world_col_i,
+                alive=True,
+            )
+            query = query.filter(OfferDocument.with_character_id.in_(here_character_ids))
+
+        return query
+
+    def get_transactions_query_for(
+        self, character_id: str, statuses: typing.List[OfferStatus]
+    ) -> Query:
+        return self._kernel.server_db_session.query(OfferDocument).filter(
+            OfferDocument.permanent == False,
+            OfferDocument.with_character_id == character_id,
+            OfferDocument.status.in_([s.value for s in statuses]),
         )
 
     def get_incoming_transactions_query(self, character_id: str) -> Query:

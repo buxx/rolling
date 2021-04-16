@@ -21,6 +21,7 @@ from rolling.model.character import GetOfferPathModel
 from rolling.model.character import RemoveOfferItemPathModel
 from rolling.model.character import SeeOfferPathModel
 from rolling.model.character import SeeOfferQueryModel
+from rolling.model.character import SeeOffersQueryModel
 from rolling.model.character import UpdateOfferQueryModel
 from rolling.model.resource import ResourceDescriptionModel
 from rolling.model.stuff import StuffProperties
@@ -49,34 +50,152 @@ class BusinessController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def main_page(self, request: Request, hapic_data: HapicData) -> Description:
-        offer_count = self._kernel.business_lib.get_offers_query(
-            hapic_data.path.character_id,
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+
+        # All character offers
+        all_offer_count_from = self._kernel.business_lib.get_offers_query(
+            [character.id],
             statuses=[OfferStatus.OPEN, OfferStatus.DRAFT, OfferStatus.CLOSED],
         ).count()
-        transaction_count = self._kernel.business_lib.get_transactions_query(
-            hapic_data.path.character_id
+
+        # All character active offers
+        active_offer_count_from = self._kernel.business_lib.get_offers_query(
+            [character.id],
+            statuses=[OfferStatus.OPEN],
         ).count()
 
-        transaction_label = f"Voir les transactions en attente ({transaction_count} en cours)"
-        if (
-            self._kernel.business_lib.get_incoming_transactions_query(hapic_data.path.character_id)
-            .filter(OfferDocument.read == False)
-            .count()
-        ):
-            transaction_label = f"*{transaction_label}"
+        # All character transactions count
+        all_transaction_count_from = self._kernel.business_lib.get_transactions_query_from(
+            character.id, statuses=[OfferStatus.OPEN, OfferStatus.DRAFT]
+        ).count()
 
+        # All character transactions count where target character is in same zone
+        all_transaction_count_is_here = self._kernel.business_lib.get_transactions_query_from(
+            character.id,
+            statuses=[OfferStatus.OPEN],
+            alive_with_character_world_row_i=character.world_row_i,
+            alive_with_character_world_col_i=character.world_col_i,
+        ).count()
+
+        other_here_character_ids = self._kernel.character_lib.get_zone_character_ids(
+            row_i=character.world_row_i,
+            col_i=character.world_col_i,
+            alive=True,
+            exclude_ids=[character.id],
+        )
+
+        # Other here character offers
+        other_here_offers_count = self._kernel.business_lib.get_offers_query(
+            other_here_character_ids,
+            statuses=[OfferStatus.OPEN],
+        ).count()
+
+        # Other here characters transactions
+        other_here_transactions_count = self._kernel.business_lib.get_transactions_query_for(
+            character.id, statuses=[OfferStatus.OPEN]
+        ).count()
+
+        create_offer_url = f"/business/{hapic_data.path.character_id}/offers-create?permanent=1"
+        create_transaction_url = f"/business/{hapic_data.path.character_id}/offers-create"
         return Description(
             title="Commerce",
             items=[
+                Part(text="Que vous proposez", classes=["h2"]),
                 Part(
-                    label=f"Voir les offres que vous proposez ({offer_count} en cours)",
-                    is_link=True,
-                    form_action=f"/business/{hapic_data.path.character_id}/offers",
+                    columns=16,
+                    items=[
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=create_offer_url,
+                                    label=create_offer_url,
+                                    classes=["create"],
+                                ),
+                            ],
+                        ),
+                        Part(
+                            is_column=True,
+                            colspan=7,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=(
+                                        f"/business/{hapic_data.path.character_id}/offers"
+                                        f"?current_character_is_author=1&permanent=1"
+                                    ),
+                                    label=(
+                                        f"{all_offer_count_from}({active_offer_count_from}) Offres"
+                                    ),
+                                ),
+                            ],
+                        ),
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=create_transaction_url,
+                                    label=create_transaction_url,
+                                    classes=["create"],
+                                ),
+                            ],
+                        ),
+                        Part(
+                            is_column=True,
+                            colspan=7,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=(
+                                        f"/business/{hapic_data.path.character_id}/offers"
+                                        f"?current_character_is_author=1&permanent=0"
+                                    ),
+                                    label=(
+                                        f"{all_transaction_count_from}"
+                                        f"({all_transaction_count_is_here}) Propositions"
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ],
                 ),
+                Part(text="Que l'on vous propose", classes=["h2"]),
                 Part(
-                    label=transaction_label,
-                    is_link=True,
-                    form_action=f"/business/{hapic_data.path.character_id}/transactions",
+                    columns=2,
+                    items=[
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=(
+                                        f"/business/{hapic_data.path.character_id}/offers"
+                                        f"?current_character_is_with=1&permanent=1"
+                                    ),
+                                    label=(f"{other_here_offers_count} Offres"),
+                                ),
+                            ],
+                        ),
+                        Part(
+                            is_column=True,
+                            colspan=1,
+                            items=[
+                                Part(
+                                    is_link=True,
+                                    form_action=(
+                                        f"/business/{hapic_data.path.character_id}/offers"
+                                        f"?current_character_is_with=1&permanent=0"
+                                    ),
+                                    label=(f"{other_here_transactions_count} Propositions"),
+                                ),
+                            ],
+                        ),
+                    ],
                 ),
             ],
             can_be_back_url=True,
@@ -84,28 +203,62 @@ class BusinessController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(SeeOffersQueryModel)
     @hapic.output_body(Description)
     async def offers(self, request: Request, hapic_data: HapicData) -> Description:
-        offers: typing.List[OfferDocument] = self._kernel.business_lib.get_offers_query(
-            hapic_data.path.character_id,
-            statuses=[OfferStatus.OPEN, OfferStatus.DRAFT, OfferStatus.CLOSED],
-        ).all()
-        parts: typing.List[Part] = [
-            Part(
-                label="Créer une nouvelle offre",
-                is_link=True,
-                form_action=f"/business/{hapic_data.path.character_id}/offers-create?permanent=1",
-            ),
-            Part(text="Ci-dessous les les offres existantes (X: innactive, V: active)"),
-        ]
+        current_character_is_author = hapic_data.query.current_character_is_author
+        current_character_is_with = hapic_data.query.current_character_is_with
+        permanent = hapic_data.query.permanent
+        assert current_character_is_author or current_character_is_with
+
+        query = self._kernel.business_lib.get_offers_query(
+            [hapic_data.path.character_id],
+        ).filter(OfferDocument.permanent == bool(permanent))
+
+        if current_character_is_author:
+            query = query.filter(
+                OfferDocument.status.in_(
+                    [s.value for s in [OfferStatus.OPEN, OfferStatus.DRAFT, OfferStatus.CLOSED]]
+                )
+            )
+        elif current_character_is_with:
+            query = query.filter(OfferDocument.status.in_([s.value for s in [OfferStatus.OPEN]]))
+
+        text = None
+        if current_character_is_author and permanent:
+            text = "Ci-dessous, vos offres"
+        elif current_character_is_author and not permanent:
+            text = "Ci-dessous, vos propositions"
+        elif current_character_is_with and permanent:
+            text = "Ci-dessous, les offres disponibles"
+        elif current_character_is_with and not permanent:
+            text = "Ci-dessous, les propositions qui vous sont faites"
+        assert text
+
+        offers: typing.List[OfferDocument] = query.all()
+        parts: typing.List[Part] = [Part(text=text)]
 
         for offer in offers:
-            state = "X"
-            if offer.status == OfferStatus.OPEN.value:
-                state = "V"
+            offer_name = None
+            if current_character_is_author and permanent:
+                offer_name = (
+                    f"{offer.title}"
+                    f"{' (innactive)' if offer.status != OfferStatus.OPEN.value else ''}"
+                )
+            elif current_character_is_author and not permanent:
+                assert offer.with_character_id
+                with_character = self._kernel.character_lib.get(offer.with_character_id)
+                offer_name = f"({with_character.name}) {offer.title}"
+            elif current_character_is_with and permanent:
+                offer_name = f"{offer.title}"
+            elif current_character_is_with and not permanent:
+                from_character = self._kernel.character_lib.get(offer.character_id)
+                offer_name = f"({from_character.id}) {offer.title}"
+            assert offer_name
+
             parts.append(
                 Part(
-                    label=f"({state}) {offer.title}",
+                    label=offer_name,
                     is_link=True,
                     form_action=f"/business/{hapic_data.path.character_id}/offers/{offer.id}",
                 )
@@ -114,65 +267,52 @@ class BusinessController(BaseController):
         return Description(
             title="Commerce: vos offres",
             items=parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner sur la page Commerce",
-                    form_action=f"/business/{hapic_data.path.character_id}",
-                )
-            ],
             can_be_back_url=True,
+            back_url=f"/business/{hapic_data.path.character_id}",
         )
 
-    @hapic.with_api_doc()
-    @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(Description)
-    async def transactions(self, request: Request, hapic_data: HapicData) -> Description:
-        transactions: typing.List[OfferDocument] = self._kernel.business_lib.get_transactions_query(
-            hapic_data.path.character_id
-        ).all()
-        parts: typing.List[Part] = []
-
-        for offer in transactions:
-            form_action = f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
-            state = " (X)"
-            is_new = ""
-            with_info = f" (avec {offer.to_character.name})"
-            if offer.status == OfferStatus.OPEN.value:
-                state = " (V)"
-
-            if offer.with_character_id == hapic_data.path.character_id:
-                state = ""
-                form_action = (
-                    f"/business/{hapic_data.path.character_id}"
-                    f"/see-offer/{offer.character_id}/{offer.id}?mark_as_read=1"
-                )
-                with_info = f" (de {offer.from_character.name})"
-
-            if not offer.read and offer.with_character_id == hapic_data.path.character_id:
-                is_new = "*"
-
-            parts.append(
-                Part(
-                    label=f"{is_new}{offer.title}{state}{with_info}",
-                    is_link=True,
-                    form_action=form_action,
-                )
-            )
-
-        return Description(
-            title="Commerce: vos transaction avec des personnes",
-            items=parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner sur la page Commerce",
-                    form_action=f"/business/{hapic_data.path.character_id}",
-                    classes=["primary"],
-                )
-            ],
-            can_be_back_url=True,
-        )
+    # @hapic.with_api_doc()
+    # @hapic.input_path(GetCharacterPathModel)
+    # @hapic.output_body(Description)
+    # async def transactions(self, request: Request, hapic_data: HapicData) -> Description:
+    #     transactions: typing.List[OfferDocument] = self._kernel.business_lib.get_transactions_query(
+    #         hapic_data.path.character_id
+    #     ).all()
+    #     parts: typing.List[Part] = []
+    #
+    #     for offer in transactions:
+    #         form_action = f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
+    #         state = " (X)"
+    #         is_new = ""
+    #         with_info = f" (avec {offer.to_character.name})"
+    #         if offer.status == OfferStatus.OPEN.value:
+    #             state = " (V)"
+    #
+    #         if offer.with_character_id == hapic_data.path.character_id:
+    #             state = ""
+    #             form_action = (
+    #                 f"/business/{hapic_data.path.character_id}"
+    #                 f"/see-offer/{offer.character_id}/{offer.id}?mark_as_read=1"
+    #             )
+    #             with_info = f" (de {offer.from_character.name})"
+    #
+    #         if not offer.read and offer.with_character_id == hapic_data.path.character_id:
+    #             is_new = "*"
+    #
+    #         parts.append(
+    #             Part(
+    #                 label=f"{is_new}{offer.title}{state}{with_info}",
+    #                 is_link=True,
+    #                 form_action=form_action,
+    #             )
+    #         )
+    #
+    #     return Description(
+    #         title="Commerce: vos transaction avec des personnes",
+    #         items=parts,
+    #         back_url=f"/business/{hapic_data.path.character_id}/offers",
+    #         can_be_back_url=True,
+    #     )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetOfferPathModel)
@@ -217,6 +357,12 @@ class BusinessController(BaseController):
         else:
             parts.append(Part(label="Activer", is_link=True, form_action=here_url + "&open=1"))
 
+        back_url = (
+            f"/business/{hapic_data.path.character_id}/offers"
+            f"?current_character_is_author={int(offer.character_id == hapic_data.path.character_id)}"
+            f"&current_character_is_with={int(offer.character_id != hapic_data.path.character_id)}"
+            f"&permanent={int(offer.permanent)}"
+        )
         return Description(
             title=offer.title,
             items=[
@@ -225,14 +371,7 @@ class BusinessController(BaseController):
                 )
             ]
             + parts,
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner sur la page Commerce",
-                    form_action=f"/business/{hapic_data.path.character_id}",
-                    classes=["primary"],
-                )
-            ],
+            back_url=back_url,
         )
 
     @hapic.with_api_doc()
@@ -518,28 +657,56 @@ class BusinessController(BaseController):
     @hapic.input_body(CreateOfferBodyModel)
     @hapic.output_body(Description)
     async def create(self, request: Request, hapic_data: HapicData) -> Description:
-        if hapic_data.query.with_character_id:
-            # FIXME BS NOW: code it
-            with_character = self._kernel.character_lib.get(hapic_data.query.with_character_id)
-            title = f"Faire une offre à {with_character.name}"
-            form_action = (
-                f"/business/{hapic_data.path.character_id}/offers-create"
-                f"?with_character_id={with_character.id}"
-            )
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+
+        if not hapic_data.query.permanent:
+            if hapic_data.query.with_character_id:
+                # FIXME BS NOW: code it
+                with_character = self._kernel.character_lib.get(hapic_data.query.with_character_id)
+                title = f"Faire une proposition à {with_character.name}"
+                form_action = (
+                    f"/business/{character.id}/offers-create"
+                    f"?with_character_id={with_character.id}"
+                )
+            else:
+                parts = []
+                here_characters = self._kernel.character_lib.get_zone_characters(
+                    row_i=character.world_row_i,
+                    col_i=character.world_col_i,
+                    alive=True,
+                    exclude_ids=[character.id],
+                )
+                for here_character in here_characters:
+                    parts.append(
+                        Part(
+                            form_action=(
+                                f"/business/{character.id}/offers-create"
+                                f"?with_character_id={here_character.id}"
+                            ),
+                            label=here_character.name,
+                        )
+                    )
+                if not here_characters:
+                    parts.append(Part(text="Aucun personnage présent ici !"))
+                return Description(
+                    title="Faire une proposition",
+                    items=[
+                        Part(text="A qui faire cette proposition ?"),
+                    ]
+                    + parts,
+                )
         else:
             title = "Créer une offre"
-            form_action = f"/business/{hapic_data.path.character_id}/offers-create?permanent=1"
+            form_action = f"/business/{character.id}/offers-create?permanent=1"
 
         if hapic_data.body.title:
             offer = self._kernel.business_lib.create_draft(
-                hapic_data.path.character_id,
+                character.id,
                 hapic_data.body.title,
                 permanent=hapic_data.query.permanent,
                 with_character_id=hapic_data.query.with_character_id,
             )
-            return Description(
-                redirect=f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
-            )
+            return Description(redirect=f"/business/{character.id}/offers/{offer.id}")
 
         return Description(
             title=title,
@@ -554,13 +721,6 @@ class BusinessController(BaseController):
                             type_=Type.STRING,
                         )
                     ],
-                )
-            ],
-            footer_links=[
-                Part(
-                    is_link=True,
-                    label="Retourner sur la page Commerce",
-                    form_action=f"/business/{hapic_data.path.character_id}",
                 )
             ],
         )
@@ -827,7 +987,7 @@ class BusinessController(BaseController):
                     "/business/{character_id}/offers/{offer_id}/remove-item/{item_id}",
                     self.remove_item,
                 ),
-                web.post("/business/{character_id}/transactions", self.transactions),
+                # web.post("/business/{character_id}/transactions", self.transactions),
                 # web.post("/business/{character_id}/transactions/{offer_id}", self.transaction),
             ]
         )

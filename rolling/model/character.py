@@ -33,6 +33,13 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class SeeOffersQueryModel:
+    current_character_is_author: int = serpyco.number_field(cast_on_load=True, default=0)
+    current_character_is_with: int = serpyco.number_field(cast_on_load=True, default=0)
+    permanent: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
 class SharedInventoryQueryModel:
     affinity_id: int = serpyco.field(cast_on_load=True)
     resource_id: typing.Optional[str] = None
