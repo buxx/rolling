@@ -211,18 +211,20 @@ class BusinessController(BaseController):
         permanent = hapic_data.query.permanent
         assert current_character_is_author or current_character_is_with
 
-        query = self._kernel.business_lib.get_offers_query(
-            [hapic_data.path.character_id],
-        ).filter(OfferDocument.permanent == bool(permanent))
+        query = self._kernel.server_db_session.query(OfferDocument).filter(
+            OfferDocument.permanent == bool(permanent),
+        )
 
         if current_character_is_author:
-            query = query.filter(
+            query = query.filter(OfferDocument.character_id.in_([hapic_data.path.character_id])).filter(
                 OfferDocument.status.in_(
                     [s.value for s in [OfferStatus.OPEN, OfferStatus.DRAFT, OfferStatus.CLOSED]]
                 )
             )
         elif current_character_is_with:
             query = query.filter(OfferDocument.status.in_([s.value for s in [OfferStatus.OPEN]]))
+            if not permanent:
+                query = query.filter(OfferDocument.with_character_id == hapic_data.path.character_id)
 
         text = None
         if current_character_is_author and permanent:
@@ -260,7 +262,7 @@ class BusinessController(BaseController):
                 Part(
                     label=offer_name,
                     is_link=True,
-                    form_action=f"/business/{hapic_data.path.character_id}/offers/{offer.id}",
+                    form_action=f"/business/{hapic_data.path.character_id}/offers-edit/{offer.id}",
                 )
             )
 
@@ -281,7 +283,7 @@ class BusinessController(BaseController):
     #     parts: typing.List[Part] = []
     #
     #     for offer in transactions:
-    #         form_action = f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
+    #         form_action = f"/business/{hapic_data.path.character_id}/offers-edit/{offer.id}"
     #         state = " (X)"
     #         is_new = ""
     #         with_info = f" (avec {offer.to_character.name})"
@@ -349,7 +351,7 @@ class BusinessController(BaseController):
         form_parts = self._produce_offer_parts(
             hapic_data.path.character_id, hapic_data.path.character_id, offer, editing=True
         )
-        here_url = f"/business/{hapic_data.path.character_id}/offers/{offer.id}?"
+        here_url = f"/business/{hapic_data.path.character_id}/offers-edit/{offer.id}?"
 
         parts = []
         if offer.status == OfferStatus.OPEN.value:
@@ -706,7 +708,7 @@ class BusinessController(BaseController):
                 permanent=hapic_data.query.permanent,
                 with_character_id=hapic_data.query.with_character_id,
             )
-            return Description(redirect=f"/business/{character.id}/offers/{offer.id}")
+            return Description(redirect=f"/business/{character.id}/offers-edit/{offer.id}")
 
         return Description(
             title=title,
@@ -735,7 +737,7 @@ class BusinessController(BaseController):
         for item in offer.request_items:
             is_link = editing
             form_action = (
-                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}" if editing else None
+                f"/business/{owner_id}/offers-edit/{offer.id}/remove-item/{item.id}" if editing else None
             )
             item_name = item.get_name(self._kernel, quantity=True)
             have_str = ""
@@ -755,7 +757,7 @@ class BusinessController(BaseController):
                     label="...",
                     is_link=True,
                     form_action=(
-                        f"/business/{owner_id}/offers/{offer.id}"
+                        f"/business/{owner_id}/offers-edit/{offer.id}"
                         f"/add-item?position={OfferItemPosition.REQUEST.value}"
                     ),
                 )
@@ -763,7 +765,7 @@ class BusinessController(BaseController):
 
         for item in offer.offer_items:
             form_action = (
-                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}" if editing else None
+                f"/business/{owner_id}/offers-edit/{offer.id}/remove-item/{item.id}" if editing else None
             )
             item_name = item.get_name(self._kernel, quantity=True)
             have_str = ""
@@ -782,7 +784,7 @@ class BusinessController(BaseController):
                     label="...",
                     is_link=True,
                     form_action=(
-                        f"/business/{owner_id}/offers/{offer.id}"
+                        f"/business/{owner_id}/offers-edit/{offer.id}"
                         f"/add-item?position={OfferItemPosition.OFFER.value}"
                     ),
                 )
@@ -833,7 +835,7 @@ class BusinessController(BaseController):
             hapic_data.path.offer_id
         ).one()
         here_url = (
-            f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
+            f"/business/{hapic_data.path.character_id}/offers-edit/{offer.id}"
             f"/add-item?position={hapic_data.query.position.value}"
         )
 
@@ -897,7 +899,7 @@ class BusinessController(BaseController):
                 raise WrongStrInput(f"Unknown '{hapic_data.query.value}'")
 
             return Description(
-                redirect=f"/business/{hapic_data.path.character_id}/offers/{offer.id}"
+                redirect=f"/business/{hapic_data.path.character_id}/offers-edit/{offer.id}"
             )
 
         parts = []
@@ -968,7 +970,7 @@ class BusinessController(BaseController):
         # TODO: check is owner
         self._kernel.business_lib.get_offer_item_query(hapic_data.path.item_id).delete()
         return Description(
-            redirect=f"/business/{hapic_data.path.character_id}/offers/{hapic_data.path.offer_id}"
+            redirect=f"/business/{hapic_data.path.character_id}/offers-edit/{hapic_data.path.offer_id}"
         )
 
     def bind(self, app: Application) -> None:
@@ -977,14 +979,14 @@ class BusinessController(BaseController):
                 web.post("/business/{character_id}", self.main_page),
                 web.post("/business/{character_id}/offers", self.offers),
                 web.post("/business/{character_id}/offers-create", self.create),
-                web.post("/business/{character_id}/offers/{offer_id}", self.offer),
+                web.post("/business/{character_id}/offers-edit/{offer_id}", self.offer),
                 web.post("/business/{character_id}/see-offer/{owner_id}/{offer_id}", self.see),
                 web.post(
                     "/business/{character_id}/see-offer/{owner_id}/{offer_id}/deal", self.deal
                 ),
-                web.post("/business/{character_id}/offers/{offer_id}/add-item", self.add_item),
+                web.post("/business/{character_id}/offers-edit/{offer_id}/add-item", self.add_item),
                 web.post(
-                    "/business/{character_id}/offers/{offer_id}/remove-item/{item_id}",
+                    "/business/{character_id}/offers-edit/{offer_id}/remove-item/{item_id}",
                     self.remove_item,
                 ),
                 # web.post("/business/{character_id}/transactions", self.transactions),
