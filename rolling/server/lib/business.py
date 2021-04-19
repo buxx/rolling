@@ -23,13 +23,15 @@ class BusinessLib:
 
     def get_offers_query(
         self,
-        character_ids: typing.List[str],
+        character_ids: typing.Optional[typing.List[str]] = None,
         statuses: typing.Optional[typing.List[OfferStatus]] = None,
     ) -> Query:
         query = self._kernel.server_db_session.query(OfferDocument).filter(
             OfferDocument.permanent == True,
-            OfferDocument.character_id.in_(character_ids),
         )
+
+        if character_ids is not None:
+            query = query.filter(OfferDocument.character_id.in_(character_ids))
 
         if statuses is not None:
             query = query.filter(OfferDocument.status.in_([s.value for s in statuses]))
