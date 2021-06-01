@@ -6,7 +6,7 @@ apispec-serpyco==0.19
 appdirs==1.4.4
 async-timeout==3.0.1
 atomicwrites==1.4.0
-attrs==20.3.0
+attrs==21.2.0
 black==20.8b1
 certifi==2020.12.5
 chardet==4.0.0
