@@ -328,7 +328,7 @@ tile_clutter_capacity = 25.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "dirt.png"
 
-  [resources.WET_DIRT]
+  [resources.WET_SOIL]
     name = "Terre crue"
     weight=2000.0
     material="SANDY"
@@ -466,9 +466,9 @@ tile_clutter_capacity = 25.0
     illustration = "fired_brick.png"
 
 [resource_mix]
-  [resource_mix.WET_DIRT_WITH_FRESH_WATER]
+  [resource_mix.WET_SOIL_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
-    produce = "WET_DIRT"
+    produce = "WET_SOIL"
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
@@ -476,9 +476,9 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     cost = 0.05
-  [resource_mix.WET_DIRT_WITH_SALTED_WATER]
+  [resource_mix.WET_SOIL_WITH_SALTED_WATER]
     require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
-    produce = "WET_DIRT"
+    produce = "WET_SOIL"
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
@@ -499,7 +499,7 @@ tile_clutter_capacity = 25.0
 
 [extractions]
   [extractions.FRESH_WATER]
-    tile="FRESH_WATER"
+    tile="FRESH_WATER_TILE"
     resources=[{resource_id="FRESH_WATER", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.SEA_WATER]
@@ -529,7 +529,7 @@ tile_clutter_capacity = 25.0
     ]
 
   [extractions.SOIL]
-    tile="SOIL"
+    tile="DIRT"
     resources=[{resource_id="SOIL", cost_per_unit=0.01, default_quantity=1.0}]
 
   [extractions.HIGH_GRASS]
@@ -837,9 +837,9 @@ tile_clutter_capacity = 25.0
     build = "CAMP_FIRE"
     cost = 0.1  # start build cost
 
-  [ACTIONS.BUILD_DIRT_KILN]
+  [ACTIONS.BUILD_SOIL_KILN]
     actions = ["BEGIN_BUILD"]
-    build = "DIRT_KILN"
+    build = "SOIL_KILN"
     cost = 0.1  # start build cost
 
   [ACTIONS.BUILD_FIRED_BRICK_KILN]
@@ -890,7 +890,7 @@ tile_clutter_capacity = 25.0
     build = "STONE_WALL"
     cost = 4.0
 
-  [ACTIONS.BUILD_DIRT_WALL]
+  [ACTIONS.BUILD_SOIL_WALL]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
@@ -898,7 +898,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     actions = ["BUILD"]
-    build = "DIRT_WALL"
+    build = "SOIL_WALL"
     cost = 2.0
 
   [ACTIONS.BUILD_RAW_BRICK_WALL]
@@ -1145,7 +1145,7 @@ tile_clutter_capacity = 25.0
     produce = [
       {resource="RAW_BRICK", coeff=1}
     ]
-    required_resource_id = "WET_DIRT"
+    required_resource_id = "WET_SOIL"
     cost_per_unit = 0.05
     cost = 0.0
 
@@ -1161,7 +1161,7 @@ tile_clutter_capacity = 25.0
     produce = [
       {resource="FIRED_BRICK", coeff=1}
     ]
-    required_resource_id = "WET_DIRT"
+    required_resource_id = "WET_SOIL"
     cost_per_unit = 0.01
     cost = 0.0
 
@@ -1782,11 +1782,11 @@ tile_clutter_capacity = 25.0
   allow_deposit = true
   allow_deposit_limited = true
   group_name = "Utilitaire"
-[build.DIRT_KILN]
+[build.SOIL_KILN]
   name = "Four de terre"
   char = "%"
   building_char = "x"
-  build_require_resources = [{resource="WET_DIRT", quantity=200.0}]
+  build_require_resources = [{resource="WET_SOIL", quantity=200.0}]
   turn_require_resources = [{resource="WOOD", quantity=0.4}]
   power_on_require_resources = [{resource="WOOD", quantity=0.5}]
   abilities = ["HEAT_UP_MIDDLE_TEMP"]
@@ -1882,7 +1882,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
-[build.DIRT_WALL]
+[build.SOIL_WALL]
   name = "Mur de terre"
   char = "-"
   building_char = "x"
