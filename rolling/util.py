@@ -265,6 +265,10 @@ def adapt_str_quantity(
             if not to_str_float:
                 return quantity
             return quantity[:-1]
+        if quantity.endswith("l"):
+            if not to_str_float:
+                return quantity
+            return quantity[:-1]
         if default_unit == Unit.KILOGRAM:
             if not to_str_float:
                 return f"{float(quantity) * 1000}g"
