@@ -986,7 +986,7 @@ tile_clutter_capacity = 25.0
     cost = 6.0
 
   [ACTIONS.CRAFT_STONE_SPEAR]
-    name = "Fabriquer une lance de bois"
+    name = "Fabriquer une lance de pierre"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
