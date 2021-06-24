@@ -186,15 +186,13 @@ class BusinessController(BaseController):
             hapic_data.path.offer_id
         ).one()
 
-        if hapic_data.query.open:
-            offer.status = OfferStatus.OPEN.value
+        try:
+            data = await request.json()
+            offer.status = OfferStatus.OPEN.value if data.get("active") == "on" else OfferStatus.CLOSED.value
             self._kernel.server_db_session.add(offer)
             self._kernel.server_db_session.commit()
-
-        if hapic_data.query.close:
-            offer.status = OfferStatus.CLOSED.value
-            self._kernel.server_db_session.add(offer)
-            self._kernel.server_db_session.commit()
+        except JSONDecodeError:
+            pass
 
         if hapic_data.body.request_operand:
             offer.request_operand = operand_str_to_enum[hapic_data.body.request_operand].value
