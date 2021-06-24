@@ -1526,20 +1526,20 @@ class CharacterController(BaseController):
         input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
-        cost = action.get_cost(character_model, input_=input_)
-        if cost is not None and character_model.action_points < cost:
-            return Description(
-                title="Action impossible",
-                items=[
-                    Part(
-                        text=f"{character_model.name} ne possède plus assez de points d'actions "
-                        f"({character_model.action_points} restant et {cost} nécessaires)"
-                    ),
-                    Part(label="Continue"),
-                ],
-            )
-
         try:
+            cost = action.get_cost(character_model, input_=input_)
+            if cost is not None and character_model.action_points < cost:
+                return Description(
+                    title="Action impossible",
+                    items=[
+                        Part(
+                            text=f"{character_model.name} ne possède plus assez de points d'actions "
+                            f"({character_model.action_points} restant et {cost} nécessaires)"
+                        ),
+                        Part(label="Continue"),
+                    ],
+                )
+
             action.check_request_is_possible(character_model, input_)
             return action.perform(character_model, input_)
         except ImpossibleAction as exc:
@@ -1563,20 +1563,20 @@ class CharacterController(BaseController):
         # TODO BS 2019-07-04: Check character owning ...
         stuff = self._kernel.stuff_lib.get_stuff(hapic_data.path.stuff_id)
 
-        cost = action.get_cost(character_model, stuff, input_=input_)
-        if cost is not None and character_model.action_points < cost:
-            return Description(
-                title="Action impossible",
-                items=[
-                    Part(
-                        text=f"{character_model.name} ne possède plus assez de points d'actions "
-                        f"({character_model.action_points} restant et {cost} nécessaires)"
-                    ),
-                    Part(label="Continue"),
-                ],
-            )
-
         try:
+            cost = action.get_cost(character_model, stuff, input_=input_)
+            if cost is not None and character_model.action_points < cost:
+                return Description(
+                    title="Action impossible",
+                    items=[
+                        Part(
+                            text=f"{character_model.name} ne possède plus assez de points d'actions "
+                            f"({character_model.action_points} restant et {cost} nécessaires)"
+                        ),
+                        Part(label="Continue"),
+                    ],
+                )
+
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
             return action.perform(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
@@ -1599,11 +1599,11 @@ class CharacterController(BaseController):
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         # TODO BS 2019-07-04: Check character can action on build...
 
-        cost = action.get_cost(character_model, hapic_data.path.build_id, input_=input_)
-        if cost is not None and character_model.action_points < cost:
-            return get_description_for_not_enough_ap(character_model, cost)
-
         try:
+            cost = action.get_cost(character_model, hapic_data.path.build_id, input_=input_)
+            if cost is not None and character_model.action_points < cost:
+                return get_description_for_not_enough_ap(character_model, cost)
+
             action.check_request_is_possible(
                 character=character_model, build_id=hapic_data.path.build_id, input_=input_
             )
@@ -1639,20 +1639,20 @@ class CharacterController(BaseController):
         input_ = action.input_model_from_request(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
-        cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
-        if cost is not None and character_model.action_points < cost:
-            return Description(
-                title="Action impossible",
-                items=[
-                    Part(
-                        text=f"{character_model.name} ne possède plus assez de points d'actions "
-                        f"({character_model.action_points} restant et {cost} nécessaires)"
-                    ),
-                    Part(label="Continue"),
-                ],
-            )
-
         try:
+            cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
+            if cost is not None and character_model.action_points < cost:
+                return Description(
+                    title="Action impossible",
+                    items=[
+                        Part(
+                            text=f"{character_model.name} ne possède plus assez de points d'actions "
+                            f"({character_model.action_points} restant et {cost} nécessaires)"
+                        ),
+                        Part(label="Continue"),
+                    ],
+                )
+
             action.check_request_is_possible(
                 character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
             )
@@ -1679,20 +1679,20 @@ class CharacterController(BaseController):
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         with_character_model = self._kernel.character_lib.get(hapic_data.path.with_character_id)
 
-        cost = action.get_cost(character_model, with_character_model, input_=input_)
-        if cost is not None and character_model.action_points < cost:
-            return Description(
-                title="Action impossible",
-                items=[
-                    Part(
-                        text=f"{character_model.name} ne possède plus assez de points d'actions "
-                        f"({character_model.action_points} restant et {cost} nécessaires)"
-                    ),
-                    Part(label="Continue"),
-                ],
-            )
-
         try:
+            cost = action.get_cost(character_model, with_character_model, input_=input_)
+            if cost is not None and character_model.action_points < cost:
+                return Description(
+                    title="Action impossible",
+                    items=[
+                        Part(
+                            text=f"{character_model.name} ne possède plus assez de points d'actions "
+                            f"({character_model.action_points} restant et {cost} nécessaires)"
+                        ),
+                        Part(label="Continue"),
+                    ],
+                )
+
             action.check_request_is_possible(
                 character=character_model, with_character=with_character_model, input_=input_
             )
