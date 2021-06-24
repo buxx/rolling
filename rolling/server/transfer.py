@@ -11,6 +11,7 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
+from rolling.server.util import get_round_resource_quantity
 from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 
@@ -360,13 +361,13 @@ class BiDirectionalTransferByUrl(abc.ABC):
             partial_quantities[
                 f"left_{left_resource_line.resource.id}"
             ] = self._get_default_left_partial_quantity(left_resource_line.resource.id) or str(
-                math.ceil((left_resource_line.resource.quantity / 10) * 100) / 100
+                get_round_resource_quantity(left_resource_line.resource.quantity)
             )
         for right_resource_line in right_resource_lines:
             partial_quantities[
                 f"right_{right_resource_line.resource.id}"
             ] = self._get_default_right_partial_quantity(right_resource_line.resource.id) or str(
-                math.ceil((right_resource_line.resource.quantity / 10) * 100) / 100
+                get_round_resource_quantity(right_resource_line.resource.quantity)
             )
 
         left_parts_column = Part(

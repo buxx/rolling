@@ -1,4 +1,5 @@
 import hashlib
+import math
 from mimetypes import guess_extension
 from mimetypes import guess_type
 import os
@@ -102,3 +103,9 @@ def with_multiple_carried_stuffs(
         parts.extend(do_for_one_func(character, all_carried[i], input_))
 
     return Description(title=title, items=parts + success_parts, redirect=redirect)
+
+
+def get_round_resource_quantity(quantity: float) -> str:
+    return str(
+        math.ceil((quantity / 10) * 100) / 100
+    )

@@ -17,6 +17,7 @@ from rolling.model.resource import ResourceDescriptionModel
 from rolling.server.action import ActionFactory
 from rolling.server.document.resource import ResourceDocument
 from rolling.server.link import CharacterActionLink
+from rolling.server.util import get_round_resource_quantity
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -446,7 +447,10 @@ class ResourceLib:
 
         raise_not_enough = False
         total_quantity = sum([float(d.quantity) for d in resource_docs])
-        if total_quantity < quantity:
+        # test if float is equal ... to prevent float round errors
+        total_quantity_str = get_round_resource_quantity(total_quantity)
+        quantity_str = get_round_resource_quantity(quantity)
+        if total_quantity < quantity and total_quantity_str != quantity_str:
             raise_exception = NotEnoughResource(
                 resource_id=resource_id,
                 required_quantity=quantity,
