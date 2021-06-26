@@ -49,7 +49,7 @@ class TakeStuffAction(WithStuffAction):
         self._kernel.character_lib.take_stuff(character_id=character.id, stuff_id=stuff.id)
 
         around_stuffs_like_this: typing.List[StuffModel] = []
-        if input_.quantity > 1:
+        if input_.quantity or 1 > 1:
             stuff_to_find = input_.quantity - 1
             scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
                 x=character.zone_row_i, y=character.zone_col_i, exclude_on=False, distance=1
