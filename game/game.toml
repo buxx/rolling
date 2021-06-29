@@ -1108,7 +1108,7 @@ tile_clutter_capacity = 25.0
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
-    required_one_of_ability_ids = ["LEATHERWORK"]
+    required_one_of_ability_ids = ["TANNERY"]
     required_all_ability_ids = []
     produce = [
       {resource="LEATHER_PIECE", coeff=1}
