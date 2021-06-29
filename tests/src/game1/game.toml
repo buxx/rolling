@@ -88,7 +88,7 @@ tile_clutter_capacity = 10.0
   default = 1.0
 
 [skill.hunting_gathering]  # required by action "SEARCH_FOOD"
-  name = "Chasse & Ceuillette"
+  name = "Chasse & Cueillette"
   type = "1.Metiers"
   default = 1.0
 

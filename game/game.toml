@@ -107,7 +107,7 @@ tile_clutter_capacity = 25.0
   default = 1.0
 
 [skill.hunting_gathering]  # required by action "SEARCH_FOOD"
-  name = "Chasse & Ceuillette"
+  name = "Chasse & Cueillette"
   type = "1.Metiers"
   default = 1.0
 
@@ -958,7 +958,7 @@ tile_clutter_capacity = 25.0
     cost = 6.0
 
   [ACTIONS.GATHERING]
-    name = "Partir en ceuillette"
+    name = "Partir en Cueillette"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
