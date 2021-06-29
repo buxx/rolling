@@ -1718,7 +1718,7 @@ tile_clutter_capacity = 25.0
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="VEGETAL_FIBER", quantity_per_hour=0.5, random_loss=30.0},
+      {resource="VEGETAL_FIBER", quantity_per_hour=0.10, random_loss=30.0},
     ]
     cost = 0.0
 
