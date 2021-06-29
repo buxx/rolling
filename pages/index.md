@@ -40,6 +40,7 @@ Votre personnage se trouve sur l'écran. Il est indiqué ici par la flèche roug
 A savoir:
 
 * `← ↑ → ↓` : Déplacer votre personnage (ou en cliquant sur la carte)
+* `MAJ + ← ↑ → ↓` : Déplacer votre personnage rapidement
 * `Enter` : Ouvrir le chat
 
 En haut à droite, le panneau résume la situation de votre personnage:
