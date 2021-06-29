@@ -90,3 +90,4 @@ class Description:
     footer_inventory: bool = True
     footer_with_build_id: typing.Optional[int] = None
     footer_with_affinity_id: typing.Optional[int] = None
+    character_ap: typing.Optional[str] = None

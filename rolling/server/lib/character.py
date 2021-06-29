@@ -300,8 +300,9 @@ class CharacterLib:
         compute_unread_transactions: bool = False,
         compute_pending_actions: bool = False,
         compute_with_fighters: bool = False,
+        dead: typing.Optional[bool] = None,
     ) -> CharacterModel:
-        character_document = self.get_document(id_)
+        character_document = self.get_document(id_, dead=dead)
         model = self.document_to_model(character_document)
 
         # TODO BS: Move these compute unread/unvote in respective libs
