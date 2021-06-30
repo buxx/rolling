@@ -41,7 +41,7 @@ def check_common_is_possible(
     character_from_required_all_ability = kernel.character_lib.have_from_of_abilities(
         character, abilities=description.properties["required_all_abilities"]
     )
-    all_of_required_abilities = len(character_from_required_all_ability) == description.properties["required_all_abilities"]
+    all_of_required_abilities = len(character_from_required_all_ability) == len(description.properties["required_all_abilities"])
 
     if description.properties["required_one_of_stuff_ids"] and not one_of_required_stuff_found:
         raise ImpossibleAction("Manque de matériel")
