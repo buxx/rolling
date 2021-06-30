@@ -38,6 +38,11 @@ def check_common_is_possible(
     ):
         one_of_required_abilities = True
 
+    character_from_required_all_ability = kernel.character_lib.have_from_of_abilities(
+        character, abilities=description.properties["required_all_abilities"]
+    )
+    all_of_required_abilities = len(character_from_required_all_ability) == description.properties["required_all_abilities"]
+
     if description.properties["required_one_of_stuff_ids"] and not one_of_required_stuff_found:
         raise ImpossibleAction("Manque de matériel")
 
@@ -54,6 +59,9 @@ def check_common_is_possible(
     for required_all_skill_id in description.properties["required_all_skills"]:
         if required_all_skill_id not in character_skill_ids:
             raise ImpossibleAction("Manque de compétences")
+
+    if description.properties["required_all_abilities"] and not all_of_required_abilities:
+        raise ImpossibleAction("Manque de compétences ou de materiel")
 
 
 def fill_base_action_properties(
