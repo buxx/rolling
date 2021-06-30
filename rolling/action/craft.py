@@ -556,6 +556,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
     ) -> None:
         self.check_is_possible(character, stuff)
+        check_common_is_possible(self._kernel, description=self._description, character=character)
         if input_.ap:
             if character.action_points < input_.ap:
                 raise ImpossibleAction(f"{character.name} ne possède passez de points d'actions")
