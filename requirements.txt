@@ -48,6 +48,6 @@ yarl==1.6.3
 zipp==3.4.1
 MarkupSafe==2.0.1
 aiohttp-jinja2==1.4.2
-jinja2==2.11.3
+jinja2==3.0.1
 aiohttp-basicauth-middleware==1.1.2
 psycopg2==2.8.6
