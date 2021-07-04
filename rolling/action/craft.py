@@ -546,10 +546,13 @@ class ContinueStuffConstructionAction(WithStuffAction):
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
         properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties["produce_stuff_id"] = action_config_raw["produce_stuff_id"]
         return properties
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         if not stuff.under_construction:
+            raise ImpossibleAction("Non concérné")
+        if self._description.properties["produce_stuff_id"] != stuff.stuff_id:
             raise ImpossibleAction("Non concérné")
 
     def check_request_is_possible(
