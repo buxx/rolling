@@ -1500,7 +1500,7 @@ tile_clutter_capacity = 25.0
     cost = 1.0
     link_group_name = "Utilitaire"
 
-  [ACTIONS.CONSTRUCT_CLUTTER_HAXE]
+  [ACTIONS.CONSTRUCT_COPPER_HAXE]
     name = "Fabriquer une hache de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
@@ -1512,7 +1512,7 @@ tile_clutter_capacity = 25.0
     produce_stuff_id = "BRONZE_HAXE"
     default_description = "Manche en bois et petite lame de cuivre"
     consume = [
-      {resource="CLUTTER", quantity=900.0}
+      {resource="COPPER", quantity=900.0}
     ]
     craft_ap = 20.0
     cost = 2.0
@@ -1626,7 +1626,7 @@ tile_clutter_capacity = 25.0
     cost = 2.0
     link_group_name = "Matériel de guerre"
 
-  [ACTIONS.CONSTRUCT_CLUTTER_SPEAR]
+  [ACTIONS.CONSTRUCT_COPPER_SPEAR]
     name = "Fabriquer une lance de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
@@ -1635,10 +1635,10 @@ tile_clutter_capacity = 25.0
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_MIDDLE_TEMP"]
-    produce_stuff_id = "CLUTTER_SPEAR"
+    produce_stuff_id = "COPPER_SPEAR"
     default_description = "Pointe de cuivre"
     consume = [
-      {resource="CLUTTER", quantity=500.0}
+      {resource="COPPER", quantity=500.0}
     ]
     craft_ap = 19.0
     cost = 2.0
