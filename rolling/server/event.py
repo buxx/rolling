@@ -203,7 +203,7 @@ class ClickActionProcessor(EventProcessor):
                         world_row_i=row_i,
                         world_col_i=col_i,
                         data=TopBarMessageData(
-                            message=str(exc),
+                            message=str(exc).replace("\n", " "),
                             type_=TopBarMessageType.ERROR,
                         ),
                     )

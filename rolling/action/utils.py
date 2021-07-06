@@ -14,54 +14,50 @@ if typing.TYPE_CHECKING:
     from rolling.model.mix import ResourceMixDescription
 
 
+# TODO BS 20210706: All properties are not covered
 def check_common_is_possible(
     kernel: "Kernel",
     description: typing.Union["ActionDescriptionModel", "ResourceMixDescription"],
     character: "CharacterModel",
 ) -> None:
     character_stuff_ids = [s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)]
-    character_skill_ids = []  # TODO BS 2019-09-26: code it
-    one_of_required_stuff_found = False
-    one_of_required_skill_found = False
-    one_of_required_abilities = False
+    error_messages: typing.List[str] = []
 
-    for required_one_of_stuff_id in description.properties["required_one_of_stuff_ids"]:
-        if required_one_of_stuff_id in character_stuff_ids:
-            one_of_required_stuff_found = True
+    # One or more stuff are required
+    if description.properties["required_one_of_stuff_ids"]:
+        if not all(
+            [
+                required_one_of_stuff_id in character_stuff_ids
+                for required_one_of_stuff_id in description.properties["required_one_of_stuff_ids"]
+            ]
+        ):
+            error_messages.append("Il vous faut au moins un des objets suivants :")
+            for required_one_of_stuff_id in description.properties["required_one_of_stuff_ids"]:
+                stuff_description = kernel.game.stuff_manager.get_stuff_properties_by_id(required_one_of_stuff_id)
+                error_messages.append(f" - {stuff_description.name}")
 
-    for required_one_of_skill in description.properties["required_one_of_skills"]:
-        if required_one_of_skill.id in character_skill_ids:
-            one_of_required_skill_found = True
+    # One or more ability is required
+    if description.properties["required_one_of_abilities"]:
+        abilities_from_requirement = kernel.character_lib.have_from_of_abilities(
+            character, abilities=description.properties["required_one_of_abilities"]
+        )
+        if not abilities_from_requirement:
+            error_messages.append("Il vous faut au moins une des habilités suivantes :")
+            for ability in description.properties["required_one_of_abilities"]:
+                error_messages.append(f" - {ability.name}")
 
-    if kernel.character_lib.have_from_of_abilities(
-        character, abilities=description.properties["required_one_of_abilities"]
-    ):
-        one_of_required_abilities = True
+    # All abilities
+    if description.properties["required_all_abilities"]:
+        abilities_from_requirement = kernel.character_lib.have_from_of_abilities(
+            character, abilities=description.properties["required_all_abilities"]
+        )
+        if len(abilities_from_requirement) != len(description.properties["required_all_abilities"]):
+            error_messages.append("Il vous faut toute les habilités suivantes :")
+            for ability in description.properties["required_all_abilities"]:
+                error_messages.append(f" - {ability.name}")
 
-    character_from_required_all_ability = kernel.character_lib.have_from_of_abilities(
-        character, abilities=description.properties["required_all_abilities"]
-    )
-    all_of_required_abilities = len(character_from_required_all_ability) == len(description.properties["required_all_abilities"])
-
-    if description.properties["required_one_of_stuff_ids"] and not one_of_required_stuff_found:
-        raise ImpossibleAction("Manque de matériel")
-
-    if description.properties["required_one_of_skills"] and not one_of_required_skill_found:
-        raise ImpossibleAction("Manque d'expérience")
-
-    if description.properties["required_one_of_abilities"] and not one_of_required_abilities:
-        raise ImpossibleAction("Manque de matériels ou de compétences")
-
-    for required_all_stuff_id in description.properties["required_all_stuff_ids"]:
-        if required_all_stuff_id not in character_stuff_ids:
-            raise ImpossibleAction("Manque de matériels")
-
-    for required_all_skill_id in description.properties["required_all_skills"]:
-        if required_all_skill_id not in character_skill_ids:
-            raise ImpossibleAction("Manque de compétences")
-
-    if description.properties["required_all_abilities"] and not all_of_required_abilities:
-        raise ImpossibleAction("Manque de compétences ou de materiel")
+    if error_messages:
+        raise ImpossibleAction("\n".join(error_messages))
 
 
 def fill_base_action_properties(
