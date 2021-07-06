@@ -1,4 +1,6 @@
 #  coding: utf-8
+from json import JSONDecodeError
+
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
