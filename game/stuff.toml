@@ -188,7 +188,7 @@
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "SPEAR"]
-[CLUTTER_SPEAR]
+[COPPER_SPEAR]
   name = "Lance de cuivre"
   weight = 1000.0
   clutter = 1.0
@@ -254,7 +254,7 @@
   damages = 1.0
   classes = ["WEAPON", "HAXE"]
   illustration = "stone_axe.png"
-[CLUTTER_HAXE]
+[COPPER_HAXE]
   name = "Hache de cuivre"
   weight = 1000.0
   clutter = 1.0
