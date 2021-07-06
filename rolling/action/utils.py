@@ -1,10 +1,17 @@
 # coding: utf-8
+import dataclasses
 import enum
 import typing
 
+import serpyco
+
+from guilang.description import Part
 from rolling.exception import ConfigurationError
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownStuffError
+from rolling.model.build import BuildDescription
+from rolling.model.stuff import StuffProperties
+from rolling.util import quantity_to_str
 
 if typing.TYPE_CHECKING:
     from rolling.action.base import ActionDescriptionModel
@@ -19,6 +26,7 @@ def check_common_is_possible(
     kernel: "Kernel",
     description: typing.Union["ActionDescriptionModel", "ResourceMixDescription"],
     character: "CharacterModel",
+    illustration_name: typing.Optional[str] = None
 ) -> None:
     character_stuff_ids = [s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)]
     error_messages: typing.List[str] = []
@@ -57,7 +65,7 @@ def check_common_is_possible(
                 error_messages.append(f" - {ability.name}")
 
     if error_messages:
-        raise ImpossibleAction("\n".join(error_messages))
+        raise ImpossibleAction("\n".join(error_messages), illustration_name=illustration_name)
 
 
 def fill_base_action_properties(
@@ -135,3 +143,61 @@ def in_percent(reference: float, number: float, percent: int) -> AroundPercent:
         return AroundPercent.MORE
 
     return AroundPercent.IN
+
+
+@dataclasses.dataclass
+class ConfirmModel:
+    confirm: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+def get_build_description_parts(kernel: "Kernel", build_description: BuildDescription, include_build_parts: bool = False) -> typing.List[Part]:
+    items = []
+
+    if build_description.description:
+        items.append(Part(text=build_description.description))
+
+    if build_description.ability_ids:
+        when_working = " lorsque est en fonctionnement" if build_description.abilities_if_is_on else ""
+        items.append(Part(text=""))
+        items.append(Part(text=f"Permet{when_working} :"))
+        for ability_id in build_description.ability_ids:
+            ability_description = kernel.game.config.abilities[ability_id]
+            items.append(Part(text=f" - {ability_description.name}"))
+
+    if include_build_parts:
+        items.append(Part(text=""))
+        items.append(Part(text=f"Pour être construit, nécéssite :"))
+        for build_require_resource in build_description.build_require_resources:
+            resource_description = kernel.game.config.resources[build_require_resource.resource_id]
+            resource_quantity_str = quantity_to_str(
+                quantity=build_require_resource.quantity,
+                unit=resource_description.unit,
+                kernel=kernel,
+            )
+            items.append(Part(text=f" - {resource_description.name}, {resource_quantity_str}"))
+
+    if build_description.power_on_require_resources:
+        items.append(Part(text=""))
+        items.append(Part(text=f"Pour être démarré, nécéssite :"))
+        for power_on_require_resource in build_description.power_on_require_resources:
+            resource_description = kernel.game.config.resources[power_on_require_resource.resource_id]
+            resource_quantity_str = quantity_to_str(
+                quantity=power_on_require_resource.quantity,
+                unit=resource_description.unit,
+                kernel=kernel,
+            )
+            items.append(Part(text=f" - {resource_description.name}, {resource_quantity_str}"))
+
+    if build_description.turn_require_resources:
+        items.append(Part(text=""))
+        items.append(Part(text=f"Pendant sont fonctionnement, consomme :"))
+        for turn_require_resource in build_description.turn_require_resources:
+            resource_description = kernel.game.config.resources[turn_require_resource.resource_id]
+            resource_quantity_str = quantity_to_str(
+                quantity=turn_require_resource.quantity,
+                unit=resource_description.unit,
+                kernel=kernel,
+            )
+            items.append(Part(text=f" - {resource_description.name}, {resource_quantity_str}"))
+
+    return items

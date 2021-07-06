@@ -12,7 +12,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_build_action_url
-from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import ConfirmModel, check_common_is_possible, get_build_description_parts
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import MissingResource
@@ -55,8 +55,8 @@ def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:
 
 
 class BeginBuildAction(CharacterAction):
-    input_model = EmptyModel
-    input_model_serializer = serpyco.Serializer(EmptyModel)
+    input_model = ConfirmModel
+    input_model_serializer = serpyco.Serializer(ConfirmModel)
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
@@ -95,14 +95,40 @@ class BeginBuildAction(CharacterAction):
                     action_description_id=self._description.id,
                     query_params={},
                 ),
-                cost=self.get_cost(character, input_=None),
                 group_name=build_description.group_name,
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    def perform(self, character: "CharacterModel", input_: ConfirmModel) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
+
+        if not input_.confirm:
+            items = get_build_description_parts(self._kernel, build_description, include_build_parts=True)
+
+            if not build_description.many:
+                items.append(Part(text=""))
+                items.append(Part(text="Cera consruit là où se trouve votre personnage"))
+
+            cost = self.get_cost(character, input_=input_)
+            items.append(
+                Part(
+                    label=f"Construire ({cost} points d'actions)",
+                    is_link=True,
+                    form_action=get_character_action_url(
+                        character_id=character.id,
+                        action_type=ActionType.BEGIN_BUILD,
+                        action_description_id=self._description.id,
+                        query_params={"confirm": 1},
+                    )
+                )
+            )
+
+            return Description(
+                title=f"Construire {build_description.name}",
+                items=items,
+                illustration_name=build_description.illustration,
+            )
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,

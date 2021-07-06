@@ -369,6 +369,7 @@ class GameConfig:
                 allow_deposit=build_raw.get("allow_deposit", False),
                 allow_deposit_limited=build_raw.get("allow_deposit_limited", False),
                 group_name=build_raw.get("group_name", None),
+                description=build_raw.get("description", None),
             )
 
         return builds

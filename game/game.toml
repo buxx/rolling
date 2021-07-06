@@ -1843,6 +1843,7 @@ tile_clutter_capacity = 25.0
   classes = ["LOOM"]
   many = false
   group_name = "Utilitaire"
+  description = "Un outil indispensable pour produire du tissu"
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"
@@ -1856,6 +1857,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=true}
   group_name = "Mur"
+  description = "Empêche le passage des animaux"
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"

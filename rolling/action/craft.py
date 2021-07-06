@@ -14,7 +14,7 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import check_common_is_possible
+from rolling.action.utils import ConfirmModel, check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
@@ -350,7 +350,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
 
 
 @dataclasses.dataclass
-class BeginStuffModel:
+class BeginStuffModel(ConfirmModel):
     description: typing.Optional[str] = None
 
 
@@ -378,82 +378,115 @@ class BeginStuffConstructionAction(CharacterAction):
     def check_request_is_possible(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> None:
-        self.check_is_possible(character)
-        check_common_is_possible(self._kernel, description=self._description, character=character)
+        if input_.confirm:
+            self.check_is_possible(character)
+            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(self.description.properties["produce_stuff_id"])
+            check_common_is_possible(self._kernel, description=self._description, character=character, illustration_name=stuff_description.illustration)
 
-        cost = self.get_cost(character)
-        if character.action_points < cost:
-            raise ImpossibleAction(
-                f"{character.name} no possède pas assez de points d'actions "
-                f"({round(cost, 2)} nécessaires)"
-            )
+            cost = self.get_cost(character)
+            if character.action_points < cost:
+                raise ImpossibleAction(
+                    f"{character.name} no possède pas assez de points d'actions "
+                    f"({round(cost, 2)} nécessaires)"
+                )
 
-        for consume in self._description.properties["consume"]:
-            if "resource" in consume:
-                resource_id = consume["resource"]
-                resource_description = self._kernel.game.config.resources[resource_id]
-                quantity = consume["quantity"]
-                quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
-                if not self._kernel.resource_lib.have_resource(
-                    character_id=character.id, resource_id=resource_id, quantity=quantity
-                ):
+            for consume in self._description.properties["consume"]:
+                if "resource" in consume:
+                    resource_id = consume["resource"]
                     resource_description = self._kernel.game.config.resources[resource_id]
-                    raise ImpossibleAction(
-                        f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
-                    )
+                    quantity = consume["quantity"]
+                    quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
+                    if not self._kernel.resource_lib.have_resource(
+                        character_id=character.id, resource_id=resource_id, quantity=quantity
+                    ):
+                        resource_description = self._kernel.game.config.resources[resource_id]
+                        raise ImpossibleAction(
+                            f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
+                        )
 
-            elif "stuff" in consume:
-                stuff_id = consume["stuff"]
-                quantity = consume["quantity"]
-                if (
-                    self._kernel.stuff_lib.get_stuff_count(
-                        character_id=character.id, stuff_id=stuff_id
-                    )
-                    < quantity
-                ):
-                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                        stuff_id
-                    )
-                    raise ImpossibleAction(
-                        f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
-                    )
+                elif "stuff" in consume:
+                    stuff_id = consume["stuff"]
+                    quantity = consume["quantity"]
+                    if (
+                        self._kernel.stuff_lib.get_stuff_count(
+                            character_id=character.id, stuff_id=stuff_id
+                        )
+                        < quantity
+                    ):
+                        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                            stuff_id
+                        )
+                        raise ImpossibleAction(
+                            f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
+                        )
 
     def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         return [
             CharacterActionLink(
-                name=f"Commencer {self._description.name}",
+                name=f"{self._description.name}",
                 link=get_character_action_url(
                     character_id=character.id,
                     action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
                     action_description_id=self._description.id,
                     query_params={},
                 ),
-                cost=self.get_cost(character),
                 group_name=self._description.properties["link_group_name"],
             )
         ]
 
     def perform(self, character: "CharacterModel", input_: BeginStuffModel) -> Description:
+        require_txts = []
+        for consume in self._description.properties["consume"]:
+            if "resource" in consume:
+                resource_id = consume["resource"]
+                resource_description = self._kernel.game.config.resources[resource_id]
+                quantity_str = quantity_to_str(
+                    consume["quantity"], resource_description.unit, self._kernel
+                )
+                require_txts.append(f" - {quantity_str} de {resource_description.name}")
+
+            elif "stuff" in consume:
+                stuff_id = consume["stuff"]
+                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff_id
+                )
+                require_txts.append(f" - {consume['quantity']} de {stuff_properties.name}")
+
+        if not input_.confirm:
+            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(self.description.properties["produce_stuff_id"])
+            start_cost = self.get_cost(character, input_=input_)
+            craft_ap_cost = self.description.properties["craft_ap"]
+            items = [
+                Part(text=f"Temps de travail nécessaire : {start_cost} + {craft_ap_cost} points d'actions"),
+                Part(text=""),
+                Part(text="Nécessite : "),
+            ]
+
+            for require_txt in require_txts:
+                items.append(Part(text=require_txt))
+
+            items.append(
+                Part(
+                    label=f"Commencer le travail ({start_cost} points d'actions)",
+                    is_link=True,
+                    form_action=get_character_action_url(
+                        character_id=character.id,
+                        action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
+                        action_description_id=self._description.id,
+                        query_params={"confirm": 1},
+                    )
+                )
+            )
+
+            return Description(
+                title=f"Commencer {stuff_description.name}",
+                items=items,
+                illustration_name=stuff_description.illustration,
+            )
+
         if not input_.description:
-            require_txts = []
-            for consume in self._description.properties["consume"]:
-                if "resource" in consume:
-                    resource_id = consume["resource"]
-                    resource_description = self._kernel.game.config.resources[resource_id]
-                    quantity_str = quantity_to_str(
-                        consume["quantity"], resource_description.unit, self._kernel
-                    )
-                    require_txts.append(f"{quantity_str} de {resource_description.name}")
-
-                elif "stuff" in consume:
-                    stuff_id = consume["stuff"]
-                    stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                        stuff_id
-                    )
-                    require_txts.append(f"{consume['quantity']} de {stuff_properties.name}")
-
             return Description(
                 title=f"Commencer {self._description.name}",
                 items=[

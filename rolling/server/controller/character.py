@@ -1183,6 +1183,7 @@ class CharacterController(BaseController):
                             form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions",
                         )
                     ],
+                    illustration_name=exc.illustration_name,
                 )
 
         return Description(
@@ -1544,7 +1545,9 @@ class CharacterController(BaseController):
             return action.perform(character_model, input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
     @hapic.with_api_doc()
@@ -1581,7 +1584,9 @@ class CharacterController(BaseController):
             return action.perform(character=character_model, stuff=stuff, input_=input_)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
     @hapic.with_api_doc()
@@ -1611,7 +1616,9 @@ class CharacterController(BaseController):
             return get_description_for_not_enough_ap(character_model, exc.cost)
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
@@ -1622,7 +1629,9 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
     @hapic.with_api_doc()
@@ -1661,7 +1670,9 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
     @hapic.with_api_doc()
@@ -1711,7 +1722,9 @@ class CharacterController(BaseController):
             )
         except ImpossibleAction as exc:
             return Description(
-                title="Action impossible", items=[Part(text=line) for line in str(exc).split("\n")]
+                title="Action impossible",
+                items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
     @hapic.with_api_doc()
@@ -1835,6 +1848,7 @@ class CharacterController(BaseController):
             return Description(
                 title="Effectuer un voyage ...",
                 items=[Part(text=line) for line in str(exc).split("\n")],
+                illustration_name=exc.illustration_name,
             )
 
         buttons = [Part(label="Rester ici")]

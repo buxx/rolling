@@ -127,7 +127,9 @@ class CantEmpty(GamePlayError):
 
 
 class ImpossibleAction(GamePlayError):
-    pass
+    def __init__(self, message: str, illustration_name: typing.Optional[str] = None):
+        super().__init__(message)
+        self.illustration_name = illustration_name
 
 
 class ImpossibleAttack(ImpossibleAction):

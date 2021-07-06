@@ -6,6 +6,7 @@ from hapic import HapicData
 
 from guilang.description import Description
 from guilang.description import Part
+from rolling.action.utils import get_build_description_parts
 from rolling.kernel import Kernel
 from rolling.model.build import DescribeBuildInputPath
 from rolling.server.controller.base import BaseController
@@ -40,6 +41,8 @@ class BuildController(BaseController):
 
         if build_description.abilities_if_is_on:
             parts.append(Part(text=f"En fonctionnement: " + ("Oui" if build_doc.is_on else "Non")))
+
+        parts.extend(get_build_description_parts(self._kernel, build_description, include_build_parts=False))
 
         carried_resources = self._kernel.resource_lib.get_stored_in_build(hapic_data.path.build_id)
         if carried_resources:
