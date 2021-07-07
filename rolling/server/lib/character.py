@@ -588,6 +588,7 @@ class CharacterLib:
                         link=DESCRIBE_LOOK_AT_STUFF_URL.format(
                             character_id=character.id, stuff_id=item.id
                         ),
+                        group_name="Voir les objets et bâtiments autour",
                     )
                 )
 
@@ -618,6 +619,7 @@ class CharacterLib:
                             row_i=resource.ground_row_i,
                             col_i=resource.ground_col_i,
                         ),
+                        group_name="Voir les objets et bâtiments autour",
                     )
                 )
 
@@ -644,6 +646,7 @@ class CharacterLib:
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {build_description.name}",
                         link=DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
+                        group_name="Voir les objets et bâtiments autour",
                     )
                 )
 
