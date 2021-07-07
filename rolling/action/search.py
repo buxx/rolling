@@ -12,7 +12,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import RollingError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -59,7 +59,7 @@ class SearchMaterialAction(CharacterAction):
     ) -> None:
         self.check_is_possible(character)
         if input_.ap and character.action_points < input_.ap:
-            raise ImpossibleAction(f"{character.name} ne poss_de pas assez de points d'actions")
+            raise WrongInputError(f"{character.name} ne possède pas assez de points d'actions")
 
     def get_character_actions(
         self, character: "CharacterModel"

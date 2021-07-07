@@ -16,6 +16,10 @@ class UserDisplayError(RollingError):
     pass
 
 
+class WrongInputError(UserDisplayError):
+    pass
+
+
 class SourceLoadError(RollingError):
     pass
 

@@ -8,7 +8,7 @@ import typing
 from guilang.description import Description
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_with_build_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
@@ -112,13 +112,13 @@ class TakeStuffOrResources(TransferStuffOrResources):
         if quantity > self._kernel.stuff_lib.get_stuff_count(
             build_id=self._from_build.id, stuff_id=stuff.stuff_id
         ):
-            raise ImpossibleAction(f"Il n'y en a pas assez")
+            raise WrongInputError(f"Il n'y en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
             build_id=self._from_build.id, resource_id=resource_id, quantity=quantity
         ):
-            raise ImpossibleAction(f"Il n'y en a pas assez")
+            raise WrongInputError(f"Il n'y en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_stored_in(

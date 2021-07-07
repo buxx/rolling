@@ -16,7 +16,7 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import ConfirmModel, check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import RollingError
 from rolling.model.skill import DEFAULT_MAXIMUM_SKILL
 from rolling.rolling_types import ActionType
@@ -63,7 +63,7 @@ class BaseCraftStuff:
         dry_run: bool = True,
     ) -> None:
         if character.action_points < cost:
-            raise ImpossibleAction(
+            raise WrongInputError(
                 f"{character.name} no possède pas assez de points d'actions "
                 f"({round(cost, 2)} nécessaires)"
             )
@@ -82,7 +82,7 @@ class BaseCraftStuff:
                 owned_quantity = len(carried_stuffs)
 
                 if owned_quantity < required_quantity:
-                    raise ImpossibleAction(
+                    raise WrongInputError(
                         f"Vous ne possédez pas assez de {stuff_properties.name}: {required_quantity} nécessaire(s)"
                     )
 
@@ -98,14 +98,14 @@ class BaseCraftStuff:
                 try:
                     carried_resource = next((c for c in carried_resources if c.id == resource_id))
                 except StopIteration:
-                    raise ImpossibleAction(f"Vous ne possédez pas de {resource_properties.name}")
+                    raise WrongInputError(f"Vous ne possédez pas de {resource_properties.name}")
                 if carried_resource.quantity < required_quantity:
                     missing_quantity_str = quantity_to_str(
                         kernel=self._kernel,
                         quantity=(required_quantity - carried_resource.quantity),
                         unit=carried_resource.unit,
                     )
-                    raise ImpossibleAction(
+                    raise WrongInputError(
                         f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} de plus nécessaire(s)"
                     )
 
@@ -385,7 +385,7 @@ class BeginStuffConstructionAction(CharacterAction):
 
             cost = self.get_cost(character)
             if character.action_points < cost:
-                raise ImpossibleAction(
+                raise WrongInputError(
                     f"{character.name} no possède pas assez de points d'actions "
                     f"({round(cost, 2)} nécessaires)"
                 )
@@ -400,7 +400,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         character_id=character.id, resource_id=resource_id, quantity=quantity
                     ):
                         resource_description = self._kernel.game.config.resources[resource_id]
-                        raise ImpossibleAction(
+                        raise WrongInputError(
                             f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
                         )
 
@@ -416,7 +416,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
                             stuff_id
                         )
-                        raise ImpossibleAction(
+                        raise WrongInputError(
                             f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
                         )
 
@@ -596,7 +596,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         check_common_is_possible(self._kernel, description=self._description, character=character)
         if input_.ap:
             if character.action_points < input_.ap:
-                raise ImpossibleAction(f"{character.name} ne possède passez de points d'actions")
+                raise WrongInputError(f"{character.name} ne possède passez de points d'actions")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"

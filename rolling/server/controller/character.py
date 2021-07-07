@@ -19,7 +19,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CantMoveCharacter
+from rolling.exception import CantMoveCharacter, WrongInputError
 from rolling.exception import ImpossibleAction
 from rolling.exception import ImpossibleAttack
 from rolling.exception import NotEnoughActionPoints
@@ -80,7 +80,7 @@ from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
-from rolling.util import get_description_for_not_enough_ap
+from rolling.util import get_exception_for_not_enough_ap
 
 base_skills = ["strength", "perception", "endurance", "charism", "intelligence", "agility", "luck"]
 
@@ -189,7 +189,7 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
             stuff_id=stuff.stuff_id,
             exclude_shared_with_affinity=True,
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
+            raise WrongInputError(f"{self._character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
@@ -198,7 +198,7 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
             exclude_shared_with_affinity=True,
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
+            raise WrongInputError(f"{self._character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(
@@ -340,7 +340,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             stuff_id=stuff.stuff_id,
             shared_with_affinity_ids=[self._affinity.id],
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
+            raise WrongInputError(f"{self._character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         if not self._kernel.resource_lib.have_resource(
@@ -349,7 +349,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
             shared_with_affinity_ids=[self._affinity.id],
         ):
-            raise ImpossibleAction(f"{self._character.name} n'en a pas assez")
+            raise WrongInputError(f"{self._character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(
@@ -1541,16 +1541,7 @@ class CharacterController(BaseController):
         try:
             cost = action.get_cost(character_model, input_=input_)
             if cost is not None and character_model.action_points < cost:
-                return Description(
-                    title="Action impossible",
-                    items=[
-                        Part(
-                            text=f"{character_model.name} ne possède plus assez de points d'actions "
-                            f"({character_model.action_points} restant et {cost} nécessaires)"
-                        ),
-                        Part(label="Continue"),
-                    ],
-                )
+                raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(character_model, input_)
             return action.perform(character_model, input_)
@@ -1580,16 +1571,7 @@ class CharacterController(BaseController):
         try:
             cost = action.get_cost(character_model, stuff, input_=input_)
             if cost is not None and character_model.action_points < cost:
-                return Description(
-                    title="Action impossible",
-                    items=[
-                        Part(
-                            text=f"{character_model.name} ne possède plus assez de points d'actions "
-                            f"({character_model.action_points} restant et {cost} nécessaires)"
-                        ),
-                        Part(label="Continue"),
-                    ],
-                )
+                raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
             return action.perform(character=character_model, stuff=stuff, input_=input_)
@@ -1618,13 +1600,13 @@ class CharacterController(BaseController):
         try:
             cost = action.get_cost(character_model, hapic_data.path.build_id, input_=input_)
             if cost is not None and character_model.action_points < cost:
-                return get_description_for_not_enough_ap(character_model, cost)
+                raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
                 character=character_model, build_id=hapic_data.path.build_id, input_=input_
             )
         except NotEnoughActionPoints as exc:
-            return get_description_for_not_enough_ap(character_model, exc.cost)
+            raise get_exception_for_not_enough_ap(character_model, exc.cost)
         except ImpossibleAction as exc:
             return Description(
                 title="Action impossible",
@@ -1662,16 +1644,7 @@ class CharacterController(BaseController):
         try:
             cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
             if cost is not None and character_model.action_points < cost:
-                return Description(
-                    title="Action impossible",
-                    items=[
-                        Part(
-                            text=f"{character_model.name} ne possède plus assez de points d'actions "
-                            f"({character_model.action_points} restant et {cost} nécessaires)"
-                        ),
-                        Part(label="Continue"),
-                    ],
-                )
+                raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
                 character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
@@ -1704,16 +1677,7 @@ class CharacterController(BaseController):
         try:
             cost = action.get_cost(character_model, with_character_model, input_=input_)
             if cost is not None and character_model.action_points < cost:
-                return Description(
-                    title="Action impossible",
-                    items=[
-                        Part(
-                            text=f"{character_model.name} ne possède plus assez de points d'actions "
-                            f"({character_model.action_points} restant et {cost} nécessaires)"
-                        ),
-                        Part(label="Continue"),
-                    ],
-                )
+                raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
                 character=character_model, with_character=with_character_model, input_=input_

@@ -11,7 +11,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_character_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.rolling_types import ActionScope
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -43,15 +43,15 @@ class LearnKnowledgeAction(CharacterAction):
     ) -> None:
         if input_.knowledge_id is not None:
             if input_.knowledge_id in character.knowledges:
-                raise ImpossibleAction("Connaissance déjà acquise")
+                raise WrongInputError("Connaissance déjà acquise")
             knowledge_description = self._kernel.game.config.knowledge[input_.knowledge_id]
             for required_knowledge_id in knowledge_description.requires:
                 if required_knowledge_id not in character.knowledges:
-                    raise ImpossibleAction(f"Cette connaissance ne peut pas encore etre abordé")
+                    raise WrongInputError(f"Cette connaissance ne peut pas encore etre abordé")
 
         if input_.ap is not None:
             if character.action_points < input_.ap:
-                raise ImpossibleAction("Pas assez de points d'actions")
+                raise WrongInputError("Pas assez de points d'actions")
 
     def get_character_actions(
         self, character: "CharacterModel"
@@ -163,10 +163,10 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
     ) -> None:
         self.check_is_possible(character, with_character)
         if input_.knowledge_id not in character.knowledges:
-            raise ImpossibleAction(f"{character.name} n'a pas cette connaisance")
+            raise WrongInputError(f"{character.name} n'a pas cette connaisance")
 
         if input_.ap is not None and character.action_points < input_.ap:
-            raise ImpossibleAction(f"{character.name} n'a pas assez de points d'actions")
+            raise WrongInputError(f"{character.name} n'a pas assez de points d'actions")
 
     def _get_url(
         self,
@@ -293,10 +293,10 @@ class TeachKnowledgeAction(WithCharacterAction):
     ) -> None:
         self.check_is_possible(character, with_character)
         if input_.knowledge_id not in character.knowledges:
-            raise ImpossibleAction(f"{character.name} n'a pas cette connaisance")
+            raise WrongInputError(f"{character.name} n'a pas cette connaisance")
 
         if input_.ap is not None and character.action_points < input_.ap:
-            raise ImpossibleAction(f"{character.name} n'a pas assez de points d'actions")
+            raise WrongInputError(f"{character.name} n'a pas assez de points d'actions")
 
     def get_character_actions(
         self, character: "CharacterModel", with_character: "CharacterModel"

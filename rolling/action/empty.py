@@ -6,7 +6,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CantEmpty
+from rolling.exception import CantEmpty, WrongInputError
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
@@ -31,7 +31,7 @@ class EmptyStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         if not stuff.filled_with_resource:
-            raise ImpossibleAction("Ne contient rien")
+            raise WrongInputError("Ne contient rien")
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:

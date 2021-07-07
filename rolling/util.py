@@ -9,6 +9,7 @@ import typing
 
 from guilang.description import Description
 from guilang.description import Part
+from rolling.exception import WrongInputError
 from rolling.log import server_logger
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
@@ -300,18 +301,12 @@ def str_quantity_to_float(quantity: str) -> float:
     return float(quantity)
 
 
-def get_description_for_not_enough_ap(
+def get_exception_for_not_enough_ap(
     character: "CharacterModel", cost: float, can_be_back_url: bool = False
-) -> Description:
-    return Description(
-        title="Action impossible",
-        items=[
-            Part(
-                text=f"{character.name} ne possède plus assez de points d'actions "
-                f"({character.action_points} restant et {cost} nécessaires)"
-            )
-        ],
-        can_be_back_url=can_be_back_url,
+) -> WrongInputError:
+    return WrongInputError(
+        f"{character.name} ne possède plus assez de points d'actions "
+        f"({character.action_points} restant et {cost} nécessaires)"
     )
 
 

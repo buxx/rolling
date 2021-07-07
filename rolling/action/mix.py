@@ -10,7 +10,7 @@ from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.utils import check_common_is_possible
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -66,7 +66,7 @@ class MixResourcesAction(WithResourceAction):
                 )
                 required_quantity = required_resource.coeff * user_input_context.real_quantity
                 if carried_resource.quantity < required_quantity:
-                    raise ImpossibleAction(
+                    raise WrongInputError(
                         f"Vous ne possédez pas assez de {required_resource.resource.name}: "
                         f"Quantité nécessaire: {required_quantity} {unit_name}, "
                         f"vous n'en avez que {carried_resource.quantity} {unit_name}"

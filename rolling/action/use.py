@@ -5,7 +5,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
@@ -80,7 +80,7 @@ class UseAsBagAction(WithStuffAction):
     ) -> None:
         # TODO BS 2019-09-03: check stuff owned
         if character.bags:
-            raise ImpossibleAction("Vous utilisez déjà un sac")
+            raise WrongInputError("Vous utilisez déjà un sac")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"

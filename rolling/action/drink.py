@@ -10,7 +10,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CantEmpty
+from rolling.exception import CantEmpty, WrongInputError
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughResource
 from rolling.model.effect import CharacterEffectDescriptionModel
@@ -82,7 +82,7 @@ class DrinkResourceAction(CharacterAction):
             if resource.id == input_.resource_id and input_.resource_id in accept_resources_ids:
                 return
 
-        raise ImpossibleAction(f"Il n'y a pas de {input_.resource_id} à proximité")
+        raise WrongInputError(f"Il n'y a pas de {input_.resource_id} à proximité")
 
     def get_character_actions(
         self, character: "CharacterModel"
@@ -166,7 +166,7 @@ class DrinkStuffAction(WithStuffAction):
         self.check_is_possible(character, stuff)
 
         if stuff.filled_value < self._description.properties["consume_per_tick"]:
-            raise ImpossibleAction(f"Pas assez pour boire")
+            raise WrongInputError(f"Pas assez pour boire")
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"

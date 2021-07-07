@@ -12,7 +12,7 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import NoCarriedResource
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -140,7 +140,7 @@ class DropResourceAction(WithResourceAction):
                 character.id, resource_id=resource_id
             )
         except NoCarriedResource:
-            raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
+            raise WrongInputError("Vous ne possedez pas assez de cette resource")
 
         if input_.quantity:
             user_input_context = InputQuantityContext.from_carried_resource(
@@ -151,7 +151,7 @@ class DropResourceAction(WithResourceAction):
                 resource_id=resource_id,
                 quantity=user_input_context.real_quantity,
             ):
-                raise ImpossibleAction("Vous ne possedez pas assez de cette resource")
+                raise WrongInputError("Vous ne possedez pas assez de cette resource")
 
     @classmethod
     def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:

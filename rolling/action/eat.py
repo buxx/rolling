@@ -8,7 +8,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import NotEnoughResource
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.rolling_types import ActionType
@@ -69,7 +69,7 @@ class EatResourceAction(WithResourceAction):
             return
 
         unit_name = self._kernel.translation.get(carried_resource.unit)
-        raise ImpossibleAction(
+        raise WrongInputError(
             f"Vous ne possédez pas/plus assez de {carried_resource.name} "
             f"({consume_per_tick} {unit_name} requis)"
         )

@@ -13,7 +13,7 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
 from rolling.rolling_types import ActionType
@@ -177,10 +177,10 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 user_input=input_.quantity, carried_resource=carried_resource
             )
             if carried_resource.quantity < user_input_context.real_quantity:
-                raise ImpossibleAction(f"Vous n'en possédez pas assez")
+                raise WrongInputError(f"Vous n'en possédez pas assez")
             cost = self.get_cost(character, resource_id=resource_id, input_=input_)
             if character.action_points < cost:
-                raise ImpossibleAction(
+                raise WrongInputError(
                     f"{character.name} no possède pas assez de points d'actions "
                     f"({round(cost, 2)} nécessaires)"
                 )
@@ -207,7 +207,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
 
         produce_quantity = quantity * there_is_unit
         if produce_quantity < 1.0:
-            raise ImpossibleAction("Pas assez de matière première")
+            raise WrongInputError("Pas assez de matière première")
         not_round = float("0." + str(str(produce_quantity).split(".")[1]))
 
         if not not_round:
