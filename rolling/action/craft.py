@@ -433,6 +433,7 @@ class BeginStuffConstructionAction(CharacterAction):
                     query_params={},
                 ),
                 group_name=self._description.properties["link_group_name"],
+                category="Artisanat",
             )
         ]
 

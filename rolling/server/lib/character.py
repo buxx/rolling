@@ -680,18 +680,49 @@ class CharacterLib:
 
         return character_actions_
 
+    def _add_category_to_action_links(
+        self,
+        action_links: typing.List[CharacterActionLink],
+        category: str,
+        only_if_none: bool = True,
+    ) -> typing.List[CharacterActionLink]:
+        for action_link in action_links:
+            if not only_if_none or (only_if_none and action_link.category is None):
+                action_link.category = category
+        return action_links
+
     def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions_: typing.List[CharacterActionLink] = []
 
-        character_actions_.extend(self.get_on_place_stuff_actions(character))
-        character_actions_.extend(self.get_on_place_resource_actions(character))
-        character_actions_.extend(self.get_on_place_build_actions(character))
-        character_actions_.extend(self.get_on_place_character_actions(character))
+        character_actions_.extend(
+            self._add_category_to_action_links(
+                self.get_on_place_stuff_actions(character), "Objets et ressources autour de vous"
+            )
+        )
+        character_actions_.extend(
+            self._add_category_to_action_links(
+                self.get_on_place_resource_actions(character), "Objets et ressources autour de vous"
+            )
+        )
+        character_actions_.extend(
+            self._add_category_to_action_links(
+                self.get_on_place_build_actions(character), "Bâtiments autour de vous"
+            )
+        )
+        character_actions_.extend(
+            self._add_category_to_action_links(
+                self.get_on_place_character_actions(character), "Personnages"
+            )
+        )
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
-            character_actions_.extend(action.get_character_actions(character))
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    action.get_character_actions(character), "Divers"
+                )
+            )
 
         return filter_action_links(character_actions_)
 

@@ -1121,20 +1121,31 @@ class CharacterController(BaseController):
                 )
             )
 
+        action_parts = []
+        action_categories = list(set([a.category for a in character_actions]))
+        for action_category in action_categories:
+            action_parts.append(
+                Part(
+                    classes=["h2"],
+                    text=action_category or "Autres"
+                )
+            )
+            for character_action in character_actions:
+                if character_action.category == action_category:
+                    action_parts.append(
+                        Part(
+                            text=character_action.get_as_str(),
+                            form_action=character_action.link,
+                            is_link=True,
+                            link_group_name=character_action.group_name,
+                        )
+                    )
+
         return Description(
             title="Que voulez-vous faire ?",
             illustration_name=zone_properties.illustration,
             disable_illustration_row=True,
-            items=parts
-            + [
-                Part(
-                    text=action.get_as_str(),
-                    form_action=action.link,
-                    is_link=True,
-                    link_group_name=action.group_name,
-                )
-                for action in character_actions
-            ],
+            items=parts + action_parts,
             can_be_back_url=True,
         )
 
