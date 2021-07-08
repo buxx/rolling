@@ -697,17 +697,17 @@ class CharacterLib:
 
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_stuff_actions(character), "Objets et ressources autour de vous"
+                self.get_on_place_stuff_actions(character), "Objets, ressources et bâtiments autour"
             )
         )
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_resource_actions(character), "Objets et ressources autour de vous"
+                self.get_on_place_resource_actions(character), "Objets, ressources et bâtiments autour"
             )
         )
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_build_actions(character), "Bâtiments autour de vous"
+                self.get_on_place_build_actions(character), "Objets, ressources et bâtiments autour"
             )
         )
         character_actions_.extend(
