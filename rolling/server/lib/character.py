@@ -664,6 +664,13 @@ class CharacterLib:
                 )
             )
 
+        for stuff in self._kernel.stuff_lib.get_carried_by(character.id, exclude_crafting=False):
+            actions.extend(
+                self._kernel.stuff_lib.get_carrying_actions(
+                    character=character, stuff=stuff
+                )
+            )
+
         return actions
 
     def get_on_place_character_actions(
