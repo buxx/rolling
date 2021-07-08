@@ -192,6 +192,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                     query_params={},
                 ),
                 cost=self.get_cost(character, resource_id),
+                category="Artisanat",
             )
         ]
 
@@ -309,6 +310,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                     query_params={},
                 ),
                 cost=self.get_cost(character, stuff),
+                category="Artisanat",
             )
         ]
 
@@ -613,6 +615,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
                 ),
                 cost=self.get_cost(character, stuff),
                 merge_by="continue_craft",
+                category="Artisanat",
             )
         ]
 

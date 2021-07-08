@@ -652,6 +652,20 @@ class CharacterLib:
 
         return character_actions_
 
+    def get_from_inventory_actions(
+        self, character: CharacterModel
+    ) -> typing.List[CharacterActionLink]:
+        actions: typing.List[CharacterActionLink] = []
+
+        for resource in self._kernel.resource_lib.get_carried_by(character.id):
+            actions.extend(
+                self._kernel.character_lib.get_on_resource_actions(
+                    character_id=character.id, resource_id=resource.id
+                )
+            )
+
+        return actions
+
     def get_on_place_character_actions(
         self, character: CharacterModel
     ) -> typing.List[CharacterActionLink]:
@@ -713,6 +727,11 @@ class CharacterLib:
         character_actions_.extend(
             self._add_category_to_action_links(
                 self.get_on_place_character_actions(character), "Personnages"
+            )
+        )
+        character_actions_.extend(
+            self._add_category_to_action_links(
+                self.get_from_inventory_actions(character), "Inventaire"
             )
         )
 

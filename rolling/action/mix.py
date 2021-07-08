@@ -109,6 +109,7 @@ class MixResourcesAction(WithResourceAction):
                             action_description_id=self._description.id,
                         ),
                         cost=None,
+                        category="Production",
                     )
                 )
 

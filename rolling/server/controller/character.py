@@ -1122,7 +1122,7 @@ class CharacterController(BaseController):
             )
 
         action_parts = []
-        action_categories = list(set([a.category for a in character_actions]))
+        action_categories = list(sorted(set([a.category for a in character_actions])))
         for action_category in action_categories:
             action_parts.append(
                 Part(
@@ -2225,9 +2225,5 @@ class CharacterController(BaseController):
                 web.post(
                     "/character/{character_id}/describe_around_builds", self.describe_around_builds
                 ),
-                # web.post(
-                #     "/character/{character_id}/pickup_around_items",
-                #     self.pickup_around_items
-                # ),
             ]
         )
