@@ -33,7 +33,7 @@ def check_common_is_possible(
 
     # One or more stuff are required
     if description.properties["required_one_of_stuff_ids"]:
-        if not all(
+        if not any(
             [
                 required_one_of_stuff_id in character_stuff_ids
                 for required_one_of_stuff_id in description.properties["required_one_of_stuff_ids"]
