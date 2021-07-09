@@ -763,7 +763,7 @@ tile_clutter_capacity = 25.0
 
   [ACTIONS.COOK_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
+    required_one_of_stuff_ids = ["PHEASANT", "PADRIDGE", "DUCK", "MOORHEN", "RAVEN"]
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
@@ -804,7 +804,7 @@ tile_clutter_capacity = 25.0
 
   [ACTIONS.BUTCHER_LITTLE_GAME]
     actions = ["TRANSFORM_STUFF_TO_RESOURCES"]
-    required_one_of_stuff_ids = ["FAISAN", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
+    required_one_of_stuff_ids = ["PHEASANT", "PADRIDGE", "PHEASANT", "DUCK", "MOORHEN", "RAVEN"]
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
