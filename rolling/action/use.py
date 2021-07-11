@@ -17,6 +17,7 @@ if typing.TYPE_CHECKING:
 
 
 class NotUseAsBagAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[object] = EmptyModel
     input_model_serializer: serpyco.Serializer
 
@@ -61,6 +62,7 @@ class NotUseAsBagAction(WithStuffAction):
 
 
 class UseAsBagAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[object] = EmptyModel
     input_model_serializer: serpyco.Serializer
 
@@ -109,6 +111,7 @@ class UseAsBagAction(WithStuffAction):
 
 
 class UseAsWeaponAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
@@ -157,6 +160,7 @@ class UseAsWeaponAction(WithStuffAction):
 
 
 class NotUseAsWeaponAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
@@ -201,6 +205,7 @@ class NotUseAsWeaponAction(WithStuffAction):
 
 
 class UseAsShieldAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
@@ -249,6 +254,7 @@ class UseAsShieldAction(WithStuffAction):
 
 
 class NotUseAsShieldAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
@@ -293,6 +299,7 @@ class NotUseAsShieldAction(WithStuffAction):
 
 
 class UseAsArmorAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
@@ -341,6 +348,7 @@ class UseAsArmorAction(WithStuffAction):
 
 
 class NotUseAsArmorAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(EmptyModel)
 

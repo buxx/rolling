@@ -40,6 +40,7 @@ class DropStuffModel:
 
 
 class DropStuffAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[DropStuffModel] = DropStuffModel
     input_model_serializer = serpyco.Serializer(DropStuffModel)
 
@@ -123,6 +124,7 @@ class DropStuffAction(WithStuffAction):
 
 
 class DropResourceAction(WithResourceAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[DropResourceModel] = DropResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 

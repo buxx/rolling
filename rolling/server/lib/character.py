@@ -660,14 +660,14 @@ class CharacterLib:
         for resource in self._kernel.resource_lib.get_carried_by(character.id):
             actions.extend(
                 self._kernel.character_lib.get_on_resource_actions(
-                    character_id=character.id, resource_id=resource.id
+                    character_id=character.id, resource_id=resource.id, for_actions_page=True,
                 )
             )
 
         for stuff in self._kernel.stuff_lib.get_carried_by(character.id, exclude_crafting=False):
             actions.extend(
                 self._kernel.stuff_lib.get_carrying_actions(
-                    character=character, stuff=stuff
+                    character=character, stuff=stuff, for_actions_page=True,
                 )
             )
 
@@ -787,10 +787,10 @@ class CharacterLib:
         return filter_action_links(character_actions)
 
     def get_on_resource_actions(
-        self, character_id: str, resource_id: str
+        self, character_id: str, resource_id: str, for_actions_page: bool = False,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
-        character_actions = self._kernel.resource_lib.get_carrying_actions(character, resource_id)
+        character_actions = self._kernel.resource_lib.get_carrying_actions(character, resource_id, for_actions_page=for_actions_page)
         return filter_action_links(character_actions)
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:

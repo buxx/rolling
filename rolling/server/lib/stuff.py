@@ -306,7 +306,7 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def get_carrying_actions(
-        self, character: CharacterModel, stuff: StuffModel
+        self, character: CharacterModel, stuff: StuffModel, for_actions_page: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -315,6 +315,9 @@ class StuffLib:
 
         for description in stuff_properties.descriptions:
             action = self._action_factory.get_with_stuff_action(description)
+            if for_actions_page and action.exclude_from_actions_page:
+                continue
+
             try:
                 action.check_is_possible(character, stuff)
                 actions.extend(action.get_character_actions(character, stuff))

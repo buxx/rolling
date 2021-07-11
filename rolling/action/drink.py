@@ -38,6 +38,7 @@ class DrinkStuffModel:
 
 
 class DrinkResourceAction(CharacterAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[DrinkResourceModel] = DrinkResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
@@ -132,6 +133,7 @@ class DrinkResourceAction(CharacterAction):
 
 
 class DrinkStuffAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[DrinkStuffModel] = DrinkStuffModel
     input_model_serializer = serpyco.Serializer(input_model)
 

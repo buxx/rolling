@@ -28,6 +28,7 @@ class EatResourceModel:
 
 
 class EatResourceAction(WithResourceAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EatResourceModel] = EatResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 

@@ -524,13 +524,16 @@ class ResourceLib:
         )
 
     def get_carrying_actions(
-        self, character: CharacterModel, resource_id: str
+        self, character: CharacterModel, resource_id: str, for_actions_page: bool = False
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         resource_description = self._kernel.game.config.resources[resource_id]
 
         for description in resource_description.descriptions:
             action = self._action_factory.get_with_resource_action(description)
+            if for_actions_page and action.exclude_from_actions_page:
+                continue
+
             try:
                 action.check_is_possible(character, resource_id=resource_id)
                 actions.extend(action.get_character_actions(character, resource_id))

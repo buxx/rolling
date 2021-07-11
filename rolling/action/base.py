@@ -125,6 +125,7 @@ class ActionDescriptionModel:
 
 
 class Action(abc.ABC):
+    exclude_from_actions_page: bool = False
     input_model: typing.Type[object]
     input_model_serializer: serpyco.Serializer
 

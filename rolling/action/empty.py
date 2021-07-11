@@ -20,6 +20,7 @@ if typing.TYPE_CHECKING:
 
 
 class EmptyStuffAction(WithStuffAction):
+    exclude_from_actions_page = True
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(input_model)
 
