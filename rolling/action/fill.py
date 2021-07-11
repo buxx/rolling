@@ -72,6 +72,7 @@ class FillStuffAction(WithStuffAction):
                             action_description_id=self._description.id,
                         ),
                         cost=self.get_cost(character, stuff),
+                        group_name=f"Remplir {stuff.name} avec {resource.name}",
                     )
                 )
 
