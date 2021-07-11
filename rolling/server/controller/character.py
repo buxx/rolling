@@ -1826,7 +1826,7 @@ class CharacterController(BaseController):
                 illustration_name=exc.illustration_name,
             )
 
-        buttons = [Part(label="Rester ici")]
+        buttons = []
         travel_url = (
             f"/_describe/character/{hapic_data.path.character_id}/move"
             f"?to_world_row={hapic_data.path.world_row_i}"
@@ -1853,11 +1853,10 @@ class CharacterController(BaseController):
                 )
             )
 
-        if move_info.can_move:
-            buttons.insert(
-                0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
-            )
-        else:
+        buttons.insert(
+            0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
+        )
+        if move_info.cannot_move_reasons:
             for reason in move_info.cannot_move_reasons:
                 parts.append(Part(text=reason))
 
