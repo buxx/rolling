@@ -39,3 +39,10 @@
 
     [ZONE_PROPERTIES.HILL.GENERATION]
       count = 0
+
+[TILES]
+  [TILES.DEAD_TREE]
+    produce = [
+      {resource="WOOD", start_capacity=1.0, regeneration=0.0, destroy_when_empty=true},
+    ]
+    replace_by_when_destroy = "DIRT"

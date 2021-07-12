@@ -370,6 +370,7 @@ class GameConfig:
                 allow_deposit_limited=build_raw.get("allow_deposit_limited", False),
                 group_name=build_raw.get("group_name", None),
                 description=build_raw.get("description", None),
+                is_floor=build_raw.get("is_floor", False),
             )
 
         return builds
@@ -481,6 +482,14 @@ class Game:
 
         for tile_type_id, tile_properties_raw in raw_world.get("TILES", {}).items():
             tile_type = ZoneMapTileType.get_all()[tile_type_id]
+            try:
+                replace_by_when_destroy_raw = tile_properties_raw["replace_by_when_destroy"]
+                try:
+                    replace_by_when_destroy = ZoneMapTileType.get_all()[replace_by_when_destroy_raw]
+                except KeyError:
+                    raise ValueError(f"'{replace_by_when_destroy_raw}' is not a valid tile type id")
+            except KeyError:
+                replace_by_when_destroy = None
             tiles_properties[tile_type] = ZoneTileProperties(
                 tile_type=tile_type,
                 produce=[
@@ -488,9 +497,11 @@ class Game:
                         resource=self.config.resources[produce_raw["resource"]],
                         start_capacity=produce_raw["start_capacity"],
                         regeneration=produce_raw["regeneration"],
+                        destroy_when_empty=produce_raw["destroy_when_empty"],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],
+                replace_by_when_destroy=replace_by_when_destroy,
             )
 
         return WorldManager(

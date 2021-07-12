@@ -4,6 +4,8 @@ import dataclasses
 import serpyco
 import typing
 
+from sqlalchemy.exc import NoResultFound
+
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
@@ -19,9 +21,7 @@ from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
-    from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
-    from rolling.server.document.character import CharacterDocument
 
 
 @dataclasses.dataclass
@@ -34,7 +34,7 @@ class CollectResourceModel:
 
 # FIXME BS 2019-08-29: Permit collect only some material (like no liquid)
 class CollectResourceAction(CharacterAction):
-    input_model: typing.Type[CollectResourceModel] = CollectResourceModel
+    input_model = CollectResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
@@ -105,7 +105,7 @@ class CollectResourceAction(CharacterAction):
         return character_actions
 
     def _get_resource_and_cost(
-        self, character: "CharacterDocument", input_: input_model
+        self, character: "CharacterModel", input_: CollectResourceModel
     ) -> typing.Tuple[ResourceDescriptionModel, ExtractableResourceDescriptionModel, float]:
         tile_type = self._kernel.tile_maps_by_position[
             (character.world_row_i, character.world_col_i)
@@ -123,16 +123,15 @@ class CollectResourceAction(CharacterAction):
         return resource, resource_extraction_description, cost_per_unit
 
     def get_cost(
-        self, character: "CharacterModel", input_: typing.Optional[input_model] = None
+        self, character: "CharacterModel", input_: typing.Optional[CollectResourceModel] = None
     ) -> typing.Optional[float]:
-        if input_.quantity is not None:
-            character_doc = self._character_lib.get_document(character.id)
+        if input_ and input_.quantity is not None:
             resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
-                character_doc, input_
+                character, input_
             )
             return input_.quantity * resource_extraction_description.cost_per_unit
 
-    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
+    def perform(self, character: "CharacterModel", input_: CollectResourceModel) -> Description:
         character_doc = self._character_lib.get_document(character.id)
         resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
             character_doc, input_
@@ -164,16 +163,56 @@ class CollectResourceAction(CharacterAction):
                 ],
             )
 
+        assert input_.row_i is not None
+        assert input_.col_i is not None
+        assert input_.resource_id is not None
+
+        try:
+            zone_resource_doc = self._kernel.zone_lib.get_zone_ressource_doc(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=input_.row_i,
+                zone_col_i=input_.col_i,
+                resource_id=input_.resource_id,
+            )
+        except NoResultFound:
+            raise RollingError(
+                "No zone resource found for : "
+                f"world_row_i:{character.world_row_i}, "
+                f"world_row_i:{character.world_col_i}, "
+                f"zone_row_i:{input_.row_i}, "
+                f"zone_col_i:{input_.col_i}, "
+                f"resource_id:{input_.resource_id}"
+            )
+
+        if zone_resource_doc.quantity < input_.quantity:
+            input_ = CollectResourceModel(
+                resource_id=input_.resource_id,
+                row_i=input_.row_i,
+                col_i=input_.col_i,
+                quantity=zone_resource_doc.quantity,
+            )
+
+        cost = self.get_cost(character, input_=input_)
+        if cost is None:
+            raise RollingError("Cost compute should not be None !")
+
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=input_.resource_id,
             quantity=input_.quantity,
             commit=False,
         )
-
-        cost = self.get_cost(character, input_=input_)
-        if cost is None:
-            raise RollingError("Cost compute should not be None !")
+        self._kernel.zone_lib.reduce_resource_quantity(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
+            resource_id=input_.resource_id,
+            quantity=input_.quantity,
+            allow_reduce_more_than_possible=True,
+            commit=False,
+        )
 
         self._kernel.character_lib.reduce_action_points(character.id, cost, commit=False)
         self._kernel.server_db_session.commit()

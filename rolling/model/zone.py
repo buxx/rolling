@@ -109,12 +109,14 @@ class ZoneMapTileProduction:
     resource: ResourceDescriptionModel
     start_capacity: float
     regeneration: float
+    destroy_when_empty: bool
 
 
 @dataclasses.dataclass
 class ZoneTileProperties:
     tile_type: typing.Type[ZoneMapTileType]
     produce: typing.List[ZoneMapTileProduction]
+    replace_by_when_destroy: typing.Optional[ZoneMapTileType]
 
 
 @dataclasses.dataclass

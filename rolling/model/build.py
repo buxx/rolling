@@ -43,6 +43,7 @@ class BuildDescription:
     power_on_require_resources: typing.List[BuildPowerOnRequireResourceDescription]
     ability_ids: typing.List[str]
     cost: float
+    is_floor: bool
     classes: typing.List[str] = serpyco.field(default_factory=list)
     many: bool = False
     traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
