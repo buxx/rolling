@@ -5,8 +5,8 @@ import typing
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_character import TakeFromModel
+from rolling.exception import WrongInputError
 from rolling.action.take_resource import TakeResourceAction, TakeResourceModel
-from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
@@ -119,7 +119,7 @@ class TestTakeFromCharacterAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction) as caught:
+        with pytest.raises(WrongInputError) as caught:
             take_from_character_action.check_is_possible(arthur, xena)
 
         assert str(caught.value) == "arthur ne peut contraindre xena"
@@ -335,7 +335,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
@@ -358,7 +358,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
@@ -378,7 +378,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_from_character_action.check_request_is_possible(
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )

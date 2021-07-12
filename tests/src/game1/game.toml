@@ -199,6 +199,11 @@ tile_clutter_capacity = 10.0
 [resource_mix]
 
 [extractions]
+[extractions.DEAD_TREE]
+    tile="DEAD_TREE"
+    resources=[
+      {resource_id="WOOD", cost_per_unit=5.0, default_quantity=0.04},
+    ]
 
 [build]
 [build.TEST_BUILD_1]

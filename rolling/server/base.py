@@ -33,7 +33,7 @@ def get_kernel(
     kernel = Kernel(
         world_map_source_raw,
         loop=loop,
-        tile_maps_folder=tile_maps_folder_path,
+        zone_maps_folder=tile_maps_folder_path,
         game_config_folder=game_config_folder,
         server_config_file_path=server_config_file_path,
     )

@@ -26,6 +26,7 @@ class MapGeography:
         self._tile_type_positions: typing.Dict[
             typing.Type[MapTileType], typing.List[typing.Tuple[int, int]]
         ] = {}
+        self.legend = legend
 
         length = self._get_max_length(raw_lines)
         for row_i, raw_line in enumerate(raw_lines):

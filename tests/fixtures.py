@@ -110,7 +110,7 @@ def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
 def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
     kernel = Kernel(
         worldmapsourcec_txt,
-        tile_maps_folder="tests/src/worldmapc_zones",
+        zone_maps_folder="tests/src/worldmapc_zones",
         game_config_folder="tests/src/game1",
         loop=loop,
     )

@@ -15,6 +15,7 @@ from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.affinity import statuses
+from tests.utils import extract_description_properties, in_one_of
 
 
 class TestAffinity:
@@ -61,22 +62,22 @@ class TestAffinity:
         # list affinity
         resp = await web.post(f"/affinity/{xena.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/xena/see/1" == descr.items[-1].form_action
-        assert "MyAffinity (Chef, Combattant)" == descr.items[-1].label
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/xena/see/1" in form_actions
+        assert "/affinity/xena/new" in form_actions
+        labels = extract_description_properties(descr.items, "label")
+        assert "MyAffinity (Chef, Combattant) 1|1" in labels
 
         # see affinity
         resp = await web.post(f"/affinity/{xena.id}/see/{1}")
         descr = descr_serializer.load(await resp.json())
         assert "MyAffinity" == descr.title
-        assert "1 membre(s)" in descr.items[1].text
-        assert "1 prêt(s)" in descr.items[1].text
-        assert "/affinity/xena/edit-relation/1" == descr.items[2].form_action
-        assert (
-            "Vous êtes membre de cette affinité et vous portez le status de Chef (Vous vous battez pour elle)"
-            == descr.items[2].label
-        )
-        item_urls = [i.form_action for i in descr.items]
-        assert "/affinity/xena/manage/1" in item_urls
+        texts = extract_description_properties(descr.items, "text")
+        assert in_one_of('1 membre(s) dont 1 prêt(s) à se battre', texts)
+        assert in_one_of('Vous êtes membre de cette affinité et vous portez le status de Chef (Vous vous battez pour elle)', texts)
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/xena/manage/1" in form_actions
+        assert "/affinity/xena/edit-relation/1" in form_actions
 
     @pytest.mark.parametrize("request_,fighter", [(False, True), (True, True), (True, False)])
     async def test_unit__join_affinity__ok__as_non_member(
@@ -99,7 +100,8 @@ class TestAffinity:
         # list unknowns
         resp = await web.post(f"/affinity/{arthur.id}/list")
         descr = descr_serializer.load(await resp.json())
-        assert "MyAffinity" == descr.items[1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert "MyAffinity" in labels
         assert "/affinity/arthur/see/1" == descr.items[1].form_action
 
         # display edit relation
@@ -150,7 +152,9 @@ class TestAffinity:
         # list affinities
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/see/1" in form_actions
+
         expected_str = ""
         if fighter and request_:
             expected_str = " (Demandé, Combattant)"
@@ -158,7 +162,8 @@ class TestAffinity:
             expected_str = " (Combattant)"
         if not fighter and request_:
             expected_str = " (Demandé)"
-        assert f"MyAffinity{expected_str}" == descr.items[-1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert f"MyAffinity{expected_str} 1|1" in labels
 
         # see affinity
         resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -166,17 +171,8 @@ class TestAffinity:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"{1 if not fighter else 2} prêt(s)" in descr.items[1].text
-        assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
-        expected_str = ""
-        if fighter and request_:
-            expected_str = (
-                "Vous avez demandé à être membre de cette affinité (Vous vous battez pour elle)"
-            )
-        if fighter and not request_:
-            expected_str = "Vous combattez pour cette affinité"
-        if not fighter and request_:
-            expected_str = "Vous avez demandé à être membre de cette affinité"
-        assert expected_str == descr.items[2].label
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/edit-relation/1" in form_actions
 
         if request_:
             # accept him
@@ -192,7 +188,8 @@ class TestAffinity:
                 expected_str = " (Membre, Combattant)"
             if not fighter:
                 expected_str = " (Membre)"
-            assert f"MyAffinity{expected_str}" == descr.items[-1].label
+            labels = extract_description_properties(descr.items, "label")
+            assert f"MyAffinity{expected_str} 2|2" in labels
 
             # see affinity
             resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -200,14 +197,6 @@ class TestAffinity:
             assert "MyAffinity" == descr.title
             assert "2 membre(s)" in descr.items[1].text
             assert f"{1 if not fighter else 2} prêt(s)" in descr.items[1].text
-            expected_str = ""
-            if fighter:
-                expected_str = "Vous êtes membre de cette affinité et vous portez le status de Membre (Vous vous battez pour elle)"
-            if not fighter:
-                expected_str = (
-                    "Vous êtes membre de cette affinité et vous portez le status de Membre"
-                )
-            assert expected_str == descr.items[2].label
 
     @pytest.mark.parametrize("disallowed,rejected", [(False, True), (True, False), (True, True)])
     async def test_unit__join_affinity__ok__as_old_member(
@@ -286,12 +275,12 @@ class TestAffinity:
         # display main
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
         if fighter:
             expected_str = " (Quitté, Combattant)"
         else:
             expected_str = " (Quitté)"
-        assert f"MyAffinity{expected_str}" == descr.items[-1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert f"MyAffinity{expected_str} 1|1" in labels
 
         # see affinity
         resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -299,12 +288,8 @@ class TestAffinity:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"{2 if fighter else 1} prêt(s)" in descr.items[1].text
-        assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
-        if fighter:
-            expected_str = "Vous avez renié cette affinité (Vous vous battez pour elle)"
-        else:
-            expected_str = "Vous avez renié cette affinité"
-        assert expected_str == descr.items[2].label
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/edit-relation/1" in form_actions
 
     @pytest.mark.parametrize("fighter", [True, False])
     async def test_unit__discard_request__ok__nominal_case(
@@ -331,12 +316,14 @@ class TestAffinity:
         # display main
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/see/1" in form_actions
         if fighter:
             expected_str = " (Combattant)"
         else:
             expected_str = " (Plus de lien)"
-        assert f"MyAffinity{expected_str}" == descr.items[-1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert f"MyAffinity{expected_str} 1|1" in labels
 
         # see affinity
         resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -344,12 +331,8 @@ class TestAffinity:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"{2 if fighter else 1} prêt(s)" in descr.items[1].text
-        assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
-        if fighter:
-            expected_str = "Vous combattez pour cette affinité"
-        else:
-            expected_str = "Vous n'avez plus aucune relation avec cette affinité"
-        assert expected_str == descr.items[2].label
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/edit-relation/1" in form_actions
 
         # re do request
         resp = await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
@@ -359,23 +342,14 @@ class TestAffinity:
         # list affinities
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
+        form_actions = extract_description_properties(descr.items, "form_action")
+        assert "/affinity/arthur/see/1" in form_actions
         if fighter:
             expected_str = " (Demandé, Combattant)"
         else:
             expected_str = " (Demandé)"
-        assert f"MyAffinity{expected_str}" == descr.items[-1].label
-
-        # see affinity
-        resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
-        descr = descr_serializer.load(await resp.json())
-        if fighter:
-            expected_str = (
-                "Vous avez demandé à être membre de cette affinité (Vous vous battez pour elle)"
-            )
-        else:
-            expected_str = "Vous avez demandé à être membre de cette affinité"
-        assert expected_str == descr.items[2].label
+        labels = extract_description_properties(descr.items, "label")
+        assert f"MyAffinity{expected_str} 1|1" in labels
 
     async def test_unit__only_fight_for_ok__nominal_case(
         self,
@@ -398,8 +372,8 @@ class TestAffinity:
         # display main
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
-        assert f"MyAffinity (Combattant)" == descr.items[-1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert f"MyAffinity (Combattant) 1|1" in labels
 
         # see affinity
         resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -407,8 +381,6 @@ class TestAffinity:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"2 prêt(s)" in descr.items[1].text
-        assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
-        assert "Vous combattez pour cette affinité" == descr.items[2].label
 
         resp = await web.post(f"/affinity/arthur/edit-relation/1?fighter=0")
         descr = descr_serializer.load(await resp.json())
@@ -420,8 +392,6 @@ class TestAffinity:
         # display main
         resp = await web.post(f"/affinity/{arthur.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "/affinity/arthur/see/1" == descr.items[-1].form_action
-        assert f"MyAffinity (Plus de lien)" == descr.items[-1].label
 
         # see affinity
         resp = await web.post(f"/affinity/{arthur.id}/see/{1}")
@@ -429,8 +399,6 @@ class TestAffinity:
         assert "MyAffinity" == descr.title
         assert "1 membre(s)" in descr.items[1].text
         assert f"1 prêt(s)" in descr.items[1].text
-        assert "/affinity/arthur/edit-relation/1" == descr.items[2].form_action
-        assert "Vous n'avez plus aucune relation avec cette affinité" == descr.items[2].label
 
     async def test_unit__manage_ok__nominal_case(
         self,
@@ -597,7 +565,8 @@ class TestAffinity:
         # on affinity list, affinity is blinking
         resp = await web.post(f"/affinity/{xena.id}")
         descr = descr_serializer.load(await resp.json())
-        assert "*MyAffinity (Chef, Combattant)" == descr.items[-1].label
+        labels = extract_description_properties(descr.items, "label")
+        assert "MyAffinity (Chef, Combattant) 1|1" in labels
         # on see affinity, link blinking
         resp = await web.post(f"/affinity/{xena.id}/see/{1}")
         descr = descr_serializer.load(await resp.json())

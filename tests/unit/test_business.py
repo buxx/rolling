@@ -298,10 +298,10 @@ class TestBusiness:
             )
         ).status == 200
 
-        assert (await web.post(f"/business/{xena.id}/offers/{1}?open=1")).status == 200
+        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={"active":"on"})).status == 200
         await self._assert_edit_offer(kernel, web, xena, offer_id=1, open_=True)
         await self._assert_owned_offers(kernel, web, xena, count=1, names=["(V) My offer"])
-        assert (await web.post(f"/business/{xena.id}/offers/{1}?close=1")).status == 200
+        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={})).status == 200
         await self._assert_edit_offer(kernel, web, xena, offer_id=1, open_=False)
         await self._assert_owned_offers(kernel, web, xena, count=1, names=["(X) My offer"])
 
@@ -913,7 +913,7 @@ class TestBusiness:
                 f"?position=OFFER&value=Vin rouge (litres)&quantity=1.5"
             )
         ).status == 200
-        assert (await web.post(f"/business/{xena.id}/offers/{1}?open=1")).status == 200
+        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={"active":"on"})).status == 200
 
         await self._assert_edit_offer(
             kernel,

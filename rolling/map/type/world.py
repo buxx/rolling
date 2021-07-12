@@ -9,6 +9,7 @@ class WorldMapTileType(MapTileType):
     _list_cache: typing.Dict[str, typing.Type["WorldMapTileType"]] = None
     _full_id_pattern = "WORLD_TILE__{}"
     require_transport_type: typing.List[TransportType] = []
+    default_tile_id = NotImplemented
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["WorldMapTileType"]]:
@@ -35,6 +36,7 @@ class Sea(WorldMapTileType):
     foreground_high_color = "#06f"
     background_high_color = "#006"
     require_transport_type = [TransportType.BOAT]
+    default_tile_id = "SEA_WATER"
 
 
 class Mountain(WorldMapTileType):
@@ -44,27 +46,32 @@ class Mountain(WorldMapTileType):
     background_color = ""
     mono = ""
     foreground_high_color = "#860"
+    default_tile_id = "ROCKY_GROUND"
 
 
 class Jungle(WorldMapTileType):
     id = "JUNGLE"
     name = "Jungle"
     foreground_high_color = "#060"
+    default_tile_id = "DIRT"
 
 
 class Hill(WorldMapTileType):
     id = "HILL"
     name = "Colline"
     foreground_high_color = "#660"
+    default_tile_id = "DIRT"
 
 
 class Beach(WorldMapTileType):
     id = "BEACH"
     name = "Plage"
     foreground_high_color = "#fa0"
+    default_tile_id = "SAND"
 
 
 class Plain(WorldMapTileType):
     id = "PLAIN"
     name = "Plaine"
     foreground_high_color = "#fda"
+    default_tile_id = "DIRT"

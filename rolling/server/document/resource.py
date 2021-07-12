@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column
+from sqlalchemy import Column, UniqueConstraint, Boolean
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
@@ -28,3 +28,35 @@ class ResourceDocument(Document):
     carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     in_built_id = Column(Integer, ForeignKey("build.id"), nullable=True)
     shared_with_affinity_id = Column(Integer, ForeignKey("affinity.id"), nullable=True)
+
+
+class ZoneResourceDocument(Document):
+    __tablename__ = "zone_resource"
+    __table_args__ = (
+        UniqueConstraint(
+            'world_col_i',
+            'world_row_i',
+            'zone_col_i',
+            'zone_row_i',
+            'resource_id',
+            name='zone_resource_unique'
+        ),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    world_col_i = Column(Integer, nullable=False)
+    world_row_i = Column(Integer, nullable=False)
+    zone_col_i = Column(Integer, nullable=False)
+    zone_row_i = Column(Integer, nullable=False)
+    resource_id = Column(String(255), nullable=False)
+
+    # properties
+    quantity = Column(Numeric(24, 6, asdecimal=False), nullable=False)
+    destroy_tile_when_empty = Column(Boolean(), nullable=False)
+
+
+# FIXME BS NOW floor:
+# * FAIT commande d'init des ressources par rapport aux tuiles
+# * FAIT (a tester) collect: reduction zone ress et remplacement de la tuile lorsque vide
+# * event: tuile remplacement
+# * FAIT constructions : que sur tuile qui authorise (et suppression de la tuile)

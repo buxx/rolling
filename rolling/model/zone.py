@@ -109,6 +109,7 @@ class ZoneMapTileProduction:
     resource: ResourceDescriptionModel
     start_capacity: float
     regeneration: float
+    destroy_when_empty: bool
 
 
 @dataclasses.dataclass

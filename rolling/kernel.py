@@ -48,6 +48,7 @@ from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from rolling.server.lib.zone import ZoneLib
 from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
@@ -68,11 +69,12 @@ class Kernel:
         self,
         world_map_str: str = None,
         loop: AbstractEventLoop = None,
-        tile_maps_folder: typing.Optional[str] = None,
+        zone_maps_folder: typing.Optional[str] = None,
         game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
         server_config_file_path: str = "./server.ini",
     ) -> None:
+        self._zone_maps_folder = zone_maps_folder
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
         self._world_map_source: typing.Optional[WorldMapSource] = (
@@ -102,20 +104,11 @@ class Kernel:
         self._server_world_events_manager = WorldEventsManager(self, loop=loop)
 
         # Generate tile maps if tile map folder given
-        if tile_maps_folder is not None:
+        if zone_maps_folder is not None:
             self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
 
-            for tile_map_source_file_path in glob.glob(os.path.join(tile_maps_folder, "*.txt")):
-                tile_map_source_file_name = ntpath.basename(tile_map_source_file_path)
-                row_i, col_i = map(int, tile_map_source_file_name.replace(".txt", "").split("-"))
-                kernel_logger.debug('Load tile map "{}"'.format(tile_map_source_file_name))
-
-                with open(tile_map_source_file_path, "r") as f:
-                    tile_map_source_raw = f.read()
-
-                self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
-                    row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
-                )
+            for zone_file_path in glob.glob(os.path.join(zone_maps_folder, "*.txt")):
+                self.load_zone_from_file_path(zone_file_path)
 
         # Generate game info if config given
         if game_config_folder is not None:
@@ -136,8 +129,27 @@ class Kernel:
         self._fight_lib: typing.Optional[FightLib] = None
         self._animated_corpse_lib: typing.Optional[AnimatedCorpseLib] = None
         self._account_lib: typing.Optional[AccountLib] = None
+        self._zone_lib: typing.Optional[ZoneLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
+
+    def load_zone_from_file_path(self, zone_file_path: str) -> None:
+        tile_map_source_file_name = ntpath.basename(zone_file_path)
+        row_i, col_i = map(int, tile_map_source_file_name.replace(".txt", "").split("-"))
+        kernel_logger.debug('Load tile map "{}"'.format(tile_map_source_file_name))
+
+        with open(zone_file_path, "r") as f:
+            tile_map_source_raw = f.read()
+
+        self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
+            row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
+        )
+
+    @property
+    def zone_maps_folder(self) -> str:
+        if self._zone_maps_folder is None:
+            raise ComponentNotPrepared("self._zone_maps_folder has not been set")
+        return self._zone_maps_folder
 
     @property
     def universe_lib(self) -> UniverseLib:
@@ -208,6 +220,12 @@ class Kernel:
         if self._account_lib is None:
             self._account_lib = AccountLib(self)
         return self._account_lib
+
+    @property
+    def zone_lib(self) -> ZoneLib:
+        if self._zone_lib is None:
+            self._zone_lib = ZoneLib(self)
+        return self._zone_lib
 
     @property
     def action_factory(self) -> ActionFactory:
@@ -379,11 +397,10 @@ class Kernel:
     def is_buildable_coordinate(
         self, world_row_i: int, world_col_i: int, zone_row_i: int, zone_col_i: int
     ) -> bool:
-        tile_type = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
+        tile_type: typing.Type[ZoneMapTileType] = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
             zone_row_i, zone_col_i
         )
-        # TODO: manage this at an other level
-        if tile_type in (zone.Nothing, zone.SeaWater, zone.FreshWater):
+        if not tile_type.permit_build:
             return False
 
         if self.build_lib.is_there_build_here(

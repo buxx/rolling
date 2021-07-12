@@ -923,6 +923,18 @@ tile_clutter_capacity = 25.0
     build = "FIRED_BRICK_WALL"
     cost = 2.0
 
+  [ACTIONS.BUILD_RAW_CLAY_FLOOR]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    required_one_of_zones = ["HILL", "PLAIN", "JUNGLE", "MOUNTAIN"]
+    actions = ["BUILD"]
+    build = "RAW_CLAY_FLOOR"
+    cost = 0.5
+
   [ACTIONS.HUNT_CRUSTACEANS]
     name = "Chercher des fruits de mer"
     actions = ["SEARCH_FOOD"]
@@ -1923,3 +1935,17 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+[build.RAW_CLAY_FLOOR]
+  name = "Terre battue"
+  char = "_"
+  building_char = "_"
+  build_require_resources = []
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["GROUND"]
+  many = true
+  traversable = {"WALKING"=true}
+  group_name = "Sol"
+  is_floor = true

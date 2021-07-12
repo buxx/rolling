@@ -20,3 +20,4 @@ class BuildDocument(Document):
     ap_spent = Column(Numeric(10, 4, asdecimal=False), nullable=False, default=0.0)
     under_construction = Column(Boolean(), nullable=False, default=True)
     is_on = Column(Boolean(), nullable=False)
+    is_floor = Column(Boolean(), nullable=False, default=False)

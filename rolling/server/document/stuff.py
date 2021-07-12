@@ -7,7 +7,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
-from sqlalchemy import Text
 import typing
 
 from rolling.exception import CantEmpty
@@ -18,7 +17,6 @@ from rolling.server.extension import ServerSideDocument as Document
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
-    from rolling.model.stuff import StuffProperties
 
 
 class StuffDocument(Document):

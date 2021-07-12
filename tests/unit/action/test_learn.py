@@ -7,7 +7,7 @@ from rolling.action.knowledge import LearnKnowledgeAction
 from rolling.action.knowledge import LearnKnowledgeModel
 from rolling.action.knowledge import ProposeTeachKnowledgeAction
 from rolling.action.knowledge import ProposeTeachKnowledgeModel
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
@@ -89,7 +89,7 @@ class TestLearnKnowledgeAction:
         franck = worldmapc_franck_model
 
         franck.action_points = 1
-        with pytest.raises(ImpossibleAction) as caught:
+        with pytest.raises(WrongInputError) as caught:
             learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
@@ -105,7 +105,7 @@ class TestLearnKnowledgeAction:
         franck = worldmapc_franck_model
 
         franck.knowledges["blacksmith"] = kernel.game.config.knowledge["blacksmith"]
-        with pytest.raises(ImpossibleAction) as caught:
+        with pytest.raises(WrongInputError) as caught:
             learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
@@ -120,7 +120,7 @@ class TestLearnKnowledgeAction:
         kernel = worldmapc_kernel
         franck = worldmapc_franck_model
 
-        with pytest.raises(ImpossibleAction) as caught:
+        with pytest.raises(WrongInputError) as caught:
             learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith2", ap=2)
             )

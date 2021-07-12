@@ -20,10 +20,8 @@ from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
 from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildRequireResourceDescription
-from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.data import ListOfItemModel
-from rolling.model.event import ClickActionData
 from rolling.model.event import NewBuildData
 from rolling.model.event import NewResumeTextData
 from rolling.model.event import WebSocketEvent
@@ -34,7 +32,6 @@ from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
-from rolling.util import EmptyModel
 from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 from rolling.util import quantity_to_str
@@ -579,8 +576,14 @@ class BuildAction(CharacterAction):
             zone_row_i=input_.row_i,
             zone_col_i=input_.col_i,
         ):
-            raise ImpossibleAction("Emplacement invalide")
+            raise ImpossibleAction("Emplacement non disponible")
 
+        self._kernel.zone_lib.destroy_tile(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
+        )
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,

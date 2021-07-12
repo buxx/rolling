@@ -370,6 +370,7 @@ class GameConfig:
                 allow_deposit_limited=build_raw.get("allow_deposit_limited", False),
                 group_name=build_raw.get("group_name", None),
                 description=build_raw.get("description", None),
+                is_floor=build_raw.get("is_floor", False),
             )
 
         return builds
@@ -488,6 +489,7 @@ class Game:
                         resource=self.config.resources[produce_raw["resource"]],
                         start_capacity=produce_raw["start_capacity"],
                         regeneration=produce_raw["regeneration"],
+                        destroy_when_empty=produce_raw["destroy_when_empty"],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],

@@ -9,6 +9,7 @@ from guilang.description import Part
 from rolling.exception import ConfigurationError
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownStuffError
+from rolling.map.type.base import MapTileType
 from rolling.model.build import BuildDescription
 from rolling.model.stuff import StuffProperties
 from rolling.util import quantity_to_str
@@ -63,6 +64,14 @@ def check_common_is_possible(
             error_messages.append("Il vous faut toute les habilités suivantes :")
             for ability in description.properties["required_all_abilities"]:
                 error_messages.append(f" - {ability.name}")
+
+    # Zone type
+    if description.properties.get("required_one_of_zones"):
+        current_zone_type: typing.Type[MapTileType] = (
+            kernel.world_map_source.geography.rows[character.world_row_i][character.world_col_i]
+        )
+        if current_zone_type.id not in description.properties["required_one_of_zones"]:
+            error_messages.append(f"Impossible de faire ça dans {current_zone_type.name}")
 
     if error_messages:
         raise ImpossibleAction("\n".join(error_messages), illustration_name=illustration_name)
@@ -121,6 +130,8 @@ def fill_base_action_properties(
             properties["required_all_abilities"].append(game_config.abilities[ability_id])
         except KeyError:
             raise ConfigurationError(f"ability_id '{ability_id}' is unknown for '{action_class}'")
+
+    properties["required_one_of_zones"] = raw_config.get("required_one_of_zones", [])
 
     return properties
 

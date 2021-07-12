@@ -30,7 +30,7 @@ class TestWorldManager:
         "resource_id,quantity,expected",
         [
             ("WOOD", 0.005, [((69, 40), 0.005)]),
-            ("WOOD", 0.05, [((69, 40), 0.02), ((69, 41), 0.02), ((68, 42), 0.01)]),
+            ("WOOD", 0.05, [((69, 40), 0.02), ((70, 39), 0.02), ((71, 39), 0.01)]),
         ],
     )
     def test_find_available_place_where_drop_when_place_resource_on_full_free_space(
@@ -54,11 +54,11 @@ class TestWorldManager:
     @pytest.mark.parametrize(
         "resource_id,quantity,expected",
         [
-            ("WOOD", 0.005, [((69, 40), 0.002), ((69, 41), 0.003)]),
+            ("WOOD", 0.005, [((69, 40), 0.002), ((70, 39), 0.003)]),
             (
                 "WOOD",
                 0.05,
-                [((69, 40), 0.002), ((69, 41), 0.02), ((68, 42), 0.02), ((70, 41), 0.008)],
+                [((69, 40), 0.002), ((70, 39), 0.02), ((71, 39), 0.02), ((68, 39), 0.008)],
             ),
         ],
     )
@@ -93,7 +93,7 @@ class TestWorldManager:
         "resource_id,quantity,expected",
         [
             ("WOOD", 0.005, [((69, 40), 0.005)]),
-            ("WOOD", 0.05, [((69, 40), 0.02), ((68, 39), 0.02), ((70, 41), 0.01)]),
+            ("WOOD", 0.05, [((69, 40), 0.02), ((70, 39), 0.02), ((71, 39), 0.01)]),
         ],
     )
     def test_find_available_place_where_drop_when_place_resource_on_walled_space(
