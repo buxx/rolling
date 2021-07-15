@@ -499,7 +499,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         form_action=get_character_action_url(
                             character_id=character.id,
                             action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
-                            query_params={},
+                            query_params={"confirm": 1},
                             action_description_id=self._description.id,
                         ),
                         items=[Part(text="Consommera :")]
