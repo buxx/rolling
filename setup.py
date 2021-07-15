@@ -1,4 +1,3 @@
-# coding: utf-8
 from setuptools import setup, find_packages
 
 test_require = ["pytest", "aioresponses", "pytest-aiohttp"]
