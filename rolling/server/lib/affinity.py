@@ -1,8 +1,6 @@
 # coding: utf-8
 import json
-from operator import and_
 import sqlalchemy
-from sqlalchemy import or_
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
@@ -85,7 +83,7 @@ class AffinityLib:
         )
 
     def get_character_relation(
-        self, affinity_id: int, character_id: str
+        self, affinity_id: int, character_id: str, raise_: bool = False
     ) -> typing.Optional[AffinityRelationDocument]:
         try:
             return (
@@ -96,7 +94,9 @@ class AffinityLib:
                 )
                 .one()
             )
-        except NoResultFound:
+        except NoResultFound as exc:
+            if raise_:
+                raise exc
             return None
 
     def get_accepted_affinities(

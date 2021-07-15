@@ -186,15 +186,16 @@ class AttackCharacterAction(WithCharacterAction):
         for attacker_fighter in attackers:
             for defense_fighter in defense_description.all_fighters:
                 # FIXME BS NOW: j'ai changé la signature
-                for _, defense_fighter_affinity in self._kernel.affinity_lib.get_with_relations(
+                for relation in self._kernel.affinity_lib.get_with_relations(
                     defense_fighter.id, active=True
                 ):
+                    affinity = self._kernel.affinity_lib.get_affinity(relation.affinity_id)
                     if self._kernel.affinity_lib.character_is_in_affinity(
-                        character_id=attacker_fighter.id, affinity_id=defense_fighter_affinity.id
+                        character_id=attacker_fighter.id, affinity_id=relation.affinity_id
                     ):
                         conflicts_str.append(
                             f"{attacker_fighter.name} à cause de son lien "
-                            f"avec {defense_fighter_affinity.name}"
+                            f"avec {affinity.name}"
                         )
 
         return list(sorted(set(conflicts_str)))

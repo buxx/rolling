@@ -4,7 +4,7 @@ import pytest
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.give import GiveToCharacterAction
 from rolling.action.give import GiveToModel
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
@@ -224,7 +224,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             give_action.check_request_is_possible(
                 xena,
                 arthur,
@@ -245,7 +245,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             give_action.check_request_is_possible(
                 xena,
                 arthur,

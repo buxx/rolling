@@ -1,4 +1,4 @@
-#  coding: utf-8
+# coding: utf-8
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -7,11 +7,11 @@ import json
 from json import JSONDecodeError
 import typing
 import urllib
+from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
-from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
@@ -21,7 +21,6 @@ from rolling.model.character import ManageAffinityQueryModel
 from rolling.model.character import ManageAffinityRelationBodyModel
 from rolling.model.character import ManageAffinityRelationQueryModel
 from rolling.model.character import ModifyAffinityRelationQueryModel
-from rolling.rolling_types import ActionType
 from rolling.server.controller.base import BaseController
 from rolling.server.document.affinity import AffinityDirectionType
 from rolling.server.document.affinity import AffinityJoinType
@@ -82,9 +81,17 @@ class AffinityController(BaseController):
             character_affinities_parts.append(Part(text="Aucune affinité ..."))
 
         for other_here_affinity in other_here_affinities:
-            suffix = ""
-            if other_here_affinity.id in requested_relation_ids:
-                suffix = " (Demandé)"
+            try:
+                relation = self._kernel.affinity_lib.get_character_relation(
+                    character_id=character.id,
+                    affinity_id=other_here_affinity.id,
+                    raise_=True,
+                )
+                rel_str = self._kernel.affinity_lib.get_rel_str(relation)
+                rel_str = f" ({rel_str})"
+            except NoResultFound:
+                rel_str = " "
+
             here_count = self._kernel.affinity_lib.count_members(
                 affinity_id=other_here_affinity.id,
                 world_row_i=character.world_row_i,
@@ -96,7 +103,7 @@ class AffinityController(BaseController):
             character_other_affinities_parts.append(
                 Part(
                     is_link=True,
-                    label=f"{other_here_affinity.name}{suffix} {here_count}|{total_count}",
+                    label=f"{other_here_affinity.name}{rel_str} {here_count}|{total_count}",
                     form_action=f"/affinity/{character.id}/see/{other_here_affinity.id}",
                 )
             )

@@ -201,7 +201,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
         try:
             stuff: StuffModel = self._kernel.stuff_lib.get_stuff(stuff_id)
         except NoResultFound:
-            raise ImpossibleAction(f"objet inexistant")
+            raise WrongInputError(f"objet inexistant")
         carried_count = self._kernel.stuff_lib.get_stuff_count(
             character_id=self._from_character.id,
             stuff_id=stuff.stuff_id,

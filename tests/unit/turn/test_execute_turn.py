@@ -345,11 +345,11 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert float(xena.life_points) == 1.05
-        assert xena.hunger == 19.75
+        assert round(xena.hunger, 1) == 20.0
         with pytest.raises(NoCarriedResource):
             kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
         r = kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH2")
-        assert r.quantity == 97.8
+        assert round(r.quantity, 1) == 97.8
 
     def test_eat__ko__eat_resource_but_not_enough(
         self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument

@@ -5,7 +5,7 @@ import typing
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_character import TakeFromModel
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
@@ -105,7 +105,7 @@ class TestTakeAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction) as caught:
+        with pytest.raises(WrongInputError) as caught:
             take_action.check_is_possible(arthur, xena)
 
         assert str(caught.value) == "arthur ne peut contraindre xena"
@@ -321,7 +321,7 @@ class TestTakeAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_action.check_request_is_possible(
                 arthur,
                 xena,
@@ -344,7 +344,7 @@ class TestTakeAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_action.check_request_is_possible(
                 arthur,
                 xena,
@@ -364,7 +364,7 @@ class TestTakeAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(ImpossibleAction):
+        with pytest.raises(WrongInputError):
             take_action.check_request_is_possible(
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
