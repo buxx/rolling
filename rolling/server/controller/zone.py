@@ -11,7 +11,6 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.exception import NoZoneMapError
 from rolling.kernel import Kernel
-from rolling.log import server_logger
 from rolling.map.type.base import MapTileType
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
@@ -58,7 +57,6 @@ class ZoneController(BaseController):
         return self._tile_lib.get_zone(row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i)
 
     async def events(self, request: Request):
-        server_logger.debug("Receive event websocket connection request")
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
         return await self._kernel.server_zone_events_manager.get_new_socket(
             request,
