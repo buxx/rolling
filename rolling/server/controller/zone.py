@@ -60,14 +60,18 @@ class ZoneController(BaseController):
     async def events(self, request: Request):
         server_logger.debug("Receive event websocket connection request")
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
-        return await self._kernel.server_zone_events_manager.get_new_socket(
-            request,
-            row_i=int(request.match_info["row_i"]),
-            col_i=int(request.match_info["col_i"]),
-            character_id=request.query["character_id"],
-            reader_token=request.query.get("reader_token"),
-            token=request.query.get("token"),
-        )
+        try:
+            return await self._kernel.server_zone_events_manager.get_new_socket(
+                request,
+                row_i=int(request.match_info["row_i"]),
+                col_i=int(request.match_info["col_i"]),
+                character_id=request.query["character_id"],
+                reader_token=request.query.get("reader_token"),
+                token=request.query.get("token"),
+            )
+        except Exception as exc:
+            server_logger.exception("Unknown error")
+            raise exc
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
