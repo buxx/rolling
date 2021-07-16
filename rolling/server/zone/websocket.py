@@ -76,25 +76,31 @@ class ZoneEventsManager:
         socket = web.WebSocketResponse()
         await socket.prepare(request)
 
-        # TODO BS 2019-01-23: Implement a heartbeat to close sockets where client disapear
-        # see https://github.com/aio-libs/aiohttp/issues/961#issuecomment-239647597
-        # Something lik asyncio.ensure_future(self._heartbeat(ws))
+        try:
+            # TODO BS 2019-01-23: Implement a heartbeat to close sockets where client disapear
+            # see https://github.com/aio-libs/aiohttp/issues/961#issuecomment-239647597
+            # Something lik asyncio.ensure_future(self._heartbeat(ws))
 
-        # Make it available for send job
-        self._sockets.setdefault((row_i, col_i), []).append(socket)
-        self._sockets_character_id[socket] = character_id
+            # Make it available for send job
+            self._sockets.setdefault((row_i, col_i), []).append(socket)
+            self._sockets_character_id[socket] = character_id
 
-        if token:
-            self._sockets_by_token[token] = socket
+            if token:
+                self._sockets_by_token[token] = socket
 
-        if reader_token:
-            self._sockets_associated_reader_token[socket] = reader_token
+            if reader_token:
+                self._sockets_associated_reader_token[socket] = reader_token
+        except Exception as exc:
+            server_logger.exception("Unknown error")
+            raise exc
 
         # Start to listen client messages
         try:
             await self._listen(socket, row_i, col_i)
         except CancelledError:
             server_logger.debug(f"websocket ({row_i},{col_i}) seems cancelled")
+        except Exception:
+            server_logger.exception("Unknown error")
 
         # If this code reached: ws is disconnected
         server_logger.debug(f"remove websocket ({row_i},{col_i})")
