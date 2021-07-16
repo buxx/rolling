@@ -579,8 +579,14 @@ class BuildAction(CharacterAction):
             zone_row_i=input_.row_i,
             zone_col_i=input_.col_i,
         ):
-            raise ImpossibleAction("Emplacement invalide")
+            raise ImpossibleAction("Emplacement non disponible")
 
+        self._kernel.zone_lib.destroy_tile(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
+        )
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,

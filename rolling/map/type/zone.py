@@ -7,6 +7,7 @@ from rolling.map.type.base import MapTileType
 class ZoneMapTileType(MapTileType):
     _list_cache: typing.Dict[str, typing.Type["ZoneMapTileType"]] = None
     _full_id_pattern = "TILE__{}"
+    permit_build: bool = False
 
     @classmethod
     def get_all(cls) -> typing.Dict[str, typing.Type["ZoneMapTileType"]]:
@@ -42,30 +43,35 @@ class Sand(ZoneMapTileType):
     id = "SAND"
     name = "Sable"
     foreground_high_color = "#fa0"
+    permit_build = True
 
 
 class ShortGrass(ZoneMapTileType):
     id = "SHORT_GRASS"
     name = "Herbe courte"
     foreground_high_color = "#080"
+    permit_build = True
 
 
 class HighGrass(ZoneMapTileType):
     id = "HIGH_GRASS"
     name = "Herbe haute"
     foreground_high_color = "#060"
+    permit_build = True
 
 
 class RockyGround(ZoneMapTileType):
     id = "ROCKY_GROUND"
     name = "Sol rocheux"
     foreground_high_color = "g31"
+    permit_build = True
 
 
 class DryBush(ZoneMapTileType):
     id = "DRY_BUSH"
     name = "Buisson sec"
     foreground_high_color = "#860"
+    permit_build = True
 
 
 class Rock(ZoneMapTileType):
@@ -85,6 +91,7 @@ class Dirt(ZoneMapTileType):
     id = "DIRT"
     name = "Terre"
     foreground_high_color = "#fd8"
+    permit_build = True
 
 
 class LeafTree(ZoneMapTileType):

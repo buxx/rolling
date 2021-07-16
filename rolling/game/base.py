@@ -482,14 +482,6 @@ class Game:
 
         for tile_type_id, tile_properties_raw in raw_world.get("TILES", {}).items():
             tile_type = ZoneMapTileType.get_all()[tile_type_id]
-            try:
-                replace_by_when_destroy_raw = tile_properties_raw["replace_by_when_destroy"]
-                try:
-                    replace_by_when_destroy = ZoneMapTileType.get_all()[replace_by_when_destroy_raw]
-                except KeyError:
-                    raise ValueError(f"'{replace_by_when_destroy_raw}' is not a valid tile type id")
-            except KeyError:
-                replace_by_when_destroy = None
             tiles_properties[tile_type] = ZoneTileProperties(
                 tile_type=tile_type,
                 produce=[
@@ -501,7 +493,6 @@ class Game:
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],
-                replace_by_when_destroy=replace_by_when_destroy,
             )
 
         return WorldManager(

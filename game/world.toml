@@ -231,29 +231,23 @@
     produce = [
       {resource="WOOD", start_capacity=1.7, regeneration=0.001, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"
   [TILES.TROPICAL_TREE]
     produce = [
       {resource="WOOD", start_capacity=1.8, regeneration=0.002, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"
   [TILES.DEAD_TREE]
     produce = [
       {resource="WOOD", start_capacity=1.0, regeneration=0.0, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"
   [TILES.COPPER_DEPOSIT]
     produce = [
       {resource="RAW_COPPER", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"
   [TILES.TIN_DEPOSIT]
     produce = [
       {resource="RAW_TIN", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"
   [TILES.IRON_DEPOSIT]
     produce = [
       {resource="RAW_IRON", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true},
     ]
-    replace_by_when_destroy = "DIRT"

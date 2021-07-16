@@ -116,7 +116,6 @@ class ZoneMapTileProduction:
 class ZoneTileProperties:
     tile_type: typing.Type[ZoneMapTileType]
     produce: typing.List[ZoneMapTileProduction]
-    replace_by_when_destroy: typing.Optional[ZoneMapTileType]
 
 
 @dataclasses.dataclass

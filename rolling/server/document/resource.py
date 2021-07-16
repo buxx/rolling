@@ -59,4 +59,4 @@ class ZoneResourceDocument(Document):
 # * FAIT commande d'init des ressources par rapport aux tuiles
 # * FAIT (a tester) collect: reduction zone ress et remplacement de la tuile lorsque vide
 # * event: tuile remplacement
-# * constructions : que sur tuile qui authorise (et suppression de la tuile)
+# * FAIT constructions : que sur tuile qui authorise (et suppression de la tuile)
