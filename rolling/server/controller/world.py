@@ -22,5 +22,9 @@ class WorldController(BaseController):
 
     def bind(self, app: Application) -> None:
         app.add_routes(
-            [web.get("/world/source", self.get_world_source), web.get("/world/events", self.events)]
+            [
+                web.get("/world/source", self.get_world_source),
+                web.get("/world/events", self.events),
+                web.get("/ws/world/events", self.events),
+            ]
         )

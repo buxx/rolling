@@ -281,6 +281,7 @@ class ZoneController(BaseController):
                 web.get("/zones/tiles", self.get_tiles),
                 web.get("/zones/{row_i}/{col_i}", self.get_zone),
                 web.get("/zones/{row_i}/{col_i}/events", self.events),
+                web.get("/ws/zones/{row_i}/{col_i}/events", self.events),
                 web.get("/zones/{row_i}/{col_i}/characters", self.get_characters),
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/resources", self.get_resources),
