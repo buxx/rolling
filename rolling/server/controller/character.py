@@ -1791,6 +1791,7 @@ class CharacterController(BaseController):
             compute_unvote_affinity_relation=True,
             compute_unread_transactions=True,
             compute_pending_actions=True,
+            dead=False,
         )
 
     @hapic.with_api_doc()
@@ -1948,6 +1949,7 @@ class CharacterController(BaseController):
         )
 
     @hapic.with_api_doc()
+    @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ListOfItemModel)
     async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfItemModel:

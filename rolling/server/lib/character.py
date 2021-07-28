@@ -14,9 +14,7 @@ import uuid
 
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.eat import EatResourceModel
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
