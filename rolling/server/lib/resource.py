@@ -416,6 +416,7 @@ class ResourceLib:
         resource_id: str,
         quantity: float,
         commit: bool = True,
+        force_before_raise: bool = False,
     ) -> float:
         zone_coordinates_filters = [
             and_(
@@ -430,7 +431,7 @@ class ResourceLib:
             ResourceDocument.world_col_i == world_col_i,
             or_(*zone_coordinates_filters),
         )
-        return self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
+        return self._reduce(resource_id, filter_, quantity=quantity, commit=commit, force_before_raise=force_before_raise)
 
     def _reduce(
         self,

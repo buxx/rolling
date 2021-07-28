@@ -5,6 +5,7 @@ import typing
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_character import TakeFromModel
+from rolling.action.take_resource import TakeResourceAction, TakeResourceModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
@@ -17,7 +18,7 @@ from rolling.server.document.affinity import MEMBER_STATUS
 
 
 @pytest.fixture
-def take_action(worldmapc_kernel: Kernel) -> TakeFromCharacterAction:
+def take_from_character_action(worldmapc_kernel: Kernel) -> TakeFromCharacterAction:
     return TakeFromCharacterAction(
         kernel=worldmapc_kernel,
         description=ActionDescriptionModel(
@@ -29,12 +30,25 @@ def take_action(worldmapc_kernel: Kernel) -> TakeFromCharacterAction:
     )
 
 
+@pytest.fixture
+def take_resource_action(worldmapc_kernel: Kernel) -> TakeResourceAction:
+    return TakeResourceAction(
+        kernel=worldmapc_kernel,
+        description=ActionDescriptionModel(
+            id="TAKE_RESOURCE",
+            action_type=ActionType.TAKE_RESOURCE,
+            base_cost=0.0,
+            properties={},
+        ),
+    )
+
+
 ModifierType = typing.Callable[
     ["TestTakeAction", Kernel, CharacterModel, CharacterModel], CharacterModel
 ]
 
 
-class TestTakeAction:
+class TestTakeFromCharacterAction:
     def _apply_low_lp(
         self, kernel: Kernel, xena: CharacterModel, arthur: CharacterModel
     ) -> CharacterModel:
@@ -83,7 +97,7 @@ class TestTakeAction:
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
     ) -> None:
         kernel = worldmapc_kernel
         xena = worldmapc_xena_model
@@ -92,21 +106,21 @@ class TestTakeAction:
         # set xena LP very low to be vulnerable
         xena = self._apply_low_lp(kernel, xena, arthur)
 
-        take_action.check_is_possible(arthur, xena)
+        take_from_character_action.check_is_possible(arthur, xena)
 
     def test_unit__take_is_possible__err_xena_not_vulnerable(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
     ) -> None:
         kernel = worldmapc_kernel
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction) as caught:
-            take_action.check_is_possible(arthur, xena)
+            take_from_character_action.check_is_possible(arthur, xena)
 
         assert str(caught.value) == "arthur ne peut contraindre xena"
 
@@ -120,14 +134,14 @@ class TestTakeAction:
         worldmapc_xena_wood_shield2: StuffModel,
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_action.perform(arthur, xena, TakeFromModel())
+        description = take_from_character_action.perform(arthur, xena, TakeFromModel())
         item_label_and_urls = [(i.label, i.form_action) for i in description.items]
 
         assert (
@@ -161,14 +175,14 @@ class TestTakeAction:
         worldmapc_xena_wood_shield2: StuffModel,
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_action.perform(
+        description = take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -178,7 +192,7 @@ class TestTakeAction:
             "?take_stuff_id=1"
         )
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1),
@@ -191,7 +205,7 @@ class TestTakeAction:
             == arthur.id
         )
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1),
@@ -214,14 +228,14 @@ class TestTakeAction:
         worldmapc_xena_wood_shield2: StuffModel,
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_action.perform(
+        description = take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -231,7 +245,7 @@ class TestTakeAction:
             "?take_stuff_id=1"
         )
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2),
@@ -252,14 +266,14 @@ class TestTakeAction:
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_leather_jacket: StuffModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_leather_jacket.id)
         )
         assert (
@@ -274,14 +288,14 @@ class TestTakeAction:
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_action.perform(arthur, xena, TakeFromModel(take_resource_id="WOOD"))
+        description = take_from_character_action.perform(arthur, xena, TakeFromModel(take_resource_id="WOOD"))
         assert description.items[0].is_form
         assert description.items[0].items[0].name == "take_resource_quantity"
         assert description.items[0].form_action == (
@@ -289,7 +303,7 @@ class TestTakeAction:
             "?take_resource_id=WOOD"
         )
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
@@ -299,7 +313,7 @@ class TestTakeAction:
             character_id=xena.id, resource_id="WOOD", quantity=0.1
         )
 
-        take_action.perform(
+        take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
         )
         assert kernel.resource_lib.have_resource(
@@ -314,7 +328,7 @@ class TestTakeAction:
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood: None,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
@@ -322,7 +336,7 @@ class TestTakeAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            take_action.check_request_is_possible(
+            take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
                 TakeFromModel(
@@ -337,7 +351,7 @@ class TestTakeAction:
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
         worldmapc_xena_wood_shield: StuffModel,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
@@ -345,7 +359,7 @@ class TestTakeAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            take_action.check_request_is_possible(
+            take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
                 TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2),
@@ -357,7 +371,7 @@ class TestTakeAction:
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
         worldmapc_arthur_model: CharacterModel,
-        take_action: TakeFromCharacterAction,
+        take_from_character_action: TakeFromCharacterAction,
         modifier: ModifierType,
     ) -> None:
         kernel = worldmapc_kernel
@@ -365,6 +379,41 @@ class TestTakeAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            take_action.check_request_is_possible(
+            take_from_character_action.check_request_is_possible(
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
+
+    def test_take_more_than_ground_is_working(
+        self,
+        take_resource_action: TakeResourceAction,
+        worldmapc_kernel: Kernel,
+        worldmapc_xena_model: CharacterModel,
+    ) -> None:
+        xena = worldmapc_xena_model
+        kernel = worldmapc_kernel
+
+        # Given
+        kernel.resource_lib.add_resource_to(
+            resource_id="WOOD",
+            ground=True,
+            quantity=1.0,
+            world_row_i=xena.world_row_i,
+            world_col_i=xena.world_col_i,
+            zone_row_i=xena.zone_row_i,
+            zone_col_i=xena.zone_col_i,
+        )
+
+        # When
+        take_resource_action.perform(
+            character=xena,
+            resource_id="WOOD",
+            input_=TakeResourceModel(
+                quantity="1.1"
+            )
+        )
+
+        # Then
+        assert kernel.resource_lib.get_one_carried_by(
+            character_id=xena.id,
+            resource_id="WOOD",
+        ).quantity == 1.0

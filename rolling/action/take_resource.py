@@ -10,6 +10,7 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
+from rolling.exception import NotEnoughResource
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -109,16 +110,20 @@ class TakeResourceAction(WithResourceAction):
             user_input=input_.quantity,
             carried_resource=ground_resource,
         )
-        # FIXME BS NOW: manage ImpossibleAction (NoCarriedResource, etc)
-        # FIXME BS NOW: manage NotEnoughResource : must add reduced (TEST IT)
-        reduced_quantity = self._kernel.resource_lib.reduce(
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
-            zone_coordinates=scan_coordinates,
-            resource_id=resource_id,
-            quantity=user_input_context.real_quantity,
-            commit=False,
-        )
+
+        try:
+            reduced_quantity = self._kernel.resource_lib.reduce(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_coordinates=scan_coordinates,
+                resource_id=resource_id,
+                quantity=user_input_context.real_quantity,
+                commit=False,
+                force_before_raise=True,
+            )
+        except NotEnoughResource as exc:
+            reduced_quantity = exc.available_quantity
+
         self._kernel.resource_lib.add_resource_to(
             character_id=character.id,
             resource_id=resource_id,
