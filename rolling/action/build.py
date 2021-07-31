@@ -575,6 +575,7 @@ class BuildAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=input_.row_i,
             zone_col_i=input_.col_i,
+            for_build_id=build_id,
         ):
             raise ImpossibleAction("Emplacement non disponible")
 

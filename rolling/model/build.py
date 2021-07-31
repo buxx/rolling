@@ -76,6 +76,7 @@ class DescribeBuildInputPath:
 class ZoneBuildModel:
     row_i: int = serpyco.number_field(getter=lambda b: b.doc.zone_row_i)
     col_i: int = serpyco.number_field(getter=lambda b: b.doc.zone_col_i)
+    is_floor: bool = serpyco.field(getter=lambda b: b.doc.is_floor)
     char: str = serpyco.string_field(getter=lambda b: b.desc.char)
     id: int = serpyco.number_field(getter=lambda b: b.doc.id)
     build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)

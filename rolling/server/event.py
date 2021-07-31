@@ -132,6 +132,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 world_col_i=character.world_col_i,
                 zone_row_i=row_i,
                 zone_col_i=col_i,
+                is_floor=False,
             )
 
         character_count = 0

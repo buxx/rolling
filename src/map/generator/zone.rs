@@ -178,7 +178,7 @@ fn is_out_zone(width: i32, height: i32, tested_row_i: i32, tested_col_i: i32) ->
     false
 }
 
-fn is_there_around(searched_char: char, chars: &Vec<Vec<char>>) -> bool {
+fn wis_there_around(searched_char: char, chars: &Vec<Vec<char>>) -> bool {
     if util::last_char_is(searched_char, chars) || util::top_chars_contains(searched_char, chars) {
         return true;
     }

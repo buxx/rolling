@@ -637,6 +637,7 @@ class CharacterLib:
                 world_col_i=character.world_col_i,
                 zone_row_i=around_row_i,
                 zone_col_i=around_col_i,
+                is_floor=False,
             )
             for build in on_same_position_builds:
                 build_description = self._kernel.game.config.builds[build.build_id]

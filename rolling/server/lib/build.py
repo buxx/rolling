@@ -26,6 +26,22 @@ class BuildLib:
         under_construction: bool = True,
         commit: bool = True,
     ) -> BuildDocument:
+        build_description = self._kernel.game.config.builds[build_id]
+
+        # If place a floor, replace if one exist
+        if build_description.is_floor:
+            try:
+                existing_floor = self.get_zone_build(
+                    world_row_i=world_row_i,
+                    world_col_i=world_col_i,
+                    zone_row_i=zone_row_i,
+                    zone_col_i=zone_col_i,
+                    is_floor=True,
+                )[0]
+                self._kernel.server_db_session.delete(existing_floor)
+            except IndexError:
+                pass
+
         build_doc = BuildDocument(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
@@ -34,6 +50,7 @@ class BuildLib:
             build_id=build_id,
             under_construction=under_construction,
             is_on=False,
+            is_floor=build_description.is_floor,
         )
         self._kernel.server_db_session.add(build_doc)
 
@@ -69,12 +86,14 @@ class BuildLib:
         world_col_i: int,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
+        is_floor: typing.Optional[bool] = None,
     ) -> typing.List[BuildDocument]:
         return self._get_zone_query(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
+            is_floor=is_floor,
         ).all()
 
     def _get_zone_query(
@@ -83,6 +102,7 @@ class BuildLib:
         world_col_i: int,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
+        is_floor: typing.Optional[bool] = None,
     ) -> Query:
         filters = [
             BuildDocument.world_row_i == world_row_i,
@@ -94,7 +114,10 @@ class BuildLib:
                 [BuildDocument.zone_row_i == zone_row_i, BuildDocument.zone_col_i == zone_col_i]
             )
 
-        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters))
+        if is_floor is not None:
+            filters.append(BuildDocument.is_floor == is_floor)
+
+        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).order_by(BuildDocument.is_floor.desc())
 
     def count_zone_build(
         self,
@@ -102,12 +125,14 @@ class BuildLib:
         world_col_i: int,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
+        is_floor: typing.Optional[bool] = None,
     ) -> int:
         return self._get_zone_query(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
+            is_floor=is_floor,
         ).count()
 
     def progress_build(
@@ -155,6 +180,7 @@ class BuildLib:
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
+        is_floor: typing.Optional[bool] = None,
     ) -> bool:
         return bool(
             self.count_zone_build(
@@ -162,5 +188,6 @@ class BuildLib:
                 world_col_i=world_col_i,
                 zone_row_i=zone_row_i,
                 zone_col_i=zone_col_i,
+                is_floor=is_floor,
             )
         )

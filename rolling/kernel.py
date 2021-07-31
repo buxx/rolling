@@ -395,19 +395,27 @@ class Kernel:
         kernel_logger.info("Reload configuration OK")
 
     def is_buildable_coordinate(
-        self, world_row_i: int, world_col_i: int, zone_row_i: int, zone_col_i: int
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        for_build_id: str,
     ) -> bool:
+        build_description = self.game.config.builds[for_build_id]
         tile_type: typing.Type[ZoneMapTileType] = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
             zone_row_i, zone_col_i
         )
         if not tile_type.permit_build:
             return False
 
-        if self.build_lib.is_there_build_here(
+        # A floor is always buildable (floor replace floor)
+        if not build_description.is_floor and self.build_lib.is_there_build_here(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
+            is_floor=False,
         ):
             return False
 
