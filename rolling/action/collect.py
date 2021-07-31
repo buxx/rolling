@@ -13,8 +13,6 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
-from rolling.model.extraction import ExtractableResourceDescriptionModel
-from rolling.model.resource import ResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.document.resource import ZoneResourceDocument
 from rolling.server.link import CharacterActionLink
@@ -43,7 +41,7 @@ class CollectResourceAction(CharacterAction):
         return {}
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+        for _ in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
@@ -54,17 +52,13 @@ class CollectResourceAction(CharacterAction):
         raise ImpossibleAction("Il n'y a rien à collecter ici")
 
     def check_request_is_possible(self, character: "CharacterModel", input_: input_model) -> None:
-        # FIXME BS 2019-08-27: check input_.row_i and input_.col_i are near
-        # FIXME BS 2019-08-29: check if quantity is possible
-        resources = self._kernel.game.world_manager.get_resources_at(
+        productions = self._kernel.game.world_manager.get_resources_at(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=input_.row_i,
             zone_col_i=input_.col_i,
         )
-        resource_ids = [resource.id for resource in resources]
-
-        if input_.resource_id in resource_ids:
+        if input_.resource_id in [production.resource.id for production in productions]:
             return
 
         raise ImpossibleAction(f"Il n'y a pas de '{input_.resource_id}' à cet endroit")
@@ -78,7 +72,7 @@ class CollectResourceAction(CharacterAction):
         character_actions: typing.List[CharacterActionLink] = []
 
         for row_i, col_i in inspect_zone_positions:
-            for resource in self._kernel.game.world_manager.get_resources_at(
+            for production in self._kernel.game.world_manager.get_resources_at(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
                 zone_row_i=row_i,
@@ -87,10 +81,10 @@ class CollectResourceAction(CharacterAction):
                 tile_type = self._kernel.tile_maps_by_position[
                     (character.world_row_i, character.world_col_i)
                 ].source.geography.rows[row_i][col_i]
-                query_params = self.input_model(resource_id=resource.id, row_i=row_i, col_i=col_i)
+                query_params = self.input_model(resource_id=production.resource.id, row_i=row_i, col_i=col_i)
                 character_actions.append(
                     CharacterActionLink(
-                        name=f"Récupérer {resource.name} sur {tile_type.name}",
+                        name=f"Récupérer {production.resource.name} sur {tile_type.name}",
                         link=get_character_action_url(
                             character_id=character.id,
                             action_type=ActionType.COLLECT_RESOURCE,
@@ -98,51 +92,53 @@ class CollectResourceAction(CharacterAction):
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=None,
-                        merge_by=(ActionType.COLLECT_RESOURCE, resource.id),
+                        merge_by=(ActionType.COLLECT_RESOURCE, production.resource.id),
                         group_name="Ramasser du matériel ou des ressources",
                     )
                 )
 
         return character_actions
 
-    def _get_resource_and_cost(
-        self, character: "CharacterModel", input_: CollectResourceModel
-    ) -> typing.Tuple[ResourceDescriptionModel, ExtractableResourceDescriptionModel, float]:
-        tile_type = self._kernel.tile_maps_by_position[
-            (character.world_row_i, character.world_col_i)
-        ].source.geography.rows[input_.row_i][input_.col_i]
-        extractable_resources: typing.Dict[
-            str, ExtractableResourceDescriptionModel
-        ] = self._kernel.game.config.extractions[tile_type.id].resources
-        resource_extraction_description: ExtractableResourceDescriptionModel = (
-            extractable_resources[input_.resource_id]
-        )
-        resource: ResourceDescriptionModel = self._kernel.game.config.resources[input_.resource_id]
-        # TODO BS 2019-08-29: cost per unit modified by competence / stuff
-        cost_per_unit = resource_extraction_description.cost_per_unit
-
-        return resource, resource_extraction_description, cost_per_unit
-
     def get_cost(
         self, character: "CharacterModel", input_: typing.Optional[CollectResourceModel] = None
     ) -> typing.Optional[float]:
-        if input_ and input_.quantity is not None:
-            resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
-                character, input_
+        if input_ and input_.quantity is not None and input_.resource_id is not None:
+            production = next(
+                production
+                for production in self._kernel.game.world_manager.get_resources_at(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=input_.row_i,
+                    zone_col_i=input_.col_i,
+                )
+                if production.resource.id == input_.resource_id
             )
-            return input_.quantity * resource_extraction_description.cost_per_unit
+
+            return input_.quantity * production.extract_cost_per_unit
 
     def perform(self, character: "CharacterModel", input_: CollectResourceModel) -> Description:
-        character_doc = self._character_lib.get_document(character.id)
-        resource, resource_extraction_description, cost_per_unit = self._get_resource_and_cost(
-            character_doc, input_
+        assert input_.resource_id is not None
+        assert input_.row_i is not None
+        assert input_.col_i is not None
+
+        character_doc = self._kernel.character_lib.get_document(character.id)
+        resource_description = self._kernel.game.config.resources[input_.resource_id]
+        production = next(
+            production
+            for production in self._kernel.game.world_manager.get_resources_at(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=input_.row_i,
+                zone_col_i=input_.col_i,
+            )
+            if production.resource.id == input_.resource_id
         )
 
         if input_.quantity is None:
-            unit_name = self._kernel.translation.get(resource.unit)
+            unit_name = self._kernel.translation.get(resource_description.unit)
 
             return Description(
-                title=f"Récupérer du {resource.name}",
+                title=f"Récupérer du {resource_description.name}",
                 items=[
                     Part(
                         is_form=True,
@@ -155,7 +151,7 @@ class CollectResourceAction(CharacterAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité (coût: {cost_per_unit} par {unit_name}) ?",
+                                label=f"Quantité (coût: {production.extract_cost_per_unit} par {unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
                             )
@@ -164,43 +160,32 @@ class CollectResourceAction(CharacterAction):
                 ],
             )
 
-        assert input_.row_i is not None
-        assert input_.col_i is not None
-        assert input_.resource_id is not None
-
-        coordinates = get_on_and_around_coordinates(input_.row_i, input_.col_i)
-        zone_resource_doc: typing.Optional[ZoneResourceDocument] = None
-
-        for row_i, col_i in coordinates:
+        if not production.infinite:
             try:
-                zone_resource_doc = self._kernel.zone_lib.get_zone_ressource_doc(
+                zone_resource_doc: ZoneResourceDocument = self._kernel.zone_lib.get_zone_ressource_doc(
                     world_row_i=character.world_row_i,
                     world_col_i=character.world_col_i,
-                    zone_row_i=row_i,
-                    zone_col_i=col_i,
+                    zone_row_i=input_.row_i,
+                    zone_col_i=input_.col_i,
                     resource_id=input_.resource_id,
                 )
-                break
             except NoResultFound:
-                pass
+                raise RollingError(
+                    "No zone resource found around : "
+                    f"world_row_i:{character.world_row_i}, "
+                    f"world_row_i:{character.world_col_i}, "
+                    f"zone_row_i:{input_.row_i}, "
+                    f"zone_col_i:{input_.col_i}, "
+                    f"resource_id:{input_.resource_id}"
+                )
 
-        if zone_resource_doc is None:
-            raise RollingError(
-                "No zone resource found around : "
-                f"world_row_i:{character.world_row_i}, "
-                f"world_row_i:{character.world_col_i}, "
-                f"zone_row_i:{input_.row_i}, "
-                f"zone_col_i:{input_.col_i}, "
-                f"resource_id:{input_.resource_id}"
-            )
-
-        if zone_resource_doc.quantity < input_.quantity:
-            input_ = CollectResourceModel(
-                resource_id=input_.resource_id,
-                row_i=zone_resource_doc.zone_row_i,
-                col_i=zone_resource_doc.zone_col_i,
-                quantity=zone_resource_doc.quantity,
-            )
+            if zone_resource_doc.quantity < input_.quantity:
+                input_ = CollectResourceModel(
+                    resource_id=input_.resource_id,
+                    row_i=input_.row_i,
+                    col_i=input_.col_i,
+                    quantity=zone_resource_doc.quantity,
+                )
 
         cost = self.get_cost(character, input_=input_)
         if cost is None:
@@ -212,25 +197,26 @@ class CollectResourceAction(CharacterAction):
             quantity=input_.quantity,
             commit=False,
         )
-        self._kernel.zone_lib.reduce_resource_quantity(
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
-            zone_row_i=zone_resource_doc.zone_row_i,
-            zone_col_i=zone_resource_doc.zone_col_i,
-            resource_id=input_.resource_id,
-            quantity=input_.quantity,
-            allow_reduce_more_than_possible=True,
-            commit=False,
-        )
+        if not production.infinite:
+            self._kernel.zone_lib.reduce_resource_quantity(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=input_.row_i,
+                zone_col_i=input_.col_i,
+                resource_id=input_.resource_id,
+                quantity=input_.quantity,
+                allow_reduce_more_than_possible=True,
+                commit=False,
+            )
 
         self._kernel.character_lib.reduce_action_points(character.id, cost, commit=False)
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"Récupérer du {resource.name}",
+            title=f"Récupérer du {resource_description.name}",
             items=[
                 Part(
-                    text=f"{input_.quantity} {self._kernel.translation.get(resource.unit)} récupéré"
+                    text=f"{input_.quantity} {self._kernel.translation.get(resource_description.unit)} récupéré"
                 )
             ],
         )

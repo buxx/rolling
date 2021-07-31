@@ -5,6 +5,7 @@ import click
 from sqlalchemy.exc import NoResultFound
 
 from rolling.map.source import ZoneMap
+from rolling.model.zone import ZoneMapTileProduction
 from rolling.server.base import get_kernel
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
@@ -148,7 +149,10 @@ def sync_zone_resources(game_config_dir: str, world_map_source: str, zone_map_fo
                     except KeyError:
                         continue
 
+                    production: ZoneMapTileProduction
                     for production in tile_properties.produce:
+                        if production.infinite:
+                            continue
                         try:
                             _ = kernel.zone_lib.get_zone_ressource_doc(
                                 world_row_i=world_row_i,

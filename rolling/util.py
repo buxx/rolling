@@ -59,14 +59,12 @@ def is_there_resource_id_in_zone(
             zone_tile_type = typing.cast(typing.Type[ZoneMapTileType], zone_tile_type)
 
             try:
-                for tile_resource_id in list(
-                    # FIXME BS 2019-09-14: Only for zero cost !
-                    kernel.game.config.extractions[zone_tile_type.id].resources.keys()
-                ):
-                    if tile_resource_id == resource_id:
-                        return True
+                productions = kernel.game.world_manager.world.tiles_properties[zone_tile_type].produce
             except KeyError:
-                pass
+                productions = []
+
+            if resource_id in [production.resource.id for production in productions]:
+                return True
 
     return False
 

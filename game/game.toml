@@ -497,61 +497,6 @@ tile_clutter_capacity = 25.0
     required_all_ability_ids = []
     cost = 0.001
 
-[extractions]
-  [extractions.FRESH_WATER]
-    tile="FRESH_WATER_TILE"
-    resources=[{resource_id="FRESH_WATER", cost_per_unit=0.01, default_quantity=1.0}]
-
-  [extractions.SEA_WATER]
-    tile="SEA_WATER"
-    resources=[{resource_id="SALTED_WATER", cost_per_unit=0.01, default_quantity=1.0}]
-
-  [extractions.SAND]
-    tile="SAND"
-    resources=[{resource_id="BEACH_SAND", cost_per_unit=0.01, default_quantity=1.0}]
-
-  [extractions.DEAD_TREE]
-    tile="DEAD_TREE"
-    resources=[
-      {resource_id="WOOD", cost_per_unit=5.0, default_quantity=0.04},
-    ]
-
-  [extractions.TROPICAL_TREE]
-    tile="TROPICAL_TREE"
-    resources=[
-      {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
-    ]
-
-  [extractions.LEAF_TREE]
-    tile="LEAF_TREE"
-    resources=[
-      {resource_id="WOOD", cost_per_unit=6.0, default_quantity=0.04},
-    ]
-
-  [extractions.SOIL]
-    tile="DIRT"
-    resources=[{resource_id="SOIL", cost_per_unit=0.01, default_quantity=1.0}]
-
-  [extractions.HIGH_GRASS]
-    tile="HIGH_GRASS"
-    resources=[{resource_id="SOIL", cost_per_unit=0.05, default_quantity=1.0}]
-
-  [extractions.SHORT_GRASS]
-    tile="SHORT_GRASS"
-    resources=[{resource_id="SOIL", cost_per_unit=0.05, default_quantity=1.0}]
-
-#  [extractions.COPPER_DEPOSIT]
-#    tile="COPPER_DEPOSIT"
-#    resources=[{resource_id="RAW_COPPER", cost_per_unit=0.001, default_quantity=1.0}]
-#
-#  [extractions.TIN_DEPOSIT]
-#    tile="TIN_DEPOSIT"
-#    resources=[{resource_id="RAW_TIN", cost_per_unit=0.001, default_quantity=1.0}]
-#
-#  [extractions.IRON_DEPOSIT]
-#    tile="IRON_DEPOSIT"
-#    resources=[{resource_id="RAW_IRON", cost_per_unit=0.001, default_quantity=1.0}]
-
 [ACTIONS]
   [ACTIONS.ATTACK_CHARACTER]
     name = "Attaquer"

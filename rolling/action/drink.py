@@ -91,18 +91,17 @@ class DrinkResourceAction(CharacterAction):
         character_actions: typing.List[CharacterActionLink] = []
         accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
 
-        for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+        for production in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=self._kernel.game.config.liquid_material_id,
         ):
-            if resource.id in accept_resources_ids:
-                query_params = self.input_model(resource_id=resource.id)
+            if production.resource.id in accept_resources_ids:
+                query_params = self.input_model(resource_id=production.resource.id)
                 character_actions.append(
                     CharacterActionLink(
-                        name=f"Boire {resource.name}",
+                        name=f"Boire {production.resource.name}",
                         link=get_character_action_url(
                             character_id=character.id,
                             action_type=ActionType.DRINK_RESOURCE,

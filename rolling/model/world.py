@@ -27,12 +27,12 @@ class World:
     tiles_properties: typing.Dict[typing.Type[ZoneMapTileType], ZoneTileProperties]
 
 
-@dataclasses.dataclass
-class Resource:
-    id: str
-    material_type: str
-    name: str
-    weight: float
-
-    def __hash__(self) -> int:
-        return hash(self.id + self.material_type)
+# @dataclasses.dataclass
+# class Resource:
+#     id: str
+#     material_type: str
+#     name: str
+#     weight: float
+#
+#     def __hash__(self) -> int:
+#         return hash(self.id + self.material_type)

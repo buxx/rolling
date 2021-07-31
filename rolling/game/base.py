@@ -16,8 +16,6 @@ from rolling.model.build import BuildDescription
 from rolling.model.build import BuildPowerOnRequireResourceDescription
 from rolling.model.build import BuildTurnRequireResourceDescription
 from rolling.model.effect import CharacterEffectDescriptionModel
-from rolling.model.extraction import ExtractableDescriptionModel
-from rolling.model.extraction import ExtractableResourceDescriptionModel
 from rolling.model.knowledge import DEFAULT_INSTRUCTOR_COEFF
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.material import MaterialDescriptionModel
@@ -115,9 +113,6 @@ class GameConfig:
         self._resources: typing.Dict[str, ResourceDescriptionModel] = self._create_resources(
             config_dict
         )
-        self._extractions: typing.Dict[
-            typing.Type[ZoneMapTileType], ExtractableDescriptionModel
-        ] = self._create_extractions(config_dict)
         self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(config_dict)
         self._builds: typing.Dict[str, BuildDescription] = self._create_builds(config_dict)
         self._action_descriptions: typing.Dict[
@@ -151,10 +146,6 @@ class GameConfig:
     @property
     def resource_mixs(self) -> typing.Dict[str, ResourceMixDescription]:
         return self._resource_mixs
-
-    @property
-    def extractions(self) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
-        return self._extractions
 
     @property
     def actions(self) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
@@ -247,30 +238,6 @@ class GameConfig:
             )
 
         return resource_mixs
-
-    def _create_extractions(
-        self, config_dict: dict
-    ) -> typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel]:
-        extractions: typing.Dict[typing.Type[ZoneMapTileType], ExtractableDescriptionModel] = {}
-        zone_tile_types = ZoneMapTileType.get_all()
-
-        for extraction_raw in config_dict.get("extractions", {}).values():
-            resource_extractions: typing.Dict[str, ExtractableResourceDescriptionModel] = {}
-            for resource_extraction_raw in extraction_raw["resources"]:
-                resource_extractions[
-                    resource_extraction_raw["resource_id"]
-                ] = ExtractableResourceDescriptionModel(
-                    resource_id=resource_extraction_raw["resource_id"],
-                    cost_per_unit=resource_extraction_raw["cost_per_unit"],
-                    default_quantity=resource_extraction_raw["default_quantity"],
-                )
-
-            extractions[extraction_raw["tile"]] = ExtractableDescriptionModel(
-                zone_tile_type=zone_tile_types[extraction_raw["tile"]],
-                resources=resource_extractions,
-            )
-
-        return extractions
 
     def _create_actions(
         self, config_raw: dict
@@ -487,9 +454,11 @@ class Game:
                 produce=[
                     ZoneMapTileProduction(
                         resource=self.config.resources[produce_raw["resource"]],
-                        start_capacity=produce_raw["start_capacity"],
-                        regeneration=produce_raw["regeneration"],
-                        destroy_when_empty=produce_raw["destroy_when_empty"],
+                        start_capacity=produce_raw.get("start_capacity", 0.0),
+                        regeneration=produce_raw.get("regeneration", 0.0),
+                        destroy_when_empty=produce_raw.get("destroy_when_empty", False),
+                        infinite=produce_raw.get("infinite", False),
+                        extract_cost_per_unit=produce_raw["extract_cost_per_unit"],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],

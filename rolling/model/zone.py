@@ -110,6 +110,14 @@ class ZoneMapTileProduction:
     start_capacity: float
     regeneration: float
     destroy_when_empty: bool
+    infinite: bool
+    extract_cost_per_unit: float
+
+    def __eq__(self, other: "ZoneMapTileProduction") -> bool:
+        return self.resource.id == other.resource.id
+
+    def __hash__(self) -> int:
+        return hash(self.resource.id)
 
 
 @dataclasses.dataclass

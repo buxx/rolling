@@ -132,23 +132,6 @@
 
   <h3>Extraction de ressources</h3>
 
-  <ul>
-    {% for extraction_description in game.config.extractions.values() %}
-      <li>Depuis {{ extraction_description.zone_tile_type.id }}
-
-      <ul>
-        {% for resource in extraction_description.resources.values() %}
-          <li>
-            <strong>{{ resource.resource_id }}</strong> :
-            AP/unité: {{ resource.cost_per_unit }},
-            Quantité: {{ resource.default_quantity }}
-          </li>
-        {% endfor %}
-      </ul>
-    </li>
-  {% endfor %}
-  </ul>
-
   {% for action_type, action_descriptions in game.config.actions.items() %}
     {% for action_description in action_descriptions %}
       {% if action_description.name %}
