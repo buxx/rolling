@@ -13,7 +13,7 @@ chardet==4.0.0
 click==8.0.1
 hapic[serpyco]==0.84
 idna==3.2
-importlib-metadata==4.6.0
+importlib-metadata==4.6.3
 iniconfig==1.1.1
 isort==5.9.1
 marshmallow==3.12.1
