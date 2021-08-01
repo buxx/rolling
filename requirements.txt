@@ -9,7 +9,7 @@ atomicwrites==1.4.0
 attrs==21.2.0
 black==21.7b0
 certifi==2021.5.30
-chardet==3.0.4
+chardet==4.0.0
 click==8.0.1
 hapic[serpyco]==0.84
 idna==3.2
