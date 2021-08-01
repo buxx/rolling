@@ -1,4 +1,4 @@
-aiohttp==3.7.3
+aiohttp==3.7.4.post0
 aioresponses==0.7.2
 apispec==2.0.2
 apispec-marshmallow-advanced==0.4
