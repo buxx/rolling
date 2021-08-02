@@ -35,7 +35,6 @@ class FillStuffAction(WithStuffAction):
                 world_col_i=character.world_col_i,
                 zone_row_i=character.zone_row_i,
                 zone_col_i=character.zone_col_i,
-                material_type=fill_acceptable_type,
             ):
                 return
 
@@ -58,7 +57,6 @@ class FillStuffAction(WithStuffAction):
                 world_col_i=character.world_col_i,
                 zone_row_i=character.zone_row_i,
                 zone_col_i=character.zone_col_i,
-                material_type=fill_acceptable_type,
             ):
                 query_params = self.input_model(resource_id=resource.id)
                 actions.append(

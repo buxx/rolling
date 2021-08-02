@@ -62,7 +62,6 @@ class DrinkResourceAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=self._kernel.game.config.liquid_material_id,
         ):
             if resource.type_.value in accept_resources_ids:
                 return
@@ -78,7 +77,6 @@ class DrinkResourceAction(CharacterAction):
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
-            material_type=self._kernel.game.config.liquid_material_id,
         ):
             if resource.id == input_.resource_id and input_.resource_id in accept_resources_ids:
                 return
