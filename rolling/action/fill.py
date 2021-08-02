@@ -30,7 +30,7 @@ class FillStuffAction(WithStuffAction):
 
     def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
         for fill_acceptable_type in self._kernel.game.config.fill_with_material_ids:
-            for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+            for _ in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
                 zone_row_i=character.zone_row_i,
@@ -52,16 +52,16 @@ class FillStuffAction(WithStuffAction):
         actions: typing.List[CharacterActionLink] = []
 
         for fill_acceptable_type in self._kernel.game.config.fill_with_material_ids:
-            for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+            for production in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
                 zone_row_i=character.zone_row_i,
                 zone_col_i=character.zone_col_i,
             ):
-                query_params = self.input_model(resource_id=resource.id)
+                query_params = self.input_model(resource_id=production.resource.id)
                 actions.append(
                     CharacterActionLink(
-                        name=f"Remplir {stuff.name} avec {resource.name}",
+                        name=f"Remplir {stuff.name} avec {production.resource.name}",
                         link=get_with_stuff_action_url(
                             character_id=character.id,
                             action_type=ActionType.FILL_STUFF,
@@ -70,7 +70,7 @@ class FillStuffAction(WithStuffAction):
                             action_description_id=self._description.id,
                         ),
                         cost=self.get_cost(character, stuff),
-                        group_name=f"Remplir {stuff.name} avec {resource.name}",
+                        group_name=f"Remplir {stuff.name} avec {production.resource.name}",
                     )
                 )
 

@@ -57,13 +57,13 @@ class DrinkResourceAction(CharacterAction):
 
     def check_is_possible(self, character: "CharacterModel") -> None:
         accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
-        for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+        for production in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
         ):
-            if resource.type_.value in accept_resources_ids:
+            if production.resource.id in accept_resources_ids:
                 return
 
         raise ImpossibleAction("Il n'y a pas à boire à proximité")
@@ -72,13 +72,13 @@ class DrinkResourceAction(CharacterAction):
         self, character: "CharacterModel", input_: DrinkResourceModel
     ) -> None:
         accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
-        for resource in self._kernel.game.world_manager.get_resource_on_or_around(
+        for production in self._kernel.game.world_manager.get_resource_on_or_around(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=character.zone_row_i,
             zone_col_i=character.zone_col_i,
         ):
-            if resource.id == input_.resource_id and input_.resource_id in accept_resources_ids:
+            if production.resource.id == input_.resource_id and input_.resource_id in accept_resources_ids:
                 return
 
         raise WrongInputError(f"Il n'y a pas de {input_.resource_id} à proximité")
