@@ -1,4 +1,6 @@
 # coding: utf-8
+import json
+
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -25,7 +27,7 @@ from rolling.exception import ImpossibleAttack
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import UserDisplayError
 from rolling.kernel import Kernel
-from rolling.model.character import CharacterActionModel
+from rolling.model.character import CharacterActionModel, DoorPathModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
 from rolling.model.character import DescribeStoryQueryModel
@@ -71,6 +73,8 @@ from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.document.affinity import AffinityDocument
+from rolling.server.document.build import DoorDocument, DOOR_MODE_LABELS, \
+    DOOR_MODE__CLOSED_EXCEPT_FOR
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
@@ -2122,6 +2126,144 @@ class CharacterController(BaseController):
 
         return Description(title=f"Personnages autour", items=parts, can_be_back_url=True)
 
+    @hapic.with_api_doc()
+    @hapic.input_path(DoorPathModel)
+    @hapic.output_body(Description)
+    async def door(self, request: Request, hapic_data: HapicData) -> Description:
+        character_id = hapic_data.path.character_id
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        door_id = hapic_data.path.door_id
+        relation: typing.Optional[DoorDocument] = None
+        relation_mode: typing.Optional[str] = None
+        access_locked = self._kernel.door_lib.is_access_locked_for(
+            character_id=character_id, build_id=door_id
+        )
+        enabled_affinity_ids = []
+        all_affinities = list(
+            set(
+                self._kernel.affinity_lib.get_accepted_affinities_docs(character_id=character_id) +
+                self._kernel.affinity_lib.get_affinities_without_relations(
+                    character_id=character_id,
+                    with_alive_character_in_world_row_i=character_doc.world_row_i,
+                    with_alive_character_in_world_col_i=character_doc.world_col_i,
+                )
+            )
+        )
+
+        door_rule_changed = False
+        new_affinity_ids = None
+        deleted = False
+        # Proceed eventual mode changes
+        if request.query.get("mode"):
+            new_affinity_ids = []
+            new_mode = list(DOOR_MODE_LABELS.keys())[list(DOOR_MODE_LABELS.values()).index(request.query["mode"])]
+            if new_mode is None:
+                self._kernel.door_lib.delete(
+                    character_id=character_id,
+                    build_id=door_id,
+                )
+                deleted = True
+            else:
+                self._kernel.door_lib.update(
+                    character_id=character_id,
+                    build_id=door_id,
+                    new_mode=new_mode,
+                )
+            door_rule_changed = True
+
+        # Proceed eventual affinity ids changes
+        for query_key in request.query.keys():
+            if query_key.startswith("affinity_"):
+                new_affinity_ids.append(int(query_key.replace("affinity_", "")))
+
+        if not deleted and new_affinity_ids is not None:
+            self._kernel.door_lib.update(
+                character_id=character_id, build_id=door_id, new_affinity_ids=new_affinity_ids
+            )
+            door_rule_changed = True
+
+        if door_rule_changed:
+            await self._kernel.door_lib.trigger_character_change_rule(
+                character_id=character_id, build_id=door_id
+            )
+
+        # Prepare display of page
+        try:
+            relation = self._kernel.door_lib.get_character_with_door_relation(
+                character_id=character_id, build_id=door_id
+            )
+            relation_mode = relation.mode
+            enabled_affinity_ids = json.loads(relation.affinity_ids)
+            all_affinities += self._kernel.affinity_lib.get_multiple(enabled_affinity_ids)
+            all_affinities = list(set(all_affinities))
+        except NoResultFound:
+            pass
+
+        description_parts = []
+        if access_locked:
+            description_parts.append(
+                Part(
+                    text=self._kernel.door_lib.get_is_access_locked_for_description(
+                        character_id=character_id, build_id=door_id
+                    )
+                )
+            )
+            if relation is not None:
+                description_parts.append(
+                    Part(
+                        text=(
+                            "Si dans le futur cette porte ne vous es plus fermé, vous appliquerez "
+                            "le comportement décrit ci-dessous :"
+                        )
+                    )
+                )
+
+        description_parts.append(
+            Part(
+                text=self._kernel.door_lib.get_relation_description(
+                    character_id=character_id, build_id=door_id
+                )
+            )
+        )
+
+        return Description(
+            title=f"Gestion de porte",
+            items=description_parts + [
+                Part(
+                    is_form=True,
+                    form_action=f"/character/{character_id}/door/{door_id}",
+                    form_values_in_query=True,
+                    items=[
+                        Part(text="Votre comportement avec cette porte :"),
+                        Part(
+                            label="Comportement à l'égard de cette porte",
+                            choices=DOOR_MODE_LABELS.values(),
+                            name="mode",
+                            value=DOOR_MODE_LABELS[relation_mode],
+                        ),
+                        Part(
+                            text=(
+                                f"Si '{DOOR_MODE_LABELS[DOOR_MODE__CLOSED_EXCEPT_FOR]}' choisi, "
+                                "laisser passer les membres de quelles affinités ?"
+                            )
+                        ),
+                    ] + (
+                        [
+                            Part(
+                                label=affinity.name,
+                                name=f"affinity_{affinity.id}",
+                                is_checkbox=True,
+                                value="on",
+                                checked=affinity.id in enabled_affinity_ids,
+                            )
+                            for affinity in all_affinities
+                        ] if all_affinities else [Part(text=" - Aucune affinité en présence")]
+                    )
+                )
+            ],
+            can_be_back_url=True,
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -2226,6 +2368,9 @@ class CharacterController(BaseController):
                 ),
                 web.post(
                     "/character/{character_id}/describe_around_builds", self.describe_around_builds
+                ),
+                web.post(
+                    "/character/{character_id}/door/{door_id}", self.door
                 ),
             ]
         )

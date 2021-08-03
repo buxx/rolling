@@ -338,6 +338,8 @@ class GameConfig:
                 group_name=build_raw.get("group_name", None),
                 description=build_raw.get("description", None),
                 is_floor=build_raw.get("is_floor", False),
+                is_door=bool(build_raw.get("door", None)),
+                door_type=build_raw.get("door", None),
             )
 
         return builds

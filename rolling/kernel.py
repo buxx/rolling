@@ -43,6 +43,7 @@ from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.corpse import AnimatedCorpseLib
+from rolling.server.lib.door import DoorLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
@@ -73,7 +74,13 @@ class Kernel:
         game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
         server_config_file_path: str = "./server.ini",
+        server_db_user: str = "rolling",
+        server_db_password: str = "rolling",
+        server_db_name: str = "rolling",
     ) -> None:
+        self.server_db_user = server_db_user
+        self.server_db_password = server_db_password
+        self.server_db_name = server_db_name
         self._zone_maps_folder = zone_maps_folder
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
@@ -130,6 +137,7 @@ class Kernel:
         self._animated_corpse_lib: typing.Optional[AnimatedCorpseLib] = None
         self._account_lib: typing.Optional[AccountLib] = None
         self._zone_lib: typing.Optional[ZoneLib] = None
+        self._door_lib: typing.Optional[DoorLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -226,6 +234,12 @@ class Kernel:
         if self._zone_lib is None:
             self._zone_lib = ZoneLib(self)
         return self._zone_lib
+
+    @property
+    def door_lib(self) -> DoorLib:
+        if self._door_lib is None:
+            self._door_lib = DoorLib(self)
+        return self._door_lib
 
     @property
     def action_factory(self) -> ActionFactory:
@@ -360,7 +374,8 @@ class Kernel:
     def init_server_db_session(self) -> None:
         kernel_logger.info("Initialize database connection to server database")
         self._server_db_engine = create_engine(
-            "postgresql+psycopg2://rolling:rolling@127.0.0.1:5432/rolling"
+            f"postgresql+psycopg2://{self.server_db_user}:{self.server_db_password}@"
+            f"127.0.0.1:5432/{self.server_db_name}"
         )
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)

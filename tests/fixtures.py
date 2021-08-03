@@ -84,7 +84,7 @@ def _erase_db(kernel: Kernel) -> Kernel:
 
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourcea_txt, loop=loop))
+    kernel = _erase_db(Kernel(worldmapsourcea_txt, loop=loop, server_db_name="rolling_test"))
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -92,7 +92,7 @@ def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop))
+    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test"))
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -100,7 +100,7 @@ def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop))
+    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test"))
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -113,6 +113,7 @@ def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
         zone_maps_folder="tests/src/worldmapc_zones",
         game_config_folder="tests/src/game1",
         loop=loop,
+        server_db_name="rolling_test",
     )
     _erase_db(kernel)
     yield kernel

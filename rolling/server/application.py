@@ -52,7 +52,6 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             )
             and not request.path.startswith("/ac/")
             and not request.path.startswith("/ws/")
-            and not request.path.startswith("/zones/")
             and not request.path.startswith("/admin")
         ):
             try:

@@ -7,6 +7,9 @@ import typing
 from rolling.model.meta import TransportType
 from rolling.server.document.build import BuildDocument
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
 
 @dataclasses.dataclass
 class BuildRequireResourceDescription:
@@ -44,6 +47,7 @@ class BuildDescription:
     ability_ids: typing.List[str]
     cost: float
     is_floor: bool
+    is_door: bool
     classes: typing.List[str] = serpyco.field(default_factory=list)
     many: bool = False
     traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
@@ -54,6 +58,7 @@ class BuildDescription:
     allow_deposit_limited: bool = False
     group_name: typing.Optional[str] = None
     description: typing.Optional[str] = None
+    door_type: typing.Optional[str] = None
 
     @property
     def allowed_resource_ids(self) -> typing.List[str]:
@@ -82,7 +87,7 @@ class ZoneBuildModel:
     build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)
     classes: typing.List[str] = serpyco.field(default_factory=list, getter=lambda b: b.desc.classes)
     traversable: typing.Dict[TransportType, bool] = serpyco.field(
-        default_factory=dict, getter=lambda b: b.desc.traversable
+        default_factory=dict, getter=lambda b: b.traversable or b.desc.traversable
     )
 
 
@@ -90,3 +95,4 @@ class ZoneBuildModel:
 class ZoneBuildModelContainer:
     doc: BuildDocument
     desc: BuildDescription
+    traversable: typing.Optional[typing.Dict[TransportType, bool]] = None

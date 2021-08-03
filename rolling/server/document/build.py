@@ -1,5 +1,7 @@
 # coding: utf-8
-from sqlalchemy import Boolean
+import datetime
+
+from sqlalchemy import Boolean, UniqueConstraint, Enum, Text, ForeignKey, DateTime
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
@@ -21,3 +23,27 @@ class BuildDocument(Document):
     under_construction = Column(Boolean(), nullable=False, default=True)
     is_on = Column(Boolean(), nullable=False)
     is_floor = Column(Boolean(), nullable=False, default=False)
+    is_door = Column(Boolean(), nullable=False, default=False)
+
+
+DOOR_TYPE__SIMPLE = "SIMPLE"
+DOOR_MODE__CLOSED = "CLOSED"
+DOOR_MODE__CLOSED_EXCEPT_FOR = "CLOSED_EXCEPT_FOR"
+DOOR_MODE_LABELS = {
+    None: "Ne rien faire",
+    DOOR_MODE__CLOSED: "Garder fermé",
+    DOOR_MODE__CLOSED_EXCEPT_FOR: "Garder fermé sauf pour ...",
+}
+
+
+class DoorDocument(Document):
+    __tablename__ = "door"
+    __table_args__ = (
+        UniqueConstraint('build_id', 'character_id', name='door_unique'),
+    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    build_id = Column(Integer, ForeignKey("build.id"), nullable=False,)
+    character_id = Column(String(255), ForeignKey("character.id"), nullable=False)
+    mode = Column(Enum(DOOR_MODE__CLOSED, DOOR_MODE__CLOSED_EXCEPT_FOR, name="door__mode"), nullable=False)
+    affinity_ids = Column(Text(), server_default="[]", nullable=False)
+    updated_datetime = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)

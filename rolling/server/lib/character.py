@@ -461,7 +461,7 @@ class CharacterLib:
         ).count()
 
     async def move(
-        self, character: CharacterModel, to_world_row: int, to_world_col: int
+        self, character: CharacterModel, to_world_row: int, to_world_col: int, commit: bool= True
     ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
         character_document = self.get_document(character.id)
@@ -522,7 +522,26 @@ class CharacterLib:
             to_world_row_i=to_world_row,
             to_world_col_i=to_world_col,
         )
+
+        # Update door rules in left zone
+        await self._kernel.door_lib.trigger_character_left_zone(
+            world_row_i=from_world_row_i,
+            world_col_i=from_world_col_i,
+            character_id=character_document.id,
+        )
+
         self.update(character_document)
+
+        # Update door rules in new zone
+        await self._kernel.door_lib.trigger_character_enter_in_zone(
+            world_row_i=to_world_row,
+            world_col_i=to_world_col,
+            character_id=character_document.id,
+        )
+
+        if commit:
+            self._kernel.server_db_session.commit()
+
         return character_document
 
     def update(self, character_document: CharacterDocument, commit: bool = True) -> None:

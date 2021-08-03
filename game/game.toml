@@ -868,6 +868,17 @@ tile_clutter_capacity = 25.0
     build = "FIRED_BRICK_WALL"
     cost = 2.0
 
+  [ACTIONS.BUILD_SIMPLE_WOOD_DOOR]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BEGIN_BUILD"]
+    build = "SIMPLE_WOOD_DOOR"
+    cost = 0.1
+
   [ACTIONS.BUILD_RAW_CLAY_FLOOR]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1801,6 +1812,19 @@ tile_clutter_capacity = 25.0
   many = false
   group_name = "Utilitaire"
   description = "Un outil indispensable pour produire du tissu"
+[build.SIMPLE_WOOD_DOOR]
+  name = "Porte en bois"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=0.5}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 10.0
+  classes = ["DOOR"]
+  group_name = "Porte"
+  door = "SIMPLE"
+  many = false
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"

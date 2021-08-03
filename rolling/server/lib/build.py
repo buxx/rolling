@@ -51,6 +51,7 @@ class BuildLib:
             under_construction=under_construction,
             is_on=False,
             is_floor=build_description.is_floor,
+            is_door=build_description.is_door,
         )
         self._kernel.server_db_session.add(build_doc)
 
@@ -70,6 +71,8 @@ class BuildLib:
         self, character: CharacterModel, build_id: int
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
 
         for action in self._kernel.action_factory.get_all_with_build_actions():
             try:
@@ -77,6 +80,14 @@ class BuildLib:
                 actions.extend(action.get_character_actions(character, build_id=build_id))
             except ImpossibleAction:
                 pass
+
+        if build_description.is_door and not build_doc.under_construction:
+            actions.append(
+                CharacterActionLink(
+                    name=f"Gestion de cette porte",
+                    link=f"/character/{character.id}/door/{build_id}",
+                )
+            )
 
         return actions
 
@@ -87,6 +98,7 @@ class BuildLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         is_floor: typing.Optional[bool] = None,
+        is_door: typing.Optional[bool] = None,
     ) -> typing.List[BuildDocument]:
         return self._get_zone_query(
             world_row_i=world_row_i,
@@ -94,6 +106,7 @@ class BuildLib:
             zone_row_i=zone_row_i,
             zone_col_i=zone_col_i,
             is_floor=is_floor,
+            is_door=is_door,
         ).all()
 
     def _get_zone_query(
@@ -103,6 +116,7 @@ class BuildLib:
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         is_floor: typing.Optional[bool] = None,
+        is_door: typing.Optional[bool] = None,
     ) -> Query:
         filters = [
             BuildDocument.world_row_i == world_row_i,
@@ -116,6 +130,9 @@ class BuildLib:
 
         if is_floor is not None:
             filters.append(BuildDocument.is_floor == is_floor)
+
+        if is_door is not None:
+            filters.append(BuildDocument.is_door == is_door)
 
         return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).order_by(BuildDocument.is_floor.desc())
 

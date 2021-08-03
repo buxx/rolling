@@ -15,6 +15,7 @@ from rolling.map.type.base import MapTileType
 from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
+from rolling.model.meta import TransportType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
@@ -109,16 +110,25 @@ class ZoneController(BaseController):
     @hapic.output_body(ZoneBuildModel, processor=RollingSerpycoProcessor(many=True))
     async def get_builds(
         self, request: Request, hapic_data: HapicData
-    ) -> typing.List[ZoneBuildModel]:
+    ) -> typing.List[ZoneBuildModelContainer]:
         build_docs = self._kernel.build_lib.get_zone_build(
             world_row_i=hapic_data.path.row_i, world_col_i=hapic_data.path.col_i
         )
-        zone_builds = [None] * len(build_docs)  # performances (possible lot of builds)
+        zone_builds: typing.List[typing.Optional[ZoneBuildModelContainer]] = [None] * len(build_docs)  # performances (possible lot of builds)
         for i, build_doc in enumerate(build_docs):
-            zone_builds[i] = ZoneBuildModelContainer(
-                doc=build_doc, desc=self._kernel.game.config.builds[build_doc.build_id]
+            build_description = self._kernel.game.config.builds[build_doc.build_id]
+            build_container = ZoneBuildModelContainer(
+                doc=build_doc, desc=build_description
             )
-        zone_builds = typing.cast(typing.List[ZoneBuildModel], zone_builds)
+            if build_description.is_door:
+                build_container.traversable = {
+                    TransportType.WALKING: not self._kernel.door_lib.is_access_locked_for(
+                        build_id=build_doc.id,
+                        character_id=request["account_character_id"],
+                    )
+                }
+            zone_builds[i] = build_container
+
         return zone_builds
 
     @hapic.with_api_doc()

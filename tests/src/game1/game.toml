@@ -272,6 +272,20 @@ tile_clutter_capacity = 10.0
   many = true
   traversable = {"WALKING"=false}
 
+[build.DOOR]
+  name = "Porte"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=0.5}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 10.0
+  classes = ["DOOR"]
+  group_name = "Porte"
+  door = "SIMPLE"
+  many = false
+
 [ACTIONS]
   [ACTIONS.USE_AS_WEAPON]
     actions = ["USE_AS_WEAPON"]

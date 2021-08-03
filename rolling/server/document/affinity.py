@@ -59,6 +59,12 @@ class AffinityDocument(Document):
     statuses = Column(JSON, nullable=False, default=json.dumps(statuses))
     default_status_id = Column(String, nullable=False, default=MEMBER_STATUS[0])
 
+    def __eq__(self, other: "AffinityDocument") -> bool:
+        return self.id == other.id and self.id is not None
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
 
 class AffinityRelationDocument(Document):
     __tablename__ = "character_affinity"

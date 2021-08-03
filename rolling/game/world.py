@@ -122,6 +122,7 @@ class WorldManager:
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
+        material_type: typing.Optional[str] = None,
     ) -> typing.List[ZoneMapTileProduction]:
         zone_map = self._kernel.tile_maps_by_position[(world_row_i, world_col_i)]
 
@@ -131,11 +132,18 @@ class WorldManager:
             return []
 
         try:
-            return self._world.tiles_properties[zone_tile_type].produce
+            productions = self._world.tiles_properties[zone_tile_type].produce
         except KeyError:
-            pass
+            return []
 
-        return []
+        if material_type is not None:
+            return [
+                production
+                for production in productions
+                if production.resource.material_type == material_type
+            ]
+
+        return productions
 
     def get_resource_on_or_around(
         self,
@@ -143,6 +151,7 @@ class WorldManager:
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
+        material_type: typing.Optional[str] = None,
     ) -> typing.List[ZoneMapTileProduction]:
         inspect_zone_positions = get_on_and_around_coordinates(zone_row_i, zone_col_i)
         productions: typing.List[ZoneMapTileProduction] = []
@@ -154,6 +163,7 @@ class WorldManager:
                     world_col_i=world_col_i,
                     zone_row_i=zone_row_i,
                     zone_col_i=zone_col_i,
+                    material_type=material_type,
                 )
             )
 

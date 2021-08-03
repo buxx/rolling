@@ -83,6 +83,12 @@ class GetOfferPathModel:
 
 
 @dataclasses.dataclass
+class DoorPathModel:
+    character_id: str
+    door_id: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
 class SeeOfferPathModel:
     character_id: str
     owner_id: str

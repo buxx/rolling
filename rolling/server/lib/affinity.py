@@ -114,6 +114,23 @@ class AffinityLib:
 
         return query.all()
 
+    def get_accepted_affinities_docs(
+        self, character_id: str, warlord: bool = False
+    ) -> typing.List[AffinityRelationDocument]:
+        query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.character_id == character_id,
+            AffinityRelationDocument.accepted == True,
+        )
+
+        if warlord:
+            query = query.filter(
+                AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0]))
+            )
+
+        return self.get_multiple(
+            [relation.affinity_id for relation in query.all()]
+        )
+
     def get_with_relations(
         self,
         character_id: str,
@@ -412,3 +429,22 @@ class AffinityLib:
                 rel_str = "Combattant"
 
         return rel_str
+
+    def get_affinity_names(
+        self,
+        affinity_ids: typing.List[int],
+        ignore_not_found: bool = False,
+    ) -> typing.List[str]:
+        affinity_names = []
+
+        # TODO: optimize with one request
+        for affinity_id in affinity_ids:
+            try:
+                affinity_names.append(
+                    self.get_affinity(affinity_id).name
+                )
+            except NoResultFound as exc:
+                if not ignore_not_found:
+                    raise exc
+
+        return affinity_names
