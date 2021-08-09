@@ -38,4 +38,4 @@ class CorpseMixin:
 
 class AnimatedCorpseDocument(CorpseMixin, Document):
     __tablename__ = "animated_corpse"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)

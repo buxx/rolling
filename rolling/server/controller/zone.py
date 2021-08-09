@@ -16,10 +16,9 @@ from rolling.model.build import ZoneBuildModel
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
 from rolling.model.meta import TransportType
-from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
-from rolling.model.zone import GetZoneCharacterPathModel
+from rolling.model.zone import GetZoneCharacterPathModel, GetZoneQueryModel
 from rolling.model.zone import GetZoneMessageQueryModel
 from rolling.model.zone import GetZonePathModel
 from rolling.model.zone import ZoneMapModel
@@ -107,6 +106,7 @@ class ZoneController(BaseController):
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
+    @hapic.input_query(GetZoneQueryModel)
     @hapic.output_body(ZoneBuildModel, processor=RollingSerpycoProcessor(many=True))
     async def get_builds(
         self, request: Request, hapic_data: HapicData
@@ -121,11 +121,14 @@ class ZoneController(BaseController):
                 doc=build_doc, desc=build_description
             )
             if build_description.is_door:
-                build_container.traversable = {
-                    TransportType.WALKING: not self._kernel.door_lib.is_access_locked_for(
+                can_walk = False
+                if not hapic_data.query.disable_door_compute:
+                    can_walk = not self._kernel.door_lib.is_access_locked_for(
                         build_id=build_doc.id,
                         character_id=request["account_character_id"],
                     )
+                build_container.traversable = {
+                    TransportType.WALKING: can_walk
                 }
             zone_builds[i] = build_container
 

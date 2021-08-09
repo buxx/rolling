@@ -26,6 +26,8 @@ from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
 from rolling.server.lib.character import CharacterLib
 
+HEADER_NAME__DISABLE_AUTH_TOKEN = "DISABLE_AUTH_TOKEN"
+
 
 def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
     character_lib = CharacterLib(kernel)
@@ -33,7 +35,13 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
 
     @middleware
     async def auth(request: Request, handler):
-        if disable_auth:
+        request_disable_auth = False
+        try:
+            request_disable_auth = request.headers[HEADER_NAME__DISABLE_AUTH_TOKEN] == kernel.server_config.disable_auth_token
+        except KeyError:
+            pass
+
+        if disable_auth or request_disable_auth:
             return await handler(request)
 
         if (
@@ -49,6 +57,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                 "/account/password_lost",
                 "/world/events",
                 "/world/source",
+                "/zones/tiles",
             )
             and not request.path.startswith("/ac/")
             and not request.path.startswith("/ws/")
