@@ -1,12 +1,19 @@
 # coding: utf-8
 import asyncio
+from random import choice
 
 import click
+import typing
+
+import requests
 from sqlalchemy.exc import NoResultFound
 
 from rolling.map.source import ZoneMap
+from rolling.map.type.world import WorldMapTileType
 from rolling.model.zone import ZoneMapTileProduction
+from rolling.server.application import HEADER_NAME__DISABLE_AUTH_TOKEN
 from rolling.server.base import get_kernel
+from rolling.server.document.corpse import AnimatedCorpseType, AnimatedCorpseDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 
@@ -171,6 +178,90 @@ def sync_zone_resources(game_config_dir: str, world_map_source: str, zone_map_fo
                                 quantity=production.start_capacity,
                                 destroy_when_empty=production.destroy_when_empty,
                             )
+
+
+@main.command()
+@click.argument("game-config-dir")
+@click.argument("world-map-source")
+@click.argument("zone-map-folder")
+@click.argument("zone_type")
+@click.argument("ac_type")
+@click.argument("count", type=int)
+@click.option("--host", default="127.0.0.1")
+@click.option("--port", default=5000, type=int)
+@click.option("--disable-sync", is_flag=True)
+def populate_ac(
+    game_config_dir: str,
+    world_map_source: str,
+    zone_map_folder: str,
+    zone_type: str,
+    ac_type: str,
+    count: int,
+    host: str,
+    port: int,
+    disable_sync: bool,
+) -> None:
+    click.echo("Preparing kernel")
+    animated_corpse_type = AnimatedCorpseType(ac_type)
+    filter_zone_type = WorldMapTileType.get_for_id(zone_type)
+    kernel = get_kernel(
+        game_config_folder=game_config_dir,
+        world_map_source_path=world_map_source,
+        tile_maps_folder_path=zone_map_folder,
+    )
+    universe_state = kernel.universe_lib.get_last_state()
+
+    zone_type: typing.Type[WorldMapTileType]
+    for world_row_i, world_row in enumerate(kernel.world_map_source.geography.rows):
+        for world_col_i, zone_type in enumerate(world_row):
+            if zone_type != filter_zone_type:
+                click.echo(f"Ignore {world_row_i}.{world_col_i} ({zone_type.__name__})")
+                continue
+            click.echo(f"Process {world_row_i}.{world_col_i} ({zone_type.__name__}) ...")
+
+            animated_corpses = kernel.animated_corpse_lib.get_all(
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                type_=animated_corpse_type,
+            )
+
+            if len(animated_corpses) >= count:
+                click.echo(f"{len(animated_corpses)} found, do nothing")
+                continue
+
+            for _ in range(count - len(animated_corpses)):
+                click.echo(f"Create new animated corpse ...")
+
+                traversable_coordinates = kernel.get_traversable_coordinates(world_row_i, world_col_i)
+                if not traversable_coordinates:
+                    click.echo(f"ERROR: no traversable coordinate found !")
+                    continue
+                zone_row_i, zone_col_i = choice(traversable_coordinates)
+
+                animated_corpse = kernel.animated_corpse_lib.create(
+                    AnimatedCorpseDocument(
+                        alive_since=universe_state.turn,
+                        world_row_i=world_row_i,
+                        world_col_i=world_col_i,
+                        zone_row_i=zone_row_i,
+                        zone_col_i=zone_col_i,
+                        alive=True,
+                        type_=animated_corpse_type.value,
+                    )
+                )
+
+                if disable_sync:
+                    click.echo(f"Sync is disabled, not not sync")
+                click.echo(f"Sync newly added animated corpse (on {host}:{port})")
+
+                response = requests.put(
+                    url=f"http://{host}:{port}/ac-signal/new/{animated_corpse.id}",
+                    headers={
+                        HEADER_NAME__DISABLE_AUTH_TOKEN: kernel.server_config.disable_auth_token
+                    }
+                )
+                if response.status_code != 204:
+                    click.echo(f"ERROR: Signal newly added result error : code {response.status_code}")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Query
 import typing
 
 from rolling.exception import CantMove
-from rolling.server.document.corpse import AnimatedCorpseDocument
+from rolling.server.document.corpse import AnimatedCorpseDocument, AnimatedCorpseType
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -26,8 +26,15 @@ class AnimatedCorpseLib:
 
         return query
 
-    def get_all(self, world_row_i: int, world_col_i: int) -> typing.List[AnimatedCorpseDocument]:
-        return self._base_query(world_row_i=world_row_i, world_col_i=world_col_i).all()
+    def get_all(
+        self, world_row_i: int, world_col_i: int, type_: typing.Optional[AnimatedCorpseType] = None
+    ) -> typing.List[AnimatedCorpseDocument]:
+        query = self._base_query(world_row_i=world_row_i, world_col_i=world_col_i)
+
+        if type_ is not None:
+            query = query.filter(AnimatedCorpseDocument.type_ == type_.value)
+
+        return query.all()
 
     def get(self, animated_corpse_id: int) -> AnimatedCorpseDocument:
         return self._base_query().filter(AnimatedCorpseDocument.id == animated_corpse_id).one()
@@ -52,3 +59,8 @@ class AnimatedCorpseLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def create(self, animated_corpse_doc: AnimatedCorpseDocument) -> AnimatedCorpseDocument:
+        self._kernel.server_db_session.add(animated_corpse_doc)
+        self._kernel.server_db_session.commit()
+        return animated_corpse_doc

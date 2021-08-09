@@ -44,6 +44,11 @@ class GetZonePathModel:
 
 
 @dataclasses.dataclass(frozen=True)
+class GetZoneQueryModel:
+    disable_door_compute: bool = serpyco.field(cast_on_load=True, default=False)
+
+
+@dataclasses.dataclass(frozen=True)
 class GetZoneCharacterPathModel:
     character_id: str
     row_i: int = number_field(cast_on_load=True)

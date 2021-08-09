@@ -58,6 +58,7 @@ from rolling.trad import GlobalTranslation
 @dataclasses.dataclass
 class ServerConfig:
     base_url: str
+    disable_auth_token: str
     sender_email: str
     smtp_server: str
     smtp_port: str
