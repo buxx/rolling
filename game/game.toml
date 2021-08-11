@@ -26,6 +26,11 @@ less_than_is_health2 = 3.0
 less_than_is_health3 = 2.0
 less_than_is_health4 = 1.0
 
+grow_progress_1 = 10_000
+grow_progress_2 = 20_000
+grow_progress_3 = 40_000
+grow_progress_4 = 60_000
+
 create_character_event_title = "You wake up on a beach"
 create_character_event_story_image = "beach_intro.png"
 create_character_event_story_text = """Quel mal de crâne !
@@ -406,6 +411,7 @@ tile_clutter_capacity = 25.0
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    grow_speed = 42
 
   [resources.BREAD]
     name = "Pain"
@@ -890,6 +896,19 @@ tile_clutter_capacity = 25.0
     actions = ["BUILD"]
     build = "RAW_CLAY_FLOOR"
     cost = 0.5
+
+  # TODO: outil pour accelerer le labour
+  [ACTIONS.BUILD_PLOUGHED_LAND]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    required_one_of_zones = ["HILL", "PLAIN", "JUNGLE"]
+    actions = ["BUILD"]
+    build = "PLOUGHED_LAND"
+    cost = 1.0
 
   [ACTIONS.HUNT_CRUSTACEANS]
     name = "Chercher des fruits de mer"
@@ -1732,6 +1751,21 @@ tile_clutter_capacity = 25.0
     ]
     cost = 0.0
 
+  [ACTIONS.SEED_CEREAL]
+    name = "Semer des céréales"
+    actions = ["SEED"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    # FIXME BS NOW farm: check "grow_speed" parameter in CEREAL resource at server startup
+    resource_id = "CEREAL"
+    build_id = "PLOUGHED_LAND"
+    consume = 1.0
+    cost = 0.1
+
 [build]
 [build.CAMP_FIRE]
   name = "Feux de camp"
@@ -1917,4 +1951,18 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=true}
   group_name = "Sol"
+  is_floor = true
+[build.PLOUGHED_LAND]
+  name = "Terre labouré"
+  char = "_"
+  building_char = "_"
+  build_require_resources = []
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["GROUND"]
+  many = true
+  traversable = {"WALKING"=true}
+  group_name = "Agriculture"
   is_floor = true

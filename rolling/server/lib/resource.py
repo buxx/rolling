@@ -259,6 +259,7 @@ class ResourceLib:
                 quantity=0.0,
                 descriptions=resource_description.descriptions,
                 illustration=resource_description.illustration,
+                grow_speed=resource_description.grow_speed,
             )
 
     def _carried_resource_model_from_doc(
@@ -293,6 +294,7 @@ class ResourceLib:
             ground_row_i=docs[0].zone_row_i,
             ground_col_i=docs[0].zone_col_i,
             illustration=resource_description.illustration,
+            grow_speed=resource_description.grow_speed,
         )
 
     def have_resource(

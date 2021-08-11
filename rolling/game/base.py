@@ -79,6 +79,11 @@ class GameConfig:
         self.less_than_is_health3: float = config_dict["less_than_is_health3"]
         self.less_than_is_health4: float = config_dict["less_than_is_health4"]
 
+        self.grow_progress_1: int = int(config_dict["grow_progress_1"])
+        self.grow_progress_2: int = int(config_dict["grow_progress_2"])
+        self.grow_progress_3: int = int(config_dict["grow_progress_3"])
+        self.grow_progress_4: int = int(config_dict["grow_progress_4"])
+
         self.create_character_event_title: str = config_dict["create_character_event_title"]
         self.create_character_event_story_image: str = config_dict.get(
             "create_character_event_story_image"
@@ -210,6 +215,7 @@ class GameConfig:
                 clutter=resource_raw["clutter"],
                 descriptions=[],  # filled after
                 illustration=illustration,
+                grow_speed=resource_raw.get("grow_speed", None),
             )
 
         return resources
