@@ -13,6 +13,7 @@ from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
+from rolling.server.document.build import BuildDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import character_can_drink_in_its_zone
@@ -41,6 +42,7 @@ class TurnLib:
         self._kill()
         self._manage_characters_props()
         self._builds_consumptions()
+        self._grow()
         self._universe_turn()
 
         # FIXME BS NOW: remove pending actions and authorizations
@@ -365,6 +367,18 @@ class TurnLib:
                         )
                 else:
                     build_doc.is_on = False
+            self._kernel.server_db_session.commit()
+
+    def _grow(self) -> None:
+        # TODO : impact of trees (shadow) and water proximity
+        query = self._kernel.build_lib.get_zone_query(with_seeded_with=True)
+        for row in query.with_entities(BuildDocument.id).all():
+            build_doc = self._kernel.build_lib.get_build_doc(row[0])
+            seeded_resource_description = self._kernel.game.config.resources[build_doc.seeded_with]
+            build_doc.grow_progress = (
+                build_doc.grow_progress + seeded_resource_description.grow_speed
+            )
+            self._kernel.server_db_session.add(build_doc)
             self._kernel.server_db_session.commit()
 
     def _universe_turn(self) -> None:

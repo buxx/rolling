@@ -39,6 +39,7 @@ from rolling.action.knowledge import ProposeTeachKnowledgeAction
 from rolling.action.knowledge import TeachKnowledgeAction
 from rolling.action.mix import MixResourcesAction
 from rolling.action.search import SearchMaterialAction
+from rolling.action.seed import SeedAction
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_resource import TakeResourceAction
 from rolling.action.take_stuff import TakeStuffAction
@@ -115,6 +116,7 @@ class ActionFactory:
         ActionType.TRANSFER_GROUND: TransfertGroundCharacterAction,
         ActionType.TAKE_STUFF: TakeStuffAction,
         ActionType.TAKE_RESOURCE: TakeResourceAction,
+        ActionType.SEED: SeedAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -165,6 +167,7 @@ class ActionFactory:
             ActionType.CHEATS: CheatsCharacterAction,
             ActionType.TRAVEL: TravelAction,
             ActionType.TRANSFER_GROUND: TransfertGroundCharacterAction,
+            ActionType.SEED: SeedAction,
         }
         self._build_actions: typing.Dict[ActionType, typing.Type[CharacterAction]] = {
             ActionType.BEGIN_BUILD: BeginBuildAction,

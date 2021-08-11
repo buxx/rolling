@@ -22,6 +22,7 @@ class ResourceDescriptionModel:
     clutter: float
     descriptions: typing.List[ActionDescriptionModel]
     illustration: typing.Optional[str]
+    grow_speed: typing.Optional[int]
 
 
 # FIXME BS: rename (can be in build)

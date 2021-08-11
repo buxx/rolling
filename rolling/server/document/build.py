@@ -25,6 +25,10 @@ class BuildDocument(Document):
     is_floor = Column(Boolean(), nullable=False, default=False)
     is_door = Column(Boolean(), nullable=False, default=False)
 
+    # farming
+    seeded_with = Column(String(255), nullable=True, default=None)
+    grow_progress = Column(Integer, nullable=False, default=0)
+
 
 DOOR_TYPE__SIMPLE = "SIMPLE"
 DOOR_MODE__CLOSED = "CLOSED"
