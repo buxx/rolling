@@ -77,6 +77,13 @@ class DescribeBuildInputPath:
     build_id: int = serpyco.number_field(cast_on_load=True)
 
 
+def get_build_classes(desc: BuildDescription, doc: BuildDocument) -> typing.List[str]:
+    classes = desc.classes + [doc.build_id]
+    if desc.power_on_require_resources and not doc.is_on:
+        classes = classes + list(map(lambda c: f"{c}__OFF", classes))
+    return classes
+
+
 @dataclasses.dataclass
 class ZoneBuildModel:
     row_i: int = serpyco.number_field(getter=lambda b: b.doc.zone_row_i)
@@ -86,7 +93,7 @@ class ZoneBuildModel:
     id: int = serpyco.number_field(getter=lambda b: b.doc.id)
     build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)
     classes: typing.List[str] = serpyco.field(
-        default_factory=list, getter=lambda b: b.classes or b.desc.classes + [b.doc.build_id]
+        default_factory=list, getter=lambda b: b.classes or get_build_classes(b.desc, b.doc)
     )
     traversable: typing.Dict[TransportType, bool] = serpyco.field(
         default_factory=dict, getter=lambda b: b.traversable or b.desc.traversable
