@@ -175,21 +175,21 @@ class ClickActionProcessor(EventProcessor):
         event: WebSocketEvent[ClickActionData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        # FIXME Experimental way to identify action ...for now, only manage build ...
-        path = event.data.base_url.split("?")[0]
-        parts = path.split("/")
-        character_id: str = parts[2]
-        build_description_id: str = parts[5]
+        character_id = self._kernel.server_zone_events_manager.get_character_id_for_socket(sender_socket)
         character = self._kernel.character_lib.get(character_id)
-
-        # FIXME BS: use dicts instead list for action descriptions
-        description = next(
-            ad
-            for ad in self._kernel.game.config.actions[ActionType.BUILD]
-            if ad.id == build_description_id
-        )
-        action = self._kernel.action_factory.get_build_action(description)
+        try:
+            action = self._kernel.action_factory.create_action(
+                action_type=event.data.action_type,
+                action_description_id=event.data.action_description_id,
+            )
+        except NotImplementedError:
+            server_logger.error(
+                f"No action for '{event.data.action_type}' "
+                f"and '{event.data.action_description_id}' found for process click action event !"
+            )
+            return
         input_ = action.input_model_from_request(event.data.to_dict())
+
         try:
             action.check_request_is_possible(character, input_)
             zone_events, sender_events = action.perform_from_event(character, input_)

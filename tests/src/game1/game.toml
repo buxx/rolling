@@ -26,6 +26,11 @@ less_than_is_health2 = 3.0
 less_than_is_health3 = 2.0
 less_than_is_health4 = 1.0
 
+grow_progress_1 = 10_000
+grow_progress_2 = 20_000
+grow_progress_3 = 40_000
+grow_progress_4 = 60_000
+
 create_character_event_title = "You wake up on a beach"
 create_character_event_story_text = """hello"""
 fresh_water_resource_id = "FRESH_WATER"
@@ -194,6 +199,14 @@ tile_clutter_capacity = 10.0
     unit = "G"
     clutter = 0.001
     actions = ["EAT_RESOURCE"]
+  [resources.CEREAL]
+    name = "Céréales"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 1.0
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    grow_speed = 42
 
 
 [resource_mix]
@@ -396,3 +409,18 @@ tile_clutter_capacity = 10.0
     character_effects = []
     like_water = true
     cost = 0.0
+
+[build.PLOUGHED_LAND]
+  name = "Terre labouré"
+  char = "_"
+  building_char = "_"
+  build_require_resources = []
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 0.0
+  classes = ["GROUND"]
+  many = true
+  traversable = {"WALKING"=true}
+  group_name = "Agriculture"
+  is_floor = true

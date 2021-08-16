@@ -59,6 +59,7 @@ class ActionType(enum.Enum):
     TRANSFER_GROUND = "TRANSFER_GROUND"
     TAKE_STUFF = "TAKE_STUFF"
     TAKE_RESOURCE = "TAKE_RESOURCE"
+    SEED = "SEED"
 
 
 # FIXME BS NOW: delete me

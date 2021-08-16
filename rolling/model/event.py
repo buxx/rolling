@@ -7,6 +7,7 @@ import typing
 
 from rolling.model.build import ZoneBuildModel
 from rolling.model.data import ListOfItemModel
+from rolling.rolling_types import ActionType
 
 
 class ZoneEventType(Enum):
@@ -90,7 +91,8 @@ class TopBarMessageData(WebSocketEventData):
 
 @dataclasses.dataclass
 class ClickActionData(WebSocketEventData):
-    base_url: str
+    action_type: ActionType
+    action_description_id: str
     row_i: int
     col_i: int
 

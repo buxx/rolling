@@ -130,6 +130,16 @@ class ZoneController(BaseController):
                 build_container.traversable = {
                     TransportType.WALKING: can_walk
                 }
+
+            # FIXME BS NOW farm
+            if build_description.id == "PLOUGHED_LAND":
+                growing_state_classes = self._kernel.farming_lib.get_growing_state_classes(
+                    build=build_doc
+                )
+                build_container.classes = (
+                    build_description.classes + [build_doc.build_id] + growing_state_classes
+                )
+
             zone_builds[i] = build_container
 
         return zone_builds

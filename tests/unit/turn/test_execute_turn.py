@@ -440,3 +440,34 @@ class TestExecuteTurn:
 
         # Then
         assert build_a_off.is_on is False
+
+    def test_turn_build_grow_ploughed_lands(
+        self, worldmapc_kernel: Kernel, turn_lib: TurnLib
+    ):
+        kernel = worldmapc_kernel
+
+        # Given
+        doc = kernel.build_lib.place_build(
+            world_row_i=1,
+            world_col_i=1,
+            zone_row_i=1,
+            zone_col_i=1,
+            build_id="PLOUGHED_LAND",
+            under_construction=False,
+        )
+        doc.seeded_with = "CEREAL"
+        kernel.server_db_session.add(doc)
+        kernel.server_db_session.commit()
+        assert doc.grow_progress == 0
+
+        # When
+        turn_lib.execute_turn()
+        doc = kernel.build_lib.get_build_doc(doc.id)
+
+        # Then 2
+        assert doc.grow_progress == 42
+
+        # When 2
+        turn_lib.execute_turn()
+        doc = kernel.build_lib.get_build_doc(doc.id)
+        assert doc.grow_progress == 42 * 2
