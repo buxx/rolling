@@ -44,6 +44,7 @@ from rolling.server.lib.business import BusinessLib
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.corpse import AnimatedCorpseLib
 from rolling.server.lib.door import DoorLib
+from rolling.server.lib.farming import FarmingLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
@@ -139,6 +140,7 @@ class Kernel:
         self._account_lib: typing.Optional[AccountLib] = None
         self._zone_lib: typing.Optional[ZoneLib] = None
         self._door_lib: typing.Optional[DoorLib] = None
+        self._farming_lib: typing.Optional[FarmingLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -241,6 +243,12 @@ class Kernel:
         if self._door_lib is None:
             self._door_lib = DoorLib(self)
         return self._door_lib
+
+    @property
+    def farming_lib(self) -> FarmingLib:
+        if self._farming_lib is None:
+            self._farming_lib = FarmingLib(self)
+        return self._farming_lib
 
     @property
     def action_factory(self) -> ActionFactory:

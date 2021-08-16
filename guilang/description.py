@@ -4,6 +4,8 @@ import dataclasses
 import enum
 import typing
 
+from rolling.rolling_types import ActionType
+
 
 class Type(enum.Enum):
     STRING = "STRING"
@@ -64,7 +66,8 @@ class Part:
 
 @dataclasses.dataclass
 class RequestClicks:
-    base_url: str
+    action_type: ActionType
+    action_description_id: str
     cursor_classes: typing.List[str]
     many: bool = False
 

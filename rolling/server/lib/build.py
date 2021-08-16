@@ -100,7 +100,7 @@ class BuildLib:
         is_floor: typing.Optional[bool] = None,
         is_door: typing.Optional[bool] = None,
     ) -> typing.List[BuildDocument]:
-        return self._get_zone_query(
+        return self.get_zone_query(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,
@@ -109,19 +109,25 @@ class BuildLib:
             is_door=is_door,
         ).all()
 
-    def _get_zone_query(
+    def get_zone_query(
         self,
-        world_row_i: int,
-        world_col_i: int,
+        world_row_i: typing.Optional[int] = None,
+        world_col_i: typing.Optional[int] = None,
         zone_row_i: typing.Optional[int] = None,
         zone_col_i: typing.Optional[int] = None,
         is_floor: typing.Optional[bool] = None,
         is_door: typing.Optional[bool] = None,
+        with_seeded_with: bool = False,
     ) -> Query:
-        filters = [
-            BuildDocument.world_row_i == world_row_i,
-            BuildDocument.world_col_i == world_col_i,
-        ]
+        filters = []
+
+        if world_row_i is not None and world_col_i is not None:
+            filters.extend(
+                [
+                    BuildDocument.world_row_i == world_row_i,
+                    BuildDocument.world_col_i == world_col_i,
+                ]
+            )
 
         if zone_row_i is not None and zone_col_i is not None:
             filters.extend(
@@ -134,6 +140,9 @@ class BuildLib:
         if is_door is not None:
             filters.append(BuildDocument.is_door == is_door)
 
+        if with_seeded_with:
+            filters.append(BuildDocument.seeded_with != None)
+
         return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).order_by(BuildDocument.is_floor.desc())
 
     def count_zone_build(
@@ -144,7 +153,7 @@ class BuildLib:
         zone_col_i: typing.Optional[int] = None,
         is_floor: typing.Optional[bool] = None,
     ) -> int:
-        return self._get_zone_query(
+        return self.get_zone_query(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             zone_row_i=zone_row_i,

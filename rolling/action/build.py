@@ -556,7 +556,8 @@ class BuildAction(CharacterAction):
         build_description = self._kernel.game.config.builds[build_id]
         return Description(
             request_clicks=RequestClicks(
-                base_url=self.get_base_url(character),
+                action_type=ActionType.BUILD,
+                action_description_id=self._description.id,
                 cursor_classes=build_description.classes + [build_id],
                 many=build_description.many,
             )

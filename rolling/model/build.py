@@ -85,7 +85,9 @@ class ZoneBuildModel:
     char: str = serpyco.string_field(getter=lambda b: b.desc.char)
     id: int = serpyco.number_field(getter=lambda b: b.doc.id)
     build_id: str = serpyco.number_field(getter=lambda b: b.doc.build_id)
-    classes: typing.List[str] = serpyco.field(default_factory=list, getter=lambda b: b.desc.classes)
+    classes: typing.List[str] = serpyco.field(
+        default_factory=list, getter=lambda b: b.classes or b.desc.classes
+    )
     traversable: typing.Dict[TransportType, bool] = serpyco.field(
         default_factory=dict, getter=lambda b: b.traversable or b.desc.traversable
     )
@@ -96,3 +98,4 @@ class ZoneBuildModelContainer:
     doc: BuildDocument
     desc: BuildDescription
     traversable: typing.Optional[typing.Dict[TransportType, bool]] = None
+    classes: typing.Optional[typing.List[str]] = None
