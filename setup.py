@@ -5,7 +5,7 @@ dev_require = ["black", "isort", "pip-utils", "mypy"] + test_require
 
 setup(
     name="rolling",
-    version="0.8.2",
+    version="0.8.3",
     description="Role game engine",
     author="Bastien Sevajol",
     author_email="sevajol.bastien@gmail.com",
