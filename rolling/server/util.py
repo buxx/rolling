@@ -106,6 +106,4 @@ def with_multiple_carried_stuffs(
 
 
 def get_round_resource_quantity(quantity: float) -> str:
-    return str(
-        math.ceil((quantity / 10) * 1000) / 100
-    )
+    return str(round(quantity * 0.1, 4))

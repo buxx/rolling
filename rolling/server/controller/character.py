@@ -1024,7 +1024,7 @@ class CharacterController(BaseController):
                 unit_str = self._kernel.translation.get(resource.unit, short=True)
                 partial_quantity: str = request.query.get(
                     f"{resource.id}_partial_quantity",
-                    str(math.ceil((resource.quantity / 10) * 100) / 100) + unit_str,
+                    str(round(resource.quantity * 0.1, 4)) + unit_str,
                 )
                 partial_drop_url = get_with_resource_action_url(
                     character_id=character.id,
