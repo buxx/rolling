@@ -19,11 +19,11 @@
 
 ### Avec Windows
 
-Ouvrez le dossier que vous avez décompréssé depuis l'archive `.zip` et double cliquez sur `rollgui.exe` (ou `rollgui.bat` si vous voulez visualiser des informations techniques pour les indiquer au développeur en cas d'erreur).
+Ouvrez le dossier que vous avez décompréssé depuis l'archive `.zip` et double cliquez sur `RiseOfClans.exe` (ou `rollgui.bat` si vous voulez visualiser des informations techniques pour les indiquer au développeur en cas d'erreur).
 
 ### Avec Gnu/Linux
 
-Ouvrez un terminal et déplacez-vous dans le dossier décompréssé. Puis éxécutez le fichier `rollgui`:
+Ouvrez un terminal et déplacez-vous dans le dossier décompréssé. Puis éxécutez le fichier `RiseOfClans`:
 
 ![start under linux](src/2021-03-09_19-12.png)
 
