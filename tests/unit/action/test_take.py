@@ -5,7 +5,7 @@ import typing
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_character import TakeFromModel
-from rolling.exception import WrongInputError
+from rolling.exception import WrongInputError, ImpossibleAction
 from rolling.action.take_resource import TakeResourceAction, TakeResourceModel
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
@@ -119,7 +119,7 @@ class TestTakeFromCharacterAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(WrongInputError) as caught:
+        with pytest.raises(ImpossibleAction) as caught:
             take_from_character_action.check_is_possible(arthur, xena)
 
         assert str(caught.value) == "arthur ne peut contraindre xena"
