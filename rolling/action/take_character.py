@@ -268,7 +268,7 @@ class TakeFromCharacterAction(WithCharacterAction):
             not take.can_take_by_force(raise_=False)
             and not take.get_can_take_from_affinity_relation_ids()
         ):
-            raise WrongInputError(f"{character.name} ne peut contraindre {with_character.name}")
+            raise ImpossibleAction(f"{character.name} ne peut contraindre {with_character.name}")
 
     def check_request_is_possible(
         self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
