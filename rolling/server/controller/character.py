@@ -1549,11 +1549,11 @@ class CharacterController(BaseController):
 
             action.check_request_is_possible(character_model, input_)
             return action.perform(character_model, input_)
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
     @hapic.with_api_doc()

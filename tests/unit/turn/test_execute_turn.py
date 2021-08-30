@@ -345,7 +345,7 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert float(xena.life_points) == 1.05
-        assert round(xena.hunger, 1) == 20.0
+        assert round(xena.hunger, 1) == 19.8
         with pytest.raises(NoCarriedResource):
             kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
         r = kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH2")
