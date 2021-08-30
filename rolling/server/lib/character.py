@@ -15,7 +15,7 @@ import uuid
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CannotMoveToZoneError
+from rolling.exception import CannotMoveToZoneError, NotEnoughActionPoints
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
@@ -938,8 +938,14 @@ class CharacterLib:
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
 
-    def reduce_action_points(self, character_id: str, cost: float, commit: bool = True) -> None:
+    def reduce_action_points(
+        self, character_id: str, cost: float, commit: bool = True, check: bool = False
+    ) -> None:
         character_doc = self.get_document(character_id)
+
+        if check and character_doc.action_points < cost:
+            raise NotEnoughActionPoints(cost)
+
         character_doc.action_points = float(character_doc.action_points) - cost
         self._kernel.server_db_session.add(character_doc)
 

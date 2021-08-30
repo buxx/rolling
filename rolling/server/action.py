@@ -21,6 +21,7 @@ from rolling.action.craft import BeginStuffConstructionAction
 from rolling.action.craft import ContinueStuffConstructionAction
 from rolling.action.craft import CraftStuffWithResourceAction
 from rolling.action.craft import CraftStuffWithStuffAction
+from rolling.action.destroy import DestroyBuildAction
 from rolling.action.drink import DrinkResourceAction
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.drop import DropResourceAction
@@ -117,6 +118,7 @@ class ActionFactory:
         ActionType.TAKE_STUFF: TakeStuffAction,
         ActionType.TAKE_RESOURCE: TakeResourceAction,
         ActionType.SEED: SeedAction,
+        ActionType.DESTROY_BUILD: DestroyBuildAction,
     }
 
     def __init__(self, kernel: "Kernel") -> None:
@@ -180,6 +182,7 @@ class ActionFactory:
             ActionType.TAKE_FROM_BUILD: TakeFromBuildAction,
             ActionType.POWER_ON_BUILD: PowerOnBuildAction,
             ActionType.POWER_OFF_BUILD: PowerOffBuildAction,
+            ActionType.DESTROY_BUILD: DestroyBuildAction,
         }
 
     def get_with_stuff_action(

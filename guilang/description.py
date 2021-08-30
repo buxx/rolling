@@ -79,7 +79,7 @@ class Description:
     footer_links: typing.List[Part] = dataclasses.field(default_factory=list)
     back_url: typing.Optional[str] = None
     back_url_is_zone: bool = False
-    back_to_zone: bool = True
+    back_to_zone: bool = False
     illustration_name: typing.Optional[str] = None
     disable_illustration_row: bool = False
     is_long_text: bool = False

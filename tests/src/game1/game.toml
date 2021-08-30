@@ -45,6 +45,7 @@ create_character_max_points = 13.0
 max_action_propose_turns = 3
 reduce_tiredness_per_turn = 50
 tile_clutter_capacity = 10.0
+destroy_robustness_per_ap = 1
 
 [materials]
   [materials.MIDDLE_PIECE]
@@ -228,6 +229,7 @@ tile_clutter_capacity = 10.0
   power_on_require_resources = [{resource="BRANCHES", quantity=0.001}]
   abilities = []
   cost = 2.0
+  robustness = 1
 [build.TEST_BUILD_2]
   name = "Test build 2"
   char = "L"
@@ -298,6 +300,7 @@ tile_clutter_capacity = 10.0
   group_name = "Porte"
   door = "SIMPLE"
   many = false
+  robustness = 2
 
 [ACTIONS]
   [ACTIONS.USE_AS_WEAPON]
@@ -409,6 +412,11 @@ tile_clutter_capacity = 10.0
     character_effects = []
     like_water = true
     cost = 0.0
+
+  [ACTIONS.DESTROY_BUILD]
+    name = "Détruire"
+    actions = ["DESTROY_BUILD"]
+    cost = 0.0  # Cost is computed with concerned build type
 
 [build.PLOUGHED_LAND]
   name = "Terre labouré"

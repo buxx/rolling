@@ -47,6 +47,7 @@ create_character_knowledges_count = 1
 create_character_max_points = 13.0
 max_action_propose_turns = 3
 tile_clutter_capacity = 25.0
+destroy_robustness_per_ap = 1
 
 [materials]
   [materials.LIQUID]
@@ -508,6 +509,11 @@ tile_clutter_capacity = 25.0
     name = "Attaquer"
     actions = ["ATTACK_CHARACTER"]
     cost = 0.0
+
+  [ACTIONS.DESTROY_BUILD]
+    name = "Détruire"
+    actions = ["DESTROY_BUILD"]
+    cost = 0.0  # Cost is computed with concerned build type
 
   [ACTIONS.CHEATS]
     name = "Triches"
@@ -1784,6 +1790,7 @@ tile_clutter_capacity = 25.0
   allow_deposit = true
   allow_deposit_limited = true
   group_name = "Utilitaire"
+  robustness = 1
 [build.SOIL_KILN]
   name = "Four de terre"
   char = "%"
@@ -1801,6 +1808,7 @@ tile_clutter_capacity = 25.0
   allow_deposit = true
   allow_deposit_limited = true
   group_name = "Four"
+  robustness = 6
 [build.RAW_BRICK_KILN]
   name = "Four de brique crues"
   char = "%"
@@ -1818,6 +1826,7 @@ tile_clutter_capacity = 25.0
   allow_deposit = true
   allow_deposit_limited = true
   group_name = "Four"
+  robustness = 12
 [build.FIRED_BRICK_KILN]
   name = "Four de brique cuites"
   char = "%"
@@ -1835,6 +1844,7 @@ tile_clutter_capacity = 25.0
   allow_deposit = true
   allow_deposit_limited = true
   group_name = "Four"
+  robustness = 18
 [build.LOOM]
   name = "Métier à tisser"
   char = "$"
@@ -1846,6 +1856,7 @@ tile_clutter_capacity = 25.0
   many = false
   group_name = "Utilitaire"
   description = "Un outil indispensable pour produire du tissu"
+  robustness = 2
 [build.SIMPLE_WOOD_DOOR]
   name = "Porte en bois"
   char = "-"
@@ -1859,6 +1870,7 @@ tile_clutter_capacity = 25.0
   group_name = "Porte"
   door = "SIMPLE"
   many = false
+  robustness = 5
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"
@@ -1873,6 +1885,7 @@ tile_clutter_capacity = 25.0
   traversable = {"WALKING"=true}
   group_name = "Mur"
   description = "Empêche le passage des animaux"
+  robustness = 1
 [build.WOOD_FENCE]
   name = "Palissade de bois"
   char = "£"
@@ -1886,6 +1899,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+  robustness = 8
 [build.STONE_WALL]
   name = "Mur de pierre"
   char = "§"
@@ -1899,6 +1913,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+  robustness = 52
 [build.SOIL_WALL]
   name = "Mur de terre"
   char = "-"
@@ -1912,6 +1927,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+  robustness = 12
 [build.RAW_BRICK_WALL]
   name = "Mur de brique crue"
   char = "-"
@@ -1925,6 +1941,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+  robustness = 16
 [build.FIRED_BRICK_WALL]
   name = "Mur de brique cuite"
   char = "-"
@@ -1938,6 +1955,7 @@ tile_clutter_capacity = 25.0
   many = true
   traversable = {"WALKING"=false}
   group_name = "Mur"
+  robustness = 48
 [build.RAW_CLAY_FLOOR]
   name = "Terre battue"
   char = "_"

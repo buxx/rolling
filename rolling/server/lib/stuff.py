@@ -569,3 +569,13 @@ class StuffLib:
             query = query.filter(StuffDocument.stuff_id == stuff_id)
 
         return [self.stuff_model_from_doc(doc) for doc in query.all()]
+
+    def get_docs_from_build(
+        self, build_id: int, stuff_id: typing.Optional[str] = None
+    ) -> typing.List[StuffDocument]:
+        query = self.get_base_query(in_built_id=build_id)
+
+        if stuff_id is not None:
+            query = query.filter(StuffDocument.stuff_id == stuff_id)
+
+        return query.all()

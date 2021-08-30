@@ -60,6 +60,7 @@ class ActionType(enum.Enum):
     TAKE_STUFF = "TAKE_STUFF"
     TAKE_RESOURCE = "TAKE_RESOURCE"
     SEED = "SEED"
+    DESTROY_BUILD = "DESTROY_BUILD"
 
 
 # FIXME BS NOW: delete me

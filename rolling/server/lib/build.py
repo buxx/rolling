@@ -52,6 +52,7 @@ class BuildLib:
             is_on=False,
             is_floor=build_description.is_floor,
             is_door=build_description.is_door,
+            health=build_description.robustness,
         )
         self._kernel.server_db_session.add(build_doc)
 
@@ -200,6 +201,14 @@ class BuildLib:
 
         return query.all()
 
+    def get_all_ids(self, is_on: typing.Optional[bool]) -> typing.List[int]:
+        query = self._kernel.server_db_session.query(BuildDocument.id)
+
+        if is_on is not None:
+            query = query.filter(BuildDocument.is_on == is_on)
+
+        return [row[0] for row in query.all()]
+
     def is_there_build_here(
         self,
         world_row_i: int,
@@ -217,3 +226,41 @@ class BuildLib:
                 is_floor=is_floor,
             )
         )
+
+    def delete(self, build_id: int, commit: bool = True) -> None:
+        build_doc = self.get_build_doc(build_id)
+
+        # If it is a door ...
+        for door_relation in self._kernel.door_lib.get_door_relations_query(build_id).all():
+            self._kernel.server_db_session.delete(door_relation)
+
+        for carried_resource in self._kernel.resource_lib.get_stored_in_build(build_id):
+            self._kernel.resource_lib.reduce_stored_in(
+                build_id=build_id,
+                resource_id=carried_resource.id,
+                quantity=carried_resource.quantity,
+                commit=commit,
+            )
+            self._kernel.resource_lib.add_resource_to(
+                resource_id=carried_resource.id,
+                world_row_i=build_doc.world_row_i,
+                world_col_i=build_doc.world_col_i,
+                zone_row_i=build_doc.zone_row_i,
+                zone_col_i=build_doc.zone_col_i,
+                quantity=carried_resource.quantity,
+                ground=True,
+                commit=commit,
+            )
+
+        for stuff_doc in self._kernel.stuff_lib.get_docs_from_build(build_id=build_id):
+            stuff_doc.world_row_i = build_doc.world_row_i
+            stuff_doc.world_col_i = build_doc.world_col_i
+            stuff_doc.zone_row_i = build_doc.zone_row_i
+            stuff_doc.zone_col_i = build_doc.zone_col_i
+            stuff_doc.in_built_id = None
+            self._kernel.server_db_session.add(stuff_doc)
+
+        self._kernel.server_db_session.delete(build_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()

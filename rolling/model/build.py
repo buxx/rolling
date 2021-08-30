@@ -41,6 +41,7 @@ class BuildDescription:
     name: str
     char: str
     building_char: str
+    robustness: typing.Optional[int]  # None seems indestructible
     build_require_resources: typing.List[BuildBuildRequireResourceDescription]
     turn_require_resources: typing.List[BuildTurnRequireResourceDescription]
     power_on_require_resources: typing.List[BuildPowerOnRequireResourceDescription]

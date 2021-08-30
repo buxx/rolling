@@ -264,5 +264,27 @@ def populate_ac(
                     click.echo(f"ERROR: Signal newly added result error : code {response.status_code}")
 
 
+@main.command()
+@click.argument("game-config-dir")
+@click.argument("world-map-source")
+@click.argument("zone-map-folder")
+def sync_build_health(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(
+        game_config_folder=game_config_dir,
+        world_map_source_path=world_map_source,
+        tile_maps_folder_path=zone_map_folder,
+    )
+
+    for build_id in kernel.build_lib.get_all_ids(is_on=None):
+        build_doc = kernel.build_lib.get_build_doc(build_id)
+        build_description = kernel.game.config.builds[build_doc.build_id]
+        if build_description.robustness is not None and build_doc.health is None:
+            click.echo(f"Fixing build {build_doc.id}")
+            build_doc.health = build_description.robustness
+            kernel.server_db_session.add(build_doc)
+            kernel.server_db_session.commit()
+
+
 if __name__ == "__main__":
     main()

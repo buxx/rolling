@@ -402,3 +402,22 @@ class InputQuantityContext:
             real_quantity=real_quantity,
             real_unit=carried_resource.unit,
         )
+
+
+def get_health_percent_sentence(percent: int):
+    if percent < 10:
+        return "Extrêmement abîmé"
+
+    if percent < 25:
+        return "Très abîmé"
+
+    if percent < 50:
+        return "Bien abîmé"
+
+    if percent < 75:
+        return "Abîmé"
+
+    if percent < 90:
+        return "Quelque traces d'usures"
+
+    return "Bon état"

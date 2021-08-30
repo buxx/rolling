@@ -24,6 +24,7 @@ class BuildDocument(Document):
     is_on = Column(Boolean(), nullable=False)
     is_floor = Column(Boolean(), nullable=False, default=False)
     is_door = Column(Boolean(), nullable=False, default=False)
+    health = Column(Integer, nullable=True, default=None)
 
     # farming
     seeded_with = Column(String(255), nullable=True, default=None)

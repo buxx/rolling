@@ -108,6 +108,7 @@ class GameConfig:
         # FIXME BS NOW: passer les écrans en heure (en fonction de tick_every)
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
         self.tile_clutter_capacity: float = config_dict["tile_clutter_capacity"]
+        self.destroy_robustness_per_ap: int = config_dict["destroy_robustness_per_ap"]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
@@ -346,6 +347,7 @@ class GameConfig:
                 is_floor=build_raw.get("is_floor", False),
                 is_door=bool(build_raw.get("door", None)),
                 door_type=build_raw.get("door", None),
+                robustness=build_raw.get("robustness"),
             )
 
         return builds
