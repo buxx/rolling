@@ -110,7 +110,7 @@ class AccountController(BaseController):
             ],
             footer_inventory=False,
             footer_actions=False,
-            back_to_zone=True,
+            back_to_zone=False,
         )
 
     @hapic.with_api_doc()
@@ -139,7 +139,7 @@ class AccountController(BaseController):
                         )
                     )
                 ],
-                back_to_zone=True,
+                back_to_zone=False,
                 footer_inventory=False,
                 footer_actions=False,
             )
@@ -163,7 +163,7 @@ class AccountController(BaseController):
             ],
             footer_inventory=False,
             footer_actions=False,
-            back_to_zone=True,
+            back_to_zone=False,
         )
 
     @hapic.with_api_doc()
