@@ -86,7 +86,7 @@ from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_exception_for_not_enough_ap
 
-base_skills = ["strength", "perception", "endurance", "charism", "intelligence", "agility", "luck"]
+base_skills = ["strength", "endurance", "intelligence", "agility"]
 
 
 class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
