@@ -14,6 +14,7 @@ from rolling.model.zone import ZoneMapTileProduction
 from rolling.server.application import HEADER_NAME__DISABLE_AUTH_TOKEN
 from rolling.server.base import get_kernel
 from rolling.server.document.corpse import AnimatedCorpseType, AnimatedCorpseDocument
+from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 
@@ -284,6 +285,27 @@ def sync_build_health(game_config_dir: str, world_map_source: str, zone_map_fold
             build_doc.health = build_description.robustness
             kernel.server_db_session.add(build_doc)
             kernel.server_db_session.commit()
+
+
+@main.command()
+@click.argument("game-config-dir")
+@click.argument("world-map-source")
+@click.argument("zone-map-folder")
+def sync_character_skill(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(
+        game_config_folder=game_config_dir,
+        world_map_source_path=world_map_source,
+        tile_maps_folder_path=zone_map_folder,
+    )
+
+    available_skills = list(kernel.game.config.skills.keys())
+    for skill_doc in kernel.server_db_session.query(CharacterSkillDocument).filter(
+        CharacterSkillDocument.skill_id.not_in(available_skills)
+    ).all():
+        click.echo(f"Delete {skill_doc.character_id} {skill_doc.skill_id}")
+        kernel.server_db_session.delete(skill_doc)
+        kernel.server_db_session.commit()
 
 
 if __name__ == "__main__":
