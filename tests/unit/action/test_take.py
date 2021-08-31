@@ -378,7 +378,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        with pytest.raises(WrongInputError):
+        with pytest.raises(ImpossibleAction):
             take_from_character_action.check_request_is_possible(
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
