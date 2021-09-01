@@ -209,7 +209,7 @@ class TestFightAction:
         )
         assert (
             "Le parti adverse compte 13 combattant(s) représenté(s) par le/les afinité(s): "
-            == descr.items[1].text
+            in descr.items[1].text
         )
         assert (
             "England, Burgundian" == descr.items[1].text
