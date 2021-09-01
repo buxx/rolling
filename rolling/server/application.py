@@ -10,8 +10,9 @@ from aiohttp.web_response import Response
 import base64
 
 from guilang.description import Description
-from rolling.exception import AccountNotFound
+from rolling.exception import AccountNotFound, ComponentNotPrepared
 from rolling.kernel import Kernel
+from rolling.log import server_logger
 from rolling.server.controller.account import AccountController
 from rolling.server.controller.admin import AdminController
 from rolling.server.controller.affinity import AffinityController
@@ -114,7 +115,21 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
 
         return Response(body=description_serializer.dump_json(description), status=response.status, content_type='application/json')
 
-    app = web.Application(middlewares=[auth, character_infos])
+    @middleware
+    async def rollback_session(request: Request, handler):
+        try:
+            return await handler(request)
+        except Exception as exc:
+            try:
+                server_logger.warning("Error happen over web handler, rollback session")
+                kernel.server_db_session.rollback()
+            except ComponentNotPrepared:
+                server_logger.error(
+                    f"Trying to rollback session on error but session not prepared !"
+                )
+            raise exc
+
+    app = web.Application(middlewares=[auth, character_infos, rollback_session])
 
     # Bind routes
     CommonController(kernel).bind(app)

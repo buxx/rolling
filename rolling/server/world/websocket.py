@@ -79,6 +79,8 @@ class WorldEventsManager:
                         )
                     )
                     return
+                except Exception:
+                    server_logger.exception("Unhandled exception during event process")
 
         server_logger.info(f"Websocket of world closed")
 
