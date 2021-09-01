@@ -201,14 +201,14 @@ class TakeStuffOrResources(TransferStuffOrResources):
         try:
             stuff: StuffModel = self._kernel.stuff_lib.get_stuff(stuff_id)
         except NoResultFound:
-            raise WrongInputError(f"objet inexistant")
+            raise ImpossibleAction(f"objet inexistant")
         carried_count = self._kernel.stuff_lib.get_stuff_count(
             character_id=self._from_character.id,
             stuff_id=stuff.stuff_id,
             shared_with_affinity_ids=shared_with_affinity_ids,
         )
         if carried_count < (quantity or 1):
-            raise WrongInputError(f"{self._from_character.name} n'en a pas assez")
+            raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         shared_with_affinity_ids = self.get_can_take_from_affinity_relation_ids()
