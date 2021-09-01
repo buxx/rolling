@@ -4,7 +4,7 @@ aiohttp-jinja2==1.5
 aioresponses==0.7.2
 alembic==1.7.1
 apispec==5.1.0
-apispec-serpyco==0.17
+apispec-serpyco==0.19
 appdirs==1.4.4
 async-timeout==3.0.1
 attrs==21.2.0
