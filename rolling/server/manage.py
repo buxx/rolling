@@ -308,5 +308,26 @@ def sync_character_skill(game_config_dir: str, world_map_source: str, zone_map_f
         kernel.server_db_session.commit()
 
 
+@main.command()
+@click.argument("game-config-dir")
+@click.argument("world-map-source")
+@click.argument("zone-map-folder")
+def sync_drop_resource_nowhere(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+    click.echo("Preparing kernel")
+    kernel = get_kernel(
+        game_config_folder=game_config_dir,
+        world_map_source_path=world_map_source,
+        tile_maps_folder_path=zone_map_folder,
+    )
+
+    for resource_description in kernel.game.config.resources.values():
+        if resource_description.drop_to_nowhere:
+            for resource_doc in kernel.resource_lib.get_base_query(
+                resource_id=resource_description.id,
+            ):
+                kernel.server_db_session.delete(resource_doc)
+                kernel.server_db_session.commit()
+
+
 if __name__ == "__main__":
     main()

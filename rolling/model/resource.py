@@ -23,6 +23,7 @@ class ResourceDescriptionModel:
     descriptions: typing.List[ActionDescriptionModel]
     illustration: typing.Optional[str]
     grow_speed: typing.Optional[int]
+    drop_to_nowhere: bool
 
 
 # FIXME BS: rename (can be in build)

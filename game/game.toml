@@ -221,6 +221,7 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "fresh_water.png"
+    drop_to_nowhere = true
 
   [resources.SALTED_WATER]
     name = "Eau salée"
@@ -230,6 +231,7 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "salted_water.png"
+    drop_to_nowhere = true
 
   [resources.WINE]
     name = "Vin"
@@ -238,6 +240,7 @@ destroy_robustness_per_ap = 1
     unit = "L"
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    drop_to_nowhere = true
 
   [resources.BEACH_SAND]
     name = "Sable de plage"
@@ -247,6 +250,7 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "sand.png"
+    drop_to_nowhere = true
 
   [resources.RAW_COPPER]
     name = "Cuivre brut"
@@ -318,6 +322,7 @@ destroy_robustness_per_ap = 1
     clutter = 0.25
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "dirt.png"
+    drop_to_nowhere = true
 
   [resources.WET_SOIL]
     name = "Terre crue"
@@ -327,6 +332,7 @@ destroy_robustness_per_ap = 1
     clutter = 0.25
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "mud.png"
+    drop_to_nowhere = true
 
   [resources.WOOD]
     name = "Bois"

@@ -60,6 +60,8 @@ class ResourceLib:
         if exclude_shared_with_affinity:
             query = query.filter(ResourceDocument.shared_with_affinity_id == None)
 
+        # NOTE: it is important to let == None for carried_by_id and in_built_id
+        # because query without them indicate ground resources
         query = query.filter(
             ResourceDocument.carried_by_id == carried_by_id,
             ResourceDocument.in_built_id == in_built_id,
@@ -92,7 +94,7 @@ class ResourceLib:
         shared_with_affinity_id: typing.Optional[int] = None,
         exclude_shared_with_affinity: bool = False,
         commit: bool = True,
-    ) -> CarriedResourceDescriptionModel:
+    ) -> None:
         server_logger.debug(
             f"add_resource_to ("
             f"resource_id:{resource_id} "
@@ -145,6 +147,9 @@ class ResourceLib:
         else:
             raise NotImplementedError()
 
+        if ground and resource_description.drop_to_nowhere:
+            return
+
         if exclude_shared_with_affinity:
             assert shared_with_affinity_id is None
             filters.append(ResourceDocument.shared_with_affinity_id == None)
@@ -173,8 +178,6 @@ class ResourceLib:
 
         if commit:
             self._kernel.server_db_session.commit()
-
-        return self._carried_resource_model_from_doc([resource])
 
     def get_carried_by(
         self,
@@ -260,6 +263,7 @@ class ResourceLib:
                 descriptions=resource_description.descriptions,
                 illustration=resource_description.illustration,
                 grow_speed=resource_description.grow_speed,
+                drop_to_nowhere=resource_description.drop_to_nowhere,
             )
 
     def _carried_resource_model_from_doc(
@@ -295,6 +299,7 @@ class ResourceLib:
             ground_col_i=docs[0].zone_col_i,
             illustration=resource_description.illustration,
             grow_speed=resource_description.grow_speed,
+            drop_to_nowhere=resource_description.drop_to_nowhere,
         )
 
     def have_resource(

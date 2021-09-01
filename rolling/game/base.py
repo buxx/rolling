@@ -217,6 +217,7 @@ class GameConfig:
                 descriptions=[],  # filled after
                 illustration=illustration,
                 grow_speed=resource_raw.get("grow_speed", None),
+                drop_to_nowhere=resource_raw.get("drop_to_nowhere", False),
             )
 
         return resources
