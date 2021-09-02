@@ -361,6 +361,15 @@ destroy_robustness_per_ap = 1
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "shellfish.png"
 
+  [resources.FISH_FRESH]
+    name = "Poissons"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "fish.png"
+
   [resources.RAW_MEAT]
     name = "Viande crue"
     weight=1.0
@@ -412,6 +421,7 @@ destroy_robustness_per_ap = 1
     unit = "G"
     clutter = 0.001
     actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    illustration = "bread.png"
 
   [resources.RAW_STONE]
     name = "Pierre brute"
@@ -462,6 +472,44 @@ destroy_robustness_per_ap = 1
     clutter = 0.1
     actions = ["DROP_RESOURCE"]
     illustration = "fired_brick.png"
+
+  [resources.FLOOR]
+    name = "Farine"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["DROP_RESOURCE"]
+    illustration = "flour.png"
+
+  [resources.WOOL]
+    name = "Fils"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "u"
+    clutter = 0.25
+    actions = ["DROP_RESOURCE"]
+    illustration = "wool.png"
+
+  [resources.CHARCOAL]
+    name = "Charbon de bois"
+    weight=1000.0
+    material="MIDDLE_PIECE"
+    unit = "L"
+    clutter = 0.5
+    actions = ["DROP_RESOURCE"]
+    illustration = "charcoal.png"
+
+# FIXME B NOW:
+# * fabrication pain
+# * fabrication farine
+# * fibre -> fils -> tissu
+# * bois -> charbon de bois
+# * four de terr et brique cru -> middle temp
+# * four de brique cuite -> high temp (charbon)
+# * cuivre|etain|bronze mix/brute/pur -> cuivre pur (middle temp) & enclume de pierre
+# * fer brute/pur (high temp) & enclume
+# * pĉhe avec lance & filet
 
 [resource_mix]
   [resource_mix.WET_SOIL_WITH_FRESH_WATER]
@@ -530,6 +578,13 @@ destroy_robustness_per_ap = 1
     actions = ["EAT_RESOURCE"]
     accept_resources = ["SHELLFISH_FRESH"]
     consume_per_tick = 20.0  # g (20.0 * 24 hours = ~500g)
+    character_effects = []
+    cost = 0.0
+
+  [ACTIONS.EAT_FISH_FRESH]
+    actions = ["EAT_RESOURCE"]
+    accept_resources = ["FISH_FRESH"]
+    consume_per_tick = 15.0
     character_effects = []
     cost = 0.0
 

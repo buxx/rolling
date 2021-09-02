@@ -429,3 +429,44 @@
   clutter = 0.5
   actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
   classes = ["CRAFT", "STATUETTE"]
+[SPINDLE]
+  name = "Fuseau"
+  weight = 500.0
+  clutter = 0.1
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+  illustration = "spindles.png"
+[ROUET]
+  name = "Rouet"
+  weight = 5000.0
+  clutter = 3.0
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+  illustration = "rouet.png"
+[LITTLE_FISHING_NET]
+  name = "Petit filet de pêche"
+  weight = 5000.0
+  clutter = 2.0
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+  illustration = "littlefishnet.png"
+[MORTIER_PILON]
+  name = "Mortier et Pilon"
+  weight = 10000.0
+  clutter = 2.0
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+  illustration = "Mortier_Pillon.png"
+[STONE_ANVIL]
+  name = "Enclume de pierre"
+  weight = 75000.0
+  clutter = 15.0
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+[IRON_ANVIL]
+  name = "Enclume"
+  weight = 95000.0
+  clutter = 10.0
+  actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
+  classes = ["CRAFT"]
+  illustration = "anvil.png"
