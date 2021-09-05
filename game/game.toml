@@ -423,6 +423,7 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     grow_speed = 42
+    illustration = "cereals.png"
 
   [resources.BREAD]
     name = "Pain"
@@ -489,14 +490,14 @@ destroy_robustness_per_ap = 1
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.001
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "flour.png"
 
   [resources.WOOL]
     name = "Fils"
     weight=1000.0
     material="MIDDLE_PIECE"
-    unit = "u"
+    unit = "U"
     clutter = 0.25
     actions = ["DROP_RESOURCE"]
     illustration = "wool.png"
@@ -521,7 +522,7 @@ destroy_robustness_per_ap = 1
 # * OK fer brute/pur (high temp) & enclume
 # * OK pĉhe avec lance & filet
 # * bonus four de terre
-# * fabrication des enclumes
+# * OK fabrication des enclumes
 
 [resource_mix]
   [resource_mix.WET_SOIL_WITH_FRESH_WATER]
@@ -1030,8 +1031,8 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = [""]
-    required_one_of_zones = ["BORDER_FISHING"]
+    required_all_ability_ids = ["BORDER_FISHING"]
+  required_one_of_zones = ["BEACH"]
     produce = [
       {resource="FISH_FRESH", quantity=10000.0, probability=50.0},
     ]
@@ -1145,10 +1146,10 @@ destroy_robustness_per_ap = 1
     required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP"]
     required_all_ability_ids = []
     produce = [
-      {resource="FLOOR", coeff=1000.0}
+      {resource="BREAD", coeff=1.0}
     ]
-    required_resource_id = "CEREAL"
-    cost_per_unit = 0.05
+    required_resource_id = "FLOOR"
+    cost_per_unit = 0.00025
     cost = 3.0
 
   [ACTIONS.MAKE_FLOOR]
@@ -1812,8 +1813,8 @@ destroy_robustness_per_ap = 1
     cost = 10.0
     link_group_name = "Matériel de forge"
 
-  [ACTIONS.IRON_ANVIL]
-    name = "Fabriquer une enclume de pierre"
+  [ACTIONS.BUILD_IRON_ANVIL]
+    name = "Fabriquer une enclume"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1829,6 +1830,24 @@ destroy_robustness_per_ap = 1
     craft_ap = 115.0
     cost = 20.0
     link_group_name = "Matériel de forge"
+
+  [ACTIONS.BUILD_MORTIER_PILON]
+    name = "Mortier et pilon"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "MORTIER_PILON"
+    default_description = "Taillé dans un bois épais"
+    consume = [
+      {resource="WOOD", quantity=0.1}
+    ]
+    craft_ap = 20.0
+    cost = 0.0
+    link_group_name = "Utilitaire"
 
   [ACTIONS.SEARCH_WOOD]
     name = "Chercher du bois (construction/artisanat)"
