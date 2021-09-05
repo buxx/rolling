@@ -193,7 +193,7 @@ class ClickActionProcessor(EventProcessor):
         try:
             action.check_request_is_possible(character, input_)
             zone_events, sender_events = action.perform_from_event(character, input_)
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             await self._kernel.server_zone_events_manager.respond_to_socket(
                 socket=sender_socket,
                 event_str=self._kernel.event_serializer_factory.get_serializer(

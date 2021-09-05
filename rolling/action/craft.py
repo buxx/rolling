@@ -63,7 +63,7 @@ class BaseCraftStuff:
         dry_run: bool = True,
     ) -> None:
         if character.action_points < cost:
-            raise WrongInputError(
+            raise ImpossibleAction(
                 f"{character.name} no possède pas assez de points d'actions "
                 f"({round(cost, 2)} nécessaires)"
             )
@@ -82,7 +82,7 @@ class BaseCraftStuff:
                 owned_quantity = len(carried_stuffs)
 
                 if owned_quantity < required_quantity:
-                    raise WrongInputError(
+                    raise ImpossibleAction(
                         f"Vous ne possédez pas assez de {stuff_properties.name}: {required_quantity} nécessaire(s)"
                     )
 
@@ -105,7 +105,7 @@ class BaseCraftStuff:
                         quantity=(required_quantity - carried_resource.quantity),
                         unit=carried_resource.unit,
                     )
-                    raise WrongInputError(
+                    raise ImpossibleAction(
                         f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} de plus nécessaire(s)"
                     )
 
@@ -387,7 +387,7 @@ class BeginStuffConstructionAction(CharacterAction):
 
             cost = self.get_cost(character)
             if character.action_points < cost:
-                raise WrongInputError(
+                raise ImpossibleAction(
                     f"{character.name} no possède pas assez de points d'actions "
                     f"({round(cost, 2)} nécessaires)"
                 )
@@ -402,7 +402,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         character_id=character.id, resource_id=resource_id, quantity=quantity
                     ):
                         resource_description = self._kernel.game.config.resources[resource_id]
-                        raise WrongInputError(
+                        raise ImpossibleAction(
                             f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
                         )
 
@@ -418,7 +418,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
                             stuff_id
                         )
-                        raise WrongInputError(
+                        raise ImpossibleAction(
                             f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
                         )
 

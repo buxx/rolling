@@ -1186,7 +1186,7 @@ class CharacterController(BaseController):
         if hapic_data.query.do:
             try:
                 return self._kernel.action_factory.execute_pending(pending_action)
-            except ImpossibleAction as exc:
+            except (ImpossibleAction, WrongInputError) as exc:
                 return Description(
                     title="Action impossible",
                     back_url=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}",
@@ -1198,7 +1198,7 @@ class CharacterController(BaseController):
                             form_action=f"/_describe/character/{hapic_data.path.character_id}/pending_actions",
                         )
                     ],
-                    illustration_name=exc.illustration_name,
+                    illustration_name=getattr(exc, "illustration_name", None),
                 )
 
         return Description(
@@ -1579,11 +1579,11 @@ class CharacterController(BaseController):
 
             action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
             return action.perform(character=character_model, stuff=stuff, input_=input_)
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
     @hapic.with_api_doc()
@@ -1611,11 +1611,11 @@ class CharacterController(BaseController):
             )
         except NotEnoughActionPoints as exc:
             raise get_exception_for_not_enough_ap(character_model, exc.cost)
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
@@ -1624,11 +1624,11 @@ class CharacterController(BaseController):
             return action.perform(
                 character=character_model, build_id=hapic_data.path.build_id, input_=input_
             )
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
     @hapic.with_api_doc()
@@ -1656,11 +1656,11 @@ class CharacterController(BaseController):
             return action.perform(
                 character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
             )
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
     @hapic.with_api_doc()
@@ -1699,11 +1699,11 @@ class CharacterController(BaseController):
                     else []
                 ),
             )
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
     @hapic.with_api_doc()
@@ -1824,11 +1824,11 @@ class CharacterController(BaseController):
                 world_row_i=hapic_data.path.world_row_i,
                 world_col_i=hapic_data.path.world_col_i,
             )
-        except ImpossibleAction as exc:
+        except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Effectuer un voyage ...",
                 items=[Part(text=line) for line in str(exc).split("\n")],
-                illustration_name=exc.illustration_name,
+                illustration_name=getattr(exc, "illustration_name", None),
             )
 
         buttons = [Part(label="Rester ici")]

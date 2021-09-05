@@ -177,10 +177,10 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 user_input=input_.quantity, carried_resource=carried_resource
             )
             if carried_resource.quantity < user_input_context.real_quantity:
-                raise WrongInputError(f"Vous n'en possédez pas assez")
+                raise ImpossibleAction(f"Vous n'en possédez pas assez")
             cost = self.get_cost(character, resource_id=resource_id, input_=input_)
             if character.action_points < cost:
-                raise WrongInputError(
+                raise ImpossibleAction(
                     f"{character.name} no possède pas assez de points d'actions "
                     f"({round(cost, 2)} nécessaires)"
                 )
