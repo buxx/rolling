@@ -206,10 +206,12 @@ destroy_robustness_per_ap = 1
   name = "Tissage"
 [ability.GRIND]
   name = "Concassage"
-[ability.SPIN]
-  name = "Filage"
+[ability.SPIN1]
+  name = "Filage manuel"
+[ability.SPIN2]
+  name = "Filage mécanisé"
 [ability.HAMMERING1]
-  name = "Martelage sur pierre"
+  name = "Martelage"
 [ability.HAMMERING2]
   name = "Martelage sur enclume"
 [ability.BORDER_FISHING]
@@ -342,7 +344,6 @@ destroy_robustness_per_ap = 1
     clutter = 0.25
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "mud.png"
-    drop_to_nowhere = true
 
   [resources.WOOD]
     name = "Bois"
@@ -455,7 +456,7 @@ destroy_robustness_per_ap = 1
     weight=50000.0
     material="MIDDLE_PIECE"
     unit = "M3"
-    clutter = 100.0
+    clutter = 50.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.CLOTH]
@@ -495,11 +496,11 @@ destroy_robustness_per_ap = 1
 
   [resources.WOOL]
     name = "Fils"
-    weight=1000.0
+    weight=500.0
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.25
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "wool.png"
 
   [resources.CHARCOAL]
@@ -1034,7 +1035,7 @@ destroy_robustness_per_ap = 1
     required_all_ability_ids = ["BORDER_FISHING"]
   required_one_of_zones = ["BEACH"]
     produce = [
-      {resource="FISH_FRESH", quantity=10000.0, probability=50.0},
+      {resource="FISH_FRESH", quantity=10000.0, probability=70.0},
     ]
     cost = 6.0
 
@@ -1168,20 +1169,36 @@ destroy_robustness_per_ap = 1
     cost_per_unit = 0.2
     cost = 0.0
 
-  [ACTIONS.MAKE_WOOL]
-    name = "Faire du fil"
+  [ACTIONS.MAKE_WOOL_WITH_SPIN1]
+    name = "Faire du fil (manuel)"
     actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
-    required_one_of_ability_ids = ["SPIN"]
+    required_one_of_ability_ids = ["SPIN1"]
     required_all_ability_ids = []
     produce = [
-      {resource="WOOL", coeff=100.0}
+      {resource="WOOL", coeff=10.0}
     ]
-    required_resource_id = "WOOL"
-    cost_per_unit = 100.0
+    required_resource_id = "VEGETAL_FIBER"
+    cost_per_unit = 50.0
+    cost = 0.0
+
+  [ACTIONS.MAKE_WOOL_WITH_SPIN2]
+    name = "Faire du fil (mécaniquement)"
+    actions = ["TRANSFORM_RESOURCES_TO_RESOURCES"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["SPIN2"]
+    required_all_ability_ids = []
+    produce = [
+      {resource="WOOL", coeff=10.0}
+    ]
+    required_resource_id = "VEGETAL_FIBER"
+    cost_per_unit = 5.0
     cost = 0.0
 
   [ACTIONS.MAKE_CHARCOAL]
@@ -1426,7 +1443,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
+    required_all_ability_ids = ["BLACKSMITH2", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
     produce_stuff_id = "IRON_SHIELD_HEATER"
     default_description = "Bouclier triangulaire en fer"
     consume = [
@@ -1516,7 +1533,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
+    required_all_ability_ids = ["BLACKSMITH2", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
     produce_stuff_id = "IRON_CUIRASS"
     default_description = "Plastron et dossière de fer"
     consume = [
@@ -1659,7 +1676,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
+    required_all_ability_ids = ["BLACKSMITH2", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
     produce_stuff_id = "IRON_HAXE"
     default_description = "Manche en bois et lame de fer"
     consume = [
@@ -1731,7 +1748,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
+    required_all_ability_ids = ["BLACKSMITH2", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
     produce_stuff_id = "IRON_DAGGER"
     default_description = "D'une pièce de fer"
     consume = [
@@ -1785,7 +1802,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["BLACKSMITH", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
+    required_all_ability_ids = ["BLACKSMITH2", "HEAT_UP_HIGH_TEMP", "HAMMERING2"]
     produce_stuff_id = "IRON_SPEAR"
     default_description = "Pointe de fer"
     consume = [
@@ -1821,7 +1838,7 @@ destroy_robustness_per_ap = 1
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = []
-    required_all_ability_ids = ["HAMMERING1"]
+    required_all_ability_ids = ["BLACKSMITH", "HAMMERING1"]
     produce_stuff_id = "IRON_ANVIL"
     default_description = "Multiple lamelles de fer"
     consume = [
@@ -1846,6 +1863,42 @@ destroy_robustness_per_ap = 1
       {resource="WOOD", quantity=0.1}
     ]
     craft_ap = 20.0
+    cost = 0.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.BUILD_ROUET]
+    name = "Rouet"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "ROUET"
+    default_description = "D'une belle facture"
+    consume = [
+      {resource="WOOD", quantity=0.5}
+    ]
+    craft_ap = 24.0
+    cost = 0.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.BUILD_SPINDLE]
+    name = "Fuseau"
+    actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce_stuff_id = "SPINDLE"
+    default_description = "Simple petite tige en bois"
+    consume = [
+      {resource="WOOD", quantity=0.1}
+    ]
+    craft_ap = 2.0
     cost = 0.0
     link_group_name = "Utilitaire"
 
@@ -1887,7 +1940,7 @@ destroy_robustness_per_ap = 1
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     produce = [
-      {resource="VEGETAL_FIBER", quantity_per_hour=0.10, random_loss=30.0},
+      {resource="VEGETAL_FIBER", quantity_per_hour=0.01, random_loss=30.0},
     ]
     cost = 0.0
 
