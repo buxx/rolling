@@ -398,11 +398,12 @@ class CharacterModel:
             [bag.clutter_capacity for bag in self.bags]
         )
 
-    def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
-        for ability in abilities:
-            if ability in self.ability_ids:
-                return True
-        return False
+    def have_abilities(self, abilities: typing.List[str]) -> typing.List[str]:
+        have_abilities = []
+        for ability_id in abilities:
+            if ability_id in self.ability_ids:
+                have_abilities.append(ability_id)
+        return have_abilities
 
     def get_skill_value(self, skill_id: str) -> float:
         return self.skills[skill_id].value

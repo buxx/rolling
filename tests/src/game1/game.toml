@@ -117,6 +117,8 @@ destroy_robustness_per_ap = 1
   name = "Maitrise de la forge"
 [ability.BLACKSMITH2]
   name = "Maitrise de la forge avancé"
+[ability.HUNT_SMALL_GAME]
+  name = "Chasse gibier"
 
 [character_effects]
   [character_effects.HUNGRY_SATISFIED]

@@ -13,5 +13,6 @@ class AbilityDescription:
 
 @dataclasses.dataclass
 class HaveAbility:
+    ability_id: str
     from_: FromType
     risk: RiskType

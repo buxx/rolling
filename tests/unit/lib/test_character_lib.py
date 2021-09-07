@@ -1,8 +1,12 @@
 # coding: utf-8
 import pytest
 
+from fixtures import create_stuff
 from rolling.kernel import Kernel
+from rolling.model.ability import HaveAbility
+from rolling.model.character import CharacterModel
 from rolling.model.measure import Unit
+from rolling.model.meta import FromType, RiskType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
@@ -136,3 +140,46 @@ class TestCharacterLib:
         assert 2 == len(inventory.stuff)
         assert "Plastic bottle" == inventory.stuff[0].name
         assert "Plastic bottle" == inventory.stuff[1].name
+
+    def test_have_from_of_abilities__around_ground_stuffs(
+        self,
+        worldmapc_xena_model: CharacterModel,
+        worldmapc_kernel: Kernel,
+    ) -> None:
+        xena = worldmapc_xena_model
+        kernel = worldmapc_kernel
+
+        # Given
+        create_stuff(
+            kernel=kernel,
+            stuff_id="STONE_HAXE",
+            world_row_i=xena.world_row_i,
+            world_col_i=xena.world_col_i,
+            zone_row_i=xena.zone_row_i,
+            zone_col_i=xena.zone_col_i,
+        )
+
+        # When
+        have_abilities = kernel.character_lib.have_from_of_abilities(
+            character=xena,
+            abilities=[
+                kernel.game.config.abilities["BLACKSMITH"],
+                kernel.game.config.abilities["HUNT_SMALL_GAME"],
+            ],
+        )
+
+        # Then
+        assert have_abilities
+        assert len(have_abilities) == 2
+        assert have_abilities == [
+            HaveAbility(
+                ability_id='BLACKSMITH',
+                from_=FromType.HIMSELF,
+                risk=RiskType.NONE
+            ),
+            HaveAbility(
+                ability_id='HUNT_SMALL_GAME',
+                from_=FromType.STUFF,
+                risk=RiskType.NONE
+            )
+        ]

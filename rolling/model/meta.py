@@ -8,7 +8,7 @@ class TransportType(Enum):
 
 
 class FromType(Enum):
-    CHARACTER = "CHARACTER"
+    HIMSELF = "HIMSELF"
     BUILD = "BUILD"
     STUFF = "STUFF"
 

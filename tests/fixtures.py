@@ -359,10 +359,22 @@ def burgundian_warlord(
     return _create_soldiers(worldmapc_kernel, burgundian_affinity, 1, warlord=True)[0]
 
 
-def create_stuff(kernel: Kernel, stuff_id: str) -> StuffModel:
+def create_stuff(
+    kernel: Kernel,
+    stuff_id: str,
+    world_row_i: int = 0,
+    world_col_i: int = 0,
+    zone_row_i: int = 0,
+    zone_col_i: int = 0,
+) -> StuffModel:
+
     haxe_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
     haxe_doc = kernel.stuff_lib.create_document_from_stuff_properties(
-        haxe_properties, world_row_i=0, world_col_i=0, zone_row_i=0, zone_col_i=0
+        haxe_properties,
+        world_row_i=world_row_i,
+        world_col_i=world_col_i,
+        zone_row_i=zone_row_i,
+        zone_col_i=zone_col_i,
     )
     kernel.stuff_lib.add_stuff(haxe_doc)
     return kernel.stuff_lib.get_stuff(haxe_doc.id)

@@ -43,11 +43,12 @@ class StuffProperties:
     skills_bonus: typing.List[str] = serpyco.field(default_factory=list)
     illustration: typing.Optional[str] = None
 
-    def have_one_of_abilities(self, abilities: typing.List[str]) -> bool:
-        for ability in abilities:
-            if ability in self.abilities:
-                return True
-        return False
+    def have_abilities(self, abilities: typing.List[str]) -> typing.List[str]:
+        have_abilities = []
+        for ability_id in abilities:
+            if ability_id in self.abilities:
+                have_abilities.append(ability_id)
+        return have_abilities
 
 
 @dataclasses.dataclass

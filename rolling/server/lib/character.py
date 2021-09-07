@@ -1033,15 +1033,34 @@ class CharacterLib:
         )
         haves: typing.List[HaveAbility] = []
 
-        if character.have_one_of_abilities([ability.id for ability in abilities]):
-            haves.append(HaveAbility(from_=FromType.CHARACTER, risk=RiskType.NONE))
+        for have_ability_id in character.have_abilities([ability.id for ability in abilities]):
+            haves.append(
+                HaveAbility(
+                    ability_id=have_ability_id, from_=FromType.HIMSELF, risk=RiskType.NONE
+                )
+            )
 
-        for stuff in self._kernel.stuff_lib.get_carried_by(character.id):
+        carried_or_around_stuffs = self._kernel.stuff_lib.get_carried_by(character.id)
+        for row_i, col_i in around_character:
+            # FIXME BS : optimize by permitting give list of coordinates
+            carried_or_around_stuffs += self._kernel.stuff_lib.get_zone_stuffs(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=row_i,
+                zone_col_i=col_i,
+            )
+        for stuff in carried_or_around_stuffs:
             stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
                 stuff.stuff_id
             )
-            if stuff_properties.have_one_of_abilities([ability.id for ability in abilities]):
-                haves.append(HaveAbility(from_=FromType.STUFF, risk=RiskType.NONE))
+            for have_ability_id in stuff_properties.have_abilities(
+                [ability.id for ability in abilities]
+            ):
+                haves.append(
+                    HaveAbility(
+                        ability_id=have_ability_id, from_=FromType.STUFF, risk=RiskType.NONE,
+                    )
+                )
 
         for around_row_i, around_col_i in around_character:
             for build in self._kernel.build_lib.get_zone_build(
@@ -1058,7 +1077,11 @@ class CharacterLib:
                     for ability in abilities:
                         if ability.id in build_description.ability_ids:
                             # TODO BS 20200220: implement risks
-                            haves.append(HaveAbility(from_=FromType.BUILD, risk=RiskType.NONE))
+                            haves.append(
+                                HaveAbility(
+                                    ability_id=ability.id, from_=FromType.BUILD, risk=RiskType.NONE
+                                )
+                            )
 
         return haves
 
