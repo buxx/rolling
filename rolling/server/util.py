@@ -10,6 +10,7 @@ from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import get_with_stuff_action_url
+from rolling.exception import NotEnoughActionPoints
 from rolling.server.document.base import ImageDocument
 
 if typing.TYPE_CHECKING:
@@ -100,7 +101,10 @@ def with_multiple_carried_stuffs(
 
     parts = []
     for i in range(do_it_count):
-        parts.extend(do_for_one_func(character, all_carried[i], input_))
+        try:
+            parts.extend(do_for_one_func(character, all_carried[i], input_))
+        except NotEnoughActionPoints:
+            parts.append(Part(text="Plus assez de Points d'Actions !"))
 
     return Description(title=title, items=parts + success_parts, redirect=redirect)
 

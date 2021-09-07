@@ -13,7 +13,7 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction, NotEnoughActionPoints, WrongInputError
 from rolling.exception import RollingError
 from rolling.model.measure import Unit
 from rolling.rolling_types import ActionType
@@ -82,6 +82,14 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     ) -> None:
         self.check_is_possible(character, stuff)
 
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: typing.Optional[typing.Any] = None,
+    ) -> typing.Optional[float]:
+        return self._description.base_cost
+
     def perform(
         self,
         character: "CharacterModel",
@@ -95,6 +103,10 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             stuff_: "StuffModel",
             input__: TransformStuffIntoResourcesModel,
         ) -> typing.List[Part]:
+            character_doc = self._kernel.character_lib.get_document(id_=character_.id)
+            if character_doc.action_points < self._description.base_cost:
+                raise NotEnoughActionPoints(self._description.base_cost)
+
             for produce in self._description.properties["produce"]:
                 resource_id = produce["resource"]
                 if "coeff" in produce:
@@ -108,7 +120,9 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     commit=False,
                 )
 
-            # FIXME BS NOW: reduce action point ?!
+            self._kernel.character_lib.reduce_action_points(
+                character_id=character_.id, cost=self._description.base_cost
+            )
             self._kernel.stuff_lib.destroy(stuff_.id)
             self._kernel.server_db_session.commit()
             return []
