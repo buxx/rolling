@@ -212,8 +212,8 @@ class TestFightAction:
             in descr.items[1].text
         )
         assert (
-            "England, Burgundian" == descr.items[1].text
-            or "Burgundian, England" == descr.items[1].text
+            "England, Burgundian" in descr.items[1].text
+            or "Burgundian, England" in descr.items[1].text
         )
 
     def test_unit__fight_description__ok__one_army_vs_2_armies_opposition_and_no_participate_because_link_not_here(
