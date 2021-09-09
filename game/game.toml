@@ -951,6 +951,17 @@ destroy_robustness_per_ap = 1
     build = "SIMPLE_WOOD_DOOR"
     cost = 0.1
 
+  [ACTIONS.BUILD_STRONG_WOOD_DOOR]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BEGIN_BUILD"]
+    build = "STRONG_WOOD_DOOR"
+    cost = 0.1
+
   [ACTIONS.BUILD_RAW_CLAY_FLOOR]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -2100,6 +2111,20 @@ destroy_robustness_per_ap = 1
   door = "SIMPLE"
   many = false
   robustness = 5
+[build.STRONG_WOOD_DOOR]
+  name = "Porte en bois solide"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=1.0}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 36.0
+  classes = ["DOOR"]
+  group_name = "Porte"
+  door = "SIMPLE"
+  many = false
+  robustness = 16
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"
