@@ -1,7 +1,7 @@
 # coding: utf-8
 import pytest
 
-from fixtures import create_stuff
+from tests.fixtures import create_stuff
 from rolling.kernel import Kernel
 from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterModel
