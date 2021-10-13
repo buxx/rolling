@@ -17,7 +17,9 @@ from rolling.server.document.affinity import MEMBER_STATUS
 
 
 def make_fake_get_attack_weapon(params: typing.Dict[str, Weapon]):
-    def fake_get_attack_weapon(self, fighter: CharacterModel, against: CharacterModel) -> Weapon:
+    def fake_get_attack_weapon(
+        self, fighter: CharacterModel, against: CharacterModel
+    ) -> Weapon:
         return params[fighter.id]
 
     return fake_get_attack_weapon
@@ -45,9 +47,15 @@ def make_fake_defenser_evade(params: typing.Dict[str, bool]):
     return fake_defenser_evade
 
 
-def make_fake_opponent_equipment_protect(params: typing.Dict[str, typing.Tuple[Weapon, float]]):
+def make_fake_opponent_equipment_protect(
+    params: typing.Dict[str, typing.Tuple[Weapon, float]]
+):
     def fake_opponent_equipment_protect(
-        self, opponent: CharacterModel, from_: CharacterModel, weapon: Weapon, damage: float
+        self,
+        opponent: CharacterModel,
+        from_: CharacterModel,
+        weapon: Weapon,
+        damage: float,
     ) -> typing.Tuple[Weapon, float]:
         weapon, damages = params[opponent.id]
         if damages is None:
@@ -79,12 +87,14 @@ def patch_fight(
         "rolling.server.lib.fight.FightLib.get_defense_weapon",
         new=make_fake_get_defense_weapon(defense),
     ), patch(
-        "rolling.server.lib.fight.FightLib.defenser_evade", new=make_fake_defenser_evade(evades)
+        "rolling.server.lib.fight.FightLib.defenser_evade",
+        new=make_fake_defenser_evade(evades),
     ), patch(
         "rolling.server.lib.fight.FightLib.opponent_equipment_protect",
         new=make_fake_opponent_equipment_protect(protect),
     ), patch(
-        "rolling.server.lib.fight.FightLib.get_damage", new=make_fake_get_damage(damages)
+        "rolling.server.lib.fight.FightLib.get_damage",
+        new=make_fake_get_damage(damages),
     ), patch(
         "random.shuffle", new=lambda l: l
     ), patch(
@@ -134,10 +144,14 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(all_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            all_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
         assert france_affinity.name == attack.affinity.name
@@ -165,17 +179,27 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
-        ready_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters[3:]]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
+        ready_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters[3:]
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(ready_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            ready_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
-        ready_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters[3:]]
+        ready_france_fighter_ids = [france_warlord.id] + [
+            f.id for f in france_fighters[3:]
+        ]
         assert france_affinity.name == attack.affinity.name
         assert set(all_france_fighter_ids) == set([f.id for f in attack.all_fighters])
-        assert set(ready_france_fighter_ids) == set([f.id for f in attack.ready_fighters])
+        assert set(ready_france_fighter_ids) == set(
+            [f.id for f in attack.ready_fighters]
+        )
 
     def test_unit__fight_description__ok__simple_armies_with_some_exhausted(
         self,
@@ -198,17 +222,27 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
-        ready_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters[3:]]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
+        ready_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters[3:]
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(ready_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            ready_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
-        ready_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters[3:]]
+        ready_france_fighter_ids = [france_warlord.id] + [
+            f.id for f in france_fighters[3:]
+        ]
         assert france_affinity.name == attack.affinity.name
         assert set(all_france_fighter_ids) == set([f.id for f in attack.all_fighters])
-        assert set(ready_france_fighter_ids) == set([f.id for f in attack.ready_fighters])
+        assert set(ready_france_fighter_ids) == set(
+            [f.id for f in attack.ready_fighters]
+        )
 
     def test_unit__fight_description__ok__simple_armies_with_some_no_more_ap(
         self,
@@ -232,16 +266,24 @@ class TestFightLib:
         )
 
         # no more ap permit to defend
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(all_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            all_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
-        ready_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters[3:]]
+        ready_france_fighter_ids = [france_warlord.id] + [
+            f.id for f in france_fighters[3:]
+        ]
         assert france_affinity.name == attack.affinity.name
         assert set(all_france_fighter_ids) == set([f.id for f in attack.all_fighters])
-        assert set(ready_france_fighter_ids) == set([f.id for f in attack.ready_fighters])
+        assert set(ready_france_fighter_ids) == set(
+            [f.id for f in attack.ready_fighters]
+        )
 
     def test_unit__fight_description__ok__one_army_vs_2_armies_opposition_but_no_participate(
         self,
@@ -264,10 +306,14 @@ class TestFightLib:
 
         # In this test only england defend because there is no relation between
         # england and burgundian
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(all_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            all_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
         assert france_affinity.name == attack.affinity.name
@@ -301,8 +347,12 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
-        all_burgundian_fighter_ids = [burgundian_warlord.id] + [f.id for f in burgundian_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
+        all_burgundian_fighter_ids = [burgundian_warlord.id] + [
+            f.id for f in burgundian_fighters
+        ]
         assert set([a.name for a in defense.affinities]) == {
             england_affinity.name,
             burgundian_affinity.name,
@@ -351,10 +401,14 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
         assert set([a.name for a in defense.affinities]) == {england_affinity.name}
         assert set([f.id for f in defense.all_fighters]) == set(all_england_fighter_ids)
-        assert set([f.id for f in defense.ready_fighters]) == set(all_england_fighter_ids)
+        assert set([f.id for f in defense.ready_fighters]) == set(
+            all_england_fighter_ids
+        )
 
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
         assert france_affinity.name == attack.affinity.name
@@ -385,7 +439,9 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
         assert set([a.name for a in defense.affinities]) == {
             england_affinity.name,
@@ -440,8 +496,12 @@ class TestFightLib:
             target=defense, attacker=france_affinity, world_row_i=1, world_col_i=1
         )
 
-        all_england_fighter_ids = [england_warlord.id] + [f.id for f in england_fighters]
-        all_burgundian_fighter_ids = [burgundian_warlord.id] + [f.id for f in burgundian_fighters]
+        all_england_fighter_ids = [england_warlord.id] + [
+            f.id for f in england_fighters
+        ]
+        all_burgundian_fighter_ids = [burgundian_warlord.id] + [
+            f.id for f in burgundian_fighters
+        ]
         all_france_fighter_ids = [france_warlord.id] + [f.id for f in france_fighters]
         assert set([a.name for a in defense.affinities]) == {
             england_affinity.name,
@@ -598,17 +658,25 @@ class TestFightLib:
         expected_life_points = {}
         for character_id, damage in injury.items():
             character_doc = worldmapc_kernel.character_lib.get_document(character_id)
-            expected_life_points[character_id] = float(character_doc.life_points) - damage
+            expected_life_points[character_id] = (
+                float(character_doc.life_points) - damage
+            )
 
         with patch_fight(
-            weapons=weapons, defense=defense, evades=evades, protect=protect, damages=damages
+            weapons=weapons,
+            defense=defense,
+            evades=evades,
+            protect=protect,
+            damages=damages,
         ):
             produced_story = worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord], ready_fighters=[france_warlord]
                 ),
                 defense=DefendDescription(
-                    all_fighters=[england_warlord], ready_fighters=[england_warlord], affinities=[]
+                    all_fighters=[england_warlord],
+                    ready_fighters=[england_warlord],
+                    affinities=[],
                 ),
             )
 
@@ -686,7 +754,11 @@ class TestFightLib:
         story: typing.List[str],
     ) -> None:
         with patch_fight(
-            weapons=weapons, defense=defense, evades=evades, protect=protect, damages=damages
+            weapons=weapons,
+            defense=defense,
+            evades=evades,
+            protect=protect,
+            damages=damages,
         ):
             produced_story = worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
@@ -695,7 +767,9 @@ class TestFightLib:
                     affinity=france_affinity,
                 ),
                 defense=DefendDescription(
-                    all_fighters=[england_warlord], ready_fighters=[england_warlord], affinities=[]
+                    all_fighters=[england_warlord],
+                    ready_fighters=[england_warlord],
+                    affinities=[],
                 ),
             )
 
@@ -880,12 +954,18 @@ class TestFightLib:
         story: typing.List[str],
     ) -> None:
         with patch_fight(
-            weapons=weapons, defense=defense, evades=evades, protect=protect, damages=damages
+            weapons=weapons,
+            defense=defense,
+            evades=evades,
+            protect=protect,
+            damages=damages,
         ):
             produced_story = worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord] + france_fighters,
-                    ready_fighters=([france_warlord] if france_warlord.id not in not_ready else [])
+                    ready_fighters=(
+                        [france_warlord] if france_warlord.id not in not_ready else []
+                    )
                     + ([f for f in france_fighters if f.id not in not_ready]),
                     affinity=france_affinity,
                 ),
@@ -937,7 +1017,11 @@ class TestFightLib:
         "around,damages,expected_damages",
         [
             (AroundPercent.LESS, 5.0, 0.0),
-            (AroundPercent.IN, 5.0, 4.0),  # 4.0 is obtain by patch of random.randrange (80%)
+            (
+                AroundPercent.IN,
+                5.0,
+                4.0,
+            ),  # 4.0 is obtain by patch of random.randrange (80%)
             (AroundPercent.MORE, 5.0, 5.0),
         ],
     )

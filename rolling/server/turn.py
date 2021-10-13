@@ -23,7 +23,9 @@ def run(args: argparse.Namespace) -> None:
 
         sentry_sdk.init(dsn=args.sentry, integrations=[SqlalchemyIntegration()])
 
-    kernel = get_kernel(args.world_map_source, args.tile_maps_folder, args.game_config_folder)
+    kernel = get_kernel(
+        args.world_map_source, args.tile_maps_folder, args.game_config_folder
+    )
     character_lib = CharacterLib(kernel)
     stuff_lib = StuffLib(kernel)
     turn_lib = TurnLib(kernel, character_lib, stuff_lib, logger=server_logger)
@@ -32,11 +34,19 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Pass the game turn")
-    parser.add_argument("world_map_source", type=str, help="Raw world source map file path")
-    parser.add_argument("tile_maps_folder", type=str, help="Tile maps sources files folder path")
-    parser.add_argument("game_config_folder", type=str, help="Directory path with game configs")
+    parser.add_argument(
+        "world_map_source", type=str, help="Raw world source map file path"
+    )
+    parser.add_argument(
+        "tile_maps_folder", type=str, help="Tile maps sources files folder path"
+    )
+    parser.add_argument(
+        "game_config_folder", type=str, help="Directory path with game configs"
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--sentry", type=str, help="Sentry address to use", default=None)
+    parser.add_argument(
+        "--sentry", type=str, help="Sentry address to use", default=None
+    )
 
     args = parser.parse_args()
     run(args)

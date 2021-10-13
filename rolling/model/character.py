@@ -37,8 +37,12 @@ class SharedInventoryQueryModel:
     affinity_id: int = serpyco.field(cast_on_load=True)
     resource_id: typing.Optional[str] = None
     resource_quantity: typing.Optional[str] = None
-    stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    stuff_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 @dataclasses.dataclass
@@ -62,7 +66,9 @@ class PickFromInventoryQueryModel:
         cast_on_load=True, default=None
     )
     stuff_id: typing.Optional[str] = None
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 @dataclasses.dataclass
@@ -102,8 +108,12 @@ class SeeOfferQueryModel:
 
 @dataclasses.dataclass
 class DealOfferQueryModel:
-    request_item_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    offer_item_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    request_item_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    offer_item_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     confirm: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
@@ -131,7 +141,9 @@ class AddOfferItemQuery:
         cast_on_load=True, default=None
     )
     stuff_id: typing.Optional[str] = None
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 @dataclasses.dataclass
@@ -192,9 +204,15 @@ class ManageAffinityRelationBodyModel:
 
 @dataclasses.dataclass
 class ModifyAffinityRelationQueryModel:
-    request: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    rejected: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    fighter: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    request: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    rejected: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    fighter: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 @dataclasses.dataclass
@@ -307,7 +325,9 @@ class MoveCharacterQueryModel:
 @dataclasses.dataclass
 class DescribeStoryQueryModel:
     event_id: int = serpyco.number_field(cast_on_load=True)
-    story_page_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    story_page_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     mark_read: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
@@ -381,7 +401,9 @@ class CharacterModel:
 
     @property
     def force_weapon_multiplier(self) -> float:
-        return min(MAXIMUM_FORCE_WEAPON_MULTIPLIER, self.get_skill_value(STRENGTH_SKILL_ID))
+        return min(
+            MAXIMUM_FORCE_WEAPON_MULTIPLIER, self.get_skill_value(STRENGTH_SKILL_ID)
+        )
 
     @property
     def display_object(self) -> "DisplayObject":
@@ -391,7 +413,9 @@ class CharacterModel:
         return self._display_object
 
     def get_weight_capacity(self, kernel: "Kernel") -> float:
-        return kernel.game.config.default_weight_capacity * self.get_skill_value(STRENGTH_SKILL_ID)
+        return kernel.game.config.default_weight_capacity * self.get_skill_value(
+            STRENGTH_SKILL_ID
+        )
 
     def get_clutter_capacity(self, kernel: "Kernel") -> float:
         return kernel.game.config.default_clutter_capacity + sum(

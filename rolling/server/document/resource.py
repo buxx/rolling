@@ -1,10 +1,12 @@
 # coding: utf-8
-from sqlalchemy import Column, UniqueConstraint, Boolean
+from sqlalchemy import Boolean
+from sqlalchemy import Column
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
+from sqlalchemy import UniqueConstraint
 
 from rolling.model.measure import Unit
 from rolling.server.extension import ServerSideDocument as Document
@@ -34,12 +36,12 @@ class ZoneResourceDocument(Document):
     __tablename__ = "zone_resource"
     __table_args__ = (
         UniqueConstraint(
-            'world_col_i',
-            'world_row_i',
-            'zone_col_i',
-            'zone_row_i',
-            'resource_id',
-            name='zone_resource_unique'
+            "world_col_i",
+            "world_row_i",
+            "zone_col_i",
+            "zone_row_i",
+            "resource_id",
+            name="zone_resource_unique",
         ),
     )
 

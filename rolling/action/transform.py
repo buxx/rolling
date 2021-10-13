@@ -13,8 +13,10 @@ from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction, NotEnoughActionPoints, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughActionPoints
 from rolling.exception import RollingError
+from rolling.exception import WrongInputError
 from rolling.model.measure import Unit
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -31,7 +33,9 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class TransformStuffIntoResourcesModel:
-    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 class TransformStuffIntoResourcesAction(WithStuffAction):
@@ -39,15 +43,26 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(TransformStuffIntoResourcesModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties.update({"produce": action_config_raw["produce"]})
         return properties
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
-        check_common_is_possible(self._kernel, character=character, description=self._description)
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
+        check_common_is_possible(
+            self._kernel, character=character, description=self._description
+        )
         # FIXME BS NOW: bug; poule peut etre transforme en viande cuite + peau
-        if stuff.stuff_id not in self._description.properties["required_one_of_stuff_ids"]:
+        if (
+            stuff.stuff_id
+            not in self._description.properties["required_one_of_stuff_ids"]
+        ):
             raise ImpossibleAction("Non concerné")
 
     def get_character_actions(
@@ -157,14 +172,18 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(QuantityModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         for produce in action_config_raw["produce"]:
             if "resource" not in produce or "coeff" not in produce:
                 raise RollingError(
                     f"Misconfiguration for following action content: {action_config_raw}"
                 )
 
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties["required_resource_id"] = action_config_raw["required_resource_id"]
         properties["produce"] = action_config_raw["produce"]
         properties["cost_per_unit"] = action_config_raw["cost_per_unit"]
@@ -280,7 +299,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             self._kernel, carried_resource
         )
         cost_per_unit = (
-            cost_per_unit * 1000 if expected_quantity_context.display_kg else cost_per_unit
+            cost_per_unit * 1000
+            if expected_quantity_context.display_kg
+            else cost_per_unit
         )
         default_quantity = expected_quantity_context.default_quantity
 
@@ -338,7 +359,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             produce_quantity_str = quantity_to_str(
                 produce_quantity, produce_resource.unit, self._kernel
             )
-            produced_resources_txts.append(f"{produce_resource.name}: {produce_quantity_str}")
+            produced_resources_txts.append(
+                f"{produce_resource.name}: {produce_quantity_str}"
+            )
             self._kernel.resource_lib.add_resource_to(
                 character_id=character.id,
                 resource_id=produce["resource"],

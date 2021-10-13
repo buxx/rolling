@@ -5,7 +5,8 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
@@ -22,10 +23,14 @@ class NotUseAsBagAction(WithStuffAction):
     input_model_serializer: serpyco.Serializer
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         bag_ids = [bag.id for bag in character.bags]
         if stuff.id not in bag_ids:
             raise ImpossibleAction("Vous n'utilisez pas ce sac")
@@ -67,10 +72,14 @@ class UseAsBagAction(WithStuffAction):
     input_model_serializer: serpyco.Serializer
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         # TODO BS 2019-09-03: permit multiple bags ?
         if not stuff.ready_for_use:
             raise ImpossibleAction(f"{stuff.name} n'est pas utilisable")
@@ -116,10 +125,14 @@ class UseAsWeaponAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if not stuff.weapon:
             raise ImpossibleAction("Ce n'est pas une arme")
         if not stuff.ready_for_use:
@@ -165,10 +178,14 @@ class NotUseAsWeaponAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if character.weapon and character.weapon.id == stuff.id:
             return
         raise ImpossibleAction("Vous n'utilisez pas cette arme")
@@ -210,10 +227,14 @@ class UseAsShieldAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if not stuff.shield:
             raise ImpossibleAction("Ce n'est pas un bouclier")
         if not stuff.ready_for_use:
@@ -259,10 +280,14 @@ class NotUseAsShieldAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if character.shield and character.shield.id == stuff.id:
             return
         raise ImpossibleAction("Vous n'utilisez pas ce bouclier")
@@ -304,10 +329,14 @@ class UseAsArmorAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if not stuff.armor:
             raise ImpossibleAction("Ce n'est pas une armure/protection")
         if not stuff.ready_for_use:
@@ -353,10 +382,14 @@ class NotUseAsArmorAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if character.armor and character.armor.id == stuff.id:
             return
         raise ImpossibleAction("Vous n'utilisez pas cette armure/equipement")

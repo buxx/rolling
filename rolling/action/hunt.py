@@ -28,7 +28,9 @@ class SearchFoodAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         for produce in action_config_raw["produce"]:
             if "resource" not in produce and "stuff" not in produce:
                 raise RollingError(
@@ -36,7 +38,9 @@ class SearchFoodAction(CharacterAction):
                     "must contain stuff or resource key"
                 )
 
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties.update({"produce": action_config_raw["produce"]})
         return properties
 
@@ -45,7 +49,9 @@ class SearchFoodAction(CharacterAction):
             kernel=self._kernel, description=self._description, character=character
         )
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> None:
         self.check_is_possible(character)
 
     def get_character_actions(
@@ -79,7 +85,9 @@ class SearchFoodAction(CharacterAction):
         zone_state = self._kernel.game.world_manager.get_zone_state(
             world_row_i=character.world_row_i, world_col_i=character.world_col_i
         )
-        minimum_by_skill = 10 * character.get_skill_value(HUNTING_AND_GATHERING_SKILL_ID)
+        minimum_by_skill = 10 * character.get_skill_value(
+            HUNTING_AND_GATHERING_SKILL_ID
+        )
         found_something = False
 
         for production in productions:
@@ -122,7 +130,8 @@ class SearchFoodAction(CharacterAction):
             resource_description = self._kernel.game.config.resources[resource_id]
             quantity_found_coeff = max(minimum_by_skill, random.randint(0, 100)) / 100
             quantity_found = (
-                production_per_resource_ids[resource_id]["quantity"] * quantity_found_coeff
+                production_per_resource_ids[resource_id]["quantity"]
+                * quantity_found_coeff
             )
             if resource_description.unit == Unit.UNIT:
                 quantity_found = round(quantity_found)
@@ -144,7 +153,9 @@ class SearchFoodAction(CharacterAction):
 
         result_stuff_strs = []
         for stuff_id in found_stuff_ids:
-            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            stuff_properties = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            )
             quantity_found_coeff = max(minimum_by_skill, random.randint(0, 100)) / 100
             quantity_found = round(
                 production_per_stuff_ids[stuff_id]["quantity"] * quantity_found_coeff

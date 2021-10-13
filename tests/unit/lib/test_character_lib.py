@@ -1,16 +1,17 @@
 # coding: utf-8
 import pytest
 
-from tests.fixtures import create_stuff
 from rolling.kernel import Kernel
 from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterModel
 from rolling.model.measure import Unit
-from rolling.model.meta import FromType, RiskType
+from rolling.model.meta import FromType
+from rolling.model.meta import RiskType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from tests.fixtures import create_stuff
 
 
 @pytest.fixture
@@ -23,7 +24,9 @@ def character_lib(
 
 
 @pytest.fixture
-def jose(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
+def jose(
+    worldmapc_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
     arthur = CharacterDocument(id="jose", name="jose", **default_character_competences)
 
     session = worldmapc_kernel.server_db_session
@@ -173,13 +176,9 @@ class TestCharacterLib:
         assert len(have_abilities) == 2
         assert have_abilities == [
             HaveAbility(
-                ability_id='BLACKSMITH',
-                from_=FromType.HIMSELF,
-                risk=RiskType.NONE
+                ability_id="BLACKSMITH", from_=FromType.HIMSELF, risk=RiskType.NONE
             ),
             HaveAbility(
-                ability_id='HUNT_SMALL_GAME',
-                from_=FromType.STUFF,
-                risk=RiskType.NONE
-            )
+                ability_id="HUNT_SMALL_GAME", from_=FromType.STUFF, risk=RiskType.NONE
+            ),
         ]

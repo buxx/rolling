@@ -1,6 +1,5 @@
-import typing
-
 import pytest
+import typing
 
 from rolling.kernel import Kernel
 from rolling.server.document.build import BuildDocument
@@ -33,10 +32,13 @@ class TestFarmingLib:
             (40_000, ["GROW_PROGRESS_3", "GROW_PROGRESS_toto_3"]),
             (60_000, ["GROW_PROGRESS_4", "GROW_PROGRESS_toto_4"]),
             (999_000, ["GROW_PROGRESS_4", "GROW_PROGRESS_toto_4"]),
-        ]
+        ],
     )
     def test_get_growing_state_classes(
-        self, worldmapc_kernel: Kernel, grow_progress: int, expected_classes: typing.List[str]
+        self,
+        worldmapc_kernel: Kernel,
+        grow_progress: int,
+        expected_classes: typing.List[str],
     ) -> None:
         # Given
         doc = BuildDocument(seeded_with="toto", grow_progress=grow_progress)

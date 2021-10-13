@@ -1,15 +1,20 @@
+from aiohttp.test_utils import TestClient
+import pytest
 import typing
 import unittest.mock
 
-import pytest
-
 from rolling.kernel import Kernel
-from rolling.model.character import CharacterModel, MINIMUM_BEFORE_EXHAUSTED
-from rolling.server.document.affinity import AffinityDirectionType, AffinityJoinType, CHIEF_STATUS, \
-    MEMBER_STATUS
-from rolling.server.document.build import BuildDocument, DOOR_MODE_LABELS, DOOR_MODE__CLOSED, \
-    DOOR_MODE__CLOSED_EXCEPT_FOR, DoorDocument
-from aiohttp.test_utils import TestClient
+from rolling.model.character import CharacterModel
+from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
+from rolling.server.document.affinity import AffinityDirectionType
+from rolling.server.document.affinity import AffinityJoinType
+from rolling.server.document.affinity import CHIEF_STATUS
+from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.document.build import BuildDocument
+from rolling.server.document.build import DOOR_MODE_LABELS
+from rolling.server.document.build import DOOR_MODE__CLOSED
+from rolling.server.document.build import DOOR_MODE__CLOSED_EXCEPT_FOR
+from rolling.server.document.build import DoorDocument
 
 
 @pytest.fixture
@@ -19,14 +24,22 @@ def websocket_prepare_mock() -> typing.Generator[unittest.mock.AsyncMock, None, 
 
 
 @pytest.fixture
-def zone_event_manager_listen_mock() -> typing.Generator[unittest.mock.AsyncMock, None, None]:
-    with unittest.mock.patch("rolling.server.zone.websocket.ZoneEventsManager._listen") as mock_:
+def zone_event_manager_listen_mock() -> typing.Generator[
+    unittest.mock.AsyncMock, None, None
+]:
+    with unittest.mock.patch(
+        "rolling.server.zone.websocket.ZoneEventsManager._listen"
+    ) as mock_:
         yield mock_
 
 
 @pytest.fixture
-def zone_event_manager_close_mock() -> typing.Generator[unittest.mock.AsyncMock, None, None]:
-    with unittest.mock.patch("rolling.server.zone.websocket.ZoneEventsManager.close_websocket") as mock_:
+def zone_event_manager_close_mock() -> typing.Generator[
+    unittest.mock.AsyncMock, None, None
+]:
+    with unittest.mock.patch(
+        "rolling.server.zone.websocket.ZoneEventsManager.close_websocket"
+    ) as mock_:
         yield mock_
 
 
@@ -75,11 +88,17 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     def test_one_rule_lock_except__author_here__stranger_cant_but_member_can(
         self,
@@ -115,13 +134,23 @@ class TestDoor:
         )
         door = self._place_door(kernel)
         self._create_rule(
-            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED_EXCEPT_FOR, affinity_ids=[aff.id]
+            kernel,
+            author=xena,
+            door=door,
+            mode=DOOR_MODE__CLOSED_EXCEPT_FOR,
+            affinity_ids=[aff.id],
         )
 
         # When
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=franck.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=franck.id
+        )
 
     def test_two_rule_lock__author_here_and_first_can__stranger_second_cant(
         self,
@@ -135,12 +164,20 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
-        self._create_rule(kernel, author=arthur, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
+        self._create_rule(
+            kernel, author=arthur, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     @pytest.mark.asyncio
     async def test_two_rule_lock__author_first_travel__stranger_second_can(
@@ -155,12 +192,20 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
-        self._create_rule(kernel, author=arthur, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
+        self._create_rule(
+            kernel, author=arthur, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When/Then 1
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         await kernel.character_lib.move(
@@ -170,7 +215,9 @@ class TestDoor:
         )
 
         # When/Then 2
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         await kernel.character_lib.move(
@@ -180,8 +227,12 @@ class TestDoor:
         )
 
         # When/Then 3
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     @pytest.mark.asyncio
     async def test_one_rule_lock__author_first_travel__stranger_second_can(
@@ -196,11 +247,17 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When/Then 1
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         await kernel.character_lib.move(
@@ -210,7 +267,9 @@ class TestDoor:
         )
 
         # When/Then 2
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         await kernel.character_lib.move(
@@ -220,8 +279,12 @@ class TestDoor:
         )
 
         # When/Then 3
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     @pytest.mark.asyncio
     async def test_one_rule_lock__author_dead__stranger_can(
@@ -236,17 +299,25 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When/Then 1
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         kernel.character_lib.kill(character_id=xena.id)
 
         # When/Then 2
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     @pytest.mark.asyncio
     async def test_one_rule_lock__author_vulnerable__stranger_can(
@@ -261,11 +332,17 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
 
         # When/Then 1
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=xena.id)
-        assert kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=xena.id
+        )
+        assert kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
         # Given 2
         xena_doc = kernel.character_lib.get_document(xena.id)
@@ -276,7 +353,9 @@ class TestDoor:
         assert xena.vulnerable
 
         # When/Then 2
-        assert not kernel.door_lib.is_access_locked_for(build_id=door.id, character_id=arthur.id)
+        assert not kernel.door_lib.is_access_locked_for(
+            build_id=door.id, character_id=arthur.id
+        )
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("websocket_prepare_mock")
@@ -296,7 +375,9 @@ class TestDoor:
 
         # Given
         door = self._place_door(kernel)
-        self._create_rule(kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[])
+        self._create_rule(
+            kernel, author=xena, door=door, mode=DOOR_MODE__CLOSED, affinity_ids=[]
+        )
         _ = await kernel.server_zone_events_manager.get_new_socket(
             request=request_mock,
             row_i=1,

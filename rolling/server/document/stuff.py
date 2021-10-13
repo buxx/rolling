@@ -30,7 +30,9 @@ class StuffDocument(Document):
 
     # properties
     filled_value = Column(Numeric(10, 2, asdecimal=False), nullable=True)
-    filled_unity = Column(Enum(*[u.value for u in Unit], name="stuff__filled_unity"), nullable=True)
+    filled_unity = Column(
+        Enum(*[u.value for u in Unit], name="stuff__filled_unity"), nullable=True
+    )
     filled_with_resource = Column(String(255), nullable=True)
     filled_capacity = Column(Numeric(10, 2, asdecimal=False), nullable=True)
     weight = Column(Numeric(10, 2, asdecimal=False), nullable=True)  # grams
@@ -48,14 +50,21 @@ class StuffDocument(Document):
     # relations
     carried_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     used_as_bag_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
-    used_as_weapon_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
-    used_as_shield_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
+    used_as_weapon_by_id = Column(
+        String(255), ForeignKey("character.id"), nullable=True
+    )
+    used_as_shield_by_id = Column(
+        String(255), ForeignKey("character.id"), nullable=True
+    )
     used_as_armor_by_id = Column(String(255), ForeignKey("character.id"), nullable=True)
     in_built_id = Column(Integer(), ForeignKey("build.id"), nullable=True)
     shared_with_affinity_id = Column(Integer, ForeignKey("affinity.id"), nullable=True)
 
     def fill(self, kernel: "Kernel", with_resource: str, add_value: float) -> None:
-        if self.filled_with_resource is not None and self.filled_with_resource != with_resource:
+        if (
+            self.filled_with_resource is not None
+            and self.filled_with_resource != with_resource
+        ):
             raise CantFill("Impossible de mélanger")
 
         if float(self.filled_value or 0.0) + add_value > float(self.filled_capacity):
@@ -64,7 +73,9 @@ class StuffDocument(Document):
         self.filled_with_resource = with_resource
         self.filled_value = float(self.filled_value or 0.0) + add_value
         resource_description = kernel.game.config.resources[self.filled_with_resource]
-        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(self.stuff_id)
+        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
+            self.stuff_id
+        )
         self.weight = (
             resource_description.weight * float(self.filled_value)
         ) + stuff_properties.weight
@@ -89,7 +100,9 @@ class StuffDocument(Document):
 
         self.filled_value = max(0.0, float(self.filled_value or 0.0) - remove_value)
         resource_description = kernel.game.config.resources[self.filled_with_resource]
-        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(self.stuff_id)
+        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
+            self.stuff_id
+        )
         self.weight = (
             resource_description.weight * float(self.filled_value)
         ) + stuff_properties.weight

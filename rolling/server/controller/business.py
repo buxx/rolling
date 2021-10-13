@@ -1,10 +1,9 @@
 #  coding: utf-8
-from json import JSONDecodeError
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from hapic.data import HapicData
+from json import JSONDecodeError
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
@@ -59,9 +58,13 @@ class BusinessController(BaseController):
             hapic_data.path.character_id
         ).count()
 
-        transaction_label = f"Voir les transactions en attente ({transaction_count} en cours)"
+        transaction_label = (
+            f"Voir les transactions en attente ({transaction_count} en cours)"
+        )
         if (
-            self._kernel.business_lib.get_incoming_transactions_query(hapic_data.path.character_id)
+            self._kernel.business_lib.get_incoming_transactions_query(
+                hapic_data.path.character_id
+            )
             .filter(OfferDocument.read == False)
             .count()
         ):
@@ -129,8 +132,12 @@ class BusinessController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def transactions(self, request: Request, hapic_data: HapicData) -> Description:
-        transactions: typing.List[OfferDocument] = self._kernel.business_lib.get_transactions_query(
+    async def transactions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        transactions: typing.List[
+            OfferDocument
+        ] = self._kernel.business_lib.get_transactions_query(
             hapic_data.path.character_id
         ).all()
         parts: typing.List[Part] = []
@@ -151,7 +158,10 @@ class BusinessController(BaseController):
                 )
                 with_info = f" (de {offer.from_character.name})"
 
-            if not offer.read and offer.with_character_id == hapic_data.path.character_id:
+            if (
+                not offer.read
+                and offer.with_character_id == hapic_data.path.character_id
+            ):
                 is_new = "*"
 
             parts.append(
@@ -190,38 +200,58 @@ class BusinessController(BaseController):
 
         try:
             data = await request.json()
-            offer.status = OfferStatus.OPEN.value if data.get("active") == "on" else OfferStatus.CLOSED.value
+            offer.status = (
+                OfferStatus.OPEN.value
+                if data.get("active") == "on"
+                else OfferStatus.CLOSED.value
+            )
             self._kernel.server_db_session.add(offer)
             self._kernel.server_db_session.commit()
         except JSONDecodeError:
             pass
 
         if hapic_data.body.request_operand:
-            offer.request_operand = operand_str_to_enum[hapic_data.body.request_operand].value
+            offer.request_operand = operand_str_to_enum[
+                hapic_data.body.request_operand
+            ].value
             self._kernel.server_db_session.add(offer)
             self._kernel.server_db_session.commit()
 
         if hapic_data.body.offer_operand:
-            offer.offer_operand = operand_str_to_enum[hapic_data.body.offer_operand].value
+            offer.offer_operand = operand_str_to_enum[
+                hapic_data.body.offer_operand
+            ].value
             self._kernel.server_db_session.add(offer)
             self._kernel.server_db_session.commit()
 
         form_parts = self._produce_offer_parts(
-            hapic_data.path.character_id, hapic_data.path.character_id, offer, editing=True
+            hapic_data.path.character_id,
+            hapic_data.path.character_id,
+            offer,
+            editing=True,
         )
         here_url = f"/business/{hapic_data.path.character_id}/offers/{offer.id}?"
 
         parts = []
         if offer.status == OfferStatus.OPEN.value:
-            parts.append(Part(label="Désactiver", is_link=True, form_action=here_url + "&close=1"))
+            parts.append(
+                Part(
+                    label="Désactiver", is_link=True, form_action=here_url + "&close=1"
+                )
+            )
         else:
-            parts.append(Part(label="Activer", is_link=True, form_action=here_url + "&open=1"))
+            parts.append(
+                Part(label="Activer", is_link=True, form_action=here_url + "&open=1")
+            )
 
         return Description(
             title=offer.title,
             items=[
                 Part(
-                    is_form=True, form_action=here_url, items=form_parts, submit_label="Enregistrer"
+                    is_form=True,
+                    form_action=here_url,
+                    items=form_parts,
+                    submit_label="Enregistrer",
                 )
             ]
             + parts,
@@ -255,9 +285,13 @@ class BusinessController(BaseController):
         )
 
         if not self._kernel.business_lib.owner_can_deal(offer.id):
-            parts.append(Part(label=f"{offer_owner.name} ne peut pas assurer cette opération"))
+            parts.append(
+                Part(label=f"{offer_owner.name} ne peut pas assurer cette opération")
+            )
 
-        if self._kernel.business_lib.character_can_deal(hapic_data.path.character_id, offer.id):
+        if self._kernel.business_lib.character_can_deal(
+            hapic_data.path.character_id, offer.id
+        ):
             parts.append(
                 Part(
                     is_link=True,
@@ -311,7 +345,9 @@ class BusinessController(BaseController):
         if not self._kernel.business_lib.owner_can_deal(offer.id):
             return Description(
                 title=offer.title,
-                items=[Part(text=f"{offer_owner.name} ne peut pas assurer cette opération")],
+                items=[
+                    Part(text=f"{offer_owner.name} ne peut pas assurer cette opération")
+                ],
                 footer_links=[
                     Part(
                         is_link=True,
@@ -335,7 +371,9 @@ class BusinessController(BaseController):
         ):
             return Description(
                 title=offer.title,
-                items=[Part(text="Vous ne possédez pas ce qu'il faut pour faire ce marché")],
+                items=[
+                    Part(text="Vous ne possédez pas ce qu'il faut pour faire ce marché")
+                ],
                 footer_links=[
                     Part(
                         is_link=True,
@@ -358,9 +396,13 @@ class BusinessController(BaseController):
             and offer.offer_operand == OfferOperand.AND.value
         ):
             if hapic_data.query.confirm:
-                self._kernel.business_lib.make_deal(offer.id, hapic_data.path.character_id)
+                self._kernel.business_lib.make_deal(
+                    offer.id, hapic_data.path.character_id
+                )
                 if not offer.permanent:
-                    self._kernel.business_lib.changer_offer_status(offer.id, OfferStatus.ACCEPTED)
+                    self._kernel.business_lib.changer_offer_status(
+                        offer.id, OfferStatus.ACCEPTED
+                    )
                 return Description(
                     title=offer.title,
                     items=[Part(text="Marché effectué")],
@@ -441,7 +483,10 @@ class BusinessController(BaseController):
                     can_be_back_url=True,
                 )
 
-        if offer.offer_operand == OfferOperand.OR.value and not hapic_data.query.offer_item_id:
+        if (
+            offer.offer_operand == OfferOperand.OR.value
+            and not hapic_data.query.offer_item_id
+        ):
             parts = []
             request_item_str = (
                 f"request_item_id={hapic_data.query.request_item_id}"
@@ -455,7 +500,8 @@ class BusinessController(BaseController):
                             is_link=True,
                             label=f"Faire ce marché et obtenir {item.get_name(self._kernel, True)}",
                             form_action=(
-                                here_url + f"&{request_item_str}" f"&offer_item_id={item.id}"
+                                here_url + f"&{request_item_str}"
+                                f"&offer_item_id={item.id}"
                             ),
                         )
                     )
@@ -496,7 +542,9 @@ class BusinessController(BaseController):
         ]
 
         if not offer.permanent:
-            self._kernel.business_lib.changer_offer_status(offer.id, OfferStatus.ACCEPTED)
+            self._kernel.business_lib.changer_offer_status(
+                offer.id, OfferStatus.ACCEPTED
+            )
         else:
             footer_links.append(
                 Part(
@@ -509,7 +557,9 @@ class BusinessController(BaseController):
             )
 
         return Description(
-            title=offer.title, items=[Part(text="Marché effectué")], footer_links=footer_links
+            title=offer.title,
+            items=[Part(text="Marché effectué")],
+            footer_links=footer_links,
         )
 
     @hapic.with_api_doc()
@@ -520,7 +570,9 @@ class BusinessController(BaseController):
     async def create(self, request: Request, hapic_data: HapicData) -> Description:
         if hapic_data.query.with_character_id:
             # FIXME BS NOW: code it
-            with_character = self._kernel.character_lib.get(hapic_data.query.with_character_id)
+            with_character = self._kernel.character_lib.get(
+                hapic_data.query.with_character_id
+            )
             title = f"Faire une offre à {with_character.name}"
             form_action = (
                 f"/business/{hapic_data.path.character_id}/offers-create"
@@ -528,7 +580,9 @@ class BusinessController(BaseController):
             )
         else:
             title = "Créer une offre"
-            form_action = f"/business/{hapic_data.path.character_id}/offers-create?permanent=1"
+            form_action = (
+                f"/business/{hapic_data.path.character_id}/offers-create?permanent=1"
+            )
 
         if hapic_data.body.title:
             offer = self._kernel.business_lib.create_draft(
@@ -566,7 +620,11 @@ class BusinessController(BaseController):
         )
 
     def _produce_offer_parts(
-        self, owner_id: str, character_id: str, offer: OfferDocument, editing: bool = False
+        self,
+        owner_id: str,
+        character_id: str,
+        offer: OfferDocument,
+        editing: bool = False,
     ) -> typing.List[Part]:
         request_item_parts: typing.List[Part] = []
         offer_item_parts: typing.List[Part] = []
@@ -575,7 +633,9 @@ class BusinessController(BaseController):
         for item in offer.request_items:
             is_link = editing
             form_action = (
-                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}" if editing else None
+                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}"
+                if editing
+                else None
             )
             item_name = item.get_name(self._kernel, quantity=True)
             have_str = ""
@@ -603,7 +663,9 @@ class BusinessController(BaseController):
 
         for item in offer.offer_items:
             form_action = (
-                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}" if editing else None
+                f"/business/{owner_id}/offers/{offer.id}/remove-item/{item.id}"
+                if editing
+                else None
             )
             item_name = item.get_name(self._kernel, quantity=True)
             have_str = ""
@@ -614,7 +676,9 @@ class BusinessController(BaseController):
                 if not self._kernel.business_lib.have_item(owner_id, item.id):
                     have_str = "(!) "
             item_name = f"{have_str}{item_name}"
-            offer_item_parts.append(Part(label=item_name, is_link=editing, form_action=form_action))
+            offer_item_parts.append(
+                Part(label=item_name, is_link=editing, form_action=form_action)
+            )
 
         if editing:
             offer_item_parts.append(
@@ -650,7 +714,9 @@ class BusinessController(BaseController):
                 + offer_item_parts
             )
         else:
-            request_operand_str = operand_enum_to_str[OfferOperand(offer.request_operand)]
+            request_operand_str = operand_enum_to_str[
+                OfferOperand(offer.request_operand)
+            ]
             offer_operand_str = operand_enum_to_str[OfferOperand(offer.offer_operand)]
             parts: typing.List[Part] = (
                 [Part(text=f"Eléments demandé(s) ({request_operand_str})")]
@@ -687,7 +753,9 @@ class BusinessController(BaseController):
         stuff_by_name: typing.Dict[str, StuffProperties] = {}
         for resource_description in self._kernel.game.config.resources.values():
             unit_str = self._kernel.translation.get(resource_description.unit)
-            resource_by_name[f"{resource_description.name} ({unit_str})"] = resource_description
+            resource_by_name[
+                f"{resource_description.name} ({unit_str})"
+            ] = resource_description
         for stuff_properties in self._kernel.game.stuff_manager.items:
             stuff_by_name[f"{stuff_properties.name} (unité)"] = stuff_properties
 
@@ -765,7 +833,10 @@ class BusinessController(BaseController):
                             label="Sélectionnez une ressource ou un object",
                             name="value",
                             choices=list(
-                                set(list(stuff_by_name.keys()) + list(resource_by_name.keys()))
+                                set(
+                                    list(stuff_by_name.keys())
+                                    + list(resource_by_name.keys())
+                                )
                             ),
                             search_by_str=True,
                         ),
@@ -818,11 +889,16 @@ class BusinessController(BaseController):
                 web.post("/business/{character_id}/offers", self.offers),
                 web.post("/business/{character_id}/offers-create", self.create),
                 web.post("/business/{character_id}/offers/{offer_id}", self.offer),
-                web.post("/business/{character_id}/see-offer/{owner_id}/{offer_id}", self.see),
                 web.post(
-                    "/business/{character_id}/see-offer/{owner_id}/{offer_id}/deal", self.deal
+                    "/business/{character_id}/see-offer/{owner_id}/{offer_id}", self.see
                 ),
-                web.post("/business/{character_id}/offers/{offer_id}/add-item", self.add_item),
+                web.post(
+                    "/business/{character_id}/see-offer/{owner_id}/{offer_id}/deal",
+                    self.deal,
+                ),
+                web.post(
+                    "/business/{character_id}/offers/{offer_id}/add-item", self.add_item
+                ),
                 web.post(
                     "/business/{character_id}/offers/{offer_id}/remove-item/{item_id}",
                     self.remove_item,

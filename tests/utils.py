@@ -3,7 +3,9 @@ import typing
 from guilang.description import Part
 
 
-def extract_description_properties(parts: typing.List[Part], property_name: str) -> typing.List[typing.Any]:
+def extract_description_properties(
+    parts: typing.List[Part], property_name: str
+) -> typing.List[typing.Any]:
     properties = []
 
     for part in parts:

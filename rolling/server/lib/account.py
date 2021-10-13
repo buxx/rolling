@@ -29,7 +29,10 @@ class AccountLib:
             try_account: AccountDocument = (
                 self._kernel.server_db_session.query(AccountDocument)
                 .filter(
-                    or_(AccountDocument.email == login, AccountDocument.username == login),
+                    or_(
+                        AccountDocument.email == login,
+                        AccountDocument.username == login,
+                    ),
                 )
                 .one()
             )
@@ -83,7 +86,9 @@ class AccountLib:
             .one()
         )
 
-    def get_account_for_username_or_email(self, username_or_email: str) -> AccountDocument:
+    def get_account_for_username_or_email(
+        self, username_or_email: str
+    ) -> AccountDocument:
         try:
             return (
                 self._kernel.server_db_session.query(AccountDocument)
@@ -96,7 +101,9 @@ class AccountLib:
                 .one()
             )
         except NoResultFound:
-            raise AccountNotFound(f"Account not found for username_or_email '{username_or_email}'")
+            raise AccountNotFound(
+                f"Account not found for username_or_email '{username_or_email}'"
+            )
 
     def get_account_for_reset_password_token(self, token: str) -> AccountDocument:
         try:
@@ -141,14 +148,19 @@ Si vous êtes bien l'auteur de cette demande, suivez ce lien: {generate_new_pass
             port=int(self._kernel.server_config.smtp_port),
         )
         server.starttls()
-        server.login(self._kernel.server_config.smtp_user, self._kernel.server_config.smtp_password)
+        server.login(
+            self._kernel.server_config.smtp_user,
+            self._kernel.server_config.smtp_password,
+        )
         server.sendmail(email["From"], email["To"], email.as_string())
         server.quit()
 
     def generate_new_password(self, token: str) -> str:
         account = self.get_account_for_reset_password_token(token)
         password = "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        account.password_hash = sha256(f"{password}{account.password_salt}".encode()).hexdigest()
+        account.password_hash = sha256(
+            f"{password}{account.password_salt}".encode()
+        ).hexdigest()
         # FIXME BS NOW: implement expiration
         account.reset_password_token = None
         self._kernel.server_db_session.add(account)

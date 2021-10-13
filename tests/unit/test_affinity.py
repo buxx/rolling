@@ -15,7 +15,8 @@ from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.affinity import statuses
-from tests.utils import extract_description_properties, in_one_of
+from tests.utils import extract_description_properties
+from tests.utils import in_one_of
 
 
 class TestAffinity:
@@ -73,13 +74,18 @@ class TestAffinity:
         descr = descr_serializer.load(await resp.json())
         assert "MyAffinity" == descr.title
         texts = extract_description_properties(descr.items, "text")
-        assert in_one_of('1 membre(s) dont 1 prêt(s) à se battre', texts)
-        assert in_one_of('Vous êtes membre de cette affinité et vous portez le status de Chef (Vous vous battez pour elle)', texts)
+        assert in_one_of("1 membre(s) dont 1 prêt(s) à se battre", texts)
+        assert in_one_of(
+            "Vous êtes membre de cette affinité et vous portez le status de Chef (Vous vous battez pour elle)",
+            texts,
+        )
         form_actions = extract_description_properties(descr.items, "form_action")
         assert "/affinity/xena/manage/1" in form_actions
         assert "/affinity/xena/edit-relation/1" in form_actions
 
-    @pytest.mark.parametrize("request_,fighter", [(False, True), (True, True), (True, False)])
+    @pytest.mark.parametrize(
+        "request_,fighter", [(False, True), (True, True), (True, False)]
+    )
     async def test_unit__join_affinity__ok__as_non_member(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -108,9 +114,17 @@ class TestAffinity:
         resp = await web.post(f"/affinity/{arthur.id}/edit-relation/{1}")
         descr = descr_serializer.load(await resp.json())
 
-        assert "/affinity/arthur/edit-relation/1?request=1" == descr.items[0].form_action
-        assert "/affinity/arthur/edit-relation/1?request=1&fighter=1" == descr.items[1].form_action
-        assert "/affinity/arthur/edit-relation/1?request=0&fighter=1" == descr.items[2].form_action
+        assert (
+            "/affinity/arthur/edit-relation/1?request=1" == descr.items[0].form_action
+        )
+        assert (
+            "/affinity/arthur/edit-relation/1?request=1&fighter=1"
+            == descr.items[1].form_action
+        )
+        assert (
+            "/affinity/arthur/edit-relation/1?request=0&fighter=1"
+            == descr.items[2].form_action
+        )
 
         # make a request
         await web.post(
@@ -135,19 +149,37 @@ class TestAffinity:
         descr = descr_serializer.load(await resp.json())
         if not request_ and fighter:
             assert "Exprimer le souhait de devenir membre" == descr.items[0].label
-            assert "/affinity/arthur/edit-relation/1?request=1" == descr.items[0].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?request=1"
+                == descr.items[0].form_action
+            )
             assert "Ne plus se battre pour cette affinité" == descr.items[1].label
-            assert "/affinity/arthur/edit-relation/1?fighter=0" == descr.items[1].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?fighter=0"
+                == descr.items[1].form_action
+            )
         elif request_ and fighter:
             assert "Ne plus demander à être membre" == descr.items[0].label
-            assert "/affinity/arthur/edit-relation/1?request=0" == descr.items[0].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?request=0"
+                == descr.items[0].form_action
+            )
             assert "Ne plus se battre pour cette affinité" == descr.items[1].label
-            assert "/affinity/arthur/edit-relation/1?fighter=0" == descr.items[1].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?fighter=0"
+                == descr.items[1].form_action
+            )
         elif request_ and not fighter:
             assert "Ne plus demander à être membre" == descr.items[0].label
-            assert "/affinity/arthur/edit-relation/1?request=0" == descr.items[0].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?request=0"
+                == descr.items[0].form_action
+            )
             assert "Me battre pour cette affinité" == descr.items[1].label
-            assert "/affinity/arthur/edit-relation/1?fighter=1" == descr.items[1].form_action
+            assert (
+                "/affinity/arthur/edit-relation/1?fighter=1"
+                == descr.items[1].form_action
+            )
 
         # list affinities
         resp = await web.post(f"/affinity/{arthur.id}")
@@ -198,7 +230,9 @@ class TestAffinity:
             assert "2 membre(s)" in descr.items[1].text
             assert f"{1 if not fighter else 2} prêt(s)" in descr.items[1].text
 
-    @pytest.mark.parametrize("disallowed,rejected", [(False, True), (True, False), (True, True)])
+    @pytest.mark.parametrize(
+        "disallowed,rejected", [(False, True), (True, False), (True, True)]
+    )
     async def test_unit__join_affinity__ok__as_old_member(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -215,7 +249,9 @@ class TestAffinity:
         kernel = worldmapc_kernel
 
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         affinity.join_type = AffinityJoinType.ACCEPT_ALL.value
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.add(
@@ -229,7 +265,9 @@ class TestAffinity:
         kernel.server_db_session.commit()
 
         # make a join request
-        resp = await web.post(f"/affinity/{arthur.id}/edit-relation/{affinity.id}?request=1")
+        resp = await web.post(
+            f"/affinity/{arthur.id}/edit-relation/{affinity.id}?request=1"
+        )
         assert 200 == resp.status
 
         arthur_relation: AffinityRelationDocument = (
@@ -257,10 +295,14 @@ class TestAffinity:
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
+        await web.post(
+            f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}"
+        )
 
         # disallow
-        resp = await web.post(f"/affinity/arthur/edit-relation/1?rejected=1&fighter={int(fighter)}")
+        resp = await web.post(
+            f"/affinity/arthur/edit-relation/1?rejected=1&fighter={int(fighter)}"
+        )
         descr = descr_serializer.load(await resp.json())
         assert "Vous avez déclaré avoir abandonné MyAffinity" == descr.title
         rel = (
@@ -306,10 +348,14 @@ class TestAffinity:
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
+        await web.post(
+            f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}"
+        )
 
         # discard
-        resp = await web.post(f"/affinity/arthur/edit-relation/1?request=0&fighter={int(fighter)}")
+        resp = await web.post(
+            f"/affinity/arthur/edit-relation/1?request=0&fighter={int(fighter)}"
+        )
         descr = descr_serializer.load(await resp.json())
         assert "Vous ne demandez plus à être membre de MyAffinity" == descr.title
 
@@ -335,7 +381,9 @@ class TestAffinity:
         assert "/affinity/arthur/edit-relation/1" in form_actions
 
         # re do request
-        resp = await web.post(f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}")
+        resp = await web.post(
+            f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}"
+        )
         descr = descr_serializer.load(await resp.json())
         assert "Requete pour etre membre de MyAffinity exprimé" == descr.title
 
@@ -413,7 +461,9 @@ class TestAffinity:
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
         assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
 
@@ -423,7 +473,10 @@ class TestAffinity:
 
         assert "/affinity/xena/manage/1" == descr.items[0].form_action
         assert descr.items[0].items[0].choices
-        assert affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT] == descr.items[0].items[0].value
+        assert (
+            affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT]
+            == descr.items[0].items[0].value
+        )
         for choice in [
             affinity_join_str[AffinityJoinType.ACCEPT_ALL],
             affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT],
@@ -439,10 +492,15 @@ class TestAffinity:
         resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
         descr = descr_serializer.load(await resp.json())
 
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         assert affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
         assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
-        assert affinity_join_str[AffinityJoinType.ACCEPT_ALL] == descr.items[0].items[0].value
+        assert (
+            affinity_join_str[AffinityJoinType.ACCEPT_ALL]
+            == descr.items[0].items[0].value
+        )
 
         # change to one chief accept
         resp = await web.post(
@@ -452,10 +510,15 @@ class TestAffinity:
         resp = await web.post(f"/affinity/{xena.id}/manage/{affinity.id}")
         descr = descr_serializer.load(await resp.json())
 
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
         assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
-        assert affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT] == descr.items[0].items[0].value
+        assert (
+            affinity_join_str[AffinityJoinType.ONE_CHIEF_ACCEPT]
+            == descr.items[0].items[0].value
+        )
 
     async def test_unit__manage_ok__to_accept_all_with_requests(
         self,
@@ -471,7 +534,9 @@ class TestAffinity:
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         assert affinity.join_type == AffinityJoinType.ONE_CHIEF_ACCEPT.value
         assert affinity.direction_type == AffinityDirectionType.ONE_DIRECTOR.value
 
@@ -481,7 +546,9 @@ class TestAffinity:
 
         # Insert one pending request
         kernel.server_db_session.add(
-            AffinityRelationDocument(character_id=arthur.id, affinity_id=affinity.id, request=True)
+            AffinityRelationDocument(
+                character_id=arthur.id, affinity_id=affinity.id, request=True
+            )
         )
         kernel.server_db_session.commit()
 
@@ -525,7 +592,9 @@ class TestAffinity:
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.commit()
@@ -539,13 +608,18 @@ class TestAffinity:
         assert "/affinity/xena/manage-requests/1" in item_urls
         assert "Il y a actuellement 0 demande(s) d'adhésion" in item_labels
         # no signal to vote for xena
-        character_model = kernel.character_lib.get(xena.id, compute_unvote_affinity_relation=True)
+        character_model = kernel.character_lib.get(
+            xena.id, compute_unvote_affinity_relation=True
+        )
         assert not character_model.unvote_affinity_relation
 
         # make an request for arthur
         kernel.server_db_session.add(
             AffinityRelationDocument(
-                character_id=arthur.id, affinity_id=affinity.id, request=True, accepted=False
+                character_id=arthur.id,
+                affinity_id=affinity.id,
+                request=True,
+                accepted=False,
             )
         )
         kernel.server_db_session.commit()
@@ -559,7 +633,9 @@ class TestAffinity:
         assert "/affinity/xena/manage-requests/1" in item_urls
         assert "Il y a actuellement 1 demande(s) d'adhésion" in item_labels
         # have signal to vote for xena
-        character_model = kernel.character_lib.get(xena.id, compute_unvote_affinity_relation=True)
+        character_model = kernel.character_lib.get(
+            xena.id, compute_unvote_affinity_relation=True
+        )
         assert character_model.unvote_affinity_relation
 
         # on affinity list, affinity is blinking
@@ -576,9 +652,14 @@ class TestAffinity:
         resp = await web.post(f"/affinity/{xena.id}/manage-requests/{affinity.id}")
         descr = descr_serializer.load(await resp.json())
 
-        assert f"/affinity/{xena.id}/manage-requests/{affinity.id}" == descr.items[0].form_action
+        assert (
+            f"/affinity/{xena.id}/manage-requests/{affinity.id}"
+            == descr.items[0].form_action
+        )
         assert arthur.id == descr.items[0].items[1].name
-        assert ["Ne rien décider", "Accepter", "Refuser"] == descr.items[0].items[1].choices
+        assert ["Ne rien décider", "Accepter", "Refuser"] == descr.items[0].items[
+            1
+        ].choices
 
         # Accept arthur
         resp = await web.post(
@@ -624,7 +705,9 @@ class TestAffinity:
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.add(
@@ -638,7 +721,9 @@ class TestAffinity:
         kernel.server_db_session.commit()
 
         # display manage relation page
-        resp = await web.post(f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}")
+        resp = await web.post(
+            f"/affinity/{xena.id}/manage-relations/{affinity.id}/{arthur.id}"
+        )
         assert 200 == resp.status
         descr = descr_serializer.load(await resp.json())
 
@@ -649,7 +734,9 @@ class TestAffinity:
         )
         assert descr.items[1].is_form
         assert "status" == descr.items[1].items[0].name
-        assert ["Chef", "Membre", "Seigneur de guerre"] == descr.items[1].items[0].choices
+        assert ["Chef", "Membre", "Seigneur de guerre"] == descr.items[1].items[
+            0
+        ].choices
         assert "Membre" == descr.items[1].items[0].value
 
         # change status
@@ -670,7 +757,9 @@ class TestAffinity:
             .one()
         )
         statuses_dict = dict(statuses)
-        expected = list(statuses_dict.keys())[list(statuses_dict.values()).index(to_status_str)]
+        expected = list(statuses_dict.keys())[
+            list(statuses_dict.values()).index(to_status_str)
+        ]
         assert arthur_relation.status_id == expected
 
     async def test_unit__disallow_member__ok__nominal_case(
@@ -686,7 +775,9 @@ class TestAffinity:
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         affinity.direction_type = AffinityDirectionType.ONE_DIRECTOR.value
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.add(

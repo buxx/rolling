@@ -78,7 +78,9 @@ class BuildLib:
         for action in self._kernel.action_factory.get_all_with_build_actions():
             try:
                 action.check_is_possible(character, build_id=build_id)
-                actions.extend(action.get_character_actions(character, build_id=build_id))
+                actions.extend(
+                    action.get_character_actions(character, build_id=build_id)
+                )
             except ImpossibleAction:
                 pass
 
@@ -132,7 +134,10 @@ class BuildLib:
 
         if zone_row_i is not None and zone_col_i is not None:
             filters.extend(
-                [BuildDocument.zone_row_i == zone_row_i, BuildDocument.zone_col_i == zone_col_i]
+                [
+                    BuildDocument.zone_row_i == zone_row_i,
+                    BuildDocument.zone_col_i == zone_col_i,
+                ]
             )
 
         if is_floor is not None:
@@ -144,7 +149,11 @@ class BuildLib:
         if with_seeded_with:
             filters.append(BuildDocument.seeded_with != None)
 
-        return self._kernel.server_db_session.query(BuildDocument).filter(and_(*filters)).order_by(BuildDocument.is_floor.desc())
+        return (
+            self._kernel.server_db_session.query(BuildDocument)
+            .filter(and_(*filters))
+            .order_by(BuildDocument.is_floor.desc())
+        )
 
     def count_zone_build(
         self,
@@ -173,7 +182,9 @@ class BuildLib:
         build_description = self._kernel.game.config.builds[build_doc.build_id]
 
         for required_resource in build_description.build_require_resources:
-            quantity_to_reduce = required_resource.quantity * (consume_resources_percent / 100)
+            quantity_to_reduce = required_resource.quantity * (
+                consume_resources_percent / 100
+            )
             self._kernel.resource_lib.reduce_stored_in(
                 build_id,
                 resource_id=required_resource.resource_id,
@@ -231,7 +242,9 @@ class BuildLib:
         build_doc = self.get_build_doc(build_id)
 
         # If it is a door ...
-        for door_relation in self._kernel.door_lib.get_door_relations_query(build_id).all():
+        for door_relation in self._kernel.door_lib.get_door_relations_query(
+            build_id
+        ).all():
             self._kernel.server_db_session.delete(door_relation)
 
         for carried_resource in self._kernel.resource_lib.get_stored_in_build(build_id):

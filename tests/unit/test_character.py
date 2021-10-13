@@ -60,7 +60,10 @@ class TestCharacter:
 
         resp = await web.post(
             f"/_describe/character/{xena.id}/card",
-            json={"attack_allowed_loss_rate": str(attack), "defend_allowed_loss_rate": str(defend)},
+            json={
+                "attack_allowed_loss_rate": str(attack),
+                "defend_allowed_loss_rate": str(defend),
+            },
         )
         assert 200 == resp.status
         resp = await web.post(f"/_describe/character/{xena.id}/card")
@@ -72,14 +75,18 @@ class TestCharacter:
         assert expected_attack == doc.attack_allowed_loss_rate
         assert expected_defend == doc.defend_allowed_loss_rate
 
-    async def _get_card_item(self, web: TestClient, character_id: str, item_label: str) -> Part:
+    async def _get_card_item(
+        self, web: TestClient, character_id: str, item_label: str
+    ) -> Part:
         resp = await web.post(f"/_describe/character/{character_id}/card")
         descr = description_serializer.load(await resp.json())
 
         item_by_label = {i.label: i for i in descr.items if i.label}
         return item_by_label[item_label]
 
-    async def _use_as(self, web: TestClient, action: ActionType, character_id: str, stuff_id: int):
+    async def _use_as(
+        self, web: TestClient, action: ActionType, character_id: str, stuff_id: int
+    ):
         resp = await web.post(
             get_with_stuff_action_url(
                 character_id=character_id,
@@ -211,7 +218,10 @@ class TestCharacter:
             direction_type=AffinityDirectionType.ONE_DIRECTOR,
         )
         kernel.affinity_lib.join(
-            character_id=xena.id, affinity_id=affinity.id, accepted=True, status_id=CHIEF_STATUS[0]
+            character_id=xena.id,
+            affinity_id=affinity.id,
+            accepted=True,
+            status_id=CHIEF_STATUS[0],
         )
         kernel.affinity_lib.join(
             character_id=arthur.id,
@@ -230,7 +240,9 @@ class TestCharacter:
         assert f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1" in urls
 
         # See shared things
-        response = await web.post(f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1")
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1"
+        )
         assert response.status == 200
         desc = description_serializer.load(await response.json())
         labels = [i.label for i in desc.items]
@@ -241,7 +253,8 @@ class TestCharacter:
         footer_link_urls = [i.form_action for i in desc.footer_links]
         assert "Partager quelque chose" in footer_link_labels
         assert (
-            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1" in footer_link_urls
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1"
+            in footer_link_urls
         )
 
         # See shareable things
@@ -255,7 +268,8 @@ class TestCharacter:
         assert "Hache de pierre" in labels
         assert "Bois (0.2 mètre cubes)" in labels
         assert (
-            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&stuff_id=1" in urls
+            f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&stuff_id=1"
+            in urls
         )
         assert (
             f"/_describe/character/{xena.id}/shared-inventory/add?affinity_id=1&resource_id=WOOD"
@@ -295,14 +309,19 @@ class TestCharacter:
         assert "Bois (0.1 mètre cubes)" in labels
 
         # See shared
-        response = await web.post(f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1")
+        response = await web.post(
+            f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1"
+        )
         assert response.status == 200
         desc = description_serializer.load(await response.json())
         labels = [i.label for i in desc.items]
         urls = [i.form_action for i in desc.items]
         assert "Hache de pierre" in labels
         assert "Bois (0.1 mètre cubes)" in labels
-        assert f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&stuff_id=1" in urls
+        assert (
+            f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&stuff_id=1"
+            in urls
+        )
         assert (
             f"/_describe/character/{xena.id}/shared-inventory?affinity_id=1&resource_id=WOOD"
             in urls
@@ -315,10 +334,14 @@ class TestCharacter:
         footer_link_labels = [i.label for i in desc.footer_links]
         footer_link_urls = [i.form_action for i in desc.footer_links]
         assert "Voir ce qui est paratgé (2)" in footer_link_labels
-        assert f"/_describe/character/{xena.id}/inventory/shared-with" in footer_link_urls
+        assert (
+            f"/_describe/character/{xena.id}/inventory/shared-with" in footer_link_urls
+        )
 
         # See shared affinity with
-        response = await web.post(f"/_describe/character/{xena.id}/inventory/shared-with")
+        response = await web.post(
+            f"/_describe/character/{xena.id}/inventory/shared-with"
+        )
         assert response.status == 200
         desc = description_serializer.load(await response.json())
         labels = [i.label for i in desc.items]

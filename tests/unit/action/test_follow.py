@@ -107,17 +107,20 @@ class TestFollowAction:
         def _apply_patch():
             if reason == "weight":
                 with unittest.mock.patch(
-                    "rolling.model.character.CharacterModel.get_weight_capacity", new=_fake_weight
+                    "rolling.model.character.CharacterModel.get_weight_capacity",
+                    new=_fake_weight,
                 ):
                     yield
             elif reason == "clutter":
                 with unittest.mock.patch(
-                    "rolling.model.character.CharacterModel.get_clutter_capacity", new=_fake_clutter
+                    "rolling.model.character.CharacterModel.get_clutter_capacity",
+                    new=_fake_clutter,
                 ):
                     yield
             elif reason == "exhausted":
                 with unittest.mock.patch(
-                    "rolling.model.character.CharacterModel.is_exhausted", new=_fake_is_exhausted
+                    "rolling.model.character.CharacterModel.is_exhausted",
+                    new=_fake_is_exhausted,
                 ):
                     yield
             else:
@@ -126,7 +129,9 @@ class TestFollowAction:
         kernel.resource_lib.add_resource_to("WOOD", 200.0, arthur.id)
 
         with _apply_patch():
-            resp = await web.post(f"/_describe/character/{xena.id}/move-to-zone/{1}/{2}")
+            resp = await web.post(
+                f"/_describe/character/{xena.id}/move-to-zone/{1}/{2}"
+            )
             assert 200 == resp.status
             descr = description_serializer.load(await resp.json())
 
@@ -134,7 +139,8 @@ class TestFollowAction:
             url_by_label = {p.label: p.form_action for p in descr.items}
 
             assert (
-                "1 personnage(s) ne pourront pas vous suivre dans ce déplacement: arthur" in texts
+                "1 personnage(s) ne pourront pas vous suivre dans ce déplacement: arthur"
+                in texts
             )
             resp = await web.post(url_by_label["Effectuer le voyage"])
             assert 200 == resp.status

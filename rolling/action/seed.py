@@ -1,16 +1,22 @@
 import dataclasses
 
+import serpyco
 import typing
 
-import serpyco
-
-from guilang.description import Description, RequestClicks
-from rolling.action.base import CharacterAction, get_character_action_url
+from guilang.description import Description
+from guilang.description import RequestClicks
+from rolling.action.base import CharacterAction
+from rolling.action.base import get_character_action_url
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction, NoCarriedResource, NotEnoughResource
+from rolling.exception import ImpossibleAction
+from rolling.exception import NoCarriedResource
+from rolling.exception import NotEnoughResource
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.data import ListOfItemModel
-from rolling.model.event import WebSocketEvent, ZoneEventType, NewBuildData, NewResumeTextData
+from rolling.model.event import NewBuildData
+from rolling.model.event import NewResumeTextData
+from rolling.model.event import WebSocketEvent
+from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
@@ -31,14 +37,20 @@ class SeedAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(SeedModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         resource_id = action_config_raw["resource_id"]
         properties["build_id"] = action_config_raw["build_id"]
         properties["resource_id"] = resource_id
         properties["consume"] = action_config_raw["consume"]
         # Check resource is properly configure (and crash at server startup if not)
-        assert game_config.resources[properties["resource_id"]].grow_speed is not None, f"{resource_id} must have a grow_speed value"
+        assert (
+            game_config.resources[properties["resource_id"]].grow_speed is not None
+        ), f"{resource_id} must have a grow_speed value"
         return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
@@ -57,13 +69,17 @@ class SeedAction(CharacterAction):
         if wanted_build_id not in [build.build_id for build in builds]:
             raise ImpossibleAction("Pas de terrain adapté ici")
 
-        concerned_build = next(build for build in builds if build.build_id == wanted_build_id)
+        concerned_build = next(
+            build for build in builds if build.build_id == wanted_build_id
+        )
         if self._kernel.farming_lib.is_seeded(build=concerned_build):
             raise ImpossibleAction("Déjà semé ici")
 
         return concerned_build
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: SeedModel) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: SeedModel
+    ) -> None:
         resource_id = self._description.properties["resource_id"]
         if not self._kernel.resource_lib.get_one_carried_by(
             character_id=character.id,
@@ -71,10 +87,14 @@ class SeedAction(CharacterAction):
             empty_object_if_not=True,
         ).quantity:
             resource_description = self._kernel.game.config.resources[resource_id]
-            raise ImpossibleAction(f"Vous ne possedez pas de {resource_description.name}")
+            raise ImpossibleAction(
+                f"Vous ne possedez pas de {resource_description.name}"
+            )
 
         if input_.row_i is not None and input_.col_i is not None:
-            self._get_concerned_build_and_check_is_possible(character=character, input_=input_)
+            self._get_concerned_build_and_check_is_possible(
+                character=character, input_=input_
+            )
 
     def get_base_url(self, character: "CharacterModel") -> str:
         return get_character_action_url(
@@ -112,8 +132,10 @@ class SeedAction(CharacterAction):
     ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         assert input_.row_i
         assert input_.col_i
-        concerned_build: BuildDocument = self._get_concerned_build_and_check_is_possible(
-            character=character, input_=input_
+        concerned_build: BuildDocument = (
+            self._get_concerned_build_and_check_is_possible(
+                character=character, input_=input_
+            )
         )
         resource_id = self._description.properties["resource_id"]
 
@@ -142,12 +164,16 @@ class SeedAction(CharacterAction):
         self._kernel.server_db_session.commit()
 
         build_description = self._kernel.game.config.builds[concerned_build.build_id]
-        build_container = ZoneBuildModelContainer(doc=concerned_build, desc=build_description)
+        build_container = ZoneBuildModelContainer(
+            doc=concerned_build, desc=build_description
+        )
         growing_state_classes = self._kernel.farming_lib.get_growing_state_classes(
             build=concerned_build
         )
         build_container.classes = (
-            build_description.classes + [concerned_build.build_id] + growing_state_classes
+            build_description.classes
+            + [concerned_build.build_id]
+            + growing_state_classes
         )
 
         return (

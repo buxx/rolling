@@ -53,7 +53,9 @@ class AccountController(BaseController):
     @hapic.handle_exception(AccountError, http_code=400)
     @hapic.input_body(CreateAccountBody)
     @hapic.output_body(Description)
-    async def create_account(self, request: Request, hapic_data: HapicData) -> Description:
+    async def create_account(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         if (
             hapic_data.body.username
             and hapic_data.body.email
@@ -62,9 +64,16 @@ class AccountController(BaseController):
         ):
             if "@" not in hapic_data.body.email:
                 raise EmailWrongFormat("Email incorrect")
-            if hapic_data.body.raw_password.strip() != hapic_data.body.raw_password_repeat.strip():
-                raise NotSamePassword("Les mots de passes saisies ne sont pas indentiques")
-            if self._kernel.account_lib.username_exist(hapic_data.body.username.strip()):
+            if (
+                hapic_data.body.raw_password.strip()
+                != hapic_data.body.raw_password_repeat.strip()
+            ):
+                raise NotSamePassword(
+                    "Les mots de passes saisies ne sont pas indentiques"
+                )
+            if self._kernel.account_lib.username_exist(
+                hapic_data.body.username.strip()
+            ):
                 raise UsernameAlreadyUsed("Login/pseudo déjà utilisé")
             if self._kernel.account_lib.email_exist(hapic_data.body.email.strip()):
                 raise EmailAlreadyUsed("Email déjà utilisé")
@@ -122,10 +131,14 @@ class AccountController(BaseController):
     @hapic.handle_exception(AccountError, http_code=400)
     @hapic.input_query(PasswordLostQuery)
     @hapic.output_body(Description)
-    async def password_lost(self, request: Request, hapic_data: HapicData) -> Description:
+    async def password_lost(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         if hapic_data.query.validate:
             try:
-                self._kernel.account_lib.send_new_password_request(hapic_data.query.login)
+                self._kernel.account_lib.send_new_password_request(
+                    hapic_data.query.login
+                )
             except AccountError:
                 pass
             return Description(
@@ -168,11 +181,17 @@ class AccountController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_query(GenerateNewPasswordQuery)
-    async def generate_new_password(self, request: Request, hapic_data: HapicData) -> Response:
+    async def generate_new_password(
+        self, request: Request, hapic_data: HapicData
+    ) -> Response:
         try:
-            new_password = self._kernel.account_lib.generate_new_password(hapic_data.query.token)
+            new_password = self._kernel.account_lib.generate_new_password(
+                hapic_data.query.token
+            )
         except AccountError:
-            return Response(body="Clé invalide: impossible de générer un nouveau mot de passe")
+            return Response(
+                body="Clé invalide: impossible de générer un nouveau mot de passe"
+            )
         return Response(body=f"Nouveau mot de passe: {new_password}")
 
     @hapic.with_api_doc()
@@ -209,7 +228,9 @@ class AccountController(BaseController):
                 new_password1 = data.get("new_password1")
                 new_password2 = data.get("new_password2")
                 if (
-                    sha256(f"{current_password}{account.password_salt}".encode()).hexdigest()
+                    sha256(
+                        f"{current_password}{account.password_salt}".encode()
+                    ).hexdigest()
                     != account.password_hash
                 ):
                     message_type = "error"

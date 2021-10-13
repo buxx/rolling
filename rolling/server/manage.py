@@ -1,19 +1,18 @@
 # coding: utf-8
 import asyncio
-from random import choice
-
 import click
-import typing
-
+from random import choice
 import requests
 from sqlalchemy.exc import NoResultFound
+import typing
 
 from rolling.map.source import ZoneMap
 from rolling.map.type.world import WorldMapTileType
 from rolling.model.zone import ZoneMapTileProduction
 from rolling.server.application import HEADER_NAME__DISABLE_AUTH_TOKEN
 from rolling.server.base import get_kernel
-from rolling.server.document.corpse import AnimatedCorpseType, AnimatedCorpseDocument
+from rolling.server.document.corpse import AnimatedCorpseDocument
+from rolling.server.document.corpse import AnimatedCorpseType
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
@@ -72,7 +71,9 @@ def create(game_config_dir: str, character_name: str, stuff_id: str) -> None:
 @click.argument("character-name")
 @click.argument("resource-id")
 @click.argument("quantity", type=float)
-def create(game_config_dir: str, character_name: str, resource_id: str, quantity: float) -> None:
+def create(
+    game_config_dir: str, character_name: str, resource_id: str, quantity: float
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(game_config_folder=game_config_dir)
     click.echo("Search character by name")
@@ -89,7 +90,9 @@ def create(game_config_dir: str, character_name: str, resource_id: str, quantity
 @click.argument("character-name")
 @click.argument("world_row_i", type=int)
 @click.argument("world_col_i", type=int)
-def move(game_config_dir: str, character_name: str, world_row_i: int, world_col_i: int) -> None:
+def move(
+    game_config_dir: str, character_name: str, world_row_i: int, world_col_i: int
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(game_config_folder=game_config_dir)
     click.echo("Search character by name")
@@ -137,7 +140,9 @@ def setup(game_config_dir: str, character_name: str, knowledge_id: str) -> None:
 @click.argument("game-config-dir")
 @click.argument("world-map-source")
 @click.argument("zone-map-folder")
-def sync_zone_resources(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+def sync_zone_resources(
+    game_config_dir: str, world_map_source: str, zone_map_folder: str
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(
         game_config_folder=game_config_dir,
@@ -148,7 +153,9 @@ def sync_zone_resources(game_config_dir: str, world_map_source: str, zone_map_fo
     for world_row_i, world_row in enumerate(kernel.world_map_source.geography.rows):
         for world_col_i, zone_type in enumerate(world_row):
             zone_map: ZoneMap = kernel.tile_maps_by_position[(world_row_i, world_col_i)]
-            click.echo(f"Process {world_row_i}.{world_col_i} ({zone_type.__name__}) ...")
+            click.echo(
+                f"Process {world_row_i}.{world_col_i} ({zone_type.__name__}) ..."
+            )
             for zone_row_i, zone_row in enumerate(zone_map.source.geography.rows):
                 for zone_col_i, tile_type in enumerate(zone_row):
                     tiles_properties = kernel.game.world_manager.world.tiles_properties
@@ -218,7 +225,9 @@ def populate_ac(
             if zone_type != filter_zone_type:
                 click.echo(f"Ignore {world_row_i}.{world_col_i} ({zone_type.__name__})")
                 continue
-            click.echo(f"Process {world_row_i}.{world_col_i} ({zone_type.__name__}) ...")
+            click.echo(
+                f"Process {world_row_i}.{world_col_i} ({zone_type.__name__}) ..."
+            )
 
             animated_corpses = kernel.animated_corpse_lib.get_all(
                 world_row_i=world_row_i,
@@ -233,7 +242,9 @@ def populate_ac(
             for _ in range(count - len(animated_corpses)):
                 click.echo(f"Create new animated corpse ...")
 
-                traversable_coordinates = kernel.get_traversable_coordinates(world_row_i, world_col_i)
+                traversable_coordinates = kernel.get_traversable_coordinates(
+                    world_row_i, world_col_i
+                )
                 if not traversable_coordinates:
                     click.echo(f"ERROR: no traversable coordinate found !")
                     continue
@@ -259,17 +270,21 @@ def populate_ac(
                     url=f"http://{host}:{port}/ac-signal/new/{animated_corpse.id}",
                     headers={
                         HEADER_NAME__DISABLE_AUTH_TOKEN: kernel.server_config.disable_auth_token
-                    }
+                    },
                 )
                 if response.status_code != 204:
-                    click.echo(f"ERROR: Signal newly added result error : code {response.status_code}")
+                    click.echo(
+                        f"ERROR: Signal newly added result error : code {response.status_code}"
+                    )
 
 
 @main.command()
 @click.argument("game-config-dir")
 @click.argument("world-map-source")
 @click.argument("zone-map-folder")
-def sync_build_health(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+def sync_build_health(
+    game_config_dir: str, world_map_source: str, zone_map_folder: str
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(
         game_config_folder=game_config_dir,
@@ -291,7 +306,9 @@ def sync_build_health(game_config_dir: str, world_map_source: str, zone_map_fold
 @click.argument("game-config-dir")
 @click.argument("world-map-source")
 @click.argument("zone-map-folder")
-def sync_character_skill(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+def sync_character_skill(
+    game_config_dir: str, world_map_source: str, zone_map_folder: str
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(
         game_config_folder=game_config_dir,
@@ -300,9 +317,11 @@ def sync_character_skill(game_config_dir: str, world_map_source: str, zone_map_f
     )
 
     available_skills = list(kernel.game.config.skills.keys())
-    for skill_doc in kernel.server_db_session.query(CharacterSkillDocument).filter(
-        CharacterSkillDocument.skill_id.not_in(available_skills)
-    ).all():
+    for skill_doc in (
+        kernel.server_db_session.query(CharacterSkillDocument)
+        .filter(CharacterSkillDocument.skill_id.not_in(available_skills))
+        .all()
+    ):
         click.echo(f"Delete {skill_doc.character_id} {skill_doc.skill_id}")
         kernel.server_db_session.delete(skill_doc)
         kernel.server_db_session.commit()
@@ -312,7 +331,9 @@ def sync_character_skill(game_config_dir: str, world_map_source: str, zone_map_f
 @click.argument("game-config-dir")
 @click.argument("world-map-source")
 @click.argument("zone-map-folder")
-def sync_drop_resource_nowhere(game_config_dir: str, world_map_source: str, zone_map_folder: str) -> None:
+def sync_drop_resource_nowhere(
+    game_config_dir: str, world_map_source: str, zone_map_folder: str
+) -> None:
     click.echo("Preparing kernel")
     kernel = get_kernel(
         game_config_folder=game_config_dir,

@@ -22,7 +22,9 @@ class UniverseLib:
     def add_new_state(self, commit: bool = True) -> None:
         last_state = self.get_last_state()
         self._kernel.server_db_session.add(
-            UniverseStateDocument(turn=last_state.turn + 1, turned_at=datetime.datetime.utcnow())
+            UniverseStateDocument(
+                turn=last_state.turn + 1, turned_at=datetime.datetime.utcnow()
+            )
         )
 
         if commit:

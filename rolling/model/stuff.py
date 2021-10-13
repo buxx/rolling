@@ -26,7 +26,9 @@ class StuffProperties:
     clutter: typing.Optional[float] = None
     clutter_capacity: typing.Optional[float] = None
     image: typing.Optional[str] = None
-    descriptions: typing.List[ActionDescriptionModel] = serpyco.field(default_factory=list)
+    descriptions: typing.List[ActionDescriptionModel] = serpyco.field(
+        default_factory=list
+    )
     material_type: typing.Optional[str] = None
     abilities: typing.List[str] = serpyco.field(default_factory=list)
     weapon: bool = False
@@ -103,7 +105,9 @@ class StuffModel:
             descriptions.append(str(round(self.filled_value, 2)))
 
         if self.filled_with_resource is not None:
-            resource_description = kernel.game.config.resources[self.filled_with_resource]
+            resource_description = kernel.game.config.resources[
+                self.filled_with_resource
+            ]
             unit_str = kernel.translation.get(resource_description.unit)
             descriptions.append(unit_str)
             descriptions.append(resource_description.name)
@@ -120,7 +124,9 @@ class StuffModel:
             descriptions.append(str(round(self.filled_value, 2)))
 
         if self.filled_with_resource is not None:
-            resource_description = kernel.game.config.resources[self.filled_with_resource]
+            resource_description = kernel.game.config.resources[
+                self.filled_with_resource
+            ]
             unit_str = kernel.translation.get(resource_description.unit)
             descriptions.append(unit_str)
             descriptions.append(f"{resource_description.name}")

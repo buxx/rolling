@@ -59,7 +59,9 @@ def is_there_resource_id_in_zone(
             zone_tile_type = typing.cast(typing.Type[ZoneMapTileType], zone_tile_type)
 
             try:
-                productions = kernel.game.world_manager.world.tiles_properties[zone_tile_type].produce
+                productions = kernel.game.world_manager.world.tiles_properties[
+                    zone_tile_type
+                ].produce
             except KeyError:
                 productions = []
 
@@ -82,7 +84,10 @@ def get_stuffs_filled_with_resource_id(
     stuff_lib = StuffLib(kernel=kernel)
     character_stuffs = stuff_lib.get_carried_by(character_id)
     for stuff in character_stuffs:
-        if stuff.filled_with_resource == resource_id and stuff.id not in exclude_stuff_ids:
+        if (
+            stuff.filled_with_resource == resource_id
+            and stuff.id not in exclude_stuff_ids
+        ):
             yield stuff
 
 
@@ -97,7 +102,9 @@ class CornerEnum(enum.Enum):
     TOP_LEFT = "TOP_LEFT"
 
 
-def get_opposite_zone_place(from_: CornerEnum, zone_width: int, zone_height: int) -> (int, int):
+def get_opposite_zone_place(
+    from_: CornerEnum, zone_width: int, zone_height: int
+) -> (int, int):
     width_part_len = zone_width // 3
     half_width_part_len = width_part_len // 2
     height_part_len = zone_height // 3
@@ -309,7 +316,9 @@ def get_exception_for_not_enough_ap(
 
 
 # FIXME BS: replace by iterator on eatable object (to manage all case like invent friends)
-def character_can_drink_in_its_zone(kernel: "Kernel", character: "CharacterModel") -> bool:
+def character_can_drink_in_its_zone(
+    kernel: "Kernel", character: "CharacterModel"
+) -> bool:
     # TODO: consider path finding
     zone_source = kernel.tile_maps_by_position[
         (character.world_row_i, character.world_col_i)

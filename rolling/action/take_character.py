@@ -10,7 +10,8 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_with_character_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
@@ -27,11 +28,15 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class TakeFromModel:
-    take_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    take_stuff_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     take_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    take_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
+    take_resource_id: typing.Optional[str] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     take_resource_quantity: typing.Optional[str] = None
 
 
@@ -84,7 +89,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
                 self._from_character.id, exclude_crafting=False
             )
 
-        can_take_from_affinity_relation_ids = self.get_can_take_from_affinity_relation_ids()
+        can_take_from_affinity_relation_ids = (
+            self.get_can_take_from_affinity_relation_ids()
+        )
         if can_take_from_affinity_relation_ids:
             return self._kernel.stuff_lib.get_carried_by(
                 self._from_character.id,
@@ -98,7 +105,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
         if self.can_take_by_force(raise_=False):
             return self._kernel.resource_lib.get_carried_by(self._from_character.id)
 
-        can_take_from_affinity_relation_ids = self.get_can_take_from_affinity_relation_ids()
+        can_take_from_affinity_relation_ids = (
+            self.get_can_take_from_affinity_relation_ids()
+        )
         if can_take_from_affinity_relation_ids:
             return self._kernel.resource_lib.get_carried_by(
                 self._from_character.id,
@@ -130,7 +139,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
         )
 
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -142,7 +153,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
 
         return f"Prendre de {self._from_character.name}"
 
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         return self._from_character.id
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
@@ -160,7 +173,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
                 self._from_character.id, exclude_crafting=False, stuff_id=stuff_id
             )
 
-        can_take_from_affinity_relation_ids = self.get_can_take_from_affinity_relation_ids()
+        can_take_from_affinity_relation_ids = (
+            self.get_can_take_from_affinity_relation_ids()
+        )
         if can_take_from_affinity_relation_ids:
             return self._kernel.stuff_lib.get_carried_by(
                 self._from_character.id,
@@ -174,13 +189,17 @@ class TakeStuffOrResources(TransferStuffOrResources):
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.set_carried_by(stuff_id, self._character.id)
 
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
         if self.can_take_by_force(raise_=False):
             return self._kernel.resource_lib.get_one_carried_by(
                 self._from_character.id, resource_id=resource_id
             )
 
-        can_take_from_affinity_relation_ids = self.get_can_take_from_affinity_relation_ids()
+        can_take_from_affinity_relation_ids = (
+            self.get_can_take_from_affinity_relation_ids()
+        )
         if can_take_from_affinity_relation_ids:
             return self._kernel.resource_lib.get_one_carried_by(
                 self._from_character.id,
@@ -250,7 +269,9 @@ class TakeFromCharacterAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(TakeFromModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -268,10 +289,15 @@ class TakeFromCharacterAction(WithCharacterAction):
             not take.can_take_by_force(raise_=False)
             and not take.get_can_take_from_affinity_relation_ids()
         ):
-            raise ImpossibleAction(f"{character.name} ne peut contraindre {with_character.name}")
+            raise ImpossibleAction(
+                f"{character.name} ne peut contraindre {with_character.name}"
+            )
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: TakeFromModel,
     ) -> None:
         self.check_is_possible(character, with_character)
         take = TakeStuffOrResources(
@@ -286,19 +312,26 @@ class TakeFromCharacterAction(WithCharacterAction):
                 with_character.id, resource_id=input_.take_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.take_resource_quantity, carried_resource=carried_resource
+                user_input=input_.take_resource_quantity,
+                carried_resource=carried_resource,
             )
             take.check_can_transfer_resource(
                 input_.take_resource_id, quantity=user_input_context.real_quantity
             )
 
         if input_.take_stuff_id:
-            take.check_can_transfer_stuff(input_.take_stuff_id, quantity=input_.take_stuff_quantity)
+            take.check_can_transfer_stuff(
+                input_.take_stuff_id, quantity=input_.take_stuff_quantity
+            )
 
     def get_character_actions(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
-        return [CharacterActionLink(name="Prendre", link=self._get_url(character, with_character))]
+        return [
+            CharacterActionLink(
+                name="Prendre", link=self._get_url(character, with_character)
+            )
+        ]
 
     def _get_url(
         self,
@@ -315,7 +348,10 @@ class TakeFromCharacterAction(WithCharacterAction):
         )
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: TakeFromModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: TakeFromModel,
     ) -> Description:
         return TakeStuffOrResources(
             self._kernel,

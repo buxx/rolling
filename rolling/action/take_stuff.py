@@ -17,7 +17,9 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class TakeStuffModel:
-    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     then_redirect_url: typing.Optional[str] = None
 
 
@@ -26,10 +28,14 @@ class TakeStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(TakeStuffModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         pass  # TODO: check if stuff is near, is not carried, is not protected ...
 
     def check_request_is_possible(
@@ -46,13 +52,20 @@ class TakeStuffAction(WithStuffAction):
         self, character: "CharacterModel", stuff: "StuffModel", input_: TakeStuffModel
     ) -> Description:
         # FIXME BS NOW: manage correctly ImpossibleAction
-        self._kernel.character_lib.take_stuff(character_id=character.id, stuff_id=stuff.id)
+        self._kernel.character_lib.take_stuff(
+            character_id=character.id, stuff_id=stuff.id
+        )
 
         around_stuffs_like_this: typing.List[StuffModel] = []
         if input_.quantity or 1 > 1:
             stuff_to_find = input_.quantity - 1
-            scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
-                x=character.zone_row_i, y=character.zone_col_i, exclude_on=False, distance=1
+            scan_coordinates: typing.List[
+                typing.Tuple[int, int]
+            ] = get_on_and_around_coordinates(
+                x=character.zone_row_i,
+                y=character.zone_col_i,
+                exclude_on=False,
+                distance=1,
             )
             for around_row_i, around_col_i in scan_coordinates:
                 for around_stuff in self._kernel.stuff_lib.get_zone_stuffs(
@@ -69,4 +82,6 @@ class TakeStuffAction(WithStuffAction):
                     character_id=character.id, stuff_id=around_stuffs_like_this.pop().id
                 )
 
-        return Description(title="Objet(s) récupéré(s)", redirect=input_.then_redirect_url)
+        return Description(
+            title="Objet(s) récupéré(s)", redirect=input_.then_redirect_url
+        )

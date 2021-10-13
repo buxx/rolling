@@ -34,7 +34,9 @@ class TakeResourceAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(TakeResourceModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
@@ -56,7 +58,9 @@ class TakeResourceAction(WithResourceAction):
         # FIXME BS NOW: manage correctly ImpossibleAction
         resource_description = self._kernel.game.config.resources[resource_id]
         around_carried_resources: typing.List[CarriedResourceDescriptionModel] = []
-        scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
+        scan_coordinates: typing.List[
+            typing.Tuple[int, int]
+        ] = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i, exclude_on=False, distance=1
         )
         for around_row_i, around_col_i in scan_coordinates:

@@ -61,7 +61,9 @@ class WorldEventsManager:
             server_logger.debug(f"Receive message on websocket for world: {msg}")
 
             if msg.type == aiohttp.WSMsgType.ERROR:
-                server_logger.error(f"World websocket closed with exception {socket.exception()}")
+                server_logger.error(
+                    f"World websocket closed with exception {socket.exception()}"
+                )
             else:
                 try:
                     await self._process_msg(msg, socket)
@@ -87,10 +89,14 @@ class WorldEventsManager:
     async def _process_msg(self, msg, socket: web.WebSocketResponse) -> None:
         event_dict = json.loads(msg.data)
         event_type = ZoneEventType(event_dict["type"])
-        event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
+        event = self._event_serializer_factory.get_serializer(event_type).load(
+            event_dict
+        )
         await self._process_event(event, socket)
 
-    async def _process_event(self, event: WebSocketEvent, socket: web.WebSocketResponse) -> None:
+    async def _process_event(
+        self, event: WebSocketEvent, socket: web.WebSocketResponse
+    ) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
         except UnknownEvent:
@@ -99,7 +105,10 @@ class WorldEventsManager:
 
         try:
             await event_processor.process(
-                event=event, sender_socket=socket, row_i=event.world_row_i, col_i=event.world_col_i
+                event=event,
+                sender_socket=socket,
+                row_i=event.world_row_i,
+                col_i=event.world_col_i,
             )
         except UnableToProcessEvent as exc:
             server_logger.debug(f"Unable to process event {event.type}: {str(exc)}")
@@ -117,11 +126,15 @@ class WorldEventsManager:
             yield socket
 
     async def send_to_sockets(
-        self, event: WebSocketEvent, world_row_i: int, world_col_i: int, repeat_to_zone: bool = True
+        self,
+        event: WebSocketEvent,
+        world_row_i: int,
+        world_col_i: int,
+        repeat_to_zone: bool = True,
     ) -> str:
-        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
-            event
-        )
+        event_str = self._kernel.event_serializer_factory.get_serializer(
+            event.type
+        ).dump_json(event)
 
         for socket in self.get_sockets():
             try:
@@ -133,7 +146,10 @@ class WorldEventsManager:
         # Replicate message on concerned zone websockets
         if repeat_to_zone:
             await self._kernel.server_zone_events_manager.send_to_sockets(
-                event, world_row_i=world_row_i, world_col_i=world_col_i, repeat_to_world=False
+                event,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                repeat_to_world=False,
             )
 
         return event_str

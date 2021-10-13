@@ -28,7 +28,9 @@ class CheatsCharacterAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(CheatsModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def _get_available_cheats(self, character: "CharacterModel") -> typing.Set[str]:
@@ -46,7 +48,9 @@ class CheatsCharacterAction(CharacterAction):
         if not self._get_available_cheats(character):
             raise ImpossibleAction("Vous n'avez pas accès")
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: CheatsModel) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: CheatsModel
+    ) -> None:
         if not input_.cheat_id:
             raise ImpossibleAction("Choix du cheat nécessaire")
 
@@ -96,7 +100,8 @@ class CheatsCharacterAction(CharacterAction):
             self._kernel.server_db_session.add(character_doc)
             self._kernel.server_db_session.commit()
             return Description(
-                title="Points d'actions rechargés", back_url=get_character_actions_url(character)
+                title="Points d'actions rechargés",
+                back_url=get_character_actions_url(character),
             )
         if input_.cheat_id == "reduce_tiredness":
             self._kernel.character_lib.reduce_tiredness(character.id, 100)

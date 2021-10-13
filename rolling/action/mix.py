@@ -10,8 +10,9 @@ from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.utils import check_common_is_possible
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import ExpectedQuantityContext
@@ -40,7 +41,9 @@ class MixResourcesAction(WithResourceAction):
 
         # TODO BS 2019-09-10: manage more than two resource mix
         for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
-            for resource_mix_description in self._kernel.game.config.get_resource_mixs_with(
+            for (
+                resource_mix_description
+            ) in self._kernel.game.config.get_resource_mixs_with(
                 [resource_id, carried_resource.id]
             ):
                 return
@@ -52,7 +55,9 @@ class MixResourcesAction(WithResourceAction):
     ) -> None:
         self.check_is_possible(character, resource_id)
         resource_mix = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
-        check_common_is_possible(self._kernel, character=character, description=resource_mix)
+        check_common_is_possible(
+            self._kernel, character=character, description=resource_mix
+        )
 
         if input_.quantity is not None:
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
@@ -64,7 +69,9 @@ class MixResourcesAction(WithResourceAction):
                 user_input_context = InputQuantityContext.from_carried_resource(
                     user_input=input_.quantity, carried_resource=carried_resource
                 )
-                required_quantity = required_resource.coeff * user_input_context.real_quantity
+                required_quantity = (
+                    required_resource.coeff * user_input_context.real_quantity
+                )
                 if carried_resource.quantity < required_quantity:
                     raise WrongInputError(
                         f"Vous ne possédez pas assez de {required_resource.resource.name}: "
@@ -73,7 +80,9 @@ class MixResourcesAction(WithResourceAction):
                     )
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def get_character_actions(
@@ -85,7 +94,9 @@ class MixResourcesAction(WithResourceAction):
             if carried_resource.id == resource_id:
                 continue
 
-            for resource_mix_description in self._kernel.game.config.get_resource_mixs_with(
+            for (
+                resource_mix_description
+            ) in self._kernel.game.config.get_resource_mixs_with(
                 [resource_id, carried_resource.id]
             ):
                 with_str = ", ".join(
@@ -138,8 +149,12 @@ class MixResourcesAction(WithResourceAction):
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
         base_cost = self.get_cost(character, resource_id=resource_id)
-        resource_mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
-        unit_name = self._kernel.translation.get(resource_mix_description.produce_resource.unit)
+        resource_mix_description = self._kernel.game.config.resource_mixs[
+            input_.resource_mix_id
+        ]
+        unit_name = self._kernel.translation.get(
+            resource_mix_description.produce_resource.unit
+        )
         cost_per_unit = resource_mix_description.cost
 
         carried_resource = self._kernel.resource_lib.get_one_carried_by(
@@ -207,9 +222,14 @@ class MixResourcesAction(WithResourceAction):
 
         # Make mix
         for required_resource in resource_mix_description.required_resources:
-            required_quantity = required_resource.coeff * user_input_context.real_quantity
+            required_quantity = (
+                required_resource.coeff * user_input_context.real_quantity
+            )
             self._kernel.resource_lib.reduce_carried_by(
-                character.id, required_resource.resource.id, required_quantity, commit=False
+                character.id,
+                required_resource.resource.id,
+                required_quantity,
+                commit=False,
             )
 
         self._kernel.resource_lib.add_resource_to(

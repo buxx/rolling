@@ -70,7 +70,9 @@ def _erase_db(kernel: Kernel) -> Kernel:
     kernel.init_server_db_session()
 
     # To prevent foreign key error, delete some table fist
-    kernel.server_db_session.execute(ServerSideDocument.metadata.tables["character_skill"].delete())
+    kernel.server_db_session.execute(
+        ServerSideDocument.metadata.tables["character_skill"].delete()
+    )
 
     for table in reversed(ServerSideDocument.metadata.sorted_tables):
         kernel.server_db_session.execute(table.delete())
@@ -84,7 +86,9 @@ def _erase_db(kernel: Kernel) -> Kernel:
 
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourcea_txt, loop=loop, server_db_name="rolling_test"))
+    kernel = _erase_db(
+        Kernel(worldmapsourcea_txt, loop=loop, server_db_name="rolling_test")
+    )
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -92,7 +96,9 @@ def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test"))
+    kernel = _erase_db(
+        Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test")
+    )
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -100,7 +106,9 @@ def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
-    kernel = _erase_db(Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test"))
+    kernel = _erase_db(
+        Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test")
+    )
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
@@ -160,7 +168,9 @@ def default_character_competences() -> dict:
 
 
 @pytest.fixture
-def xena(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
+def xena(
+    worldmapc_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
     xena = CharacterDocument(id="xena", name="xena", **default_character_competences)
     xena.world_row_i = 1
     xena.world_col_i = 1
@@ -173,21 +183,29 @@ def xena(worldmapc_kernel: Kernel, default_character_competences: dict) -> Chara
     worldmapc_kernel.character_lib.ensure_skills_for_character(xena.id)
 
     worldmapc_kernel.character_lib.increase_knowledge_progress(
-        xena.id, "blacksmith", worldmapc_kernel.game.config.knowledge["blacksmith"].ap_required
+        xena.id,
+        "blacksmith",
+        worldmapc_kernel.game.config.knowledge["blacksmith"].ap_required,
     )
 
     return xena
 
 
 @pytest.fixture
-def worldmapc_xena_model(xena: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+def worldmapc_xena_model(
+    xena: CharacterDocument, worldmapc_kernel: Kernel
+) -> CharacterModel:
     character_lib = CharacterLib(worldmapc_kernel)
     return character_lib.document_to_model(xena)
 
 
 @pytest.fixture
-def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
-    arthur = CharacterDocument(id="arthur", name="arthur", **default_character_competences)
+def arthur(
+    worldmapc_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
+    arthur = CharacterDocument(
+        id="arthur", name="arthur", **default_character_competences
+    )
     arthur.world_row_i = 1
     arthur.world_col_i = 1
     arthur.zone_row_i = 10
@@ -202,8 +220,12 @@ def arthur(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
 
 
 @pytest.fixture
-def franck(worldmapc_kernel: Kernel, default_character_competences: dict) -> CharacterDocument:
-    franck = CharacterDocument(id="franck", name="franck", **default_character_competences)
+def franck(
+    worldmapc_kernel: Kernel, default_character_competences: dict
+) -> CharacterDocument:
+    franck = CharacterDocument(
+        id="franck", name="franck", **default_character_competences
+    )
     franck.world_row_i = 1
     franck.world_col_i = 1
     franck.zone_row_i = 11
@@ -218,13 +240,17 @@ def franck(worldmapc_kernel: Kernel, default_character_competences: dict) -> Cha
 
 
 @pytest.fixture
-def worldmapc_arthur_model(arthur: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+def worldmapc_arthur_model(
+    arthur: CharacterDocument, worldmapc_kernel: Kernel
+) -> CharacterModel:
     character_lib = CharacterLib(worldmapc_kernel)
     return character_lib.document_to_model(arthur)
 
 
 @pytest.fixture
-def worldmapc_franck_model(franck: CharacterDocument, worldmapc_kernel: Kernel) -> CharacterModel:
+def worldmapc_franck_model(
+    franck: CharacterDocument, worldmapc_kernel: Kernel
+) -> CharacterModel:
     character_lib = CharacterLib(worldmapc_kernel)
     return character_lib.document_to_model(franck)
 
@@ -343,12 +369,16 @@ def burgundian_fighters(
 
 
 @pytest.fixture
-def france_warlord(worldmapc_kernel: Kernel, france_affinity: AffinityDocument) -> CharacterModel:
+def france_warlord(
+    worldmapc_kernel: Kernel, france_affinity: AffinityDocument
+) -> CharacterModel:
     return _create_soldiers(worldmapc_kernel, france_affinity, 1, warlord=True)[0]
 
 
 @pytest.fixture
-def england_warlord(worldmapc_kernel: Kernel, england_affinity: AffinityDocument) -> CharacterModel:
+def england_warlord(
+    worldmapc_kernel: Kernel, england_affinity: AffinityDocument
+) -> CharacterModel:
     return _create_soldiers(worldmapc_kernel, england_affinity, 1, warlord=True)[0]
 
 
@@ -441,7 +471,9 @@ def worldmapc_xena_wood_shield2(
 
 
 @pytest.fixture
-def worldmapc_xena_wood(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel) -> None:
+def worldmapc_xena_wood(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> None:
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel
 
@@ -449,7 +481,9 @@ def worldmapc_xena_wood(worldmapc_xena_model: CharacterModel, worldmapc_kernel: 
 
 
 @pytest.fixture
-def worldmapc_xena_stone(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel) -> None:
+def worldmapc_xena_stone(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+) -> None:
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel
 
@@ -458,7 +492,9 @@ def worldmapc_xena_stone(worldmapc_xena_model: CharacterModel, worldmapc_kernel:
 
 @pytest.fixture
 def worldmapc_xena_haxe_weapon(
-    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel, worldmapc_xena_haxe: StuffModel
+    worldmapc_xena_model: CharacterModel,
+    worldmapc_kernel: Kernel,
+    worldmapc_xena_haxe: StuffModel,
 ) -> StuffModel:
     xena = worldmapc_xena_model
     kernel = worldmapc_kernel

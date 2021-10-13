@@ -21,7 +21,9 @@ class BusinessLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
-    def get_offers_query(self, character_id: str, statuses: typing.List[OfferStatus]) -> Query:
+    def get_offers_query(
+        self, character_id: str, statuses: typing.List[OfferStatus]
+    ) -> Query:
         return self._kernel.server_db_session.query(OfferDocument).filter(
             OfferDocument.status.in_([s.value for s in statuses]),
             OfferDocument.permanent == True,
@@ -45,7 +47,11 @@ class BusinessLib:
                 and_(
                     OfferDocument.character_id == character_id,
                     OfferDocument.status.in_(
-                        (OfferStatus.OPEN.value, OfferStatus.DRAFT.value, OfferStatus.CLOSED.value)
+                        (
+                            OfferStatus.OPEN.value,
+                            OfferStatus.DRAFT.value,
+                            OfferStatus.CLOSED.value,
+                        )
                     ),
                 ),
                 and_(
@@ -104,7 +110,9 @@ class BusinessLib:
         item: OfferItemDocument = self.get_offer_item_query(item_id).one()
         if item.resource_id:
             return self._kernel.resource_lib.have_resource(
-                character_id=character_id, resource_id=item.resource_id, quantity=item.quantity
+                character_id=character_id,
+                resource_id=item.resource_id,
+                quantity=item.quantity,
             )
         return (
             self._kernel.stuff_lib.get_stuff_count(
@@ -116,7 +124,9 @@ class BusinessLib:
     def character_can_deal(self, character_id: str, offer_id: int) -> bool:
         offer: OfferDocument = self.get_offer_query(offer_id).one()
         item: OfferItemDocument
-        request_items = [i for i in offer.items if i.position == OfferItemPosition.REQUEST.value]
+        request_items = [
+            i for i in offer.items if i.position == OfferItemPosition.REQUEST.value
+        ]
 
         if not request_items:
             return True
@@ -135,7 +145,9 @@ class BusinessLib:
     def owner_can_deal(self, offer_id: int) -> bool:
         offer: OfferDocument = self.get_offer_query(offer_id).one()
         item: OfferItemDocument
-        offer_items = [i for i in offer.items if i.position == OfferItemPosition.OFFER.value]
+        offer_items = [
+            i for i in offer.items if i.position == OfferItemPosition.OFFER.value
+        ]
 
         if not offer_items:
             return True
@@ -177,11 +189,15 @@ class BusinessLib:
         if offer.offer_operand == OfferOperand.OR.value:
             if not offer_item_id:
                 raise RollingError(f"Offer {offer_id} require an offer_item_id")
-            offer_items.append(next(i for i in offer.offer_items if i.id == offer_item_id))
+            offer_items.append(
+                next(i for i in offer.offer_items if i.id == offer_item_id)
+            )
         else:
             offer_items.extend(offer.offer_items)
 
-        def _deal_item(item: OfferItemDocument, giver_id: str, receiver_id: str) -> None:
+        def _deal_item(
+            item: OfferItemDocument, giver_id: str, receiver_id: str
+        ) -> None:
             if item.resource_id:
                 self._kernel.resource_lib.reduce_carried_by(
                     character_id=giver_id,
@@ -200,18 +216,26 @@ class BusinessLib:
                     stuff = self._kernel.stuff_lib.get_first_carried_stuff(
                         character_id=giver_id, stuff_id=item.stuff_id
                     )
-                    self._kernel.stuff_lib.un_use_stuff(stuff.id)  # TODO BS 20200719: test it
+                    self._kernel.stuff_lib.un_use_stuff(
+                        stuff.id
+                    )  # TODO BS 20200719: test it
                     self._kernel.stuff_lib.set_carried_by(
                         stuff_id=stuff.id, character_id=receiver_id, commit=False
                     )
 
         for request_item in request_items:
-            _deal_item(request_item, giver_id=character_id, receiver_id=offer.character_id)
-            event_texts.append(f"- {request_item.get_name(self._kernel, quantity=True)}")
+            _deal_item(
+                request_item, giver_id=character_id, receiver_id=offer.character_id
+            )
+            event_texts.append(
+                f"- {request_item.get_name(self._kernel, quantity=True)}"
+            )
 
         event_texts.append("Vous avez donné:")
         for offer_item in offer_items:
-            _deal_item(offer_item, giver_id=offer.character_id, receiver_id=character_id)
+            _deal_item(
+                offer_item, giver_id=offer.character_id, receiver_id=character_id
+            )
             event_texts.append(f"- {offer_item.get_name(self._kernel, quantity=True)}")
 
         self._kernel.character_lib.add_event(
@@ -225,7 +249,9 @@ class BusinessLib:
         self.get_offer_query(offer_id).update({"read": True})
         self._kernel.server_db_session.commit()
 
-    def changer_offer_status(self, offer_id: int, status: OfferStatus, commit: bool = True) -> None:
+    def changer_offer_status(
+        self, offer_id: int, status: OfferStatus, commit: bool = True
+    ) -> None:
         offer: OfferDocument = self.get_offer_query(offer_id).one()
         offer.status = status.value
         self._kernel.server_db_session.add(offer)

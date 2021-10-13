@@ -32,7 +32,9 @@ def test_get_corner():
         "X": None,
     }
 
-    for row_i, line in enumerate([line.strip() for line in str_map.splitlines() if line.strip()]):
+    for row_i, line in enumerate(
+        [line.strip() for line in str_map.splitlines() if line.strip()]
+    ):
         for col_i, charr in enumerate(line):
             real_row_i = row_i - 1
             real_col_i = col_i - 1
@@ -55,9 +57,15 @@ def test_get_corner():
     ],
 )
 def test_get_opposite_zone_place(
-    expected_row_i: int, expected_col_i: int, from_: CornerEnum, zone_width: int, zone_height: int
+    expected_row_i: int,
+    expected_col_i: int,
+    from_: CornerEnum,
+    zone_width: int,
+    zone_height: int,
 ):
-    assert get_opposite_zone_place(from_=from_, zone_width=zone_width, zone_height=zone_height) == (
+    assert get_opposite_zone_place(
+        from_=from_, zone_width=zone_width, zone_height=zone_height
+    ) == (
         expected_row_i,
         expected_col_i,
     )

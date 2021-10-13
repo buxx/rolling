@@ -14,10 +14,12 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import ConfirmModel, check_common_is_possible
+from rolling.action.utils import ConfirmModel
+from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.exception import WrongInputError
 from rolling.model.skill import DEFAULT_MAXIMUM_SKILL
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
@@ -32,7 +34,9 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class CraftInput:
-    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 class BaseCraftStuff:
@@ -48,9 +52,14 @@ class BaseCraftStuff:
                     "must contain stuff or resource key"
                 )
 
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties.update(
-            {"produce": action_config_raw["produce"], "require": action_config_raw["require"]}
+            {
+                "produce": action_config_raw["produce"],
+                "require": action_config_raw["require"],
+            }
         )
         return properties
 
@@ -75,8 +84,8 @@ class BaseCraftStuff:
             if "stuff" in require:
                 required_quantity = input_.quantity * int(require["quantity"])
                 stuff_id = require["stuff"]
-                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                    stuff_id
+                stuff_properties = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
                 )
                 carried_stuffs = [c for c in carried_stuffs if c.stuff_id == stuff_id]
                 owned_quantity = len(carried_stuffs)
@@ -96,9 +105,13 @@ class BaseCraftStuff:
                 resource_id = require["resource"]
                 resource_properties = self._kernel.game.config.resources[resource_id]
                 try:
-                    carried_resource = next((c for c in carried_resources if c.id == resource_id))
+                    carried_resource = next(
+                        (c for c in carried_resources if c.id == resource_id)
+                    )
                 except StopIteration:
-                    raise WrongInputError(f"Vous ne possédez pas de {resource_properties.name}")
+                    raise WrongInputError(
+                        f"Vous ne possédez pas de {resource_properties.name}"
+                    )
                 if carried_resource.quantity < required_quantity:
                     missing_quantity_str = quantity_to_str(
                         kernel=self._kernel,
@@ -122,15 +135,19 @@ class BaseCraftStuff:
         for produce in description.properties["produce"]:
             stuff_id = produce["stuff"]
             quantity = produce["quantity"]
-            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            stuff_properties = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            )
 
             for i in range(int(quantity)):
-                stuff_doc = self._kernel.stuff_lib.create_document_from_stuff_properties(
-                    properties=stuff_properties,
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=character.zone_row_i,
-                    zone_col_i=character.zone_col_i,
+                stuff_doc = (
+                    self._kernel.stuff_lib.create_document_from_stuff_properties(
+                        properties=stuff_properties,
+                        world_row_i=character.world_row_i,
+                        world_col_i=character.world_col_i,
+                        zone_row_i=character.zone_row_i,
+                        zone_col_i=character.zone_col_i,
+                    )
                 )
                 self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
                 self._kernel.stuff_lib.set_carried_by__from_doc(
@@ -147,7 +164,9 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
     input_model_serializer = serpyco.Serializer(CraftInput)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
@@ -202,8 +221,12 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         resource_id: str,
         input_: typing.Optional[CraftInput] = None,
     ) -> typing.Optional[float]:
-        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
-        base_cost = max(self._description.base_cost / 2, self._description.base_cost - bonus)
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value(
+            "crafts"
+        )
+        base_cost = max(
+            self._description.base_cost / 2, self._description.base_cost - bonus
+        )
         if input_ and input_.quantity:
             return base_cost * input_.quantity
         return base_cost
@@ -226,7 +249,11 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                             action_description_id=self._description.id,
                         ),
                         items=[
-                            Part(label=f"Quelle quantité ?", type_=Type.NUMBER, name="quantity")
+                            Part(
+                                label=f"Quelle quantité ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                            )
                         ],
                     )
                 ],
@@ -234,10 +261,18 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
 
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
         self._perform(
-            character, description=self._description, input_=input_, cost=cost, dry_run=True
+            character,
+            description=self._description,
+            input_=input_,
+            cost=cost,
+            dry_run=True,
         )
         self._perform(
-            character, description=self._description, input_=input_, cost=cost, dry_run=False
+            character,
+            description=self._description,
+            input_=input_,
+            cost=cost,
+            dry_run=False,
         )
         return Description(
             title="Action effectué avec succès",
@@ -250,10 +285,14 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
     input_model_serializer = serpyco.Serializer(CraftInput)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return cls._get_properties_from_config(game_config, action_config_raw)
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         # Consider action ca be possible (displayed in interface) if at least one of required stuff
         # is owned by character
         carried = self._kernel.stuff_lib.get_carried_by(character.id)
@@ -271,8 +310,12 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         stuff: "StuffModel",
         input_: typing.Optional[typing.Any] = None,
     ) -> typing.Optional[float]:
-        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
-        base_cost = max(self._description.base_cost / 2, self._description.base_cost - bonus)
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value(
+            "crafts"
+        )
+        base_cost = max(
+            self._description.base_cost / 2, self._description.base_cost - bonus
+        )
         if input_ and input_.quantity:
             return base_cost * input_.quantity
         return base_cost
@@ -287,7 +330,11 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         if input_.quantity is not None:
             cost = self.get_cost(character, stuff=stuff, input_=input_)
             self._perform(
-                character, description=self._description, input_=input_, cost=cost, dry_run=True
+                character,
+                description=self._description,
+                input_=input_,
+                cost=cost,
+                dry_run=True,
             )
 
     def get_character_actions(
@@ -332,7 +379,11 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                             action_description_id=self._description.id,
                         ),
                         items=[
-                            Part(label=f"Quelle quantité ?", type_=Type.NUMBER, name="quantity")
+                            Part(
+                                label=f"Quelle quantité ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                            )
                         ],
                     )
                 ],
@@ -340,10 +391,18 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
 
         cost = self.get_cost(character, stuff=stuff, input_=input_)
         self._perform(
-            character, description=self._description, input_=input_, cost=cost, dry_run=True
+            character,
+            description=self._description,
+            input_=input_,
+            cost=cost,
+            dry_run=True,
         )
         self._perform(
-            character, description=self._description, input_=input_, cost=cost, dry_run=False
+            character,
+            description=self._description,
+            input_=input_,
+            cost=cost,
+            dry_run=False,
         )
         return Description(
             title="Action effectué avec succès",
@@ -361,16 +420,22 @@ class BeginStuffConstructionAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(BeginStuffModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         for consume in action_config_raw["consume"]:
             if "resource" not in consume and "stuff" not in consume:
                 raise RollingError(f"Action config is not correct: {action_config_raw}")
 
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties["produce_stuff_id"] = action_config_raw["produce_stuff_id"]
         properties["consume"] = action_config_raw["consume"]
         properties["craft_ap"] = action_config_raw["craft_ap"]
-        properties["default_description"] = action_config_raw.get("default_description", "")
+        properties["default_description"] = action_config_raw.get(
+            "default_description", ""
+        )
         properties["link_group_name"] = action_config_raw.get("link_group_name", None)
         return properties
 
@@ -382,8 +447,17 @@ class BeginStuffConstructionAction(CharacterAction):
     ) -> None:
         if input_.confirm:
             self.check_is_possible(character)
-            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(self.description.properties["produce_stuff_id"])
-            check_common_is_possible(self._kernel, description=self._description, character=character, illustration_name=stuff_description.illustration)
+            stuff_description = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    self.description.properties["produce_stuff_id"]
+                )
+            )
+            check_common_is_possible(
+                self._kernel,
+                description=self._description,
+                character=character,
+                illustration_name=stuff_description.illustration,
+            )
 
             cost = self.get_cost(character)
             if character.action_points < cost:
@@ -395,13 +469,21 @@ class BeginStuffConstructionAction(CharacterAction):
             for consume in self._description.properties["consume"]:
                 if "resource" in consume:
                     resource_id = consume["resource"]
-                    resource_description = self._kernel.game.config.resources[resource_id]
+                    resource_description = self._kernel.game.config.resources[
+                        resource_id
+                    ]
                     quantity = consume["quantity"]
-                    quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
+                    quantity_str = quantity_to_str(
+                        quantity, resource_description.unit, self._kernel
+                    )
                     if not self._kernel.resource_lib.have_resource(
-                        character_id=character.id, resource_id=resource_id, quantity=quantity
+                        character_id=character.id,
+                        resource_id=resource_id,
+                        quantity=quantity,
                     ):
-                        resource_description = self._kernel.game.config.resources[resource_id]
+                        resource_description = self._kernel.game.config.resources[
+                            resource_id
+                        ]
                         raise ImpossibleAction(
                             f"Vous ne possédez pas assez de {resource_description.name}: {quantity_str} nécessaire(s)"
                         )
@@ -415,8 +497,10 @@ class BeginStuffConstructionAction(CharacterAction):
                         )
                         < quantity
                     ):
-                        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                            stuff_id
+                        stuff_properties = (
+                            self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                                stuff_id
+                            )
                         )
                         raise ImpossibleAction(
                             f"Vous ne possédez pas assez de {stuff_properties.name}: {quantity} nécessaire(s)"
@@ -439,7 +523,9 @@ class BeginStuffConstructionAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: BeginStuffModel) -> Description:
+    def perform(
+        self, character: "CharacterModel", input_: BeginStuffModel
+    ) -> Description:
         require_txts = []
         for consume in self._description.properties["consume"]:
             if "resource" in consume:
@@ -452,17 +538,25 @@ class BeginStuffConstructionAction(CharacterAction):
 
             elif "stuff" in consume:
                 stuff_id = consume["stuff"]
-                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                    stuff_id
+                stuff_properties = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
                 )
-                require_txts.append(f" - {consume['quantity']} de {stuff_properties.name}")
+                require_txts.append(
+                    f" - {consume['quantity']} de {stuff_properties.name}"
+                )
 
         if not input_.confirm:
-            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(self.description.properties["produce_stuff_id"])
+            stuff_description = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    self.description.properties["produce_stuff_id"]
+                )
+            )
             start_cost = self.get_cost(character, input_=input_)
             craft_ap_cost = self.description.properties["craft_ap"]
             items = [
-                Part(text=f"Temps de travail nécessaire : {start_cost} + {craft_ap_cost} points d'actions"),
+                Part(
+                    text=f"Temps de travail nécessaire : {start_cost} + {craft_ap_cost} points d'actions"
+                ),
                 Part(text=""),
                 Part(text="Nécessite : "),
             ]
@@ -479,7 +573,7 @@ class BeginStuffConstructionAction(CharacterAction):
                         action_type=ActionType.BEGIN_STUFF_CONSTRUCTION,
                         action_description_id=self._description.id,
                         query_params={"confirm": 1},
-                    )
+                    ),
                 )
             )
 
@@ -509,7 +603,9 @@ class BeginStuffConstructionAction(CharacterAction):
                                 label=f"Vous pouvez fournir une description de l'objet",
                                 type_=Type.STRING,
                                 name="description",
-                                default_value=self._description.properties["default_description"],
+                                default_value=self._description.properties[
+                                    "default_description"
+                                ],
                             )
                         ],
                     )
@@ -535,7 +631,9 @@ class BeginStuffConstructionAction(CharacterAction):
                     self._kernel.stuff_lib.destroy(carried_stuffs[i].id, commit=False)
 
         stuff_id = self._description.properties["produce_stuff_id"]
-        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff_id
+        )
         stuff_doc = self._kernel.stuff_lib.create_document_from_stuff_properties(
             properties=stuff_properties,
             world_row_i=character.world_row_i,
@@ -580,25 +678,38 @@ class ContinueStuffConstructionAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(ContinueStuffModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties["produce_stuff_id"] = action_config_raw["produce_stuff_id"]
         return properties
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if not stuff.under_construction:
             raise ImpossibleAction("Non concérné")
         if self._description.properties["produce_stuff_id"] != stuff.stuff_id:
             raise ImpossibleAction("Non concérné")
 
     def check_request_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: ContinueStuffModel,
     ) -> None:
         self.check_is_possible(character, stuff)
-        check_common_is_possible(self._kernel, description=self._description, character=character)
+        check_common_is_possible(
+            self._kernel, description=self._description, character=character
+        )
         if input_.ap:
             if character.action_points < input_.ap:
-                raise WrongInputError(f"{character.name} ne possède passez de points d'actions")
+                raise WrongInputError(
+                    f"{character.name} ne possède passez de points d'actions"
+                )
 
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
@@ -628,9 +739,14 @@ class ContinueStuffConstructionAction(WithStuffAction):
         return 0.0  # we use only one action description in config and we don't want ap for continue
 
     def perform(
-        self, character: "CharacterModel", stuff: "StuffModel", input_: ContinueStuffModel
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: ContinueStuffModel,
     ) -> Description:
-        bonus = character.get_skill_value("intelligence") + character.get_skill_value("crafts")
+        bonus = character.get_skill_value("intelligence") + character.get_skill_value(
+            "crafts"
+        )
         bonus_divider = max(1.0, (bonus * 2) / DEFAULT_MAXIMUM_SKILL)
         remain_ap = stuff.ap_required - stuff.ap_spent
         remain_ap_for_character = remain_ap / bonus_divider
@@ -676,7 +792,9 @@ class ContinueStuffConstructionAction(WithStuffAction):
         consume_ap = min(remain_ap, input_.ap * bonus_divider)
         stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff.id)
         stuff_doc.ap_spent = float(stuff_doc.ap_spent) + consume_ap
-        self._kernel.character_lib.reduce_action_points(character.id, consume_ap, commit=False)
+        self._kernel.character_lib.reduce_action_points(
+            character.id, consume_ap, commit=False
+        )
 
         if stuff_doc.ap_spent >= stuff_doc.ap_required:
             stuff_doc.under_construction = False

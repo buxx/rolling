@@ -48,12 +48,16 @@ class TransferStuffOrResources(abc.ABC):
 
     @abc.abstractmethod
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         pass
 
     @abc.abstractmethod
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         pass
 
     def _get_footer_links(self, sizing_up_quantity: bool) -> typing.List[Part]:
@@ -80,7 +84,9 @@ class TransferStuffOrResources(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
         pass
 
     @abc.abstractmethod
@@ -154,8 +160,10 @@ class TransferStuffOrResources(abc.ABC):
 
         if stuff_id is not None:
             stuff = self._get_stuff(stuff_id)
-            stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                stuff.stuff_id
+            stuff_description = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff.stuff_id
+                )
             )
             likes_this_stuff = self._get_likes_this_stuff(stuff.stuff_id)
 
@@ -193,7 +201,11 @@ class TransferStuffOrResources(abc.ABC):
                 self._transfer_stuff(likes_this_stuff[i].id)
 
             text_parts.append(
-                Part(text=(f"Vous avez transféré {stuff_quantity} {stuff_description.name}"))
+                Part(
+                    text=(
+                        f"Vous avez transféré {stuff_quantity} {stuff_description.name}"
+                    )
+                )
             )
 
         if resource_id is not None:
@@ -275,11 +287,15 @@ class BiDirectionalTransferByUrl(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _get_default_left_partial_quantity(self, resource_id: str) -> typing.Optional[float]:
+    def _get_default_left_partial_quantity(
+        self, resource_id: str
+    ) -> typing.Optional[float]:
         pass
 
     @abc.abstractmethod
-    def _get_default_right_partial_quantity(self, resource_id: str) -> typing.Optional[float]:
+    def _get_default_right_partial_quantity(
+        self, resource_id: str
+    ) -> typing.Optional[float]:
         pass
 
     @abc.abstractmethod
@@ -360,13 +376,17 @@ class BiDirectionalTransferByUrl(abc.ABC):
         for left_resource_line in left_resource_lines:
             partial_quantities[
                 f"left_{left_resource_line.resource.id}"
-            ] = self._get_default_left_partial_quantity(left_resource_line.resource.id) or str(
+            ] = self._get_default_left_partial_quantity(
+                left_resource_line.resource.id
+            ) or str(
                 get_round_resource_quantity(left_resource_line.resource.quantity)
             )
         for right_resource_line in right_resource_lines:
             partial_quantities[
                 f"right_{right_resource_line.resource.id}"
-            ] = self._get_default_right_partial_quantity(right_resource_line.resource.id) or str(
+            ] = self._get_default_right_partial_quantity(
+                right_resource_line.resource.id
+            ) or str(
                 get_round_resource_quantity(right_resource_line.resource.quantity)
             )
 
@@ -381,7 +401,10 @@ class BiDirectionalTransferByUrl(abc.ABC):
         right_parts_column = Part(
             is_column=True,
             colspan=1,
-            items=[Part(text=right_title, classes=["h2"]), Part(text="Objets", classes=["h3"])],
+            items=[
+                Part(text=right_title, classes=["h2"]),
+                Part(text="Objets", classes=["h3"]),
+            ],
         )
 
         left_parts_column.items.extend(
@@ -465,9 +488,7 @@ class BiDirectionalTransferByUrl(abc.ABC):
                 continue
             displayed_stuff_ids.add(stuff_line.stuff.stuff_id)
             if not stuff_line.stuff.under_construction:
-                stuff_name = (
-                    f"{stuff_count[stuff_line.stuff.stuff_id]} {stuff_line.stuff.get_name()}"
-                )
+                stuff_name = f"{stuff_count[stuff_line.stuff.stuff_id]} {stuff_line.stuff.get_name()}"
             else:
                 stuff_name = stuff_line.stuff.get_name()
 
@@ -555,11 +576,15 @@ class BiDirectionalTransferByUrl(abc.ABC):
         assert link_class_suffix in ("left", "right")
         parts: typing.List[Part] = []
         resource_quantities: typing.Dict[str, float] = defaultdict(lambda: 0.0)
-        not_movable_resource_quantities: typing.Dict[str, float] = defaultdict(lambda: 0.0)
+        not_movable_resource_quantities: typing.Dict[str, float] = defaultdict(
+            lambda: 0.0
+        )
 
         for resource_line in resource_lines:
             if resource_line.movable:
-                resource_quantities[resource_line.resource.id] += resource_line.resource.quantity
+                resource_quantities[
+                    resource_line.resource.id
+                ] += resource_line.resource.quantity
             else:
                 not_movable_resource_quantities[
                     resource_line.resource.id
@@ -567,7 +592,9 @@ class BiDirectionalTransferByUrl(abc.ABC):
 
         for resource_id, resource_quantity in resource_quantities.items():
             resource_description = self._kernel.game.config.resources[resource_id]
-            unit_str = self._kernel.translation.get(resource_description.unit, short=True)
+            unit_str = self._kernel.translation.get(
+                resource_description.unit, short=True
+            )
             text = f"{resource_quantity}{unit_str} {resource_description.name}"
             partial_quantity = partial_quantities[f"{side}_{resource_id}"]
             # Exclude default quantity of this resource to permit new calculate
@@ -639,7 +666,9 @@ class BiDirectionalTransferByUrl(abc.ABC):
 
         for resource_id, resource_quantity in not_movable_resource_quantities.items():
             resource_description = self._kernel.game.config.resources[resource_id]
-            unit_str = self._kernel.translation.get(resource_description.unit, short=True)
+            unit_str = self._kernel.translation.get(
+                resource_description.unit, short=True
+            )
             text = f"{resource_quantity}{unit_str}"
             parts.append(Part(text=text))
 

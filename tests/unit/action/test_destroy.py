@@ -1,7 +1,8 @@
 import pytest
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.destroy import DestroyBuildAction, DestroyBuildModel
+from rolling.action.destroy import DestroyBuildAction
+from rolling.action.destroy import DestroyBuildModel
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
@@ -14,7 +15,10 @@ def power_off_action(worldmapc_kernel: Kernel) -> DestroyBuildAction:
     action = DestroyBuildAction(
         worldmapc_kernel,
         description=ActionDescriptionModel(
-            id="ACTION_ID", action_type=ActionType.DESTROY_BUILD, base_cost=0.0, properties={}
+            id="ACTION_ID",
+            action_type=ActionType.DESTROY_BUILD,
+            base_cost=0.0,
+            properties={},
         ),
     )
     yield action
@@ -53,7 +57,7 @@ class TestDestroyBuildAction:
             build_id=door.id,
             input_=DestroyBuildModel(
                 spent_all_ap=1,
-            )
+            ),
         )
 
         # Then
@@ -87,7 +91,7 @@ class TestDestroyBuildAction:
             build_id=door.id,
             input_=DestroyBuildModel(
                 spent_1_ap=1,
-            )
+            ),
         )
 
         # Then
@@ -100,7 +104,7 @@ class TestDestroyBuildAction:
             build_id=door.id,
             input_=DestroyBuildModel(
                 spent_1_ap=1,
-            )
+            ),
         )
 
         # Then
@@ -142,7 +146,7 @@ class TestDestroyBuildAction:
             build_id=build.id,
             input_=DestroyBuildModel(
                 spent_all_ap=1,
-            )
+            ),
         )
 
         # Then

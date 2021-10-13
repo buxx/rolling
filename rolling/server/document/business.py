@@ -41,7 +41,8 @@ class OfferItemDocument(Document):
     id = Column(Integer, autoincrement=True, primary_key=True)
     offer_id = Column(Integer, ForeignKey("offer.id"))
     position = Column(
-        Enum(*[p.value for p in OfferItemPosition], name="offer_item__position"), nullable=False
+        Enum(*[p.value for p in OfferItemPosition], name="offer_item__position"),
+        nullable=False,
     )
     resource_id = Column(String(255), nullable=True)
     stuff_id = Column(String(255), nullable=True)
@@ -54,11 +55,15 @@ class OfferItemDocument(Document):
         if self.resource_id:
             resource_properties = kernel.game.config.resources[self.resource_id]
             if quantity:
-                quantity_str = quantity_to_str(self.quantity, resource_properties.unit, kernel)
+                quantity_str = quantity_to_str(
+                    self.quantity, resource_properties.unit, kernel
+                )
                 quantity_str = f" ({quantity_str})"
             return f"{resource_properties.name}{quantity_str}"
 
-        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(self.stuff_id)
+        stuff_properties = kernel.game.stuff_manager.get_stuff_properties_by_id(
+            self.stuff_id
+        )
         if quantity:
             quantity_str = f" ({round(self.quantity)})"
         return f"{stuff_properties.name}{quantity_str}"
@@ -99,7 +104,9 @@ class OfferDocument(Document):
         primaryjoin=CharacterDocument.id == with_character_id,
     )
     items: typing.List["OfferItemDocument"] = relationship(
-        "OfferItemDocument", back_populates="offer", primaryjoin=OfferItemDocument.offer_id == id
+        "OfferItemDocument",
+        back_populates="offer",
+        primaryjoin=OfferItemDocument.offer_id == id,
     )
 
     @property

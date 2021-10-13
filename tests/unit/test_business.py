@@ -57,7 +57,9 @@ def _add_items(kernel: Kernel, offer_id: int) -> None:
 
 
 @pytest.fixture
-def xena_permanent_or_offer(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel):
+def xena_permanent_or_offer(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+):
     offer_doc = OfferDocument(
         character_id=worldmapc_xena_model.id,
         title="OfferTitle",
@@ -74,7 +76,9 @@ def xena_permanent_or_offer(worldmapc_xena_model: CharacterModel, worldmapc_kern
 
 
 @pytest.fixture
-def xena_permanent_and_offer(worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel):
+def xena_permanent_and_offer(
+    worldmapc_xena_model: CharacterModel, worldmapc_kernel: Kernel
+):
     offer_doc = OfferDocument(
         character_id=worldmapc_xena_model.id,
         title="OfferTitle",
@@ -186,7 +190,9 @@ class TestBusiness:
         have_item_names = have_item_names or []
         offer_item_names = offer_item_names or []
 
-        resp = await web.post(f"/business/{character.id}/see-offer/{owner.id}/{offer_id}")
+        resp = await web.post(
+            f"/business/{character.id}/see-offer/{owner.id}/{offer_id}"
+        )
         assert 200 == resp.status
         descr = description_serializer.load(await resp.json())
 
@@ -208,7 +214,9 @@ class TestBusiness:
             if can_make_deal:
                 assert "Effectuer une transaction" in form_item_labels
             else:
-                assert "Vous ne possédez pas de quoi faire un marché" in form_item_labels
+                assert (
+                    "Vous ne possédez pas de quoi faire un marché" in form_item_labels
+                )
         else:
             assert f"{owner.name} ne peut pas assurer cette opération"
 
@@ -260,7 +268,8 @@ class TestBusiness:
         # see test_create_offer__nominal_case if in error
         assert (
             await web.post(
-                f"/business/{xena.id}/offers-create?permanent=1", json={"title": "My offer"}
+                f"/business/{xena.id}/offers-create?permanent=1",
+                json={"title": "My offer"},
             )
         ).status == 200
 
@@ -294,16 +303,25 @@ class TestBusiness:
         # see test_create_offer__nominal_case if in error
         assert (
             await web.post(
-                f"/business/{xena.id}/offers-create?permanent=1", json={"title": "My offer"}
+                f"/business/{xena.id}/offers-create?permanent=1",
+                json={"title": "My offer"},
             )
         ).status == 200
 
-        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={"active":"on"})).status == 200
+        assert (
+            await web.post(f"/business/{xena.id}/offers/{1}", json={"active": "on"})
+        ).status == 200
         await self._assert_edit_offer(kernel, web, xena, offer_id=1, open_=True)
-        await self._assert_owned_offers(kernel, web, xena, count=1, names=["(V) My offer"])
-        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={})).status == 200
+        await self._assert_owned_offers(
+            kernel, web, xena, count=1, names=["(V) My offer"]
+        )
+        assert (
+            await web.post(f"/business/{xena.id}/offers/{1}", json={})
+        ).status == 200
         await self._assert_edit_offer(kernel, web, xena, offer_id=1, open_=False)
-        await self._assert_owned_offers(kernel, web, xena, count=1, names=["(X) My offer"])
+        await self._assert_owned_offers(
+            kernel, web, xena, count=1, names=["(X) My offer"]
+        )
 
     async def test_add_items__check_form(
         self,
@@ -317,10 +335,13 @@ class TestBusiness:
 
         assert (
             await web.post(
-                f"/business/{xena.id}/offers-create?permanent=1", json={"title": "My offer"}
+                f"/business/{xena.id}/offers-create?permanent=1",
+                json={"title": "My offer"},
             )
         ).status == 200
-        resp = await web.post(f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST")
+        resp = await web.post(
+            f"/business/{xena.id}/offers/{1}/add-item?position=REQUEST"
+        )
         assert resp.status == 200
         descr = description_serializer.load(await resp.json())
 
@@ -354,7 +375,8 @@ class TestBusiness:
         # see test_create_offer__nominal_case if in error
         assert (
             await web.post(
-                f"/business/{xena.id}/offers-create?permanent=1", json={"title": "My offer"}
+                f"/business/{xena.id}/offers-create?permanent=1",
+                json={"title": "My offer"},
             )
         ).status == 200
 
@@ -366,7 +388,11 @@ class TestBusiness:
             )
         ).status == 200
         await self._assert_edit_offer(
-            kernel, web, xena, offer_id=1, request_item_names=[EXPECTED_PLASTIC_BOTTLE_NAME]
+            kernel,
+            web,
+            xena,
+            offer_id=1,
+            request_item_names=[EXPECTED_PLASTIC_BOTTLE_NAME],
         )
 
         # Add one resource
@@ -381,7 +407,10 @@ class TestBusiness:
             web,
             xena,
             offer_id=1,
-            request_item_names=[EXPECTED_PLASTIC_BOTTLE_NAME, "Petit bois (1.5 mètre cubes)"],
+            request_item_names=[
+                EXPECTED_PLASTIC_BOTTLE_NAME,
+                "Petit bois (1.5 mètre cubes)",
+            ],
         )
 
     async def test_update_offer__have_some_required__remove_item(
@@ -398,7 +427,8 @@ class TestBusiness:
         # see test_create_offer__nominal_case if in error
         assert (
             await web.post(
-                f"/business/{xena.id}/offers-create?permanent=1", json={"title": "My offer"}
+                f"/business/{xena.id}/offers-create?permanent=1",
+                json={"title": "My offer"},
             )
         ).status == 200
 
@@ -409,14 +439,24 @@ class TestBusiness:
             )
         ).status == 200
         await self._assert_edit_offer(
-            kernel, web, xena, offer_id=1, request_item_names=[EXPECTED_PLASTIC_BOTTLE_NAME]
+            kernel,
+            web,
+            xena,
+            offer_id=1,
+            request_item_names=[EXPECTED_PLASTIC_BOTTLE_NAME],
         )
 
         # remove it
-        assert (await web.post(f"/business/{xena.id}/offers/{1}/remove-item/{1}")).status == 200
+        assert (
+            await web.post(f"/business/{xena.id}/offers/{1}/remove-item/{1}")
+        ).status == 200
 
         await self._assert_edit_offer(
-            kernel, web, xena, offer_id=1, request_item_names_not=[EXPECTED_PLASTIC_BOTTLE_NAME]
+            kernel,
+            web,
+            xena,
+            offer_id=1,
+            request_item_names_not=[EXPECTED_PLASTIC_BOTTLE_NAME],
         )
 
     async def test_edit_offer__test_owner_have_display(
@@ -704,11 +744,15 @@ class TestBusiness:
         assert kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="WOOD", quantity=0.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="LEATHER_JACKET")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="LEATHER_JACKET"
+        )
         assert not kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="STONE_HAXE"
+        )
 
         assert not kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.5
@@ -719,7 +763,9 @@ class TestBusiness:
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="STONE_HAXE"
+        )
 
         resp = await web.post(
             f"/business/{arthur.id}/see-offer/{offer.character_id}/{offer.id}/deal"
@@ -743,20 +789,28 @@ class TestBusiness:
         assert not kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="WOOD", quantity=0.5
         )
-        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="LEATHER_JACKET")
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="LEATHER_JACKET"
+        )
         assert kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="STONE_HAXE"
+        )
 
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="LEATHER_JACKET")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="LEATHER_JACKET"
+        )
         assert not kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert not kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="STONE_HAXE"
+        )
 
     async def test_read_offer__make_transaction__missing_all_request_or(
         self,
@@ -815,7 +869,9 @@ class TestBusiness:
         assert not kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="STONE_HAXE"
+        )
 
         assert not kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.5
@@ -823,7 +879,9 @@ class TestBusiness:
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="STONE_HAXE"
+        )
 
         resp = await web.post(
             f"/business/{arthur.id}/see-offer/{offer.character_id}/{offer.id}/deal"
@@ -871,7 +929,9 @@ class TestBusiness:
         assert kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert not kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="STONE_HAXE")
+        assert not kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="STONE_HAXE"
+        )
 
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.5
@@ -879,7 +939,9 @@ class TestBusiness:
         assert not kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=arthur.id, stuff_id="STONE_HAXE")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=arthur.id, stuff_id="STONE_HAXE"
+        )
 
     async def test_create_with_character_transaction(
         self,
@@ -913,7 +975,9 @@ class TestBusiness:
                 f"?position=OFFER&value=Vin rouge (litres)&quantity=1.5"
             )
         ).status == 200
-        assert (await web.post(f"/business/{xena.id}/offers/{1}", json={"active":"on"})).status == 200
+        assert (
+            await web.post(f"/business/{xena.id}/offers/{1}", json={"active": "on"})
+        ).status == 200
 
         await self._assert_edit_offer(
             kernel,
@@ -1015,7 +1079,9 @@ class TestBusiness:
         assert not kernel.resource_lib.have_resource(
             character_id=xena.id, resource_id="RED_WINE", quantity=1.5
         )
-        assert kernel.stuff_lib.get_stuff_count(character_id=xena.id, stuff_id="PLASTIC_BOTTLE_1L")
+        assert kernel.stuff_lib.get_stuff_count(
+            character_id=xena.id, stuff_id="PLASTIC_BOTTLE_1L"
+        )
 
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="RED_WINE", quantity=1.5

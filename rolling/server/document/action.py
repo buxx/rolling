@@ -16,10 +16,12 @@ class PendingActionDocument(Document):
     __tablename__ = "pending_action"
     id = Column(Integer, autoincrement=True, primary_key=True)
     action_scope = Column(
-        Enum(*[s.value for s in ActionScope], name="pending_action__action_scope"), nullable=False
+        Enum(*[s.value for s in ActionScope], name="pending_action__action_scope"),
+        nullable=False,
     )
     action_type = Column(
-        Enum(*[s.value for s in ActionType], name="pending_action__action_type"), nullable=False
+        Enum(*[s.value for s in ActionType], name="pending_action__action_type"),
+        nullable=False,
     )
     action_description_id = Column(String, nullable=False)
     parameters = Column(JSON, nullable=False, server_default="{}")

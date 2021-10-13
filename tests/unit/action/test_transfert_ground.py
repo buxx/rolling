@@ -24,9 +24,15 @@ class ButtonNotFound(Exception):
     pass
 
 
-def extract_resource_button_url(description: Description, class_: str, identifier: str) -> str:
+def extract_resource_button_url(
+    description: Description, class_: str, identifier: str
+) -> str:
     def extract_button_url_from_part(part: Part, class__: str, identifier_: str) -> str:
-        if class__ in part.classes and part.form_action and identifier_ in part.form_action:
+        if (
+            class__ in part.classes
+            and part.form_action
+            and identifier_ in part.form_action
+        ):
             return part.form_action
 
         for item_ in part.items:
@@ -46,9 +52,15 @@ def extract_resource_button_url(description: Description, class_: str, identifie
     raise ButtonNotFound()
 
 
-def extract_stuff_button_url(description: Description, class_: str, identifier: int) -> str:
+def extract_stuff_button_url(
+    description: Description, class_: str, identifier: int
+) -> str:
     def extract_button_url_from_part(part: Part, class__: str, identifier_: int) -> str:
-        if class__ in part.classes and part.form_action and str(identifier_) in part.form_action:
+        if (
+            class__ in part.classes
+            and part.form_action
+            and str(identifier_) in part.form_action
+        ):
             return part.form_action
 
         for item_ in part.items:
@@ -219,8 +231,12 @@ class TestTransfertGround:
 
         def get_on_ground_quantity(raise_: bool = False) -> float:
             found_on_ground = False
-            on_ground_quantities: typing.DefaultDict[str, float] = defaultdict(lambda: 0.0)
-            scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
+            on_ground_quantities: typing.DefaultDict[str, float] = defaultdict(
+                lambda: 0.0
+            )
+            scan_coordinates: typing.List[
+                typing.Tuple[int, int]
+            ] = get_on_and_around_coordinates(
                 x=xena.zone_row_i, y=xena.zone_col_i, exclude_on=False, distance=1
             )
             for around_row_i, around_col_i in scan_coordinates:
@@ -271,14 +287,20 @@ class TestTransfertGround:
             # Deposit
             response = None
             if transfer.partial_deposit_count:
-                description = action.perform(xena, input_=TransfertGroundCharacterModel(parameters))
-                deposit_url = extract_resource_button_url(description, "partial_right", "WOOD")
+                description = action.perform(
+                    xena, input_=TransfertGroundCharacterModel(parameters)
+                )
+                deposit_url = extract_resource_button_url(
+                    description, "partial_right", "WOOD"
+                )
                 for _ in range(transfer.partial_deposit_count):
                     response = await web.post(deposit_url)
                     assert 200 == response.status
 
             if transfer.deposit_count:
-                description = action.perform(xena, input_=TransfertGroundCharacterModel(parameters))
+                description = action.perform(
+                    xena, input_=TransfertGroundCharacterModel(parameters)
+                )
                 deposit_url = extract_resource_button_url(description, "right", "WOOD")
                 for _ in range(transfer.deposit_count):
                     response = await web.post(deposit_url)
@@ -286,14 +308,20 @@ class TestTransfertGround:
 
             # Take
             if transfer.partial_take_count:
-                description = action.perform(xena, input_=TransfertGroundCharacterModel(parameters))
-                take_url = extract_resource_button_url(description, "partial_left", "WOOD")
+                description = action.perform(
+                    xena, input_=TransfertGroundCharacterModel(parameters)
+                )
+                take_url = extract_resource_button_url(
+                    description, "partial_left", "WOOD"
+                )
                 for _ in range(transfer.partial_take_count):
                     response = await web.post(take_url)
                     assert 200 == response.status
 
             if transfer.take_count:
-                description = action.perform(xena, input_=TransfertGroundCharacterModel(parameters))
+                description = action.perform(
+                    xena, input_=TransfertGroundCharacterModel(parameters)
+                )
                 take_url = extract_resource_button_url(description, "left", "WOOD")
                 for _ in range(transfer.take_count):
                     response = await web.post(take_url)
@@ -346,7 +374,11 @@ class TestTransfertGround:
             )
 
         def get_carried_quantity() -> int:
-            return len(kernel.stuff_lib.get_carried_by(character_id=xena.id, stuff_id="STONE_HAXE"))
+            return len(
+                kernel.stuff_lib.get_carried_by(
+                    character_id=xena.id, stuff_id="STONE_HAXE"
+                )
+            )
 
         assert get_on_ground_quantity() == 0
         assert get_carried_quantity() == 3

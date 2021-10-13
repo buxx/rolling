@@ -75,7 +75,9 @@ class AffinityLib:
             .one()
         )
 
-    def get_multiple(self, affinity_ids: typing.List[int]) -> typing.List[AffinityDocument]:
+    def get_multiple(
+        self, affinity_ids: typing.List[int]
+    ) -> typing.List[AffinityDocument]:
         return (
             self._kernel.server_db_session.query(AffinityDocument)
             .filter(AffinityDocument.id.in_(affinity_ids))
@@ -109,7 +111,9 @@ class AffinityLib:
 
         if warlord:
             query = query.filter(
-                AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0]))
+                AffinityRelationDocument.status_id.in_(
+                    (CHIEF_STATUS[0], WARLORD_STATUS[0])
+                )
             )
 
         return query.all()
@@ -124,12 +128,12 @@ class AffinityLib:
 
         if warlord:
             query = query.filter(
-                AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0]))
+                AffinityRelationDocument.status_id.in_(
+                    (CHIEF_STATUS[0], WARLORD_STATUS[0])
+                )
             )
 
-        return self.get_multiple(
-            [relation.affinity_id for relation in query.all()]
-        )
+        return self.get_multiple([relation.affinity_id for relation in query.all()])
 
     def get_with_relations(
         self,
@@ -157,7 +161,9 @@ class AffinityLib:
     ) -> typing.List[AffinityDocument]:
         current_character_affinity_ids = [
             r[0]
-            for r in self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
+            for r in self._kernel.server_db_session.query(
+                AffinityRelationDocument.affinity_id
+            )
             .filter(
                 AffinityRelationDocument.character_id == character_id,
                 AffinityRelationDocument.accepted == True,
@@ -165,7 +171,9 @@ class AffinityLib:
             .all()
         ]
 
-        query = self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id).filter(
+        query = self._kernel.server_db_session.query(
+            AffinityRelationDocument.affinity_id
+        ).filter(
             AffinityRelationDocument.affinity_id.notin_(current_character_affinity_ids)
         )
 
@@ -183,7 +191,9 @@ class AffinityLib:
                 )
             ]
             query = query.filter(
-                AffinityRelationDocument.affinity_id.in_(here_alive_character_affinity_ids)
+                AffinityRelationDocument.affinity_id.in_(
+                    here_alive_character_affinity_ids
+                )
             )
 
         affinity_ids = [r.affinity_id for r in query.all()]
@@ -202,12 +212,16 @@ class AffinityLib:
         exclude_character_ids: typing.Optional[typing.List[str]] = None,
     ) -> Query:
         if not fighter:
-            query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            query = self._kernel.server_db_session.query(
+                AffinityRelationDocument
+            ).filter(
                 AffinityRelationDocument.affinity_id == affinity_id,
                 AffinityRelationDocument.accepted == True,
             )
         else:
-            query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            query = self._kernel.server_db_session.query(
+                AffinityRelationDocument
+            ).filter(
                 AffinityRelationDocument.affinity_id == affinity_id,
                 AffinityRelationDocument.fighter == True,
             )
@@ -220,7 +234,9 @@ class AffinityLib:
                     CharacterDocument.world_col_i == world_col_i,
                 ).all()
             ]
-            query = query.filter(AffinityRelationDocument.character_id.in_(zone_character_ids))
+            query = query.filter(
+                AffinityRelationDocument.character_id.in_(zone_character_ids)
+            )
 
         if exclude_character_ids:
             query = query.filter(
@@ -287,7 +303,9 @@ class AffinityLib:
         return [
             r[0]
             for r in (
-                self._kernel.server_db_session.query(AffinityRelationDocument.character_id)
+                self._kernel.server_db_session.query(
+                    AffinityRelationDocument.character_id
+                )
                 .filter(
                     AffinityRelationDocument.affinity_id == affinity_id,
                     AffinityRelationDocument.fighter == True,
@@ -296,7 +314,9 @@ class AffinityLib:
             )
         ]
 
-    def count_ready_fighter(self, affinity_id: int, world_row_i: int, world_col_i: int) -> int:
+    def count_ready_fighter(
+        self, affinity_id: int, world_row_i: int, world_col_i: int
+    ) -> int:
         affinity_fighter_ids = self.get_affinity_fighter_ids(affinity_id)
         if not affinity_fighter_ids:
             return 0
@@ -329,7 +349,9 @@ class AffinityLib:
             .count()
         )
 
-    def get_active_relation(self, character_id: str, affinity_id: int) -> AffinityRelationDocument:
+    def get_active_relation(
+        self, character_id: str, affinity_id: int
+    ) -> AffinityRelationDocument:
         return (
             self._kernel.server_db_session.query(AffinityRelationDocument)
             .filter(
@@ -357,9 +379,13 @@ class AffinityLib:
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> typing.List[CharacterModel]:
-        query = self._kernel.server_db_session.query(AffinityRelationDocument.character_id).filter(
+        query = self._kernel.server_db_session.query(
+            AffinityRelationDocument.character_id
+        ).filter(
             AffinityRelationDocument.affinity_id == affinity_id,
-            AffinityRelationDocument.status_id.in_((CHIEF_STATUS[0], WARLORD_STATUS[0])),
+            AffinityRelationDocument.status_id.in_(
+                (CHIEF_STATUS[0], WARLORD_STATUS[0])
+            ),
             AffinityRelationDocument.accepted == True,
         )
 
@@ -398,7 +424,9 @@ class AffinityLib:
 
         return query.all()
 
-    def count_things_shared_with_affinity(self, character_id: str, affinity_id: int) -> int:
+    def count_things_shared_with_affinity(
+        self, character_id: str, affinity_id: int
+    ) -> int:
         return (
             self._kernel.resource_lib.get_base_query(
                 carried_by_id=character_id, shared_with_affinity_ids=[affinity_id]
@@ -440,9 +468,7 @@ class AffinityLib:
         # TODO: optimize with one request
         for affinity_id in affinity_ids:
             try:
-                affinity_names.append(
-                    self.get_affinity(affinity_id).name
-                )
+                affinity_names.append(self.get_affinity(affinity_id).name)
             except NoResultFound as exc:
                 if not ignore_not_found:
                     raise exc

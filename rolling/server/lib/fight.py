@@ -37,9 +37,13 @@ class FightLib:
         def search_fighters_for(fighter_id, helping: bool = False):
             all_fighter_ids_ = []
             all_affinity_ids_ = []
-            for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(fighter_id):
-                all_affinity_fighter_ids = self._kernel.affinity_lib.get_affinity_fighter_ids(
-                    affinity_id=affinity_relation.affinity_id
+            for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+                fighter_id
+            ):
+                all_affinity_fighter_ids = (
+                    self._kernel.affinity_lib.get_affinity_fighter_ids(
+                        affinity_id=affinity_relation.affinity_id
+                    )
                 )
                 here_affinity_fighter_ids = [
                     r[0]
@@ -73,7 +77,9 @@ class FightLib:
         while not same:
             copy_ = list(all_fighter_ids)
             for fighter_id_ in all_fighter_ids:
-                new_fighter_list, new_affinity_list = search_fighters_for(fighter_id_, helping=True)
+                new_fighter_list, new_affinity_list = search_fighters_for(
+                    fighter_id_, helping=True
+                )
                 all_fighter_ids.extend(new_fighter_list)
                 all_fighter_ids = list(set(all_fighter_ids))
                 all_affinity_ids.extend(new_affinity_list)
@@ -81,16 +87,23 @@ class FightLib:
             if set(copy_) == set(all_fighter_ids):
                 same = True
 
-        all_fighters = self._kernel.character_lib.get_multiple(character_ids=all_fighter_ids)
-        all_affinities = self._kernel.affinity_lib.get_multiple(affinity_ids=all_affinity_ids)
+        all_fighters = self._kernel.character_lib.get_multiple(
+            character_ids=all_fighter_ids
+        )
+        all_affinities = self._kernel.affinity_lib.get_multiple(
+            affinity_ids=all_affinity_ids
+        )
         affinities_by_ids = {a.id: a for a in all_affinities}
-        all_fighters += [origin_target] if origin_target.id not in all_fighter_ids else []
+        all_fighters += (
+            [origin_target] if origin_target.id not in all_fighter_ids else []
+        )
         return DefendDescription(
             all_fighters=all_fighters,
             ready_fighters=[f for f in all_fighters if f.is_defend_ready()],
             affinities=all_affinities,
             helpers={
-                f_id: [affinities_by_ids[a_id] for a_id in set(helpers[f_id])] for f_id in helpers
+                f_id: [affinities_by_ids[a_id] for a_id in set(helpers[f_id])]
+                for f_id in helpers
             },
         )
 
@@ -122,7 +135,9 @@ class FightLib:
             affinity=attacker,
             all_fighters=all_fighters,
             ready_fighters=[
-                f for f in all_fighters if f.is_attack_ready() and f.id not in target_fighter_ids
+                f
+                for f in all_fighters
+                if f.is_attack_ready() and f.id not in target_fighter_ids
             ],
         )
 
@@ -151,7 +166,9 @@ class FightLib:
 
         return groups
 
-    def fight(self, attack: AttackDescription, defense: DefendDescription) -> typing.List[str]:
+    def fight(
+        self, attack: AttackDescription, defense: DefendDescription
+    ) -> typing.List[str]:
         story: typing.List[str] = []
         attack_affinity_str = f" ({attack.affinity.name})" if attack.affinity else ""
         defense_affinities_str = (
@@ -174,7 +191,9 @@ class FightLib:
             )
             return story
         elif len(defense.ready_fighters) < len(defense.all_fighters):
-            no_ready_to_fight_len = len(defense.all_fighters) - len(defense.ready_fighters)
+            no_ready_to_fight_len = len(defense.all_fighters) - len(
+                defense.ready_fighters
+            )
             story.append(
                 f"{no_ready_to_fight_len} combattant(s) du parti attaqué ne sont pas en "
                 f"état de se battre."
@@ -217,7 +236,10 @@ class FightLib:
                 )
 
                 if self.defenser_evade(
-                    opponent, from_=fighter, weapon=attacker_weapon, defenser_weapon=defenser_weapon
+                    opponent,
+                    from_=fighter,
+                    weapon=attacker_weapon,
+                    defenser_weapon=defenser_weapon,
                 ):
                     story_sentences.append(
                         f"{fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
@@ -244,22 +266,32 @@ class FightLib:
                             f"{opponent_equipment.name} à protégé {opponent.name}."
                         )
 
-                    self.apply_damage_on_equipment(opponent, equipment=opponent_equipment)
+                    self.apply_damage_on_equipment(
+                        opponent, equipment=opponent_equipment
+                    )
                     self.apply_damage_on_character(opponent, damages=pass_damages)
 
                     if opponent.life_points < 0:
-                        story_sentences.append(f"Le coup à été fatal pour {opponent.name}.")
+                        story_sentences.append(
+                            f"Le coup à été fatal pour {opponent.name}."
+                        )
 
                     # FIXME BS NOW: write test about this
                     self.increase_attacker_skills(fighter, attacker_weapon)
 
                 story.append(" ".join(story_sentences))
-                self._kernel.character_lib.reduce_action_points(fighter.id, FIGHT_AP_CONSUME)
-                self._kernel.character_lib.increase_tiredness(fighter.id, FIGHT_TIREDNESS_INCREASE)
+                self._kernel.character_lib.reduce_action_points(
+                    fighter.id, FIGHT_AP_CONSUME
+                )
+                self._kernel.character_lib.increase_tiredness(
+                    fighter.id, FIGHT_TIREDNESS_INCREASE
+                )
 
         return story
 
-    def get_attack_weapon(self, fighter: CharacterModel, against: CharacterModel) -> Weapon:
+    def get_attack_weapon(
+        self, fighter: CharacterModel, against: CharacterModel
+    ) -> Weapon:
         if fighter.weapon:
             return Weapon(name=fighter.weapon.name, stuff=fighter.weapon)
         return Weapon(name="Main nue")
@@ -275,7 +307,11 @@ class FightLib:
         return Weapon(name="Main nue")
 
     def opponent_equipment_protect(
-        self, opponent: CharacterModel, from_: CharacterModel, weapon: Weapon, damage: float
+        self,
+        opponent: CharacterModel,
+        from_: CharacterModel,
+        weapon: Weapon,
+        damage: float,
     ) -> typing.Tuple[Weapon, float]:
         if opponent.armor:
             armor = Weapon(name=opponent.armor.name, stuff=opponent.armor)
@@ -291,9 +327,12 @@ class FightLib:
     ) -> bool:
         probability_to_evade = PROBABILITY_TO_EVADE_START_PROBABILITY  # percent
         probability_to_evade += (
-            opponent.get_skill_value(EVADE_SKILL_ID) - from_.get_skill_value(EVADE_SKILL_ID)
+            opponent.get_skill_value(EVADE_SKILL_ID)
+            - from_.get_skill_value(EVADE_SKILL_ID)
         ) * PROBABILITY_TO_EVADE_MULTIPLIER
-        probability_to_evade = min(PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY, probability_to_evade)
+        probability_to_evade = min(
+            PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY, probability_to_evade
+        )
 
         return bool(random.randint(0, 100) < probability_to_evade)
 
@@ -305,12 +344,18 @@ class FightLib:
         ) * (random.randrange(8, 12, 1) / 10)
         return round(damages, 2)
 
-    def apply_damage_on_equipment(self, opponent: CharacterModel, equipment: Weapon) -> None:
+    def apply_damage_on_equipment(
+        self, opponent: CharacterModel, equipment: Weapon
+    ) -> None:
         # Use updated stuff model infos
         pass  # TODO: Code it; display state
 
-    def apply_damage_on_character(self, opponent: CharacterModel, damages: float) -> None:
-        new_life_points = self._kernel.character_lib.reduce_life_points(opponent.id, value=damages)
+    def apply_damage_on_character(
+        self, opponent: CharacterModel, damages: float
+    ) -> None:
+        new_life_points = self._kernel.character_lib.reduce_life_points(
+            opponent.id, value=damages
+        )
         opponent.life_points = new_life_points
 
     def increase_attacker_skills(self, fighter: CharacterModel, weapon: Weapon) -> None:

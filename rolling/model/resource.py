@@ -38,7 +38,8 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
         weight = display_g_or_kg(self.weight)
         quantity_str = quantity_to_str(self.quantity, self.unit, kernel=kernel)
         return (
-            f"{self.name} " f"({quantity_str}, {weight}, {round(self.clutter, 3)} d'encombrement)"
+            f"{self.name} "
+            f"({quantity_str}, {weight}, {round(self.clutter, 3)} d'encombrement)"
         )
 
     def get_light_description(self, kernel: "Kernel") -> str:

@@ -52,7 +52,8 @@ class MessageLib:
         self, character_id: str, conversation_id: int
     ) -> None:
         self._get_character_messages_query(character_id, zone=False).filter(
-            MessageDocument.read == False, MessageDocument.first_message == conversation_id
+            MessageDocument.read == False,
+            MessageDocument.first_message == conversation_id,
         ).update({MessageDocument.read: True})
 
     def get_last_character_zone_messages(
@@ -66,7 +67,12 @@ class MessageLib:
         )
 
     async def add_zone_message(
-        self, character_id: str, message: str, zone_row_i: int, zone_col_i: int, commit: bool = True
+        self,
+        character_id: str,
+        message: str,
+        zone_row_i: int,
+        zone_col_i: int,
+        commit: bool = True,
     ) -> None:
         if not message.strip():
             return
@@ -140,7 +146,8 @@ class MessageLib:
                 character_id=character_id,
                 author_id=author_id,
                 author_name=author_doc.name,
-                read=author_doc.id == character_id or character_id in active_zone_characters_ids,
+                read=author_doc.id == character_id
+                or character_id in active_zone_characters_ids,
                 zone=False,
                 concerned=concerned,
                 first_message=conversation_id,
@@ -190,7 +197,10 @@ class MessageLib:
         )
 
         await self._kernel.server_zone_events_manager.send_to_sockets(
-            event, world_row_i=world_row_i, world_col_i=world_col_i, character_ids=concerned
+            event,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            character_ids=concerned,
         )
 
     def get_conversation_first_messages(
@@ -220,7 +230,10 @@ class MessageLib:
         return query
 
     def get_conversation_messages(
-        self, character_id: str, conversation_id: int, message_count: typing.Optional[int] = None
+        self,
+        character_id: str,
+        conversation_id: int,
+        message_count: typing.Optional[int] = None,
     ) -> typing.List[MessageDocument]:
         query = (
             self._get_character_messages_query(character_id, zone=False)
@@ -241,8 +254,10 @@ class MessageLib:
     ) -> None:
         # Zone message
         try:
-            last_character_message = self._kernel.message_lib.get_last_character_zone_messages(
-                character_id=character.id, zone=True
+            last_character_message = (
+                self._kernel.message_lib.get_last_character_zone_messages(
+                    character_id=character.id, zone=True
+                )
             )
             if not last_character_message.is_outzone_message:
                 self._kernel.server_db_session.add(
@@ -289,7 +304,9 @@ class MessageLib:
         # conversations
         for (message_id, concerned, subject) in (
             self._kernel.server_db_session.query(
-                MessageDocument.first_message, MessageDocument.concerned, MessageDocument.subject
+                MessageDocument.first_message,
+                MessageDocument.concerned,
+                MessageDocument.subject,
             )
             .filter(cast(MessageDocument.concerned, String).contains(character.id))
             .filter(MessageDocument.first_message != None)
@@ -301,7 +318,9 @@ class MessageLib:
             new_concerned = list(set(concerned) - {character.id})
             message = f"{character.name} n'est plus là pour parler"
             for (before_character_id, before_character_name) in (
-                self._kernel.server_db_session.query(CharacterDocument.id, CharacterDocument.name)
+                self._kernel.server_db_session.query(
+                    CharacterDocument.id, CharacterDocument.name
+                )
                 .filter(
                     CharacterDocument.world_row_i == from_world_row_i,
                     CharacterDocument.world_col_i == from_world_col_i,
@@ -356,7 +375,9 @@ class MessageLib:
             message = f"{character.name} vous à rejoin"
             new_concerned = list(set(concerned) - {character.id})
             for (after_character_id, after_character_name) in (
-                self._kernel.server_db_session.query(CharacterDocument.id, CharacterDocument.name)
+                self._kernel.server_db_session.query(
+                    CharacterDocument.id, CharacterDocument.name
+                )
                 .filter(
                     CharacterDocument.world_row_i == to_world_row_i,
                     CharacterDocument.world_col_i == to_world_col_i,

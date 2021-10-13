@@ -287,7 +287,9 @@ class TestBringResourcesOnBuild:
         deposit_action.perform(
             character=xena,
             build_id=build5.id,
-            input_=DepositToModel(deposit_resource_id="WOOD", deposit_resource_quantity="0.2"),
+            input_=DepositToModel(
+                deposit_resource_id="WOOD", deposit_resource_quantity="0.2"
+            ),
         )
 
         # Then
@@ -315,12 +317,16 @@ class TestBringResourcesOnBuild:
             deposit_action.perform(
                 character=xena,
                 build_id=build6.id,
-                input_=DepositToModel(deposit_resource_id="WOOD", deposit_resource_quantity="0.2"),
+                input_=DepositToModel(
+                    deposit_resource_id="WOOD", deposit_resource_quantity="0.2"
+                ),
             )
         deposit_action.perform(
             character=xena,
             build_id=build6.id,
-            input_=DepositToModel(deposit_resource_id="STONE", deposit_resource_quantity="2"),
+            input_=DepositToModel(
+                deposit_resource_id="STONE", deposit_resource_quantity="2"
+            ),
         )
 
         # Then
@@ -347,7 +353,9 @@ class TestBringResourcesOnBuild:
             deposit_action.perform(
                 character=xena,
                 build_id=build4.id,
-                input_=DepositToModel(deposit_resource_id="STONE", deposit_resource_quantity="2"),
+                input_=DepositToModel(
+                    deposit_resource_id="STONE", deposit_resource_quantity="2"
+                ),
             )
 
         # Then
@@ -372,7 +380,9 @@ class TestBringResourcesOnBuild:
         deposit_action.perform(
             character=xena,
             build_id=build5.id,
-            input_=DepositToModel(deposit_stuff_id=haxe.id, deposit_resource_quantity="1"),
+            input_=DepositToModel(
+                deposit_stuff_id=haxe.id, deposit_resource_quantity="1"
+            ),
         )
 
         # Then
@@ -400,7 +410,9 @@ class TestBringResourcesOnBuild:
             deposit_action.perform(
                 character=xena,
                 build_id=build6.id,
-                input_=DepositToModel(deposit_stuff_id=haxe.id, deposit_stuff_quantity=1),
+                input_=DepositToModel(
+                    deposit_stuff_id=haxe.id, deposit_stuff_quantity=1
+                ),
             )
 
         # Then
@@ -426,7 +438,9 @@ class TestBringResourcesOnBuild:
             deposit_action.perform(
                 character=xena,
                 build_id=build4.id,
-                input_=DepositToModel(deposit_stuff_id=haxe.id, deposit_stuff_quantity=1),
+                input_=DepositToModel(
+                    deposit_stuff_id=haxe.id, deposit_stuff_quantity=1
+                ),
             )
 
         # Then
@@ -448,7 +462,9 @@ class TestBringResourcesOnBuild:
         deposit_action.perform(
             character=xena,
             build_id=build5.id,
-            input_=DepositToModel(deposit_resource_id="WOOD", deposit_resource_quantity="0.2"),
+            input_=DepositToModel(
+                deposit_resource_id="WOOD", deposit_resource_quantity="0.2"
+            ),
         )
         assert kernel.resource_lib.get_stored_in_build(build5.id)
 

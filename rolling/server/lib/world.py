@@ -15,7 +15,9 @@ class WorldLib:
 
     def get_legend(self) -> WorldMapLegendModel:
         try:
-            legend_default_type = self._kernel.world_map_source.legend.get_default_type()
+            legend_default_type = (
+                self._kernel.world_map_source.legend.get_default_type()
+            )
             default_type = WorldTileTypeModel(
                 id=legend_default_type.id,
                 foreground_color=legend_default_type.foreground_color,

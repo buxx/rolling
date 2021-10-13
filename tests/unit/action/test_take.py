@@ -5,8 +5,10 @@ import typing
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_character import TakeFromModel
-from rolling.exception import WrongInputError, ImpossibleAction
-from rolling.action.take_resource import TakeResourceAction, TakeResourceModel
+from rolling.action.take_resource import TakeResourceAction
+from rolling.action.take_resource import TakeResourceModel
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
@@ -195,23 +197,31 @@ class TestTakeFromCharacterAction:
         take_from_character_action.perform(
             arthur,
             xena,
-            TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1),
+            TakeFromModel(
+                take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
-            not kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
+            not kernel.stuff_lib.get_stuff_doc(
+                worldmapc_xena_wood_shield2.id
+            ).carried_by_id
             == arthur.id
         )
 
         take_from_character_action.perform(
             arthur,
             xena,
-            TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1),
+            TakeFromModel(
+                take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=1
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
             kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
@@ -248,10 +258,13 @@ class TestTakeFromCharacterAction:
         take_from_character_action.perform(
             arthur,
             xena,
-            TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2),
+            TakeFromModel(
+                take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
             kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
@@ -277,7 +290,9 @@ class TestTakeFromCharacterAction:
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_leather_jacket.id)
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_leather_jacket.id).carried_by_id
+            kernel.stuff_lib.get_stuff_doc(
+                worldmapc_xena_leather_jacket.id
+            ).carried_by_id
             == arthur.id
         )
 
@@ -295,7 +310,9 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_from_character_action.perform(arthur, xena, TakeFromModel(take_resource_id="WOOD"))
+        description = take_from_character_action.perform(
+            arthur, xena, TakeFromModel(take_resource_id="WOOD")
+        )
         assert description.items[0].is_form
         assert description.items[0].items[0].name == "take_resource_quantity"
         assert description.items[0].form_action == (
@@ -304,7 +321,9 @@ class TestTakeFromCharacterAction:
         )
 
         take_from_character_action.perform(
-            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
+            arthur,
+            xena,
+            TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1"),
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.1
@@ -314,12 +333,16 @@ class TestTakeFromCharacterAction:
         )
 
         take_from_character_action.perform(
-            arthur, xena, TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1")
+            arthur,
+            xena,
+            TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1"),
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.2
         )
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD")
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD"
+        )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
     def test_unit__list_take_wood__err__require_more(
@@ -340,7 +363,8 @@ class TestTakeFromCharacterAction:
                 arthur,
                 xena,
                 TakeFromModel(
-                    take_resource_id="WOOD", take_resource_quantity="0.21"  # 0.2 in fixtures
+                    take_resource_id="WOOD",
+                    take_resource_quantity="0.21",  # 0.2 in fixtures
                 ),
             )
 
@@ -362,7 +386,9 @@ class TestTakeFromCharacterAction:
             take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
-                TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2),
+                TakeFromModel(
+                    take_stuff_id=worldmapc_xena_wood_shield.id, take_stuff_quantity=2
+                ),
             )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
@@ -405,15 +431,14 @@ class TestTakeFromCharacterAction:
 
         # When
         take_resource_action.perform(
-            character=xena,
-            resource_id="WOOD",
-            input_=TakeResourceModel(
-                quantity="1.1"
-            )
+            character=xena, resource_id="WOOD", input_=TakeResourceModel(quantity="1.1")
         )
 
         # Then
-        assert kernel.resource_lib.get_one_carried_by(
-            character_id=xena.id,
-            resource_id="WOOD",
-        ).quantity == 1.0
+        assert (
+            kernel.resource_lib.get_one_carried_by(
+                character_id=xena.id,
+                resource_id="WOOD",
+            ).quantity
+            == 1.0
+        )

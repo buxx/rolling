@@ -1,25 +1,35 @@
 import dataclasses
-import typing
 
 import serpyco
+import typing
 
-from guilang.description import Description, Part
-from rolling.action.base import WithBuildAction, get_with_build_action_url
-from rolling.exception import ImpossibleAction, NotEnoughActionPoints, WrongInputError
+from guilang.description import Description
+from guilang.description import Part
+from rolling.action.base import WithBuildAction
+from rolling.action.base import get_with_build_action_url
+from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughActionPoints
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import get_health_percent_sentence
 
 if typing.TYPE_CHECKING:
-    from rolling.model.character import CharacterModel
     from rolling.game.base import GameConfig
+    from rolling.model.character import CharacterModel
 
 
 @dataclasses.dataclass
 class DestroyBuildModel:
-    spent_1_ap: typing.Optional[int] = serpyco.number_field(default=0, cast_on_load=True)
-    spent_6_ap: typing.Optional[int] = serpyco.number_field(default=0, cast_on_load=True)
-    spent_all_ap: typing.Optional[int] = serpyco.number_field(default=0, cast_on_load=True)
+    spent_1_ap: typing.Optional[int] = serpyco.number_field(
+        default=0, cast_on_load=True
+    )
+    spent_6_ap: typing.Optional[int] = serpyco.number_field(
+        default=0, cast_on_load=True
+    )
+    spent_all_ap: typing.Optional[int] = serpyco.number_field(
+        default=0, cast_on_load=True
+    )
 
 
 class DestroyBuildAction(WithBuildAction):
@@ -28,7 +38,9 @@ class DestroyBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(DestroyBuildModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -97,7 +109,9 @@ class DestroyBuildAction(WithBuildAction):
             self._kernel.build_lib.delete(build_id)
             return Description(back_to_zone=True)
 
-        build_health_percent = int(round((build_doc.health / build_description.robustness) * 100))
+        build_health_percent = int(
+            round((build_doc.health / build_description.robustness) * 100)
+        )
         return Description(
             title=f"Détruire {build_description.name}",
             items=[
@@ -108,28 +122,34 @@ class DestroyBuildAction(WithBuildAction):
                     is_link=True,
                     label="Dépenser 1 AP",
                     form_action=self._get_url(
-                        character=character, build_id=build_id, input_=DestroyBuildModel(
+                        character=character,
+                        build_id=build_id,
+                        input_=DestroyBuildModel(
                             spent_1_ap=1,
-                        )
+                        ),
                     ),
                 ),
                 Part(
                     is_link=True,
                     label="Dépenser maximum 6 AP",
                     form_action=self._get_url(
-                        character=character, build_id=build_id, input_=DestroyBuildModel(
+                        character=character,
+                        build_id=build_id,
+                        input_=DestroyBuildModel(
                             spent_6_ap=1,
-                        )
+                        ),
                     ),
                 ),
                 Part(
                     is_link=True,
                     label="Y passer le temps nécessaire",
                     form_action=self._get_url(
-                        character=character, build_id=build_id, input_=DestroyBuildModel(
+                        character=character,
+                        build_id=build_id,
+                        input_=DestroyBuildModel(
                             spent_all_ap=1,
-                        )
+                        ),
                     ),
                 ),
-            ]
+            ],
         )

@@ -26,7 +26,9 @@ class CharacterDocument(CorpseMixin, Document):
     hunting_and_collecting_comp = Column(
         Numeric(10, 2, asdecimal=False), nullable=False, default=1.0
     )
-    find_water_comp = Column(Numeric(10, 2, asdecimal=False), nullable=False, default=1.0)
+    find_water_comp = Column(
+        Numeric(10, 2, asdecimal=False), nullable=False, default=1.0
+    )
     # percent of injured/died fighter before retreat
     attack_allowed_loss_rate = Column(Integer, nullable=False, default=30)
     defend_allowed_loss_rate = Column(Integer, nullable=False, default=30)
@@ -77,6 +79,10 @@ class CharacterDocument(CorpseMixin, Document):
 
 class FollowCharacterDocument(Document):
     __tablename__ = "follow_character"
-    follower_id = Column(String(255), ForeignKey("character.id"), nullable=False, primary_key=True)
-    followed_id = Column(String(255), ForeignKey("character.id"), nullable=False, primary_key=True)
+    follower_id = Column(
+        String(255), ForeignKey("character.id"), nullable=False, primary_key=True
+    )
+    followed_id = Column(
+        String(255), ForeignKey("character.id"), nullable=False, primary_key=True
+    )
     discreetly = Column(Boolean, default=False, nullable=False)

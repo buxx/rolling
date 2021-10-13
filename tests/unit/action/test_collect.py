@@ -1,11 +1,12 @@
+import pytest
 import shutil
 
-import pytest
-
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.collect import CollectResourceAction, CollectResourceModel
+from rolling.action.collect import CollectResourceAction
+from rolling.action.collect import CollectResourceModel
 from rolling.kernel import Kernel
-from rolling.map.type.zone import DeadTree, Dirt
+from rolling.map.type.zone import DeadTree
+from rolling.map.type.zone import Dirt
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
 
@@ -62,10 +63,16 @@ class TestCollectResourceAction:
 
         # check fixtures
         follow_action.check_is_possible(xena)
-        assert kernel.tile_maps_by_position[(1, 2)].source.geography.rows[0][160] == DeadTree
-        assert kernel.resource_lib.get_one_carried_by(
-            xena.id, resource_id="WOOD", empty_object_if_not=True
-        ).quantity == 0.0
+        assert (
+            kernel.tile_maps_by_position[(1, 2)].source.geography.rows[0][160]
+            == DeadTree
+        )
+        assert (
+            kernel.resource_lib.get_one_carried_by(
+                xena.id, resource_id="WOOD", empty_object_if_not=True
+            ).quantity
+            == 0.0
+        )
 
         # When
         follow_action.perform(
@@ -79,7 +86,12 @@ class TestCollectResourceAction:
         )
 
         # Then
-        assert kernel.tile_maps_by_position[(1, 2)].source.geography.rows[0][160] == Dirt
-        assert kernel.resource_lib.get_one_carried_by(
-            xena.id, resource_id="WOOD", empty_object_if_not=True
-        ).quantity == 1.0
+        assert (
+            kernel.tile_maps_by_position[(1, 2)].source.geography.rows[0][160] == Dirt
+        )
+        assert (
+            kernel.resource_lib.get_one_carried_by(
+                xena.id, resource_id="WOOD", empty_object_if_not=True
+            ).quantity
+            == 1.0
+        )

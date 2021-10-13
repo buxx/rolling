@@ -1,11 +1,10 @@
 # coding: utf-8
-import json
-
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from hapic import HapicData
+import json
 import math
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
@@ -21,16 +20,18 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CantMoveCharacter, WrongInputError
+from rolling.exception import CantMoveCharacter
 from rolling.exception import ImpossibleAction
 from rolling.exception import ImpossibleAttack
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import UserDisplayError
+from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
-from rolling.model.character import CharacterActionModel, DoorPathModel
+from rolling.model.character import CharacterActionModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
 from rolling.model.character import DescribeStoryQueryModel
+from rolling.model.character import DoorPathModel
 from rolling.model.character import GetCharacterAndPendingActionPathModel
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetCharacterWithPathModel
@@ -73,8 +74,9 @@ from rolling.server.controller.url import WITH_CHARACTER_ACTION
 from rolling.server.controller.url import WITH_RESOURCE_ACTION
 from rolling.server.controller.url import WITH_STUFF_ACTION
 from rolling.server.document.affinity import AffinityDocument
-from rolling.server.document.build import DoorDocument, DOOR_MODE_LABELS, \
-    DOOR_MODE__CLOSED_EXCEPT_FOR
+from rolling.server.document.build import DOOR_MODE_LABELS
+from rolling.server.document.build import DOOR_MODE__CLOSED_EXCEPT_FOR
+from rolling.server.document.build import DoorDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
@@ -141,7 +143,9 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
         return url
 
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -153,7 +157,9 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
 
         return f"Partager avec {self._affinity.name}"
 
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         return None
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
@@ -175,7 +181,9 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.set_shared_with_affinity(stuff_id, self._affinity.id)
 
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
         return self._kernel.resource_lib.get_one_carried_by(
             character_id=self._character.id,
             resource_id=resource_id,
@@ -274,7 +282,9 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
         return url
 
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         if stuff_id is not None:
             stuff = self._kernel.stuff_lib.get_stuff(stuff_id)
@@ -301,7 +311,9 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
             )
         ]
 
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         return None
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
@@ -326,7 +338,9 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.unshare_with_affinity(stuff_id)
 
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
         return self._kernel.resource_lib.get_one_carried_by(
             character_id=self._character.id,
             resource_id=resource_id,
@@ -414,7 +428,9 @@ class CharacterController(BaseController):
                 )
             )
 
-        create_character_knowledges = self._kernel.game.config.create_character_knowledges
+        create_character_knowledges = (
+            self._kernel.game.config.create_character_knowledges
+        )
         if (
             create_character_knowledges
             and self._kernel.game.config.create_character_knowledges_count
@@ -447,7 +463,10 @@ class CharacterController(BaseController):
                 Part(
                     is_form=True,
                     form_action="/_describe/character/create/do",
-                    items=[Part(label="Nom du personnage", type_=Type.STRING, name="name")] + parts,
+                    items=[
+                        Part(label="Nom du personnage", type_=Type.STRING, name="name")
+                    ]
+                    + parts,
                 ),
             ],
         )
@@ -493,7 +512,8 @@ class CharacterController(BaseController):
             items=[
                 Part(label="Nom", text=character.name),
                 Part(
-                    label="Points d'actions restants", text=f"{str(character.action_points)}/24.0"
+                    label="Points d'actions restants",
+                    text=f"{str(character.action_points)}/24.0",
                 ),
                 Part(
                     label="Points de vie",
@@ -502,7 +522,9 @@ class CharacterController(BaseController):
                 Part(label="Soif", text=str(round(character.thirst, 0))),
                 Part(label="Faim", text=str(round(character.hunger, 0))),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
-                Part(label="Exténué", text="oui" if character.is_exhausted() else "non"),
+                Part(
+                    label="Exténué", text="oui" if character.is_exhausted() else "non"
+                ),
                 Part(
                     label="Arme",
                     text=character.weapon.name if character.weapon else "aucune",
@@ -589,7 +611,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def skills_and_knowledge(self, request: Request, hapic_data: HapicData) -> Description:
+    async def skills_and_knowledge(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO: check same zone
         character = self._character_lib.get(hapic_data.path.character_id)
         items = [Part(text="# CARACTERISTIQUES")]
@@ -619,7 +643,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterWithPathModel)
     @hapic.output_body(Description)
-    async def with_character_card(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_character_card(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO: check same zone
         character = self._character_lib.get(hapic_data.path.character_id)
         with_character = self._character_lib.get(hapic_data.path.with_character_id)
@@ -632,7 +658,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_inventory(self, request: Request, hapic_data: HapicData) -> Description:
+    async def _describe_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(character.id)
         inventory_parts = self._get_inventory_parts(
@@ -705,9 +733,13 @@ class CharacterController(BaseController):
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character_id=character.id
         ):
-            affinity = self._kernel.affinity_lib.get_affinity(affinity_relation.affinity_id)
-            count_things_shared_with = self._kernel.affinity_lib.count_things_shared_with_affinity(
-                character_id=character.id, affinity_id=affinity_relation.affinity_id
+            affinity = self._kernel.affinity_lib.get_affinity(
+                affinity_relation.affinity_id
+            )
+            count_things_shared_with = (
+                self._kernel.affinity_lib.count_things_shared_with_affinity(
+                    character_id=character.id, affinity_id=affinity_relation.affinity_id
+                )
             )
             items.append(
                 Part(
@@ -721,7 +753,9 @@ class CharacterController(BaseController):
             )
 
         return Description(
-            title="Inventaire partagé avec des affinités", items=items, can_be_back_url=True
+            title="Inventaire partagé avec des affinités",
+            items=items,
+            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -772,7 +806,9 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.input_query(PickFromInventoryQueryModel)
     @hapic.output_body(Description)
-    async def pick_from_inventory(self, request: Request, hapic_data: HapicData) -> Description:
+    async def pick_from_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(character.id)
         form_parts = []
@@ -785,7 +821,9 @@ class CharacterController(BaseController):
         can_be_back_url = True
 
         if hapic_data.query.resource_id is None and hapic_data.query.stuff_id is None:
-            stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
+            stuff_displayed: typing.Dict[str, bool] = {
+                s.stuff_id: False for s in inventory.stuff
+            }
             for stuff in inventory.stuff:
                 if stuff_displayed[stuff.stuff_id]:
                     continue
@@ -814,7 +852,9 @@ class CharacterController(BaseController):
             can_be_back_url = False
 
             if hapic_data.query.resource_id is not None:
-                form_action = f"{form_action}&resource_id={hapic_data.query.resource_id}"
+                form_action = (
+                    f"{form_action}&resource_id={hapic_data.query.resource_id}"
+                )
                 default_value = self._kernel.resource_lib.get_one_carried_by(
                     character.id, resource_id=hapic_data.query.resource_id
                 ).quantity
@@ -856,10 +896,14 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterWithPathModel)
     @hapic.output_body(Description)
-    async def with_inventory(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO: check same zone
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        with_character = self._kernel.character_lib.get(hapic_data.path.with_character_id)
+        with_character = self._kernel.character_lib.get(
+            hapic_data.path.with_character_id
+        )
         inventory = self._character_lib.get_inventory(with_character.id)
         inventory_parts = self._get_inventory_parts(
             request,
@@ -869,7 +913,9 @@ class CharacterController(BaseController):
             disable_drop_links=True,
         )
 
-        return Description(title="Inventory", items=inventory_parts, can_be_back_url=True)
+        return Description(
+            title="Inventory", items=inventory_parts, can_be_back_url=True
+        )
 
     def _get_inventory_parts(
         self,
@@ -893,7 +939,9 @@ class CharacterController(BaseController):
             stuff_count[stuff.stuff_id] += 1
             stuff_by_stuff_ids[stuff.stuff_id].append(stuff)
 
-        stuff_displayed: typing.Dict[str, bool] = {s.stuff_id: False for s in inventory.stuff}
+        stuff_displayed: typing.Dict[str, bool] = {
+            s.stuff_id: False for s in inventory.stuff
+        }
         for stuff in inventory.stuff:
             if stuff_displayed[stuff.stuff_id]:
                 continue
@@ -901,13 +949,17 @@ class CharacterController(BaseController):
             name = stuff.get_name()
             if stuff_count[stuff.stuff_id] > 1:
                 total_weight = sum(s.weight for s in stuff_by_stuff_ids[stuff.stuff_id])
-                total_clutter = sum(s.clutter for s in stuff_by_stuff_ids[stuff.stuff_id])
+                total_clutter = sum(
+                    s.clutter for s in stuff_by_stuff_ids[stuff.stuff_id]
+                )
                 description = (
                     f" ({display_g_or_kg(total_weight)}, "
                     f"{round(total_clutter, 2)} encombrement)"
                 )
             else:
-                descriptions: typing.List[str] = stuff.get_full_description(self._kernel)
+                descriptions: typing.List[str] = stuff.get_full_description(
+                    self._kernel
+                )
 
                 description = ""
                 if descriptions:
@@ -934,7 +986,12 @@ class CharacterController(BaseController):
 
             if disable_drop_links:
                 stuff_items.append(
-                    Part(text=text, is_link=is_link, align="left", form_action=form_action)
+                    Part(
+                        text=text,
+                        is_link=is_link,
+                        align="left",
+                        form_action=form_action,
+                    )
                 )
             else:
                 partial_drop_url = get_with_stuff_action_url(
@@ -1105,14 +1162,18 @@ class CharacterController(BaseController):
     async def _describe_on_place_actions(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        character_actions = self._character_lib.get_on_place_actions(hapic_data.path.character_id)
+        character_actions = self._character_lib.get_on_place_actions(
+            hapic_data.path.character_id
+        )
         pending_actions_count = self._kernel.character_lib.get_pending_actions_count(
             hapic_data.path.character_id
         )
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        zone_properties = self._kernel.game.world_manager.get_zone_properties_by_coordinates(
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
+        zone_properties = (
+            self._kernel.game.world_manager.get_zone_properties_by_coordinates(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
         )
 
         parts = []
@@ -1128,12 +1189,7 @@ class CharacterController(BaseController):
         action_parts = []
         action_categories = list(sorted(set([a.category for a in character_actions])))
         for action_category in action_categories:
-            action_parts.append(
-                Part(
-                    classes=["h2"],
-                    text=action_category or "Autres"
-                )
-            )
+            action_parts.append(Part(classes=["h2"], text=action_category or "Autres"))
             for character_action in character_actions:
                 if character_action.category == action_category:
                     action_parts.append(
@@ -1156,7 +1212,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def pending_actions(self, request: Request, hapic_data: HapicData) -> Description:
+    async def pending_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         pending_actions = self._kernel.character_lib.get_pending_actions(
             hapic_data.path.character_id
         )
@@ -1171,13 +1229,17 @@ class CharacterController(BaseController):
                 )
             )
 
-        return Description(title="Propositions d'actions", items=parts, can_be_back_url=True)
+        return Description(
+            title="Propositions d'actions", items=parts, can_be_back_url=True
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterAndPendingActionPathModel)
     @hapic.input_query(PendingActionQueryModel)
     @hapic.output_body(Description)
-    async def pending_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def pending_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         pending_action = self._kernel.character_lib.get_pending_action(
             hapic_data.path.pending_action_id,
             check_authorized_character_id=hapic_data.path.character_id,
@@ -1216,8 +1278,12 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_build_actions(self, request: Request, hapic_data: HapicData) -> Description:
-        build_actions = self._character_lib.get_build_actions(hapic_data.path.character_id)
+    async def _describe_build_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        build_actions = self._character_lib.get_build_actions(
+            hapic_data.path.character_id
+        )
 
         return Description(
             title="Démarrer une construction",
@@ -1236,22 +1302,26 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def _describe_events(self, request: Request, hapic_data: HapicData) -> Description:
-        character = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=None)
+    async def _describe_events(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id, dead=None
+        )
         character_events = self._character_lib.get_last_events(
             hapic_data.path.character_id, count=100
         )
         parts = []
         event_ids_to_mark_read = []
         for event in character_events:
-            there_is_story = bool(self._kernel.character_lib.count_story_pages(event.id))
+            there_is_story = bool(
+                self._kernel.character_lib.count_story_pages(event.id)
+            )
             unread = "*" if event.unread else ""
 
             form_action = None
             if there_is_story:
-                form_action = (
-                    f"/_describe/character/{character.id}/story?event_id={event.id}&mark_read=1"
-                )
+                form_action = f"/_describe/character/{character.id}/story?event_id={event.id}&mark_read=1"
 
             parts.append(
                 Part(
@@ -1267,19 +1337,29 @@ class CharacterController(BaseController):
             if event_ids_to_mark_read:
                 self._kernel.character_lib.mark_event_as_read(event_ids_to_mark_read)
 
-        return Description(title="Histoire", is_long_text=True, items=parts, can_be_back_url=True)
+        return Description(
+            title="Histoire", is_long_text=True, items=parts, can_be_back_url=True
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.input_query(DescribeStoryQueryModel)
     @hapic.output_body(Description)
-    async def _describe_story(self, request: Request, hapic_data: HapicData) -> Description:
-        character = self._kernel.character_lib.get_document(hapic_data.path.character_id, dead=None)
+    async def _describe_story(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id, dead=None
+        )
         event = self._kernel.character_lib.get_event(hapic_data.query.event_id)
         if not hapic_data.query.story_page_id:
-            story_page = self._kernel.character_lib.get_first_story_page(hapic_data.query.event_id)
+            story_page = self._kernel.character_lib.get_first_story_page(
+                hapic_data.query.event_id
+            )
         else:
-            story_page = self._kernel.character_lib.get_story_page(hapic_data.query.story_page_id)
+            story_page = self._kernel.character_lib.get_story_page(
+                hapic_data.query.story_page_id
+            )
 
         items = []
         footer_links = []
@@ -1327,7 +1407,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetLookStuffModelModel)
     @hapic.output_body(Description)
-    async def _describe_look_stuff(self, request: Request, hapic_data: HapicData) -> Description:
+    async def _describe_look_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
         actions = self._character_lib.get_on_stuff_actions(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
@@ -1376,9 +1458,13 @@ class CharacterController(BaseController):
     @hapic.input_path(GetLookResourceModel)
     @hapic.input_query(TakeResourceModel)
     @hapic.output_body(Description)
-    async def _describe_look_resource(self, request: Request, hapic_data: HapicData) -> Description:
+    async def _describe_look_resource(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        resource_description = self._kernel.game.config.resources[hapic_data.path.resource_id]
+        resource_description = self._kernel.game.config.resources[
+            hapic_data.path.resource_id
+        ]
         ground_resources = self._kernel.resource_lib.get_ground_resource(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
@@ -1387,8 +1473,12 @@ class CharacterController(BaseController):
         )
         ground_resource_ids = [r.id for r in ground_resources]
         if hapic_data.path.resource_id not in ground_resource_ids:
-            return Description(title="Cette ressource n'est plus là", items=[Part(is_link=True)])
-        ground_resource = next(r for r in ground_resources if r.id == hapic_data.path.resource_id)
+            return Description(
+                title="Cette ressource n'est plus là", items=[Part(is_link=True)]
+            )
+        ground_resource = next(
+            r for r in ground_resources if r.id == hapic_data.path.resource_id
+        )
         expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
             self._kernel, ground_resource
         )
@@ -1451,7 +1541,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(ChooseBetweenStuffInventoryStuffModelModel)
     @hapic.output_body(Description)
-    async def _choose_between_stuff(self, request: Request, hapic_data: HapicData) -> Description:
+    async def _choose_between_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         stuffs = self._kernel.stuff_lib.get_carried_by(
             character_id=hapic_data.path.character_id,
             stuff_id=hapic_data.path.stuff_id,
@@ -1465,7 +1557,9 @@ class CharacterController(BaseController):
         for stuff in stuffs:
             description_str = ", ".join(stuff.get_full_description(self._kernel))
             under_construction_str = "*" if stuff.under_construction else ""
-            label = f"{under_construction_str}{stuff_properties.name} ({description_str})"
+            label = (
+                f"{under_construction_str}{stuff_properties.name} ({description_str})"
+            )
             parts.append(
                 Part(
                     label=label,
@@ -1511,9 +1605,12 @@ class CharacterController(BaseController):
     async def _describe_inventory_look_resource(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
-        resource_description = self._kernel.game.config.resources[hapic_data.path.resource_id]
+        resource_description = self._kernel.game.config.resources[
+            hapic_data.path.resource_id
+        ]
         actions = self._character_lib.get_on_resource_actions(
-            character_id=hapic_data.path.character_id, resource_id=hapic_data.path.resource_id
+            character_id=hapic_data.path.character_id,
+            resource_id=hapic_data.path.resource_id,
         )
         return Description(
             title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
@@ -1533,13 +1630,18 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(CharacterActionModel)
     @hapic.output_body(Description)
-    async def character_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def character_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         action_type = hapic_data.path.action_type
         action_description_id = hapic_data.path.action_description_id
         action = typing.cast(
-            CharacterAction, self._action_factory.create_action(action_type, action_description_id)
+            CharacterAction,
+            self._action_factory.create_action(action_type, action_description_id),
         )
-        input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
+        input_ = serpyco.Serializer(action.input_model).load(
+            dict(request.query)
+        )  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
         try:
@@ -1559,7 +1661,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithStuffActionModel)
     @hapic.output_body(Description)
-    async def with_stuff_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_stuff_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithStuffAction,
@@ -1567,7 +1671,9 @@ class CharacterController(BaseController):
                 action_type, action_description_id=hapic_data.path.action_description_id
             ),
         )
-        input_ = serpyco.Serializer(action.input_model).load(dict(request.query))  # TODO perf
+        input_ = serpyco.Serializer(action.input_model).load(
+            dict(request.query)
+        )  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
         # TODO BS 2019-07-04: Check character owning ...
         stuff = self._kernel.stuff_lib.get_stuff(hapic_data.path.stuff_id)
@@ -1577,7 +1683,9 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(character=character_model, stuff=stuff, input_=input_)
+            action.check_request_is_possible(
+                character=character_model, stuff=stuff, input_=input_
+            )
             return action.perform(character=character_model, stuff=stuff, input_=input_)
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
@@ -1589,7 +1697,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithBuildActionModel)
     @hapic.output_body(Description)
-    async def with_build_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_build_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithBuildAction,
@@ -1602,12 +1712,16 @@ class CharacterController(BaseController):
         # TODO BS 2019-07-04: Check character can action on build...
 
         try:
-            cost = action.get_cost(character_model, hapic_data.path.build_id, input_=input_)
+            cost = action.get_cost(
+                character_model, hapic_data.path.build_id, input_=input_
+            )
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
-                character=character_model, build_id=hapic_data.path.build_id, input_=input_
+                character=character_model,
+                build_id=hapic_data.path.build_id,
+                input_=input_,
             )
         except NotEnoughActionPoints as exc:
             raise get_exception_for_not_enough_ap(character_model, exc.cost)
@@ -1622,7 +1736,9 @@ class CharacterController(BaseController):
         #  in perform like in this action !
         try:
             return action.perform(
-                character=character_model, build_id=hapic_data.path.build_id, input_=input_
+                character=character_model,
+                build_id=hapic_data.path.build_id,
+                input_=input_,
             )
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
@@ -1634,7 +1750,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithResourceActionModel)
     @hapic.output_body(Description)
-    async def with_resource_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_resource_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithResourceAction,
@@ -1646,15 +1764,21 @@ class CharacterController(BaseController):
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
 
         try:
-            cost = action.get_cost(character_model, hapic_data.path.resource_id, input_=input_)
+            cost = action.get_cost(
+                character_model, hapic_data.path.resource_id, input_=input_
+            )
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
-                character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
+                character=character_model,
+                resource_id=hapic_data.path.resource_id,
+                input_=input_,
             )
             return action.perform(
-                character=character_model, resource_id=hapic_data.path.resource_id, input_=input_
+                character=character_model,
+                resource_id=hapic_data.path.resource_id,
+                input_=input_,
             )
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
@@ -1666,7 +1790,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(WithCharacterActionModel)
     @hapic.output_body(Description)
-    async def with_character_action(self, request: Request, hapic_data: HapicData) -> Description:
+    async def with_character_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         action_type = hapic_data.path.action_type
         action = typing.cast(
             WithCharacterAction,
@@ -1676,7 +1802,9 @@ class CharacterController(BaseController):
         )
         input_ = action.input_model_from_request(dict(request.query))
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)
-        with_character_model = self._kernel.character_lib.get(hapic_data.path.with_character_id)
+        with_character_model = self._kernel.character_lib.get(
+            hapic_data.path.with_character_id
+        )
 
         try:
             cost = action.get_cost(character_model, with_character_model, input_=input_)
@@ -1684,10 +1812,14 @@ class CharacterController(BaseController):
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(
-                character=character_model, with_character=with_character_model, input_=input_
+                character=character_model,
+                with_character=with_character_model,
+                input_=input_,
             )
             return action.perform(
-                character=character_model, with_character=with_character_model, input_=input_
+                character=character_model,
+                with_character=with_character_model,
+                input_=input_,
             )
         except ImpossibleAttack as exc:
             return Description(
@@ -1714,7 +1846,9 @@ class CharacterController(BaseController):
         skills_total = 0.0
 
         if len(data["name"]) < 3 or len(data["name"]) > 21:
-            raise UserDisplayError(f"Le nom du personnage doit faire entre 3 et 21 caractères")
+            raise UserDisplayError(
+                f"Le nom du personnage doit faire entre 3 et 21 caractères"
+            )
 
         for skill_id in base_skills + self._kernel.game.config.create_character_skills:
             value = float(data[f"skill__{skill_id}"])
@@ -1731,7 +1865,9 @@ class CharacterController(BaseController):
                 f"Vous avez choisis {skills_total} points au total ({maximum_points} max)"
             )
 
-        create_character_knowledges = self._kernel.game.config.create_character_knowledges
+        create_character_knowledges = (
+            self._kernel.game.config.create_character_knowledges
+        )
         knowledges = []
         if (
             create_character_knowledges
@@ -1742,7 +1878,8 @@ class CharacterController(BaseController):
                     [
                         k_id
                         for k_id in create_character_knowledges
-                        if f"knowledge__{k_id}" in data and data[f"knowledge__{k_id}"] == "on"
+                        if f"knowledge__{k_id}" in data
+                        and data[f"knowledge__{k_id}"] == "on"
                     ]
                 )
                 > self._kernel.game.config.create_character_knowledges_count
@@ -1860,7 +1997,8 @@ class CharacterController(BaseController):
 
         if move_info.can_move:
             buttons.insert(
-                0, Part(label="Effectuer le voyage", is_link=True, form_action=travel_url)
+                0,
+                Part(label="Effectuer le voyage", is_link=True, form_action=travel_url),
             )
         else:
             for reason in move_info.cannot_move_reasons:
@@ -1873,14 +2011,22 @@ class CharacterController(BaseController):
     @hapic.input_query(MoveCharacterQueryModel)
     @hapic.handle_exception(CantMoveCharacter)
     @hapic.output_body(Description)
-    async def describe_move(self, request: Request, hapic_data: HapicData) -> Description:
+    async def describe_move(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._character_lib.get(hapic_data.path.character_id)
         to_world_row = hapic_data.query.to_world_row
         to_world_col = hapic_data.query.to_world_col
-        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][to_world_col]
-        zone_properties = self._kernel.game.world_manager.get_zone_properties(move_to_zone_type)
+        move_to_zone_type = self._kernel.world_map_source.geography.rows[to_world_row][
+            to_world_col
+        ]
+        zone_properties = self._kernel.game.world_manager.get_zone_properties(
+            move_to_zone_type
+        )
         move_info = self._character_lib.get_move_to_zone_infos(
-            hapic_data.path.character_id, world_row_i=to_world_row, world_col_i=to_world_col
+            hapic_data.path.character_id,
+            world_row_i=to_world_row,
+            world_col_i=to_world_col,
         )
 
         if move_info.can_move:
@@ -1921,7 +2067,9 @@ class CharacterController(BaseController):
                     ),
                 ),
             )
-            self._character_lib.reduce_action_points(character_.id, zone_properties.move_cost)
+            self._character_lib.reduce_action_points(
+                character_.id, zone_properties.move_cost
+            )
 
             if character_ != character:
                 self._kernel.character_lib.add_event(
@@ -1929,13 +2077,17 @@ class CharacterController(BaseController):
                 )
                 # FIXME BS NOW: si connecté, event pour voyage !
 
-        for character_ in move_info.followers_cannot + move_info.followers_discreetly_cannot:
+        for character_ in (
+            move_info.followers_cannot + move_info.followers_discreetly_cannot
+        ):
             self._kernel.character_lib.add_event(
-                character_.id, f"Vous n'avez pas pu suivre {character.name} (fatigue ou surcharge)"
+                character_.id,
+                f"Vous n'avez pas pu suivre {character.name} (fatigue ou surcharge)",
             )
 
         return Description(
-            title="Effectuer un voyage ...", items=[Part(text=message) for message in messages]
+            title="Effectuer un voyage ...",
+            items=[Part(text=message) for message in messages],
         )
 
     @hapic.with_api_doc()
@@ -1948,15 +2100,19 @@ class CharacterController(BaseController):
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
 
         return ZoneRequiredPlayerData(
-            weight_overcharge=inventory.weight > character.get_weight_capacity(self._kernel),
-            clutter_overcharge=inventory.clutter > character.get_clutter_capacity(self._kernel),
+            weight_overcharge=inventory.weight
+            > character.get_weight_capacity(self._kernel),
+            clutter_overcharge=inventory.clutter
+            > character.get_clutter_capacity(self._kernel),
         )
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(ListOfItemModel)
-    async def get_resume_texts(self, request: Request, hapic_data: HapicData) -> ListOfItemModel:
+    async def get_resume_texts(
+        self, request: Request, hapic_data: HapicData
+    ) -> ListOfItemModel:
         return ListOfItemModel(
             self._kernel.character_lib.get_resume_text(hapic_data.path.character_id)
         )
@@ -1973,7 +2129,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def get_post_mortem(self, request: Request, hapic_data: HapicData) -> Description:
+    async def get_post_mortem(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character_doc = self._kernel.character_lib.get_document(
             hapic_data.path.character_id, dead=True
         )
@@ -1998,7 +2156,9 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
     async def describe_ap(self, request: Request, hapic_data: HapicData) -> Description:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id
+        )
         return Description(
             title=f"Points d'actions (PA) disponibles",
             items=[
@@ -2020,7 +2180,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def describe_turn(self, request: Request, hapic_data: HapicData) -> Description:
+    async def describe_turn(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         return Description(
             title=f"Ecoulement du temps",
             items=[
@@ -2050,7 +2212,8 @@ class CharacterController(BaseController):
             parts.append(
                 Part(
                     is_link=True,
-                    label=f"{followed.name}" + (" (n'est pas dans cette zone)" if not here else ""),
+                    label=f"{followed.name}"
+                    + (" (n'est pas dans cette zone)" if not here else ""),
                     form_action=DESCRIBE_LOOK_AT_CHARACTER_URL.format(
                         character_id=character.id, with_character_id=followed.id
                     ),
@@ -2071,7 +2234,9 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def describe_around_items(self, request: Request, hapic_data: HapicData) -> Description:
+    async def describe_around_items(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         character_actions = self._kernel.character_lib.get_on_place_stuff_actions(
             character
@@ -2086,14 +2251,20 @@ class CharacterController(BaseController):
             for action in character_actions
         ]
 
-        return Description(title=f"Objet et ressources autour", items=parts, can_be_back_url=True)
+        return Description(
+            title=f"Objet et ressources autour", items=parts, can_be_back_url=True
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
-    async def describe_around_builds(self, request: Request, hapic_data: HapicData) -> Description:
+    async def describe_around_builds(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        character_actions = self._kernel.character_lib.get_on_place_build_actions(character)
+        character_actions = self._kernel.character_lib.get_on_place_build_actions(
+            character
+        )
         parts = [
             Part(
                 text=action.get_as_str(),
@@ -2113,7 +2284,9 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        character_actions = self._kernel.character_lib.get_on_place_character_actions(character)
+        character_actions = self._kernel.character_lib.get_on_place_character_actions(
+            character
+        )
         parts = [
             Part(
                 text=action.get_as_str(),
@@ -2124,7 +2297,9 @@ class CharacterController(BaseController):
             for action in character_actions
         ]
 
-        return Description(title=f"Personnages autour", items=parts, can_be_back_url=True)
+        return Description(
+            title=f"Personnages autour", items=parts, can_be_back_url=True
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(DoorPathModel)
@@ -2141,8 +2316,10 @@ class CharacterController(BaseController):
         enabled_affinity_ids = []
         all_affinities = list(
             set(
-                self._kernel.affinity_lib.get_accepted_affinities_docs(character_id=character_id) +
-                self._kernel.affinity_lib.get_affinities_without_relations(
+                self._kernel.affinity_lib.get_accepted_affinities_docs(
+                    character_id=character_id
+                )
+                + self._kernel.affinity_lib.get_affinities_without_relations(
                     character_id=character_id,
                     with_alive_character_in_world_row_i=character_doc.world_row_i,
                     with_alive_character_in_world_col_i=character_doc.world_col_i,
@@ -2156,7 +2333,9 @@ class CharacterController(BaseController):
         # Proceed eventual mode changes
         if request.query.get("mode"):
             new_affinity_ids = []
-            new_mode = list(DOOR_MODE_LABELS.keys())[list(DOOR_MODE_LABELS.values()).index(request.query["mode"])]
+            new_mode = list(DOOR_MODE_LABELS.keys())[
+                list(DOOR_MODE_LABELS.values()).index(request.query["mode"])
+            ]
             if new_mode is None:
                 self._kernel.door_lib.delete(
                     character_id=character_id,
@@ -2178,7 +2357,9 @@ class CharacterController(BaseController):
 
         if not deleted and new_affinity_ids is not None:
             self._kernel.door_lib.update(
-                character_id=character_id, build_id=door_id, new_affinity_ids=new_affinity_ids
+                character_id=character_id,
+                build_id=door_id,
+                new_affinity_ids=new_affinity_ids,
             )
             door_rule_changed = True
 
@@ -2194,7 +2375,9 @@ class CharacterController(BaseController):
             )
             relation_mode = relation.mode
             enabled_affinity_ids = json.loads(relation.affinity_ids)
-            all_affinities += self._kernel.affinity_lib.get_multiple(enabled_affinity_ids)
+            all_affinities += self._kernel.affinity_lib.get_multiple(
+                enabled_affinity_ids
+            )
             all_affinities = list(set(all_affinities))
         except NoResultFound:
             pass
@@ -2228,7 +2411,8 @@ class CharacterController(BaseController):
 
         return Description(
             title=f"Gestion de porte",
-            items=description_parts + [
+            items=description_parts
+            + [
                 Part(
                     is_form=True,
                     form_action=f"/character/{character_id}/door/{door_id}",
@@ -2247,7 +2431,8 @@ class CharacterController(BaseController):
                                 "laisser passer les membres de quelles affinités ?"
                             )
                         ),
-                    ] + (
+                    ]
+                    + (
                         [
                             Part(
                                 label=affinity.name,
@@ -2257,8 +2442,10 @@ class CharacterController(BaseController):
                                 checked=affinity.id in enabled_affinity_ids,
                             )
                             for affinity in all_affinities
-                        ] if all_affinities else [Part(text=" - Aucune affinité en présence")]
-                    )
+                        ]
+                        if all_affinities
+                        else [Part(text=" - Aucune affinité en présence")]
+                    ),
                 )
             ],
             can_be_back_url=True,
@@ -2268,14 +2455,29 @@ class CharacterController(BaseController):
         app.add_routes(
             [
                 web.get("/_describe/character/create", self._describe_create_character),
-                web.post("/_describe/character/create", self._describe_create_character),
-                web.get("/_describe/character/{character_id}/card", self._describe_character_card),
-                web.post("/_describe/character/{character_id}/card", self._describe_character_card),
                 web.post(
-                    "/character/{character_id}/card/{with_character_id}", self.with_character_card
+                    "/_describe/character/create", self._describe_create_character
                 ),
-                web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
-                web.post("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.get(
+                    "/_describe/character/{character_id}/card",
+                    self._describe_character_card,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/card",
+                    self._describe_character_card,
+                ),
+                web.post(
+                    "/character/{character_id}/card/{with_character_id}",
+                    self.with_character_card,
+                ),
+                web.get(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
                 web.post(
                     "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}",
                     self._choose_between_stuff,
@@ -2285,7 +2487,8 @@ class CharacterController(BaseController):
                     self._describe_shared_with_inventory,
                 ),
                 web.post(
-                    "/character/{character_id}/inventory/{with_character_id}", self.with_inventory
+                    "/character/{character_id}/inventory/{with_character_id}",
+                    self.with_inventory,
                 ),
                 web.get(
                     "/_describe/character/{character_id}/on_place_actions",
@@ -2296,7 +2499,8 @@ class CharacterController(BaseController):
                     self._describe_on_place_actions,
                 ),
                 web.post(
-                    "/_describe/character/{character_id}/pending_actions", self.pending_actions
+                    "/_describe/character/{character_id}/pending_actions",
+                    self.pending_actions,
                 ),
                 web.post(
                     "/_describe/character/{character_id}/pending_actions/{pending_action_id}",
@@ -2318,12 +2522,21 @@ class CharacterController(BaseController):
                     "/_describe/character/{character_id}/build_actions",
                     self._describe_build_actions,
                 ),
-                web.get("/_describe/character/{character_id}/events", self._describe_events),
-                web.post("/_describe/character/{character_id}/events", self._describe_events),
-                web.post("/_describe/character/{character_id}/story", self._describe_story),
+                web.get(
+                    "/_describe/character/{character_id}/events", self._describe_events
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/events", self._describe_events
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/story", self._describe_story
+                ),
                 web.post("/_describe/character/create/do", self.create_character_do),
                 web.get("/character/{character_id}", self.get),
-                web.get("/_describe/character/{character_id}/inventory", self._describe_inventory),
+                web.get(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
                 web.post(
                     "/_describe/character/{character_id}/shared-inventory",
                     self._describe_shared_inventory,
@@ -2336,13 +2549,18 @@ class CharacterController(BaseController):
                     "/_describe/character/{character_id}/pick_from_inventory",
                     self.pick_from_inventory,
                 ),
-                web.post("/_describe/character/{character_id}/move", self.describe_move),
+                web.post(
+                    "/_describe/character/{character_id}/move", self.describe_move
+                ),
                 web.post(DESCRIBE_LOOK_AT_STUFF_URL, self._describe_look_stuff),
                 web.post(DESCRIBE_LOOK_AT_RESOURCE_URL, self._describe_look_resource),
                 web.post(DESCRIBE_LOOK_AT_CHARACTER_URL, self._describe_look_character),
-                web.post(DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff),
                 web.post(
-                    DESCRIBE_INVENTORY_RESOURCE_ACTION, self._describe_inventory_look_resource
+                    DESCRIBE_INVENTORY_STUFF_ACTION, self._describe_inventory_look_stuff
+                ),
+                web.post(
+                    DESCRIBE_INVENTORY_RESOURCE_ACTION,
+                    self._describe_inventory_look_resource,
                 ),
                 web.post(CHARACTER_ACTION, self.character_action),
                 web.post(WITH_STUFF_ACTION, self.with_stuff_action),
@@ -2350,27 +2568,30 @@ class CharacterController(BaseController):
                 web.post(WITH_RESOURCE_ACTION, self.with_resource_action),
                 web.post(WITH_CHARACTER_ACTION, self.with_character_action),
                 web.get("/character/{character_id}/zone_data", self.get_zone_data),
-                web.get("/character/{character_id}/resume_texts", self.get_resume_texts),
+                web.get(
+                    "/character/{character_id}/resume_texts", self.get_resume_texts
+                ),
                 web.get("/character/{character_id}/dead", self.is_dead),
                 web.post("/character/{character_id}/post_mortem", self.get_post_mortem),
                 web.post("/character/{character_id}/AP", self.describe_ap),
                 web.post("/character/{character_id}/turn", self.describe_turn),
                 web.post(
-                    "/character/{character_id}/skills_and_knowledge", self.skills_and_knowledge
+                    "/character/{character_id}/skills_and_knowledge",
+                    self.skills_and_knowledge,
                 ),
                 web.post("/character/{character_id}/followed", self.followed),
                 web.post(
-                    "/character/{character_id}/describe_around_items", self.describe_around_items
+                    "/character/{character_id}/describe_around_items",
+                    self.describe_around_items,
                 ),
                 web.post(
                     "/character/{character_id}/describe_around_characters",
                     self.describe_around_characters,
                 ),
                 web.post(
-                    "/character/{character_id}/describe_around_builds", self.describe_around_builds
+                    "/character/{character_id}/describe_around_builds",
+                    self.describe_around_builds,
                 ),
-                web.post(
-                    "/character/{character_id}/door/{door_id}", self.door
-                ),
+                web.post("/character/{character_id}/door/{door_id}", self.door),
             ]
         )

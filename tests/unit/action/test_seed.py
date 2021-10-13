@@ -1,7 +1,8 @@
 import pytest
 
 from rolling.action.base import ActionDescriptionModel
-from rolling.action.seed import SeedAction, SeedModel
+from rolling.action.seed import SeedAction
+from rolling.action.seed import SeedModel
 from rolling.exception import ImpossibleAction
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
@@ -71,7 +72,7 @@ class TestSeedAction:
             input_=SeedModel(
                 row_i=1,
                 col_i=1,
-            )
+            ),
         )
 
         # Then
@@ -111,7 +112,7 @@ class TestSeedAction:
                 input_=SeedModel(
                     row_i=1,
                     col_i=1,
-                )
+                ),
             )
 
     def test_event_perform__already_seeded_build(
@@ -148,7 +149,7 @@ class TestSeedAction:
                 input_=SeedModel(
                     row_i=1,
                     col_i=1,
-                )
+                ),
             )
 
     def test_event_perform__no_build(
@@ -174,5 +175,5 @@ class TestSeedAction:
                 input_=SeedModel(
                     row_i=1,
                     col_i=1,
-                )
+                ),
             )

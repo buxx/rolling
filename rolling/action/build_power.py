@@ -21,7 +21,9 @@ class PowerOnBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -67,9 +69,13 @@ class PowerOnBuildAction(WithBuildAction):
         parts: typing.List[Part] = []
 
         for required in build_description.power_on_require_resources:
-            resource_description = self._kernel.game.config.resources[required.resource_id]
+            resource_description = self._kernel.game.config.resources[
+                required.resource_id
+            ]
             if not self._kernel.resource_lib.have_resource(
-                resource_id=required.resource_id, build_id=build_id, quantity=required.quantity
+                resource_id=required.resource_id,
+                build_id=build_id,
+                quantity=required.quantity,
             ):
                 unit_str = self._kernel.translation.get(resource_description.unit)
                 missing_parts.append(
@@ -105,7 +111,9 @@ class PowerOffBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:

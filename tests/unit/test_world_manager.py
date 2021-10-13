@@ -38,14 +38,18 @@ class TestWorldManager:
         worldmapc_kernel: Kernel,
         resource_id: str,
         quantity: float,
-        expected: typing.List[typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]],
+        expected: typing.List[
+            typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]
+        ],
     ) -> None:
         # Given
         kernel = worldmapc_kernel
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
+            kernel.game.world_manager,
+            resource_id=resource_id,
+            resource_quantity=quantity,
         )
 
         # Then
@@ -58,7 +62,12 @@ class TestWorldManager:
             (
                 "WOOD",
                 0.05,
-                [((69, 40), 0.002), ((70, 39), 0.02), ((71, 39), 0.02), ((68, 39), 0.008)],
+                [
+                    ((69, 40), 0.002),
+                    ((70, 39), 0.02),
+                    ((71, 39), 0.02),
+                    ((68, 39), 0.008),
+                ],
             ),
         ],
     )
@@ -67,7 +76,9 @@ class TestWorldManager:
         worldmapc_kernel: Kernel,
         resource_id: str,
         quantity: float,
-        expected: typing.List[typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]],
+        expected: typing.List[
+            typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]
+        ],
     ) -> None:
         # Given
         kernel = worldmapc_kernel
@@ -83,7 +94,9 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
+            kernel.game.world_manager,
+            resource_id=resource_id,
+            resource_quantity=quantity,
         )
 
         # Then
@@ -101,7 +114,9 @@ class TestWorldManager:
         worldmapc_kernel: Kernel,
         resource_id: str,
         quantity: float,
-        expected: typing.List[typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]],
+        expected: typing.List[
+            typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]
+        ],
     ) -> None:
         # Given
         kernel = worldmapc_kernel
@@ -116,7 +131,9 @@ class TestWorldManager:
 
         # When
         places = self._find_available_place_where_drop(
-            kernel.game.world_manager, resource_id=resource_id, resource_quantity=quantity
+            kernel.game.world_manager,
+            resource_id=resource_id,
+            resource_quantity=quantity,
         )
 
         # Then

@@ -12,8 +12,9 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import quantity_to_str
@@ -33,8 +34,12 @@ class SearchMaterialAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(SearchMaterialModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
 
         for produce in action_config_raw["produce"]:
             if "resource" not in produce and "stuff" not in produce:
@@ -52,14 +57,18 @@ class SearchMaterialAction(CharacterAction):
         return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        check_common_is_possible(self._kernel, character=character, description=self._description)
+        check_common_is_possible(
+            self._kernel, character=character, description=self._description
+        )
 
     def check_request_is_possible(
         self, character: "CharacterModel", input_: SearchMaterialModel
     ) -> None:
         self.check_is_possible(character)
         if input_.ap and character.action_points < input_.ap:
-            raise WrongInputError(f"{character.name} ne possède pas assez de points d'actions")
+            raise WrongInputError(
+                f"{character.name} ne possède pas assez de points d'actions"
+            )
 
     def get_character_actions(
         self, character: "CharacterModel"
@@ -78,7 +87,9 @@ class SearchMaterialAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: SearchMaterialModel) -> Description:
+    def perform(
+        self, character: "CharacterModel", input_: SearchMaterialModel
+    ) -> Description:
         if not input_.ap:
             return Description(
                 title=self._description.name,
@@ -160,7 +171,9 @@ class SearchMaterialAction(CharacterAction):
 
         for resource_id, quantity in found:
             resource_description = self._kernel.game.config.resources[resource_id]
-            quantity_str = quantity_to_str(quantity, resource_description.unit, self._kernel)
+            quantity_str = quantity_to_str(
+                quantity, resource_description.unit, self._kernel
+            )
             parts.append(Part(text=f"{quantity_str} de {resource_description.name}"))
 
         if not found:

@@ -106,7 +106,9 @@ class TestExecuteTurn:
 
         # fixtures
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
-        affinity: AffinityDocument = kernel.server_db_session.query(AffinityDocument).one()
+        affinity: AffinityDocument = kernel.server_db_session.query(
+            AffinityDocument
+        ).one()
         affinity.join_type = AffinityJoinType.ACCEPT_ALL.value
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.commit()
@@ -257,7 +259,9 @@ class TestExecuteTurn:
         kernel.server_db_session.commit()
 
         # When
-        with unittest.mock.patch("rolling.util.is_there_resource_id_in_zone", retur_value=True):
+        with unittest.mock.patch(
+            "rolling.util.is_there_resource_id_in_zone", retur_value=True
+        ):
             a = 1
             turn_lib.execute_turn()
 
@@ -316,7 +320,9 @@ class TestExecuteTurn:
         assert xena.hunger == after_hunger
         if after_vegetal_food_quantity == 0.0:
             with pytest.raises(NoCarriedResource):
-                kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
+                kernel.resource_lib.get_one_carried_by(
+                    xena.id, resource_id="VEGETAL_FOOD_FRESH"
+                )
         else:
             resource = kernel.resource_lib.get_one_carried_by(
                 xena.id, resource_id="VEGETAL_FOOD_FRESH"
@@ -347,8 +353,12 @@ class TestExecuteTurn:
         assert float(xena.life_points) == 1.05
         assert round(xena.hunger, 1) == 19.8
         with pytest.raises(NoCarriedResource):
-            kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH")
-        r = kernel.resource_lib.get_one_carried_by(xena.id, resource_id="VEGETAL_FOOD_FRESH2")
+            kernel.resource_lib.get_one_carried_by(
+                xena.id, resource_id="VEGETAL_FOOD_FRESH"
+            )
+        r = kernel.resource_lib.get_one_carried_by(
+            xena.id, resource_id="VEGETAL_FOOD_FRESH2"
+        )
         assert round(r.quantity, 1) == 97.8
 
     def test_eat__ko__eat_resource_but_not_enough(
@@ -357,7 +367,9 @@ class TestExecuteTurn:
         kernel = worldmapc_kernel
 
         kernel.resource_lib.add_resource_to(
-            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.5  # not enough
+            character_id=xena.id,
+            resource_id="VEGETAL_FOOD_FRESH",
+            quantity=0.5,  # not enough
         )
         with unittest.mock.patch(
             "rolling.server.effect.EffectManager.enable_effect"
@@ -433,7 +445,9 @@ class TestExecuteTurn:
         self, worldmapc_kernel: Kernel, turn_lib: TurnLib, build_a_off: BuildDocument
     ):
         # Given
-        assert not worldmapc_kernel.resource_lib.get_stored_in_build(build_id=build_a_off.id)
+        assert not worldmapc_kernel.resource_lib.get_stored_in_build(
+            build_id=build_a_off.id
+        )
 
         # When
         turn_lib.execute_turn()

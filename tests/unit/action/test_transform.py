@@ -70,7 +70,9 @@ class TestTransformAction:
             ).quantity
             == 5.0
         )
-        assert not kernel.resource_lib.have_resource(character_id=franck.id, resource_id="CLOTH")
+        assert not kernel.resource_lib.have_resource(
+            character_id=franck.id, resource_id="CLOTH"
+        )
 
         action.perform(
             character=franck,
@@ -96,9 +98,24 @@ class TestTransformAction:
     @pytest.mark.parametrize(
         "initial_quantity,expected_unit_sentence,expected_default_quantity,reduce_and_after",
         [
-            (5000.0, "5.0 kg", "5.0 kg", [("1500g", 3500.0), ("1,5kg", 2000.0), ("2", 0.0)]),
-            (5000.0, "5.0 kg", "5.0 kg", [("1500 g", 3500.0), ("1, 5 kg ", 2000.0), ("2.0", 0.0)]),
-            (5000.0, "5.0 kg", "5.0 kg", [("1500 g", 3500.0), ("1.5 kg", 2000.0), ("2", 0.0)]),
+            (
+                5000.0,
+                "5.0 kg",
+                "5.0 kg",
+                [("1500g", 3500.0), ("1,5kg", 2000.0), ("2", 0.0)],
+            ),
+            (
+                5000.0,
+                "5.0 kg",
+                "5.0 kg",
+                [("1500 g", 3500.0), ("1, 5 kg ", 2000.0), ("2.0", 0.0)],
+            ),
+            (
+                5000.0,
+                "5.0 kg",
+                "5.0 kg",
+                [("1500 g", 3500.0), ("1.5 kg", 2000.0), ("2", 0.0)],
+            ),
             (500.0, "500.0 g", "500.0 g", [("250", 250.0), ("0.250kg", 0)]),
         ],
     )
@@ -127,7 +144,10 @@ class TestTransformAction:
             description.items[0].items[0].text
             == f"Vous possedez {expected_unit_sentence} de Ressource1"
         )
-        assert description.items[0].items[1].default_value.lower() == expected_default_quantity
+        assert (
+            description.items[0].items[1].default_value.lower()
+            == expected_default_quantity
+        )
 
         for input_quantity, after_quantity in reduce_and_after:
             action.perform(

@@ -12,8 +12,10 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_build_action_url
-from rolling.action.utils import ConfirmModel, check_common_is_possible, get_build_description_parts
+from rolling.action.utils import ConfirmModel
+from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
+from rolling.action.utils import get_build_description_parts
 from rolling.exception import ImpossibleAction
 from rolling.exception import MissingResource
 from rolling.exception import NoCarriedResource
@@ -56,11 +58,15 @@ class BeginBuildAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(ConfirmModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {
             "build_id": action_config_raw["build"],
             "require_resources": [
-                BuildRequireResourceDescription(resource_id=r["resource"], quantity=r["quantity"])
+                BuildRequireResourceDescription(
+                    resource_id=r["resource"], quantity=r["quantity"]
+                )
                 for r in action_config_raw.get("require_resources", [])
             ],
         }
@@ -70,7 +76,9 @@ class BeginBuildAction(CharacterAction):
         # because we want to permit begin construction)
         pass
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> None:
         self.check_is_possible(character)
 
     def get_character_actions(
@@ -101,11 +109,15 @@ class BeginBuildAction(CharacterAction):
         build_description = self._kernel.game.config.builds[build_id]
 
         if not input_.confirm:
-            items = get_build_description_parts(self._kernel, build_description, include_build_parts=True)
+            items = get_build_description_parts(
+                self._kernel, build_description, include_build_parts=True
+            )
 
             if not build_description.many:
                 items.append(Part(text=""))
-                items.append(Part(text="Cera consruit là où se trouve votre personnage"))
+                items.append(
+                    Part(text="Cera consruit là où se trouve votre personnage")
+                )
 
             cost = self.get_cost(character, input_=input_)
             items.append(
@@ -117,7 +129,7 @@ class BeginBuildAction(CharacterAction):
                         action_type=ActionType.BEGIN_BUILD,
                         action_description_id=self._description.id,
                         query_params={"confirm": 1},
-                    )
+                    ),
                 )
             )
 
@@ -155,7 +167,9 @@ class BringResourcesOnBuild(WithBuildAction):
     input_model_serializer = serpyco.Serializer(BringResourceModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -176,13 +190,19 @@ class BringResourcesOnBuild(WithBuildAction):
     ) -> typing.Tuple[ResourceDescriptionModel, float, float]:
         build_progress = get_build_progress(build_doc, kernel=kernel)
         stored_resources = kernel.resource_lib.get_stored_in_build(build_doc.id)
-        stored_resources_by_resource_id: typing.Dict[str, CarriedResourceDescriptionModel] = {
+        stored_resources_by_resource_id: typing.Dict[
+            str, CarriedResourceDescriptionModel
+        ] = {
             stored_resource.id: stored_resource for stored_resource in stored_resources
         }
 
-        resource_description = kernel.game.config.resources[required_resource.resource_id]
+        resource_description = kernel.game.config.resources[
+            required_resource.resource_id
+        ]
         try:
-            stored_resource = stored_resources_by_resource_id[required_resource.resource_id]
+            stored_resource = stored_resources_by_resource_id[
+                required_resource.resource_id
+            ]
             stored_resource_quantity = stored_resource.quantity
         except KeyError:
             if raise_if_missing:
@@ -219,10 +239,14 @@ class BringResourcesOnBuild(WithBuildAction):
             if left <= 0:
                 continue
 
-            left_str = quantity_to_str(left, resource_description.unit, kernel=self._kernel)
+            left_str = quantity_to_str(
+                left, resource_description.unit, kernel=self._kernel
+            )
 
             query_params = BringResourcesOnBuild.input_model_serializer.dump(
-                BringResourcesOnBuild.input_model(resource_id=required_resource.resource_id)
+                BringResourcesOnBuild.input_model(
+                    resource_id=required_resource.resource_id
+                )
             )
             name = (
                 f"Apporter {resource_description.name} pour la construction "
@@ -249,7 +273,9 @@ class BringResourcesOnBuild(WithBuildAction):
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         carried_resource = self._kernel.resource_lib.get_one_carried_by(
-            character_id=character.id, resource_id=input_.resource_id, empty_object_if_not=True
+            character_id=character.id,
+            resource_id=input_.resource_id,
+            empty_object_if_not=True,
         )
         expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
             self._kernel, carried_resource
@@ -267,7 +293,9 @@ class BringResourcesOnBuild(WithBuildAction):
             resource_description, left, left_percent = self.get_resource_infos(
                 self._kernel, required_resource, build_doc=build_doc
             )
-            left_str = quantity_to_str(left, resource_description.unit, kernel=self._kernel)
+            left_str = quantity_to_str(
+                left, resource_description.unit, kernel=self._kernel
+            )
 
             return Description(
                 title=f"Cette construction nécessite encore {left_str} "
@@ -323,7 +351,9 @@ class BringResourcesOnBuild(WithBuildAction):
 
         build_description = self._kernel.game.config.builds[build_doc.build_id]
         quantity_str = quantity_to_str(
-            user_input_context.real_quantity, resource_description.unit, kernel=self._kernel
+            user_input_context.real_quantity,
+            resource_description.unit,
+            kernel=self._kernel,
         )
 
         return Description(
@@ -337,13 +367,17 @@ class BringResourcesOnBuild(WithBuildAction):
                 )
             ],
             footer_with_build_id=build_doc.id,
-            back_url=DESCRIBE_BUILD.format(build_id=build_doc.id, character_id=character.id),
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 
 @dataclasses.dataclass
 class ConstructBuildModel:
-    cost_to_spent: typing.Optional[float] = serpyco.number_field(cast_on_load=True, default=None)
+    cost_to_spent: typing.Optional[float] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
 
 
 class ConstructBuildAction(WithBuildAction):
@@ -351,7 +385,9 @@ class ConstructBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(ConstructBuildModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -393,7 +429,11 @@ class ConstructBuildAction(WithBuildAction):
         biggest_left_percent = 0.0
 
         for required_resource in build_description.build_require_resources:
-            resource_description, left, left_percent = BringResourcesOnBuild.get_resource_infos(
+            (
+                resource_description,
+                left,
+                left_percent,
+            ) = BringResourcesOnBuild.get_resource_infos(
                 self._kernel,
                 required_resource,
                 build_doc=build_doc,
@@ -481,7 +521,9 @@ class ConstructBuildAction(WithBuildAction):
         return Description(
             title=f"Travail effectué",
             footer_with_build_id=build_doc.id,
-            back_url=DESCRIBE_BUILD.format(build_id=build_doc.id, character_id=character.id),
+            back_url=DESCRIBE_BUILD.format(
+                build_id=build_doc.id, character_id=character.id
+            ),
         )
 
 
@@ -496,15 +538,21 @@ class BuildAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(BuildModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
-        properties = fill_base_action_properties(cls, game_config, {}, action_config_raw)
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
         properties["build_id"] = action_config_raw["build"]
         return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(self, character: "CharacterModel", input_: BuildModel) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: BuildModel
+    ) -> None:
         check_common_is_possible(
             kernel=self._kernel, description=self._description, character=character
         )
@@ -520,7 +568,9 @@ class BuildAction(CharacterAction):
                 resource_id=require.resource_id,
                 quantity=require.quantity,
             ):
-                resource_properties = self._kernel.game.config.resources[require.resource_id]
+                resource_properties = self._kernel.game.config.resources[
+                    require.resource_id
+                ]
                 required_quantity_str = quantity_to_str(
                     require.quantity, resource_properties.unit, self._kernel
                 )
@@ -596,7 +646,9 @@ class BuildAction(CharacterAction):
             commit=False,
         )
         self._kernel.character_lib.reduce_action_points(
-            character_id=character.id, cost=self.get_cost(character, input_), commit=False
+            character_id=character.id,
+            cost=self.get_cost(character, input_),
+            commit=False,
         )
         for require in build_description.build_require_resources:
             self._kernel.resource_lib.reduce_carried_by(
@@ -614,7 +666,9 @@ class BuildAction(CharacterAction):
                     world_row_i=character.world_row_i,
                     world_col_i=character.world_col_i,
                     data=NewBuildData(
-                        build=ZoneBuildModelContainer(doc=build_doc, desc=build_description)
+                        build=ZoneBuildModelContainer(
+                            doc=build_doc, desc=build_description
+                        )
                     ),
                 )
             ],

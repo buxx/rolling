@@ -5,9 +5,9 @@ from aiohttp.web_request import Request
 from hapic import HapicData
 import json
 from json import JSONDecodeError
+from sqlalchemy.orm.exc import NoResultFound
 import typing
 import urllib
-from sqlalchemy.orm.exc import NoResultFound
 
 from guilang.description import Description
 from guilang.description import Part
@@ -51,10 +51,12 @@ class AffinityController(BaseController):
                 request=True,
             )
         ]
-        other_here_affinities = self._kernel.affinity_lib.get_affinities_without_relations(
-            character_id=character.id,
-            with_alive_character_in_world_row_i=character.world_row_i,
-            with_alive_character_in_world_col_i=character.world_col_i,
+        other_here_affinities = (
+            self._kernel.affinity_lib.get_affinities_without_relations(
+                character_id=character.id,
+                with_alive_character_in_world_row_i=character.world_row_i,
+                with_alive_character_in_world_col_i=character.world_col_i,
+            )
         )
 
         character_affinities_parts: typing.List[Part] = []
@@ -131,7 +133,9 @@ class AffinityController(BaseController):
                         Part(
                             is_column=True,
                             colspan=1,
-                            items=[Part(text="Autres affinités présentes", classes=["h2"])]
+                            items=[
+                                Part(text="Autres affinités présentes", classes=["h2"])
+                            ]
                             + character_other_affinities_parts,
                         ),
                     ],
@@ -159,7 +163,9 @@ class AffinityController(BaseController):
                 rel_str = "Exclu"
             elif relation.request:
                 rel_str = "Demandé"
-            elif not relation.accepted and not relation.request and not relation.fighter:
+            elif (
+                not relation.accepted and not relation.request and not relation.fighter
+            ):
                 rel_str = "Plus de lien"
             if relation.fighter:
                 if rel_str:
@@ -224,7 +230,9 @@ class AffinityController(BaseController):
         return Description(
             title="Affinités existantes",
             items=[
-                Part(text="Ci-dessous, les affinités pour lesquelles vous n'avez aucune relation.")
+                Part(
+                    text="Ci-dessous, les affinités pour lesquelles vous n'avez aucune relation."
+                )
             ]
             + non_affiliated_parts,
             can_be_back_url=True,
@@ -279,18 +287,19 @@ class AffinityController(BaseController):
     async def see(self, request: Request, hapic_data: HapicData) -> Description:
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        member_count = self._kernel.affinity_lib.count_members(hapic_data.path.affinity_id)
+        member_count = self._kernel.affinity_lib.count_members(
+            hapic_data.path.affinity_id
+        )
         fighter_count = self._kernel.affinity_lib.count_members(
             hapic_data.path.affinity_id, fighter=True
         )
 
         parts = []
-        edit_relation_url = (
-            f"/affinity/{hapic_data.path.character_id}/edit-relation/{hapic_data.path.affinity_id}"
-        )
+        edit_relation_url = f"/affinity/{hapic_data.path.character_id}/edit-relation/{hapic_data.path.affinity_id}"
 
         if relation:
             fighter_str = ""
@@ -308,7 +317,9 @@ class AffinityController(BaseController):
                     f"de {status_str}{fighter_str}"
                 )
             elif relation.request:
-                relation_str = f"Vous avez demandé à être membre de cette affinité{fighter_str}"
+                relation_str = (
+                    f"Vous avez demandé à être membre de cette affinité{fighter_str}"
+                )
             elif relation.rejected:
                 relation_str = f"Vous avez renié cette affinité{fighter_str}"
             elif relation.disallowed:
@@ -325,7 +336,9 @@ class AffinityController(BaseController):
             if relation and relation.status_id == CHIEF_STATUS[0]:
                 need_action = (
                     "*"
-                    if self._kernel.affinity_lib.there_is_unvote_relation(affinity, relation)
+                    if self._kernel.affinity_lib.there_is_unvote_relation(
+                        affinity, relation
+                    )
                     else ""
                 )
                 parts.extend(
@@ -373,8 +386,10 @@ class AffinityController(BaseController):
         #             except ImpossibleAction:
         #                 pass
 
-        count_things_shared_with = self._kernel.affinity_lib.count_things_shared_with_affinity(
-            character_id=character.id, affinity_id=affinity.id
+        count_things_shared_with = (
+            self._kernel.affinity_lib.count_things_shared_with_affinity(
+                character_id=character.id, affinity_id=affinity.id
+            )
         )
         parts.append(
             Part(
@@ -411,10 +426,13 @@ class AffinityController(BaseController):
     @hapic.input_path(GetAffinityPathModel)
     @hapic.input_query(ModifyAffinityRelationQueryModel)
     @hapic.output_body(Description)
-    async def edit_relation(self, request: Request, hapic_data: HapicData) -> Description:
+    async def edit_relation(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
 
         if (
@@ -462,7 +480,9 @@ class AffinityController(BaseController):
                 self._kernel.affinity_lib.join(
                     character_id=hapic_data.path.character_id,
                     affinity_id=hapic_data.path.affinity_id,
-                    accepted=True if affinity.join_type == AffinityJoinType.ACCEPT_ALL else False,
+                    accepted=True
+                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL
+                    else False,
                     fighter=True,
                     request=False,
                 )
@@ -610,7 +630,8 @@ class AffinityController(BaseController):
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
 
         if hapic_data.query.join_type == affinity_join_str[AffinityJoinType.ACCEPT_ALL]:
@@ -657,7 +678,10 @@ class AffinityController(BaseController):
             ]
 
             # TODO BS: code it
-            if join_type not in [AffinityJoinType.ACCEPT_ALL, AffinityJoinType.ONE_CHIEF_ACCEPT]:
+            if join_type not in [
+                AffinityJoinType.ACCEPT_ALL,
+                AffinityJoinType.ONE_CHIEF_ACCEPT,
+            ]:
                 raise RollingError("Cette fonctionnalite n'est pas encore disponible")
 
             if join_type == AffinityJoinType.ACCEPT_ALL:
@@ -727,7 +751,9 @@ class AffinityController(BaseController):
                             label="Mode d'admission des nouveaux membres",
                             choices=join_values,
                             name="join_type",
-                            value=affinity_join_str[AffinityJoinType(affinity.join_type)],
+                            value=affinity_join_str[
+                                AffinityJoinType(affinity.join_type)
+                            ],
                         )
                     ],
                 )
@@ -740,11 +766,14 @@ class AffinityController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetAffinityPathModel)
     @hapic.output_body(Description)
-    async def manage_requests(self, request: Request, hapic_data: HapicData) -> Description:
+    async def manage_requests(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
         requests: typing.List[AffinityRelationDocument] = (
             self._kernel.server_db_session.query(AffinityRelationDocument)
@@ -813,17 +842,22 @@ class AffinityController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetAffinityPathModel)
     @hapic.output_body(Description)
-    async def manage_relations(self, request: Request, hapic_data: HapicData) -> Description:
+    async def manage_relations(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
 
         parts = []
         for character_id, character_name, status_id in (
             self._kernel.server_db_session.query(
-                CharacterDocument.id, CharacterDocument.name, AffinityRelationDocument.status_id
+                CharacterDocument.id,
+                CharacterDocument.name,
+                AffinityRelationDocument.status_id,
             )
             .filter(
                 AffinityRelationDocument.affinity_id == affinity.id,
@@ -856,11 +890,14 @@ class AffinityController(BaseController):
     @hapic.input_query(ManageAffinityRelationQueryModel)
     @hapic.input_body(ManageAffinityRelationBodyModel)
     @hapic.output_body(Description)
-    async def manage_relation(self, request: Request, hapic_data: HapicData) -> Description:
+    async def manage_relation(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
         displayer_relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id, character_id=hapic_data.path.character_id
+            affinity_id=hapic_data.path.affinity_id,
+            character_id=hapic_data.path.character_id,
         )
         relation = self._kernel.affinity_lib.get_character_relation(
             affinity_id=hapic_data.path.affinity_id,
@@ -885,7 +922,9 @@ class AffinityController(BaseController):
             return Description(redirect=f"/affinity/{hapic_data.path.character_id}")
 
         if hapic_data.body.status:
-            status_id = list(statuses.keys())[list(statuses.values()).index(hapic_data.body.status)]
+            status_id = list(statuses.keys())[
+                list(statuses.values()).index(hapic_data.body.status)
+            ]
             relation.status_id = status_id
             self._kernel.server_db_session.add(relation)
             self._kernel.server_db_session.commit()
@@ -926,10 +965,15 @@ class AffinityController(BaseController):
                 web.post(url_base + "/see/{affinity_id}", self.see),
                 web.post(url_base + "/edit-relation/{affinity_id}", self.edit_relation),
                 web.post(url_base + "/manage/{affinity_id}", self.manage),
-                web.post(url_base + "/manage-requests/{affinity_id}", self.manage_requests),
-                web.post(url_base + "/manage-relations/{affinity_id}", self.manage_relations),
                 web.post(
-                    url_base + "/manage-relations/{affinity_id}/{relation_character_id}",
+                    url_base + "/manage-requests/{affinity_id}", self.manage_requests
+                ),
+                web.post(
+                    url_base + "/manage-relations/{affinity_id}", self.manage_relations
+                ),
+                web.post(
+                    url_base
+                    + "/manage-relations/{affinity_id}/{relation_character_id}",
                     self.manage_relation,
                 ),
             ]

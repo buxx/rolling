@@ -4,7 +4,8 @@ import pytest
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.give import GiveToCharacterAction
 from rolling.action.give import GiveToModel
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.model.stuff import StuffModel
@@ -92,23 +93,31 @@ class TestGiveAction:
         give_action.perform(
             xena,
             arthur,
-            GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=1),
+            GiveToModel(
+                give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=1
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
-            not kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
+            not kernel.stuff_lib.get_stuff_doc(
+                worldmapc_xena_wood_shield2.id
+            ).carried_by_id
             == arthur.id
         )
 
         give_action.perform(
             xena,
             arthur,
-            GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=1),
+            GiveToModel(
+                give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=1
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
             kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
@@ -143,10 +152,13 @@ class TestGiveAction:
         give_action.perform(
             xena,
             arthur,
-            GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=2),
+            GiveToModel(
+                give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=2
+            ),
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id == arthur.id
+            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield.id).carried_by_id
+            == arthur.id
         )
         assert (
             kernel.stuff_lib.get_stuff_doc(worldmapc_xena_wood_shield2.id).carried_by_id
@@ -170,7 +182,9 @@ class TestGiveAction:
             xena, arthur, GiveToModel(give_stuff_id=worldmapc_xena_leather_jacket.id)
         )
         assert (
-            kernel.stuff_lib.get_stuff_doc(worldmapc_xena_leather_jacket.id).carried_by_id
+            kernel.stuff_lib.get_stuff_doc(
+                worldmapc_xena_leather_jacket.id
+            ).carried_by_id
             == arthur.id
         )
 
@@ -186,7 +200,9 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        description = give_action.perform(xena, arthur, GiveToModel(give_resource_id="WOOD"))
+        description = give_action.perform(
+            xena, arthur, GiveToModel(give_resource_id="WOOD")
+        )
         assert description.items[0].is_form
         assert description.items[0].items[0].name == "give_resource_quantity"
         assert description.items[0].form_action == (
@@ -195,7 +211,9 @@ class TestGiveAction:
         )
 
         give_action.perform(
-            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1")
+            xena,
+            arthur,
+            GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1"),
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.1
@@ -205,12 +223,16 @@ class TestGiveAction:
         )
 
         give_action.perform(
-            xena, arthur, GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1")
+            xena,
+            arthur,
+            GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1"),
         )
         assert kernel.resource_lib.have_resource(
             character_id=arthur.id, resource_id="WOOD", quantity=0.2
         )
-        assert not kernel.resource_lib.have_resource(character_id=xena.id, resource_id="WOOD")
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="WOOD"
+        )
 
     def test_unit__list_give_wood__err__require_more(
         self,
@@ -229,7 +251,8 @@ class TestGiveAction:
                 xena,
                 arthur,
                 GiveToModel(
-                    give_resource_id="WOOD", give_resource_quantity="0.21"  # 0.2 in fixtures
+                    give_resource_id="WOOD",
+                    give_resource_quantity="0.21",  # 0.2 in fixtures
                 ),
             )
 
@@ -249,7 +272,9 @@ class TestGiveAction:
             give_action.check_request_is_possible(
                 xena,
                 arthur,
-                GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=2),
+                GiveToModel(
+                    give_stuff_id=worldmapc_xena_wood_shield.id, give_stuff_quantity=2
+                ),
             )
 
     def test_unit__list_give_shield__err__dont_have(

@@ -11,7 +11,8 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithCharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_character_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionScope
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -32,7 +33,9 @@ class LearnKnowledgeAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(LearnKnowledgeModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel") -> None:
@@ -44,10 +47,14 @@ class LearnKnowledgeAction(CharacterAction):
         if input_.knowledge_id is not None:
             if input_.knowledge_id in character.knowledges:
                 raise WrongInputError("Connaissance déjà acquise")
-            knowledge_description = self._kernel.game.config.knowledge[input_.knowledge_id]
+            knowledge_description = self._kernel.game.config.knowledge[
+                input_.knowledge_id
+            ]
             for required_knowledge_id in knowledge_description.requires:
                 if required_knowledge_id not in character.knowledges:
-                    raise WrongInputError(f"Cette connaissance ne peut pas encore etre abordé")
+                    raise WrongInputError(
+                        f"Cette connaissance ne peut pas encore etre abordé"
+                    )
 
         if input_.ap is not None:
             if character.action_points < input_.ap:
@@ -58,7 +65,10 @@ class LearnKnowledgeAction(CharacterAction):
     ) -> typing.List[CharacterActionLink]:
         action_links = []
 
-        for knowledge_id, knowledge_description in self._kernel.game.config.knowledge.items():
+        for (
+            knowledge_id,
+            knowledge_description,
+        ) in self._kernel.game.config.knowledge.items():
             continue_ = False
 
             if knowledge_id in character.knowledges:
@@ -73,7 +83,9 @@ class LearnKnowledgeAction(CharacterAction):
             action_links.append(
                 CharacterActionLink(
                     name=knowledge_description.name,
-                    link=self._get_url(character, LearnKnowledgeModel(knowledge_id=knowledge_id)),
+                    link=self._get_url(
+                        character, LearnKnowledgeModel(knowledge_id=knowledge_id)
+                    ),
                     group_name="Apprentissages",
                 )
             )
@@ -81,7 +93,9 @@ class LearnKnowledgeAction(CharacterAction):
         return action_links
 
     def _get_url(
-        self, character: "CharacterModel", input_: typing.Optional[LearnKnowledgeModel] = None
+        self,
+        character: "CharacterModel",
+        input_: typing.Optional[LearnKnowledgeModel] = None,
     ) -> str:
         return get_character_action_url(
             character_id=character.id,
@@ -90,7 +104,9 @@ class LearnKnowledgeAction(CharacterAction):
             action_description_id=self._description.id,
         )
 
-    def perform(self, character: "CharacterModel", input_: LearnKnowledgeModel) -> Description:
+    def perform(
+        self, character: "CharacterModel", input_: LearnKnowledgeModel
+    ) -> Description:
         knowledge_description = self._kernel.game.config.knowledge[input_.knowledge_id]
         current_progress = self._kernel.character_lib.get_knowledge_progress(
             character.id, input_.knowledge_id
@@ -112,7 +128,9 @@ class LearnKnowledgeAction(CharacterAction):
                         form_action=self._get_url(character, input_),
                         items=[
                             Part(
-                                label=f"Points d'actions à dépenser ?", type_=Type.NUMBER, name="ap"
+                                label=f"Points d'actions à dépenser ?",
+                                type_=Type.NUMBER,
+                                name="ap",
                             )
                         ],
                     ),
@@ -142,7 +160,9 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(ProposeTeachKnowledgeModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -247,7 +267,8 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
             parameters=TeachKnowledgeAction.input_model_serializer.dump(
                 TeachKnowledgeModel(knowledge_id=input_.knowledge_id, ap=input_.ap)
             ),
-            expire_at_turn=self._kernel.universe_lib.get_last_state().turn + (input_.expire - 1),
+            expire_at_turn=self._kernel.universe_lib.get_last_state().turn
+            + (input_.expire - 1),
             suggested_by=character.id,
             name=(
                 f"Prendre un cours de {knowledge_description.name} avec"
@@ -256,7 +277,8 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
             delete_after_first_perform=True,
         )
         self._kernel.action_factory.add_pending_action_authorization(
-            pending_action_id=pending_action_document.id, authorized_character_id=with_character.id
+            pending_action_id=pending_action_document.id,
+            authorized_character_id=with_character.id,
         )
 
         return Description(title="Proposition effectué")
@@ -273,7 +295,9 @@ class TeachKnowledgeAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(TeachKnowledgeModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -319,7 +343,9 @@ class TeachKnowledgeAction(WithCharacterAction):
         else:
             title = "Apprentissage effectué"
         self._kernel.character_lib.reduce_action_points(character.id, cost=input_.ap)
-        self._kernel.character_lib.reduce_action_points(with_character.id, cost=input_.ap)
+        self._kernel.character_lib.reduce_action_points(
+            with_character.id, cost=input_.ap
+        )
 
         return Description(title=title)
 

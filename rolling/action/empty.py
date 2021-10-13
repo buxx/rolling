@@ -6,8 +6,9 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CantEmpty, WrongInputError
+from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
 from rolling.server.link import CharacterActionLink
@@ -24,7 +25,9 @@ class EmptyStuffAction(WithStuffAction):
     input_model: typing.Type[EmptyModel] = EmptyModel
     input_model_serializer = serpyco.Serializer(input_model)
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if not stuff.filled_with_resource:
             raise ImpossibleAction("Ne contient rien")
 
@@ -35,7 +38,9 @@ class EmptyStuffAction(WithStuffAction):
             raise WrongInputError("Ne contient rien")
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def get_character_actions(

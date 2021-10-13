@@ -32,7 +32,8 @@ class CorpseMixin:
     zone_row_i = Column(Integer, nullable=True)
     alive = Column(Boolean, default=True)
     type_ = Column(
-        Enum(*[t.value for t in AnimatedCorpseType], name="animated_corpse__type_"), nullable=False
+        Enum(*[t.value for t in AnimatedCorpseType], name="animated_corpse__type_"),
+        nullable=False,
     )
 
 

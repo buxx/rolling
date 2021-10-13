@@ -129,8 +129,12 @@ class ZoneMapSource(MapSource):
 
     def _create_geography(self, raw_source: str) -> ZoneMapGeography:
         # TODO BS 2018-11-03: raise if not found
-        geography_lines = self._get_blocks(raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False)[0]
-        return ZoneMapGeography(self.legend, geography_lines, missing_right_tile_str=" ")
+        geography_lines = self._get_blocks(
+            raw_source, BLOCK_GEOGRAPHY_NAME, strip_=False
+        )[0]
+        return ZoneMapGeography(
+            self.legend, geography_lines, missing_right_tile_str=" "
+        )
 
 
 @dataclasses.dataclass(frozen=True)

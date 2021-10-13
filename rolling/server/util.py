@@ -40,7 +40,9 @@ def register_image(kernel: "Kernel", file_path: str) -> int:
         kernel.server_db_session.commit()
         image_id = image_document.id
 
-    stored_file_path = f"{kernel.game.config.folder_path}/data/images/{image_id}{extension}"
+    stored_file_path = (
+        f"{kernel.game.config.folder_path}/data/images/{image_id}{extension}"
+    )
     os.makedirs(f"{kernel.game.config.folder_path}/data/images/", exist_ok=True)
     if not os.path.isfile(stored_file_path):
         with open(stored_file_path, "wb+") as f:
@@ -86,7 +88,10 @@ def with_multiple_carried_stuffs(
                     form_values_in_query=True,
                     items=[
                         Part(
-                            label="Quantité", name="quantity", type_=Type.NUMBER, default_value="1"
+                            label="Quantité",
+                            name="quantity",
+                            type_=Type.NUMBER,
+                            default_value="1",
                         )
                     ],
                 ),

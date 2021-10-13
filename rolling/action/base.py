@@ -32,7 +32,10 @@ def remove_none_values(dict_: dict) -> dict:
 
 
 def get_character_action_url(
-    character_id: str, action_type: ActionType, action_description_id: str, query_params: dict
+    character_id: str,
+    action_type: ActionType,
+    action_description_id: str,
+    query_params: dict,
 ) -> str:
     query_params = remove_none_values(query_params)
     base_url = CHARACTER_ACTION.format(
@@ -137,11 +140,15 @@ class Action(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         pass
 
     @classmethod
-    def input_model_from_request(cls, parameters: typing.Dict[str, typing.Any]) -> typing.Any:
+    def input_model_from_request(
+        cls, parameters: typing.Dict[str, typing.Any]
+    ) -> typing.Any:
         return cls.input_model_serializer.load(parameters)
 
     @property
@@ -151,7 +158,9 @@ class Action(abc.ABC):
 
 class WithStuffAction(Action):
     @abc.abstractmethod
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         pass
 
     @abc.abstractmethod
@@ -199,7 +208,10 @@ class WithBuildAction(Action):
         pass
 
     def get_cost(
-        self, character: "CharacterModel", build_id: int, input_: typing.Optional[typing.Any] = None
+        self,
+        character: "CharacterModel",
+        build_id: int,
+        input_: typing.Optional[typing.Any] = None,
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
@@ -248,7 +260,9 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(self, character: "CharacterModel", input_: typing.Any) -> None:
+    def check_request_is_possible(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> None:
         pass
 
     @abc.abstractmethod
@@ -284,7 +298,10 @@ class WithCharacterAction(Action):
 
     @abc.abstractmethod
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: typing.Any,
     ) -> None:
         pass
 
@@ -304,6 +321,9 @@ class WithCharacterAction(Action):
 
     @abc.abstractmethod
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: typing.Any,
     ) -> Description:
         pass

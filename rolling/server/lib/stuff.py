@@ -109,7 +109,9 @@ class StuffLib:
             # properties
             filled_value=stuff_generation_properties.meta.get("filled_value")
             or stuff_generation_properties.stuff.filled_value,
-            filled_with_resource=stuff_generation_properties.meta.get("filled_with_resource")
+            filled_with_resource=stuff_generation_properties.meta.get(
+                "filled_with_resource"
+            )
             or stuff_generation_properties.stuff.filled_with_resource,
             filled_unity=stuff_generation_properties.stuff.filled_unity,
             weight=stuff_generation_properties.meta.get("weight")
@@ -210,7 +212,9 @@ class StuffLib:
         return self.stuff_model_from_doc(doc)
 
     def stuff_model_from_doc(self, doc: StuffDocument) -> StuffModel:
-        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(doc.stuff_id)
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            doc.stuff_id
+        )
         return StuffModel(
             id=doc.id,
             name=stuff_properties.name,
@@ -219,7 +223,9 @@ class StuffLib:
             zone_row_i=doc.zone_row_i,
             filled_value=float(doc.filled_value) if doc.filled_value else None,
             filled_unity=Unit(doc.filled_unity) if doc.filled_unity else None,
-            filled_with_resource=doc.filled_with_resource if doc.filled_with_resource else None,
+            filled_with_resource=doc.filled_with_resource
+            if doc.filled_with_resource
+            else None,
             weight=float(doc.weight) if doc.weight else None,
             clutter=float(doc.clutter) if doc.clutter else None,
             clutter_capacity=float(stuff_properties.clutter_capacity)
@@ -276,9 +282,13 @@ class StuffLib:
             .one()
         )
 
-    def set_carried_by(self, stuff_id: int, character_id: str, commit: bool = True) -> None:
+    def set_carried_by(
+        self, stuff_id: int, character_id: str, commit: bool = True
+    ) -> None:
         stuff_doc = self.get_stuff_doc(stuff_id)
-        self.set_carried_by__from_doc(stuff_doc, character_id=character_id, commit=commit)
+        self.set_carried_by__from_doc(
+            stuff_doc, character_id=character_id, commit=commit
+        )
 
     def set_shared_with_affinity(
         self, stuff_id: int, affinity_id: int, commit: bool = True
@@ -306,7 +316,10 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     def get_carrying_actions(
-        self, character: CharacterModel, stuff: StuffModel, for_actions_page: bool = False,
+        self,
+        character: CharacterModel,
+        stuff: StuffModel,
+        for_actions_page: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -351,7 +364,9 @@ class StuffLib:
         ]
 
     # FIXME: exclude crafting stuff
-    def set_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def set_as_used_as_bag(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
             .filter(StuffDocument.id == stuff_id)
@@ -364,7 +379,9 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     # FIXME: exclude crafting stuff
-    def set_as_used_as_weapon(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def set_as_used_as_weapon(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
@@ -379,7 +396,9 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     # FIXME: exclude crafting stuff
-    def set_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def set_as_used_as_armor(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
@@ -393,7 +412,9 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     # FIXME: exclude crafting stuff
-    def set_as_used_as_shield(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def set_as_used_as_shield(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
@@ -406,7 +427,9 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_bag(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def unset_as_used_as_bag(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
             .filter(StuffDocument.id == stuff_id)
@@ -446,7 +469,9 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_armor(self, character_id: str, stuff_id: int, commit: bool = True) -> None:
+    def unset_as_used_as_armor(
+        self, character_id: str, stuff_id: int, commit: bool = True
+    ) -> None:
         stuff_doc: StuffDocument = (
             self._kernel.server_db_session.query(StuffDocument)
             .filter(StuffDocument.id == stuff_id)

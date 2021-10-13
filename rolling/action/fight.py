@@ -30,7 +30,9 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class AttackModel:
     lonely: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
-    as_affinity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    as_affinity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     confirm: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
@@ -39,7 +41,9 @@ class AttackCharacterAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(AttackModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -48,23 +52,40 @@ class AttackCharacterAction(WithCharacterAction):
         pass
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: AttackModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: AttackModel,
     ) -> None:
         # lonely attack when exhausted is not possible
-        if input_.lonely is not None and input_.lonely and not character.is_attack_ready():
-            raise ImpossibleAttack(f"{character.name} n'est pas en mesure de mener cette attaque !")
+        if (
+            input_.lonely is not None
+            and input_.lonely
+            and not character.is_attack_ready()
+        ):
+            raise ImpossibleAttack(
+                f"{character.name} n'est pas en mesure de mener cette attaque !"
+            )
 
         # with_character must not been part of attacking affinity
-        if input_.as_affinity is not None and self._kernel.affinity_lib.character_is_in_affinity(
-            affinity_id=input_.as_affinity, character_id=with_character.id
+        if (
+            input_.as_affinity is not None
+            and self._kernel.affinity_lib.character_is_in_affinity(
+                affinity_id=input_.as_affinity, character_id=with_character.id
+            )
         ):
-            raise ImpossibleAttack(f"Vous ne pouvez pas attaquer un membre d'une même affinités")
+            raise ImpossibleAttack(
+                f"Vous ne pouvez pas attaquer un membre d'une même affinités"
+            )
 
         # It must have ready fighter to fight
-        if input_.as_affinity is not None and not self._kernel.affinity_lib.count_ready_fighter(
-            affinity_id=input_.as_affinity,
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
+        if (
+            input_.as_affinity is not None
+            and not self._kernel.affinity_lib.count_ready_fighter(
+                affinity_id=input_.as_affinity,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
         ):
             raise ImpossibleAttack(f"Personne n'est en état de se battre actuellement")
 
@@ -73,11 +94,15 @@ class AttackCharacterAction(WithCharacterAction):
     ) -> typing.List[CharacterActionLink]:
         return [
             CharacterActionLink(
-                name=f"Attaquer", link=self._get_here_url(character, with_character), cost=0.0
+                name=f"Attaquer",
+                link=self._get_here_url(character, with_character),
+                cost=0.0,
             )
         ]
 
-    def _get_here_url(self, character: "CharacterModel", with_character: "CharacterModel") -> str:
+    def _get_here_url(
+        self, character: "CharacterModel", with_character: "CharacterModel"
+    ) -> str:
         return get_with_character_action_url(
             character_id=character.id,
             with_character_id=with_character.id,
@@ -95,7 +120,9 @@ class AttackCharacterAction(WithCharacterAction):
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character.id, warlord=True
         ):
-            affinity = self._kernel.affinity_lib.get_affinity(affinity_relation.affinity_id)
+            affinity = self._kernel.affinity_lib.get_affinity(
+                affinity_relation.affinity_id
+            )
             parts.append(
                 Part(
                     is_link=True,
@@ -123,10 +150,12 @@ class AttackCharacterAction(WithCharacterAction):
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> Description:
         here_url = self._get_here_url(character, with_character)
-        defense_description: DefendDescription = self._kernel.fight_lib.get_defense_description(
-            origin_target=with_character,
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
+        defense_description: DefendDescription = (
+            self._kernel.fight_lib.get_defense_description(
+                origin_target=with_character,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
         )
         aff = ", ".join([a.name for a in defense_description.affinities])
         self._check_attack_lonely(character, defense_description, aff)
@@ -177,7 +206,9 @@ class AttackCharacterAction(WithCharacterAction):
             )
 
     def _get_attackers_conflicts_str(
-        self, attackers: typing.List[CharacterModel], defense_description: DefendDescription
+        self,
+        attackers: typing.List[CharacterModel],
+        defense_description: DefendDescription,
     ) -> typing.List[str]:
         conflicts_str: typing.List[str] = []
         attacker_fighter: CharacterModel
@@ -189,9 +220,12 @@ class AttackCharacterAction(WithCharacterAction):
                 for relation in self._kernel.affinity_lib.get_with_relations(
                     defense_fighter.id, active=True
                 ):
-                    affinity = self._kernel.affinity_lib.get_affinity(relation.affinity_id)
+                    affinity = self._kernel.affinity_lib.get_affinity(
+                        relation.affinity_id
+                    )
                     if self._kernel.affinity_lib.character_is_in_affinity(
-                        character_id=attacker_fighter.id, affinity_id=relation.affinity_id
+                        character_id=attacker_fighter.id,
+                        affinity_id=relation.affinity_id,
                     ):
                         conflicts_str.append(
                             f"{attacker_fighter.name} à cause de son lien "
@@ -203,16 +237,20 @@ class AttackCharacterAction(WithCharacterAction):
     def _perform_attack_lonely(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> Description:
-        defense_description: DefendDescription = self._kernel.fight_lib.get_defense_description(
-            origin_target=with_character,
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
+        defense_description: DefendDescription = (
+            self._kernel.fight_lib.get_defense_description(
+                origin_target=with_character,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
         )
         aff = ", ".join([a.name for a in defense_description.affinities])
         self._check_attack_lonely(character, defense_description, aff)
 
         story = self._kernel.fight_lib.fight(
-            attack=AttackDescription(all_fighters=[character], ready_fighters=[character]),
+            attack=AttackDescription(
+                all_fighters=[character], ready_fighters=[character]
+            ),
             defense=defense_description,
         )
         parts = [Part(text=p) for p in story]
@@ -258,17 +296,21 @@ class AttackCharacterAction(WithCharacterAction):
         world_row_i: int,
         world_col_i: int,
     ) -> typing.Tuple[AttackDescription, DefendDescription]:
-        defense_description: DefendDescription = self._kernel.fight_lib.get_defense_description(
-            origin_target=target,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-            attacker_affinity=as_affinity,
+        defense_description: DefendDescription = (
+            self._kernel.fight_lib.get_defense_description(
+                origin_target=target,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                attacker_affinity=as_affinity,
+            )
         )
-        attack_description: AttackDescription = self._kernel.fight_lib.get_attack_description(
-            target=defense_description,
-            attacker=as_affinity,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
+        attack_description: AttackDescription = (
+            self._kernel.fight_lib.get_attack_description(
+                target=defense_description,
+                attacker=as_affinity,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+            )
         )
 
         # remove attacker in conflict from defense
@@ -315,7 +357,8 @@ class AttackCharacterAction(WithCharacterAction):
             pass
 
         conflicts = self._get_attackers_conflicts_str(
-            attackers=attack_description.all_fighters, defense_description=defense_description
+            attackers=attack_description.all_fighters,
+            defense_description=defense_description,
         )
         if conflicts:
             return Description(
@@ -333,7 +376,10 @@ class AttackCharacterAction(WithCharacterAction):
             )
 
     def _get_attack_as_affinity_description(
-        self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        as_affinity_id: int,
     ) -> Description:
         here_url = self._get_here_url(character, with_character)
         as_affinity = self._kernel.affinity_lib.get_affinity(as_affinity_id)
@@ -386,7 +432,10 @@ class AttackCharacterAction(WithCharacterAction):
         )
 
     def _perform_attack_as_affinity(
-        self, character: "CharacterModel", with_character: "CharacterModel", as_affinity_id: int
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        as_affinity_id: int,
     ) -> Description:
         as_affinity = self._kernel.affinity_lib.get_affinity(as_affinity_id)
         title = f"Attaquer {with_character.name} en tant que {as_affinity.name}"
@@ -408,22 +457,32 @@ class AttackCharacterAction(WithCharacterAction):
         if resp:
             return resp
 
-        story = self._kernel.fight_lib.fight(attack=attack_description, defense=defense_description)
+        story = self._kernel.fight_lib.fight(
+            attack=attack_description, defense=defense_description
+        )
         parts = [Part(text=p) for p in story]
 
         self._proceed_events(
             attacker_title="Vous avez participé à une attaque",
             attacked_title="Vous avez subit une attaque",
-            characters=attack_description.all_fighters + defense_description.all_fighters,
+            characters=attack_description.all_fighters
+            + defense_description.all_fighters,
             author=character,
             story=story,
         )
-        self._kill_deads(attack_description.all_fighters + defense_description.all_fighters)
+        self._kill_deads(
+            attack_description.all_fighters + defense_description.all_fighters
+        )
 
-        return Description(title=title, items=parts, footer_with_character_id=with_character.id)
+        return Description(
+            title=title, items=parts, footer_with_character_id=with_character.id
+        )
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: AttackModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: AttackModel,
     ) -> Description:
         if input_.lonely is None and input_.as_affinity is None:
             return self._get_root_description(character, with_character)

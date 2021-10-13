@@ -38,12 +38,16 @@ class ErrorBuilder(SerpycoDefaultErrorBuilder):
             )
         elif isinstance(exception, ValidationError):
             server_logger.exception(exception)
-            return DefaultErrorSchema(message=(f"Il y a une erreur de saisie: {exception.args[0]}"))
+            return DefaultErrorSchema(
+                message=(f"Il y a une erreur de saisie: {exception.args[0]}")
+            )
 
         server_logger.exception(exception)
         return DefaultErrorSchema(message="Une erreur serveur est survenue")
 
-    def build_from_validation_error(self, error: ProcessValidationError) -> DefaultErrorSchema:
+    def build_from_validation_error(
+        self, error: ProcessValidationError
+    ) -> DefaultErrorSchema:
         server_logger.debug(str(error))
         err = super().build_from_validation_error(error)
         return err
@@ -76,7 +80,9 @@ def run(args: argparse.Namespace) -> None:
 
     # Configure hapic
     server_logger.info("Configure web api")
-    context = AiohttpContext(app, debug=args.debug, default_error_builder=ErrorBuilder())
+    context = AiohttpContext(
+        app, debug=args.debug, default_error_builder=ErrorBuilder()
+    )
     context.handle_exception(HTTPNotFound, http_code=404)
     context.handle_exception(UserDisplayError, http_code=400)
     context.handle_exception(Exception, http_code=500)
@@ -90,7 +96,8 @@ def run(args: argparse.Namespace) -> None:
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
         sentry_sdk.init(
-            dsn=args.sentry, integrations=[AioHttpIntegration(), SqlalchemyIntegration()]
+            dsn=args.sentry,
+            integrations=[AioHttpIntegration(), SqlalchemyIntegration()],
         )
 
     kernel.init()
@@ -101,17 +108,30 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
-    parser.add_argument("world_map_source", type=str, help="Raw world source map file path")
-    parser.add_argument("tile_maps_folder", type=str, help="Tile maps sources files folder path")
-    parser.add_argument("game_config_folder", type=str, help="Directory path with game configs")
     parser.add_argument(
-        "server_config_file_path", type=str, help="server config file path", default="./server.ini"
+        "world_map_source", type=str, help="Raw world source map file path"
+    )
+    parser.add_argument(
+        "tile_maps_folder", type=str, help="Tile maps sources files folder path"
+    )
+    parser.add_argument(
+        "game_config_folder", type=str, help="Directory path with game configs"
+    )
+    parser.add_argument(
+        "server_config_file_path",
+        type=str,
+        help="server config file path",
+        default="./server.ini",
     )
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--sentry", type=str, help="Sentry address to use", default=None)
-    parser.add_argument("--server-db-path", type=str, help="path of server.db", default="server.db")
+    parser.add_argument(
+        "--sentry", type=str, help="Sentry address to use", default=None
+    )
+    parser.add_argument(
+        "--server-db-path", type=str, help="path of server.db", default="server.db"
+    )
     parser.add_argument("--admin-login", type=str, default="adminRoll")
     parser.add_argument("--admin-password", type=str, default="RollNRoll42")
     parser.add_argument("--disable-auth", action="store_true", default=False)

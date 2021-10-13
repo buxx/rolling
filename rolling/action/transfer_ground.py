@@ -60,8 +60,13 @@ class TransfertGroundByUrl(BiDirectionalTransferByUrl):
         return stuff_lines
 
     def _get_right_stuffs(self) -> typing.List[StuffLine]:
-        scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
-            x=self._character.zone_row_i, y=self._character.zone_col_i, exclude_on=False, distance=1
+        scan_coordinates: typing.List[
+            typing.Tuple[int, int]
+        ] = get_on_and_around_coordinates(
+            x=self._character.zone_row_i,
+            y=self._character.zone_col_i,
+            exclude_on=False,
+            distance=1,
         )
         stuff_lines: typing.List[StuffLine] = []
 
@@ -85,8 +90,13 @@ class TransfertGroundByUrl(BiDirectionalTransferByUrl):
         return resource_lines
 
     def _get_right_resources(self) -> typing.List[ResourceLine]:
-        scan_coordinates: typing.List[typing.Tuple[int, int]] = get_on_and_around_coordinates(
-            x=self._character.zone_row_i, y=self._character.zone_col_i, exclude_on=False, distance=1
+        scan_coordinates: typing.List[
+            typing.Tuple[int, int]
+        ] = get_on_and_around_coordinates(
+            x=self._character.zone_row_i,
+            y=self._character.zone_col_i,
+            exclude_on=False,
+            distance=1,
         )
         resource_lines: typing.List[ResourceLine] = []
 
@@ -97,7 +107,9 @@ class TransfertGroundByUrl(BiDirectionalTransferByUrl):
                 zone_row_i=around_row_i,
                 zone_col_i=around_col_i,
             ):
-                resource_lines.append(ResourceLine(resource=carried_resource, movable=True))
+                resource_lines.append(
+                    ResourceLine(resource=carried_resource, movable=True)
+                )
 
         return resource_lines
 
@@ -127,7 +139,10 @@ class TransfertGroundByUrl(BiDirectionalTransferByUrl):
             stuff_id=stuff_id,
             action_type=ActionType.DROP_STUFF,
             action_description_id="DROP_STUFF",
-            query_params={"quantity": stuff_quantity, "then_redirect_url": self._get_here_url()},
+            query_params={
+                "quantity": stuff_quantity,
+                "then_redirect_url": self._get_here_url(),
+            },
         )
 
     def _get_move_stuff_left_url(
@@ -175,7 +190,10 @@ class TransfertGroundByUrl(BiDirectionalTransferByUrl):
             resource_id=resource_id,
             action_type=ActionType.TAKE_RESOURCE,
             action_description_id="TAKE_RESOURCE",
-            query_params={"quantity": resource_quantity, "then_redirect_url": self._get_here_url()},
+            query_params={
+                "quantity": resource_quantity,
+                "then_redirect_url": self._get_here_url(),
+            },
         )
 
 
@@ -189,7 +207,9 @@ class TransfertGroundCharacterAction(CharacterAction):
     input_model_serializer = serpyco.Serializer(TransfertGroundCharacterModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     @classmethod
@@ -199,7 +219,9 @@ class TransfertGroundCharacterAction(CharacterAction):
         partial_quantities: typing.Optional[typing.Dict[str, float]] = {}
         for parameter_name, parameter_value in parameters.items():
             if parameter_name.endswith("_partial_quantity"):
-                partial_quantities[parameter_name] = str_quantity_to_float(parameter_value)
+                partial_quantities[parameter_name] = str_quantity_to_float(
+                    parameter_value
+                )
         return TransfertGroundCharacterModel(
             partial_quantities=partial_quantities,
         )

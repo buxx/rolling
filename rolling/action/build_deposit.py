@@ -46,7 +46,9 @@ class DepositStuffOrResources(TransferStuffOrResources):
         return self.__kernel
 
     def _get_available_stuffs(self) -> typing.List[StuffModel]:
-        if self._kernel.game.config.builds[self._to_build.build_id].allow_deposit_limited:
+        if self._kernel.game.config.builds[
+            self._to_build.build_id
+        ].allow_deposit_limited:
             return []
 
         return self._kernel.stuff_lib.get_carried_by(
@@ -54,7 +56,9 @@ class DepositStuffOrResources(TransferStuffOrResources):
         )
 
     def _get_available_resources(self) -> typing.List[CarriedResourceDescriptionModel]:
-        carried_resources = self._kernel.resource_lib.get_carried_by(self._from_character.id)
+        carried_resources = self._kernel.resource_lib.get_carried_by(
+            self._from_character.id
+        )
 
         build_description = self._kernel.game.config.builds[self._to_build.build_id]
         if build_description.allow_deposit_limited:
@@ -78,13 +82,17 @@ class DepositStuffOrResources(TransferStuffOrResources):
             build_id=self._to_build.id,
             action_type=ActionType.DEPOSIT_ON_BUILD,
             query_params=DepositToBuildAction.input_model_serializer.dump(
-                DepositToModel(deposit_stuff_id=stuff_id, deposit_resource_id=resource_id)
+                DepositToModel(
+                    deposit_stuff_id=stuff_id, deposit_resource_id=resource_id
+                )
             ),
             action_description_id=self._description_id,
         )
 
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         build_name = self._kernel.game.config.builds[self._to_build.build_id].name
 
@@ -98,7 +106,9 @@ class DepositStuffOrResources(TransferStuffOrResources):
 
         return f"Déposer sur {build_name}"
 
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         return None
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
@@ -118,12 +128,19 @@ class DepositStuffOrResources(TransferStuffOrResources):
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.place_in_build(stuff_id, self._to_build.id)
 
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
-        return self._kernel.resource_lib.get_one_carried_by(self._from_character.id, resource_id)
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
+        return self._kernel.resource_lib.get_one_carried_by(
+            self._from_character.id, resource_id
+        )
 
     def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
         build_description = self._kernel.game.config.builds[self._to_build.build_id]
-        if not build_description.allow_deposit or build_description.allow_deposit_limited:
+        if (
+            not build_description.allow_deposit
+            or build_description.allow_deposit_limited
+        ):
             raise ImpossibleAction("Vous ne pouvez pas déposer ça ici")
 
         try:
@@ -141,18 +158,24 @@ class DepositStuffOrResources(TransferStuffOrResources):
         if not build_description.allow_deposit or (
             build_description.allow_deposit_limited
             and resource_id
-            not in self._kernel.game.config.builds[self._to_build.build_id].allowed_resource_ids
+            not in self._kernel.game.config.builds[
+                self._to_build.build_id
+            ].allowed_resource_ids
         ):
             raise ImpossibleAction("Vous ne pouvez pas déposer de cela ici")
 
         if not self._kernel.resource_lib.have_resource(
-            character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
+            character_id=self._from_character.id,
+            resource_id=resource_id,
+            quantity=quantity,
         ):
             raise ImpossibleAction(f"{self._from_character.name} n'en a pas assez")
 
     def _transfer_resource(self, resource_id: str, quantity: float) -> None:
         self._kernel.resource_lib.reduce_carried_by(
-            character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
+            character_id=self._from_character.id,
+            resource_id=resource_id,
+            quantity=quantity,
         )
         self._kernel.resource_lib.add_resource_to(
             build_id=self._to_build.id, resource_id=resource_id, quantity=quantity
@@ -161,7 +184,9 @@ class DepositStuffOrResources(TransferStuffOrResources):
 
 @dataclasses.dataclass
 class DepositToModel:
-    deposit_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    deposit_stuff_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     deposit_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
@@ -176,7 +201,9 @@ class DepositToBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(DepositToModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -197,7 +224,8 @@ class DepositToBuildAction(WithBuildAction):
                 character_id=character.id, resource_id=input_.deposit_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.deposit_resource_quantity, carried_resource=carried_resource
+                user_input=input_.deposit_resource_quantity,
+                carried_resource=carried_resource,
             )
             DepositStuffOrResources(
                 self._kernel,
@@ -205,7 +233,8 @@ class DepositToBuildAction(WithBuildAction):
                 to_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_resource(
-                resource_id=input_.deposit_resource_id, quantity=user_input_context.real_quantity
+                resource_id=input_.deposit_resource_id,
+                quantity=user_input_context.real_quantity,
             )
 
         if input_.deposit_stuff_id and input_.deposit_stuff_quantity:
@@ -221,7 +250,9 @@ class DepositToBuildAction(WithBuildAction):
     def get_character_actions(
         self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
-        return [CharacterActionLink(name="Déposer", link=self._get_url(character, build_id))]
+        return [
+            CharacterActionLink(name="Déposer", link=self._get_url(character, build_id))
+        ]
 
     def _get_url(
         self,

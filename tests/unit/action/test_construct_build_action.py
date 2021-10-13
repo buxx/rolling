@@ -135,7 +135,9 @@ class TestConstructBuildAction:
         action.perform(
             xena,
             build.id,
-            input_=ConstructBuildModel(cost_to_spent=1.1),  # no resource so 50% progress possible
+            input_=ConstructBuildModel(
+                cost_to_spent=1.1
+            ),  # no resource so 50% progress possible
         )
 
         xena_ = kernel.character_lib.get(xena.id)
@@ -173,7 +175,9 @@ class TestConstructBuildAction:
         action.perform(
             xena,
             build.id,
-            input_=ConstructBuildModel(cost_to_spent=1.0),  # no resource so 50% progress possible
+            input_=ConstructBuildModel(
+                cost_to_spent=1.0
+            ),  # no resource so 50% progress possible
         )
 
         xena_ = kernel.character_lib.get(xena.id)

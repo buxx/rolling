@@ -7,7 +7,8 @@ from rolling.action.knowledge import LearnKnowledgeAction
 from rolling.action.knowledge import LearnKnowledgeModel
 from rolling.action.knowledge import ProposeTeachKnowledgeAction
 from rolling.action.knowledge import ProposeTeachKnowledgeModel
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
@@ -48,10 +49,13 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 0
 
-        descr = learn_action.perform(franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith"))
+        descr = learn_action.perform(
+            franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
+        )
         assert descr.title == "Apprendre Forgeron"
         assert (
-            descr.items[0].text == "Il reste 10 points d'actions à dépenser pour apprendre Forgeron"
+            descr.items[0].text
+            == "Il reste 10 points d'actions à dépenser pour apprendre Forgeron"
         )
         assert descr.items[1].is_form
         assert descr.items[1].items[0].name == "ap"
@@ -65,10 +69,13 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 5
 
-        descr = learn_action.perform(franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith"))
+        descr = learn_action.perform(
+            franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
+        )
         assert descr.title == "Apprendre Forgeron"
         assert (
-            descr.items[0].text == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
+            descr.items[0].text
+            == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
         )
 
         descr = learn_action.perform(
@@ -144,7 +151,9 @@ class TestLearnKnowledgeAction:
         description = propose_teach_action.perform(
             xena,
             arthur,
-            input_=ProposeTeachKnowledgeModel(knowledge_id="blacksmith", ap=5, expire=2),
+            input_=ProposeTeachKnowledgeModel(
+                knowledge_id="blacksmith", ap=5, expire=2
+            ),
         )
         assert description.title == "Proposition effectué"
 
@@ -166,7 +175,10 @@ class TestLearnKnowledgeAction:
         item_labels = [p.label for p in descr.items]
 
         assert f"/_describe/character/{arthur.id}/pending_actions/1" in item_urls
-        assert "Prendre un cours de Forgeron avec xena pendant 5 points d'actions" in item_labels
+        assert (
+            "Prendre un cours de Forgeron avec xena pendant 5 points d'actions"
+            in item_labels
+        )
 
         resp = await web.post(f"/_describe/character/{arthur.id}/pending_actions/1")
         assert 200 == resp.status
@@ -175,7 +187,9 @@ class TestLearnKnowledgeAction:
 
         assert f"/_describe/character/{arthur.id}/pending_actions/1?do=1" in item_urls
 
-        resp = await web.post(f"/_describe/character/{arthur.id}/pending_actions/1?do=1")
+        resp = await web.post(
+            f"/_describe/character/{arthur.id}/pending_actions/1?do=1"
+        )
         assert 200 == resp.status
 
         arthur = kernel.character_lib.get(arthur.id, compute_pending_actions=True)

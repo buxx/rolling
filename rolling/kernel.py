@@ -114,7 +114,9 @@ class Kernel:
 
         # Generate tile maps if tile map folder given
         if zone_maps_folder is not None:
-            self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
+            self._tile_maps_by_position: typing.Dict[
+                typing.Tuple[int, int], ZoneMap
+            ] = {}
 
             for zone_file_path in glob.glob(os.path.join(zone_maps_folder, "*.txt")):
                 self.load_zone_from_file_path(zone_file_path)
@@ -146,7 +148,9 @@ class Kernel:
 
     def load_zone_from_file_path(self, zone_file_path: str) -> None:
         tile_map_source_file_name = ntpath.basename(zone_file_path)
-        row_i, col_i = map(int, tile_map_source_file_name.replace(".txt", "").split("-"))
+        row_i, col_i = map(
+            int, tile_map_source_file_name.replace(".txt", "").split("-")
+        )
         kernel_logger.debug('Load tile map "{}"'.format(tile_map_source_file_name))
 
         with open(zone_file_path, "r") as f:
@@ -291,7 +295,9 @@ class Kernel:
     @property
     def world_map_source(self) -> WorldMapSource:
         if self._world_map_source is None:
-            raise ComponentNotPrepared("self._world_map_source must be prepared before usage")
+            raise ComponentNotPrepared(
+                "self._world_map_source must be prepared before usage"
+            )
 
         return self._world_map_source
 
@@ -303,7 +309,9 @@ class Kernel:
     @property
     def tile_maps_by_position(self) -> typing.Dict[typing.Tuple[int, int], ZoneMap]:
         if self._world_map_source is None:
-            raise ComponentNotPrepared("self._tile_maps_by_position must be prepared before usage")
+            raise ComponentNotPrepared(
+                "self._tile_maps_by_position must be prepared before usage"
+            )
 
         return self._tile_maps_by_position
 
@@ -395,7 +403,9 @@ class Kernel:
                 UniverseStateDocument.turn.desc()
             ).limit(1).one()
         except NoResultFound:
-            self.server_db_session.add(UniverseStateDocument(turned_at=datetime.datetime.utcnow()))
+            self.server_db_session.add(
+                UniverseStateDocument(turned_at=datetime.datetime.utcnow())
+            )
             self.server_db_session.commit()
 
         # Ensure all skills are present in db for each character
@@ -404,7 +414,9 @@ class Kernel:
                 self.character_lib.ensure_skills_for_character(row[0])
         self.server_db_session.commit()
 
-    async def send_to_zone_sockets(self, row_i: int, col_i: int, event: WebSocketEvent) -> None:
+    async def send_to_zone_sockets(
+        self, row_i: int, col_i: int, event: WebSocketEvent
+    ) -> None:
         await self.server_zone_events_manager.send_to_sockets(event, row_i, col_i)
 
     def on_sighup_signal(self, signum, frame) -> None:
@@ -427,9 +439,9 @@ class Kernel:
         for_build_id: str,
     ) -> bool:
         build_description = self.game.config.builds[for_build_id]
-        tile_type: typing.Type[ZoneMapTileType] = self.get_tile_map(world_row_i, world_col_i).source.geography.get_tile_type(
-            zone_row_i, zone_col_i
-        )
+        tile_type: typing.Type[ZoneMapTileType] = self.get_tile_map(
+            world_row_i, world_col_i
+        ).source.geography.get_tile_type(zone_row_i, zone_col_i)
         if not tile_type.permit_build:
             return False
 
@@ -458,7 +470,9 @@ class Kernel:
         self, world_row_i: int, world_col_i: int
     ) -> typing.List[typing.Tuple[int, int]]:
         available_coordinates: typing.List[typing.Tuple[int, int]] = []
-        build_docs = self.build_lib.get_zone_build(world_row_i=world_row_i, world_col_i=world_col_i)
+        build_docs = self.build_lib.get_zone_build(
+            world_row_i=world_row_i, world_col_i=world_col_i
+        )
         not_traversable_by_builds: typing.List[typing.Tuple[int, int]] = []
         for build_doc in build_docs:
             build_description = self.game.config.builds[build_doc.build_id]
@@ -466,14 +480,20 @@ class Kernel:
             if not build_description.traversable.get(
                 TransportType.WALKING.value, True
             ) or not build_description.traversable.get(TransportType.WALKING, True):
-                not_traversable_by_builds.append((build_doc.zone_row_i, build_doc.zone_col_i))
+                not_traversable_by_builds.append(
+                    (build_doc.zone_row_i, build_doc.zone_col_i)
+                )
 
-        geography = self.tile_maps_by_position[world_row_i, world_col_i].source.geography
+        geography = self.tile_maps_by_position[
+            world_row_i, world_col_i
+        ].source.geography
         for row_i, row in enumerate(geography.rows):
             for col_i, map_tile_type in enumerate(row):
                 # TODO: traversable to update here
                 if (
-                    traversable_properties[map_tile_type].get(TransportType.WALKING.value)
+                    traversable_properties[map_tile_type].get(
+                        TransportType.WALKING.value
+                    )
                     and (row_i, col_i) not in not_traversable_by_builds
                 ):
                     available_coordinates.append((row_i, col_i))

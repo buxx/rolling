@@ -33,7 +33,9 @@ class FollowCharacterAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(FollowModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -42,12 +44,17 @@ class FollowCharacterAction(WithCharacterAction):
         if not (
             character.world_row_i == with_character.world_row_i
             and character.world_col_i == with_character.world_col_i
-            and not self._kernel.character_lib.is_following(character.id, with_character.id)
+            and not self._kernel.character_lib.is_following(
+                character.id, with_character.id
+            )
         ):
             raise ImpossibleAction(f"{with_character.name} ne se trouve pas ici")
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: FollowModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: FollowModel,
     ) -> None:
         self.check_is_possible(character, with_character)
 
@@ -70,16 +77,22 @@ class FollowCharacterAction(WithCharacterAction):
     ) -> typing.List[CharacterActionLink]:
         return [
             CharacterActionLink(
-                name=f"Suivre {with_character.name}", link=self._get_url(character, with_character)
+                name=f"Suivre {with_character.name}",
+                link=self._get_url(character, with_character),
             ),
             CharacterActionLink(
                 name=f"Suivre {with_character.name} discrètement",
-                link=self._get_url(character, with_character, input_=FollowModel(discreetly=1)),
+                link=self._get_url(
+                    character, with_character, input_=FollowModel(discreetly=1)
+                ),
             ),
         ]
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: FollowModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: FollowModel,
     ) -> Description:
         self._kernel.character_lib.set_following(
             character.id, with_character.id, discreetly=input_.discreetly
@@ -99,7 +112,9 @@ class StopFollowCharacterAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(StopFollowModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
@@ -109,7 +124,10 @@ class StopFollowCharacterAction(WithCharacterAction):
             raise ImpossibleAction(f"{with_character.name} n'est pass uivis'")
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: FollowModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: FollowModel,
     ) -> None:
         self.check_is_possible(character, with_character)
 
@@ -147,7 +165,10 @@ class StopFollowCharacterAction(WithCharacterAction):
         ]
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: FollowModel
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: FollowModel,
     ) -> Description:
         self._kernel.character_lib.set_not_following(character.id, with_character.id)
 

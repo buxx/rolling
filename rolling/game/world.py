@@ -6,7 +6,8 @@ from rolling.map.source import ZoneMap
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.world import World
-from rolling.model.zone import ZoneMapTileProduction, ZoneProperties
+from rolling.model.zone import ZoneMapTileProduction
+from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneTileProperties
 from rolling.util import get_on_and_around_coordinates
 
@@ -39,7 +40,10 @@ class ZoneState:
         return stuff_id in self._properties.stuff_ids
 
     def is_there_resource(
-        self, resource_id: str, check_from_absolute: bool = True, check_from_tiles: bool = True
+        self,
+        resource_id: str,
+        check_from_absolute: bool = True,
+        check_from_tiles: bool = True,
     ) -> bool:
         assert check_from_absolute or check_from_tiles
 
@@ -48,10 +52,16 @@ class ZoneState:
             return resource_id in self._properties.resource_ids
 
         if check_from_tiles:
-            for zone_tile_type in self._zone_map.source.geography.tile_type_positions.keys():
-                tiles_properties = self._kernel.game.world_manager.world.tiles_properties
+            for (
+                zone_tile_type
+            ) in self._zone_map.source.geography.tile_type_positions.keys():
+                tiles_properties = (
+                    self._kernel.game.world_manager.world.tiles_properties
+                )
                 try:
-                    zone_tile_properties: ZoneTileProperties = tiles_properties[zone_tile_type]
+                    zone_tile_properties: ZoneTileProperties = tiles_properties[
+                        zone_tile_type
+                    ]
                 except KeyError:
                     continue
 
@@ -62,7 +72,9 @@ class ZoneState:
 
         raise Exception("should not be here")
 
-    def reduce_resource(self, resource_id: str, quantity: float, commit: bool = True) -> None:
+    def reduce_resource(
+        self, resource_id: str, quantity: float, commit: bool = True
+    ) -> None:
         pass  # TODO: code resource stock
 
     def reduce_resource_from_tile(
@@ -91,7 +103,9 @@ class WorldManager:
     def get_zone_properties_by_coordinates(
         self, world_row_i: int, world_col_i: int
     ) -> ZoneProperties:
-        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][
+            world_col_i
+        ]
         zone_type = typing.cast(ZoneMapTileType, zone_type)
         return self.get_zone_properties(zone_type)
 
@@ -127,7 +141,10 @@ class WorldManager:
         zone_map = self._kernel.tile_maps_by_position[(world_row_i, world_col_i)]
 
         try:
-            zone_tile_type = typing.cast(typing.Type[ZoneMapTileType], zone_map.source.geography.rows[zone_row_i][zone_col_i])
+            zone_tile_type = typing.cast(
+                typing.Type[ZoneMapTileType],
+                zone_map.source.geography.rows[zone_row_i][zone_col_i],
+            )
         except IndexError:
             return []
 
@@ -170,7 +187,9 @@ class WorldManager:
         return list(set(productions))
 
     def get_zone_state(self, world_row_i: int, world_col_i: int) -> ZoneState:
-        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][
+            world_col_i
+        ]
         zone_type = typing.cast(ZoneMapTileType, zone_type)
         zone_properties = self.get_zone_properties(zone_type)
         zone_map = self._kernel.tile_maps_by_position[(world_row_i, world_col_i)]
@@ -197,9 +216,11 @@ class WorldManager:
 
         if stuff_id is not None:
             clutter_ref = 1.0
-            clutter_to_place = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                stuff_id
-            ).clutter
+            clutter_to_place = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff_id
+                ).clutter
+            )
             clutter_in_one_tile = True
         else:
             clutter_ref = self._kernel.game.config.resources[resource_id].clutter
@@ -207,7 +228,9 @@ class WorldManager:
             clutter_in_one_tile = False
 
         # FIXME BS NOW: get_traversable_coordinates return an enormous list Oo
-        zone_traversable_tiles = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        zone_traversable_tiles = self._kernel.get_traversable_coordinates(
+            world_row_i, world_col_i
+        )
         available_places: typing.List[typing.Tuple[typing.Tuple[int, int], float]] = []
         place_visited: typing.Set[typing.Tuple[int, int]] = set()
 
@@ -230,7 +253,12 @@ class WorldManager:
                                 clutter_to_place or resource_quantity,
                             )
                         ]
-                    return [((start_from_zone_row_i, start_from_zone_col_i), resource_quantity)]
+                    return [
+                        (
+                            (start_from_zone_row_i, start_from_zone_col_i),
+                            resource_quantity,
+                        )
+                    ]
                 raise IndexError("No place where drop !")
 
             if (test_tile_row_i, test_tile_col_i) in place_visited:
@@ -245,7 +273,9 @@ class WorldManager:
             # Extend list of tiles to explore with around tiles (to keep searching if needed)
             tiles_to_explore.extend(
                 set(
-                    get_on_and_around_coordinates(test_tile_row_i, test_tile_col_i, exclude_on=True)
+                    get_on_and_around_coordinates(
+                        test_tile_row_i, test_tile_col_i, exclude_on=True
+                    )
                 )
                 - place_visited
             )
@@ -260,8 +290,10 @@ class WorldManager:
                 zone_row_i=test_tile_row_i,
                 zone_col_i=test_tile_col_i,
             ):
-                stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                    tile_stuff.stuff_id
+                stuff_properties = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        tile_stuff.stuff_id
+                    )
                 )
                 tile_used_clutter += stuff_properties.clutter
 
@@ -271,8 +303,12 @@ class WorldManager:
                 zone_row_i=test_tile_row_i,
                 zone_col_i=test_tile_col_i,
             ):
-                resource_description = self._kernel.game.config.resources[carried_resource.id]
-                tile_used_clutter += resource_description.clutter * carried_resource.quantity
+                resource_description = self._kernel.game.config.resources[
+                    carried_resource.id
+                ]
+                tile_used_clutter += (
+                    resource_description.clutter * carried_resource.quantity
+                )
 
             # Continue with this tile only if there is enough clutter here
             tile_left_clutter = max(

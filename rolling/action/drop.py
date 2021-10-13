@@ -12,8 +12,9 @@ from rolling.action.base import WithResourceAction
 from rolling.action.base import WithStuffAction
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
 from rolling.exception import NoCarriedResource
+from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import with_multiple_carried_stuffs
@@ -35,7 +36,9 @@ class DropResourceModel:
 
 @dataclasses.dataclass
 class DropStuffModel:
-    quantity: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     then_redirect_url: typing.Optional[str] = None
 
 
@@ -44,7 +47,9 @@ class DropStuffAction(WithStuffAction):
     input_model: typing.Type[DropStuffModel] = DropStuffModel
     input_model_serializer = serpyco.Serializer(DropStuffModel)
 
-    def check_is_possible(self, character: "CharacterModel", stuff: "StuffModel") -> None:
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
         if stuff.carried_by != character.id:
             raise ImpossibleAction("Vous ne possedez pas cet objet")
 
@@ -54,7 +59,9 @@ class DropStuffAction(WithStuffAction):
         self.check_is_possible(character, stuff)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def get_character_actions(
@@ -82,13 +89,15 @@ class DropStuffAction(WithStuffAction):
         def do_for_one(
             character_: "CharacterModel", stuff_: "StuffModel", input__: DropStuffModel
         ) -> typing.List[Part]:
-            places_to_drop = self._kernel.game.world_manager.find_available_place_where_drop(
-                stuff_id=stuff_.stuff_id,
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                start_from_zone_row_i=character.zone_row_i,
-                start_from_zone_col_i=character.zone_col_i,
-                allow_fallback_on_start_coordinates=True,
+            places_to_drop = (
+                self._kernel.game.world_manager.find_available_place_where_drop(
+                    stuff_id=stuff_.stuff_id,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    start_from_zone_row_i=character.zone_row_i,
+                    start_from_zone_col_i=character.zone_col_i,
+                    allow_fallback_on_start_coordinates=True,
+                )
             )
 
             for place, _ in places_to_drop:
@@ -156,7 +165,9 @@ class DropResourceAction(WithResourceAction):
                 raise WrongInputError("Vous ne possedez pas assez de cette resource")
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def get_character_actions(
@@ -222,14 +233,16 @@ class DropResourceAction(WithResourceAction):
         user_input_context = InputQuantityContext.from_carried_resource(
             user_input=input_.quantity, carried_resource=carried_resource
         )
-        places_to_drop = self._kernel.game.world_manager.find_available_place_where_drop(
-            resource_id=resource_id,
-            resource_quantity=user_input_context.real_quantity,
-            world_row_i=character.world_row_i,
-            world_col_i=character.world_col_i,
-            start_from_zone_row_i=character.zone_row_i,
-            start_from_zone_col_i=character.zone_col_i,
-            allow_fallback_on_start_coordinates=True,
+        places_to_drop = (
+            self._kernel.game.world_manager.find_available_place_where_drop(
+                resource_id=resource_id,
+                resource_quantity=user_input_context.real_quantity,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                start_from_zone_row_i=character.zone_row_i,
+                start_from_zone_col_i=character.zone_col_i,
+                allow_fallback_on_start_coordinates=True,
+            )
         )
 
         for place, quantity in places_to_drop:

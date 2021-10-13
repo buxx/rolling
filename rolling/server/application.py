@@ -1,16 +1,16 @@
 # coding: utf-8
-import json
-
-import serpyco
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_middlewares import middleware
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 import base64
+import json
+import serpyco
 
 from guilang.description import Description
-from rolling.exception import AccountNotFound, ComponentNotPrepared
+from rolling.exception import AccountNotFound
+from rolling.exception import ComponentNotPrepared
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.server.controller.account import AccountController
@@ -38,7 +38,10 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
     async def auth(request: Request, handler):
         request_disable_auth = False
         try:
-            request_disable_auth = request.headers[HEADER_NAME__DISABLE_AUTH_TOKEN] == kernel.server_config.disable_auth_token
+            request_disable_auth = (
+                request.headers[HEADER_NAME__DISABLE_AUTH_TOKEN]
+                == kernel.server_config.disable_auth_token
+            )
         except KeyError:
             pass
 
@@ -66,12 +69,16 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         ):
             try:
                 login, password = (
-                    base64.b64decode(request.headers["Authorization"][6:]).decode().split(":")
+                    base64.b64decode(request.headers["Authorization"][6:])
+                    .decode()
+                    .split(":")
                 )
             except (KeyError, IndexError, ValueError):
                 return Response(
                     status=401,
-                    headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'},
+                    headers={
+                        "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
+                    },
                 )
             try:
                 account = kernel.account_lib.get_account_for_credentials(
@@ -80,7 +87,9 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             except AccountNotFound:
                 return Response(
                     status=401,
-                    headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'},
+                    headers={
+                        "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
+                    },
                 )
 
             request["account_id"] = account.id
@@ -97,7 +106,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
 
         response = await handler(request)
 
-        if 'application/json' != response.headers.get("Content-Type"):
+        if "application/json" != response.headers.get("Content-Type"):
             return response
 
         body_as_json = json.loads(response.body._value)
@@ -113,7 +122,11 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         character = character_lib.get(account_character_id)
         description.character_ap = str(round(character.action_points, 1))
 
-        return Response(body=description_serializer.dump_json(description), status=response.status, content_type='application/json')
+        return Response(
+            body=description_serializer.dump_json(description),
+            status=response.status,
+            content_type="application/json",
+        )
 
     @middleware
     async def rollback_session(request: Request, handler):

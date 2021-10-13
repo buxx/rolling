@@ -18,9 +18,10 @@ from rolling.model.character import CharacterModel
 from rolling.model.meta import TransportType
 from rolling.model.resource import OnGroundResourceModel
 from rolling.model.stuff import StuffModel
-from rolling.model.zone import GetZoneCharacterPathModel, GetZoneQueryModel
+from rolling.model.zone import GetZoneCharacterPathModel
 from rolling.model.zone import GetZoneMessageQueryModel
 from rolling.model.zone import GetZonePathModel
+from rolling.model.zone import GetZoneQueryModel
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 from rolling.server.controller.base import BaseController
@@ -54,7 +55,9 @@ class ZoneController(BaseController):
     @hapic.input_path(GetZonePathModel)
     @hapic.output_body(ZoneMapModel)
     async def get_zone(self, request: Request, hapic_data: HapicData) -> ZoneMapModel:
-        return self._tile_lib.get_zone(row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i)
+        return self._tile_lib.get_zone(
+            row_i=hapic_data.path.row_i, col_i=hapic_data.path.col_i
+        )
 
     async def events(self, request: Request):
         # TODO BS 2019-01-23: Establish zone websocket must require character in zone
@@ -82,21 +85,29 @@ class ZoneController(BaseController):
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
     @hapic.output_body(StuffModel, processor=RollingSerpycoProcessor(many=True))
-    async def get_stuff(self, request: Request, hapic_data: HapicData) -> typing.List[StuffModel]:
+    async def get_stuff(
+        self, request: Request, hapic_data: HapicData
+    ) -> typing.List[StuffModel]:
         return self._stuff_lib.get_zone_stuffs(
-            world_row_i=request.match_info["row_i"], world_col_i=request.match_info["col_i"]
+            world_row_i=request.match_info["row_i"],
+            world_col_i=request.match_info["col_i"],
         )
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)
-    @hapic.output_body(OnGroundResourceModel, processor=RollingSerpycoProcessor(many=True))
+    @hapic.output_body(
+        OnGroundResourceModel, processor=RollingSerpycoProcessor(many=True)
+    )
     async def get_resources(
         self, request: Request, hapic_data: HapicData
     ) -> typing.List[OnGroundResourceModel]:
         return [
             OnGroundResourceModel(
-                id=c.id, quantity=c.quantity, zone_row_i=c.ground_row_i, zone_col_i=c.ground_col_i
+                id=c.id,
+                quantity=c.quantity,
+                zone_row_i=c.ground_row_i,
+                zone_col_i=c.ground_col_i,
             )
             for c in self._kernel.resource_lib.get_ground_resource(
                 world_row_i=hapic_data.path.row_i, world_col_i=hapic_data.path.col_i
@@ -114,7 +125,11 @@ class ZoneController(BaseController):
         build_docs = self._kernel.build_lib.get_zone_build(
             world_row_i=hapic_data.path.row_i, world_col_i=hapic_data.path.col_i
         )
-        zone_builds: typing.List[typing.Optional[ZoneBuildModelContainer]] = [None] * len(build_docs)  # performances (possible lot of builds)
+        zone_builds: typing.List[typing.Optional[ZoneBuildModelContainer]] = [
+            None
+        ] * len(
+            build_docs
+        )  # performances (possible lot of builds)
         for i, build_doc in enumerate(build_docs):
             build_description = self._kernel.game.config.builds[build_doc.build_id]
             build_container = ZoneBuildModelContainer(
@@ -127,17 +142,17 @@ class ZoneController(BaseController):
                         build_id=build_doc.id,
                         character_id=request["account_character_id"],
                     )
-                build_container.traversable = {
-                    TransportType.WALKING: can_walk
-                }
+                build_container.traversable = {TransportType.WALKING: can_walk}
 
             # FIXME BS NOW farm
             if build_description.id == "PLOUGHED_LAND":
-                growing_state_classes = self._kernel.farming_lib.get_growing_state_classes(
-                    build=build_doc
+                growing_state_classes = (
+                    self._kernel.farming_lib.get_growing_state_classes(build=build_doc)
                 )
                 build_container.classes = (
-                    build_description.classes + [build_doc.build_id] + growing_state_classes
+                    build_description.classes
+                    + [build_doc.build_id]
+                    + growing_state_classes
                 )
 
             zone_builds[i] = build_container
@@ -150,7 +165,9 @@ class ZoneController(BaseController):
     @hapic.output_body(Description)
     async def describe(self, request: Request, hapic_data: HapicData) -> Description:
         world_rows = self._kernel.world_map_source.geography.rows
-        tile_type: MapTileType = world_rows[hapic_data.path.row_i][hapic_data.path.col_i]
+        tile_type: MapTileType = world_rows[hapic_data.path.row_i][
+            hapic_data.path.col_i
+        ]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(tile_type)
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         characters = self._kernel.character_lib.get_zone_characters(
@@ -171,8 +188,12 @@ class ZoneController(BaseController):
                 )
 
         affinities_parts = []
-        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(character.id):
-            affinity = self._kernel.affinity_lib.get_affinity(affinity_relation.affinity_id)
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+            character.id
+        ):
+            affinity = self._kernel.affinity_lib.get_affinity(
+                affinity_relation.affinity_id
+            )
             here_count = self._kernel.affinity_lib.count_members(
                 affinity.id,
                 fighter=None,
@@ -197,7 +218,8 @@ class ZoneController(BaseController):
                 )
 
         character_affinity_ids = [
-            r.affinity_id for r in self._kernel.affinity_lib.get_accepted_affinities(character.id)
+            r.affinity_id
+            for r in self._kernel.affinity_lib.get_accepted_affinities(character.id)
         ]
         for relation in self._kernel.affinity_lib.get_zone_relations(
             row_i=character.world_row_i,
@@ -246,9 +268,13 @@ class ZoneController(BaseController):
         message_parts: typing.List[Part] = []
         for message in messages:
             if message.is_outzone_message:
-                message_parts.append(Part(text=message.text or "Vous avez quitté la zone"))
+                message_parts.append(
+                    Part(text=message.text or "Vous avez quitté la zone")
+                )
             else:
-                message_parts.append(Part(text=f"{message.author_name}: {message.text}"))
+                message_parts.append(
+                    Part(text=f"{message.author_name}: {message.text}")
+                )
 
         return Description(
             title="Messagerie de zone",
@@ -309,7 +335,9 @@ class ZoneController(BaseController):
                 web.get("/zones/{row_i}/{col_i}/stuff", self.get_stuff),
                 web.get("/zones/{row_i}/{col_i}/resources", self.get_resources),
                 web.get("/zones/{row_i}/{col_i}/builds", self.get_builds),
-                web.post("/zones/{row_i}/{col_i}/describe/{character_id}", self.describe),
+                web.post(
+                    "/zones/{row_i}/{col_i}/describe/{character_id}", self.describe
+                ),
                 web.post("/zones/{row_i}/{col_i}/messages", self.messages),
                 web.post("/zones/{row_i}/{col_i}/messages/add", self.add_message),
             ]

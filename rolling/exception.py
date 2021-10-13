@@ -137,7 +137,9 @@ class ImpossibleAction(GamePlayError):
 
 
 class ImpossibleAttack(ImpossibleAction):
-    def __init__(self, msg: str, msg_lines: typing.Optional[typing.List[str]] = None) -> None:
+    def __init__(
+        self, msg: str, msg_lines: typing.Optional[typing.List[str]] = None
+    ) -> None:
         self.msg = msg
         self.msg_lines = msg_lines
 

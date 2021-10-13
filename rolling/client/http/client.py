@@ -25,7 +25,9 @@ class HttpClient:
         self._zone_serializer = serpyco.Serializer(ZoneMapModel)
         self._tiles_serializer = serpyco.Serializer(ZoneTileTypeModel, many=True)
         self._gui_description_serializer = serpyco.Serializer(Description)
-        self._zone_required_character_data_serializer = serpyco.Serializer(ZoneRequiredPlayerData)
+        self._zone_required_character_data_serializer = serpyco.Serializer(
+            ZoneRequiredPlayerData
+        )
         self._zone_build_serializers = serpyco.Serializer(ZoneBuildModel, many=True)
         self._move_zone_infos_serializer = serpyco.Serializer(MoveZoneInfos)
 
@@ -36,7 +38,8 @@ class HttpClient:
     def _check_response(self, response: Response) -> None:
         if response.status_code not in (200, 204):
             raise ClientServerExchangeError(
-                f"Server response is {response.status_code},{response.json()}", response=response
+                f"Server response is {response.status_code},{response.json()}",
+                response=response,
             )
 
     def request_post(self, path: str, data: dict = None) -> Response:
@@ -44,7 +47,9 @@ class HttpClient:
         return requests.post(f"{self._server_address}/{path.lstrip('/')}", json=data)
 
     def get_character(self, character_id: str) -> CharacterModel:
-        response = requests.get("{}/character/{}".format(self._server_address, character_id))
+        response = requests.get(
+            "{}/character/{}".format(self._server_address, character_id)
+        )
         self._check_response(response)
         response_json = response.json()
         return self._character_serializer.load(response_json)
@@ -64,7 +69,9 @@ class HttpClient:
         self, world_row_i: int, world_col_i: int
     ) -> typing.List[CharacterModel]:
         response = requests.get(
-            "{}/zones/{}/{}/characters".format(self._server_address, world_row_i, world_col_i)
+            "{}/zones/{}/{}/characters".format(
+                self._server_address, world_row_i, world_col_i
+            )
         )
         self._check_response(response)
         response_json = response.json()
@@ -80,7 +87,9 @@ class HttpClient:
         self._check_response(response)
         return self._tiles_serializer.load(response.json())
 
-    def move_character(self, character_id: str, to_world_row: int, to_world_col: int) -> None:
+    def move_character(
+        self, character_id: str, to_world_row: int, to_world_col: int
+    ) -> None:
         try:
             self._check_response(
                 requests.put(
@@ -100,7 +109,9 @@ class HttpClient:
         return self._gui_description_serializer.load(response.json())
 
     def get_character_card_description(self, character_id: str) -> Description:
-        response = requests.get(f"{self._server_address}/_describe/character/{character_id}/card")
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/card"
+        )
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
@@ -125,34 +136,50 @@ class HttpClient:
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
-    def get_zone_stuffs(self, world_row_i: int, world_col_i: int) -> typing.List[StuffModel]:
+    def get_zone_stuffs(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[StuffModel]:
         response = requests.get(
-            "{}/zones/{}/{}/stuff".format(self._server_address, world_row_i, world_col_i)
+            "{}/zones/{}/{}/stuff".format(
+                self._server_address, world_row_i, world_col_i
+            )
         )
         self._check_response(response)
         response_json = response.json()
         return self._stuffs_serializer.load(response_json)
 
-    def get_zone_builds(self, world_row_i: int, world_col_i: int) -> typing.List[ZoneBuildModel]:
+    def get_zone_builds(
+        self, world_row_i: int, world_col_i: int
+    ) -> typing.List[ZoneBuildModel]:
         response = requests.get(
-            "{}/zones/{}/{}/builds".format(self._server_address, world_row_i, world_col_i)
+            "{}/zones/{}/{}/builds".format(
+                self._server_address, world_row_i, world_col_i
+            )
         )
         self._check_response(response)
         response_json = response.json()
         return self._zone_build_serializers.load(response_json)
 
     def get_character_events(self, character_id: str) -> Description:
-        response = requests.get(f"{self._server_address}/_describe/character/{character_id}/events")
+        response = requests.get(
+            f"{self._server_address}/_describe/character/{character_id}/events"
+        )
         self._check_response(response)
         return self._gui_description_serializer.load(response.json())
 
-    def get_zone_required_character_data(self, character_id: str) -> ZoneRequiredPlayerData:
-        response = requests.get(f"{self._server_address}/character/{character_id}/zone_data")
+    def get_zone_required_character_data(
+        self, character_id: str
+    ) -> ZoneRequiredPlayerData:
+        response = requests.get(
+            f"{self._server_address}/character/{character_id}/zone_data"
+        )
         self._check_response(response)
         return self._zone_required_character_data_serializer.load(response.json())
 
     def get_zone_resume_texts(self, character_id: str) -> typing.List[str]:
-        response = requests.get(f"{self._server_address}/character/{character_id}/resume_texts")
+        response = requests.get(
+            f"{self._server_address}/character/{character_id}/resume_texts"
+        )
         self._check_response(response)
         return response.json()["items"]
 

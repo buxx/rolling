@@ -27,17 +27,24 @@ class KillCharacterAction(WithCharacterAction):
     input_model_serializer = serpyco.Serializer(EmptyModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> None:
         if not with_character.vulnerable:
-            raise ImpossibleAction(f"{with_character.name} est en capacité de se defendre")
+            raise ImpossibleAction(
+                f"{with_character.name} est en capacité de se defendre"
+            )
 
     def check_request_is_possible(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: typing.Any,
     ) -> None:
         self.check_is_possible(character, with_character)
 
@@ -58,7 +65,12 @@ class KillCharacterAction(WithCharacterAction):
         ]
 
     def perform(
-        self, character: "CharacterModel", with_character: "CharacterModel", input_: typing.Any
+        self,
+        character: "CharacterModel",
+        with_character: "CharacterModel",
+        input_: typing.Any,
     ) -> Description:
         self._kernel.character_lib.kill(with_character.id)
-        return Description(title=f"Vous avez tué {with_character.name}", back_url_is_zone=True)
+        return Description(
+            title=f"Vous avez tué {with_character.name}", back_url_is_zone=True
+        )

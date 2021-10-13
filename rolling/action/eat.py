@@ -8,8 +8,9 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughResource
+from rolling.exception import WrongInputError
 from rolling.model.effect import CharacterEffectDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
@@ -24,7 +25,9 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class EatResourceModel:
-    all_possible: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=0)
+    all_possible: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=0
+    )
 
 
 class EatResourceAction(WithResourceAction):
@@ -33,19 +36,24 @@ class EatResourceAction(WithResourceAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {
             "accept_resources": [
                 game_config.resources[r] for r in action_config_raw["accept_resources"]
             ],
             "effects": [
-                game_config.character_effects[e] for e in action_config_raw["character_effects"]
+                game_config.character_effects[e]
+                for e in action_config_raw["character_effects"]
             ],
             "consume_per_tick": action_config_raw["consume_per_tick"],
         }
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
+        accept_resources_ids = [
+            rd.id for rd in self._description.properties["accept_resources"]
+        ]
         if resource_id in accept_resources_ids:
             return
 
@@ -78,7 +86,9 @@ class EatResourceAction(WithResourceAction):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
-        accept_resources_ids = [rd.id for rd in self._description.properties["accept_resources"]]
+        accept_resources_ids = [
+            rd.id for rd in self._description.properties["accept_resources"]
+        ]
         # TODO BS 2019-09-14: perf
         carried_resource = next(
             (
@@ -105,7 +115,9 @@ class EatResourceAction(WithResourceAction):
 
         return []
 
-    def _get_url(self, character: "CharacterModel", resource_id: str, all_possible: bool) -> str:
+    def _get_url(
+        self, character: "CharacterModel", resource_id: str, all_possible: bool
+    ) -> str:
         return get_with_resource_action_url(
             character_id=character.id,
             action_type=ActionType.EAT_RESOURCE,
@@ -143,7 +155,9 @@ class EatResourceAction(WithResourceAction):
                     not_enough_resource_exc.available_quantity / consume_per_tick
                 )
 
-            character_doc.hunger = max(0.0, float(character_doc.hunger) - reduce_hunger_by)
+            character_doc.hunger = max(
+                0.0, float(character_doc.hunger) - reduce_hunger_by
+            )
             kernel.server_db_session.add(character_doc)
             kernel.server_db_session.commit()
 
@@ -152,7 +166,8 @@ class EatResourceAction(WithResourceAction):
 
             if (
                 not all_possible
-                or float(character_doc.hunger) <= kernel.game.config.stop_auto_eat_hunger
+                or float(character_doc.hunger)
+                <= kernel.game.config.stop_auto_eat_hunger
             ):
                 break
 

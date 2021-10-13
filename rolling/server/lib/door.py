@@ -1,16 +1,19 @@
 import datetime
 import json
-import typing
-
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Query
+import typing
 
 from rolling.log import server_logger
 from rolling.model.build import ZoneBuildModelContainer
-from rolling.model.event import WebSocketEvent, ZoneEventType, NewBuildData
+from rolling.model.event import NewBuildData
+from rolling.model.event import WebSocketEvent
+from rolling.model.event import ZoneEventType
 from rolling.model.meta import TransportType
-from rolling.server.document.build import DoorDocument, DOOR_TYPE__SIMPLE, DOOR_MODE__CLOSED, \
-    DOOR_MODE__CLOSED_EXCEPT_FOR
+from rolling.server.document.build import DOOR_MODE__CLOSED
+from rolling.server.document.build import DOOR_MODE__CLOSED_EXCEPT_FOR
+from rolling.server.document.build import DOOR_TYPE__SIMPLE
+from rolling.server.document.build import DoorDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -20,37 +23,31 @@ class DoorLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
-    def get_door_relations_query(
-        self, build_id: int
-    ) -> Query:
-        query = self._kernel.server_db_session.query(
-            DoorDocument
-        ).filter(
+    def get_door_relations_query(self, build_id: int) -> Query:
+        query = self._kernel.server_db_session.query(DoorDocument).filter(
             DoorDocument.build_id == build_id,
         )
 
         return query
 
-    def get_character_relations_query(
-        self, character_id: str
-    ) -> Query:
-        query = self._kernel.server_db_session.query(
-            DoorDocument
-        ).filter(
+    def get_character_relations_query(self, character_id: str) -> Query:
+        query = self._kernel.server_db_session.query(DoorDocument).filter(
             DoorDocument.character_id == character_id,
         )
 
         return query
 
-    def get_character_with_door_relation_query(self, character_id: str, build_id: int) -> Query:
-        return self._kernel.server_db_session.query(
-            DoorDocument
-        ).filter(
+    def get_character_with_door_relation_query(
+        self, character_id: str, build_id: int
+    ) -> Query:
+        return self._kernel.server_db_session.query(DoorDocument).filter(
             DoorDocument.character_id == character_id,
             DoorDocument.build_id == build_id,
         )
 
-    def get_character_with_door_relation(self, character_id: str, build_id: int) -> DoorDocument:
+    def get_character_with_door_relation(
+        self, character_id: str, build_id: int
+    ) -> DoorDocument:
         return self.get_character_with_door_relation_query(
             character_id=character_id,
             build_id=build_id,
@@ -79,8 +76,10 @@ class DoorLib:
                     affinity_ids=affinity_ids,
                     ignore_not_found=True,
                 )
-                return "Vous gardez cette porte close pour les personnes étrangères à : " \
-                       f"{', '.join(affinity_names)}."
+                return (
+                    "Vous gardez cette porte close pour les personnes étrangères à : "
+                    f"{', '.join(affinity_names)}."
+                )
             else:
                 raise NotImplementedError()
         else:
@@ -93,9 +92,11 @@ class DoorLib:
     ) -> typing.Optional[DoorDocument]:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
-        rules: typing.List[DoorDocument] = self.get_door_relations_query(build_id) \
-            .order_by(DoorDocument.updated_datetime.asc()) \
+        rules: typing.List[DoorDocument] = (
+            self.get_door_relations_query(build_id)
+            .order_by(DoorDocument.updated_datetime.asc())
             .all()
+        )
         character_affinity_ids = [
             affinity.id
             for affinity in self._kernel.affinity_lib.get_accepted_affinities_docs(
@@ -109,12 +110,18 @@ class DoorLib:
         if build_description.door_type == DOOR_TYPE__SIMPLE:
             for rule in rules:
                 # Ignore rule if character is not in zone or vulnerable
-                rule_character = self._kernel.character_lib.get(rule.character_id, dead=None)
+                rule_character = self._kernel.character_lib.get(
+                    rule.character_id, dead=None
+                )
                 rule_character_is_here = (
                     build_doc.world_row_i == rule_character.world_row_i
                     and build_doc.world_col_i == rule_character.world_col_i
                 )
-                if not rule_character_is_here or not rule_character.alive or rule_character.vulnerable:
+                if (
+                    not rule_character_is_here
+                    or not rule_character.alive
+                    or rule_character.vulnerable
+                ):
                     continue
 
                 # If door is simply closed and character_id is not the author, door is closed
@@ -147,7 +154,8 @@ class DoorLib:
         return (
             self.get_is_access_locked_for_rule(
                 build_id=build_id, character_id=character_id
-            ) is not None
+            )
+            is not None
         )
 
     def get_is_access_locked_for_description(
@@ -174,7 +182,9 @@ class DoorLib:
         commit: bool = True,
     ) -> None:
         try:
-            relation = self.get_character_with_door_relation(character_id=character_id, build_id=build_id)
+            relation = self.get_character_with_door_relation(
+                character_id=character_id, build_id=build_id
+            )
         except NoResultFound:
             # Door character rule is waiting if door is locked
             relation = DoorDocument(
@@ -237,7 +247,9 @@ class DoorLib:
             world_col_i=world_col_i,
         )
 
-    async def trigger_character_change_rule(self, character_id: str, build_id: int) -> None:
+    async def trigger_character_change_rule(
+        self, character_id: str, build_id: int
+    ) -> None:
         """When character change door rule, clients must receive new version of door builds"""
         character_doc = self._kernel.character_lib.get_document(id_=character_id)
         # TODO: Optimisation could be filter of door_id ...
@@ -258,12 +270,16 @@ class DoorLib:
             row_i=world_row_i,
             col_i=world_col_i,
         ):
-            character_id = self._kernel.server_zone_events_manager.get_character_id_for_socket(
-                socket
+            character_id = (
+                self._kernel.server_zone_events_manager.get_character_id_for_socket(
+                    socket
+                )
             )
             for door_build in door_builds:
                 build_description = self._kernel.game.config.builds[door_build.build_id]
-                build_container = ZoneBuildModelContainer(doc=door_build, desc=build_description)
+                build_container = ZoneBuildModelContainer(
+                    doc=door_build, desc=build_description
+                )
                 build_container.traversable = {
                     TransportType.WALKING: not self._kernel.door_lib.is_access_locked_for(
                         build_id=door_build.id,
@@ -276,9 +292,9 @@ class DoorLib:
                     world_col_i=world_col_i,
                     data=NewBuildData(build=build_container),
                 )
-                event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
-                    event
-                )
+                event_str = self._kernel.event_serializer_factory.get_serializer(
+                    event.type
+                ).dump_json(event)
                 try:
                     await socket.send_str(event_str)
                 except ConnectionResetError as exc:
@@ -293,4 +309,3 @@ class DoorLib:
             self._kernel.server_db_session.commit()
         except NoResultFound:
             pass
-

@@ -24,7 +24,10 @@ def attack_action(worldmapc_kernel: Kernel) -> AttackCharacterAction:
     return AttackCharacterAction(
         kernel=worldmapc_kernel,
         description=ActionDescriptionModel(
-            id="FIGHT", action_type=ActionType.ATTACK_CHARACTER, base_cost=0.0, properties={}
+            id="FIGHT",
+            action_type=ActionType.ATTACK_CHARACTER,
+            base_cost=0.0,
+            properties={},
         ),
     )
 
@@ -54,7 +57,9 @@ class TestFightAction:
         attack_action: AttackCharacterAction,
     ) -> None:
         descr = attack_action.perform(
-            france_warlord, with_character=england_warlord, input_=AttackModel(lonely=True)
+            france_warlord,
+            with_character=england_warlord,
+            input_=AttackModel(lonely=True),
         )
         assert (
             "Engager ce combat implique de vous battre contre EnglandWarlord0 seul à seul"
@@ -377,7 +382,9 @@ class TestFightAction:
 
         with pytest.raises(ImpossibleAction) as exc:
             attack_action.perform(
-                france_warlord, with_character=england_warlord, input_=AttackModel(lonely=1)
+                france_warlord,
+                with_character=england_warlord,
+                input_=AttackModel(lonely=1),
             )
         assert (
             "Vous ne pouvez pas mener cette attaque car parmis les defenseur se trouve des "
@@ -392,16 +399,22 @@ class TestFightAction:
         worldmapc_kernel: Kernel,
         attack_action: AttackCharacterAction,
     ) -> None:
-        france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+        france_warlord_doc = worldmapc_kernel.character_lib.get_document(
+            france_warlord.id
+        )
         france_warlord.tiredness = 100
         worldmapc_kernel.server_db_session.add(france_warlord_doc)
         worldmapc_kernel.server_db_session.commit()
 
         with pytest.raises(ImpossibleAction) as exc:
             attack_action.check_request_is_possible(
-                france_warlord, with_character=england_warlord, input_=AttackModel(lonely=1)
+                france_warlord,
+                with_character=england_warlord,
+                input_=AttackModel(lonely=1),
             )
-        assert "FranceWarlord0 n'est pas en mesure de mener cette attaque !" == str(exc.value)
+        assert "FranceWarlord0 n'est pas en mesure de mener cette attaque !" == str(
+            exc.value
+        )
 
     def test_unit__check_request__ok__attack_as_affinity_but_all_exhausted(
         self,
@@ -412,13 +425,17 @@ class TestFightAction:
         worldmapc_kernel: Kernel,
         attack_action: AttackCharacterAction,
     ) -> None:
-        france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+        france_warlord_doc = worldmapc_kernel.character_lib.get_document(
+            france_warlord.id
+        )
         france_warlord_doc.tiredness = 100
         worldmapc_kernel.server_db_session.add(france_warlord_doc)
         worldmapc_kernel.server_db_session.commit()
 
         for france_fighter in france_fighters:
-            france_fighter_doc = worldmapc_kernel.character_lib.get_document(france_fighter.id)
+            france_fighter_doc = worldmapc_kernel.character_lib.get_document(
+                france_fighter.id
+            )
             france_fighter_doc.tiredness = 100
             worldmapc_kernel.server_db_session.add(france_fighter_doc)
 
@@ -448,7 +465,9 @@ class TestFightAction:
                 with_character=england_warlord,
                 input_=AttackModel(as_affinity=france_affinity.id),
             )
-        assert "Vous ne pouvez pas attaquer un membre d'une même affinités" == str(exc.value)
+        assert "Vous ne pouvez pas attaquer un membre d'une même affinités" == str(
+            exc.value
+        )
 
     def test_unit__descriptions__ok__root_description(
         self,
@@ -505,10 +524,16 @@ class TestFightAction:
         attack_action: AttackCharacterAction,
     ) -> None:
         descr = attack_action.perform(
-            france_warlord, with_character=england_warlord, input_=AttackModel(lonely=1, confirm=1)
+            france_warlord,
+            with_character=england_warlord,
+            input_=AttackModel(lonely=1, confirm=1),
         )
-        f_warlord_e = list(worldmapc_kernel.character_lib.get_last_events(france_warlord.id, 1))
-        e_warlord_e = list(worldmapc_kernel.character_lib.get_last_events(england_warlord.id, 1))
+        f_warlord_e = list(
+            worldmapc_kernel.character_lib.get_last_events(france_warlord.id, 1)
+        )
+        e_warlord_e = list(
+            worldmapc_kernel.character_lib.get_last_events(england_warlord.id, 1)
+        )
 
         assert f_warlord_e
         assert 1 == len(f_warlord_e)
@@ -534,14 +559,17 @@ class TestFightAction:
         ), patch("random.shuffle", new=lambda l: l), patch(
             "random.randrange", new=lambda *_, **__: 100
         ), patch(
-            "rolling.server.lib.fight.FightLib.defenser_evade", new=lambda *_, **__: False
+            "rolling.server.lib.fight.FightLib.defenser_evade",
+            new=lambda *_, **__: False,
         ):
             attack_action.perform(
                 france_warlord,
                 with_character=england_warlord,
                 input_=AttackModel(lonely=1, confirm=1),
             )
-            france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+            france_warlord_doc = worldmapc_kernel.character_lib.get_document(
+                france_warlord.id
+            )
             england_warlord_doc = worldmapc_kernel.character_lib.get_document(
                 england_warlord.id, dead=True
             )
@@ -623,12 +651,16 @@ class TestFightAction:
 
         while True:
             try:
-                france_warlord_doc = worldmapc_kernel.character_lib.get_document(france_warlord.id)
+                france_warlord_doc = worldmapc_kernel.character_lib.get_document(
+                    france_warlord.id
+                )
                 france_warlord = worldmapc_kernel.character_lib.get(france_warlord.id)
                 if not france_warlord.is_attack_ready():
                     return
             except NoResultFound:
-                worldmapc_kernel.character_lib.get_document(france_warlord.id, dead=True)
+                worldmapc_kernel.character_lib.get_document(
+                    france_warlord.id, dead=True
+                )
                 return
 
             try:
@@ -639,7 +671,9 @@ class TestFightAction:
                 if not england_warlord.is_attack_ready():
                     return
             except NoResultFound:
-                worldmapc_kernel.character_lib.get_document(england_warlord.id, dead=True)
+                worldmapc_kernel.character_lib.get_document(
+                    england_warlord.id, dead=True
+                )
                 return
 
             france_warlord_doc.action_points = 24.0

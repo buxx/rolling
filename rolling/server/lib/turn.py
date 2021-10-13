@@ -60,7 +60,9 @@ class TurnLib:
         for row_i, row in enumerate(self._kernel.world_map_source.geography.rows):
             for col_i, zone_type in enumerate(row):
                 if zone_type not in generation_stuff_by_zone_type:
-                    self._logger.debug(f"No generation info for {zone_type} at {row_i},{col_i}")
+                    self._logger.debug(
+                        f"No generation info for {zone_type} at {row_i},{col_i}"
+                    )
                     continue
 
                 # Choose some stuff
@@ -83,7 +85,9 @@ class TurnLib:
 
                 # TODO BS 2019-06-18: Be able to place stuff near specific tiles types
                 # Choose some positions where place stuff
-                zone_source_geo = self._kernel.tile_maps_by_position[row_i, col_i].source.geography
+                zone_source_geo = self._kernel.tile_maps_by_position[
+                    row_i, col_i
+                ].source.geography
                 chosen_positions: typing.List[typing.Tuple[int, int]] = []
                 for i in range(zone_property.generation_info.count):
                     retry = 0
@@ -106,13 +110,15 @@ class TurnLib:
                     self._logger.info(
                         f"Place {stuff_to_place.stuff.id} at {chosen_position[0]},{chosen_position[1]}"
                     )
-                    stuff_doc = self._stuff_lib.create_document_from_generation_properties(
-                        stuff_to_place,
-                        stuff_id=stuff_to_place.stuff.id,
-                        world_col_i=col_i,
-                        world_row_i=row_i,
-                        zone_col_i=chosen_position[0],
-                        zone_row_i=chosen_position[1],
+                    stuff_doc = (
+                        self._stuff_lib.create_document_from_generation_properties(
+                            stuff_to_place,
+                            stuff_id=stuff_to_place.stuff.id,
+                            world_col_i=col_i,
+                            world_row_i=row_i,
+                            zone_col_i=chosen_position[0],
+                            zone_row_i=chosen_position[1],
+                        )
                     )
                     self._stuff_lib.add_stuff(stuff_doc, commit=False)
         self._kernel.server_db_session.commit()
@@ -130,17 +136,23 @@ class TurnLib:
             self._logger.info(
                 f"Provide natural needs of {character_document.name} {character_document.id}"
             )
-            zone_contains_fresh_water = character_can_drink_in_its_zone(self._kernel, character)
+            zone_contains_fresh_water = character_can_drink_in_its_zone(
+                self._kernel, character
+            )
 
             # DRINKING
             character_document.thirst = min(
                 100.0,
-                float(character_document.thirst) + self._kernel.game.config.thirst_change_per_tick,
+                float(character_document.thirst)
+                + self._kernel.game.config.thirst_change_per_tick,
             )
             self._logger.info(f"Increase thirst to {character_document.thirst}")
 
             drink_in = []
-            while character_document.thirst > self._kernel.game.config.stop_auto_drink_thirst:
+            while (
+                character_document.thirst
+                > self._kernel.game.config.stop_auto_drink_thirst
+            ):
                 stuff_with_fresh_water = None
                 try:
                     stuff_with_fresh_water = next(
@@ -158,13 +170,17 @@ class TurnLib:
                 if zone_contains_fresh_water:
                     self._logger.info(f"Drink in zone")
                     have_drink = True
-                    character_document.thirst = self._kernel.game.config.stop_auto_drink_thirst
+                    character_document.thirst = (
+                        self._kernel.game.config.stop_auto_drink_thirst
+                    )
 
                 elif stuff_with_fresh_water is not None:
                     self._logger.info(f"Drink in stuff {stuff_with_fresh_water.id}")
                     have_drink = True
 
-                    stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff_with_fresh_water.id)
+                    stuff_doc = self._kernel.stuff_lib.get_stuff_doc(
+                        stuff_with_fresh_water.id
+                    )
                     drink_water_action_description = (
                         self._kernel.game.get_drink_water_action_description()
                     )
@@ -202,12 +218,16 @@ class TurnLib:
             # EATING
             character_document.hunger = min(
                 100.0,
-                float(character_document.hunger) + self._kernel.game.config.hunger_change_per_tick,
+                float(character_document.hunger)
+                + self._kernel.game.config.hunger_change_per_tick,
             )
             self._logger.info(f"Increase hunger to {character_document.hunger}")
 
             eat_resource_ids = []
-            while character_document.hunger > self._kernel.game.config.stop_auto_eat_hunger:
+            while (
+                character_document.hunger
+                > self._kernel.game.config.stop_auto_eat_hunger
+            ):
                 have_eat = False
 
                 try:
@@ -223,7 +243,9 @@ class TurnLib:
                             character_doc=character_document,
                             resource_id=carried_resource.id,
                             all_possible=True,
-                            consume_per_tick=action_description.properties["consume_per_tick"],
+                            consume_per_tick=action_description.properties[
+                                "consume_per_tick"
+                            ],
                         )
                     except NoCarriedResource:
                         pass
@@ -246,7 +268,9 @@ class TurnLib:
                     float(character_document.life_points)
                     - self._kernel.game.config.hunger_life_point_loss_per_tick,
                 )
-                self._logger.info(f"Losing LP because hungry for {character_document.life_points}")
+                self._logger.info(
+                    f"Losing LP because hungry for {character_document.life_points}"
+                )
 
             self._character_lib.update(character_document)
 
@@ -286,7 +310,9 @@ class TurnLib:
                     float(character_document.life_points)
                     + self._kernel.game.config.life_point_points_per_tick,
                 )
-                self._logger.info(f"Increase life points for {character_document.life_points}")
+                self._logger.info(
+                    f"Increase life points for {character_document.life_points}"
+                )
 
             self._character_lib.update(character_document)
 
@@ -316,7 +342,9 @@ class TurnLib:
             if not character_doc.is_alive:
                 continue
 
-            self._logger.info(f"Manage props of {character_doc.name} {character_doc.id}")
+            self._logger.info(
+                f"Manage props of {character_doc.name} {character_doc.id}"
+            )
 
             character_doc.action_points = min(
                 float(character_doc.max_action_points),
@@ -358,7 +386,9 @@ class TurnLib:
                     except NoResultFound:
                         have_all_resources = False
                 if have_all_resources:
-                    for turn_require_resource in build_description.turn_require_resources:
+                    for (
+                        turn_require_resource
+                    ) in build_description.turn_require_resources:
                         self._kernel.resource_lib.reduce_stored_in(
                             build_id=build_doc.id,
                             resource_id=turn_require_resource.resource_id,
@@ -374,7 +404,9 @@ class TurnLib:
         query = self._kernel.build_lib.get_zone_query(with_seeded_with=True)
         for row in query.with_entities(BuildDocument.id).all():
             build_doc = self._kernel.build_lib.get_build_doc(row[0])
-            seeded_resource_description = self._kernel.game.config.resources[build_doc.seeded_with]
+            seeded_resource_description = self._kernel.game.config.resources[
+                build_doc.seeded_with
+            ]
             build_doc.grow_progress = (
                 build_doc.grow_progress + seeded_resource_description.grow_speed
             )

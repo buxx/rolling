@@ -23,9 +23,13 @@ if typing.TYPE_CHECKING:
 
 class ZoneEventsManager:
     def __init__(self, kernel: "Kernel", loop: asyncio.AbstractEventLoop) -> None:
-        self._sockets: typing.Dict[typing.Tuple[int, int], typing.List[web.WebSocketResponse]] = {}
+        self._sockets: typing.Dict[
+            typing.Tuple[int, int], typing.List[web.WebSocketResponse]
+        ] = {}
         self._sockets_character_id: typing.Dict[web.WebSocketResponse, str] = {}
-        self._sockets_associated_reader_token: typing.Dict[web.WebSocketResponse, str] = {}
+        self._sockets_associated_reader_token: typing.Dict[
+            web.WebSocketResponse, str
+        ] = {}
         self._sockets_by_token: typing.Dict[str, web.WebSocketResponse] = {}
         self._event_processor_factory = EventProcessorFactory(kernel, self)
         self._event_serializer_factory = ZoneEventSerializerFactory()
@@ -70,7 +74,9 @@ class ZoneEventsManager:
         reader_token: typing.Optional[str] = None,
         token: typing.Optional[str] = None,
     ) -> web.WebSocketResponse:
-        server_logger.info(f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})")
+        server_logger.info(
+            f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})"
+        )
 
         # Create socket
         socket = web.WebSocketResponse()
@@ -102,13 +108,19 @@ class ZoneEventsManager:
 
         return socket
 
-    async def _listen(self, socket: web.WebSocketResponse, row_i: int, col_i: int) -> None:
+    async def _listen(
+        self, socket: web.WebSocketResponse, row_i: int, col_i: int
+    ) -> None:
         server_logger.info(f"Listen websocket for zone {row_i},{col_i}")
         async for msg in socket:
-            server_logger.debug(f"Receive message on websocket for zone {row_i},{col_i}: {msg}")
+            server_logger.debug(
+                f"Receive message on websocket for zone {row_i},{col_i}: {msg}"
+            )
 
             if msg.type == aiohttp.WSMsgType.ERROR:
-                server_logger.error(f"Zone websocket closed with exception {socket.exception()}")
+                server_logger.error(
+                    f"Zone websocket closed with exception {socket.exception()}"
+                )
             else:
                 try:
                     await self._process_msg(row_i, col_i, msg, socket)
@@ -140,11 +152,17 @@ class ZoneEventsManager:
         # Event zone coordinate is mandatory
         event_dict["world_row_i"] = row_i
         event_dict["world_col_i"] = col_i
-        event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
+        event = self._event_serializer_factory.get_serializer(event_type).load(
+            event_dict
+        )
         await self._process_event(row_i, col_i, event, socket)
 
     async def _process_event(
-        self, row_i: int, col_i: int, event: WebSocketEvent, socket: web.WebSocketResponse
+        self,
+        row_i: int,
+        col_i: int,
+        event: WebSocketEvent,
+        socket: web.WebSocketResponse,
     ) -> None:
         try:
             event_processor = self._event_processor_factory.get_processor(event.type)
@@ -165,7 +183,9 @@ class ZoneEventsManager:
             # FIXME: do kept this feature ?
             await socket.send_str(exception_event_str)
 
-    def get_sockets(self, row_i: int, col_i: int) -> typing.Iterable[web.WebSocketResponse]:
+    def get_sockets(
+        self, row_i: int, col_i: int
+    ) -> typing.Iterable[web.WebSocketResponse]:
         for socket in self._sockets.get((row_i, col_i), []):
             yield socket
 
@@ -177,9 +197,9 @@ class ZoneEventsManager:
         repeat_to_world: bool = True,
         character_ids: typing.Optional[typing.List[str]] = None,
     ) -> str:
-        event_str = self._kernel.event_serializer_factory.get_serializer(event.type).dump_json(
-            event
-        )
+        event_str = self._kernel.event_serializer_factory.get_serializer(
+            event.type
+        ).dump_json(event)
 
         for socket in self.get_sockets(world_row_i, world_col_i):
             if (
@@ -197,7 +217,10 @@ class ZoneEventsManager:
         # Replicate message on world websockets
         if repeat_to_world:
             await self._kernel.server_world_events_manager.send_to_sockets(
-                event, world_row_i=world_row_i, world_col_i=world_col_i, repeat_to_zone=False
+                event,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                repeat_to_zone=False,
             )
 
         return event_str
@@ -210,7 +233,9 @@ class ZoneEventsManager:
             for socket in self.get_sockets(world_row_i, world_col_i)
         ]
 
-    async def respond_to_socket(self, socket: web.WebSocketResponse, event_str: str) -> None:
+    async def respond_to_socket(
+        self, socket: web.WebSocketResponse, event_str: str
+    ) -> None:
         associated_reader_token = self._sockets_associated_reader_token.get(socket)
 
         if not associated_reader_token:
@@ -218,7 +243,9 @@ class ZoneEventsManager:
             return
 
         if associated_reader_token not in self._sockets_by_token:
-            server_logger.warning(f"No associated reader ws for toen '{associated_reader_token}' !")
+            server_logger.warning(
+                f"No associated reader ws for toen '{associated_reader_token}' !"
+            )
             return
 
         associated_reader_ws = self._sockets_by_token.get(associated_reader_token)

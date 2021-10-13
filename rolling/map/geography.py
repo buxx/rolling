@@ -44,7 +44,9 @@ class MapGeography:
                 char_tile_type = legend.get_type_with_str(char)
                 row_tile_types.append(char_tile_type)
                 if char_tile_type != Nothing:
-                    self._tile_type_positions.setdefault(char_tile_type, []).append((row_i, col_i))
+                    self._tile_type_positions.setdefault(char_tile_type, []).append(
+                        (row_i, col_i)
+                    )
 
             self._rows.append(row_tile_types)
 

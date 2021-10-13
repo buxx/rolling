@@ -121,9 +121,9 @@ class ResourceLib:
             else True
         )
 
-        resource_description: ResourceDescriptionModel = self._kernel.game.config.resources[
-            resource_id
-        ]
+        resource_description: ResourceDescriptionModel = (
+            self._kernel.game.config.resources[resource_id]
+        )
         if character_id:
             filters = [
                 ResourceDocument.carried_by_id == character_id,
@@ -155,10 +155,16 @@ class ResourceLib:
             filters.append(ResourceDocument.shared_with_affinity_id == None)
 
         if shared_with_affinity_id is not None:
-            filters.append(ResourceDocument.shared_with_affinity_id == shared_with_affinity_id)
+            filters.append(
+                ResourceDocument.shared_with_affinity_id == shared_with_affinity_id
+            )
 
         try:
-            resource = self._kernel.server_db_session.query(ResourceDocument).filter(*filters).one()
+            resource = (
+                self._kernel.server_db_session.query(ResourceDocument)
+                .filter(*filters)
+                .one()
+            )
         except NoResultFound:
             resource = ResourceDocument(
                 resource_id=resource_id,
@@ -193,9 +199,9 @@ class ResourceLib:
 
         resource_docs_by_resource_id = {}
         for resource_doc in resource_docs:
-            resource_docs_by_resource_id.setdefault(resource_doc.resource_id, []).append(
-                resource_doc
-            )
+            resource_docs_by_resource_id.setdefault(
+                resource_doc.resource_id, []
+            ).append(resource_doc)
 
         carried_models = []
         for resource_docs_ in resource_docs_by_resource_id.values():
@@ -361,7 +367,9 @@ class ResourceLib:
             filters.append(ResourceDocument.shared_with_affinity_id == None)
 
         if shared_with_affinity_ids:
-            filters.append(ResourceDocument.shared_with_affinity_id.in_(shared_with_affinity_ids))
+            filters.append(
+                ResourceDocument.shared_with_affinity_id.in_(shared_with_affinity_ids)
+            )
 
         self._reduce(
             resource_id,
@@ -378,7 +386,9 @@ class ResourceLib:
         )
         if not carried.quantity:
             resource_docs = (
-                self._kernel.server_db_session.query(ResourceDocument).filter(and_(*filters)).all()
+                self._kernel.server_db_session.query(ResourceDocument)
+                .filter(and_(*filters))
+                .all()
             )
             for resource_doc in resource_docs:
                 self._kernel.server_db_session.delete(resource_doc)
@@ -411,7 +421,8 @@ class ResourceLib:
         self, build_id: int, resource_id: str, quantity: float, commit: bool = True
     ) -> None:
         filter_ = and_(
-            ResourceDocument.in_built_id == build_id, ResourceDocument.resource_id == resource_id
+            ResourceDocument.in_built_id == build_id,
+            ResourceDocument.resource_id == resource_id,
         )
         self._reduce(resource_id, filter_, quantity=quantity, commit=commit)
 
@@ -438,7 +449,13 @@ class ResourceLib:
             ResourceDocument.world_col_i == world_col_i,
             or_(*zone_coordinates_filters),
         )
-        return self._reduce(resource_id, filter_, quantity=quantity, commit=commit, force_before_raise=force_before_raise)
+        return self._reduce(
+            resource_id,
+            filter_,
+            quantity=quantity,
+            commit=commit,
+            force_before_raise=force_before_raise,
+        )
 
     def _reduce(
         self,
@@ -448,7 +465,9 @@ class ResourceLib:
         commit: bool = True,
         force_before_raise: bool = False,
     ) -> float:
-        resource_docs = self._kernel.server_db_session.query(ResourceDocument).filter(filter_).all()
+        resource_docs = (
+            self._kernel.server_db_session.query(ResourceDocument).filter(filter_).all()
+        )
 
         if not resource_docs:
             raise NoCarriedResource()
@@ -532,7 +551,10 @@ class ResourceLib:
         )
 
     def get_carrying_actions(
-        self, character: CharacterModel, resource_id: str, for_actions_page: bool = False
+        self,
+        character: CharacterModel,
+        resource_id: str,
+        for_actions_page: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         resource_description = self._kernel.game.config.resources[resource_id]
@@ -550,14 +572,18 @@ class ResourceLib:
 
         return actions
 
-    def get_stored_in_build(self, build_id: int) -> typing.List[CarriedResourceDescriptionModel]:
+    def get_stored_in_build(
+        self, build_id: int
+    ) -> typing.List[CarriedResourceDescriptionModel]:
         carried = self.get_base_query(in_built_id=build_id).all()
         return [self._carried_resource_model_from_doc([doc]) for doc in carried]
 
     def get_one_stored_in_build(
         self, build_id: int, resource_id: str
     ) -> CarriedResourceDescriptionModel:
-        carried = self.get_base_query(in_built_id=build_id, resource_id=resource_id).one()
+        carried = self.get_base_query(
+            in_built_id=build_id, resource_id=resource_id
+        ).one()
         return self._carried_resource_model_from_doc([carried])
 
     def get_shared_with_affinity(

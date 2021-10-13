@@ -8,7 +8,8 @@ import typing
 from guilang.description import Description
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_with_build_action_url
-from rolling.exception import ImpossibleAction, WrongInputError
+from rolling.exception import ImpossibleAction
+from rolling.exception import WrongInputError
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
@@ -68,7 +69,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
         )
 
     def _get_title(
-        self, stuff_id: typing.Optional[int] = None, resource_id: typing.Optional[str] = None
+        self,
+        stuff_id: typing.Optional[int] = None,
+        resource_id: typing.Optional[str] = None,
     ) -> str:
         build_name = self._kernel.game.config.builds[self._from_build.build_id].name
 
@@ -82,7 +85,9 @@ class TakeStuffOrResources(TransferStuffOrResources):
 
         return f"Prendre depuis {build_name}"
 
-    def _get_footer_character_id(self, sizing_up_quantity: bool) -> typing.Optional[str]:
+    def _get_footer_character_id(
+        self, sizing_up_quantity: bool
+    ) -> typing.Optional[str]:
         return None
 
     def _get_footer_affinity_id(self, sizing_up_quantity: bool) -> typing.Optional[int]:
@@ -95,13 +100,19 @@ class TakeStuffOrResources(TransferStuffOrResources):
         return self._kernel.stuff_lib.get_stuff(stuff_id)
 
     def _get_likes_this_stuff(self, stuff_id: str) -> typing.List[StuffModel]:
-        return self._kernel.stuff_lib.get_from_build(self._from_build.id, stuff_id=stuff_id)
+        return self._kernel.stuff_lib.get_from_build(
+            self._from_build.id, stuff_id=stuff_id
+        )
 
     def _transfer_stuff(self, stuff_id: int) -> None:
         self._kernel.stuff_lib.set_carried_by(stuff_id, self._from_character.id)
 
-    def _get_carried_resource(self, resource_id: str) -> CarriedResourceDescriptionModel:
-        return self._kernel.resource_lib.get_one_stored_in_build(self._from_build.id, resource_id)
+    def _get_carried_resource(
+        self, resource_id: str
+    ) -> CarriedResourceDescriptionModel:
+        return self._kernel.resource_lib.get_one_stored_in_build(
+            self._from_build.id, resource_id
+        )
 
     def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
         try:
@@ -125,17 +136,23 @@ class TakeStuffOrResources(TransferStuffOrResources):
             build_id=self._from_build.id, resource_id=resource_id, quantity=quantity
         )
         self._kernel.resource_lib.add_resource_to(
-            character_id=self._from_character.id, resource_id=resource_id, quantity=quantity
+            character_id=self._from_character.id,
+            resource_id=resource_id,
+            quantity=quantity,
         )
 
 
 @dataclasses.dataclass
 class TakeFromModel:
-    take_stuff_id: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    take_stuff_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     take_stuff_quantity: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    take_resource_id: typing.Optional[str] = serpyco.number_field(cast_on_load=True, default=None)
+    take_resource_id: typing.Optional[str] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
     take_resource_quantity: typing.Optional[str] = None
 
 
@@ -144,7 +161,9 @@ class TakeFromBuildAction(WithBuildAction):
     input_model_serializer = serpyco.Serializer(TakeFromModel)
 
     @classmethod
-    def get_properties_from_config(cls, game_config: "GameConfig", action_config_raw: dict) -> dict:
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
         return {}
 
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
@@ -165,7 +184,8 @@ class TakeFromBuildAction(WithBuildAction):
                 build_id=build_id, resource_id=input_.take_resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.take_resource_quantity, carried_resource=carried_resource
+                user_input=input_.take_resource_quantity,
+                carried_resource=carried_resource,
             )
             TakeStuffOrResources(
                 self._kernel,
@@ -173,7 +193,8 @@ class TakeFromBuildAction(WithBuildAction):
                 from_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_resource(
-                resource_id=input_.take_resource_id, quantity=user_input_context.real_quantity
+                resource_id=input_.take_resource_id,
+                quantity=user_input_context.real_quantity,
             )
 
         if input_.take_stuff_id and input_.take_stuff_quantity:
@@ -189,7 +210,9 @@ class TakeFromBuildAction(WithBuildAction):
     def get_character_actions(
         self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
-        return [CharacterActionLink(name="Prendre", link=self._get_url(character, build_id))]
+        return [
+            CharacterActionLink(name="Prendre", link=self._get_url(character, build_id))
+        ]
 
     def _get_url(
         self,

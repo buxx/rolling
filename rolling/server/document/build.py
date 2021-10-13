@@ -1,11 +1,15 @@
 # coding: utf-8
 import datetime
-
-from sqlalchemy import Boolean, UniqueConstraint, Enum, Text, ForeignKey, DateTime
+from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import Enum
+from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Numeric
 from sqlalchemy import String
+from sqlalchemy import Text
+from sqlalchemy import UniqueConstraint
 
 from rolling.server.extension import ServerSideDocument as Document
 
@@ -43,12 +47,19 @@ DOOR_MODE_LABELS = {
 
 class DoorDocument(Document):
     __tablename__ = "door"
-    __table_args__ = (
-        UniqueConstraint('build_id', 'character_id', name='door_unique'),
-    )
+    __table_args__ = (UniqueConstraint("build_id", "character_id", name="door_unique"),)
     id = Column(Integer, primary_key=True, autoincrement=True)
-    build_id = Column(Integer, ForeignKey("build.id"), nullable=False,)
+    build_id = Column(
+        Integer,
+        ForeignKey("build.id"),
+        nullable=False,
+    )
     character_id = Column(String(255), ForeignKey("character.id"), nullable=False)
-    mode = Column(Enum(DOOR_MODE__CLOSED, DOOR_MODE__CLOSED_EXCEPT_FOR, name="door__mode"), nullable=False)
+    mode = Column(
+        Enum(DOOR_MODE__CLOSED, DOOR_MODE__CLOSED_EXCEPT_FOR, name="door__mode"),
+        nullable=False,
+    )
     affinity_ids = Column(Text(), server_default="[]", nullable=False)
-    updated_datetime = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    updated_datetime = Column(
+        DateTime, default=datetime.datetime.utcnow, nullable=False
+    )

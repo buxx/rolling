@@ -53,7 +53,9 @@ class TileMapGenerator:
         # Must be odd
         if not width % 2 or not height % 2:
             raise RollingError(
-                "Width and height must be odd: given values are {}x{}".format(width, height)
+                "Width and height must be odd: given values are {}x{}".format(
+                    width, height
+                )
             )
 
         self._current_raw_source = "::GEO\n"

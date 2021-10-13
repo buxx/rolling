@@ -31,12 +31,18 @@ if typing.TYPE_CHECKING:
 
 
 class EventProcessor(metaclass=abc.ABCMeta):
-    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
+    def __init__(
+        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
+    ) -> None:
         self._zone_events_manager = zone_events_manager
         self._kernel = kernel
 
     async def process(
-        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: web.WebSocketResponse
+        self,
+        row_i: int,
+        col_i: int,
+        event: WebSocketEvent,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         self._check(row_i, col_i, event)
         await self._process(row_i, col_i, event, sender_socket=sender_socket)
@@ -46,7 +52,11 @@ class EventProcessor(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def _process(
-        self, row_i: int, col_i: int, event: WebSocketEvent, sender_socket: web.WebSocketResponse
+        self,
+        row_i: int,
+        col_i: int,
+        event: WebSocketEvent,
+        sender_socket: web.WebSocketResponse,
     ) -> None:
         pass
 
@@ -54,7 +64,9 @@ class EventProcessor(metaclass=abc.ABCMeta):
 # FIXME BS NOW EVENT: type of zone_events_manager must be a base abstract class
 # FIXME BS NOW EVENT: world event manager must add zone coordinates to sent event
 class PlayerMoveProcessor(EventProcessor):
-    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
+    def __init__(
+        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
+    ) -> None:
         super().__init__(kernel, zone_events_manager)
         self._character_lib = CharacterLib(self._kernel)
 
@@ -175,7 +187,11 @@ class ClickActionProcessor(EventProcessor):
         event: WebSocketEvent[ClickActionData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        character_id = self._kernel.server_zone_events_manager.get_character_id_for_socket(sender_socket)
+        character_id = (
+            self._kernel.server_zone_events_manager.get_character_id_for_socket(
+                sender_socket
+            )
+        )
         character = self._kernel.character_lib.get(character_id)
         try:
             action = self._kernel.action_factory.create_action(
@@ -264,9 +280,11 @@ class RequestChatProcessor(EventProcessor):
                         conversation_id=event.data.previous_conversation_id,
                     )
                 else:
-                    conversation_id = self._kernel.message_lib.get_previous_conversation_id(
-                        character_id=event.data.character_id,
-                        conversation_id=event.data.previous_conversation_id,
+                    conversation_id = (
+                        self._kernel.message_lib.get_previous_conversation_id(
+                            character_id=event.data.character_id,
+                            conversation_id=event.data.previous_conversation_id,
+                        )
                     )
                 messages = self._kernel.message_lib.get_conversation_messages(
                     character_id=event.data.character_id,
@@ -342,9 +360,13 @@ class AnimatedCorpseMoveProcessor(EventProcessor):
         sender_socket: web.WebSocketResponse,
     ) -> None:
         try:
-            animated_corpse = self._kernel.animated_corpse_lib.get(event.data.animated_corpse_id)
+            animated_corpse = self._kernel.animated_corpse_lib.get(
+                event.data.animated_corpse_id
+            )
         except NoResultFound:
-            server_logger.error(f"No animated corpse found for id {event.data.animated_corpse_id}")
+            server_logger.error(
+                f"No animated corpse found for id {event.data.animated_corpse_id}"
+            )
             return
 
         new_zone_row_i = animated_corpse.zone_row_i
@@ -380,7 +402,9 @@ class AnimatedCorpseMoveProcessor(EventProcessor):
 
 class EventProcessorFactory:
     # FIXME BS NOW EVENT: type of zone_events_manager must be a base abstract class
-    def __init__(self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager") -> None:
+    def __init__(
+        self, kernel: "Kernel", zone_events_manager: "ZoneEventsManager"
+    ) -> None:
         self._processors: typing.Dict[ZoneEventType, EventProcessor] = {}
 
         for zone_event_type, processor_type in [
@@ -392,7 +416,9 @@ class EventProcessorFactory:
             (ZoneEventType.NEW_CHAT_MESSAGE, NewChatMessageProcessor),
             (ZoneEventType.ANIMATED_CORPSE_MOVE, AnimatedCorpseMoveProcessor),
         ]:
-            self._processors[zone_event_type] = processor_type(kernel, zone_events_manager)
+            self._processors[zone_event_type] = processor_type(
+                kernel, zone_events_manager
+            )
 
     def get_processor(self, zone_event_type: ZoneEventType) -> EventProcessor:
         try:

@@ -49,31 +49,53 @@ class GameConfig:
         self._kernel = kernel
 
         self.action_points_per_tick: float = config_dict["action_points_per_tick"]
-        self.life_point_points_per_tick: float = config_dict["life_point_points_per_tick"]
-        self.thirst_change_per_tick: float = config_dict["thirst_change_per_tick"]  # percent
-        self.thirst_life_point_loss_per_tick: float = config_dict["thirst_life_point_loss_per_tick"]
-        self.hunger_change_per_tick: float = config_dict["hunger_change_per_tick"]  # percent
-        self.hunger_life_point_loss_per_tick: float = config_dict["hunger_life_point_loss_per_tick"]
+        self.life_point_points_per_tick: float = config_dict[
+            "life_point_points_per_tick"
+        ]
+        self.thirst_change_per_tick: float = config_dict[
+            "thirst_change_per_tick"
+        ]  # percent
+        self.thirst_life_point_loss_per_tick: float = config_dict[
+            "thirst_life_point_loss_per_tick"
+        ]
+        self.hunger_change_per_tick: float = config_dict[
+            "hunger_change_per_tick"
+        ]  # percent
+        self.hunger_life_point_loss_per_tick: float = config_dict[
+            "hunger_life_point_loss_per_tick"
+        ]
         self.tick_every: int = config_dict["tick_every"]  # seconds
         self.default_maximum_ap: float = config_dict["default_maximum_ap"]
         self.reduce_tiredness_per_tick: int = config_dict["reduce_tiredness_per_tick"]
         self.start_thirst: float = config_dict["start_thirst"]
         self.start_hunger: float = config_dict["start_hunger"]
         self.start_action_points: float = config_dict["start_action_points"]
-        self.start_hunger_life_point_loss: float = config_dict["start_hunger_life_point_loss"]
-        self.start_thirst_life_point_loss: float = config_dict["start_thirst_life_point_loss"]
+        self.start_hunger_life_point_loss: float = config_dict[
+            "start_hunger_life_point_loss"
+        ]
+        self.start_thirst_life_point_loss: float = config_dict[
+            "start_thirst_life_point_loss"
+        ]
         self.limit_hunger_increase_life_point: float = config_dict[
             "limit_hunger_increase_life_point"
         ]
         self.limit_thirst_increase_life_point: float = config_dict[
             "limit_thirst_increase_life_point"
         ]
-        self.limit_hunger_reduce_tiredness: float = config_dict["limit_hunger_reduce_tiredness"]
-        self.limit_thirst_reduce_tiredness: float = config_dict["limit_thirst_reduce_tiredness"]
+        self.limit_hunger_reduce_tiredness: float = config_dict[
+            "limit_hunger_reduce_tiredness"
+        ]
+        self.limit_thirst_reduce_tiredness: float = config_dict[
+            "limit_thirst_reduce_tiredness"
+        ]
         self.stop_auto_drink_thirst: float = config_dict["stop_auto_drink_thirst"]
         self.stop_auto_eat_hunger: float = config_dict["stop_auto_eat_hunger"]
-        self.limit_warning_drink_left_tick: int = config_dict["limit_warning_drink_left_tick"]
-        self.limit_warning_eat_left_tick: int = config_dict["limit_warning_eat_left_tick"]
+        self.limit_warning_drink_left_tick: int = config_dict[
+            "limit_warning_drink_left_tick"
+        ]
+        self.limit_warning_eat_left_tick: int = config_dict[
+            "limit_warning_eat_left_tick"
+        ]
 
         self.less_than_is_health2: float = config_dict["less_than_is_health2"]
         self.less_than_is_health3: float = config_dict["less_than_is_health3"]
@@ -84,7 +106,9 @@ class GameConfig:
         self.grow_progress_3: int = int(config_dict["grow_progress_3"])
         self.grow_progress_4: int = int(config_dict["grow_progress_4"])
 
-        self.create_character_event_title: str = config_dict["create_character_event_title"]
+        self.create_character_event_title: str = config_dict[
+            "create_character_event_title"
+        ]
         self.create_character_event_story_image: str = config_dict.get(
             "create_character_event_story_image"
         )
@@ -93,18 +117,24 @@ class GameConfig:
         ]
         self.fresh_water_resource_id: str = config_dict["fresh_water_resource_id"]
         self.liquid_material_id: str = config_dict["liquid_material_id"]
-        self.fill_with_material_ids: typing.List[str] = config_dict["fill_with_material_ids"]
+        self.fill_with_material_ids: typing.List[str] = config_dict[
+            "fill_with_material_ids"
+        ]
         self.default_weight_capacity: float = config_dict["default_weight_capacity"]
         self.default_clutter_capacity: float = config_dict["default_clutter_capacity"]
         self.cheats: typing.Dict[str, typing.List[str]] = config_dict.get("cheats")
-        self.create_character_skills: typing.List[str] = config_dict["create_character_skills"]
+        self.create_character_skills: typing.List[str] = config_dict[
+            "create_character_skills"
+        ]
         self.create_character_knowledges: typing.List[str] = config_dict[
             "create_character_knowledges"
         ]
         self.create_character_knowledges_count: int = config_dict[
             "create_character_knowledges_count"
         ]
-        self.create_character_max_points: float = config_dict["create_character_max_points"]
+        self.create_character_max_points: float = config_dict[
+            "create_character_max_points"
+        ]
         # FIXME BS NOW: passer les écrans en heure (en fonction de tick_every)
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
         self.tile_clutter_capacity: float = config_dict["tile_clutter_capacity"]
@@ -113,25 +143,31 @@ class GameConfig:
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel
         ] = self._create_character_effects(config_dict)
-        self._materials: typing.Dict[str, MaterialDescriptionModel] = self._create_materials(
+        self._materials: typing.Dict[
+            str, MaterialDescriptionModel
+        ] = self._create_materials(config_dict)
+        self._resources: typing.Dict[
+            str, ResourceDescriptionModel
+        ] = self._create_resources(config_dict)
+        self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(
             config_dict
         )
-        self._resources: typing.Dict[str, ResourceDescriptionModel] = self._create_resources(
+        self._builds: typing.Dict[str, BuildDescription] = self._create_builds(
             config_dict
         )
-        self._abilities: typing.Dict[str, AbilityDescription] = self._create_ablilities(config_dict)
-        self._builds: typing.Dict[str, BuildDescription] = self._create_builds(config_dict)
         self._action_descriptions: typing.Dict[
             ActionType, typing.List[ActionDescriptionModel]
         ] = self._create_actions(config_dict)
         self._fill_resource_actions(config_dict)
-        self._skills: typing.Dict[str, SkillDescription] = self._create_skills(config_dict)
-        self._knowledge: typing.Dict[str, KnowledgeDescription] = self._create_knowledges(
+        self._skills: typing.Dict[str, SkillDescription] = self._create_skills(
             config_dict
         )
-        self._resource_mixs: typing.Dict[str, ResourceMixDescription] = self._create_resource_mixs(
-            config_dict
-        )
+        self._knowledge: typing.Dict[
+            str, KnowledgeDescription
+        ] = self._create_knowledges(config_dict)
+        self._resource_mixs: typing.Dict[
+            str, ResourceMixDescription
+        ] = self._create_resource_mixs(config_dict)
 
     @property
     def folder_path(self) -> str:
@@ -188,7 +224,9 @@ class GameConfig:
 
         return effects
 
-    def _create_materials(self, config_dict: dict) -> typing.Dict[str, MaterialDescriptionModel]:
+    def _create_materials(
+        self, config_dict: dict
+    ) -> typing.Dict[str, MaterialDescriptionModel]:
         materials: typing.Dict[str, MaterialDescriptionModel] = {}
 
         for material_id, material_raw in config_dict.get("materials", {}).items():
@@ -198,7 +236,9 @@ class GameConfig:
 
         return materials
 
-    def _create_resources(self, config_dict: dict) -> typing.Dict[str, ResourceDescriptionModel]:
+    def _create_resources(
+        self, config_dict: dict
+    ) -> typing.Dict[str, ResourceDescriptionModel]:
         resources: typing.Dict[str, ResourceDescriptionModel] = {}
 
         for resource_id, resource_raw in config_dict.get("resources", {}).items():
@@ -222,7 +262,9 @@ class GameConfig:
 
         return resources
 
-    def _create_resource_mixs(self, config_dict: dict) -> typing.Dict[str, ResourceMixDescription]:
+    def _create_resource_mixs(
+        self, config_dict: dict
+    ) -> typing.Dict[str, ResourceMixDescription]:
         resource_mixs: typing.Dict[str, ResourceMixDescription] = {}
 
         for mix_id, mix_raw in config_dict.get("resource_mix", {}).items():
@@ -235,7 +277,9 @@ class GameConfig:
                     )
                 )
             properties = {}
-            fill_base_action_properties(RequiredResourceForMix, self, properties, mix_raw)
+            fill_base_action_properties(
+                RequiredResourceForMix, self, properties, mix_raw
+            )
 
             resource_mixs[mix_id] = ResourceMixDescription(
                 id=mix_id,
@@ -252,7 +296,9 @@ class GameConfig:
     ) -> typing.Dict[ActionType, typing.List[ActionDescriptionModel]]:
         actions: typing.Dict[ActionType, typing.List[ActionDescriptionModel]] = {}
 
-        for action_description_id, action_description_raw in config_raw.get("ACTIONS", {}).items():
+        for action_description_id, action_description_raw in config_raw.get(
+            "ACTIONS", {}
+        ).items():
             for action_raw in action_description_raw["actions"]:
                 action_type = ActionType(action_raw)
                 action_class = ActionFactory.actions[action_type]
@@ -272,8 +318,12 @@ class GameConfig:
 
     def _fill_resource_actions(self, config_raw: dict) -> None:
         for resource_description in self.resources.values():
-            for action_type_id in config_raw["resources"][resource_description.id]["actions"]:
-                resource_description.descriptions.extend(self.actions[ActionType(action_type_id)])
+            for action_type_id in config_raw["resources"][resource_description.id][
+                "actions"
+            ]:
+                resource_description.descriptions.extend(
+                    self.actions[ActionType(action_type_id)]
+                )
 
     def get_resource_mixs_with(
         self, required_resource_ids: typing.List[str]
@@ -284,7 +334,10 @@ class GameConfig:
             all_in = True
 
             for required_resource_id in required_resource_ids:
-                if required_resource_id not in resource_mix_description.required_resources_ids:
+                if (
+                    required_resource_id
+                    not in resource_mix_description.required_resources_ids
+                ):
                     all_in = False
 
             if all_in:
@@ -292,11 +345,15 @@ class GameConfig:
 
         return resource_mixs
 
-    def _create_ablilities(self, config_dict: dict) -> typing.Dict[str, AbilityDescription]:
+    def _create_ablilities(
+        self, config_dict: dict
+    ) -> typing.Dict[str, AbilityDescription]:
         ablilities: typing.Dict[str, AbilityDescription] = {}
 
         for ability_id, ability_raw in config_dict.get("ability", {}).items():
-            ablilities[ability_id] = AbilityDescription(id=ability_id, name=ability_raw["name"])
+            ablilities[ability_id] = AbilityDescription(
+                id=ability_id, name=ability_raw["name"]
+            )
 
         return ablilities
 
@@ -336,7 +393,8 @@ class GameConfig:
                 classes=build_raw.get("classes", []),
                 many=build_raw.get("many", False),
                 traversable={
-                    TransportType(k): v for k, v in build_raw.get("traversable", {}).items()
+                    TransportType(k): v
+                    for k, v in build_raw.get("traversable", {}).items()
                 },
                 illustration=illustration,
                 default_is_on=build_raw.get("default_is_on", True),
@@ -364,13 +422,17 @@ class GameConfig:
             for skill_id, skill_raw in config_raw.get("skill", {}).items()
         }
 
-    def _create_knowledges(self, config_raw: dict) -> typing.Dict[str, KnowledgeDescription]:
+    def _create_knowledges(
+        self, config_raw: dict
+    ) -> typing.Dict[str, KnowledgeDescription]:
         return {
             knowledge_id: KnowledgeDescription(
                 id=knowledge_id,
                 name=knowledge_raw["name"],
                 ap_required=int(knowledge_raw["ap_required"]),
-                instructor_coeff=knowledge_raw.get("instructor_coeff", DEFAULT_INSTRUCTOR_COEFF),
+                instructor_coeff=knowledge_raw.get(
+                    "instructor_coeff", DEFAULT_INSTRUCTOR_COEFF
+                ),
                 abilities=knowledge_raw.get("abilities", []),
                 requires=knowledge_raw.get("requires", []),
             )
@@ -403,7 +465,9 @@ class Game:
     def world_manager(self) -> WorldManager:
         return self._world
 
-    def _create_stuff_manager(self, stuff_file_path: str, config: GameConfig) -> StuffManager:
+    def _create_stuff_manager(
+        self, stuff_file_path: str, config: GameConfig
+    ) -> StuffManager:
         items: typing.List[StuffProperties] = []
         raw_stuffs = toml.load(stuff_file_path)
 
@@ -431,7 +495,9 @@ class Game:
     def _create_world_manager(self, world_file_path: str) -> WorldManager:
         raw_world = toml.load(world_file_path)
         zones_properties: typing.List[ZoneProperties] = []
-        tiles_properties: typing.Dict[typing.Type[ZoneMapTileType], ZoneTileProperties] = {}
+        tiles_properties: typing.Dict[
+            typing.Type[ZoneMapTileType], ZoneTileProperties
+        ] = {}
 
         for zone_type_str, zone_data in raw_world.get("ZONE_PROPERTIES", {}).items():
             move_cost: float = zone_data["move_cost"]
@@ -488,10 +554,16 @@ class Game:
         for stuff_id, stuff_generation_info in generation_data.get("STUFF", {}).items():
             probability = stuff_generation_info["probability"]
             meta = dict(
-                [item for item in stuff_generation_info.items() if item[0] not in ["probability"]]
+                [
+                    item
+                    for item in stuff_generation_info.items()
+                    if item[0] not in ["probability"]
+                ]
             )
             stuff = self._stuff.get_stuff_properties_by_id(stuff_id)
-            stuffs.append(ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta))
+            stuffs.append(
+                ZoneGenerationStuff(stuff=stuff, probability=probability, meta=meta)
+            )
 
         return GenerationInfo(count=count, stuffs=stuffs)
 

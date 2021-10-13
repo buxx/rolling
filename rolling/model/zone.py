@@ -95,7 +95,9 @@ class ZoneProperties:
     resources: typing.List[ZoneResource]
     stuffs: typing.List[ZoneStuff]
     description: str
-    require_transport_type: typing.List[TransportType] = serpyco.field(default_factory=list)
+    require_transport_type: typing.List[TransportType] = serpyco.field(
+        default_factory=list
+    )
     illustration: typing.Optional[str] = None
 
     @property
@@ -144,5 +146,9 @@ class MoveZoneInfos:
     cannot_move_reasons: typing.List[str]
     followers_can: typing.List[CharacterModel] = serpyco.field(default_factory=list)
     followers_cannot: typing.List[CharacterModel] = serpyco.field(default_factory=list)
-    followers_discreetly_can: typing.List[CharacterModel] = serpyco.field(default_factory=list)
-    followers_discreetly_cannot: typing.List[CharacterModel] = serpyco.field(default_factory=list)
+    followers_discreetly_can: typing.List[CharacterModel] = serpyco.field(
+        default_factory=list
+    )
+    followers_discreetly_cannot: typing.List[CharacterModel] = serpyco.field(
+        default_factory=list
+    )

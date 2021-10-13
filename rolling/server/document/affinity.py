@@ -72,7 +72,9 @@ class AffinityRelationDocument(Document):
     affinity_id = Column(Integer, ForeignKey("affinity.id"), primary_key=True)
     request = Column(Boolean, nullable=False, default=False)
     accepted = Column(Boolean, nullable=False, default=False)
-    disallowed = Column(Boolean, nullable=False, default=False)  # disallowed by affinity
+    disallowed = Column(
+        Boolean, nullable=False, default=False
+    )  # disallowed by affinity
     rejected = Column(Boolean, nullable=False, default=False)  # rejected by character
     status_id = Column(String, nullable=True, default=None)
     fighter = Column(Boolean, nullable=False, default=False)

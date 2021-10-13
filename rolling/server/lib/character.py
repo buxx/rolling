@@ -15,8 +15,9 @@ import uuid
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
-from rolling.exception import CannotMoveToZoneError, NotEnoughActionPoints
+from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
+from rolling.exception import NotEnoughActionPoints
 from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.model.ability import AbilityDescription
@@ -76,7 +77,9 @@ STARING_LIFE_POINTS = 3.0  # + endurance
 
 
 class CharacterLib:
-    def __init__(self, kernel: "Kernel", stuff_lib: typing.Optional[StuffLib] = None) -> None:
+    def __init__(
+        self, kernel: "Kernel", stuff_lib: typing.Optional[StuffLib] = None
+    ) -> None:
         self._kernel = kernel
         self._stuff_lib: StuffLib = stuff_lib or StuffLib(kernel)
         self._action_factory = ActionFactory(kernel)
@@ -124,12 +127,19 @@ class CharacterLib:
         character.hunger = self._kernel.game.config.start_hunger
 
         # Place on zone
-        world_row_i, world_col_i = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
+        (
+            world_row_i,
+            world_col_i,
+        ) = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
             self._kernel.world_map_source
         )
-        traversable_coordinates = self._kernel.get_traversable_coordinates(world_row_i, world_col_i)
+        traversable_coordinates = self._kernel.get_traversable_coordinates(
+            world_row_i, world_col_i
+        )
         if not traversable_coordinates:
-            raise RollingError(f"No traversable coordinate in zone {world_row_i},{world_col_i}")
+            raise RollingError(
+                f"No traversable coordinate in zone {world_row_i},{world_col_i}"
+            )
         zone_row_i, zone_col_i = random.choice(traversable_coordinates)
 
         character.world_row_i = world_row_i
@@ -142,7 +152,9 @@ class CharacterLib:
 
         for skill_id, skill_value in skills.items():
             self._kernel.server_db_session.add(
-                self._kernel.character_lib.create_skill_doc(character.id, skill_id, skill_value)
+                self._kernel.character_lib.create_skill_doc(
+                    character.id, skill_id, skill_value
+                )
             )
         self._kernel.server_db_session.commit()
         self.ensure_skills_for_character(character.id)
@@ -165,7 +177,9 @@ class CharacterLib:
                 ),
             )
 
-        event = self.add_event(character.id, self._kernel.game.config.create_character_event_title)
+        event = self.add_event(
+            character.id, self._kernel.game.config.create_character_event_title
+        )
         first_story_page = StoryPageDocument(
             event_id=event.id,
             text=self._kernel.game.config.create_character_event_story_text,
@@ -176,7 +190,9 @@ class CharacterLib:
         self.ensure_skills_for_character(character.id)
         return character.id
 
-    def ensure_skills_for_character(self, character_id: str, commit: bool = True) -> None:
+    def ensure_skills_for_character(
+        self, character_id: str, commit: bool = True
+    ) -> None:
         for skill_id, skill_description in self._kernel.game.config.skills.items():
             if (
                 not self._kernel.server_db_session.query(CharacterSkillDocument)
@@ -198,7 +214,9 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def get_document(self, id_: str, dead: typing.Optional[bool] = False) -> CharacterDocument:
+    def get_document(
+        self, id_: str, dead: typing.Optional[bool] = False
+    ) -> CharacterDocument:
         if dead is None:
             query = self.dont_care_alive_query
         elif dead:
@@ -210,7 +228,9 @@ class CharacterLib:
     def get_document_by_name(self, name: str) -> CharacterDocument:
         return self.alive_query.filter(CharacterDocument.name == name).one()
 
-    def document_to_model(self, character_document: CharacterDocument) -> CharacterModel:
+    def document_to_model(
+        self, character_document: CharacterDocument
+    ) -> CharacterModel:
         weapon = None
         weapon_doc = character_document.used_as_primary_weapon
         if weapon_doc:
@@ -232,14 +252,17 @@ class CharacterLib:
                 name=self._kernel.game.config.skills[skill_document.skill_id].name,
                 value=float(skill_document.value),
             )
-            for skill_document in self._kernel.server_db_session.query(CharacterSkillDocument)
+            for skill_document in self._kernel.server_db_session.query(
+                CharacterSkillDocument
+            )
             .filter(CharacterSkillDocument.character_id == character_document.id)
             .all()
         }
         knowledges: typing.Dict[str, KnowledgeDescription] = {
             row[0]: self._kernel.game.config.knowledge[row[0]]
             for row in self._kernel.server_db_session.query(
-                CharacterKnowledgeDocument.knowledge_id, CharacterKnowledgeDocument.acquired
+                CharacterKnowledgeDocument.knowledge_id,
+                CharacterKnowledgeDocument.acquired,
             )
             .filter(CharacterKnowledgeDocument.character_id == character_document.id)
             .all()
@@ -263,7 +286,9 @@ class CharacterLib:
             background_story=character_document.background_story,
             life_points=float(character_document.life_points),
             max_life_comp=float(character_document.max_life_comp),
-            hunting_and_collecting_comp=float(character_document.hunting_and_collecting_comp),
+            hunting_and_collecting_comp=float(
+                character_document.hunting_and_collecting_comp
+            ),
             find_water_comp=float(character_document.find_water_comp),
             thirst=character_document.thirst,
             hunger=character_document.hunger,
@@ -282,10 +307,14 @@ class CharacterLib:
             alive=character_document.alive,
         )
 
-    def get_multiple(self, character_ids: typing.List[str]) -> typing.List[CharacterModel]:
+    def get_multiple(
+        self, character_ids: typing.List[str]
+    ) -> typing.List[CharacterModel]:
         return [
             self.document_to_model(doc)
-            for doc in self.alive_query.filter(CharacterDocument.id.in_(character_ids)).all()
+            for doc in self.alive_query.filter(
+                CharacterDocument.id.in_(character_ids)
+            ).all()
         ]
 
     def get(
@@ -307,7 +336,9 @@ class CharacterLib:
         if (
             compute_unread_event
             and self._kernel.server_db_session.query(EventDocument.id)
-            .filter(and_(EventDocument.character_id == id_, EventDocument.read == False))
+            .filter(
+                and_(EventDocument.character_id == id_, EventDocument.read == False)
+            )
             .count()
         ):
             model.unread_event = True
@@ -340,7 +371,9 @@ class CharacterLib:
         if compute_unvote_affinity_relation:
             character_chief_affinity_ids = [
                 r[0]
-                for r in self._kernel.server_db_session.query(AffinityRelationDocument.affinity_id)
+                for r in self._kernel.server_db_session.query(
+                    AffinityRelationDocument.affinity_id
+                )
                 .filter(
                     AffinityRelationDocument.character_id == character_document.id,
                     AffinityRelationDocument.accepted == True,
@@ -354,14 +387,18 @@ class CharacterLib:
                 for a in self._kernel.server_db_session.query(AffinityDocument.id)
                 .filter(
                     AffinityDocument.id.in_(character_chief_affinity_ids),
-                    AffinityDocument.direction_type.in_([AffinityDirectionType.ONE_DIRECTOR.value]),
+                    AffinityDocument.direction_type.in_(
+                        [AffinityDirectionType.ONE_DIRECTOR.value]
+                    ),
                 )
                 .all()
             ]
             if (
                 self._kernel.server_db_session.query(AffinityRelationDocument)
                 .filter(
-                    AffinityRelationDocument.affinity_id.in_(character_chief_affinity_ids),
+                    AffinityRelationDocument.affinity_id.in_(
+                        character_chief_affinity_ids
+                    ),
                     AffinityRelationDocument.accepted == False,
                     AffinityRelationDocument.request == True,
                 )
@@ -378,10 +415,14 @@ class CharacterLib:
                 model.unread_transactions = True
 
         if compute_pending_actions:
-            model.pending_actions = self.get_pending_actions_count(character_document.id)
+            model.pending_actions = self.get_pending_actions_count(
+                character_document.id
+            )
 
         if compute_with_fighters:
-            model.with_fighters_count = self.get_with_fighters_count(character_document.id)
+            model.with_fighters_count = self.get_with_fighters_count(
+                character_document.id
+            )
 
         return model
 
@@ -410,7 +451,10 @@ class CharacterLib:
         exclude_ids: typing.Optional[typing.List[str]] = None,
     ) -> Query:
         exclude_ids = exclude_ids or []
-        filters = [CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i]
+        filters = [
+            CharacterDocument.world_row_i == row_i,
+            CharacterDocument.world_col_i == col_i,
+        ]
 
         if exclude_ids:
             filters.extend([CharacterDocument.id.notin_(exclude_ids)])
@@ -441,7 +485,8 @@ class CharacterLib:
             exclude_ids=exclude_ids,
         ).all()
         return [
-            self.document_to_model(character_document) for character_document in character_documents
+            self.document_to_model(character_document)
+            for character_document in character_documents
         ]
 
     def count_zone_characters(
@@ -461,7 +506,11 @@ class CharacterLib:
         ).count()
 
     async def move(
-        self, character: CharacterModel, to_world_row: int, to_world_col: int, commit: bool= True
+        self,
+        character: CharacterModel,
+        to_world_row: int,
+        to_world_col: int,
+        commit: bool = True,
     ) -> CharacterDocument:
         # TODO BS 2019-06-04: Check if move is possible
         character_document = self.get_document(character.id)
@@ -485,16 +534,35 @@ class CharacterLib:
         )
 
         # FIXME BS NOW: walking or something else
-        def get_walking_coordinates(origin_new_zone_row_i: int, origin_new_zone_col_i: int):
+        def get_walking_coordinates(
+            origin_new_zone_row_i: int, origin_new_zone_col_i: int
+        ):
             if traversable_properties[
                 new_zone_geography.rows[origin_new_zone_row_i][origin_new_zone_col_i]
             ].get(TransportType.WALKING.value):
                 return origin_new_zone_row_i, origin_new_zone_col_i
 
-            distances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # after 10 of distance ... it is a fail
+            distances = [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+            ]  # after 10 of distance ... it is a fail
             for distance in distances:
-                for new_zone_row_i_, new_zone_col_i_ in util.get_on_and_around_coordinates(
-                    origin_new_zone_row_i, origin_new_zone_col_i, distance=distance, exclude_on=True
+                for (
+                    new_zone_row_i_,
+                    new_zone_col_i_,
+                ) in util.get_on_and_around_coordinates(
+                    origin_new_zone_row_i,
+                    origin_new_zone_col_i,
+                    distance=distance,
+                    exclude_on=True,
                 ):
                     if new_zone_row_i_ < 0:
                         new_zone_row_i_ = 0
@@ -511,7 +579,9 @@ class CharacterLib:
 
             return origin_new_zone_row_i, origin_new_zone_col_i
 
-        new_zone_row_i, new_zone_col_i = get_walking_coordinates(new_zone_row_i, new_zone_col_i)
+        new_zone_row_i, new_zone_col_i = get_walking_coordinates(
+            new_zone_row_i, new_zone_col_i
+        )
         character_document.zone_row_i = new_zone_row_i
         character_document.zone_col_i = new_zone_col_i
 
@@ -544,7 +614,9 @@ class CharacterLib:
 
         return character_document
 
-    def update(self, character_document: CharacterDocument, commit: bool = True) -> None:
+    def update(
+        self, character_document: CharacterDocument, commit: bool = True
+    ) -> None:
         self._kernel.server_db_session.add(character_document)
         if commit:
             self._kernel.server_db_session.commit()
@@ -565,14 +637,20 @@ class CharacterLib:
         )
 
     def get_inventory(self, character_id: str) -> CharacterInventoryModel:
-        carried_stuff = self._stuff_lib.get_carried_by(character_id, exclude_crafting=False)
+        carried_stuff = self._stuff_lib.get_carried_by(
+            character_id, exclude_crafting=False
+        )
         carried_resources = self._kernel.resource_lib.get_carried_by(character_id)
 
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
 
         total_clutter = sum(
-            [stuff.clutter for stuff in carried_stuff if stuff.clutter and not stuff.used_by]
+            [
+                stuff.clutter
+                for stuff in carried_stuff
+                if stuff.clutter and not stuff.used_by
+            ]
         )
         total_clutter += sum([r.clutter for r in carried_resources if r.clutter])
 
@@ -663,7 +741,9 @@ class CharacterLib:
                 character_actions_.append(
                     CharacterActionLink(
                         name=f"Jeter un coup d'oeil sur {build_description.name}",
-                        link=DESCRIBE_BUILD.format(character_id=character.id, build_id=build.id),
+                        link=DESCRIBE_BUILD.format(
+                            character_id=character.id, build_id=build.id
+                        ),
                         group_name="Voir les objets et bâtiments autour",
                     )
                 )
@@ -678,14 +758,20 @@ class CharacterLib:
         for resource in self._kernel.resource_lib.get_carried_by(character.id):
             actions.extend(
                 self._kernel.character_lib.get_on_resource_actions(
-                    character_id=character.id, resource_id=resource.id, for_actions_page=True,
+                    character_id=character.id,
+                    resource_id=resource.id,
+                    for_actions_page=True,
                 )
             )
 
-        for stuff in self._kernel.stuff_lib.get_carried_by(character.id, exclude_crafting=False):
+        for stuff in self._kernel.stuff_lib.get_carried_by(
+            character.id, exclude_crafting=False
+        ):
             actions.extend(
                 self._kernel.stuff_lib.get_carrying_actions(
-                    character=character, stuff=stuff, for_actions_page=True,
+                    character=character,
+                    stuff=stuff,
+                    for_actions_page=True,
                 )
             )
 
@@ -730,23 +816,28 @@ class CharacterLib:
                 action_link.category = category
         return action_links
 
-    def get_on_place_actions(self, character_id: str) -> typing.List[CharacterActionLink]:
+    def get_on_place_actions(
+        self, character_id: str
+    ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions_: typing.List[CharacterActionLink] = []
 
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_stuff_actions(character), "Objets, ressources et bâtiments autour"
+                self.get_on_place_stuff_actions(character),
+                "Objets, ressources et bâtiments autour",
             )
         )
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_resource_actions(character), "Objets, ressources et bâtiments autour"
+                self.get_on_place_resource_actions(character),
+                "Objets, ressources et bâtiments autour",
             )
         )
         character_actions_.extend(
             self._add_category_to_action_links(
-                self.get_on_place_build_actions(character), "Objets, ressources et bâtiments autour"
+                self.get_on_place_build_actions(character),
+                "Objets, ressources et bâtiments autour",
             )
         )
         character_actions_.extend(
@@ -800,15 +891,22 @@ class CharacterLib:
                 )
             )
         elif stuff.carried_by == character_id:
-            character_actions.extend(self._stuff_lib.get_carrying_actions(character, stuff))
+            character_actions.extend(
+                self._stuff_lib.get_carrying_actions(character, stuff)
+            )
 
         return filter_action_links(character_actions)
 
     def get_on_resource_actions(
-        self, character_id: str, resource_id: str, for_actions_page: bool = False,
+        self,
+        character_id: str,
+        resource_id: str,
+        for_actions_page: bool = False,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
-        character_actions = self._kernel.resource_lib.get_carrying_actions(character, resource_id, for_actions_page=for_actions_page)
+        character_actions = self._kernel.resource_lib.get_carrying_actions(
+            character, resource_id, for_actions_page=for_actions_page
+        )
         return filter_action_links(character_actions)
 
     def take_stuff(self, character_id: str, stuff_id: int) -> None:
@@ -921,7 +1019,9 @@ class CharacterLib:
     ) -> EventDocument:
         story_pages = story_pages or []
         turn = self._kernel.universe_lib.get_last_state().turn
-        event_doc = EventDocument(character_id=character_id, text=title, turn=turn, read=read)
+        event_doc = EventDocument(
+            character_id=character_id, text=title, turn=turn, read=read
+        )
         self._kernel.server_db_session.add(event_doc)
         self._kernel.server_db_session.commit()
         if story_pages:
@@ -956,10 +1056,14 @@ class CharacterLib:
         self, character_id: str, world_row_i: int, world_col_i: int
     ) -> MoveZoneInfos:
         try:
-            zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+            zone_type = self._kernel.world_map_source.geography.rows[world_row_i][
+                world_col_i
+            ]
         except IndexError:
             raise ImpossibleAction("Mouvement impossible (hors du monde)")
-        move_cost = self._kernel.game.world_manager.get_zone_properties(zone_type).move_cost
+        move_cost = self._kernel.game.world_manager.get_zone_properties(
+            zone_type
+        ).move_cost
         character = self.get(character_id)
         inventory = self.get_inventory(character_id)
         can_move = True
@@ -1000,7 +1104,8 @@ class CharacterLib:
             follower_inventory = self.get_inventory(follower.id)
             if (
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
-                or follower_inventory.clutter > follower.get_clutter_capacity(self._kernel)
+                or follower_inventory.clutter
+                > follower.get_clutter_capacity(self._kernel)
                 or follower.is_exhausted()
                 or follower.action_points < move_cost
                 or not transport_type_ok
@@ -1033,10 +1138,14 @@ class CharacterLib:
         )
         haves: typing.List[HaveAbility] = []
 
-        for have_ability_id in character.have_abilities([ability.id for ability in abilities]):
+        for have_ability_id in character.have_abilities(
+            [ability.id for ability in abilities]
+        ):
             haves.append(
                 HaveAbility(
-                    ability_id=have_ability_id, from_=FromType.HIMSELF, risk=RiskType.NONE
+                    ability_id=have_ability_id,
+                    from_=FromType.HIMSELF,
+                    risk=RiskType.NONE,
                 )
             )
 
@@ -1050,15 +1159,19 @@ class CharacterLib:
                 zone_col_i=col_i,
             )
         for stuff in carried_or_around_stuffs:
-            stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                stuff.stuff_id
+            stuff_properties = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff.stuff_id
+                )
             )
             for have_ability_id in stuff_properties.have_abilities(
                 [ability.id for ability in abilities]
             ):
                 haves.append(
                     HaveAbility(
-                        ability_id=have_ability_id, from_=FromType.STUFF, risk=RiskType.NONE,
+                        ability_id=have_ability_id,
+                        from_=FromType.STUFF,
+                        risk=RiskType.NONE,
                     )
                 )
 
@@ -1079,7 +1192,9 @@ class CharacterLib:
                             # TODO BS 20200220: implement risks
                             haves.append(
                                 HaveAbility(
-                                    ability_id=ability.id, from_=FromType.BUILD, risk=RiskType.NONE
+                                    ability_id=ability.id,
+                                    from_=FromType.BUILD,
+                                    risk=RiskType.NONE,
                                 )
                             )
 
@@ -1109,7 +1224,9 @@ class CharacterLib:
             )
 
         corpse = self._stuff_lib.create_document_from_properties(
-            properties=self._kernel.game.stuff_manager.get_stuff_properties_by_id("CORPSE"),
+            properties=self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                "CORPSE"
+            ),
             stuff_id="CORPSE",
             world_row_i=character_doc.world_row_i,
             world_col_i=character_doc.world_col_i,
@@ -1123,7 +1240,9 @@ class CharacterLib:
             AffinityRelationDocument.character_id == character_doc.id
         ).update({"accepted": False, "request": False, "fighter": False})
 
-    def increase_tiredness(self, character_id: str, value: int, commit: bool = True) -> None:
+    def increase_tiredness(
+        self, character_id: str, value: int, commit: bool = True
+    ) -> None:
         doc = self.get_document(character_id)
 
         new_tiredness = doc.tiredness + value
@@ -1135,7 +1254,9 @@ class CharacterLib:
             self._kernel.server_db_session.add(doc)
             self._kernel.server_db_session.commit()
 
-    def reduce_tiredness(self, character_id: str, value: int, commit: bool = True) -> int:
+    def reduce_tiredness(
+        self, character_id: str, value: int, commit: bool = True
+    ) -> int:
         doc = self.get_document(character_id)
 
         new_tiredness = doc.tiredness - value
@@ -1177,7 +1298,9 @@ class CharacterLib:
             ).all()
         ]
 
-    def reduce_life_points(self, character_id: str, value: float, commit: bool = True) -> float:
+    def reduce_life_points(
+        self, character_id: str, value: float, commit: bool = True
+    ) -> float:
         doc = self.get_document(character_id)
         doc.life_points = float(doc.life_points) - value
 
@@ -1222,7 +1345,9 @@ class CharacterLib:
             try:
                 action.check_is_possible(character, with_character=with_character)
                 character_actions.extend(
-                    action.get_character_actions(character, with_character=with_character)
+                    action.get_character_actions(
+                        character, with_character=with_character
+                    )
                 )
             except ImpossibleAction:
                 pass
@@ -1238,7 +1363,10 @@ class CharacterLib:
             counter += 1
 
         return CharacterSkillDocument(
-            skill_id=skill_id, character_id=character_id, value=str(value), counter=counter
+            skill_id=skill_id,
+            character_id=character_id,
+            value=str(value),
+            counter=counter,
         )
 
     def increase_skill(
@@ -1283,15 +1411,23 @@ class CharacterLib:
             can_drink_str = "Oui"
         else:
             drinkable_stuffs = get_stuffs_filled_with_resource_id(
-                self._kernel, character_id, self._kernel.game.config.fresh_water_resource_id
+                self._kernel,
+                character_id,
+                self._kernel.game.config.fresh_water_resource_id,
             )
             total_drinkable_value = sum(s.filled_value or 0.0 for s in drinkable_stuffs)
             if total_drinkable_value:
-                drink_action_description = self._kernel.game.get_drink_water_action_description()
-                drinkable_ticks = (
-                    total_drinkable_value // drink_action_description.properties["consume_per_tick"]
+                drink_action_description = (
+                    self._kernel.game.get_drink_water_action_description()
                 )
-                if drinkable_ticks > self._kernel.game.config.limit_warning_drink_left_tick:
+                drinkable_ticks = (
+                    total_drinkable_value
+                    // drink_action_description.properties["consume_per_tick"]
+                )
+                if (
+                    drinkable_ticks
+                    > self._kernel.game.config.limit_warning_drink_left_tick
+                ):
                     can_drink_str = "Oui"
                 else:
                     can_drink_str = "Faible"
@@ -1307,21 +1443,32 @@ class CharacterLib:
             eatables_total_ticks += eatable_total_ticks
         if eatables_total_ticks:
             can_eat_str = "Faible"
-            if eatables_total_ticks > self._kernel.game.config.limit_warning_eat_left_tick:
+            if (
+                eatables_total_ticks
+                > self._kernel.game.config.limit_warning_eat_left_tick
+            ):
                 can_eat_str = "Oui"
 
-        fighter_with_him = self._kernel.character_lib.get_with_fighters_count(character_id)
+        fighter_with_him = self._kernel.character_lib.get_with_fighters_count(
+            character_id
+        )
 
         hunger_class = "green"
         thirst_class = "green"
         tiredness_class = "green"
 
-        if character.hunger >= self._kernel.game.config.limit_hunger_increase_life_point:
+        if (
+            character.hunger
+            >= self._kernel.game.config.limit_hunger_increase_life_point
+        ):
             hunger_class = "red"
         elif character.hunger >= self._kernel.game.config.stop_auto_eat_hunger:
             hunger_class = "yellow"
 
-        if character.thirst >= self._kernel.game.config.limit_thirst_increase_life_point:
+        if (
+            character.thirst
+            >= self._kernel.game.config.limit_thirst_increase_life_point
+        ):
             thirst_class = "red"
         elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
             thirst_class = "yellow"
@@ -1332,8 +1479,12 @@ class CharacterLib:
             tiredness_class = "yellow"
 
         return [
-            ItemModel("PV", value_is_str=True, value_str=self.get_health_text(character)),
-            ItemModel("PA", value_is_float=True, value_float=round(character.action_points, 1)),
+            ItemModel(
+                "PV", value_is_str=True, value_str=self.get_health_text(character)
+            ),
+            ItemModel(
+                "PA", value_is_float=True, value_float=round(character.action_points, 1)
+            ),
             ItemModel(
                 "Faim",
                 value_is_float=True,
@@ -1354,13 +1505,22 @@ class CharacterLib:
             ),
             ItemModel("A boire", value_is_str=True, value_str=can_drink_str),
             ItemModel("A manger", value_is_str=True, value_str=can_eat_str),
-            ItemModel("Suivis", value_is_float=True, value_float=float(following_count)),
-            ItemModel("Suiveurs", value_is_float=True, value_float=float(followers_count)),
-            ItemModel("Combattants", value_is_float=True, value_float=float(fighter_with_him)),
+            ItemModel(
+                "Suivis", value_is_float=True, value_float=float(following_count)
+            ),
+            ItemModel(
+                "Suiveurs", value_is_float=True, value_float=float(followers_count)
+            ),
+            ItemModel(
+                "Combattants", value_is_float=True, value_float=float(fighter_with_him)
+            ),
         ]
 
     def is_following(
-        self, follower_id: str, followed_id: str, discreetly: typing.Optional[bool] = None
+        self,
+        follower_id: str,
+        followed_id: str,
+        discreetly: typing.Optional[bool] = None,
     ) -> bool:
         query = self._kernel.server_db_session.query(FollowCharacterDocument).filter(
             FollowCharacterDocument.follower_id == follower_id,
@@ -1419,13 +1579,17 @@ class CharacterLib:
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
-        query = self.get_follower_query(followed_id, discreetly, row_i=row_i, col_i=col_i)
+        query = self.get_follower_query(
+            followed_id, discreetly, row_i=row_i, col_i=col_i
+        )
         follows = [r for r in query.all()]
         follows_by_id = {f.follower_id: f for f in follows}
 
         return [
             (follows_by_id[doc.id], self.document_to_model(doc))
-            for doc in self.alive_query.filter(CharacterDocument.id.in_(follows_by_id.keys())).all()
+            for doc in self.alive_query.filter(
+                CharacterDocument.id.in_(follows_by_id.keys())
+            ).all()
         ]
 
     def get_follower_count(
@@ -1435,7 +1599,9 @@ class CharacterLib:
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> int:
-        return self.get_follower_query(followed_id, discreetly, row_i=row_i, col_i=col_i).count()
+        return self.get_follower_query(
+            followed_id, discreetly, row_i=row_i, col_i=col_i
+        ).count()
 
     def get_followed(
         self,
@@ -1444,13 +1610,17 @@ class CharacterLib:
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> typing.List[typing.Tuple[FollowCharacterDocument, CharacterModel]]:
-        query = self.get_followed_query(follower_id, discreetly, row_i=row_i, col_i=col_i)
+        query = self.get_followed_query(
+            follower_id, discreetly, row_i=row_i, col_i=col_i
+        )
         follows = [r for r in query.all()]
         follows_by_id = {f.followed_id: f for f in follows}
 
         return [
             (follows_by_id[doc.id], self.document_to_model(doc))
-            for doc in self.alive_query.filter(CharacterDocument.id.in_(follows_by_id.keys())).all()
+            for doc in self.alive_query.filter(
+                CharacterDocument.id.in_(follows_by_id.keys())
+            ).all()
         ]
 
     def get_followed_count(
@@ -1460,7 +1630,9 @@ class CharacterLib:
         row_i: typing.Optional[int] = None,
         col_i: typing.Optional[int] = None,
     ) -> int:
-        return self.get_followed_query(follower_id, discreetly, row_i=row_i, col_i=col_i).count()
+        return self.get_followed_query(
+            follower_id, discreetly, row_i=row_i, col_i=col_i
+        ).count()
 
     def set_following(
         self,
@@ -1488,7 +1660,9 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def set_not_following(self, follower_id: str, followed_id: str, commit: bool = True) -> None:
+    def set_not_following(
+        self, follower_id: str, followed_id: str, commit: bool = True
+    ) -> None:
         try:
             follow = (
                 self._kernel.server_db_session.query(FollowCharacterDocument)
@@ -1518,14 +1692,17 @@ class CharacterLib:
         return [
             r[0]
             for r in query.filter(
-                CharacterDocument.world_row_i == row_i, CharacterDocument.world_col_i == col_i
+                CharacterDocument.world_row_i == row_i,
+                CharacterDocument.world_col_i == col_i,
             ).all()
         ]
 
     def check_can_move_to_zone(
         self, world_row_i: int, world_col_i: int, character: CharacterModel
     ) -> None:
-        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][world_col_i]
+        zone_type = self._kernel.world_map_source.geography.rows[world_row_i][
+            world_col_i
+        ]
         zone_properties = self._kernel.game.world_manager.get_zone_properties(zone_type)
 
         # TODO BS 20200707: currently hardcoded
@@ -1538,7 +1715,9 @@ class CharacterLib:
     def get_knowledge_progress(self, character_id: str, knowledge_id: str) -> int:
         try:
             return (
-                self._kernel.server_db_session.query(CharacterKnowledgeDocument.progress)
+                self._kernel.server_db_session.query(
+                    CharacterKnowledgeDocument.progress
+                )
                 .filter(
                     CharacterKnowledgeDocument.character_id == character_id,
                     CharacterKnowledgeDocument.knowledge_id == knowledge_id,
@@ -1580,17 +1759,23 @@ class CharacterLib:
     def get_pending_actions_count(self, character_id: str) -> int:
         return (
             self._kernel.server_db_session.query(AuthorizePendingActionDocument)
-            .filter(AuthorizePendingActionDocument.authorized_character_id == character_id)
+            .filter(
+                AuthorizePendingActionDocument.authorized_character_id == character_id
+            )
             .count()
         )
 
-    def get_pending_actions(self, character_id: str) -> typing.List[PendingActionDocument]:
+    def get_pending_actions(
+        self, character_id: str
+    ) -> typing.List[PendingActionDocument]:
         pending_action_ids = [
             r[0]
             for r in self._kernel.server_db_session.query(
                 AuthorizePendingActionDocument.pending_action_id
             )
-            .filter(AuthorizePendingActionDocument.authorized_character_id == character_id)
+            .filter(
+                AuthorizePendingActionDocument.authorized_character_id == character_id
+            )
             .all()
         ]
         return (
@@ -1624,12 +1809,16 @@ class CharacterLib:
         character: CharacterModel,
         exclude_resource_ids: typing.Optional[typing.List[str]] = None,
     ) -> typing.Generator[
-        typing.Tuple[CarriedResourceDescriptionModel, ActionDescriptionModel], None, None
+        typing.Tuple[CarriedResourceDescriptionModel, ActionDescriptionModel],
+        None,
+        None,
     ]:
         exclude_resource_ids = exclude_resource_ids or []
         # With inventory resources
         for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
-            resource_properties = self._kernel.game.config.resources[carried_resource.id]
+            resource_properties = self._kernel.game.config.resources[
+                carried_resource.id
+            ]
 
             if resource_properties.id in exclude_resource_ids:
                 continue
@@ -1638,7 +1827,10 @@ class CharacterLib:
                 if (
                     description.action_type == ActionType.EAT_RESOURCE
                     and resource_properties.id
-                    in [rd.id for rd in description.properties.get("accept_resources", [])]
+                    in [
+                        rd.id
+                        for rd in description.properties.get("accept_resources", [])
+                    ]
                 ):
                     yield carried_resource, description
 

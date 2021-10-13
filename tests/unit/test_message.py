@@ -20,7 +20,9 @@ class TestMessage:
         assert_messages: typing.Optional[typing.List[str]] = None,
     ) -> None:
         assert_messages = assert_messages or []
-        resp = await web.post(f"/zones/{row_i}/{col_i}/messages?character_id={character_id}")
+        resp = await web.post(
+            f"/zones/{row_i}/{col_i}/messages?character_id={character_id}"
+        )
         descr = description_serializer.load(await resp.json())
 
         assert 3 + message_count == len(descr.items)
@@ -46,7 +48,11 @@ class TestMessage:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         await self._assert_messages(
-            web, xena.id, message_count=0, row_i=xena.world_row_i, col_i=xena.world_col_i
+            web,
+            xena.id,
+            message_count=0,
+            row_i=xena.world_row_i,
+            col_i=xena.world_col_i,
         )
 
     async def _post_zone_message(
@@ -82,7 +88,11 @@ class TestMessage:
 
         # no message at startup
         await self._assert_messages(
-            web, xena.id, message_count=0, row_i=xena.world_row_i, col_i=xena.world_col_i
+            web,
+            xena.id,
+            message_count=0,
+            row_i=xena.world_row_i,
+            col_i=xena.world_col_i,
         )
         # send message, visible for xena and arthur
         await self._post_zone_message(
@@ -105,7 +115,11 @@ class TestMessage:
             assert_messages=[f"{xena.name}: hello"],
         )
         await self._post_zone_message(
-            web, arthur.id, "hello xena !", row_i=arthur.world_row_i, col_i=arthur.world_col_i
+            web,
+            arthur.id,
+            "hello xena !",
+            row_i=arthur.world_row_i,
+            col_i=arthur.world_col_i,
         )
         await self._assert_messages(
             web,
@@ -125,7 +139,9 @@ class TestMessage:
         )
 
         # Move xena, arthur don' see new xena message
-        xena_doc = await kernel.character_lib.move(character=xena, to_world_row=0, to_world_col=0)
+        xena_doc = await kernel.character_lib.move(
+            character=xena, to_world_row=0, to_world_col=0
+        )
         await self._assert_messages(
             web,
             xena.id,
@@ -147,7 +163,11 @@ class TestMessage:
             assert_messages=[f"{xena.name}: hello", f"{arthur.name}: hello xena !"],
         )
         await self._post_zone_message(
-            web, xena.id, "some here ?", row_i=xena_doc.world_row_i, col_i=xena_doc.world_col_i
+            web,
+            xena.id,
+            "some here ?",
+            row_i=xena_doc.world_row_i,
+            col_i=xena_doc.world_col_i,
         )
         await self._assert_messages(
             web,
@@ -163,11 +183,19 @@ class TestMessage:
             ],
         )
         await self._assert_messages(
-            web, arthur.id, message_count=2, row_i=arthur.world_row_i, col_i=arthur.world_col_i
+            web,
+            arthur.id,
+            message_count=2,
+            row_i=arthur.world_row_i,
+            col_i=arthur.world_col_i,
         )
 
     async def _assert_conversations(
-        self, web: TestClient, character: CharacterModel, count: int, resp_code: int = 200
+        self,
+        web: TestClient,
+        character: CharacterModel,
+        count: int,
+        resp_code: int = 200,
     ) -> None:
         resp = await web.post(f"/conversation/{character.id}")
         text = await resp.text()
@@ -227,10 +255,15 @@ class TestMessage:
             assert message in messages_
 
     async def _add_conversation_message(
-        self, web: TestClient, character: CharacterModel, conversation_id: int, message: str
+        self,
+        web: TestClient,
+        character: CharacterModel,
+        conversation_id: int,
+        message: str,
     ) -> None:
         resp = await web.post(
-            f"/conversation/{character.id}/add/{conversation_id}", json={"message": message}
+            f"/conversation/{character.id}/add/{conversation_id}",
+            json={"message": message},
         )
         text = await resp.text()
         assert 200 == resp.status
@@ -340,7 +373,10 @@ class TestMessage:
             xena,
             c.id,
             message_count=2,
-            messages=[f"{xena.name}: coucou", f"{arthur.name} n'est plus là pour parler"],
+            messages=[
+                f"{xena.name}: coucou",
+                f"{arthur.name} n'est plus là pour parler",
+            ],
             between=[xena, arthur, franck],
         )
         await self._assert_conversation(
@@ -348,7 +384,10 @@ class TestMessage:
             franck,
             c.id,
             message_count=2,
-            messages=[f"{xena.name}: coucou", f"{arthur.name} n'est plus là pour parler"],
+            messages=[
+                f"{xena.name}: coucou",
+                f"{arthur.name} n'est plus là pour parler",
+            ],
             between=[xena, arthur, franck],
         )
         await self._assert_conversation(

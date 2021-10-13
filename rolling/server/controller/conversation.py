@@ -78,7 +78,9 @@ class ConversationController(BaseController):
     @hapic.input_query(ConversationsQueryModel)
     @hapic.output_body(Description)
     async def start(self, request: Request, hapic_data: HapicData) -> Description:
-        character_doc = self._kernel.character_lib.get_document(hapic_data.path.character_id)
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id
+        )
         zone_characters = self._kernel.character_lib.get_zone_characters(
             row_i=character_doc.world_row_i,
             col_i=character_doc.world_col_i,
@@ -88,19 +90,23 @@ class ConversationController(BaseController):
         try:
             data = await request.json()
             if data.get("message"):
-                selected_character_ids = [c.id for c in zone_characters if data.get(c.id) == "on"]
+                selected_character_ids = [
+                    c.id for c in zone_characters if data.get(c.id) == "on"
+                ]
                 if not selected_character_ids:
                     return Description(
                         title="Démarrer une nouvelle conversation",
                         items=[Part(text="Vous devez choisir au moins un personnage")],
                     )
 
-                conversation_id = await self._kernel.message_lib.add_conversation_message(
-                    author_id=hapic_data.path.character_id,
-                    subject=data.get("subject", "Une conversation"),
-                    message=data["message"],
-                    concerned=selected_character_ids,
-                    is_first_message=True,
+                conversation_id = (
+                    await self._kernel.message_lib.add_conversation_message(
+                        author_id=hapic_data.path.character_id,
+                        subject=data.get("subject", "Une conversation"),
+                        message=data["message"],
+                        concerned=selected_character_ids,
+                        is_first_message=True,
+                    )
                 )
                 return Description(
                     redirect=f"/conversation/{hapic_data.path.character_id}/read/{conversation_id}"
@@ -146,8 +152,16 @@ class ConversationController(BaseController):
                     form_action=f"/conversation/{hapic_data.path.character_id}/start",
                     items=character_parts
                     + [
-                        Part(label="Choisissez un titre", type_=Type.STRING, name="subject"),
-                        Part(label="Saisissez votre élocuction", type_=Type.STRING, name="message"),
+                        Part(
+                            label="Choisissez un titre",
+                            type_=Type.STRING,
+                            name="subject",
+                        ),
+                        Part(
+                            label="Saisissez votre élocuction",
+                            type_=Type.STRING,
+                            name="message",
+                        ),
                     ],
                 ),
             ],
@@ -200,7 +214,13 @@ class ConversationController(BaseController):
                 Part(
                     is_form=True,
                     form_action=f"/conversation/{hapic_data.path.character_id}/add/{hapic_data.path.conversation_id}",
-                    items=[Part(label="Ajouter un message", type_=Type.STRING, name="message")],
+                    items=[
+                        Part(
+                            label="Ajouter un message",
+                            type_=Type.STRING,
+                            name="message",
+                        )
+                    ],
                 ),
                 Part(text="Conversation (message le plus récente en haut):"),
             ]
@@ -308,7 +328,11 @@ class ConversationController(BaseController):
             [
                 web.post("/conversation/{character_id}", self.main_page),
                 web.post("/conversation/{character_id}/start", self.start),
-                web.post("/conversation/{character_id}/read/{conversation_id}", self.read),
-                web.post("/conversation/{character_id}/add/{conversation_id}", self.add),
+                web.post(
+                    "/conversation/{character_id}/read/{conversation_id}", self.read
+                ),
+                web.post(
+                    "/conversation/{character_id}/add/{conversation_id}", self.add
+                ),
             ]
         )

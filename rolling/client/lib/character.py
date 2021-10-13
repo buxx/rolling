@@ -20,7 +20,10 @@ class CharacterLib:
         return self._client.get_character(character_id)
 
     def get_zone_characters(
-        self, world_row_i: int, world_col_i: int, excluded_character_ids: typing.List[str] = None
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        excluded_character_ids: typing.List[str] = None,
     ) -> typing.List[CharacterModel]:
         return [
             c
@@ -60,5 +63,7 @@ class CharacterLib:
         elif disp_char.col_i == 0:
             disp_char.col_i = to_zone_source.geography.width - 1
 
-    def get_zone_required_character_data(self, character_id: str) -> ZoneRequiredPlayerData:
+    def get_zone_required_character_data(
+        self, character_id: str
+    ) -> ZoneRequiredPlayerData:
         return self._client.get_zone_required_character_data(character_id)

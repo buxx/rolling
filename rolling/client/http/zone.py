@@ -33,7 +33,9 @@ class ZoneWebSocketClient:
         self._client_getter = client_getter
         self._ws: typing.Optional[_WSRequestContextManager] = None
         self._received_zone_queue = received_zone_queue
-        self._event_processor_factory = EventProcessorFactory(self._controller.kernel, controller)
+        self._event_processor_factory = EventProcessorFactory(
+            self._controller.kernel, controller
+        )
         self._event_serializer_factory = ZoneEventSerializerFactory()
 
     async def make_connection(self, row_i: int, col_i: int) -> None:
@@ -62,12 +64,16 @@ class ZoneWebSocketClient:
 
         event_dict = json.loads(msg_data)
         event_type = ZoneEventType(event_dict["type"])
-        event = self._event_serializer_factory.get_serializer(event_type).load(event_dict)
+        event = self._event_serializer_factory.get_serializer(event_type).load(
+            event_dict
+        )
 
         processor = self._event_processor_factory.get_processor(event.type)
         await processor.process(event)
 
     async def send_event(self, event: WebSocketEvent) -> None:
-        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(event)
+        event_str = self._event_serializer_factory.get_serializer(event.type).dump_json(
+            event
+        )
         gui_logger.debug("Send str version of event over zone write websocket")
         await self._ws.send_str(event_str)

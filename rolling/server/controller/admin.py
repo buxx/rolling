@@ -42,17 +42,20 @@ class AdminController(BaseController):
         game_backups = [
             f
             for f in os.listdir(config_folder_path)
-            if f.startswith("game") and os.path.isfile(os.path.join(config_folder_path, f))
+            if f.startswith("game")
+            and os.path.isfile(os.path.join(config_folder_path, f))
         ]
         stuff_backups = [
             f
             for f in os.listdir(config_folder_path)
-            if f.startswith("stuff") and os.path.isfile(os.path.join(config_folder_path, f))
+            if f.startswith("stuff")
+            and os.path.isfile(os.path.join(config_folder_path, f))
         ]
         world_backups = [
             f
             for f in os.listdir(config_folder_path)
-            if f.startswith("world") and os.path.isfile(os.path.join(config_folder_path, f))
+            if f.startswith("world")
+            and os.path.isfile(os.path.join(config_folder_path, f))
         ]
 
         if request.method == "POST":
@@ -63,12 +66,16 @@ class AdminController(BaseController):
 
             with open(os.path.join(config_folder_path, "game.toml")) as game_file, open(
                 os.path.join(config_folder_path, "stuff.toml")
-            ) as stuff_file, open(os.path.join(config_folder_path, "world.toml")) as world_file:
+            ) as stuff_file, open(
+                os.path.join(config_folder_path, "world.toml")
+            ) as world_file:
                 backup_game_content = game_file.read()
                 backup_stuff_content = stuff_file.read()
                 backup_world_content = world_file.read()
 
-            with open(os.path.join(config_folder_path, "game.toml"), "w+") as game_file, open(
+            with open(
+                os.path.join(config_folder_path, "game.toml"), "w+"
+            ) as game_file, open(
                 os.path.join(config_folder_path, "stuff.toml"), "w+"
             ) as stuff_file, open(
                 os.path.join(config_folder_path, "world.toml"), "w+"
@@ -81,7 +88,9 @@ class AdminController(BaseController):
             try:
                 game = Game(self._kernel, config_folder_path)
             except Exception as exc:
-                with open(os.path.join(config_folder_path, "game.toml"), "w+") as game_file, open(
+                with open(
+                    os.path.join(config_folder_path, "game.toml"), "w+"
+                ) as game_file, open(
                     os.path.join(config_folder_path, "stuff.toml"), "w+"
                 ) as stuff_file, open(
                     os.path.join(config_folder_path, "world.toml"), "w+"
@@ -122,7 +131,9 @@ class AdminController(BaseController):
 
         with open(os.path.join(config_folder_path, "game.toml")) as game_file, open(
             os.path.join(config_folder_path, "stuff.toml")
-        ) as stuff_file, open(os.path.join(config_folder_path, "world.toml")) as world_file:
+        ) as stuff_file, open(
+            os.path.join(config_folder_path, "world.toml")
+        ) as world_file:
             game_content = game_file.read()
             stuff_content = stuff_file.read()
             world_content = world_file.read()
