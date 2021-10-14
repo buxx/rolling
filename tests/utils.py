@@ -1,6 +1,9 @@
 import typing
 
 from guilang.description import Part
+from rolling.model.character import CharacterModel
+from rolling.kernel import Kernel
+from rolling.server.document.build import BuildDocument
 
 
 def extract_description_properties(
@@ -20,3 +23,17 @@ def extract_description_properties(
 
 def in_one_of(search: str, in_: typing.List[str]) -> bool:
     return any(search in item for item in in_)
+
+
+def place_build_on_character_position(
+    kernel: Kernel,
+    character: CharacterModel,
+    build_id: str,
+) -> BuildDocument:
+    return kernel.build_lib.place_build(
+        world_row_i=character.world_row_i,
+        world_col_i=character.world_col_i,
+        zone_row_i=character.zone_row_i,
+        zone_col_i=character.zone_col_i,
+        build_id=build_id,
+    )

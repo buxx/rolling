@@ -102,6 +102,8 @@ class BuildLib:
         zone_col_i: typing.Optional[int] = None,
         is_floor: typing.Optional[bool] = None,
         is_door: typing.Optional[bool] = None,
+        with_seeded_with: typing.Optional[bool] = None,
+        seeded_with: typing.Optional[str] = None,
     ) -> typing.List[BuildDocument]:
         return self.get_zone_query(
             world_row_i=world_row_i,
@@ -110,6 +112,8 @@ class BuildLib:
             zone_col_i=zone_col_i,
             is_floor=is_floor,
             is_door=is_door,
+            with_seeded_with=with_seeded_with,
+            seeded_with=seeded_with,
         ).all()
 
     def get_zone_query(
@@ -121,6 +125,7 @@ class BuildLib:
         is_floor: typing.Optional[bool] = None,
         is_door: typing.Optional[bool] = None,
         with_seeded_with: bool = False,
+        seeded_with: typing.Optional[str] = None,
     ) -> Query:
         filters = []
 
@@ -148,6 +153,9 @@ class BuildLib:
 
         if with_seeded_with:
             filters.append(BuildDocument.seeded_with != None)
+
+        if seeded_with is not None:
+            filters.append(BuildDocument.seeded_with == seeded_with)
 
         return (
             self._kernel.server_db_session.query(BuildDocument)

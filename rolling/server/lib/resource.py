@@ -270,6 +270,8 @@ class ResourceLib:
                 illustration=resource_description.illustration,
                 grow_speed=resource_description.grow_speed,
                 drop_to_nowhere=resource_description.drop_to_nowhere,
+                harvest_cost_per_tile=resource_description.harvest_cost_per_tile,
+                harvest_production_per_tile=resource_description.harvest_production_per_tile,
             )
 
     def _carried_resource_model_from_doc(
@@ -306,6 +308,8 @@ class ResourceLib:
             illustration=resource_description.illustration,
             grow_speed=resource_description.grow_speed,
             drop_to_nowhere=resource_description.drop_to_nowhere,
+            harvest_cost_per_tile=resource_description.harvest_cost_per_tile,
+            harvest_production_per_tile=resource_description.harvest_production_per_tile,
         )
 
     def have_resource(

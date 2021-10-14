@@ -20,6 +20,7 @@ from rolling.action.collect import CollectResourceAction
 from rolling.action.craft import BeginStuffConstructionAction
 from rolling.action.craft import ContinueStuffConstructionAction
 from rolling.action.craft import CraftStuffWithResourceAction
+from rolling.action.harvest import HarvestAction
 from rolling.action.craft import CraftStuffWithStuffAction
 from rolling.action.destroy import DestroyBuildAction
 from rolling.action.drink import DrinkResourceAction
@@ -75,6 +76,7 @@ class ActionFactory:
         ActionType.DRINK_STUFF: DrinkStuffAction,
         ActionType.DRINK_RESOURCE: DrinkResourceAction,
         ActionType.COLLECT_RESOURCE: CollectResourceAction,
+        ActionType.HARVEST: HarvestAction,
         ActionType.USE_AS_BAG: UseAsBagAction,
         ActionType.NOT_USE_AS_BAG: NotUseAsBagAction,
         ActionType.USE_AS_WEAPON: UseAsWeaponAction,
@@ -170,6 +172,7 @@ class ActionFactory:
         ] = {
             ActionType.DRINK_RESOURCE: DrinkResourceAction,
             ActionType.COLLECT_RESOURCE: CollectResourceAction,
+            ActionType.HARVEST: HarvestAction,
             ActionType.SEARCH_FOOD: SearchFoodAction,
             ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
             ActionType.SEARCH_MATERIAL: SearchMaterialAction,

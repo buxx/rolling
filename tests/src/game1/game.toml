@@ -210,6 +210,8 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     grow_speed = 42
+    harvest_cost_per_tile = 1.0
+    harvest_production_per_tile = 2.0
 
 
 [resource_mix]

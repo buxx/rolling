@@ -424,6 +424,8 @@ destroy_robustness_per_ap = 1
     clutter = 1.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     grow_speed = 42
+    harvest_cost_per_tile = 1.0
+    harvest_production_per_tile = 5.0
     illustration = "cereals.png"
 
   [resources.BREAD]
@@ -1051,7 +1053,7 @@ destroy_robustness_per_ap = 1
     cost = 6.0
 
   [ACTIONS.CEREAL_HARVEST]
-    name = "Récolter des céréales"
+    name = "Chercher des céréales sauvages"
     actions = ["SEARCH_FOOD"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -2009,7 +2011,7 @@ destroy_robustness_per_ap = 1
     # FIXME BS NOW farm: check "grow_speed" parameter in CEREAL resource at server startup
     resource_id = "CEREAL"
     build_id = "PLOUGHED_LAND"
-    consume = 1.0
+    consume = 0.5
     cost = 0.1
 
 [build]

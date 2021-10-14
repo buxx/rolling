@@ -1,6 +1,7 @@
 import typing
 
 from rolling.server.document.build import BuildDocument
+from rolling.server.document.character import CharacterDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -39,3 +40,32 @@ class FarmingLib:
             f"GROW_PROGRESS_{grow_state}",
             f"GROW_PROGRESS_{resource_id}_{grow_state}",
         ]
+
+    def can_be_collected(self, build: BuildDocument) -> bool:
+        return build.grow_progress >= self._kernel.game.config.grow_progress_4
+
+    def harvest(
+        self,
+        build: BuildDocument,
+        character_doc: CharacterDocument,
+        commit: bool = True,
+    ) -> True:
+        resource_description = self._kernel.game.config.resources[build.seeded_with]
+        character_doc.action_points = self._kernel.character_lib.reduce_action_points(
+            character_id=character_doc.id,
+            cost=resource_description.harvest_cost_per_tile,
+        ).action_points
+        self._kernel.resource_lib.add_resource_to(
+            character_id=character_doc.id,
+            resource_id=build.seeded_with,
+            quantity=resource_description.harvest_production_per_tile,
+            commit=False,
+        )
+        build.seeded_with = None
+        build.grow_progress = 0
+
+        self._kernel.server_db_session.add(build)
+        self._kernel.server_db_session.add(character_doc)
+
+        if commit:
+            self._kernel.server_db_session.commit()

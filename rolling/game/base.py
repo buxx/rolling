@@ -257,6 +257,10 @@ class GameConfig:
                 descriptions=[],  # filled after
                 illustration=illustration,
                 grow_speed=resource_raw.get("grow_speed", None),
+                harvest_cost_per_tile=resource_raw.get("harvest_cost_per_tile", None),
+                harvest_production_per_tile=resource_raw.get(
+                    "harvest_production_per_tile", None
+                ),
                 drop_to_nowhere=resource_raw.get("drop_to_nowhere", False),
             )
 

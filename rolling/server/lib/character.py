@@ -1040,7 +1040,7 @@ class CharacterLib:
 
     def reduce_action_points(
         self, character_id: str, cost: float, commit: bool = True, check: bool = False
-    ) -> None:
+    ) -> CharacterDocument:
         character_doc = self.get_document(character_id)
 
         if check and character_doc.action_points < cost:
@@ -1051,6 +1051,8 @@ class CharacterLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        return character_doc
 
     def get_move_to_zone_infos(
         self, character_id: str, world_row_i: int, world_col_i: int

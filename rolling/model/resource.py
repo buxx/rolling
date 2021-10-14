@@ -23,6 +23,8 @@ class ResourceDescriptionModel:
     descriptions: typing.List[ActionDescriptionModel]
     illustration: typing.Optional[str]
     grow_speed: typing.Optional[int]
+    harvest_cost_per_tile: typing.Optional[float]
+    harvest_production_per_tile: typing.Optional[float]
     drop_to_nowhere: bool
 
 
