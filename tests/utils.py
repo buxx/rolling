@@ -29,11 +29,13 @@ def place_build_on_character_position(
     kernel: Kernel,
     character: CharacterModel,
     build_id: str,
+    zone_row_modifier: int = 0,
+    zone_col_modifier: int = 0,
 ) -> BuildDocument:
     return kernel.build_lib.place_build(
         world_row_i=character.world_row_i,
         world_col_i=character.world_col_i,
-        zone_row_i=character.zone_row_i,
-        zone_col_i=character.zone_col_i,
+        zone_row_i=character.zone_row_i + zone_row_modifier,
+        zone_col_i=character.zone_col_i + zone_col_modifier,
         build_id=build_id,
     )
