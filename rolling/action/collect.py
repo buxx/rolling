@@ -54,7 +54,7 @@ class CollectResourceAction(CharacterAction):
 
         raise ImpossibleAction("Il n'y a rien à collecter ici")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: input_model
     ) -> None:
         productions = self._kernel.game.world_manager.get_resources_at(
@@ -98,13 +98,26 @@ class CollectResourceAction(CharacterAction):
                             action_description_id=self._description.id,
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
+                        additional_link_parameters_for_quick_action={
+                            "quantity": production.extract_quick_action_quantity
+                        },
                         cost=None,
                         merge_by=(ActionType.COLLECT_RESOURCE, production.resource.id),
                         group_name="Ramasser du matériel ou des ressources",
+                        classes1=["COLLECT"],
+                        classes2=[production.resource.id],
                     )
                 )
 
         return character_actions
+
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(character)
+        ]
 
     def get_cost(
         self,
@@ -112,20 +125,23 @@ class CollectResourceAction(CharacterAction):
         input_: typing.Optional[CollectResourceModel] = None,
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None and input_.resource_id is not None:
-            production = next(
-                production
-                for production in self._kernel.game.world_manager.get_resources_at(
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=input_.row_i,
-                    zone_col_i=input_.col_i,
+            try:
+                production = next(
+                    production
+                    for production in self._kernel.game.world_manager.get_resources_at(
+                        world_row_i=character.world_row_i,
+                        world_col_i=character.world_col_i,
+                        zone_row_i=input_.row_i,
+                        zone_col_i=input_.col_i,
+                    )
+                    if production.resource.id == input_.resource_id
                 )
-                if production.resource.id == input_.resource_id
-            )
+            except StopIteration:
+                raise ImpossibleAction("Plus de ressource à cet endroit")
 
             return input_.quantity * production.extract_cost_per_unit
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: CollectResourceModel
     ) -> Description:
         assert input_.resource_id is not None
@@ -211,7 +227,7 @@ class CollectResourceAction(CharacterAction):
             commit=False,
         )
         if not production.infinite:
-            self._kernel.zone_lib.reduce_resource_quantity(
+            await self._kernel.zone_lib.reduce_resource_quantity(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
                 zone_row_i=input_.row_i,
@@ -222,16 +238,14 @@ class CollectResourceAction(CharacterAction):
                 commit=False,
             )
 
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost, commit=False
         )
         self._kernel.server_db_session.commit()
 
+        text = f"{input_.quantity} {self._kernel.translation.get(resource_description.unit)} récupéré"
         return Description(
             title=f"Récupérer du {resource_description.name}",
-            items=[
-                Part(
-                    text=f"{input_.quantity} {self._kernel.translation.get(resource_description.unit)} récupéré"
-                )
-            ],
+            items=[Part(text=text)],
+            quick_action_response=text,
         )

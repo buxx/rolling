@@ -61,7 +61,7 @@ class SearchMaterialAction(CharacterAction):
             self._kernel, character=character, description=self._description
         )
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: SearchMaterialModel
     ) -> None:
         self.check_is_possible(character)
@@ -87,7 +87,7 @@ class SearchMaterialAction(CharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: SearchMaterialModel
     ) -> Description:
         if not input_.ap:
@@ -164,7 +164,7 @@ class SearchMaterialAction(CharacterAction):
             )
         parts: typing.List[Part] = []
 
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=input_.ap, commit=False
         )
         self._kernel.server_db_session.commit()

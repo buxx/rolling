@@ -44,17 +44,19 @@ class FarmingLib:
     def can_be_collected(self, build: BuildDocument) -> bool:
         return build.grow_progress >= self._kernel.game.config.grow_progress_4
 
-    def harvest(
+    async def harvest(
         self,
         build: BuildDocument,
         character_doc: CharacterDocument,
         commit: bool = True,
     ) -> True:
         resource_description = self._kernel.game.config.resources[build.seeded_with]
-        character_doc.action_points = self._kernel.character_lib.reduce_action_points(
-            character_id=character_doc.id,
-            cost=resource_description.harvest_cost_per_tile,
-        ).action_points
+        character_doc.action_points = (
+            await self._kernel.character_lib.reduce_action_points(
+                character_id=character_doc.id,
+                cost=resource_description.harvest_cost_per_tile,
+            ).action_points
+        )
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=build.seeded_with,

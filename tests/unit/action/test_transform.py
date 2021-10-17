@@ -46,7 +46,7 @@ class TestTransformAction:
             ("2.0", 3.0, 4, 10.0),
         ],
     )
-    def test_unit__transform_resource_to_resource__ok__m3_to_unit(
+    async def test_unit__transform_resource_to_resource__ok__m3_to_unit(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -74,7 +74,7 @@ class TestTransformAction:
             character_id=franck.id, resource_id="CLOTH"
         )
 
-        action.perform(
+        await action.perform(
             character=franck,
             resource_id="VEGETAL_FIBER",
             input_=QuantityModel(quantity=input_quantity),
@@ -119,7 +119,7 @@ class TestTransformAction:
             (500.0, "500.0 g", "500.0 g", [("250", 250.0), ("0.250kg", 0)]),
         ],
     )
-    def test_transform_with_kg_or_g_input(
+    async def test_transform_with_kg_or_g_input(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -137,7 +137,7 @@ class TestTransformAction:
             resource_id="RES1", character_id=franck.id, quantity=initial_quantity
         )
 
-        description = action.perform(
+        description = await action.perform(
             character=franck, resource_id="RES1", input_=QuantityModel(quantity=None)
         )
         assert (
@@ -150,7 +150,7 @@ class TestTransformAction:
         )
 
         for input_quantity, after_quantity in reduce_and_after:
-            action.perform(
+            await action.perform(
                 character=franck,
                 resource_id="RES1",
                 input_=QuantityModel(quantity=input_quantity),

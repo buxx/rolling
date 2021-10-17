@@ -540,6 +540,9 @@ class Game:
                         destroy_when_empty=produce_raw.get("destroy_when_empty", False),
                         infinite=produce_raw.get("infinite", False),
                         extract_cost_per_unit=produce_raw["extract_cost_per_unit"],
+                        extract_quick_action_quantity=produce_raw[
+                            "extract_quick_action_quantity"
+                        ],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],

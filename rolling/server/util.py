@@ -51,7 +51,7 @@ def register_image(kernel: "Kernel", file_path: str) -> int:
     return image_id
 
 
-def with_multiple_carried_stuffs(
+async def with_multiple_carried_stuffs(
     action: "WithStuffAction",
     kernel: "Kernel",
     character: "CharacterModel",
@@ -107,7 +107,7 @@ def with_multiple_carried_stuffs(
     parts = []
     for i in range(do_it_count):
         try:
-            parts.extend(do_for_one_func(character, all_carried[i], input_))
+            parts.extend(await do_for_one_func(character, all_carried[i], input_))
         except NotEnoughActionPoints:
             parts.append(Part(text="Plus assez de Points d'Actions !"))
 

@@ -166,7 +166,7 @@ class FightLib:
 
         return groups
 
-    def fight(
+    async def fight(
         self, attack: AttackDescription, defense: DefendDescription
     ) -> typing.List[str]:
         story: typing.List[str] = []
@@ -199,7 +199,7 @@ class FightLib:
                 f"état de se battre."
             )
 
-        def get_alive_opponent_in_group(
+        async def get_alive_opponent_in_group(
             group_: typing.List[CharacterModel], for_: CharacterModel
         ) -> CharacterModel:
             is_attacker = for_ in attack.all_fighters
@@ -226,7 +226,7 @@ class FightLib:
                     continue
 
                 story_sentences: typing.List[str] = []
-                opponent = get_alive_opponent_in_group(group, for_=fighter)
+                opponent = await get_alive_opponent_in_group(group, for_=fighter)
                 if not opponent:
                     continue
 
@@ -280,7 +280,7 @@ class FightLib:
                     self.increase_attacker_skills(fighter, attacker_weapon)
 
                 story.append(" ".join(story_sentences))
-                self._kernel.character_lib.reduce_action_points(
+                await self._kernel.character_lib.reduce_action_points(
                     fighter.id, FIGHT_AP_CONSUME
                 )
                 self._kernel.character_lib.increase_tiredness(

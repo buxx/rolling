@@ -76,7 +76,7 @@ class BeginBuildAction(CharacterAction):
         # because we want to permit begin construction)
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         self.check_is_possible(character)
@@ -104,7 +104,9 @@ class BeginBuildAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: ConfirmModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: ConfirmModel
+    ) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
 
@@ -146,7 +148,7 @@ class BeginBuildAction(CharacterAction):
             build_id=build_description.id,
             under_construction=True,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=self.get_cost(character, input_)
         )
         return Description(
@@ -175,7 +177,7 @@ class BringResourcesOnBuild(WithBuildAction):
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
         return
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         return
@@ -268,7 +270,7 @@ class BringResourcesOnBuild(WithBuildAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -395,7 +397,7 @@ class ConstructBuildAction(WithBuildAction):
         if not build_doc.under_construction:
             raise ImpossibleAction("Cette construction est terminée")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         # FIXME BS 2019-10-03: delete all check_request_is_possible and move into perform
@@ -444,7 +446,7 @@ class ConstructBuildAction(WithBuildAction):
 
         return biggest_left_percent
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: input_model
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -513,7 +515,7 @@ class ConstructBuildAction(WithBuildAction):
             consume_resources_percent=consume_resources_percent,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost=input_cost_to_spent, commit=False
         )
         self._kernel.server_db_session.commit()
@@ -550,7 +552,7 @@ class BuildAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: BuildModel
     ) -> None:
         check_common_is_possible(
@@ -601,7 +603,9 @@ class BuildAction(CharacterAction):
             query_params={},
         )
 
-    def perform(self, character: "CharacterModel", input_: BuildModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: BuildModel
+    ) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
         return Description(
@@ -613,7 +617,7 @@ class BuildAction(CharacterAction):
             )
         )
 
-    def perform_from_event(
+    async def perform_from_event(
         self, character: "CharacterModel", input_: BuildModel
     ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         assert input_.row_i
@@ -630,7 +634,7 @@ class BuildAction(CharacterAction):
         ):
             raise ImpossibleAction("Emplacement non disponible")
 
-        self._kernel.zone_lib.destroy_tile(
+        await self._kernel.zone_lib.destroy_tile(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
             zone_row_i=input_.row_i,
@@ -645,7 +649,7 @@ class BuildAction(CharacterAction):
             under_construction=False,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id,
             cost=self.get_cost(character, input_),
             commit=False,

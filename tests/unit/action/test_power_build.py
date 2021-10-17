@@ -55,7 +55,7 @@ def power_on_action(worldmapc_kernel: Kernel) -> PowerOnBuildAction:
 
 
 class TestPowerBuild:
-    def test_power_on_build_with_enough_resources(
+    async def test_power_on_build_with_enough_resources(
         self,
         worldmapc_kernel: Kernel,
         build1: BuildDocument,
@@ -77,7 +77,7 @@ class TestPowerBuild:
         )
 
         # When
-        power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert kernel.build_lib.get_build_doc(build1.id).is_on
@@ -85,7 +85,7 @@ class TestPowerBuild:
             resource_id="BRANCHES", build_id=build1.id, quantity=0.001
         )
 
-    def test_power_on_build_with_not_enough_resources(
+    async def test_power_on_build_with_not_enough_resources(
         self,
         worldmapc_kernel: Kernel,
         build1: BuildDocument,
@@ -107,7 +107,7 @@ class TestPowerBuild:
         )
 
         # When
-        power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
@@ -115,7 +115,7 @@ class TestPowerBuild:
             resource_id="BRANCHES", build_id=build1.id, quantity=0.0005
         )
 
-    def test_power_on_build_with_no_resources(
+    async def test_power_on_build_with_no_resources(
         self,
         worldmapc_kernel: Kernel,
         build1: BuildDocument,
@@ -129,12 +129,12 @@ class TestPowerBuild:
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
 
         # When
-        power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
 
-    def test_power_off_build(
+    async def test_power_off_build(
         self,
         worldmapc_kernel: Kernel,
         build1: BuildDocument,
@@ -149,7 +149,7 @@ class TestPowerBuild:
         kernel.server_db_session.commit()
 
         # When
-        power_off_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        await power_off_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on

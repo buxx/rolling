@@ -49,7 +49,7 @@ class SearchFoodAction(CharacterAction):
             kernel=self._kernel, description=self._description, character=character
         )
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         self.check_is_possible(character)
@@ -76,7 +76,9 @@ class SearchFoodAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         productions = self._description.properties["produce"]
         production_per_resource_ids: typing.Dict[str, dict] = {}
         production_per_stuff_ids: typing.Dict[str, dict] = {}
@@ -177,7 +179,7 @@ class SearchFoodAction(CharacterAction):
                 self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
             zone_state.reduce_stuff(stuff_id, quantity_found, commit=False)
 
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost=self.get_cost(character, input_)
         )
         self._kernel.server_db_session.commit()

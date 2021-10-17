@@ -50,7 +50,7 @@ class FollowCharacterAction(WithCharacterAction):
         ):
             raise ImpossibleAction(f"{with_character.name} ne se trouve pas ici")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -88,7 +88,7 @@ class FollowCharacterAction(WithCharacterAction):
             ),
         ]
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -123,7 +123,7 @@ class StopFollowCharacterAction(WithCharacterAction):
         if not self._kernel.character_lib.is_following(character.id, with_character.id):
             raise ImpossibleAction(f"{with_character.name} n'est pass uivis'")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -164,7 +164,7 @@ class StopFollowCharacterAction(WithCharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

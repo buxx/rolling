@@ -361,7 +361,9 @@ class ActionFactory:
         self._kernel.server_db_session.commit()
         return authorization
 
-    def execute_pending(self, pending_action: PendingActionDocument) -> Description:
+    async def execute_pending(
+        self, pending_action: PendingActionDocument
+    ) -> Description:
         action = self.create_action(
             action_type=ActionType(pending_action.action_type),
             action_description_id=pending_action.action_description_id,
@@ -372,8 +374,8 @@ class ActionFactory:
                 pending_action.with_character_id
             )
             input_ = action.input_model_from_request(pending_action.parameters)
-            action.check_request_is_possible(character, with_character, input_=input_)
-            description = action.perform(character, with_character, input_=input_)
+            await action.check_request_is_possible(character, with_character, input_=input_)
+            description = await action.perform(character, with_character, input_=input_)
         else:
             raise NotImplementedError("TODO")
 

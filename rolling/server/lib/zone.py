@@ -11,6 +11,7 @@ from rolling.map.type.base import MapTileType
 from rolling.map.type.property.traversable import traversable_properties
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.event import WebSocketEvent, ZoneEventType, ZoneTileReplaceData
 from rolling.model.zone import ZoneMapModel
 from rolling.model.zone import ZoneTileTypeModel
 from rolling.server.document.resource import ZoneResourceDocument
@@ -107,7 +108,7 @@ class ZoneLib:
         self._kernel.server_db_session.commit()
         return zone_resource_document
 
-    def reduce_resource_quantity(
+    async def reduce_resource_quantity(
         self,
         world_row_i: int,
         world_col_i: int,
@@ -141,7 +142,7 @@ class ZoneLib:
             self._kernel.server_db_session.delete(zone_resource_doc)
 
             if zone_resource_doc.destroy_tile_when_empty:
-                self.destroy_tile(
+                await self.destroy_tile(
                     world_row_i=world_row_i,
                     world_col_i=world_col_i,
                     zone_row_i=zone_row_i,
@@ -151,7 +152,7 @@ class ZoneLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def destroy_tile(
+    async def destroy_tile(
         self,
         world_row_i: int,
         world_col_i: int,
@@ -189,3 +190,18 @@ class ZoneLib:
                 zone_file.write("\n".join(zone_raw_by_lines))
 
             self._kernel.load_zone_from_file_path(str(zone_file_path))
+
+            await self._kernel.server_zone_events_manager.send_to_sockets(
+                WebSocketEvent(
+                    type=ZoneEventType.ZONE_TILE_REPLACE,
+                    world_row_i=world_row_i,
+                    world_col_i=world_col_i,
+                    data=ZoneTileReplaceData(
+                        zone_row_i=zone_row_i,
+                        zone_col_i=zone_col_i,
+                        new_tile_id=zone_type.default_tile_id,
+                    ),
+                ),
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+            )

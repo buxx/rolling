@@ -25,7 +25,7 @@ def power_off_action(worldmapc_kernel: Kernel) -> DestroyBuildAction:
 
 
 class TestDestroyBuildAction:
-    def test_destroy_door_with_relations(
+    async def test_destroy_door_with_relations(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -52,7 +52,7 @@ class TestDestroyBuildAction:
         assert kernel.build_lib.get_all_ids(None)
 
         # When
-        description = power_off_action.perform(
+        description = await power_off_action.perform(
             xena,
             build_id=door.id,
             input_=DestroyBuildModel(
@@ -65,7 +65,7 @@ class TestDestroyBuildAction:
         assert not kernel.build_lib.get_all_ids(None)
         assert description.back_to_zone
 
-    def test_destroy_door_one_ap(
+    async def test_destroy_door_one_ap(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -86,7 +86,7 @@ class TestDestroyBuildAction:
         assert kernel.build_lib.get_all_ids(None)
 
         # When
-        description = power_off_action.perform(
+        description = await power_off_action.perform(
             xena,
             build_id=door.id,
             input_=DestroyBuildModel(
@@ -99,7 +99,7 @@ class TestDestroyBuildAction:
         assert not description.back_to_zone
 
         # When
-        description = power_off_action.perform(
+        description = await power_off_action.perform(
             xena,
             build_id=door.id,
             input_=DestroyBuildModel(
@@ -111,7 +111,7 @@ class TestDestroyBuildAction:
         assert not kernel.build_lib.get_all_ids(None)
         assert description.back_to_zone
 
-    def test_destroy_build_with_ressource_and_stuffs(
+    async def test_destroy_build_with_ressource_and_stuffs(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -141,7 +141,7 @@ class TestDestroyBuildAction:
         )
 
         # When
-        description = power_off_action.perform(
+        description = await power_off_action.perform(
             xena,
             build_id=build.id,
             input_=DestroyBuildModel(

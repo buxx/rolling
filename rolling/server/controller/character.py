@@ -10,7 +10,7 @@ import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
-from guilang.description import Description
+from guilang.description import Description, DescriptionType
 from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
@@ -1247,10 +1247,12 @@ class CharacterController(BaseController):
 
         if hapic_data.query.do:
             try:
-                return self._kernel.action_factory.execute_pending(pending_action)
+                return await self._kernel.action_factory.execute_pending(pending_action)
             except (ImpossibleAction, WrongInputError) as exc:
                 return Description(
                     title="Action impossible",
+                    quick_action_response=str(exc).replace("\n", " "),
+                    type_=DescriptionType.ERROR,
                     back_url=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}",
                     items=[Part(text=line) for line in str(exc).split("\n")],
                     footer_links=[
@@ -1649,11 +1651,13 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(character_model, input_)
-            return action.perform(character_model, input_)
+            await action.check_request_is_possible(character_model, input_)
+            return await action.perform(character_model, input_)
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1683,13 +1687,17 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model, stuff=stuff, input_=input_
             )
-            return action.perform(character=character_model, stuff=stuff, input_=input_)
+            return await action.perform(
+                character=character_model, stuff=stuff, input_=input_
+            )
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1718,7 +1726,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 build_id=hapic_data.path.build_id,
                 input_=input_,
@@ -1728,6 +1736,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1735,7 +1745,7 @@ class CharacterController(BaseController):
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
         #  in perform like in this action !
         try:
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 build_id=hapic_data.path.build_id,
                 input_=input_,
@@ -1743,6 +1753,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1770,12 +1782,12 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 resource_id=hapic_data.path.resource_id,
                 input_=input_,
             )
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 resource_id=hapic_data.path.resource_id,
                 input_=input_,
@@ -1783,6 +1795,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1811,12 +1825,12 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 with_character=with_character_model,
                 input_=input_,
             )
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 with_character=with_character_model,
                 input_=input_,
@@ -1824,6 +1838,8 @@ class CharacterController(BaseController):
         except ImpossibleAttack as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=exc.msg)]
                 + (
                     [Part(text=f"- {msg_line}") for msg_line in exc.msg_lines]
@@ -1834,6 +1850,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1964,6 +1982,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Effectuer un voyage ...",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )

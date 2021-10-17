@@ -44,7 +44,7 @@ class FillStuffAction(WithStuffAction):
 
         raise ImpossibleAction("Rien à proximité ne correspond")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-08-01: check owned
@@ -80,7 +80,7 @@ class FillStuffAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         footer_links = [

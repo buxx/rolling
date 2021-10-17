@@ -35,7 +35,7 @@ class NotUseAsBagAction(WithStuffAction):
         if stuff.id not in bag_ids:
             raise ImpossibleAction("Vous n'utilisez pas ce sac")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -59,7 +59,7 @@ class NotUseAsBagAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_bag(character.id, stuff.id)
@@ -86,7 +86,7 @@ class UseAsBagAction(WithStuffAction):
         if character.bags:
             raise ImpossibleAction("Vous utilisez déjà un sac")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> None:
         # TODO BS 2019-09-03: check stuff owned
@@ -112,7 +112,7 @@ class UseAsBagAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_bag(character.id, stuff.id)
@@ -140,7 +140,7 @@ class UseAsWeaponAction(WithStuffAction):
         if character.weapon:
             raise ImpossibleAction("Vous utilisez déjà une arme")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         # TODO BS 2019-09-03: check stuff owned
@@ -165,7 +165,7 @@ class UseAsWeaponAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
@@ -190,7 +190,7 @@ class NotUseAsWeaponAction(WithStuffAction):
             return
         raise ImpossibleAction("Vous n'utilisez pas cette arme")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -214,7 +214,7 @@ class NotUseAsWeaponAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
@@ -242,7 +242,7 @@ class UseAsShieldAction(WithStuffAction):
         if character.shield:
             raise ImpossibleAction("Vous utilisez déjà un bouclier")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         # TODO BS 2019-09-03: check stuff owned
@@ -267,7 +267,7 @@ class UseAsShieldAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
@@ -292,7 +292,7 @@ class NotUseAsShieldAction(WithStuffAction):
             return
         raise ImpossibleAction("Vous n'utilisez pas ce bouclier")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -316,7 +316,7 @@ class NotUseAsShieldAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
@@ -344,7 +344,7 @@ class UseAsArmorAction(WithStuffAction):
         if character.armor:
             raise ImpossibleAction("Vous utilisez déjà une armure/protection")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         # TODO BS 2019-09-03: check stuff owned
@@ -369,7 +369,7 @@ class UseAsArmorAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
@@ -394,7 +394,7 @@ class NotUseAsArmorAction(WithStuffAction):
             return
         raise ImpossibleAction("Vous n'utilisez pas cette armure/equipement")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -418,7 +418,7 @@ class NotUseAsArmorAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)

@@ -41,7 +41,7 @@ class LearnKnowledgeAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: LearnKnowledgeModel
     ) -> None:
         if input_.knowledge_id is not None:
@@ -104,7 +104,7 @@ class LearnKnowledgeAction(CharacterAction):
             action_description_id=self._description.id,
         )
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: LearnKnowledgeModel
     ) -> Description:
         knowledge_description = self._kernel.game.config.knowledge[input_.knowledge_id]
@@ -143,7 +143,9 @@ class LearnKnowledgeAction(CharacterAction):
             title = "Connaissance acquise !"
         else:
             title = "Apprentissage effectué"
-        self._kernel.character_lib.reduce_action_points(character.id, cost=input_.ap)
+        await self._kernel.character_lib.reduce_action_points(
+            character.id, cost=input_.ap
+        )
 
         return Description(title=title)
 
@@ -175,7 +177,7 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
         ):
             raise ImpossibleAction("Les personnages ne sont pas sur la meme zone")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -222,7 +224,7 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
 
         return action_links
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -309,7 +311,7 @@ class TeachKnowledgeAction(WithCharacterAction):
         ):
             raise ImpossibleAction("Les personnages ne sont pas sur la meme zone")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -327,7 +329,7 @@ class TeachKnowledgeAction(WithCharacterAction):
     ) -> typing.List[CharacterActionLink]:
         return []  # should not be called because called from pending action
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -342,8 +344,10 @@ class TeachKnowledgeAction(WithCharacterAction):
             title = "Connaissance acquise !"
         else:
             title = "Apprentissage effectué"
-        self._kernel.character_lib.reduce_action_points(character.id, cost=input_.ap)
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
+            character.id, cost=input_.ap
+        )
+        await self._kernel.character_lib.reduce_action_points(
             with_character.id, cost=input_.ap
         )
 

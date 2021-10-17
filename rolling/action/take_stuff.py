@@ -38,7 +38,7 @@ class TakeStuffAction(WithStuffAction):
     ) -> None:
         pass  # TODO: check if stuff is near, is not carried, is not protected ...
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: TakeStuffModel
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -48,7 +48,7 @@ class TakeStuffAction(WithStuffAction):
     ) -> typing.List[CharacterActionLink]:
         pass  # do not display action in actions page
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: TakeStuffModel
     ) -> Description:
         # FIXME BS NOW: manage correctly ImpossibleAction

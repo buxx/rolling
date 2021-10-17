@@ -10,7 +10,7 @@ class ActionScope(enum.Enum):
     BUILD = "BUILD"
 
 
-class ActionType(enum.Enum):
+class ActionType(str, enum.Enum):
     FILL_STUFF = "FILL_STUFF"
     EMPTY_STUFF = "EMPTY_STUFF"
     ATTACK_CHARACTER_WITH = "ATTACK_CHARACTER_WITH"

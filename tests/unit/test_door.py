@@ -179,7 +179,6 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
-    @pytest.mark.asyncio
     async def test_two_rule_lock__author_first_travel__stranger_second_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -234,7 +233,6 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
-    @pytest.mark.asyncio
     async def test_one_rule_lock__author_first_travel__stranger_second_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -286,7 +284,6 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
-    @pytest.mark.asyncio
     async def test_one_rule_lock__author_dead__stranger_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -319,7 +316,6 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
-    @pytest.mark.asyncio
     async def test_one_rule_lock__author_vulnerable__stranger_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -357,7 +353,6 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("websocket_prepare_mock")
     @pytest.mark.usefixtures("zone_event_manager_listen_mock")
     @pytest.mark.usefixtures("zone_event_manager_close_mock")
@@ -412,7 +407,6 @@ class TestDoor:
         assert any(["NEW_BUILD" in event_str for event_str in events_str_list])
         assert any(['{"WALKING":false}' in event_str for event_str in events_str_list])
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("websocket_prepare_mock")
     @pytest.mark.usefixtures("zone_event_manager_listen_mock")
     @pytest.mark.usefixtures("zone_event_manager_close_mock")

@@ -119,6 +119,7 @@ class ZoneMapTileProduction:
     destroy_when_empty: bool
     infinite: bool
     extract_cost_per_unit: float
+    extract_quick_action_quantity: float
 
     def __eq__(self, other: "ZoneMapTileProduction") -> bool:
         return self.resource.id == other.resource.id

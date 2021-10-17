@@ -63,7 +63,7 @@ class BaseCraftStuff:
         )
         return properties
 
-    def _perform(
+    async def _perform(
         self,
         character: "CharacterModel",
         description: ActionDescriptionModel,
@@ -153,7 +153,7 @@ class BaseCraftStuff:
                 self._kernel.stuff_lib.set_carried_by__from_doc(
                     stuff_doc, character_id=character.id, commit=False
                 )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=cost, commit=False
         )
         self._kernel.server_db_session.commit()
@@ -176,7 +176,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
 
         raise ImpossibleAction("non concerné")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
     ) -> None:
         self.check_is_possible(character, resource_id=resource_id)
@@ -184,7 +184,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             kernel=self._kernel, description=self._description, character=character
         )
         if input_.quantity is not None:
-            self._perform(
+            await self._perform(
                 character,
                 description=self._description,
                 input_=input_,
@@ -231,7 +231,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             return base_cost * input_.quantity
         return base_cost
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
@@ -320,7 +320,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             return base_cost * input_.quantity
         return base_cost
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> None:
         self.check_is_possible(character, stuff=stuff)
@@ -361,7 +361,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
@@ -442,7 +442,7 @@ class BeginStuffConstructionAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass  # Always accept to display this action
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> None:
         if input_.confirm:
@@ -523,7 +523,7 @@ class BeginStuffConstructionAction(CharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> Description:
         require_txts = []
@@ -647,7 +647,7 @@ class BeginStuffConstructionAction(CharacterAction):
         stuff_doc.ap_required = self._description.properties["craft_ap"]
         stuff_doc.under_construction = True
         self._kernel.stuff_lib.add_stuff(stuff_doc, commit=False)
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost=self.get_cost(character), commit=False
         )
         self._kernel.server_db_session.commit()
@@ -695,7 +695,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         if self._description.properties["produce_stuff_id"] != stuff.stuff_id:
             raise ImpossibleAction("Non concérné")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         stuff: "StuffModel",
@@ -738,7 +738,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
     ) -> typing.Optional[float]:
         return 0.0  # we use only one action description in config and we don't want ap for continue
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         stuff: "StuffModel",
@@ -792,7 +792,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
         consume_ap = min(remain_ap, input_.ap * bonus_divider)
         stuff_doc = self._kernel.stuff_lib.get_stuff_doc(stuff.id)
         stuff_doc.ap_spent = float(stuff_doc.ap_spent) + consume_ap
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, consume_ap, commit=False
         )
 

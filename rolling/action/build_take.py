@@ -173,7 +173,7 @@ class TakeFromBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment ne permet pas de prendre")
         pass  # TODO: check build is accessible
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: TakeFromModel
     ) -> None:
         self.check_is_possible(character, build_id)
@@ -228,7 +228,7 @@ class TakeFromBuildAction(WithBuildAction):
             action_description_id=self._description.id,
         )
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: TakeFromModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)

@@ -59,7 +59,7 @@ class EatResourceAction(WithResourceAction):
 
         raise ImpossibleAction("Non consommable")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
     ) -> None:
         self.check_is_possible(character, resource_id)
@@ -171,7 +171,7 @@ class EatResourceAction(WithResourceAction):
             ):
                 break
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)

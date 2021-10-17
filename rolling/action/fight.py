@@ -51,7 +51,7 @@ class AttackCharacterAction(WithCharacterAction):
     ) -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -234,7 +234,7 @@ class AttackCharacterAction(WithCharacterAction):
 
         return list(sorted(set(conflicts_str)))
 
-    def _perform_attack_lonely(
+    async def _perform_attack_lonely(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> Description:
         defense_description: DefendDescription = (
@@ -247,7 +247,7 @@ class AttackCharacterAction(WithCharacterAction):
         aff = ", ".join([a.name for a in defense_description.affinities])
         self._check_attack_lonely(character, defense_description, aff)
 
-        story = self._kernel.fight_lib.fight(
+        story = await self._kernel.fight_lib.fight(
             attack=AttackDescription(
                 all_fighters=[character], ready_fighters=[character]
             ),
@@ -431,7 +431,7 @@ class AttackCharacterAction(WithCharacterAction):
             footer_with_character_id=with_character.id,
         )
 
-    def _perform_attack_as_affinity(
+    async def _perform_attack_as_affinity(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -457,7 +457,7 @@ class AttackCharacterAction(WithCharacterAction):
         if resp:
             return resp
 
-        story = self._kernel.fight_lib.fight(
+        story = await self._kernel.fight_lib.fight(
             attack=attack_description, defense=defense_description
         )
         parts = [Part(text=p) for p in story]
@@ -478,7 +478,7 @@ class AttackCharacterAction(WithCharacterAction):
             title=title, items=parts, footer_with_character_id=with_character.id
         )
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -490,14 +490,14 @@ class AttackCharacterAction(WithCharacterAction):
             if not input_.confirm:
                 return self._get_attack_lonely_description(character, with_character)
             else:
-                return self._perform_attack_lonely(character, with_character)
+                return await self._perform_attack_lonely(character, with_character)
         elif input_.as_affinity:
             if not input_.confirm:
                 return self._get_attack_as_affinity_description(
                     character, with_character, as_affinity_id=input_.as_affinity
                 )
             else:
-                return self._perform_attack_as_affinity(
+                return await self._perform_attack_as_affinity(
                     character, with_character, as_affinity_id=input_.as_affinity
                 )
 

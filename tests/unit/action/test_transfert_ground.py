@@ -287,7 +287,7 @@ class TestTransfertGround:
             # Deposit
             response = None
             if transfer.partial_deposit_count:
-                description = action.perform(
+                description = await action.perform(
                     xena, input_=TransfertGroundCharacterModel(parameters)
                 )
                 deposit_url = extract_resource_button_url(
@@ -298,7 +298,7 @@ class TestTransfertGround:
                     assert 200 == response.status
 
             if transfer.deposit_count:
-                description = action.perform(
+                description = await action.perform(
                     xena, input_=TransfertGroundCharacterModel(parameters)
                 )
                 deposit_url = extract_resource_button_url(description, "right", "WOOD")
@@ -308,7 +308,7 @@ class TestTransfertGround:
 
             # Take
             if transfer.partial_take_count:
-                description = action.perform(
+                description = await action.perform(
                     xena, input_=TransfertGroundCharacterModel(parameters)
                 )
                 take_url = extract_resource_button_url(
@@ -319,7 +319,7 @@ class TestTransfertGround:
                     assert 200 == response.status
 
             if transfer.take_count:
-                description = action.perform(
+                description = await action.perform(
                     xena, input_=TransfertGroundCharacterModel(parameters)
                 )
                 take_url = extract_resource_button_url(description, "left", "WOOD")
@@ -383,7 +383,7 @@ class TestTransfertGround:
         assert get_on_ground_quantity() == 0
         assert get_carried_quantity() == 3
 
-        description = action.perform(xena, input_=TransfertGroundCharacterModel())
+        description = await action.perform(xena, input_=TransfertGroundCharacterModel())
         deposit_url = extract_stuff_button_url(description, "partial_right", haxe1.id)
 
         response = await web.post(deposit_url)
@@ -392,7 +392,7 @@ class TestTransfertGround:
         assert get_on_ground_quantity() == 1
         assert get_carried_quantity() == 2
 
-        description = action.perform(xena, input_=TransfertGroundCharacterModel())
+        description = await action.perform(xena, input_=TransfertGroundCharacterModel())
         deposit_url = extract_stuff_button_url(description, "right", haxe2.id)
 
         response = await web.post(deposit_url)
@@ -401,7 +401,7 @@ class TestTransfertGround:
         assert get_on_ground_quantity() == 3
         assert get_carried_quantity() == 0
 
-        description = action.perform(xena, input_=TransfertGroundCharacterModel())
+        description = await action.perform(xena, input_=TransfertGroundCharacterModel())
         take_url = extract_stuff_button_url(description, "partial_left", haxe1.id)
 
         response = await web.post(take_url)
@@ -410,7 +410,7 @@ class TestTransfertGround:
         assert get_on_ground_quantity() == 2
         assert get_carried_quantity() == 1
 
-        description = action.perform(xena, input_=TransfertGroundCharacterModel())
+        description = await action.perform(xena, input_=TransfertGroundCharacterModel())
         take_url = extract_stuff_button_url(description, "left", haxe2.id)
 
         response = await web.post(take_url)

@@ -48,7 +48,7 @@ class CheatsCharacterAction(CharacterAction):
         if not self._get_available_cheats(character):
             raise ImpossibleAction("Vous n'avez pas accès")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: CheatsModel
     ) -> None:
         if not input_.cheat_id:
@@ -93,7 +93,9 @@ class CheatsCharacterAction(CharacterAction):
 
         return action_links
 
-    def perform(self, character: "CharacterModel", input_: CheatsModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: CheatsModel
+    ) -> Description:
         if input_.cheat_id == "increase_ap":
             character_doc = self._kernel.character_lib.get_document(character.id)
             character_doc.action_points = 24.0

@@ -642,7 +642,7 @@ class TestFightLib:
             ),
         ],
     )
-    def test_unit__fight__ok__one_vs_one(
+    async def test_unit__fight__ok__one_vs_one(
         self,
         france_warlord: CharacterModel,
         england_warlord: CharacterModel,
@@ -669,7 +669,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = worldmapc_kernel.fight_lib.fight(
+            produced_story = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord], ready_fighters=[france_warlord]
                 ),
@@ -739,7 +739,7 @@ class TestFightLib:
             )
         ],
     )
-    def test_unit__fight__ok__army_vs_one(
+    async def test_unit__fight__ok__army_vs_one(
         self,
         france_affinity: AffinityDocument,
         france_warlord: CharacterModel,
@@ -760,7 +760,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = worldmapc_kernel.fight_lib.fight(
+            produced_story = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord] + france_fighters,
                     ready_fighters=[france_warlord] + france_fighters,
@@ -936,7 +936,7 @@ class TestFightLib:
             ),
         ],
     )
-    def test_unit__fight__ok__army_vs_army(
+    async def test_unit__fight__ok__army_vs_army(
         self,
         france_affinity: AffinityDocument,
         france_warlord: CharacterModel,
@@ -960,7 +960,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = worldmapc_kernel.fight_lib.fight(
+            produced_story = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord] + france_fighters,
                     ready_fighters=(

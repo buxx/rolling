@@ -37,7 +37,7 @@ def propose_teach_action(worldmapc_kernel: Kernel) -> ProposeTeachKnowledgeActio
 
 @pytest.mark.usefixtures("initial_universe_state")
 class TestLearnKnowledgeAction:
-    def test_unit__learn__ok__nominal_case(
+    async def test_unit__learn__ok__nominal_case(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -49,7 +49,7 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 0
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
         )
         assert descr.title == "Apprendre Forgeron"
@@ -60,7 +60,7 @@ class TestLearnKnowledgeAction:
         assert descr.items[1].is_form
         assert descr.items[1].items[0].name == "ap"
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=5)
         )
         assert descr.title == "Apprentissage effectué"
@@ -69,7 +69,7 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 5
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
         )
         assert descr.title == "Apprendre Forgeron"
@@ -78,7 +78,7 @@ class TestLearnKnowledgeAction:
             == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
         )
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=5)
         )
         assert descr.title == "Connaissance acquise !"
@@ -86,7 +86,7 @@ class TestLearnKnowledgeAction:
         franck = kernel.character_lib.get(franck.id)
         assert "blacksmith" in franck.knowledges
 
-    def test_unit__learn__err__not_enough_ap(
+    async def test_unit__learn__err__not_enough_ap(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -97,12 +97,12 @@ class TestLearnKnowledgeAction:
 
         franck.action_points = 1
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
         assert str(caught.value) == "Pas assez de points d'actions"
 
-    def test_unit__learn__err__already_knew(
+    async def test_unit__learn__err__already_knew(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -113,12 +113,12 @@ class TestLearnKnowledgeAction:
 
         franck.knowledges["blacksmith"] = kernel.game.config.knowledge["blacksmith"]
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
         assert str(caught.value) == "Connaissance déjà acquise"
 
-    def test_unit__learn__err__require_other_knowledge(
+    async def test_unit__learn__err__require_other_knowledge(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -128,7 +128,7 @@ class TestLearnKnowledgeAction:
         franck = worldmapc_franck_model
 
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith2", ap=2)
             )
         assert str(caught.value) == "Cette connaissance ne peut pas encore etre abordé"
@@ -148,7 +148,7 @@ class TestLearnKnowledgeAction:
 
         assert kernel.character_lib.get_knowledge_progress(arthur.id, "blacksmith") == 0
 
-        description = propose_teach_action.perform(
+        description = await propose_teach_action.perform(
             xena,
             arthur,
             input_=ProposeTeachKnowledgeModel(

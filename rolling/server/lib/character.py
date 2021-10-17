@@ -26,8 +26,13 @@ from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
-from rolling.model.data import ItemModel
-from rolling.model.event import StoryPage
+from rolling.model.data import ItemModel, ListOfItemModel
+from rolling.model.event import (
+    NewResumeTextData,
+    StoryPage,
+    WebSocketEvent,
+    ZoneEventType,
+)
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
@@ -817,47 +822,60 @@ class CharacterLib:
         return action_links
 
     def get_on_place_actions(
-        self, character_id: str
+        self, character_id: str, quick_actions_only: bool = False
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions_: typing.List[CharacterActionLink] = []
 
-        character_actions_.extend(
-            self._add_category_to_action_links(
-                self.get_on_place_stuff_actions(character),
-                "Objets, ressources et bâtiments autour",
+        if not quick_actions_only:
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    self.get_on_place_stuff_actions(character),
+                    "Objets, ressources et bâtiments autour",
+                )
             )
-        )
-        character_actions_.extend(
-            self._add_category_to_action_links(
-                self.get_on_place_resource_actions(character),
-                "Objets, ressources et bâtiments autour",
+
+        if not quick_actions_only:
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    self.get_on_place_resource_actions(character),
+                    "Objets, ressources et bâtiments autour",
+                )
             )
-        )
-        character_actions_.extend(
-            self._add_category_to_action_links(
-                self.get_on_place_build_actions(character),
-                "Objets, ressources et bâtiments autour",
+
+        if not quick_actions_only:
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    self.get_on_place_build_actions(character),
+                    "Objets, ressources et bâtiments autour",
+                )
             )
-        )
-        character_actions_.extend(
-            self._add_category_to_action_links(
-                self.get_on_place_character_actions(character), "Personnages"
+
+        if not quick_actions_only:
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    self.get_on_place_character_actions(character),
+                    "Personnages",
+                )
             )
-        )
-        character_actions_.extend(
-            self._add_category_to_action_links(
-                self.get_from_inventory_actions(character), "Inventaire"
+
+        if not quick_actions_only:
+            character_actions_.extend(
+                self._add_category_to_action_links(
+                    self.get_from_inventory_actions(character), "Inventaire"
+                )
             )
-        )
 
         # Actions with available character actions
         for action in self._action_factory.get_all_character_actions():
-            character_actions_.extend(
-                self._add_category_to_action_links(
-                    action.get_character_actions(character), "Divers"
+            if not quick_actions_only:
+                character_actions_.extend(
+                    self._add_category_to_action_links(
+                        action.get_character_actions(character), "Divers"
+                    )
                 )
-            )
+            else:
+                character_actions_.extend(action.get_quick_actions(character))
 
         return filter_action_links(character_actions_)
 
@@ -1038,7 +1056,7 @@ class CharacterLib:
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
 
-    def reduce_action_points(
+    async def reduce_action_points(
         self, character_id: str, cost: float, commit: bool = True, check: bool = False
     ) -> CharacterDocument:
         character_doc = self.get_document(character_id)
@@ -1051,6 +1069,22 @@ class CharacterLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_RESUME_TEXT,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=NewResumeTextData(
+                    resume=ListOfItemModel(
+                        self._kernel.character_lib.get_resume_text(character_doc.id)
+                    )
+                ),
+            ),
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            character_ids=[character_id],
+        )
 
         return character_doc
 

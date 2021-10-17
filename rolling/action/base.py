@@ -164,7 +164,7 @@ class WithStuffAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> None:
         pass
@@ -175,6 +175,11 @@ class WithStuffAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
+    def get_quick_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -184,7 +189,7 @@ class WithStuffAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         pass
@@ -196,7 +201,7 @@ class WithBuildAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         pass
@@ -207,6 +212,11 @@ class WithBuildAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -216,7 +226,7 @@ class WithBuildAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> Description:
         pass
@@ -228,7 +238,7 @@ class WithResourceAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: typing.Any
     ) -> None:
         pass
@@ -239,6 +249,11 @@ class WithResourceAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
+    def get_quick_actions(
+        self, character: "CharacterModel", resource_id: str
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -248,7 +263,7 @@ class WithResourceAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: typing.Any
     ) -> Description:
         pass
@@ -260,7 +275,7 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         pass
@@ -272,10 +287,12 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         pass
 
-    def perform_from_event(
+    async def perform_from_event(
         self, character: "CharacterModel", input_: typing.Any
     ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         """
@@ -288,6 +305,11 @@ class CharacterAction(Action):
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
 
 class WithCharacterAction(Action):
     @abc.abstractmethod
@@ -297,7 +319,7 @@ class WithCharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -320,10 +342,15 @@ class WithCharacterAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
         input_: typing.Any,
     ) -> Description:
         pass
+
+    def get_quick_actions(
+        self, character: "CharacterModel", with_character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []

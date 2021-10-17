@@ -53,7 +53,7 @@ class DropStuffAction(WithStuffAction):
         if stuff.carried_by != character.id:
             raise ImpossibleAction("Vous ne possedez pas cet objet")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         self.check_is_possible(character, stuff)
@@ -83,10 +83,10 @@ class DropStuffAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: DropStuffModel
     ) -> Description:
-        def do_for_one(
+        async def do_for_one(
             character_: "CharacterModel", stuff_: "StuffModel", input__: DropStuffModel
         ) -> typing.List[Part]:
             places_to_drop = (
@@ -111,7 +111,7 @@ class DropStuffAction(WithStuffAction):
                 )
             return [Part(text=f"{stuff_.name} laissé ici")]
 
-        return with_multiple_carried_stuffs(
+        return await with_multiple_carried_stuffs(
             self,
             self._kernel,
             character=character,
@@ -143,7 +143,7 @@ class DropResourceAction(WithResourceAction):
         ):
             raise ImpossibleAction("Vous ne possedez pas cette resource")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> None:
         try:
@@ -193,7 +193,7 @@ class DropResourceAction(WithResourceAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
         # TODO BS 2019-09-09: perfs

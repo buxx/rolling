@@ -50,16 +50,24 @@ class Part:
     columns: int = 0
 
     @classmethod
-    def from_dataclass_fields(cls, dataclass_, is_form: bool = False) -> typing.List["Part"]:
+    def from_dataclass_fields(
+        cls, dataclass_, is_form: bool = False
+    ) -> typing.List["Part"]:
         items: typing.List[Part] = []
 
         for field in dataclasses.fields(dataclass_):
-            type_ = Type.TEXT if field.metadata.get("is_text") else Type.from_python_type(field.type)
-            items.append(Part(
-                label=field.metadata.get("label", None),
-                type_=type_,
-                name=field.name,
-            ))
+            type_ = (
+                Type.TEXT
+                if field.metadata.get("is_text")
+                else Type.from_python_type(field.type)
+            )
+            items.append(
+                Part(
+                    label=field.metadata.get("label", None),
+                    type_=type_,
+                    name=field.name,
+                )
+            )
 
         return items
 
@@ -72,8 +80,14 @@ class RequestClicks:
     many: bool = False
 
 
+class DescriptionType(str, enum.Enum):
+    DEFAULT = "DEFAULT"
+    ERROR = "ERROR"
+
+
 @dataclasses.dataclass
 class Description:
+    type_: DescriptionType = DescriptionType.DEFAULT
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     footer_links: typing.List[Part] = dataclasses.field(default_factory=list)
@@ -94,3 +108,4 @@ class Description:
     footer_with_build_id: typing.Optional[int] = None
     footer_with_affinity_id: typing.Optional[int] = None
     character_ap: typing.Optional[str] = None
+    quick_action_response: typing.Optional[str] = None

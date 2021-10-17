@@ -240,7 +240,7 @@ class TestBringResourcesOnBuild:
         character_actions = action.get_character_actions(xena, build.id)
         assert not character_actions
 
-    def test_unit__perform__nothing_on_place_and_no_progress(
+    async def test_unit__perform__nothing_on_place_and_no_progress(
         self,
         action: BringResourcesOnBuild,
         worldmapc_kernel: Kernel,
@@ -256,7 +256,7 @@ class TestBringResourcesOnBuild:
         )
 
         assert not kernel.resource_lib.get_stored_in_build(build.id)
-        action.perform(
+        await action.perform(
             xena,
             build_id=build.id,
             input_=BringResourceModel(
@@ -270,7 +270,7 @@ class TestBringResourcesOnBuild:
         assert 0.00025 == resource.quantity
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
-    def test_deposit_resource_on_build_allowing_it_because_allow_all(
+    async def test_deposit_resource_on_build_allowing_it_because_allow_all(
         self,
         worldmapc_kernel: Kernel,
         build5: BuildDocument,
@@ -284,7 +284,7 @@ class TestBringResourcesOnBuild:
         assert not kernel.resource_lib.get_stored_in_build(build5.id)
 
         # When
-        deposit_action.perform(
+        await deposit_action.perform(
             character=xena,
             build_id=build5.id,
             input_=DepositToModel(
@@ -299,7 +299,7 @@ class TestBringResourcesOnBuild:
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
     @pytest.mark.usefixtures("worldmapc_xena_stone")
-    def test_deposit_resource_on_build_allowing_it_because_allow_limit(
+    async def test_deposit_resource_on_build_allowing_it_because_allow_limit(
         self,
         worldmapc_kernel: Kernel,
         build6: BuildDocument,
@@ -314,14 +314,14 @@ class TestBringResourcesOnBuild:
 
         # When
         with pytest.raises(ImpossibleAction):
-            deposit_action.perform(
+            await deposit_action.perform(
                 character=xena,
                 build_id=build6.id,
                 input_=DepositToModel(
                     deposit_resource_id="WOOD", deposit_resource_quantity="0.2"
                 ),
             )
-        deposit_action.perform(
+        await deposit_action.perform(
             character=xena,
             build_id=build6.id,
             input_=DepositToModel(
@@ -335,7 +335,7 @@ class TestBringResourcesOnBuild:
         assert kernel.resource_lib.get_stored_in_build(build6.id)[0].id == "STONE"
 
     @pytest.mark.usefixtures("worldmapc_xena_stone")
-    def test_deposit_resource_on_build_refusing_it_because_not_allow(
+    async def test_deposit_resource_on_build_refusing_it_because_not_allow(
         self,
         worldmapc_kernel: Kernel,
         build4: BuildDocument,
@@ -350,7 +350,7 @@ class TestBringResourcesOnBuild:
 
         # When
         with pytest.raises(ImpossibleAction):
-            deposit_action.perform(
+            await deposit_action.perform(
                 character=xena,
                 build_id=build4.id,
                 input_=DepositToModel(
@@ -361,7 +361,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.resource_lib.get_stored_in_build(build4.id)
 
-    def test_deposit_stuff_on_build_allowing_it_because_allow_all(
+    async def test_deposit_stuff_on_build_allowing_it_because_allow_all(
         self,
         worldmapc_kernel: Kernel,
         build5: BuildDocument,
@@ -377,7 +377,7 @@ class TestBringResourcesOnBuild:
         assert not kernel.resource_lib.get_stored_in_build(build5.id)
 
         # When
-        deposit_action.perform(
+        await deposit_action.perform(
             character=xena,
             build_id=build5.id,
             input_=DepositToModel(
@@ -390,7 +390,7 @@ class TestBringResourcesOnBuild:
         assert 1 == len(kernel.stuff_lib.get_from_build(build5.id))
         assert kernel.stuff_lib.get_from_build(build5.id)[0].id == haxe.id
 
-    def test_deposit_stuff_on_build_refusing_it_because_allow_limit(
+    async def test_deposit_stuff_on_build_refusing_it_because_allow_limit(
         self,
         worldmapc_kernel: Kernel,
         build6: BuildDocument,
@@ -407,7 +407,7 @@ class TestBringResourcesOnBuild:
 
         # When
         with pytest.raises(ImpossibleAction):
-            deposit_action.perform(
+            await deposit_action.perform(
                 character=xena,
                 build_id=build6.id,
                 input_=DepositToModel(
@@ -418,7 +418,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.stuff_lib.get_from_build(build6.id)
 
-    def test_deposit_stuff_on_build_refusing_it_because_not_allow(
+    async def test_deposit_stuff_on_build_refusing_it_because_not_allow(
         self,
         worldmapc_kernel: Kernel,
         build4: BuildDocument,
@@ -435,7 +435,7 @@ class TestBringResourcesOnBuild:
 
         # When
         with pytest.raises(ImpossibleAction):
-            deposit_action.perform(
+            await deposit_action.perform(
                 character=xena,
                 build_id=build4.id,
                 input_=DepositToModel(
@@ -447,7 +447,7 @@ class TestBringResourcesOnBuild:
         assert not kernel.stuff_lib.get_from_build(build4.id)
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
-    def test_take_resource_from_build(
+    async def test_take_resource_from_build(
         self,
         worldmapc_kernel: Kernel,
         build5: BuildDocument,
@@ -459,7 +459,7 @@ class TestBringResourcesOnBuild:
         xena = worldmapc_xena_model
 
         # Given
-        deposit_action.perform(
+        await deposit_action.perform(
             character=xena,
             build_id=build5.id,
             input_=DepositToModel(
@@ -469,7 +469,7 @@ class TestBringResourcesOnBuild:
         assert kernel.resource_lib.get_stored_in_build(build5.id)
 
         # When
-        take_action.perform(
+        await take_action.perform(
             character=xena,
             build_id=build5.id,
             input_=TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.2"),
@@ -478,7 +478,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.resource_lib.get_stored_in_build(build5.id)
 
-    def test_take_stuff_from_build(
+    async def test_take_stuff_from_build(
         self,
         worldmapc_kernel: Kernel,
         build5: BuildDocument,
@@ -492,7 +492,7 @@ class TestBringResourcesOnBuild:
         haxe = worldmapc_xena_haxe_weapon
 
         # Given
-        deposit_action.perform(
+        await deposit_action.perform(
             character=xena,
             build_id=build5.id,
             input_=DepositToModel(deposit_stuff_id=haxe.id, deposit_stuff_quantity=1),
@@ -500,7 +500,7 @@ class TestBringResourcesOnBuild:
         assert kernel.stuff_lib.get_from_build(build5.id)
 
         # When
-        take_action.perform(
+        await take_action.perform(
             character=xena,
             build_id=build5.id,
             input_=TakeFromModel(take_stuff_id=haxe.id, take_stuff_quantity=1),

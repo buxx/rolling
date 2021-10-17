@@ -229,49 +229,49 @@
 [TILES]
   [TILES.LEAF_TREE]
     produce = [
-      {resource="WOOD", start_capacity=1.7, regeneration=0.001, destroy_when_empty=true, extract_cost_per_unit=6.0},
+      {resource="WOOD", start_capacity=1.7, regeneration=0.001, destroy_when_empty=true, extract_cost_per_unit=6.0, extract_quick_action_quantity=0.25},
     ]
   [TILES.TROPICAL_TREE]
     produce = [
-      {resource="WOOD", start_capacity=1.8, regeneration=0.002, destroy_when_empty=true, extract_cost_per_unit=6.0},
+      {resource="WOOD", start_capacity=1.8, regeneration=0.002, destroy_when_empty=true, extract_cost_per_unit=6.0, extract_quick_action_quantity=0.25},
     ]
   [TILES.DEAD_TREE]
     produce = [
-      {resource="WOOD", start_capacity=1.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=5.0},
+      {resource="WOOD", start_capacity=1.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=5.0, extract_quick_action_quantity=0.25},
     ]
   [TILES.COPPER_DEPOSIT]
     produce = [
-      {resource="RAW_COPPER", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001},
+      {resource="RAW_COPPER", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001, extract_quick_action_quantity=1000.0},
     ]
   [TILES.TIN_DEPOSIT]
     produce = [
-      {resource="RAW_TIN", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001},
+      {resource="RAW_TIN", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001, extract_quick_action_quantity=1000.0},
     ]
   [TILES.IRON_DEPOSIT]
     produce = [
-      {resource="RAW_IRON", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001},
+      {resource="RAW_IRON", start_capacity=1000000.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.001, extract_quick_action_quantity=1000.0},
     ]
   [TILES.DIRT]
     produce = [
-      {resource="SOIL", infinite=true, extract_cost_per_unit=0.01},
+      {resource="SOIL", infinite=true, extract_cost_per_unit=0.01, extract_quick_action_quantity=10.0},
     ]
   [TILES.FRESH_WATER_TILE]
     produce = [
-      {resource="FRESH_WATER", infinite=true, extract_cost_per_unit=0.01},
+      {resource="FRESH_WATER", infinite=true, extract_cost_per_unit=0.01, extract_quick_action_quantity=10.0},
     ]
   [TILES.SEA_WATER]
     produce = [
-      {resource="SALTED_WATER", infinite=true, extract_cost_per_unit=0.01},
+      {resource="SALTED_WATER", infinite=true, extract_cost_per_unit=0.01, extract_quick_action_quantity=10.0},
     ]
   [TILES.SAND]
     produce = [
-      {resource="BEACH_SAND", infinite=true, extract_cost_per_unit=0.01},
+      {resource="BEACH_SAND", infinite=true, extract_cost_per_unit=0.01, extract_quick_action_quantity=10.0},
     ]
   [TILES.HIGH_GRASS]
     produce = [
-      {resource="SOIL", infinite=true, extract_cost_per_unit=0.05},
+      {resource="SOIL", infinite=true, extract_cost_per_unit=0.05, extract_quick_action_quantity=10.0},
     ]
   [TILES.SHORT_GRASS]
     produce = [
-      {resource="SOIL", infinite=true, extract_cost_per_unit=0.05},
+      {resource="SOIL", infinite=true, extract_cost_per_unit=0.05, extract_quick_action_quantity=10.0},
     ]

@@ -28,7 +28,7 @@ def seed_action(worldmapc_kernel: Kernel) -> SeedAction:
 
 
 class TestSeedAction:
-    def test_check_request_is_possible_without_coordinates__cant_because_no_resource(
+    async def test_check_request_is_possible_without_coordinates__cant_because_no_resource(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -37,12 +37,12 @@ class TestSeedAction:
         xena = worldmapc_xena_model
 
         with pytest.raises(ImpossibleAction):
-            seed_action.check_request_is_possible(
+            await seed_action.check_request_is_possible(
                 character=xena,
                 input_=SeedModel(),
             )
 
-    def test_event_perform_success(
+    async def test_event_perform_success(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -67,7 +67,7 @@ class TestSeedAction:
         )
 
         # When
-        zone_events, sender_events = seed_action.perform_from_event(
+        zone_events, sender_events = await seed_action.perform_from_event(
             character=xena,
             input_=SeedModel(
                 row_i=1,
@@ -81,7 +81,7 @@ class TestSeedAction:
         assert len(sender_events) == 1
         assert sender_events[0].type == ZoneEventType.NEW_RESUME_TEXT
 
-    def test_event_perform__not_enough_cereal(
+    async def test_event_perform__not_enough_cereal(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -107,7 +107,7 @@ class TestSeedAction:
 
         # When
         with pytest.raises(ImpossibleAction):
-            seed_action.perform_from_event(
+            await seed_action.perform_from_event(
                 character=xena,
                 input_=SeedModel(
                     row_i=1,
@@ -115,7 +115,7 @@ class TestSeedAction:
                 ),
             )
 
-    def test_event_perform__already_seeded_build(
+    async def test_event_perform__already_seeded_build(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -144,7 +144,7 @@ class TestSeedAction:
 
         # When
         with pytest.raises(ImpossibleAction):
-            seed_action.perform_from_event(
+            await seed_action.perform_from_event(
                 character=xena,
                 input_=SeedModel(
                     row_i=1,
@@ -152,7 +152,7 @@ class TestSeedAction:
                 ),
             )
 
-    def test_event_perform__no_build(
+    async def test_event_perform__no_build(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -170,7 +170,7 @@ class TestSeedAction:
 
         # When
         with pytest.raises(ImpossibleAction):
-            seed_action.perform_from_event(
+            await seed_action.perform_from_event(
                 character=xena,
                 input_=SeedModel(
                     row_i=1,

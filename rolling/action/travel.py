@@ -31,7 +31,7 @@ class TravelAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass  # always authorize display travel description page
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         self.check_is_possible(character)
@@ -73,5 +73,7 @@ class TravelAction(CharacterAction):
 
         return action_links
 
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         pass  # action links are descriptions

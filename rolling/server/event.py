@@ -4,7 +4,7 @@ from aiohttp import web
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
-from rolling.exception import CantMove
+from rolling.exception import CantMove, WrongInputError
 from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
@@ -159,6 +159,10 @@ class ThereIsAroundProcessor(EventProcessor):
                 exclude_ids=[character.id],
             )
 
+        quick_actions = self._kernel.character_lib.get_on_place_actions(
+            character.id, quick_actions_only=True
+        )
+
         around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,
             world_row_i=character.world_row_i,
@@ -168,6 +172,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 resource_count=resource_count,
                 build_count=build_count,
                 character_count=character_count,
+                quick_actions=quick_actions,
             ),
         )
         event_str = self._kernel.event_serializer_factory.get_serializer(
@@ -207,8 +212,8 @@ class ClickActionProcessor(EventProcessor):
         input_ = action.input_model_from_request(event.data.to_dict())
 
         try:
-            action.check_request_is_possible(character, input_)
-            zone_events, sender_events = action.perform_from_event(character, input_)
+            await action.check_request_is_possible(character, input_)
+            zone_events, sender_events = await action.perform_from_event(character, input_)
         except (ImpossibleAction, WrongInputError) as exc:
             await self._kernel.server_zone_events_manager.respond_to_socket(
                 socket=sender_socket,

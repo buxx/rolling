@@ -43,8 +43,8 @@ class TestFollowAction:
         web = worldmapc_web_app
         kernel = worldmapc_kernel
 
-        follow_action.perform(arthur, xena, input_=FollowModel())
-        follow_action.perform(franck, xena, input_=FollowModel(discreetly=1))
+        await follow_action.perform(arthur, xena, input_=FollowModel())
+        await follow_action.perform(franck, xena, input_=FollowModel(discreetly=1))
 
         resp = await web.post(f"/_describe/character/{xena.id}/move-to-zone/{1}/{2}")
         assert 200 == resp.status
@@ -89,7 +89,7 @@ class TestFollowAction:
         web = worldmapc_web_app
         kernel = worldmapc_kernel
 
-        follow_action.perform(arthur, xena, input_=FollowModel())
+        await follow_action.perform(arthur, xena, input_=FollowModel())
 
         def _fake_weight(self, kernel):
             if self.id == "arthur":
