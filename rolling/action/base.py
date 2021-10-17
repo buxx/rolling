@@ -175,6 +175,11 @@ class WithStuffAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
+    def get_quick_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -207,6 +212,11 @@ class WithBuildAction(Action):
     ) -> typing.List[CharacterActionLink]:
         pass
 
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
     def get_cost(
         self,
         character: "CharacterModel",
@@ -238,6 +248,11 @@ class WithResourceAction(Action):
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
         pass
+
+    def get_quick_actions(
+        self, character: "CharacterModel", resource_id: str
+    ) -> typing.List[CharacterActionLink]:
+        return []
 
     def get_cost(
         self,
@@ -288,6 +303,11 @@ class CharacterAction(Action):
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []
+
 
 class WithCharacterAction(Action):
     @abc.abstractmethod
@@ -327,3 +347,8 @@ class WithCharacterAction(Action):
         input_: typing.Any,
     ) -> Description:
         pass
+
+    def get_quick_actions(
+        self, character: "CharacterModel", with_character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return []

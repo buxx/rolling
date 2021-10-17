@@ -2,10 +2,9 @@
 from requests import Response
 import typing
 
-from rolling.model.event import WebSocketEvent
-
 if typing.TYPE_CHECKING:
     from rolling.util import CornerEnum
+    from rolling.model.event import WebSocketEvent
 
 
 class RollingError(Exception):
@@ -58,12 +57,12 @@ class UnknownEvent(EventError):
 
 
 class UnableToProcessEvent(EventError):
-    def __init__(self, msg: str, event: WebSocketEvent) -> None:
+    def __init__(self, msg: str, event: "WebSocketEvent") -> None:
         super().__init__(msg)
         self._event = event
 
     @property
-    def event(self) -> WebSocketEvent:
+    def event(self) -> "WebSocketEvent":
         return self._event
 
 

@@ -159,6 +159,10 @@ class ThereIsAroundProcessor(EventProcessor):
                 exclude_ids=[character.id],
             )
 
+        quick_actions = self._kernel.character_lib.get_on_place_actions(
+            character.id, quick_actions_only=True
+        )
+
         around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,
             world_row_i=character.world_row_i,
@@ -168,6 +172,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 resource_count=resource_count,
                 build_count=build_count,
                 character_count=character_count,
+                quick_actions=quick_actions,
             ),
         )
         event_str = self._kernel.event_serializer_factory.get_serializer(

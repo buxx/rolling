@@ -98,6 +98,9 @@ class CollectResourceAction(CharacterAction):
                             action_description_id=self._description.id,
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
+                        additional_link_parameters_for_quick_action={
+                            "quantity": production.extract_quick_action_quantity
+                        },
                         cost=None,
                         merge_by=(ActionType.COLLECT_RESOURCE, production.resource.id),
                         group_name="Ramasser du matériel ou des ressources",
@@ -105,6 +108,14 @@ class CollectResourceAction(CharacterAction):
                 )
 
         return character_actions
+
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(character)
+        ]
 
     def get_cost(
         self,
@@ -227,11 +238,9 @@ class CollectResourceAction(CharacterAction):
         )
         self._kernel.server_db_session.commit()
 
+        text = f"{input_.quantity} {self._kernel.translation.get(resource_description.unit)} récupéré"
         return Description(
             title=f"Récupérer du {resource_description.name}",
-            items=[
-                Part(
-                    text=f"{input_.quantity} {self._kernel.translation.get(resource_description.unit)} récupéré"
-                )
-            ],
+            items=[Part(text=text)],
+            quick_action_response=text,
         )
