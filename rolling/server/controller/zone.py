@@ -1,4 +1,4 @@
-#  coding: utf-8
+# coding: utf-8
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request

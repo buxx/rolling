@@ -80,8 +80,14 @@ class RequestClicks:
     many: bool = False
 
 
+class DescriptionType(str, enum.Enum):
+    DEFAULT = "DEFAULT"
+    ERROR = "ERROR"
+
+
 @dataclasses.dataclass
 class Description:
+    type_: DescriptionType = DescriptionType.DEFAULT
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
     footer_links: typing.List[Part] = dataclasses.field(default_factory=list)

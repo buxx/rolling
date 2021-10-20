@@ -104,6 +104,8 @@ class CollectResourceAction(CharacterAction):
                         cost=None,
                         merge_by=(ActionType.COLLECT_RESOURCE, production.resource.id),
                         group_name="Ramasser du matériel ou des ressources",
+                        classes1=["COLLECT"],
+                        classes2=[production.resource.id],
                     )
                 )
 

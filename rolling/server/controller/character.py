@@ -10,7 +10,7 @@ import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
-from guilang.description import Description
+from guilang.description import Description, DescriptionType
 from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
@@ -1251,6 +1251,8 @@ class CharacterController(BaseController):
             except (ImpossibleAction, WrongInputError) as exc:
                 return Description(
                     title="Action impossible",
+                    quick_action_response=str(exc).replace("\n", " "),
+                    type_=DescriptionType.ERROR,
                     back_url=f"/_describe/character/{hapic_data.path.character_id}/pending_actions/{pending_action.id}",
                     items=[Part(text=line) for line in str(exc).split("\n")],
                     footer_links=[
@@ -1654,6 +1656,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1690,6 +1694,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1728,6 +1734,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1743,6 +1751,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1783,6 +1793,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1824,6 +1836,8 @@ class CharacterController(BaseController):
         except ImpossibleAttack as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=exc.msg)]
                 + (
                     [Part(text=f"- {msg_line}") for msg_line in exc.msg_lines]
@@ -1834,6 +1848,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )
@@ -1964,6 +1980,8 @@ class CharacterController(BaseController):
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Effectuer un voyage ...",
+                quick_action_response=str(exc).replace("\n", " "),
+                type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
             )

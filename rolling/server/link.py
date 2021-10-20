@@ -31,7 +31,7 @@ class CharacterActionLink:
         link: "CharacterActionLink" = copy.copy(self)
         if "?" not in link.link:
             link.link += "?"
-        link.link += "&".join(
+        link.link += "&" + "&".join(
             f"{key}={value}"
             for key, value in self.additional_link_parameters_for_quick_action.items()
         )
