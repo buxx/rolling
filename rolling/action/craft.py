@@ -231,7 +231,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             return base_cost * input_.quantity
         return base_cost
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
@@ -361,7 +361,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
@@ -523,7 +523,7 @@ class BeginStuffConstructionAction(CharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> Description:
         require_txts = []
@@ -738,7 +738,7 @@ class ContinueStuffConstructionAction(WithStuffAction):
     ) -> typing.Optional[float]:
         return 0.0  # we use only one action description in config and we don't want ap for continue
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         stuff: "StuffModel",

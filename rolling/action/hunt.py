@@ -76,7 +76,9 @@ class SearchFoodAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         productions = self._description.properties["produce"]
         production_per_resource_ids: typing.Dict[str, dict] = {}
         production_per_stuff_ids: typing.Dict[str, dict] = {}

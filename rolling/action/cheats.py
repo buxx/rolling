@@ -93,7 +93,9 @@ class CheatsCharacterAction(CharacterAction):
 
         return action_links
 
-    def perform(self, character: "CharacterModel", input_: CheatsModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: CheatsModel
+    ) -> Description:
         if input_.cheat_id == "increase_ap":
             character_doc = self._kernel.character_lib.get_document(character.id)
             character_doc.action_points = 24.0

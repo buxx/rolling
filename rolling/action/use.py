@@ -59,7 +59,7 @@ class NotUseAsBagAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_bag(character.id, stuff.id)
@@ -112,7 +112,7 @@ class UseAsBagAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_bag(character.id, stuff.id)
@@ -165,7 +165,7 @@ class UseAsWeaponAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
@@ -214,7 +214,7 @@ class NotUseAsWeaponAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
@@ -267,7 +267,7 @@ class UseAsShieldAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
@@ -316,7 +316,7 @@ class NotUseAsShieldAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
@@ -369,7 +369,7 @@ class UseAsArmorAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
@@ -418,7 +418,7 @@ class NotUseAsArmorAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
         self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)

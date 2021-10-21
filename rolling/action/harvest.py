@@ -115,7 +115,9 @@ class HarvestAction(CharacterAction):
 
         return character_actions
 
-    def perform(self, character: "CharacterModel", input_: HarvestModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: HarvestModel
+    ) -> Description:
         resource_description = self._kernel.game.config.resources[input_.resource_id]
 
         if input_.ap is None:

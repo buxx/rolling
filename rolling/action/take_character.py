@@ -347,7 +347,7 @@ class TakeFromCharacterAction(WithCharacterAction):
             action_description_id=self._description.id,
         )
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

@@ -73,5 +73,7 @@ class TravelAction(CharacterAction):
 
         return action_links
 
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         pass  # action links are descriptions

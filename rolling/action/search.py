@@ -87,7 +87,7 @@ class SearchMaterialAction(CharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: SearchMaterialModel
     ) -> Description:
         if not input_.ap:

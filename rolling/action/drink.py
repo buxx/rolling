@@ -127,7 +127,9 @@ class DrinkResourceAction(CharacterAction):
 
         return character_actions
 
-    def perform(self, character: "CharacterModel", input_: input_model) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: input_model
+    ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
         effects: typing.List[
             CharacterEffectDescriptionModel
@@ -270,7 +272,7 @@ class DrinkStuffAction(WithStuffAction):
             ):
                 break
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)

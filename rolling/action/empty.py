@@ -62,7 +62,7 @@ class EmptyStuffAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> Description:
         footer_links = [

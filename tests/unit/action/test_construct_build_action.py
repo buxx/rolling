@@ -90,7 +90,7 @@ class TestConstructBuildAction:
         )
         assert "Faire avancer la construction" == action.name
 
-    def test__perform_some_hours__build_not_started_no_resources(
+    async def test__perform_some_hours__build_not_started_no_resources(
         self,
         action: ConstructBuildAction,
         worldmapc_mock_build_document: BuildDocument,
@@ -100,7 +100,7 @@ class TestConstructBuildAction:
         xena = worldmapc_xena_model
 
         with pytest.raises(ImpossibleAction) as exc:
-            action.perform(
+            await action.perform(
                 xena,
                 build.id,
                 input_=ConstructBuildModel(
@@ -109,7 +109,7 @@ class TestConstructBuildAction:
             )
         assert "Il manque Petit bois" == str(exc.value)
 
-    def test__perform__build_not_started_with_some_resources(
+    async def test__perform__build_not_started_with_some_resources(
         self,
         action: ConstructBuildAction,
         worldmapc_kernel: Kernel,
@@ -132,7 +132,7 @@ class TestConstructBuildAction:
         assert 0.0 == float(build.ap_spent)
 
         # Possible, but 1.0 really spent
-        action.perform(
+        await action.perform(
             xena,
             build.id,
             input_=ConstructBuildModel(
@@ -149,7 +149,7 @@ class TestConstructBuildAction:
 
         # If try to continue, miss resources
         with pytest.raises(ImpossibleAction) as exc:
-            action.perform(
+            await action.perform(
                 xena,
                 build.id,
                 input_=ConstructBuildModel(
@@ -172,7 +172,7 @@ class TestConstructBuildAction:
         assert 1.0 == float(build.ap_spent)
 
         # can finish now
-        action.perform(
+        await action.perform(
             xena,
             build.id,
             input_=ConstructBuildModel(
@@ -186,7 +186,7 @@ class TestConstructBuildAction:
         assert 2.0 == float(build.ap_spent)
         assert not kernel.resource_lib.get_stored_in_build(build_id=build.id)
 
-    def test__perform__build_not_started_with_multiple_resources(
+    async def test__perform__build_not_started_with_multiple_resources(
         self,
         action: ConstructBuildAction,
         worldmapc_kernel: Kernel,
@@ -200,7 +200,7 @@ class TestConstructBuildAction:
 
         # Missing branches (and stone)
         with pytest.raises(ImpossibleAction) as exc:
-            action.perform(xena, build.id, input_=ConstructBuildModel())
+            await action.perform(xena, build.id, input_=ConstructBuildModel())
         assert "Il manque Petit bois" == str(exc.value)
 
         kernel.server_db_session.add(
@@ -216,7 +216,7 @@ class TestConstructBuildAction:
 
         # Missing stones
         with pytest.raises(ImpossibleAction) as exc:
-            action.perform(xena, build.id, input_=ConstructBuildModel())
+            await action.perform(xena, build.id, input_=ConstructBuildModel())
         assert "Il manque Pierre" == str(exc.value)
 
         kernel.server_db_session.add(
@@ -228,7 +228,7 @@ class TestConstructBuildAction:
         )
 
         # Possible, but 0.2 really spent (20% stones)
-        action.perform(xena, build.id, input_=ConstructBuildModel(cost_to_spent=2.0))
+        actionawait xena, build.id, input_=ConstructBuildModel(cost_to_spent=2.0))
 
         xena_ = kernel.character_lib.get(xena.id)
         assert 24.0 - 0.4 == xena_.action_points
@@ -244,7 +244,7 @@ class TestConstructBuildAction:
 
         # If try to continue, miss resources
         with pytest.raises(ImpossibleAction) as exc:
-            action.perform(xena, build.id, input_=ConstructBuildModel())
+            await action.perform(xena, build.id, input_=ConstructBuildModel())
         assert "Il manque Pierre" == str(exc.value)
 
         assert 24.0 - 0.4 == xena_.action_points
@@ -264,7 +264,7 @@ class TestConstructBuildAction:
         )
 
         # can finish now
-        action.perform(xena, build.id, input_=ConstructBuildModel(cost_to_spent=1.8))
+        await action.perform(xena, build.id, input_=ConstructBuildModel(cost_to_spent=1.8))
 
         xena_ = kernel.character_lib.get(xena.id)
         assert 24.0 - 2.0 == xena_.action_points

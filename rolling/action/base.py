@@ -189,7 +189,7 @@ class WithStuffAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> Description:
         pass
@@ -226,7 +226,7 @@ class WithBuildAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> Description:
         pass
@@ -263,7 +263,7 @@ class WithResourceAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: typing.Any
     ) -> Description:
         pass
@@ -287,10 +287,12 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def perform(self, character: "CharacterModel", input_: typing.Any) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: typing.Any
+    ) -> Description:
         pass
 
-    def perform_from_event(
+    async def perform_from_event(
         self, character: "CharacterModel", input_: typing.Any
     ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         """
@@ -340,7 +342,7 @@ class WithCharacterAction(Action):
         return self._description.base_cost
 
     @abc.abstractmethod
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

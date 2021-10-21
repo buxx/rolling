@@ -83,7 +83,7 @@ class DropStuffAction(WithStuffAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: DropStuffModel
     ) -> Description:
         def do_for_one(
@@ -193,7 +193,7 @@ class DropResourceAction(WithResourceAction):
 
         return actions
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
         # TODO BS 2019-09-09: perfs

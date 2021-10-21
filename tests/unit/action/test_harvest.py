@@ -27,7 +27,7 @@ def harvest_action(worldmapc_kernel: Kernel) -> HarvestAction:
 
 
 class TestHarvestAction:
-    def test_collect_cereals_from_field_with_one_ready_ploughed_land(
+    async def test_collect_cereals_from_field_with_one_ready_ploughed_land(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -55,7 +55,7 @@ class TestHarvestAction:
                 ap=6.0,
             ),
         )
-        action.perform(
+        await action.perform(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",
@@ -79,7 +79,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 1.0
 
-    def test_collect_cereals_from_fields_with_all_ready_ploughed_lands(
+    async def test_collect_cereals_from_fields_with_all_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -115,7 +115,7 @@ class TestHarvestAction:
                 ap=6.0,
             ),
         )
-        action.perform(
+        await action.perform(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",
@@ -142,7 +142,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 2.0
 
-    def test_collect_cereals_from_fields_with_some_ready_ploughed_lands(
+    async def test_collect_cereals_from_fields_with_some_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -178,7 +178,7 @@ class TestHarvestAction:
                 ap=6.0,
             ),
         )
-        action.perform(
+        await action.perform(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",

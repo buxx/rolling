@@ -52,7 +52,7 @@ class TakeResourceAction(WithResourceAction):
     ) -> typing.List[CharacterActionLink]:
         pass  # do not display action in actions page
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: TakeResourceModel
     ) -> Description:
         # FIXME BS NOW: manage correctly ImpossibleAction

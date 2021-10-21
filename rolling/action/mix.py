@@ -145,7 +145,7 @@ class MixResourcesAction(WithResourceAction):
             return resource_mix_description.cost * user_input_context.real_quantity
         return self._description.base_cost
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
         base_cost = self.get_cost(character, resource_id=resource_id)

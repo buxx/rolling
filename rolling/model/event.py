@@ -27,6 +27,7 @@ class ZoneEventType(Enum):
     ANIMATED_CORPSE_MOVE = "ANIMATED_CORPSE_MOVE"
     TOP_BAR_MESSAGE = "TOP_BAR_MESSAGE"
     NEW_ANIMATED_CORPSE = "NEW_ANIMATED_CORPSE"
+    ZONE_TILE_REPLACE = "ZONE_TILE_REPLACE"
 
 
 T = typing.TypeVar("T")
@@ -163,6 +164,13 @@ class NewBuildData(WebSocketEventData):
 
 
 @dataclasses.dataclass
+class ZoneTileReplaceData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+    new_tile_id: str
+
+
+@dataclasses.dataclass
 class NewAnimatedCorpseData(WebSocketEventData):
     animated_corpse_id: int
 
@@ -188,6 +196,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.ANIMATED_CORPSE_MOVE: AnimatedCorpseMoveData,
     ZoneEventType.TOP_BAR_MESSAGE: TopBarMessageData,
     ZoneEventType.NEW_ANIMATED_CORPSE: NewAnimatedCorpseData,
+    ZoneEventType.ZONE_TILE_REPLACE: ZoneTileReplaceData,
 }
 
 

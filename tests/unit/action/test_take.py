@@ -127,7 +127,7 @@ class TestTakeFromCharacterAction:
         assert str(caught.value) == "arthur ne peut contraindre xena"
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take__ok(
+    async def test_unit__list_take__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -143,7 +143,9 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_from_character_action.perform(arthur, xena, TakeFromModel())
+        description = await take_from_character_action.perform(
+            arthur, xena, TakeFromModel()
+        )
         item_label_and_urls = [(i.label, i.form_action) for i in description.items]
 
         assert (
@@ -168,7 +170,7 @@ class TestTakeFromCharacterAction:
         ) in item_label_and_urls
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_one_then_one_shield__ok(
+    async def test_unit__list_take_one_then_one_shield__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -184,7 +186,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_from_character_action.perform(
+        description = await take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -194,7 +196,7 @@ class TestTakeFromCharacterAction:
             "?take_stuff_id=1"
         )
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(
@@ -212,7 +214,7 @@ class TestTakeFromCharacterAction:
             == arthur.id
         )
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(
@@ -229,7 +231,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_two_shields__ok(
+    async def test_unit__list_take_two_shields__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -245,7 +247,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_from_character_action.perform(
+        description = await take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -255,7 +257,7 @@ class TestTakeFromCharacterAction:
             "?take_stuff_id=1"
         )
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(
@@ -272,7 +274,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_one_jacket__ok(
+    async def test_unit__list_take_one_jacket__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -286,7 +288,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_stuff_id=worldmapc_xena_leather_jacket.id)
         )
         assert (
@@ -297,7 +299,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_wood__ok(
+    async def test_unit__list_take_wood__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -310,7 +312,7 @@ class TestTakeFromCharacterAction:
         xena = modifier(self, kernel, worldmapc_xena_model, worldmapc_arthur_model)
         arthur = worldmapc_arthur_model
 
-        description = take_from_character_action.perform(
+        description = await take_from_character_action.perform(
             arthur, xena, TakeFromModel(take_resource_id="WOOD")
         )
         assert description.items[0].is_form
@@ -320,7 +322,7 @@ class TestTakeFromCharacterAction:
             "?take_resource_id=WOOD"
         )
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1"),
@@ -332,7 +334,7 @@ class TestTakeFromCharacterAction:
             character_id=xena.id, resource_id="WOOD", quantity=0.1
         )
 
-        take_from_character_action.perform(
+        await take_from_character_action.perform(
             arthur,
             xena,
             TakeFromModel(take_resource_id="WOOD", take_resource_quantity="0.1"),
@@ -409,7 +411,7 @@ class TestTakeFromCharacterAction:
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
 
-    def test_take_more_than_ground_is_working(
+    async def test_take_more_than_ground_is_working(
         self,
         take_resource_action: TakeResourceAction,
         worldmapc_kernel: Kernel,
@@ -430,7 +432,7 @@ class TestTakeFromCharacterAction:
         )
 
         # When
-        take_resource_action.perform(
+        await take_resource_action.perform(
             character=xena, resource_id="WOOD", input_=TakeResourceModel(quantity="1.1")
         )
 

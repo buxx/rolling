@@ -249,7 +249,7 @@ class TransfertGroundCharacterAction(CharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: TransfertGroundCharacterModel
     ) -> Description:
         return TransfertGroundByUrl(

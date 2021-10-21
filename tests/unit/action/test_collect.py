@@ -34,7 +34,7 @@ def tmp_zone_folder(worldmapc_kernel: Kernel):
 
 class TestCollectResourceAction:
     @pytest.mark.usefixtures("tmp_zone_folder")
-    def test_collect_more_than_tile_capacity(
+    async def test_collect_more_than_tile_capacity(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -75,7 +75,7 @@ class TestCollectResourceAction:
         )
 
         # When
-        follow_action.perform(
+       await follow_action.perform(
             xena,
             input_=CollectResourceModel(
                 resource_id="WOOD",

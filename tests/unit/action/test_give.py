@@ -26,7 +26,7 @@ def give_action(worldmapc_kernel: Kernel) -> GiveToCharacterAction:
 
 
 class TestGiveAction:
-    def test_unit__list_give__ok(
+    async def test_unit__list_give__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -41,7 +41,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        description = give_action.perform(xena, arthur, GiveToModel())
+        description = await give_action.perform(xena, arthur, GiveToModel())
         item_label_and_urls = [(i.label, i.form_action) for i in description.items]
 
         assert (
@@ -65,7 +65,7 @@ class TestGiveAction:
             "?give_resource_id=WOOD",
         ) in item_label_and_urls
 
-    def test_unit__list_give_one_then_one_shield__ok(
+    async def test_unit__list_give_one_then_one_shield__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -80,7 +80,7 @@ class TestGiveAction:
         arthur = worldmapc_arthur_model
         xena = worldmapc_xena_model
 
-        description = give_action.perform(
+        description = await give_action.perform(
             xena, arthur, GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -90,7 +90,7 @@ class TestGiveAction:
             "?give_stuff_id=1"
         )
 
-        give_action.perform(
+        await give_action.perform(
             xena,
             arthur,
             GiveToModel(
@@ -108,7 +108,7 @@ class TestGiveAction:
             == arthur.id
         )
 
-        give_action.perform(
+        await give_action.perform(
             xena,
             arthur,
             GiveToModel(
@@ -124,7 +124,7 @@ class TestGiveAction:
             == arthur.id
         )
 
-    def test_unit__list_give_two_shields__ok(
+    async def test_unit__list_give_two_shields__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -139,7 +139,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        description = give_action.perform(
+        description = await give_action.perform(
             xena, arthur, GiveToModel(give_stuff_id=worldmapc_xena_wood_shield.id)
         )
         assert description.items[0].is_form
@@ -149,7 +149,7 @@ class TestGiveAction:
             "?give_stuff_id=1"
         )
 
-        give_action.perform(
+        await give_action.perform(
             xena,
             arthur,
             GiveToModel(
@@ -165,7 +165,7 @@ class TestGiveAction:
             == arthur.id
         )
 
-    def test_unit__list_give_one_jacket__ok(
+    async def test_unit__list_give_one_jacket__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -178,7 +178,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        give_action.perform(
+        await give_action.perform(
             xena, arthur, GiveToModel(give_stuff_id=worldmapc_xena_leather_jacket.id)
         )
         assert (
@@ -188,7 +188,7 @@ class TestGiveAction:
             == arthur.id
         )
 
-    def test_unit__list_give_wood__ok(
+    async def test_unit__list_give_wood__ok(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -200,7 +200,7 @@ class TestGiveAction:
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
 
-        description = give_action.perform(
+        description = await give_action.perform(
             xena, arthur, GiveToModel(give_resource_id="WOOD")
         )
         assert description.items[0].is_form
@@ -210,7 +210,7 @@ class TestGiveAction:
             "?give_resource_id=WOOD"
         )
 
-        give_action.perform(
+        await give_action.perform(
             xena,
             arthur,
             GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1"),
@@ -222,7 +222,7 @@ class TestGiveAction:
             character_id=xena.id, resource_id="WOOD", quantity=0.1
         )
 
-        give_action.perform(
+        await give_action.perform(
             xena,
             arthur,
             GiveToModel(give_resource_id="WOOD", give_resource_quantity="0.1"),

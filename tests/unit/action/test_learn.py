@@ -37,7 +37,7 @@ def propose_teach_action(worldmapc_kernel: Kernel) -> ProposeTeachKnowledgeActio
 
 @pytest.mark.usefixtures("initial_universe_state")
 class TestLearnKnowledgeAction:
-    def test_unit__learn__ok__nominal_case(
+    async def test_unit__learn__ok__nominal_case(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -49,7 +49,7 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 0
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
         )
         assert descr.title == "Apprendre Forgeron"
@@ -60,7 +60,7 @@ class TestLearnKnowledgeAction:
         assert descr.items[1].is_form
         assert descr.items[1].items[0].name == "ap"
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=5)
         )
         assert descr.title == "Apprentissage effectué"
@@ -69,7 +69,7 @@ class TestLearnKnowledgeAction:
         assert "blacksmith" not in franck.knowledges
         assert kernel.character_lib.get_knowledge_progress(franck.id, "blacksmith") == 5
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith")
         )
         assert descr.title == "Apprendre Forgeron"
@@ -78,7 +78,7 @@ class TestLearnKnowledgeAction:
             == "Il reste 5 points d'actions à dépenser pour apprendre Forgeron"
         )
 
-        descr = learn_action.perform(
+        descr = await learn_action.perform(
             franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=5)
         )
         assert descr.title == "Connaissance acquise !"
@@ -148,7 +148,7 @@ class TestLearnKnowledgeAction:
 
         assert kernel.character_lib.get_knowledge_progress(arthur.id, "blacksmith") == 0
 
-        description = propose_teach_action.perform(
+        description = await propose_teach_action.perform(
             xena,
             arthur,
             input_=ProposeTeachKnowledgeModel(

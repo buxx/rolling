@@ -64,7 +64,7 @@ class KillCharacterAction(WithCharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

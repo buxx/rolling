@@ -478,7 +478,7 @@ class AttackCharacterAction(WithCharacterAction):
             title=title, items=parts, footer_with_character_id=with_character.id
         )
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

@@ -105,7 +105,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     ) -> typing.Optional[float]:
         return self._description.base_cost
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         stuff: "StuffModel",
@@ -284,7 +284,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: QuantityModel
     ) -> Description:
         base_cost = self.get_cost(character, resource_id=resource_id)

@@ -60,7 +60,7 @@ class PowerOnBuildAction(WithBuildAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -148,7 +148,7 @@ class PowerOffBuildAction(WithBuildAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)

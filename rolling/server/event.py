@@ -4,7 +4,7 @@ from aiohttp import web
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
-from rolling.exception import CantMove
+from rolling.exception import CantMove, WrongInputError
 from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
@@ -213,7 +213,7 @@ class ClickActionProcessor(EventProcessor):
 
         try:
             action.check_request_is_possible(character, input_)
-            zone_events, sender_events = action.perform_from_event(character, input_)
+            zone_events, sender_events = await action.perform_from_event(character, input_)
         except (ImpossibleAction, WrongInputError) as exc:
             await self._kernel.server_zone_events_manager.respond_to_socket(
                 socket=sender_socket,

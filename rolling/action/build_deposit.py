@@ -268,7 +268,7 @@ class DepositToBuildAction(WithBuildAction):
             action_description_id=self._description.id,
         )
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: DepositToModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)

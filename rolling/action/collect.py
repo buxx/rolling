@@ -125,20 +125,23 @@ class CollectResourceAction(CharacterAction):
         input_: typing.Optional[CollectResourceModel] = None,
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None and input_.resource_id is not None:
-            production = next(
-                production
-                for production in self._kernel.game.world_manager.get_resources_at(
-                    world_row_i=character.world_row_i,
-                    world_col_i=character.world_col_i,
-                    zone_row_i=input_.row_i,
-                    zone_col_i=input_.col_i,
+            try:
+                production = next(
+                    production
+                    for production in self._kernel.game.world_manager.get_resources_at(
+                        world_row_i=character.world_row_i,
+                        world_col_i=character.world_col_i,
+                        zone_row_i=input_.row_i,
+                        zone_col_i=input_.col_i,
+                    )
+                    if production.resource.id == input_.resource_id
                 )
-                if production.resource.id == input_.resource_id
-            )
+            except StopIteration:
+                raise ImpossibleAction("Plus de ressource à cet endroit")
 
             return input_.quantity * production.extract_cost_per_unit
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", input_: CollectResourceModel
     ) -> Description:
         assert input_.resource_id is not None
@@ -224,7 +227,7 @@ class CollectResourceAction(CharacterAction):
             commit=False,
         )
         if not production.infinite:
-            self._kernel.zone_lib.reduce_resource_quantity(
+            await self._kernel.zone_lib.reduce_resource_quantity(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
                 zone_row_i=input_.row_i,

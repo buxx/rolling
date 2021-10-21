@@ -76,7 +76,7 @@ class DestroyBuildAction(WithBuildAction):
             query_params=self.input_model_serializer.dump(input_),
         )
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", build_id: int, input_: DestroyBuildModel
     ) -> Description:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)

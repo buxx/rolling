@@ -88,7 +88,7 @@ class FollowCharacterAction(WithCharacterAction):
             ),
         ]
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",
@@ -164,7 +164,7 @@ class StopFollowCharacterAction(WithCharacterAction):
             )
         ]
 
-    def perform(
+    async def perform(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

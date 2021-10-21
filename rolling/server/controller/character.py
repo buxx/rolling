@@ -1247,7 +1247,7 @@ class CharacterController(BaseController):
 
         if hapic_data.query.do:
             try:
-                return self._kernel.action_factory.execute_pending(pending_action)
+                return await self._kernel.action_factory.execute_pending(pending_action)
             except (ImpossibleAction, WrongInputError) as exc:
                 return Description(
                     title="Action impossible",
@@ -1652,7 +1652,7 @@ class CharacterController(BaseController):
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
             action.check_request_is_possible(character_model, input_)
-            return action.perform(character_model, input_)
+            return await action.perform(character_model, input_)
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
@@ -1690,7 +1690,9 @@ class CharacterController(BaseController):
             action.check_request_is_possible(
                 character=character_model, stuff=stuff, input_=input_
             )
-            return action.perform(character=character_model, stuff=stuff, input_=input_)
+            return await action.perform(
+                character=character_model, stuff=stuff, input_=input_
+            )
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
                 title="Action impossible",
@@ -1743,7 +1745,7 @@ class CharacterController(BaseController):
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
         #  in perform like in this action !
         try:
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 build_id=hapic_data.path.build_id,
                 input_=input_,
@@ -1785,7 +1787,7 @@ class CharacterController(BaseController):
                 resource_id=hapic_data.path.resource_id,
                 input_=input_,
             )
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 resource_id=hapic_data.path.resource_id,
                 input_=input_,
@@ -1828,7 +1830,7 @@ class CharacterController(BaseController):
                 with_character=with_character_model,
                 input_=input_,
             )
-            return action.perform(
+            return await action.perform(
                 character=character_model,
                 with_character=with_character_model,
                 input_=input_,

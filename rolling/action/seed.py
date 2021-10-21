@@ -117,7 +117,9 @@ class SeedAction(CharacterAction):
             )
         ]
 
-    def perform(self, character: "CharacterModel", input_: SeedModel) -> Description:
+    async def perform(
+        self, character: "CharacterModel", input_: SeedModel
+    ) -> Description:
         return Description(
             request_clicks=RequestClicks(
                 action_type=ActionType.SEED,
@@ -127,7 +129,7 @@ class SeedAction(CharacterAction):
             )
         )
 
-    def perform_from_event(
+    async def perform_from_event(
         self, character: "CharacterModel", input_: SeedModel
     ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
         assert input_.row_i

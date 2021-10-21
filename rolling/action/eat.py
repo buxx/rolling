@@ -171,7 +171,7 @@ class EatResourceAction(WithResourceAction):
             ):
                 break
 
-    def perform(
+    async def perform(
         self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
     ) -> Description:
         character_doc = self._character_lib.get_document(character.id)
