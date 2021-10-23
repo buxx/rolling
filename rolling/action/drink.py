@@ -76,7 +76,7 @@ class DrinkResourceAction(CharacterAction):
 
         raise ImpossibleAction("Il n'y a pas à boire à proximité")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: DrinkResourceModel
     ) -> None:
         accept_resources_ids = [
@@ -182,7 +182,7 @@ class DrinkStuffAction(WithStuffAction):
 
         raise ImpossibleAction(f"Il n'y a pas de quoi boire la dedans")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-07-31: check is owned stuff

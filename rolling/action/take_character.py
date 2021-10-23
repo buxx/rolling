@@ -293,7 +293,7 @@ class TakeFromCharacterAction(WithCharacterAction):
                 f"{character.name} ne peut contraindre {with_character.name}"
             )
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

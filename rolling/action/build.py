@@ -76,7 +76,7 @@ class BeginBuildAction(CharacterAction):
         # because we want to permit begin construction)
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         self.check_is_possible(character)
@@ -148,7 +148,7 @@ class BeginBuildAction(CharacterAction):
             build_id=build_description.id,
             under_construction=True,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=self.get_cost(character, input_)
         )
         return Description(
@@ -177,7 +177,7 @@ class BringResourcesOnBuild(WithBuildAction):
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
         return
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         return
@@ -397,7 +397,7 @@ class ConstructBuildAction(WithBuildAction):
         if not build_doc.under_construction:
             raise ImpossibleAction("Cette construction est terminée")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         # FIXME BS 2019-10-03: delete all check_request_is_possible and move into perform
@@ -515,7 +515,7 @@ class ConstructBuildAction(WithBuildAction):
             consume_resources_percent=consume_resources_percent,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost=input_cost_to_spent, commit=False
         )
         self._kernel.server_db_session.commit()
@@ -552,7 +552,7 @@ class BuildAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: BuildModel
     ) -> None:
         check_common_is_possible(
@@ -649,7 +649,7 @@ class BuildAction(CharacterAction):
             under_construction=False,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id,
             cost=self.get_cost(character, input_),
             commit=False,

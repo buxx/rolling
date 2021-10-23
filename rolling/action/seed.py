@@ -77,7 +77,7 @@ class SeedAction(CharacterAction):
 
         return concerned_build
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: SeedModel
     ) -> None:
         resource_id = self._description.properties["resource_id"]
@@ -157,7 +157,7 @@ class SeedAction(CharacterAction):
             resource_id=resource_id,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id,
             cost=self.get_cost(character=character, input_=input_),
             commit=False,

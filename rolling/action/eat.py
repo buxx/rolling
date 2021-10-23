@@ -59,7 +59,7 @@ class EatResourceAction(WithResourceAction):
 
         raise ImpossibleAction("Non consommable")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: EatResourceModel
     ) -> None:
         self.check_is_possible(character, resource_id)

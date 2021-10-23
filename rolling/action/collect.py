@@ -54,7 +54,7 @@ class CollectResourceAction(CharacterAction):
 
         raise ImpossibleAction("Il n'y a rien à collecter ici")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: input_model
     ) -> None:
         productions = self._kernel.game.world_manager.get_resources_at(
@@ -238,7 +238,7 @@ class CollectResourceAction(CharacterAction):
                 commit=False,
             )
 
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character.id, cost, commit=False
         )
         self._kernel.server_db_session.commit()

@@ -48,7 +48,7 @@ class TestHarvestAction:
 
         # When/Then
         action.check_is_possible(xena)
-        action.check_request_is_possible(
+        await action.check_request_is_possible(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",
@@ -108,7 +108,7 @@ class TestHarvestAction:
 
         # When/Then
         action.check_is_possible(xena)
-        action.check_request_is_possible(
+        await action.check_request_is_possible(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",
@@ -171,7 +171,7 @@ class TestHarvestAction:
 
         # When/Then
         action.check_is_possible(xena)
-        action.check_request_is_possible(
+        await action.check_request_is_possible(
             xena,
             input_=HarvestModel(
                 resource_id="CEREAL",
@@ -205,7 +205,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 1.0
 
-    def test_collect_cereals_from_fields_with_no_ready_ploughed_lands(
+    async def test_collect_cereals_from_fields_with_no_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -235,7 +235,7 @@ class TestHarvestAction:
         # When/Then
         action.check_is_possible(xena)
         with pytest.raises(ImpossibleAction):
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 xena,
                 input_=HarvestModel(
                     resource_id="CEREAL",

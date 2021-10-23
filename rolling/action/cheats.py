@@ -48,7 +48,7 @@ class CheatsCharacterAction(CharacterAction):
         if not self._get_available_cheats(character):
             raise ImpossibleAction("Vous n'avez pas accès")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: CheatsModel
     ) -> None:
         if not input_.cheat_id:

@@ -374,7 +374,7 @@ class ActionFactory:
                 pending_action.with_character_id
             )
             input_ = action.input_model_from_request(pending_action.parameters)
-            action.check_request_is_possible(character, with_character, input_=input_)
+            await action.check_request_is_possible(character, with_character, input_=input_)
             description = await action.perform(character, with_character, input_=input_)
         else:
             raise NotImplementedError("TODO")

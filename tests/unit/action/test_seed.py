@@ -28,7 +28,7 @@ def seed_action(worldmapc_kernel: Kernel) -> SeedAction:
 
 
 class TestSeedAction:
-    def test_check_request_is_possible_without_coordinates__cant_because_no_resource(
+    async def test_check_request_is_possible_without_coordinates__cant_because_no_resource(
         self,
         worldmapc_kernel: Kernel,
         seed_action: SeedAction,
@@ -37,7 +37,7 @@ class TestSeedAction:
         xena = worldmapc_xena_model
 
         with pytest.raises(ImpossibleAction):
-            seed_action.check_request_is_possible(
+            await seed_action.check_request_is_possible(
                 character=xena,
                 input_=SeedModel(),
             )

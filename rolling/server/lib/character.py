@@ -26,8 +26,13 @@ from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
-from rolling.model.data import ItemModel
-from rolling.model.event import StoryPage
+from rolling.model.data import ItemModel, ListOfItemModel
+from rolling.model.event import (
+    NewResumeTextData,
+    StoryPage,
+    WebSocketEvent,
+    ZoneEventType,
+)
 from rolling.model.knowledge import KnowledgeDescription
 from rolling.model.meta import FromType
 from rolling.model.meta import RiskType
@@ -1051,7 +1056,7 @@ class CharacterLib:
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
 
-    def reduce_action_points(
+    async def reduce_action_points(
         self, character_id: str, cost: float, commit: bool = True, check: bool = False
     ) -> CharacterDocument:
         character_doc = self.get_document(character_id)
@@ -1064,6 +1069,22 @@ class CharacterLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_RESUME_TEXT,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=NewResumeTextData(
+                    resume=ListOfItemModel(
+                        self._kernel.character_lib.get_resume_text(character_doc.id)
+                    )
+                ),
+            ),
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            character_ids=[character_id],
+        )
 
         return character_doc
 

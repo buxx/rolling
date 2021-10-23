@@ -31,7 +31,7 @@ class EmptyStuffAction(WithStuffAction):
         if not stuff.filled_with_resource:
             raise ImpossibleAction("Ne contient rien")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         if not stuff.filled_with_resource:

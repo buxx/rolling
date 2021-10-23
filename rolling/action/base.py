@@ -164,7 +164,7 @@ class WithStuffAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: typing.Any
     ) -> None:
         pass
@@ -201,7 +201,7 @@ class WithBuildAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: typing.Any
     ) -> None:
         pass
@@ -238,7 +238,7 @@ class WithResourceAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: typing.Any
     ) -> None:
         pass
@@ -275,7 +275,7 @@ class CharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
         pass
@@ -319,7 +319,7 @@ class WithCharacterAction(Action):
         pass
 
     @abc.abstractmethod
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

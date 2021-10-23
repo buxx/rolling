@@ -86,7 +86,7 @@ class TestLearnKnowledgeAction:
         franck = kernel.character_lib.get(franck.id)
         assert "blacksmith" in franck.knowledges
 
-    def test_unit__learn__err__not_enough_ap(
+    async def test_unit__learn__err__not_enough_ap(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -97,12 +97,12 @@ class TestLearnKnowledgeAction:
 
         franck.action_points = 1
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
         assert str(caught.value) == "Pas assez de points d'actions"
 
-    def test_unit__learn__err__already_knew(
+    async def test_unit__learn__err__already_knew(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -113,12 +113,12 @@ class TestLearnKnowledgeAction:
 
         franck.knowledges["blacksmith"] = kernel.game.config.knowledge["blacksmith"]
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith", ap=2)
             )
         assert str(caught.value) == "Connaissance déjà acquise"
 
-    def test_unit__learn__err__require_other_knowledge(
+    async def test_unit__learn__err__require_other_knowledge(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_franck_model: CharacterModel,
@@ -128,7 +128,7 @@ class TestLearnKnowledgeAction:
         franck = worldmapc_franck_model
 
         with pytest.raises(WrongInputError) as caught:
-            learn_action.check_request_is_possible(
+            await learn_action.check_request_is_possible(
                 franck, input_=LearnKnowledgeModel(knowledge_id="blacksmith2", ap=2)
             )
         assert str(caught.value) == "Cette connaissance ne peut pas encore etre abordé"

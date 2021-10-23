@@ -48,7 +48,7 @@ class DestroyBuildAction(WithBuildAction):
         if build_doc.health is None:
             raise ImpossibleAction("Ce bâtiment ne peut être détruit")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: DestroyBuildModel
     ) -> None:
         self.check_is_possible(character, build_id=build_id)
@@ -92,7 +92,7 @@ class DestroyBuildAction(WithBuildAction):
 
             for _ in range(to_spent):
                 try:
-                    self._kernel.character_lib.reduce_action_points(
+                    await self._kernel.character_lib.reduce_action_points(
                         character_id=character.id,
                         cost=1.0,
                         check=True,

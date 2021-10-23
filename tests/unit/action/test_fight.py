@@ -392,7 +392,7 @@ class TestFightAction:
             == str(exc.value)
         )
 
-    def test_unit__check_request__ok__attack_lonely_but_exhausted(
+    async def test_unit__check_request__ok__attack_lonely_but_exhausted(
         self,
         france_warlord: CharacterModel,
         england_warlord: CharacterModel,
@@ -407,7 +407,7 @@ class TestFightAction:
         worldmapc_kernel.server_db_session.commit()
 
         with pytest.raises(ImpossibleAction) as exc:
-            attack_action.check_request_is_possible(
+            await attack_action.check_request_is_possible(
                 france_warlord,
                 with_character=england_warlord,
                 input_=AttackModel(lonely=1),
@@ -416,7 +416,7 @@ class TestFightAction:
             exc.value
         )
 
-    def test_unit__check_request__ok__attack_as_affinity_but_all_exhausted(
+    async def test_unit__check_request__ok__attack_as_affinity_but_all_exhausted(
         self,
         france_affinity: AffinityDocument,
         france_warlord: CharacterModel,
@@ -442,14 +442,14 @@ class TestFightAction:
         worldmapc_kernel.server_db_session.commit()
 
         with pytest.raises(ImpossibleAction) as exc:
-            attack_action.check_request_is_possible(
+            await attack_action.check_request_is_possible(
                 france_warlord,
                 with_character=england_warlord,
                 input_=AttackModel(as_affinity=france_affinity.id),
             )
         assert "Personne n'est en état de se battre actuellement" == str(exc.value)
 
-    def test_unit__check_request__ok__attack_as_affinity_but_target_in_affinity(
+    async def test_unit__check_request__ok__attack_as_affinity_but_target_in_affinity(
         self,
         france_affinity: AffinityDocument,
         france_warlord: CharacterModel,
@@ -460,7 +460,7 @@ class TestFightAction:
         self._active_relation_with(worldmapc_kernel, england_warlord, france_affinity)
 
         with pytest.raises(ImpossibleAction) as exc:
-            attack_action.check_request_is_possible(
+            await attack_action.check_request_is_possible(
                 france_warlord,
                 with_character=england_warlord,
                 input_=AttackModel(as_affinity=france_affinity.id),

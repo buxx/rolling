@@ -1651,7 +1651,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(character_model, input_)
+            await action.check_request_is_possible(character_model, input_)
             return await action.perform(character_model, input_)
         except (ImpossibleAction, WrongInputError) as exc:
             return Description(
@@ -1687,7 +1687,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model, stuff=stuff, input_=input_
             )
             return await action.perform(
@@ -1726,7 +1726,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 build_id=hapic_data.path.build_id,
                 input_=input_,
@@ -1782,7 +1782,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 resource_id=hapic_data.path.resource_id,
                 input_=input_,
@@ -1825,7 +1825,7 @@ class CharacterController(BaseController):
             if cost is not None and character_model.action_points < cost:
                 raise get_exception_for_not_enough_ap(character_model, cost)
 
-            action.check_request_is_possible(
+            await action.check_request_is_possible(
                 character=character_model,
                 with_character=with_character_model,
                 input_=input_,

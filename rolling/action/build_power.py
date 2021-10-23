@@ -36,7 +36,7 @@ class PowerOnBuildAction(WithBuildAction):
         if build_doc.under_construction:
             raise ImpossibleAction("Ce batiment est en construction")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, build_id)
@@ -124,7 +124,7 @@ class PowerOffBuildAction(WithBuildAction):
         if not build_doc.is_on:
             raise ImpossibleAction("Ce batiment n'est pas en fonctionnement")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, build_id)

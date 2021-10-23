@@ -50,7 +50,7 @@ class MixResourcesAction(WithResourceAction):
 
         raise ImpossibleAction("Aucune association possible")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> None:
         self.check_is_possible(character, resource_id)
@@ -238,7 +238,7 @@ class MixResourcesAction(WithResourceAction):
             quantity=user_input_context.real_quantity,
             commit=False,
         )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id,
             cost=self.get_cost(character, resource_id=resource_id, input_=input_),
             commit=False,

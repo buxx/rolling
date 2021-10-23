@@ -53,7 +53,7 @@ class HarvestAction(CharacterAction):
 
         raise ImpossibleAction("Il n'y a rien à récolter ici")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: input_model
     ) -> None:
         inspect_zone_positions = get_on_and_around_coordinates(
@@ -167,7 +167,9 @@ class HarvestAction(CharacterAction):
                 seeded_with=input_.resource_id,
             ):
                 if self._kernel.farming_lib.can_be_collected(build):
-                    self._kernel.farming_lib.harvest(build, character_doc, commit=True)
+                    await self._kernel.farming_lib.harvest(
+                        build, character_doc, commit=True
+                    )
 
                     expected_ap -= resource_description.harvest_cost_per_tile
                     spent_ap += resource_description.harvest_cost_per_tile

@@ -176,7 +176,7 @@ class GiveToCharacterAction(WithCharacterAction):
     ) -> None:
         pass  # TODO: user config to refuse receiving ?
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

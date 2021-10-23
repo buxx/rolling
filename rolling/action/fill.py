@@ -44,7 +44,7 @@ class FillStuffAction(WithStuffAction):
 
         raise ImpossibleAction("Rien à proximité ne correspond")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel", input_: input_model
     ) -> None:
         # TODO BS 2019-08-01: check owned

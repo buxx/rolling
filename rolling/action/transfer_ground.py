@@ -229,7 +229,7 @@ class TransfertGroundCharacterAction(CharacterAction):
     def check_is_possible(self, character: "CharacterModel") -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", input_: TransfertGroundCharacterModel
     ) -> None:
         pass  # note: check done by drop/take related actions

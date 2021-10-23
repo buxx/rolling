@@ -40,7 +40,7 @@ class KillCharacterAction(WithCharacterAction):
                 f"{with_character.name} est en capacité de se defendre"
             )
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         with_character: "CharacterModel",

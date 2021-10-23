@@ -89,7 +89,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             )
         ]
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self,
         character: "CharacterModel",
         stuff: "StuffModel",
@@ -111,9 +111,9 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         stuff: "StuffModel",
         input_: TransformStuffIntoResourcesModel,
     ) -> Description:
-        self.check_request_is_possible(character, stuff, input_)
+        await self.check_request_is_possible(character, stuff, input_)
 
-        def do_for_one(
+        async def do_for_one(
             character_: "CharacterModel",
             stuff_: "StuffModel",
             input__: TransformStuffIntoResourcesModel,
@@ -135,14 +135,14 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     commit=False,
                 )
 
-            self._kernel.character_lib.reduce_action_points(
+            await self._kernel.character_lib.reduce_action_points(
                 character_id=character_.id, cost=self._description.base_cost
             )
             self._kernel.stuff_lib.destroy(stuff_.id)
             self._kernel.server_db_session.commit()
             return []
 
-        return with_multiple_carried_stuffs(
+        return await with_multiple_carried_stuffs(
             self,
             self._kernel,
             character=character,
@@ -193,7 +193,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         if resource_id != self._description.properties["required_resource_id"]:
             raise ImpossibleAction("Non concerné")
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: QuantityModel
     ) -> None:
         self.check_is_possible(character, resource_id)
@@ -368,7 +368,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 quantity=produce_quantity,
                 commit=False,
             )
-        self._kernel.character_lib.reduce_action_points(
+        await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=cost, commit=False
         )
         self._kernel.server_db_session.commit()

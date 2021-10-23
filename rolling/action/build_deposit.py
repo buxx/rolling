@@ -213,7 +213,7 @@ class DepositToBuildAction(WithBuildAction):
             raise ImpossibleAction("Ce batiment ne permet pas de déposer")
         pass  # TODO: check build is accessible
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: DepositToModel
     ) -> None:
         self.check_is_possible(character, build_id)

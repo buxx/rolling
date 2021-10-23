@@ -234,7 +234,7 @@ class TestGiveAction:
             character_id=xena.id, resource_id="WOOD"
         )
 
-    def test_unit__list_give_wood__err__require_more(
+    async def test_unit__list_give_wood__err__require_more(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -247,7 +247,7 @@ class TestGiveAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(WrongInputError):
-            give_action.check_request_is_possible(
+            await give_action.check_request_is_possible(
                 xena,
                 arthur,
                 GiveToModel(
@@ -256,7 +256,7 @@ class TestGiveAction:
                 ),
             )
 
-    def test_unit__list_give_shield__err__require_more(
+    async def test_unit__list_give_shield__err__require_more(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -269,7 +269,7 @@ class TestGiveAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(WrongInputError):
-            give_action.check_request_is_possible(
+            await give_action.check_request_is_possible(
                 xena,
                 arthur,
                 GiveToModel(
@@ -277,7 +277,7 @@ class TestGiveAction:
                 ),
             )
 
-    def test_unit__list_give_shield__err__dont_have(
+    async def test_unit__list_give_shield__err__dont_have(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -289,6 +289,6 @@ class TestGiveAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            give_action.check_request_is_possible(
+            await give_action.check_request_is_possible(
                 xena, arthur, GiveToModel(give_stuff_id=42, give_stuff_quantity=1)
             )

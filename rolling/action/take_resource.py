@@ -42,7 +42,7 @@ class TakeResourceAction(WithResourceAction):
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
         pass
 
-    def check_request_is_possible(
+    async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: TakeResourceModel
     ) -> None:
         pass

@@ -347,7 +347,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_wood__err__require_more(
+    async def test_unit__list_take_wood__err__require_more(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -361,7 +361,7 @@ class TestTakeFromCharacterAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(WrongInputError):
-            take_from_character_action.check_request_is_possible(
+            await take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
                 TakeFromModel(
@@ -371,7 +371,7 @@ class TestTakeFromCharacterAction:
             )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_shield__err__require_more(
+    async def test_unit__list_take_shield__err__require_more(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -385,7 +385,7 @@ class TestTakeFromCharacterAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            take_from_character_action.check_request_is_possible(
+            await take_from_character_action.check_request_is_possible(
                 arthur,
                 xena,
                 TakeFromModel(
@@ -394,7 +394,7 @@ class TestTakeFromCharacterAction:
             )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
-    def test_unit__list_take_shield__err__dont_have(
+    async def test_unit__list_take_shield__err__dont_have(
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
@@ -407,7 +407,7 @@ class TestTakeFromCharacterAction:
         arthur = worldmapc_arthur_model
 
         with pytest.raises(ImpossibleAction):
-            take_from_character_action.check_request_is_possible(
+            await take_from_character_action.check_request_is_possible(
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
 
