@@ -244,7 +244,7 @@ class TestFightLib:
             [f.id for f in attack.ready_fighters]
         )
 
-    def test_unit__fight_description__ok__simple_armies_with_some_no_more_ap(
+    async def test_unit__fight_description__ok__simple_armies_with_some_no_more_ap(
         self,
         france_affinity: AffinityDocument,
         england_affinity: AffinityDocument,
@@ -256,7 +256,7 @@ class TestFightLib:
     ) -> None:
         for fighter in france_fighters[0:3] + england_fighters[0:3]:
             fighter.action_points = 0.0
-            worldmapc_kernel.character_lib.reduce_action_points(fighter.id, 24)
+            await worldmapc_kernel.character_lib.reduce_action_points(fighter.id, 24)
 
         defense = worldmapc_kernel.fight_lib.get_defense_description(
             origin_target=england_warlord, world_row_i=1, world_col_i=1

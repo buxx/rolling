@@ -55,8 +55,8 @@ class FarmingLib:
             await self._kernel.character_lib.reduce_action_points(
                 character_id=character_doc.id,
                 cost=resource_description.harvest_cost_per_tile,
-            ).action_points
-        )
+            )
+        ).action_points
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=build.seeded_with,

@@ -2087,7 +2087,7 @@ class CharacterController(BaseController):
                     ),
                 ),
             )
-            self._character_lib.reduce_action_points(
+            await self._character_lib.reduce_action_points(
                 character_.id, zone_properties.move_cost
             )
 
