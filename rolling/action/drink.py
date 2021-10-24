@@ -14,7 +14,9 @@ from rolling.exception import CantEmpty
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughResource
 from rolling.exception import WrongInputError
+from rolling.model.data import ListOfItemModel
 from rolling.model.effect import CharacterEffectDescriptionModel
+from rolling.model.event import NewResumeTextData, WebSocketEvent, ZoneEventType
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 
@@ -122,10 +124,20 @@ class DrinkResourceAction(CharacterAction):
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
                         cost=self.get_cost(character),
+                        classes1=["DRINK"],
+                        classes2=[production.resource.id],
                     )
                 )
 
         return character_actions
+
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(character)
+        ]
 
     async def perform(
         self, character: "CharacterModel", input_: input_model
@@ -143,7 +155,22 @@ class DrinkResourceAction(CharacterAction):
         self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
 
-        return Description(title="Vous avez bu")
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_RESUME_TEXT,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                data=NewResumeTextData(
+                    resume=ListOfItemModel(
+                        self._kernel.character_lib.get_resume_text(character.id)
+                    )
+                ),
+            ),
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+        )
+
+        return Description(title="Vous avez bu", quick_action_response="Vous avez bu")
 
 
 class DrinkStuffAction(WithStuffAction):
