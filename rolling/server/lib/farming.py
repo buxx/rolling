@@ -1,4 +1,6 @@
 import typing
+from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.event import NewBuildData, WebSocketEvent, ZoneEventType
 
 from rolling.server.document.build import BuildDocument
 from rolling.server.document.character import CharacterDocument
@@ -71,3 +73,17 @@ class FarmingLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        build_description = self._kernel.game.config.builds[build.build_id]
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_BUILD,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=NewBuildData(
+                    build=ZoneBuildModelContainer(doc=build, desc=build_description)
+                ),
+            ),
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+        )

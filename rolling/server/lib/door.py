@@ -298,7 +298,11 @@ class DoorLib:
                 try:
                     await socket.send_str(event_str)
                 except ConnectionResetError as exc:
-                    server_logger.exception(exc)
+                    server_logger.debug(exc)
+                except Exception:
+                    server_logger.exception(
+                        "Error when compute and send builds to current sockets"
+                    )
 
     def delete(self, character_id: str, build_id: int) -> None:
         try:

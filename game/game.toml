@@ -692,6 +692,10 @@ destroy_robustness_per_ap = 1
     actions = ["TAKE_RESOURCE"]
     cost = 0.0
 
+  [ACTIONS.HARVEST]  # required by system !
+    actions = ["HARVEST"]
+    cost = 0.0
+
   [ACTIONS.TRANSFER_GROUND]  # required by system !
     actions = ["TRANSFER_GROUND"]
     cost = 0.0

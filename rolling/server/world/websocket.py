@@ -81,6 +81,8 @@ class WorldEventsManager:
                         )
                     )
                     return
+                except ConnectionResetError as exc:
+                    server_logger.debug(str(exc))
                 except Exception:
                     server_logger.exception("Unhandled exception during event process")
 
@@ -119,7 +121,12 @@ class WorldEventsManager:
             ).dump_json(exception_event)
 
             # FIXME: do kept this feature ?
-            await socket.send_str(exception_event_str)
+            try:
+                await socket.send_str(exception_event_str)
+            except ConnectionResetError as exc:
+                server_logger.debug(exc)
+            except Exception:
+                server_logger.exception("Error when send event (world)")
 
     def get_sockets(self) -> typing.Iterable[web.WebSocketResponse]:
         for socket in self._sockets:
@@ -140,6 +147,8 @@ class WorldEventsManager:
             try:
                 server_logger.debug(event_str)
                 await socket.send_str(event_str)
+            except ConnectionResetError as exc:
+                server_logger.debug(exc)
             except Exception as exc:
                 server_logger.exception(exc)
 

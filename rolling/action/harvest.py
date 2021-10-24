@@ -77,7 +77,7 @@ class HarvestAction(CharacterAction):
         )
 
     def get_character_actions(
-        self, character: "CharacterModel"
+        self, character: "CharacterModel", distinct_resource_ids: bool = False
     ) -> typing.List[CharacterActionLink]:
         inspect_zone_positions = get_on_and_around_coordinates(
             character.zone_row_i, character.zone_col_i
@@ -87,6 +87,7 @@ class HarvestAction(CharacterAction):
         inspect_zone_positions = get_on_and_around_coordinates(
             character.zone_row_i, character.zone_col_i
         )
+        seen_resource_ids: typing.List[str] = []
         for inspect_row_i, inspect_col_i in inspect_zone_positions:
             for build in self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
@@ -95,6 +96,9 @@ class HarvestAction(CharacterAction):
                 zone_col_i=inspect_col_i,
                 with_seeded_with=True,
             ):
+                if distinct_resource_ids and build.seeded_with in seen_resource_ids:
+                    continue
+                seen_resource_ids.append(build.seeded_with)
                 resource_description = self._kernel.game.config.resources[
                     build.seeded_with
                 ]
@@ -108,12 +112,27 @@ class HarvestAction(CharacterAction):
                             action_description_id=self._description.id,
                             query_params=self.input_model_serializer.dump(query_params),
                         ),
+                        additional_link_parameters_for_quick_action={
+                            "ap": min(3.0, character.action_points)
+                        },
                         cost=None,
                         group_name="Récolter",
+                        classes1=["HARVEST"],
+                        classes2=[build.seeded_with],
                     )
                 )
 
         return character_actions
+
+    def get_quick_actions(
+        self, character: "CharacterModel"
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(
+                character, distinct_resource_ids=True
+            )
+        ]
 
     async def perform(
         self, character: "CharacterModel", input_: HarvestModel
@@ -185,4 +204,5 @@ class HarvestAction(CharacterAction):
                     "récoltés ({spent_ap} Point d'Actions dépensés)"
                 )
             ],
+            quick_action_response="Récolte effectuée",
         )

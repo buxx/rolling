@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 import aiohttp
 from aiohttp import web
 from aiohttp.web_request import Request
@@ -181,7 +182,12 @@ class ZoneEventsManager:
             ).dump_json(exception_event)
 
             # FIXME: do kept this feature ?
-            await socket.send_str(exception_event_str)
+            try:
+                await socket.send_str(exception_event_str)
+            except ConnectionResetError as exc:
+                server_logger.debug(exc)
+            except Exception:
+                server_logger.exception("Error when send event (zone)")
 
     def get_sockets(
         self, row_i: int, col_i: int
@@ -211,6 +217,8 @@ class ZoneEventsManager:
             try:
                 server_logger.debug(event_str)
                 await socket.send_str(event_str)
+            except ConnectionResetError as exc:
+                server_logger.debug(exc)
             except Exception as exc:
                 server_logger.exception(exc)
 
@@ -239,7 +247,12 @@ class ZoneEventsManager:
         associated_reader_token = self._sockets_associated_reader_token.get(socket)
 
         if not associated_reader_token:
-            await socket.send_str(event_str)
+            try:
+                await socket.send_str(event_str)
+            except ConnectionResetError as exc:
+                server_logger.debug(str(exc))
+            except Exception:
+                server_logger.exception("Error when respond to socket")
             return
 
         if associated_reader_token not in self._sockets_by_token:
@@ -249,7 +262,12 @@ class ZoneEventsManager:
             return
 
         associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
-        await associated_reader_ws.send_str(event_str)
+        try:
+            await associated_reader_ws.send_str(event_str)
+        except ConnectionResetError as exc:
+            server_logger.debug(str(exc))
+        except Exception:
+            server_logger.exception("Error when respond to socket")
 
     def get_character_socket(
         self,
