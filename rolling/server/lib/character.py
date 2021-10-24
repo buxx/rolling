@@ -726,14 +726,14 @@ class CharacterLib:
         return character_actions_
 
     def get_on_place_build_actions(
-        self, character: CharacterModel
+        self, character: CharacterModel, only_quick_actions: bool = False
     ) -> typing.List[CharacterActionLink]:
-        around_character = get_on_and_around_coordinates(
+        around_coordinates = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
-        for around_row_i, around_col_i in around_character:
+        for around_row_i, around_col_i in around_coordinates:
             on_same_position_builds = self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
@@ -742,16 +742,26 @@ class CharacterLib:
                 is_floor=False,
             )
             for build in on_same_position_builds:
-                build_description = self._kernel.game.config.builds[build.build_id]
-                character_actions_.append(
-                    CharacterActionLink(
-                        name=f"Jeter un coup d'oeil sur {build_description.name}",
-                        link=DESCRIBE_BUILD.format(
-                            character_id=character.id, build_id=build.id
-                        ),
-                        group_name="Voir les objets et bâtiments autour",
+                if only_quick_actions:
+                    character_actions_.extend(
+                        self._kernel.build_lib.get_on_build_actions(
+                            character=character,
+                            build_id=build.id,
+                            only_quick_actions=True,
+                        )
                     )
-                )
+
+                else:
+                    build_description = self._kernel.game.config.builds[build.build_id]
+                    character_actions_.append(
+                        CharacterActionLink(
+                            name=f"Jeter un coup d'oeil sur {build_description.name}",
+                            link=DESCRIBE_BUILD.format(
+                                character_id=character.id, build_id=build.id
+                            ),
+                            group_name="Voir les objets et bâtiments autour",
+                        )
+                    )
 
         return character_actions_
 
@@ -849,6 +859,10 @@ class CharacterLib:
                     self.get_on_place_build_actions(character),
                     "Objets, ressources et bâtiments autour",
                 )
+            )
+        else:
+            character_actions_.extend(
+                self.get_on_place_build_actions(character, only_quick_actions=True)
             )
 
         if not quick_actions_only:

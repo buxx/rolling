@@ -7,13 +7,35 @@ from guilang.description import Part
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
+from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.event import NewBuildData, WebSocketEvent, ZoneEventType
 from rolling.rolling_types import ActionType
+from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
 from rolling.util import EmptyModel
 
 if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
     from rolling.game.base import GameConfig
     from rolling.model.character import CharacterModel
+
+
+async def send_new_build(
+    kernel: "Kernel", character: "CharacterModel", build: BuildDocument
+) -> None:
+    build_description = kernel.game.config.builds[build.build_id]
+    await kernel.server_zone_events_manager.send_to_sockets(
+        WebSocketEvent(
+            type=ZoneEventType.NEW_BUILD,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            data=NewBuildData(
+                build=ZoneBuildModelContainer(doc=build, desc=build_description)
+            ),
+        ),
+        world_row_i=character.world_row_i,
+        world_col_i=character.world_col_i,
+    )
 
 
 class PowerOnBuildAction(WithBuildAction):
@@ -47,6 +69,8 @@ class PowerOnBuildAction(WithBuildAction):
     def get_character_actions(
         self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
         return [
             CharacterActionLink(
                 name="Démarrer",
@@ -57,7 +81,17 @@ class PowerOnBuildAction(WithBuildAction):
                     query_params={},
                     action_description_id=self._description.id,
                 ),
+                classes1=["ON"],
+                classes2=build_description.classes,
             )
+        ]
+
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(character, build_id=build_id)
         ]
 
     async def perform(
@@ -98,11 +132,14 @@ class PowerOnBuildAction(WithBuildAction):
             build_doc.is_on = True
             self._kernel.server_db_session.commit()
             parts.append(Part(text=f"{build_description.name} démarré avec succès"))
+            await send_new_build(self._kernel, character, build_doc)
 
+        quick_text = "Démarré" if not missing_parts else "Pas assez de stock"
         return Description(
             title=f"Démarrer {build_description.name}",
             items=parts + missing_parts,
             footer_with_build_id=build_id,
+            quick_action_response=quick_text,
         )
 
 
@@ -135,6 +172,8 @@ class PowerOffBuildAction(WithBuildAction):
     def get_character_actions(
         self, character: "CharacterModel", build_id: int
     ) -> typing.List[CharacterActionLink]:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
         return [
             CharacterActionLink(
                 name="Arrêter",
@@ -145,7 +184,17 @@ class PowerOffBuildAction(WithBuildAction):
                     query_params={},
                     action_description_id=self._description.id,
                 ),
+                classes1=["OFF"],
+                classes2=build_description.classes,
             )
+        ]
+
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        return [
+            link.clone_for_quick_action()
+            for link in self.get_character_actions(character, build_id=build_id)
         ]
 
     async def perform(
@@ -156,9 +205,11 @@ class PowerOffBuildAction(WithBuildAction):
 
         build_doc.is_on = False
         self._kernel.server_db_session.commit()
+        await send_new_build(self._kernel, character, build_doc)
 
         return Description(
             title=f"Arrêter {build_description.name}",
             items=[Part(text="Arrêté avec succès")],
             footer_with_build_id=build_id,
+            quick_action_response="Arrêté",
         )

@@ -398,7 +398,9 @@ class GameConfig:
                 many=build_raw.get("many", False),
                 traversable={
                     TransportType(k): v
-                    for k, v in build_raw.get("traversable", {}).items()
+                    for k, v in build_raw.get(
+                        "traversable", {TransportType.WALKING.value: True}
+                    ).items()
                 },
                 illustration=illustration,
                 default_is_on=build_raw.get("default_is_on", True),

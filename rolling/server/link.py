@@ -20,7 +20,7 @@ class CharacterActionLink:
     classes2: typing.List[str] = dataclasses.field(default_factory=list)
     additional_link_parameters_for_quick_action: typing.Optional[
         typing.Dict[str, typing.Union[str, int, float]]
-    ] = None
+    ] = dataclasses.field(default_factory=dict)
 
     def get_as_str(self) -> str:
         if not self.cost:

@@ -227,7 +227,9 @@ class ClickActionProcessor(EventProcessor):
 
         try:
             await action.check_request_is_possible(character, input_)
-            zone_events, sender_events = await action.perform_from_event(character, input_)
+            zone_events, sender_events = await action.perform_from_event(
+                character, input_
+            )
         except (ImpossibleAction, WrongInputError) as exc:
             await self._kernel.server_zone_events_manager.respond_to_socket(
                 socket=sender_socket,

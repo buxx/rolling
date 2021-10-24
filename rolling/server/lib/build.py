@@ -69,7 +69,7 @@ class BuildLib:
         )
 
     def get_on_build_actions(
-        self, character: CharacterModel, build_id: int
+        self, character: CharacterModel, build_id: int, only_quick_actions: bool = False
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
@@ -78,9 +78,14 @@ class BuildLib:
         for action in self._kernel.action_factory.get_all_with_build_actions():
             try:
                 action.check_is_possible(character, build_id=build_id)
-                actions.extend(
-                    action.get_character_actions(character, build_id=build_id)
-                )
+                if only_quick_actions:
+                    actions.extend(
+                        action.get_quick_actions(character, build_id=build_id)
+                    )
+                else:
+                    actions.extend(
+                        action.get_character_actions(character, build_id=build_id)
+                    )
             except ImpossibleAction:
                 pass
 

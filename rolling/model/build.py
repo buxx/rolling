@@ -51,7 +51,9 @@ class BuildDescription:
     is_door: bool
     classes: typing.List[str] = serpyco.field(default_factory=list)
     many: bool = False
-    traversable: typing.Dict[TransportType, bool] = serpyco.field(default_factory=dict)
+    traversable: typing.Dict[TransportType, bool] = serpyco.field(
+        default_factory=lambda: {TransportType.WALKING.value: True}
+    )
     illustration: typing.Optional[str] = None
     default_is_on: bool = True
     abilities_if_is_on: bool = False
