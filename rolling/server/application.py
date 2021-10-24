@@ -25,6 +25,7 @@ from rolling.server.controller.corpse import AnimatedCorpseController
 from rolling.server.controller.system import SystemController
 from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
+from rolling.server.event import ThereIsAroundProcessor
 from rolling.server.lib.character import CharacterLib
 
 HEADER_NAME__DISABLE_AUTH_TOKEN = "DISABLE_AUTH_TOKEN"
@@ -129,6 +130,29 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         )
 
     @middleware
+    async def quick_actions(request: Request, handler):
+        account_character_id = request.get("account_character_id")
+        response = await handler(request)
+
+        if account_character_id and request.query.get("quick_action") == "1":
+            character_doc = kernel.character_lib.get_document(account_character_id)
+            character_socket = kernel.server_zone_events_manager.get_character_socket(
+                account_character_id,
+            )
+            if character_socket is not None:
+                await ThereIsAroundProcessor(
+                    kernel=kernel,
+                    zone_events_manager=kernel.server_zone_events_manager,
+                ).send_around(
+                    row_i=character_doc.zone_row_i,
+                    col_i=character_doc.zone_col_i,
+                    character_id=character_doc.id,
+                    sender_socket=character_socket,
+                )
+
+        return response
+
+    @middleware
     async def rollback_session(request: Request, handler):
         try:
             return await handler(request)
@@ -142,7 +166,9 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                 )
             raise exc
 
-    app = web.Application(middlewares=[auth, character_infos, rollback_session])
+    app = web.Application(
+        middlewares=[auth, character_infos, rollback_session, quick_actions]
+    )
 
     # Bind routes
     CommonController(kernel).bind(app)

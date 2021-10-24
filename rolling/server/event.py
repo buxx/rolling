@@ -108,7 +108,21 @@ class ThereIsAroundProcessor(EventProcessor):
         event: WebSocketEvent[ClientRequireAroundData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        character = self._kernel.character_lib.get_document(event.data.character_id)
+        await self.send_around(
+            row_i=row_i,
+            col_i=col_i,
+            character_id=event.data.character_id,
+            sender_socket=sender_socket,
+        )
+
+    async def send_around(
+        self,
+        row_i: int,
+        col_i: int,
+        character_id: str,
+        sender_socket: web.WebSocketResponse,
+    ) -> None:
+        character = self._kernel.character_lib.get_document(character_id)
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )

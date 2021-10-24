@@ -250,3 +250,11 @@ class ZoneEventsManager:
 
         associated_reader_ws = self._sockets_by_token.get(associated_reader_token)
         await associated_reader_ws.send_str(event_str)
+
+    def get_character_socket(
+        self,
+        character_id: str,
+    ) -> typing.Optional[web.WebSocketResponse]:
+        for socket, socket_character_id in self._sockets_character_id.items():
+            if character_id == socket_character_id:
+                return socket

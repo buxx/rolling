@@ -33,7 +33,10 @@ class CharacterActionLink:
             link.link += "?"
         link.link += "&" + "&".join(
             f"{key}={value}"
-            for key, value in self.additional_link_parameters_for_quick_action.items()
+            for key, value in (
+                list(self.additional_link_parameters_for_quick_action.items())
+                + [("quick_action", "1")]
+            )
         )
         link.additional_link_parameters_for_quick_action = None
         return link
