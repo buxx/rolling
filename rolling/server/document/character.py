@@ -9,6 +9,8 @@ from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 import typing
 
+from sqlalchemy.sql.expression import null
+
 from rolling.server.document.corpse import CorpseMixin
 from rolling.server.document.resource import ResourceDocument
 from rolling.server.document.stuff import StuffDocument
@@ -61,6 +63,10 @@ class CharacterDocument(CorpseMixin, Document):
     shipped_resource = relationship(
         ResourceDocument, foreign_keys=[ResourceDocument.carried_by_id], uselist=True
     )
+
+    # Must match with data/character_avatar/{uuid}.png
+    avatar_uuid = Column(String(255), nullable=True)
+    avatar_is_validated = Column(Boolean(), nullable=False, default=False)
 
     @property
     def is_alive(self) -> bool:

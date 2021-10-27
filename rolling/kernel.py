@@ -54,6 +54,7 @@ from rolling.server.lib.zone import ZoneLib
 from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
+from rolling.util import generate_avatar_illustration_media
 
 
 @dataclasses.dataclass
@@ -65,6 +66,7 @@ class ServerConfig:
     smtp_port: str
     smtp_user: str
     smtp_password: str
+    avatars_folder_path: str
 
 
 class Kernel:
@@ -145,6 +147,23 @@ class Kernel:
         self._farming_lib: typing.Optional[FarmingLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
+
+        self.avatars_paths: typing.List[str] = [
+            avatar_path
+            for avatar_path in glob.glob(
+                f"{self.server_config.avatars_folder_path}/**/*.png"
+            )
+        ]
+        kernel_logger.info(f"Found {len(self.avatars_paths)} avatars")
+
+    def ensure_avatar_medias(self) -> None:
+        for index, avatar_path in enumerate(self.avatars_paths):
+            stored_file_path = (
+                f"{self.game.config.folder_path}/media/pool_avatar__{index}.png"
+            )
+            if not os.path.exists(stored_file_path):
+                kernel_logger.info(f"Generate {stored_file_path} ...")
+                generate_avatar_illustration_media(avatar_path, stored_file_path)
 
     def load_zone_from_file_path(self, zone_file_path: str) -> None:
         tile_map_source_file_name = ntpath.basename(zone_file_path)

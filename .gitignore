@@ -115,5 +115,8 @@ test/
 DEADJOE
 game/data/
 game/media/bg
+game/media/pool_avatar__*
+game/media/character_avatar__*
 server.ini
 .vscode
+avatars

@@ -1,4 +1,5 @@
 # coding: utf-8
+import dataclasses
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -6,6 +7,8 @@ from aiohttp.web_response import Response
 import aiohttp_jinja2
 from pathlib import Path
 import pkg_resources
+import serpyco
+from hapic import HapicData
 
 from guilang.description import Description
 from guilang.description import Part
@@ -14,6 +17,11 @@ from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
 
 version = pkg_resources.require("rolling")[0].version
+
+
+@dataclasses.dataclass
+class AvatarIndexPath:
+    index: int = serpyco.field(cast_on_load=True)
 
 
 class SystemController(BaseController):
@@ -45,6 +53,17 @@ class SystemController(BaseController):
             ],
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(AvatarIndexPath)
+    async def avatar(self, request: Request, hapic_data: HapicData) -> web.Response:
+        index = hapic_data.path.index
+        avatar_path = self._kernel.avatars_paths[index]
+        with open(avatar_path, "rb") as avatar_file:
+            return web.Response(
+                body=avatar_file.read(),
+                content_type="image/png",
+            )
+
     def bind(self, app: Application) -> None:
         Path("game/media/bg").mkdir(parents=True, exist_ok=True)
         app.add_routes(
@@ -54,5 +73,6 @@ class SystemController(BaseController):
                 web.get("/infos", self.infos),
                 web.static("/media", "game/media"),
                 web.static("/media_bg", "game/media/bg"),
+                web.get("/avatar/{index}", self.avatar),
             ]
         )

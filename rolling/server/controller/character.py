@@ -3,6 +3,7 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+import aiohttp_jinja2
 from hapic import HapicData
 import json
 import math
@@ -10,6 +11,7 @@ import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
+import random
 from guilang.description import Description, DescriptionType
 from guilang.description import Part
 from guilang.description import Type
@@ -27,7 +29,10 @@ from rolling.exception import NotEnoughActionPoints
 from rolling.exception import UserDisplayError
 from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
-from rolling.model.character import CharacterActionModel
+from rolling.model.character import (
+    CharacterActionModel,
+    ChooseAvatarQuery,
+)
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
 from rolling.model.character import DescribeStoryQueryModel
@@ -82,7 +87,7 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.transfer import TransferStuffOrResources
-from rolling.util import ExpectedQuantityContext
+from rolling.util import ILLUSTRATION_AVATAR_PATTERN, ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
@@ -506,8 +511,23 @@ class CharacterController(BaseController):
             )
         ]
 
+        if not character.avatar_uuid:
+            parts.append(
+                Part(
+                    label="Choisir un avatar",
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/card/choose-avatar",
+                )
+            )
+
+        illustration_name = (
+            ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=character.avatar_uuid)
+            if character.avatar_uuid
+            else None
+        )
         return Description(
             title="Fiche de personnage",
+            illustration_name=illustration_name,
             can_be_back_url=True,
             items=[
                 Part(label="Nom", text=character.name),
@@ -649,8 +669,14 @@ class CharacterController(BaseController):
         # TODO: check same zone
         character = self._character_lib.get(hapic_data.path.character_id)
         with_character = self._character_lib.get(hapic_data.path.with_character_id)
+        illustration_name = (
+            ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=with_character.avatar_uuid)
+            if with_character.avatar_uuid
+            else None
+        )
         return Description(
             title=f"Fiche de {with_character.name}",
+            illustration_name=illustration_name,
             items=[Part(text="Personnage"), Part(text=f"Nom: {with_character.name}")],
             can_be_back_url=True,
         )
@@ -1442,8 +1468,14 @@ class CharacterController(BaseController):
         actions = self._character_lib.get_with_character_actions(
             character=character, with_character=with_character
         )
+        illustration_name = (
+            ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=with_character.avatar_uuid)
+            if with_character.avatar_uuid
+            else None
+        )
         return Description(
             title=with_character.name,
+            illustration_name=illustration_name,
             items=[
                 Part(
                     text=action.get_as_str(),
@@ -2471,6 +2503,48 @@ class CharacterController(BaseController):
             can_be_back_url=True,
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(ChooseAvatarQuery)
+    @hapic.output_body(Description)
+    async def _choose_avatar(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        if character.avatar_uuid is not None:
+            return Description(
+                title="Choix d'avatar",
+                items=[Part(text=f"{character.name} possède déjà un avatar")],
+            )
+
+        avatars_count = len(self._kernel.avatars_paths)
+        avatar_index = random.randrange(start=0, stop=avatars_count)
+
+        if hapic_data.query.choose:
+            self._kernel.character_lib.setup_avatar_from_pool(
+                character.id, avatar_index=hapic_data.query.choose
+            )
+            return Description(redirect=f"/_describe/character/{character.id}/card")
+
+        return Description(
+            title=f"Choix de l'avatar de {character.name}",
+            illustration_name=f"pool_avatar__{avatar_index}.png",
+            items=[
+                Part(
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/card/choose-avatar?choose={avatar_index}",
+                    label="Choisir cet avatar",
+                    classes=["primary"],
+                ),
+                Part(
+                    is_link=True,
+                    form_action=f"/_describe/character/{character.id}/card/choose-avatar",
+                    label="Afficher un nouvel avatar",
+                    classes=["secondary"],
+                ),
+            ],
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -2485,6 +2559,10 @@ class CharacterController(BaseController):
                 web.post(
                     "/_describe/character/{character_id}/card",
                     self._describe_character_card,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/card/choose-avatar",
+                    self._choose_avatar,
                 ),
                 web.post(
                     "/character/{character_id}/card/{with_character_id}",

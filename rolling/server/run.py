@@ -101,6 +101,8 @@ def run(args: argparse.Namespace) -> None:
         )
 
     kernel.init()
+    kernel.ensure_avatar_medias()
+
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
     signal.signal(signal.SIGHUP, kernel.on_sighup_signal)
     web.run_app(app, host=args.host, port=args.port, access_log=server_logger)

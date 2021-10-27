@@ -310,6 +310,8 @@ class CharacterLib:
             knowledges=knowledges,
             ability_ids=ability_ids,
             alive=character_document.alive,
+            avatar_uuid=character_document.avatar_uuid,
+            avatar_is_validated=character_document.avatar_is_validated,
         )
 
     def get_multiple(
@@ -1942,3 +1944,17 @@ class CharacterLib:
                 )
             ).count()
         )
+
+    def setup_avatar_from_pool(self, character_id: str, avatar_index: int) -> None:
+        character_doc = self.get_document(character_id)
+        avatar_uuid = uuid.uuid4().hex
+        avatar_source = self._kernel.avatars_paths[avatar_index]
+        util.ensure_avatar_medias(
+            self._kernel,
+            image_source=avatar_source,
+            avatar_uuid=avatar_uuid,
+        )
+        character_doc.avatar_uuid = avatar_uuid
+        character_doc.avatar_is_validated = True
+        self._kernel.server_db_session.add(character_doc)
+        self._kernel.server_db_session.commit()

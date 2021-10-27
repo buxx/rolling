@@ -1,4 +1,5 @@
 * Thanks to https://opengameart.org/content/16x16-weapon-sprites-free
+* Thanks to https://www.fantasy-faces.com/
 * dirt.png by kqedquest is licensed with CC BY-NC 2.0
 * stone_axe.png by https://commons.wikimedia.org/wiki/File:Stone_tools,_Neolithic_or_Copper_Age,_City_of_Prague_Museum,_175541.jpg
 * hare.png by https://commons.wikimedia.org/wiki/File:EB1911_-_Hare_Fig_1.png

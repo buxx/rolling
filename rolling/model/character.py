@@ -33,6 +33,11 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class ChooseAvatarQuery:
+    choose: typing.Optional[int] = serpyco.field(cast_on_load=True, default=None)
+
+
+@dataclasses.dataclass
 class SharedInventoryQueryModel:
     affinity_id: int = serpyco.field(cast_on_load=True)
     resource_id: typing.Optional[str] = None
@@ -373,6 +378,10 @@ class CharacterModel:
     unvote_affinity_relation: bool = False
     unread_transactions: bool = False
     pending_actions: int = 0
+
+    # Must match with data/character_avatar/{uuid}.png
+    avatar_uuid: typing.Optional[str] = None
+    avatar_is_validated: bool = False
 
     @property
     def tired(self) -> bool:

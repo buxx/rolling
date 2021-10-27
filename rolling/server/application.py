@@ -67,6 +67,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             and not request.path.startswith("/ac/")
             and not request.path.startswith("/ws/")
             and not request.path.startswith("/admin")
+            and not request.path.startswith("/avatar")
         ):
             try:
                 login, password = (

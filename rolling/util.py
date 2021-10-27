@@ -6,6 +6,7 @@ import enum
 from os import path
 from pathlib import Path
 import typing
+import shutil
 
 from guilang.description import Description
 from guilang.description import Part
@@ -21,6 +22,11 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
     from rolling.model.resource import CarriedResourceDescriptionModel
     from rolling.model.stuff import StuffModel
+
+
+ORIGINAL_AVATAR_PATTERN = "character_avatar__original__{avatar_uuid}.png"
+ILLUSTRATION_AVATAR_PATTERN = "character_avatar__illustration__{avatar_uuid}.png"
+ZONE_THUMB_AVATAR_PATTERN = "character_avatar__zone_thumb__{avatar_uuid}.png"
 
 
 @dataclasses.dataclass
@@ -104,7 +110,7 @@ class CornerEnum(enum.Enum):
 
 def get_opposite_zone_place(
     from_: CornerEnum, zone_width: int, zone_height: int
-) -> (int, int):
+) -> typing.Tuple[int, int]:
     width_part_len = zone_width // 3
     half_width_part_len = width_part_len // 2
     height_part_len = zone_height // 3
@@ -342,6 +348,47 @@ def generate_background_media(media_name: str, folder_path: str) -> None:
         alpha = Image.new("L", image.size, 10)
         image.putalpha(alpha)
         image.save(illustration_bg_path)
+
+
+def generate_avatar_illustration_media(
+    source_image_path: str, save_to_path: str
+) -> None:
+    avatar = Image.open(source_image_path)
+    ratio = avatar.height / 300
+    avatar.thumbnail((avatar.width * ratio, 300), Image.ANTIALIAS)
+    media = Image.new(mode="RGB", size=(768, 300))
+    media.paste(avatar, ((768 // 2) - (avatar.width // 2), 0))
+    media.save(save_to_path)
+
+
+def generate_avatar_zone_thumb_media(source_image_path: str, save_to_path: str) -> None:
+    avatar = Image.open(source_image_path)
+    ratio = avatar.height / 64
+    avatar.thumbnail((avatar.width * ratio, 64), Image.ANTIALIAS)
+    avatar.save(save_to_path)
+
+
+def ensure_avatar_medias(kernel: "Kernel", image_source: str, avatar_uuid: str) -> None:
+    original_avatar_file_name = ORIGINAL_AVATAR_PATTERN.format(avatar_uuid=avatar_uuid)
+    illustration_avatar_file_name = ILLUSTRATION_AVATAR_PATTERN.format(
+        avatar_uuid=avatar_uuid
+    )
+    zone_thumb_avatar_file_name = ZONE_THUMB_AVATAR_PATTERN.format(
+        avatar_uuid=avatar_uuid
+    )
+
+    shutil.copy(
+        image_source,
+        f"{kernel.game.config.folder_path}/media/{original_avatar_file_name}",
+    )
+    generate_avatar_illustration_media(
+        image_source,
+        save_to_path=f"{kernel.game.config.folder_path}/media/{illustration_avatar_file_name}",
+    )
+    generate_avatar_zone_thumb_media(
+        image_source,
+        save_to_path=f"{kernel.game.config.folder_path}/media/{zone_thumb_avatar_file_name}",
+    )
 
 
 @dataclasses.dataclass
