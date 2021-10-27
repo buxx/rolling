@@ -55,6 +55,7 @@ from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 from rolling.util import generate_avatar_illustration_media
+from rolling.util import ensure_avatar_medias
 
 
 @dataclasses.dataclass
@@ -67,6 +68,7 @@ class ServerConfig:
     smtp_user: str
     smtp_password: str
     avatars_folder_path: str
+    anonymous_media_file_name: str
 
 
 class Kernel:
@@ -157,6 +159,17 @@ class Kernel:
         kernel_logger.info(f"Found {len(self.avatars_paths)} avatars")
 
     def ensure_avatar_medias(self) -> None:
+        # Anonymous avatar
+        ensure_avatar_medias(
+            self,
+            image_source=(
+                f"{self.game.config.folder_path}/media/"
+                f"{self.server_config.anonymous_media_file_name}"
+            ),
+            avatar_uuid="0000",
+        )
+
+        # Pool of avatars
         for index, avatar_path in enumerate(self.avatars_paths):
             stored_file_path = (
                 f"{self.game.config.folder_path}/media/pool_avatar__{index}.png"

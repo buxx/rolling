@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+import os
 
 from PIL import Image
 import enum
@@ -377,18 +378,32 @@ def ensure_avatar_medias(kernel: "Kernel", image_source: str, avatar_uuid: str) 
         avatar_uuid=avatar_uuid
     )
 
-    shutil.copy(
-        image_source,
-        f"{kernel.game.config.folder_path}/media/{original_avatar_file_name}",
+    source_target = (
+        f"{kernel.game.config.folder_path}/media/{original_avatar_file_name}"
     )
-    generate_avatar_illustration_media(
-        image_source,
-        save_to_path=f"{kernel.game.config.folder_path}/media/{illustration_avatar_file_name}",
+    if not os.path.exists(source_target):
+        shutil.copy(
+            image_source,
+            source_target,
+        )
+
+    illustration_target = (
+        f"{kernel.game.config.folder_path}/media/{illustration_avatar_file_name}"
     )
-    generate_avatar_zone_thumb_media(
-        image_source,
-        save_to_path=f"{kernel.game.config.folder_path}/media/{zone_thumb_avatar_file_name}",
+    if not os.path.exists(illustration_target):
+        generate_avatar_illustration_media(
+            image_source,
+            save_to_path=illustration_target,
+        )
+
+    zone_thumb_target = (
+        f"{kernel.game.config.folder_path}/media/{zone_thumb_avatar_file_name}"
     )
+    if not os.path.exists(zone_thumb_target):
+        generate_avatar_zone_thumb_media(
+            image_source,
+            save_to_path=zone_thumb_target,
+        )
 
 
 @dataclasses.dataclass

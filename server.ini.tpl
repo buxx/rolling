@@ -7,3 +7,4 @@ smtp_port = 587
 smtp_user = xxxxxxxxx
 smtp_password = xxxxxxxxx
 avatars_folder_path = ./avatars
+anonymous_media_file_name = anonymous.png

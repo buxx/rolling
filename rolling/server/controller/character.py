@@ -523,7 +523,7 @@ class CharacterController(BaseController):
         illustration_name = (
             ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=character.avatar_uuid)
             if character.avatar_uuid
-            else None
+            else ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid="0000")
         )
         return Description(
             title="Fiche de personnage",
@@ -672,7 +672,7 @@ class CharacterController(BaseController):
         illustration_name = (
             ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=with_character.avatar_uuid)
             if with_character.avatar_uuid
-            else None
+            else ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid="0000")
         )
         return Description(
             title=f"Fiche de {with_character.name}",
@@ -1471,7 +1471,7 @@ class CharacterController(BaseController):
         illustration_name = (
             ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=with_character.avatar_uuid)
             if with_character.avatar_uuid
-            else None
+            else ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid="0000")
         )
         return Description(
             title=with_character.name,
