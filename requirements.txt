@@ -3,7 +3,7 @@ aiohttp-basicauth-middleware==1.1.2
 aiohttp-jinja2==1.5
 aioresponses==0.7.2
 alembic==1.7.4
-apispec==2.0.2
+apispec==5.1.1
 apispec-serpyco==0.17
 appdirs==1.4.4
 async-timeout==3.0.1
