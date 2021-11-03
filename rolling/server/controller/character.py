@@ -594,29 +594,29 @@ class CharacterController(BaseController):
                     classes=["link"],
                 ),
                 Part(text=""),
-                Part(
-                    is_form=True,
-                    form_action=f"/_describe/character/{character.id}/card",
-                    items=[
-                        Part(
-                            text="Si vous occupez la position de chef de guerre, vous pouvez "
-                            "décider de la part de perte maximale dans vos rangs avant "
-                            "d'ordonner le replis"
-                        ),
-                        Part(
-                            label="Lorsque vous menez un assault (%)",
-                            type_=Type.NUMBER,
-                            name="attack_allowed_loss_rate",
-                            default_value=str(doc.attack_allowed_loss_rate),
-                        ),
-                        Part(
-                            label="Lorsque vous êtes attaqué (%)",
-                            type_=Type.NUMBER,
-                            name="defend_allowed_loss_rate",
-                            default_value=str(doc.defend_allowed_loss_rate),
-                        ),
-                    ],
-                ),
+                # Part(
+                #     is_form=True,
+                #     form_action=f"/_describe/character/{character.id}/card",
+                #     items=[
+                #         Part(
+                #             text="Si vous occupez la position de chef de guerre, vous pouvez "
+                #             "décider de la part de perte maximale dans vos rangs avant "
+                #             "d'ordonner le replis"
+                #         ),
+                #         Part(
+                #             label="Lorsque vous menez un assault (%)",
+                #             type_=Type.NUMBER,
+                #             name="attack_allowed_loss_rate",
+                #             default_value=str(doc.attack_allowed_loss_rate),
+                #         ),
+                #         Part(
+                #             label="Lorsque vous êtes attaqué (%)",
+                #             type_=Type.NUMBER,
+                #             name="defend_allowed_loss_rate",
+                #             default_value=str(doc.defend_allowed_loss_rate),
+                #         ),
+                #     ],
+                # ),
             ]
             + parts,
             footer_links=[
