@@ -257,7 +257,7 @@ class ZoneEventsManager:
 
         if associated_reader_token not in self._sockets_by_token:
             server_logger.warning(
-                f"No associated reader ws for toen '{associated_reader_token}' !"
+                f"No associated reader ws for token '{associated_reader_token}' !"
             )
             return
 
@@ -273,6 +273,19 @@ class ZoneEventsManager:
         self,
         character_id: str,
     ) -> typing.Optional[web.WebSocketResponse]:
+        found_sockets = []
+
         for socket, socket_character_id in self._sockets_character_id.items():
             if character_id == socket_character_id:
-                return socket
+                # Socket must be a response socket
+                reader_token = self._sockets_associated_reader_token.get(socket)
+                reader_socket = self._sockets_by_token.get(reader_token)
+                if reader_socket is not None and reader_socket.close_code is None:
+                    found_sockets.append(reader_socket)
+
+        if len(found_sockets) > 1:
+            server_logger.warning(
+                f"Found more than one socket for character '{character_id}' !"
+            )
+        elif len(found_sockets) == 1:
+            return found_sockets[0]
