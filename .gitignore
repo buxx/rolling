@@ -117,6 +117,7 @@ game/data/
 game/media/bg
 game/media/pool_avatar__*
 game/media/character_avatar__*
+game/media/loading__*
 server.ini
 .vscode
 avatars

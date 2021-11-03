@@ -6,6 +6,7 @@ import configparser
 import datetime
 import glob
 import ntpath
+import hashlib
 import os
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
@@ -54,7 +55,7 @@ from rolling.server.lib.zone import ZoneLib
 from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
-from rolling.util import generate_avatar_illustration_media
+from rolling.util import generate_avatar_illustration_media, generate_loading_media
 from rolling.util import ensure_avatar_medias
 
 
@@ -68,6 +69,7 @@ class ServerConfig:
     smtp_user: str
     smtp_password: str
     avatars_folder_path: str
+    loading_folder_path: str
     anonymous_media_file_name: str
 
 
@@ -152,11 +154,22 @@ class Kernel:
 
         self.avatars_paths: typing.List[str] = [
             avatar_path
-            for avatar_path in glob.glob(
-                f"{self.server_config.avatars_folder_path}/**/*.png"
+            for avatar_path in (
+                list(
+                    glob.glob(f"{self.server_config.avatars_folder_path}/**/*.png")
+                    + list(glob.glob(f"{self.server_config.avatars_folder_path}/*.png"))
+                )
             )
         ]
         kernel_logger.info(f"Found {len(self.avatars_paths)} avatars")
+        self.loadings_paths: typing.List[str] = [
+            loading_path
+            for loading_path in glob.glob(
+                f"{self.server_config.loading_folder_path}/*.png"
+            )
+        ]
+        self.loadings_medias_names = []
+        kernel_logger.info(f"Found {len(self.loadings_paths)} loading screens")
 
     def ensure_avatar_medias(self) -> None:
         # Anonymous avatar
@@ -177,6 +190,18 @@ class Kernel:
             if not os.path.exists(stored_file_path):
                 kernel_logger.info(f"Generate {stored_file_path} ...")
                 generate_avatar_illustration_media(avatar_path, stored_file_path)
+
+    def ensure_loading_medias(self) -> None:
+        # Pool of loading screens
+        for loading_path in self.loadings_paths:
+            file_name = os.path.basename(loading_path)
+            file_md5 = hashlib.md5(file_name.encode()).hexdigest()
+            media_name = f"loading__{file_md5}.png"
+            stored_file_path = f"{self.game.config.folder_path}/media/{media_name}"
+            if not os.path.exists(stored_file_path):
+                kernel_logger.info(f"Generate {stored_file_path} ...")
+                generate_loading_media(loading_path, stored_file_path)
+            self.loadings_medias_names.append(media_name)
 
     def load_zone_from_file_path(self, zone_file_path: str) -> None:
         tile_map_source_file_name = ntpath.basename(zone_file_path)

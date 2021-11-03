@@ -1,5 +1,6 @@
 # coding: utf-8
 import dataclasses
+import json
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -54,6 +55,10 @@ class SystemController(BaseController):
         )
 
     @hapic.with_api_doc()
+    async def loadings(self, request: Request) -> web.Response:
+        return web.json_response(self._kernel.loadings_medias_names)
+
+    @hapic.with_api_doc()
     @hapic.input_path(AvatarIndexPath)
     async def avatar(self, request: Request, hapic_data: HapicData) -> web.Response:
         index = hapic_data.path.index
@@ -74,5 +79,6 @@ class SystemController(BaseController):
                 web.static("/media", "game/media"),
                 web.static("/media_bg", "game/media/bg"),
                 web.get("/avatar/{index}", self.avatar),
+                web.get("/system/loadings", self.loadings),
             ]
         )

@@ -55,6 +55,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                 "/account/create",
                 "/system/version",
                 "/system/describe/infos",
+                "/system/loadings",
                 "/infos",
                 "/media",
                 "/media_bg",
@@ -68,6 +69,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             and not request.path.startswith("/ws/")
             and not request.path.startswith("/admin")
             and not request.path.startswith("/avatar")
+            and not request.path.startswith("/media")
         ):
             try:
                 login, password = (

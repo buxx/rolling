@@ -2,7 +2,7 @@
 import dataclasses
 import os
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 import enum
 from os import path
 from pathlib import Path
@@ -360,6 +360,15 @@ def generate_avatar_illustration_media(
     media = Image.new(mode="RGB", size=(768, 300))
     media.paste(avatar, ((768 // 2) - (avatar.width // 2), 0))
     media.save(save_to_path)
+
+
+def generate_loading_media(source_image_path: str, save_to_path: str) -> None:
+    loading = Image.open(source_image_path)
+    ratio = loading.width / 768
+    loading.thumbnail((768, loading.height * ratio), Image.ANTIALIAS)
+    enhancer = ImageEnhance.Brightness(loading)
+    loading = enhancer.enhance(0.33)
+    loading.save(save_to_path)
 
 
 def generate_avatar_zone_thumb_media(source_image_path: str, save_to_path: str) -> None:
