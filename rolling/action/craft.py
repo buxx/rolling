@@ -260,14 +260,14 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             )
 
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
-        self._perform(
+        await self._perform(
             character,
             description=self._description,
             input_=input_,
             cost=cost,
             dry_run=True,
         )
-        self._perform(
+        await self._perform(
             character,
             description=self._description,
             input_=input_,
@@ -329,7 +329,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         )
         if input_.quantity is not None:
             cost = self.get_cost(character, stuff=stuff, input_=input_)
-            self._perform(
+            await self._perform(
                 character,
                 description=self._description,
                 input_=input_,
@@ -390,14 +390,14 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             )
 
         cost = self.get_cost(character, stuff=stuff, input_=input_)
-        self._perform(
+        await self._perform(
             character,
             description=self._description,
             input_=input_,
             cost=cost,
             dry_run=True,
         )
-        self._perform(
+        await self._perform(
             character,
             description=self._description,
             input_=input_,
