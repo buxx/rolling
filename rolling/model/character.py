@@ -33,6 +33,24 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class GetCharacterQueryModel:
+    compute_unread_event: int = serpyco.number_field(cast_on_load=True, default=0)
+    compute_unread_zone_message: int = serpyco.number_field(
+        cast_on_load=True, default=0
+    )
+    compute_unread_conversation: int = serpyco.number_field(
+        cast_on_load=True, default=0
+    )
+    compute_unvote_affinity_relation: int = serpyco.number_field(
+        cast_on_load=True, default=0
+    )
+    compute_unread_transactions: int = serpyco.number_field(
+        cast_on_load=True, default=0
+    )
+    compute_pending_actions: int = serpyco.number_field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
 class ChooseAvatarQuery:
     choose: typing.Optional[int] = serpyco.field(cast_on_load=True, default=None)
 
@@ -364,6 +382,17 @@ class CharacterModel:
     thirst: float = 0  # %
     hunger: float = 0  # %
 
+    is_thirsty: bool = False
+    is_hunger: bool = False
+
+    @property
+    def is_tired(self) -> bool:
+        return self.tired
+
+    @property
+    def is_vulnerable(self) -> bool:
+        return self.vulnerable
+
     _display_object = None
 
     bags: typing.List[StuffModel] = serpyco.field(default_factory=list)
@@ -387,23 +416,26 @@ class CharacterModel:
     def tired(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_TIRED
 
+    @property
     def is_exhausted(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_EXHAUSTED
 
     @property
     def vulnerable(self) -> bool:
-        return not self.is_defend_ready()
+        return not self.is_defend_ready
 
+    @property
     def is_attack_ready(self) -> bool:
         return (
-            not self.is_exhausted()
+            not self.is_exhausted
             and self.action_points >= FIGHT_AP_CONSUME
             and self.life_points > FIGHT_LP_REQUIRE
         )
 
+    @property
     def is_defend_ready(self) -> bool:
         # FIXME BS: keep exhausted ?
-        return not self.is_exhausted() and self.life_points > FIGHT_LP_REQUIRE
+        return not self.is_exhausted and self.life_points > FIGHT_LP_REQUIRE
 
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
@@ -451,6 +483,53 @@ class CharacterModel:
             if with_this_skill_bonus > better_coeff:
                 better_coeff = with_this_skill_bonus
         return better_coeff
+
+
+@dataclasses.dataclass
+class CharacterModelApi:
+    id: str
+    name: str
+    alive: bool
+    max_life_comp: float
+    hunting_and_collecting_comp: float
+    find_water_comp: float
+    life_points: float
+    action_points: float
+    skills: typing.Dict[str, CharacterSkillModel]
+    knowledges: typing.Dict[str, KnowledgeDescription]
+    ability_ids: typing.List[str]
+
+    world_col_i: int
+    world_row_i: int
+    zone_col_i: int
+    zone_row_i: int
+
+    tiredness: int
+    thirst: float
+    hunger: float
+
+    is_thirsty: bool
+    is_hunger: bool
+    is_tired: bool
+    is_exhausted: bool
+    is_vulnerable: bool
+    is_attack_ready: bool
+    is_defend_ready: bool
+
+    bags: typing.List[StuffModel]
+    weapon: typing.Optional[StuffModel] = None
+    shield: typing.Optional[StuffModel] = None
+    armor: typing.Optional[StuffModel] = None
+
+    unread_event: bool = False
+    unread_zone_message: bool = False
+    unread_conversation: bool = False
+    unvote_affinity_relation: bool = False
+    unread_transactions: bool = False
+    pending_actions: int = 0
+
+    avatar_uuid: typing.Optional[str] = None
+    avatar_is_validated: bool = False
 
 
 @dataclasses.dataclass
