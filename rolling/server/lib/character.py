@@ -431,6 +431,11 @@ class CharacterLib:
                 character_document.id
             )
 
+        model.is_hunger = model.hunger > self._kernel.game.config.stop_auto_eat_hunger
+        model.is_thirsty = (
+            model.thirst > self._kernel.game.config.stop_auto_drink_thirst
+        )
+
         return model
 
     def get_by_name(self, name: str) -> CharacterModel:
@@ -1125,7 +1130,7 @@ class CharacterLib:
             can_move = False
             cannot_move_reasons.append("Pas assez de Point d'Actions.")
 
-        if character.is_exhausted():
+        if character.is_exhausted:
             can_move = False
             cannot_move_reasons.append("Le personnage est épuisé.")
 
@@ -1158,7 +1163,7 @@ class CharacterLib:
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
                 or follower_inventory.clutter
                 > follower.get_clutter_capacity(self._kernel)
-                or follower.is_exhausted()
+                or follower.is_exhausted
                 or follower.action_points < move_cost
                 or not transport_type_ok
             ):
@@ -1525,7 +1530,7 @@ class CharacterLib:
         elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
             thirst_class = "yellow"
 
-        if character.is_exhausted():
+        if character.is_exhausted:
             tiredness_class = "red"
         elif character.tired:
             tiredness_class = "yellow"

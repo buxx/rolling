@@ -31,7 +31,9 @@ from rolling.exception import WrongInputError
 from rolling.kernel import Kernel
 from rolling.model.character import (
     CharacterActionModel,
+    CharacterModelApi,
     ChooseAvatarQuery,
+    GetCharacterQueryModel,
 )
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
@@ -543,7 +545,7 @@ class CharacterController(BaseController):
                 Part(label="Faim", text=str(round(character.hunger, 0))),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
                 Part(
-                    label="Exténué", text="oui" if character.is_exhausted() else "non"
+                    label="Exténué", text="oui" if character.is_exhausted else "non"
                 ),
                 Part(
                     label="Arme",
@@ -1971,17 +1973,21 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)
+    @hapic.input_query(GetCharacterQueryModel)
     @hapic.input_path(GetCharacterPathModel)
-    @hapic.output_body(CharacterModel)
+    @hapic.output_body(CharacterModelApi)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
+
         return self._character_lib.get(
             hapic_data.path.character_id,
-            compute_unread_event=True,
-            compute_unread_zone_message=True,
-            compute_unread_conversation=True,
-            compute_unvote_affinity_relation=True,
-            compute_unread_transactions=True,
-            compute_pending_actions=True,
+            compute_unread_event=bool(hapic_data.query.compute_unread_event),
+            compute_unread_zone_message=bool(hapic_data.query.compute_unread_event),
+            compute_unread_conversation=bool(hapic_data.query.compute_unread_event),
+            compute_unvote_affinity_relation=bool(
+                hapic_data.query.compute_unread_event
+            ),
+            compute_unread_transactions=bool(hapic_data.query.compute_unread_event),
+            compute_pending_actions=bool(hapic_data.query.compute_unread_event),
             dead=False,
         )
 
