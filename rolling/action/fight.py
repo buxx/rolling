@@ -61,7 +61,7 @@ class AttackCharacterAction(WithCharacterAction):
         if (
             input_.lonely is not None
             and input_.lonely
-            and not character.is_attack_ready()
+            and not character.is_attack_ready
         ):
             raise ImpossibleAttack(
                 f"{character.name} n'est pas en mesure de mener cette attaque !"
@@ -185,7 +185,7 @@ class AttackCharacterAction(WithCharacterAction):
     def _check_attack_lonely(
         self, character: CharacterModel, defense: DefendDescription, aff: str
     ) -> None:
-        if not character.is_attack_ready():
+        if not character.is_attack_ready:
             raise ImpossibleAttack("Vous n'etes pas en état de vous battre")
 
         # by affinities, character can be in defense side. In that case, don't permit the fight

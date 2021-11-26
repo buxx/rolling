@@ -655,7 +655,7 @@ class TestFightAction:
                     france_warlord.id
                 )
                 france_warlord = worldmapc_kernel.character_lib.get(france_warlord.id)
-                if not france_warlord.is_attack_ready():
+                if not france_warlord.is_attack_ready:
                     return
             except NoResultFound:
                 worldmapc_kernel.character_lib.get_document(
@@ -668,7 +668,7 @@ class TestFightAction:
                     england_warlord.id
                 )
                 england_warlord = worldmapc_kernel.character_lib.get(england_warlord.id)
-                if not england_warlord.is_attack_ready():
+                if not england_warlord.is_attack_ready:
                     return
             except NoResultFound:
                 worldmapc_kernel.character_lib.get_document(

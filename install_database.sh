@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO : prepare script for following usage : cat install_database.sh | sudo -u postgres bash
+
 sudo su -c "psql -lqt | cut -d \| -f 1 | grep -qw rolling" postgres
 
 if [ "$?" -eq "0" ]; then

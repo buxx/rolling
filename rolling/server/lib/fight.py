@@ -99,7 +99,7 @@ class FightLib:
         )
         return DefendDescription(
             all_fighters=all_fighters,
-            ready_fighters=[f for f in all_fighters if f.is_defend_ready()],
+            ready_fighters=[f for f in all_fighters if f.is_defend_ready],
             affinities=all_affinities,
             helpers={
                 f_id: [affinities_by_ids[a_id] for a_id in set(helpers[f_id])]
@@ -137,7 +137,7 @@ class FightLib:
             ready_fighters=[
                 f
                 for f in all_fighters
-                if f.is_attack_ready() and f.id not in target_fighter_ids
+                if f.is_attack_ready and f.id not in target_fighter_ids
             ],
         )
 
