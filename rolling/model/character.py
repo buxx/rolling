@@ -366,6 +366,7 @@ class CharacterModel:
     find_water_comp: float
     life_points: float
     action_points: float
+    max_action_points: float
     attack_allowed_loss_rate: int
     defend_allowed_loss_rate: int
     skills: typing.Dict[str, CharacterSkillModel]
@@ -495,6 +496,7 @@ class CharacterModelApi:
     find_water_comp: float
     life_points: float
     action_points: float
+    max_action_points: float
     skills: typing.Dict[str, CharacterSkillModel]
     knowledges: typing.Dict[str, KnowledgeDescription]
     ability_ids: typing.List[str]

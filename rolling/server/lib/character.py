@@ -299,6 +299,7 @@ class CharacterLib:
             hunger=character_document.hunger,
             tiredness=character_document.tiredness,
             action_points=float(character_document.action_points),
+            max_action_points=float(character_document.max_action_points),
             bags=[
                 self._stuff_lib.stuff_model_from_doc(bag_doc)
                 for bag_doc in character_document.used_as_bag
