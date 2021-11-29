@@ -98,8 +98,8 @@ class TestFollowAction:
 
         _fake_clutter = _fake_weight
 
-        def _fake_is_exhausted(self):
-            if self.id == "arthur":
+        def _fake_is_exhausted(mock, self_, class_):
+            if self_.id == "arthur":
                 return True
             return False
 
@@ -120,8 +120,9 @@ class TestFollowAction:
             elif reason == "exhausted":
                 with unittest.mock.patch(
                     "rolling.model.character.CharacterModel.is_exhausted",
-                    new=_fake_is_exhausted,
-                ):
+                    autospec=True,
+                ) as is_exhausted_mock:
+                    is_exhausted_mock.__get__ = _fake_is_exhausted
                     yield
             else:
                 raise NotImplementedError
