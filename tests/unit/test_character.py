@@ -18,6 +18,7 @@ from tests.fixtures import description_serializer
 
 
 class TestCharacter:
+    @pytest.mark.skip(reason="Retreat removed for now")
     @pytest.mark.parametrize(
         "attack,defend,expected_attack,expected_defend",
         [
