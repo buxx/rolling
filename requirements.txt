@@ -11,7 +11,7 @@ attrs==21.2.0
 black==21.11b1
 certifi==2021.10.8
 chardet==4.0.0
-click==8.0.1
+click==8.0.3
 greenlet==1.1.0
 hapic==0.84
 http-basic-auth==1.2.0
