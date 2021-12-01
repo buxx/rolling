@@ -475,7 +475,7 @@ destroy_robustness_per_ap = 1
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.1
-    actions = ["DROP_RESOURCE"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "raw_brick.png"
 
   [resources.FIRED_BRICK]
