@@ -485,3 +485,32 @@ class TestExecuteTurn:
         turn_lib.execute_turn()
         doc = kernel.build_lib.get_build_doc(doc.id)
         assert doc.grow_progress == 42 * 2
+
+    def test_turn_clean_resources(self, worldmapc_kernel: Kernel, turn_lib: TurnLib):
+        # Given
+        worldmapc_kernel.resource_lib.add_resource_to(
+            resource_id="WOOD",
+            world_row_i=1,
+            world_col_i=1,
+            zone_row_i=1,
+            zone_col_i=1,
+            ground=True,
+            quantity=0.00000001,
+        )
+
+        # When
+        assert worldmapc_kernel.resource_lib.get_ground_resource(
+            world_row_i=1,
+            world_col_i=1,
+            zone_row_i=1,
+            zone_col_i=1,
+        )
+        turn_lib.execute_turn()
+
+        # Then
+        assert not worldmapc_kernel.resource_lib.get_ground_resource(
+            world_row_i=1,
+            world_col_i=1,
+            zone_row_i=1,
+            zone_col_i=1,
+        )
