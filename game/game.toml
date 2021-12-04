@@ -350,7 +350,7 @@ destroy_robustness_per_ap = 1
     weight=1000000.0
     material="BIG_PIECE"
     unit = "M3"
-    clutter = 50.0
+    clutter = 25.0
     actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "wood.png"
 
@@ -450,7 +450,7 @@ destroy_robustness_per_ap = 1
     weight=1000.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 1.0
+    clutter = 0.5
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.VEGETAL_FIBER]
@@ -458,7 +458,7 @@ destroy_robustness_per_ap = 1
     weight=50000.0
     material="MIDDLE_PIECE"
     unit = "M3"
-    clutter = 50.0
+    clutter = 25.0
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.CLOTH]
@@ -466,7 +466,7 @@ destroy_robustness_per_ap = 1
     weight=500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 1.0
+    clutter = 0.5
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.RAW_BRICK]
@@ -474,7 +474,7 @@ destroy_robustness_per_ap = 1
     weight=3500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 0.1
+    clutter = 0.05
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "raw_brick.png"
 
@@ -483,7 +483,7 @@ destroy_robustness_per_ap = 1
     weight=3000.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 0.1
+    clutter = 0.05
     actions = ["DROP_RESOURCE"]
     illustration = "fired_brick.png"
 
@@ -492,7 +492,7 @@ destroy_robustness_per_ap = 1
     weight=1.0
     material="MIDDLE_PIECE"
     unit = "G"
-    clutter = 0.001
+    clutter = 0.0005
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "flour.png"
 
@@ -501,7 +501,7 @@ destroy_robustness_per_ap = 1
     weight=500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 0.25
+    clutter = 0.125
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
     illustration = "wool.png"
 
@@ -510,22 +510,9 @@ destroy_robustness_per_ap = 1
     weight=50000.0
     material="MIDDLE_PIECE"
     unit = "M3"
-    clutter = 500.0
+    clutter = 25.0
     actions = ["DROP_RESOURCE"]
     illustration = "charcoal.png"
-
-# FIXME B NOW:
-# * OK fabrication pain
-# * OK fabrication farine
-# * OK fibre -> fils -> tissu
-# * OK bois -> charbon de bois
-# * OK four de terr et brique cru -> middle temp
-# * OK four de brique cuite -> high temp (charbon)
-# * OK cuivre|etain|bronze mix/brute/pur -> cuivre pur (middle temp) & enclume de pierre
-# * OK fer brute/pur (high temp) & enclume
-# * OK pĉhe avec lance & filet
-# * bonus four de terre
-# * OK fabrication des enclumes
 
 [resource_mix]
   [resource_mix.WET_SOIL_WITH_FRESH_WATER]
