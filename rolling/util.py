@@ -501,3 +501,38 @@ def get_health_percent_sentence(percent: int):
         return "Quelque traces d'usures"
 
     return "Bon état"
+
+
+def square_walker(
+    x: int, y: int
+) -> typing.Generator[typing.Tuple[int, int], None, None]:
+    yield x, y
+    d = 1
+
+    def top_line():
+        start_x = 0 - d
+        fixed_y = 0 - d
+        return [(start_x, fixed_y)] + [
+            (start_x + i, fixed_y) for i in range(1, (d * 2) + 1)
+        ]
+
+    def right_line():
+        fixed_x = 0 + d
+        start_y = 0 - d
+        return [(fixed_x, start_y + i) for i in range(1, (d * 2) + 1)]
+
+    def bottom_line():
+        start_x = 0 + d
+        fixed_y = 0 + d
+        return [(start_x - i, fixed_y) for i in range(1, (d * 2) + 1)]
+
+    def left_line():
+        fixed_x = 0 - d
+        start_y = 0 + d
+        return [(fixed_x, start_y - i) for i in range(1, (d * 2))]
+
+    while True:
+        modifiers = top_line() + right_line() + bottom_line() + left_line()
+        for modifier in modifiers:
+            yield x + modifier[0], y + modifier[1]
+        d += 1
