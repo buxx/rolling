@@ -514,19 +514,6 @@ destroy_robustness_per_ap = 1
     actions = ["DROP_RESOURCE"]
     illustration = "charcoal.png"
 
-# FIXME B NOW:
-# * OK fabrication pain
-# * OK fabrication farine
-# * OK fibre -> fils -> tissu
-# * OK bois -> charbon de bois
-# * OK four de terr et brique cru -> middle temp
-# * OK four de brique cuite -> high temp (charbon)
-# * OK cuivre|etain|bronze mix/brute/pur -> cuivre pur (middle temp) & enclume de pierre
-# * OK fer brute/pur (high temp) & enclume
-# * OK pĉhe avec lance & filet
-# * bonus four de terre
-# * OK fabrication des enclumes
-
 [resource_mix]
   [resource_mix.WET_SOIL_WITH_FRESH_WATER]
     require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
@@ -537,7 +524,7 @@ destroy_robustness_per_ap = 1
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = []
-    cost = 0.05
+    cost = 0.01
   [resource_mix.WET_SOIL_WITH_SALTED_WATER]
     require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
     produce = "WET_SOIL"
@@ -547,7 +534,7 @@ destroy_robustness_per_ap = 1
     required_all_skill_ids = []
     required_one_of_ability_ids = []
     required_all_ability_ids = []
-    cost = 0.05
+    cost = 0.01
   [resource_mix.COPPER_WITH_TIN]
     require = [{resource_id="COPPER", coeff=0.80}, {resource_id="TIN", coeff=0.20}]
     produce = "BRONZE"
