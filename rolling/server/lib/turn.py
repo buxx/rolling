@@ -14,6 +14,7 @@ from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
 from rolling.model.stuff import ZoneGenerationStuff
 from rolling.server.document.build import BuildDocument
+from rolling.server.document.resource import ResourceDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import character_can_drink_in_its_zone
@@ -43,6 +44,7 @@ class TurnLib:
         self._manage_characters_props()
         self._builds_consumptions()
         self._grow()
+        self._clean()
         self._universe_turn()
 
         # FIXME BS NOW: remove pending actions and authorizations
@@ -412,6 +414,22 @@ class TurnLib:
             )
             self._kernel.server_db_session.add(build_doc)
             self._kernel.server_db_session.commit()
+
+    def _clean(self) -> None:
+        for resource_doc in (
+            self._kernel.server_db_session.query(ResourceDocument)
+            .filter(ResourceDocument.quantity < 0.000001)
+            .filter(
+                ResourceDocument.carried_by_id == None,
+                ResourceDocument.in_built_id == None,
+                ResourceDocument.world_row_i != None,
+                ResourceDocument.world_col_i != None,
+                ResourceDocument.zone_row_i != None,
+                ResourceDocument.zone_col_i != None,
+            )
+        ):
+            self._kernel.server_db_session.delete(resource_doc)
+        self._kernel.server_db_session.commit()
 
     def _universe_turn(self) -> None:
         self._kernel.universe_lib.add_new_state()

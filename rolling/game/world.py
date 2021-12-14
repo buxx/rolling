@@ -9,7 +9,7 @@ from rolling.model.world import World
 from rolling.model.zone import ZoneMapTileProduction
 from rolling.model.zone import ZoneProperties
 from rolling.model.zone import ZoneTileProperties
-from rolling.util import get_on_and_around_coordinates
+from rolling.util import get_on_and_around_coordinates, square_walker
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -232,54 +232,22 @@ class WorldManager:
             world_row_i, world_col_i
         )
         available_places: typing.List[typing.Tuple[typing.Tuple[int, int], float]] = []
-        place_visited: typing.Set[typing.Tuple[int, int]] = set()
 
-        tiles_to_explore = [
-            (start_from_zone_row_i, start_from_zone_col_i)
-        ] + get_on_and_around_coordinates(
-            start_from_zone_row_i, start_from_zone_col_i, exclude_on=True
-        )
-
+        walker = square_walker(start_from_zone_row_i, start_from_zone_col_i)
+        max_counter = 0
         while clutter_to_place:
-            try:
-                # Pick up on tile
-                test_tile_row_i, test_tile_col_i = tiles_to_explore.pop(0)
-            except IndexError:
-                if allow_fallback_on_start_coordinates:
-                    if available_places:
-                        return available_places + [
-                            (
-                                (start_from_zone_row_i, start_from_zone_col_i),
-                                clutter_to_place or resource_quantity,
-                            )
-                        ]
-                    return [
-                        (
-                            (start_from_zone_row_i, start_from_zone_col_i),
-                            resource_quantity,
-                        )
-                    ]
-                raise IndexError("No place where drop !")
+            max_counter += 1
 
-            if (test_tile_row_i, test_tile_col_i) in place_visited:
-                continue
+            # Protection against infinite loop
+            if max_counter > 200:
+                return available_places
+
+            # Pick up on tile
+            test_tile_row_i, test_tile_col_i = next(walker)
 
             # Accept this tile only if can be walked
             if (test_tile_row_i, test_tile_col_i) not in zone_traversable_tiles:
                 continue
-
-            place_visited.add((test_tile_row_i, test_tile_col_i))
-
-            # Extend list of tiles to explore with around tiles (to keep searching if needed)
-            tiles_to_explore.extend(
-                set(
-                    get_on_and_around_coordinates(
-                        test_tile_row_i, test_tile_col_i, exclude_on=True
-                    )
-                )
-                - place_visited
-            )
-            tiles_to_explore = list(set(tiles_to_explore))
 
             # Compute available space on this tile
             tile_used_clutter = 0.0

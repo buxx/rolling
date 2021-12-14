@@ -4,6 +4,7 @@ import pytest
 from rolling.util import CornerEnum
 from rolling.util import get_corner
 from rolling.util import get_opposite_zone_place
+from rolling.util import square_walker
 
 
 def test_get_corner():
@@ -69,3 +70,51 @@ def test_get_opposite_zone_place(
         expected_row_i,
         expected_col_i,
     )
+
+
+def test_square_walker():
+    walker = square_walker(0, 0)
+    points = [next(walker) for i in range(9)]
+    assert points == [
+        (0, 0),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+        (0, 1),
+        (-1, 1),
+        (-1, 0),
+    ]
+
+
+def test_square_walker2():
+    walker = square_walker(0, 0)
+    points = [next(walker) for i in range(25)]
+    assert points == [
+        (0, 0),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+        (0, 1),
+        (-1, 1),
+        (-1, 0),
+        (-2, -2),
+        (-1, -2),
+        (0, -2),
+        (1, -2),
+        (2, -2),
+        (2, -1),
+        (2, 0),
+        (2, 1),
+        (2, 2),
+        (1, 2),
+        (0, 2),
+        (-1, 2),
+        (-2, 2),
+        (-2, 1),
+        (-2, 0),
+        (-2, -1),
+    ]
