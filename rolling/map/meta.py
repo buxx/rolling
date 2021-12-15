@@ -20,6 +20,7 @@ SPAWN_LINE_NAME = "SPAWN"
 
 class SpawnType(enum.Enum):
     RANDOM = "RANDOM"
+    POSITION = "POSITION"
 
 
 class WorldMapSpawn(abc.ABC):
@@ -45,6 +46,13 @@ class WorldMapSpawn(abc.ABC):
             ]
             spawn_values = [WorldMapTileType.get_for_id(v) for v in spawn_raw_values]
             return RandomWorldMapSpawn(kernel, world_tile_types=spawn_values)
+
+        if spawn_type == SpawnType.POSITION.value:
+            positions = [
+                (int(coordinates.split(".")[0]), int(coordinates.split(".")[1]))
+                for coordinates in raw_spawn_values.split(",")
+            ]
+            return PositionsWorldMapSpawn(kernel, positions=positions)
 
 
 class RandomWorldMapSpawn(WorldMapSpawn):
@@ -72,6 +80,21 @@ class RandomWorldMapSpawn(WorldMapSpawn):
             raise RollingError("No matching world tile for find spawn coordinate")
 
         return random.choice(available_coordinates)
+
+
+class PositionsWorldMapSpawn(WorldMapSpawn):
+    def __init__(
+        self,
+        kernel: "Kernel",
+        positions: typing.List[typing.Tuple[int, int]],
+    ) -> None:
+        self._kernel = kernel
+        self._positions = positions
+
+    def get_spawn_coordinates(
+        self, world_map_source: "WorldMapSource"
+    ) -> typing.Tuple[int, int]:
+        return random.choice(self._positions)
 
 
 class WorldMapMeta:
