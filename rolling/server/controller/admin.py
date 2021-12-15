@@ -23,6 +23,7 @@ class AdminController(BaseController):
                 web.get("/admin/configs", self.configs),
                 web.post("/admin/configs", self.configs),
                 web.get("/admin/config/{name}", self.config),
+                web.put("/admin/refresh/characters", self.refresh_characters),
             ]
         )
 
@@ -146,3 +147,7 @@ class AdminController(BaseController):
             "world_content": world_content,
             "world_backups": world_backups,
         }
+
+    async def refresh_characters(self, request: Request) -> Response:
+        await self._kernel.refresh_characters()
+        return Response(status=204)

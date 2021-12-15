@@ -1092,22 +1092,7 @@ class CharacterLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-        await self._kernel.server_zone_events_manager.send_to_sockets(
-            WebSocketEvent(
-                type=ZoneEventType.NEW_RESUME_TEXT,
-                world_row_i=character_doc.world_row_i,
-                world_col_i=character_doc.world_col_i,
-                data=NewResumeTextData(
-                    resume=ListOfItemModel(
-                        self._kernel.character_lib.get_resume_text(character_doc.id)
-                    )
-                ),
-            ),
-            world_row_i=character_doc.world_row_i,
-            world_col_i=character_doc.world_col_i,
-            character_ids=[character_id],
-        )
-
+        await self.refresh_character(character_doc)
         return character_doc
 
     def get_move_to_zone_infos(
@@ -1964,3 +1949,20 @@ class CharacterLib:
         character_doc.avatar_is_validated = True
         self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
+
+    async def refresh_character(self, character_doc: CharacterDocument) -> None:
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_RESUME_TEXT,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=NewResumeTextData(
+                    resume=ListOfItemModel(
+                        self._kernel.character_lib.get_resume_text(character_doc.id)
+                    )
+                ),
+            ),
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            character_ids=[character_doc.id],
+        )

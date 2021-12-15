@@ -75,7 +75,10 @@ def run(args: argparse.Namespace) -> None:
         ),
     )
     app.middlewares.append(
-        basic_auth_middleware(("/admin",), {args.admin_login: args.admin_password})
+        basic_auth_middleware(
+            ("/admin",),
+            {kernel.server_config.admin_login: kernel.server_config.admin_password},
+        )
     )
 
     # Configure hapic
@@ -135,8 +138,6 @@ def main() -> None:
     parser.add_argument(
         "--server-db-path", type=str, help="path of server.db", default="server.db"
     )
-    parser.add_argument("--admin-login", type=str, default="adminRoll")
-    parser.add_argument("--admin-password", type=str, default="RollNRoll42")
     parser.add_argument("--disable-auth", action="store_true", default=False)
 
     args = parser.parse_args()

@@ -3,12 +3,11 @@ from logging import Logger
 import random
 from sqlalchemy.orm.exc import NoResultFound
 import typing
+import requests
 
 from rolling.action.drink import DrinkStuffAction
 from rolling.action.eat import EatResourceAction
-from rolling.exception import ErrorWhenConsume
 from rolling.exception import NoCarriedResource
-from rolling.exception import NotEnoughResource
 from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.map.type.zone import Nothing
@@ -49,6 +48,19 @@ class TurnLib:
 
         # FIXME BS NOW: remove pending actions and authorizations
         self._kernel.server_db_session.commit()
+
+        # Require refresh for currently connected players
+        try:
+            response = requests.put(
+                f"{self._kernel.server_config.base_url}/admin/refresh/characters",
+                auth=(
+                    self._kernel.server_config.admin_login,
+                    self._kernel.server_config.admin_password,
+                ),
+            )
+            self._logger.info(f"Refresh characters response: {response.status_code}")
+        except requests.exceptions.RequestException as exc:
+            self._logger.info("Error when refreshing players:", exc)
 
     def _generate_stuff(self) -> None:
         self._logger.info("Generate stuff")

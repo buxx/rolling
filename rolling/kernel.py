@@ -71,6 +71,8 @@ class ServerConfig:
     avatars_folder_path: str
     loading_folder_path: str
     anonymous_media_file_name: str
+    admin_login: str
+    admin_password: str
 
 
 class Kernel:
@@ -556,3 +558,15 @@ class Kernel:
                     available_coordinates.append((row_i, col_i))
 
         return available_coordinates
+
+    async def refresh_characters(self) -> None:
+        for world_row_i, world_row in enumerate(self.world_map_source.geography.rows):
+            for world_col_i, _ in enumerate(world_row):
+                character_ids = (
+                    self._server_zone_events_manager.get_active_zone_characters_ids(
+                        world_row_i=world_row_i, world_col_i=world_col_i
+                    )
+                )
+                for character_id in character_ids:
+                    character_doc = self.character_lib.get_document(character_id)
+                    await self._character_lib.refresh_character(character_doc)
