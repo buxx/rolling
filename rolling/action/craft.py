@@ -235,8 +235,18 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
+
+            illustration: typing.Optional[str] = None
+            for produce in self._description.properties["produce"]:
+                illustration = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        produce["stuff"]
+                    ).illustration
+                )
+
             return Description(
                 title=self._description.name,
+                illustration_name=illustration,
                 items=[
                     Part(
                         is_form=True,
@@ -365,8 +375,18 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         self, character: "CharacterModel", stuff: "StuffModel", input_: CraftInput
     ) -> Description:
         if input_.quantity is None:
+
+            illustration: typing.Optional[str] = None
+            for produce in self._description.properties["produce"]:
+                illustration = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        produce["stuff"]
+                    ).illustration
+                )
+
             return Description(
                 title=self._description.name,
+                illustration_name=illustration,
                 items=[
                     Part(
                         is_form=True,

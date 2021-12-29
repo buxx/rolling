@@ -183,8 +183,18 @@ class MixResourcesAction(WithResourceAction):
                 have_parts.append(
                     Part(text=f"{required.resource.name} : {have_quantity} {unit_str}")
                 )
+
+            produce_resource_id = resource_mix_description.produce_resource.id
+            produce_resource_description = self._kernel.game.config.resources[
+                produce_resource_id
+            ]
+            illustration: typing.Optional[
+                str
+            ] = produce_resource_description.illustration
+
             return Description(
                 title=f"Faire {resource_mix_description.produce_resource.name}",
+                illustration_name=illustration,
                 items=[
                     Part(
                         is_form=True,
