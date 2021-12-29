@@ -360,7 +360,7 @@ destroy_robustness_per_ap = 1
     material="MIDDLE_PIECE"
     unit = "L"
     clutter = 1.0
-    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "EAT_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "fruits.png"
 
   [resources.SHELLFISH_FRESH]
@@ -1122,6 +1122,23 @@ destroy_robustness_per_ap = 1
     ]
     require = [
       {resource="ANIMAL_SKIN", quantity=2}
+    ]
+    cost = 6.0
+
+  [ACTIONS.CRAFT_LITTLE_VEGETAL_CANTEEN]
+    name = "Fabriquer une petite gourde végétale"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="LITTLE_VEGETAL_CANTEEN", quantity=1.0},
+    ]
+    require = [
+      {resource="VEGETAL_FOOD_FRESH", quantity=5.0}
     ]
     cost = 6.0
 

@@ -57,3 +57,4 @@
 * fish.png by https://commons.wikimedia.org/wiki/File:Ensenada_fish_market_2.jpg?uselang=fr
 * anvil.png by https://fr.wikipedia.org/wiki/Enclume_(outil)#/media/Fichier:Enclume.JPG
 * cereals.png by https://fr.wikipedia.org/wiki/C%C3%A9r%C3%A9ale#/media/Fichier:Panicum_miliaceum0.jpg
+* vegetal_canteen.png by https://commons.wikimedia.org/wiki/File:2_gourdes_MHNT_ETH_AC_NC_85_Nouvelle_Cal%C3%A9donie_Sav%C3%A8s.jpg?uselang=fr

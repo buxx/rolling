@@ -15,6 +15,17 @@
   actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
   material_type = "OBJECT"
   classes = ["BOTTLE"]
+[LITTLE_VEGETAL_CANTEEN]
+  name = "Petite gourde végétale"
+  filled_value = 0.0
+  filled_unity = "L"
+  filled_capacity = 1.0
+  weight = 1500.0
+  clutter = 1.5
+  actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
+  material_type = "OBJECT"
+  classes = ["BOTTLE"]
+  illustration = "vegetal_canteen.png"
 [BASKETRY_BAG]
   name = "Sac végétal"
   weight = 1000.0
