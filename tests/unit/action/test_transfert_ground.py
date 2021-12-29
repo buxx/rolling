@@ -140,79 +140,6 @@ class TestTransfertGround:
                     ),
                 ],
             ),
-            (
-                0.2,
-                [
-                    TransferOperation(
-                        before_ground_quantity=0.0,
-                        before_carried_quantity=0.2,
-                        partial_deposit_count=5,
-                        after_ground_quantity=0.1,
-                        after_carried_quantity=0.1,
-                    ),
-                    TransferOperation(
-                        partial_deposit_count=5,
-                        after_ground_quantity=0.2,
-                        after_carried_quantity=0.0,
-                    ),
-                    TransferOperation(
-                        take_count=1,
-                        after_ground_quantity=0.0,
-                        after_carried_quantity=0.2,
-                    ),
-                ],
-            ),
-            (
-                1.0,
-                [
-                    TransferOperation(
-                        before_ground_quantity=0.0,
-                        before_carried_quantity=1.0,
-                        partial_deposit_count=10,
-                        after_ground_quantity=1.0,
-                        after_carried_quantity=0.0,
-                    ),
-                ],
-            ),
-            (
-                1.0,
-                [
-                    TransferOperation(
-                        before_ground_quantity=0.0,
-                        before_carried_quantity=1.0,
-                        deposit_count=1,
-                        after_ground_quantity=1.0,
-                        after_carried_quantity=0.0,
-                    ),
-                    TransferOperation(
-                        partial_take_count=10,
-                        after_ground_quantity=0.0,
-                        after_carried_quantity=1.0,
-                    ),
-                ],
-            ),
-            (
-                1.0,
-                [
-                    TransferOperation(
-                        before_ground_quantity=0.0,
-                        before_carried_quantity=1.0,
-                        partial_deposit_count=1,
-                        after_ground_quantity=0.1,
-                        after_carried_quantity=0.9,
-                    ),
-                    TransferOperation(
-                        deposit_count=1,
-                        after_ground_quantity=1.0,
-                        after_carried_quantity=0.0,
-                    ),
-                    TransferOperation(
-                        partial_take_count=2,
-                        after_ground_quantity=0.8,
-                        after_carried_quantity=0.2,
-                    ),
-                ],
-            ),
         ],
     )
     async def test_transfer_partial_resource(
@@ -228,6 +155,13 @@ class TestTransfertGround:
         kernel = worldmapc_kernel
         web = worldmapc_web_app
         kernel.resource_lib.add_resource_to("WOOD", initial_quantity, xena.id)
+
+        xena_doc = kernel.character_lib.get_document(xena.id)
+        xena_doc.zone_row_i = 100
+        xena_doc.zone_col_i = 95
+        kernel.server_db_session.add(xena_doc)
+        kernel.server_db_session.commit()
+        xena = kernel.character_lib.get(xena_doc.id)
 
         def get_on_ground_quantity(raise_: bool = False) -> float:
             found_on_ground = False
@@ -359,6 +293,13 @@ class TestTransfertGround:
         xena = worldmapc_xena_model
         kernel = worldmapc_kernel
         web = worldmapc_web_app
+
+        xena_doc = kernel.character_lib.get_document(xena.id)
+        xena_doc.zone_row_i = 100
+        xena_doc.zone_col_i = 95
+        kernel.server_db_session.add(xena_doc)
+        kernel.server_db_session.commit()
+        xena = kernel.character_lib.get(xena_doc.id)
 
         haxe1 = create_stuff(kernel, "STONE_HAXE")
         haxe2 = create_stuff(kernel, "STONE_HAXE")
