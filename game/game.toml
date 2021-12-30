@@ -1063,7 +1063,7 @@ destroy_robustness_per_ap = 1
     cost = 6.0
 
   [ACTIONS.CRAFT_STONE_SPEAR]
-    name = "Fabriquer une lance de pierre"
+    name = "Lance de pierre"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1078,9 +1078,10 @@ destroy_robustness_per_ap = 1
       {resource="WOOD", quantity=0.002}
     ]
     cost = 4.0
+    link_group_name = "Matériel de guerre"
 
   [ACTIONS.CRAFT_HUNT_BOW]
-    name = "Fabriquer un arc de chasse"
+    name = "Arc de chasse"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1095,9 +1096,10 @@ destroy_robustness_per_ap = 1
       {resource="WOOD", quantity=0.002}
     ]
     cost = 4.0
+    link_group_name = "Utilitaire"
 
   [ACTIONS.CRAFT_WOOD_MACE]
-    name = "Fabriquer une massue en bois"
+    name = "Massue en bois"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1112,9 +1114,10 @@ destroy_robustness_per_ap = 1
       {resource="WOOD", quantity=0.01}
     ]
     cost = 4.0
+    link_group_name = "Matériel de guerre"
 
   [ACTIONS.CRAFT_STONE_HAXE]
-    name = "Fabriquer une hache de pierre"
+    name = "Hache de pierre"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1129,9 +1132,10 @@ destroy_robustness_per_ap = 1
       {resource="WOOD", quantity=0.002}
     ]
     cost = 6.0
+    link_group_name = "Matériel de guerre"
 
   [ACTIONS.CRAFT_LITTLE_SKIN_CANTEEN]
-    name = "Fabriquer une petite gourde en peaux"
+    name = "Petite gourde en peaux"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1146,9 +1150,10 @@ destroy_robustness_per_ap = 1
       {resource="ANIMAL_SKIN", quantity=2}
     ]
     cost = 6.0
+    link_group_name = "Utilitaire"
 
   [ACTIONS.CRAFT_LITTLE_VEGETAL_CANTEEN]
-    name = "Fabriquer une petite gourde végétale"
+    name = "Petite gourde végétale"
     actions = ["CRAFT_STUFF_WITH_RESOURCE"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1163,6 +1168,7 @@ destroy_robustness_per_ap = 1
       {resource="VEGETAL_FOOD_FRESH", quantity=5.0}
     ]
     cost = 6.0
+    link_group_name = "Utilitaire"
 
   [ACTIONS.MAKE_DRIED_MEAT]
     name = "Faire de la viande séché"
@@ -1423,7 +1429,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Artisanat d'art"
 
   [ACTIONS.CONSTRUCT_PRIMITIVE_WOOD_SHIELD]
-    name = "Fabriquer une coque de bois"
+    name = "Coque de bois"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1441,7 +1447,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_LEATHER_SHIELD]
-    name = "Fabriquer un bouclier de cuir"
+    name = "Bouclier de cuir"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1459,7 +1465,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_COPPER_SHIELD]
-    name = "Fabriquer un bouclier de cuivre"
+    name = "Bouclier de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1477,7 +1483,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_BRONZE_SHIELD]
-    name = "Fabriquer un bouclier de bronze"
+    name = "Bouclier de bronze"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1495,7 +1501,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_IRON_SHIELD_HEATER]
-    name = "Fabriquer un écu"
+    name = "Écu"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1692,7 +1698,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Utilitaire"
 
   [ACTIONS.CONSTRUCT_COPPER_HAXE]
-    name = "Fabriquer une hache de cuivre"
+    name = "Hache de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1710,7 +1716,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_BRONZE_HAXE]
-    name = "Fabriquer une hache de bronze"
+    name = "Hache de bronze"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1728,7 +1734,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_IRON_HAXE]
-    name = "Fabriquer une hache de fer"
+    name = "Hache de fer"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1746,7 +1752,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_STONE_DAGGER]
-    name = "Fabriquer une dague de pierre"
+    name = "Dague de pierre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1764,7 +1770,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_COPPER_DAGGER]
-    name = "Fabriquer une dague de cuivre"
+    name = "Dague de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1782,7 +1788,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_BRONZE_DAGGER]
-    name = "Fabriquer une dague de bronze"
+    name = "Dague de bronze"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1800,7 +1806,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_IRON_DAGGER]
-    name = "Fabriquer une dague de fer"
+    name = "Dague de fer"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1818,7 +1824,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_COPPER_SPEAR]
-    name = "Fabriquer une lance de cuivre"
+    name = "Lance de cuivre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1836,7 +1842,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_BRONZE_SPEAR]
-    name = "Fabriquer une lance de bronze"
+    name = "Lance de bronze"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1854,7 +1860,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_IRON_SPEAR]
-    name = "Fabriquer une lance de fer"
+    name = "Lance de fer"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1872,7 +1878,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CONSTRUCT_STONE_ANVIL]
-    name = "Fabriquer une enclume de pierre"
+    name = "Enclume de pierre"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -1890,7 +1896,7 @@ destroy_robustness_per_ap = 1
     link_group_name = "Matériel de forge"
 
   [ACTIONS.BUILD_IRON_ANVIL]
-    name = "Fabriquer une enclume"
+    name = "Enclume"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []

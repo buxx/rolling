@@ -61,6 +61,7 @@ class BaseCraftStuff:
                 "require": action_config_raw["require"],
             }
         )
+        properties["link_group_name"] = action_config_raw.get("link_group_name", None)
         return properties
 
     async def _perform(
@@ -210,6 +211,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                     resource_id=resource_id,
                     query_params={},
                 ),
+                group_name=self._description.properties["link_group_name"],
                 cost=self.get_cost(character, resource_id),
                 category="Artisanat",
             )
