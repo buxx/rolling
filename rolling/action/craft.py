@@ -245,6 +245,8 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                         produce["stuff"]
                     ).illustration
                 )
+                if illustration:
+                    break
 
             return Description(
                 title=self._description.name,
@@ -385,6 +387,8 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                         produce["stuff"]
                     ).illustration
                 )
+                if illustration:
+                    break
 
             return Description(
                 title=self._description.name,

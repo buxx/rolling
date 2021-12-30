@@ -59,3 +59,6 @@
 * cereals.png by https://fr.wikipedia.org/wiki/C%C3%A9r%C3%A9ale#/media/Fichier:Panicum_miliaceum0.jpg
 * vegetal_canteen.png by https://commons.wikimedia.org/wiki/File:2_gourdes_MHNT_ETH_AC_NC_85_Nouvelle_Cal%C3%A9donie_Sav%C3%A8s.jpg?uselang=fr
 * hunt_bow.png by https://search.openverse.engineering/photos/e451823f-cc99-4ac1-916e-3901d6784caa
+* raw_clay_jar.png by "Venice Pottery" par DragonWoman est sous licence CC BY-NC-ND 2.0
+* clay_jar.png by "Jars" par oatsy40 est sous licence CC BY 2.0
+* clay.png by "Clay" par shorty76 est sous licence CC BY-NC-ND 2.0

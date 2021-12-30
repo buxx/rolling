@@ -46,7 +46,10 @@ from rolling.action.take_character import TakeFromCharacterAction
 from rolling.action.take_resource import TakeResourceAction
 from rolling.action.take_stuff import TakeStuffAction
 from rolling.action.transfer_ground import TransfertGroundCharacterAction
-from rolling.action.transform import TransformResourcesIntoResourcesAction
+from rolling.action.transform import (
+    TransformResourcesIntoResourcesAction,
+    TransformStuffIntoStuffAction,
+)
 from rolling.action.transform import TransformStuffIntoResourcesAction
 from rolling.action.travel import TravelAction
 from rolling.action.use import NotUseAsArmorAction
@@ -97,6 +100,7 @@ class ActionFactory:
         ActionType.TRANSFORM_RESOURCES_TO_RESOURCES: TransformResourcesIntoResourcesAction,
         ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
         ActionType.CRAFT_STUFF_WITH_RESOURCE: CraftStuffWithResourceAction,
+        ActionType.TRANSFORM_STUFF_TO_STUFF: TransformStuffIntoStuffAction,
         ActionType.BEGIN_STUFF_CONSTRUCTION: BeginStuffConstructionAction,
         ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
         ActionType.SEARCH_MATERIAL: SearchMaterialAction,
@@ -136,6 +140,7 @@ class ActionFactory:
             ActionType.DROP_STUFF: DropStuffAction,
             ActionType.TRANSFORM_STUFF_TO_RESOURCES: TransformStuffIntoResourcesAction,
             ActionType.CRAFT_STUFF_WITH_STUFF: CraftStuffWithStuffAction,
+            ActionType.TRANSFORM_STUFF_TO_STUFF: TransformStuffIntoStuffAction,
             ActionType.CONTINUE_STUFF_CONSTRUCTION: ContinueStuffConstructionAction,
             ActionType.USE_AS_WEAPON: UseAsWeaponAction,
             ActionType.NOT_USE_AS_WEAPON: NotUseAsWeaponAction,
@@ -374,7 +379,9 @@ class ActionFactory:
                 pending_action.with_character_id
             )
             input_ = action.input_model_from_request(pending_action.parameters)
-            await action.check_request_is_possible(character, with_character, input_=input_)
+            await action.check_request_is_possible(
+                character, with_character, input_=input_
+            )
             description = await action.perform(character, with_character, input_=input_)
         else:
             raise NotImplementedError("TODO")

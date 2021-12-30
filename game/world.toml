@@ -77,6 +77,10 @@
         probability = 100.0
         maximum = 1000.0
         regeneration = 10.0
+      [ZONE_PROPERTIES.PLAIN.RESOURCES.CLAY]
+        probability = 100.0
+        maximum = 1000000000.0
+        regeneration = 0.0
 
     [ZONE_PROPERTIES.PLAIN.GENERATION]
       count = 1
@@ -143,6 +147,10 @@
         probability = 100.0
         maximum = 200.0
         regeneration = 5.0
+      [ZONE_PROPERTIES.JUNGLE.RESOURCES.CLAY]
+        probability = 100.0
+        maximum = 1000000000.0
+        regeneration = 0.0
 
     [ZONE_PROPERTIES.JUNGLE.STUFFS]
       # TODO: ANIMAUX DE LA JUNGLE
@@ -192,6 +200,10 @@
         probability = 100.0
         maximum = 1000.0
         regeneration = 10.0
+      [ZONE_PROPERTIES.HILL.RESOURCES.CLAY]
+        probability = 100.0
+        maximum = 1000000000.0
+        regeneration = 0.0
 
     [ZONE_PROPERTIES.HILL.STUFFS]
       [ZONE_PROPERTIES.HILL.STUFFS.HARE]  # bernard l'hermite, u

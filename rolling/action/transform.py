@@ -1,4 +1,5 @@
 # coding: utf-8
+from collections import defaultdict
 import dataclasses
 
 import serpyco
@@ -55,10 +56,6 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
     def check_is_possible(
         self, character: "CharacterModel", stuff: "StuffModel"
     ) -> None:
-        check_common_is_possible(
-            self._kernel, character=character, description=self._description
-        )
-        # FIXME BS NOW: bug; poule peut etre transforme en viande cuite + peau
         if (
             stuff.stuff_id
             not in self._description.properties["required_one_of_stuff_ids"]
@@ -95,6 +92,9 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         stuff: "StuffModel",
         input_: TransformStuffIntoResourcesModel,
     ) -> None:
+        check_common_is_possible(
+            self._kernel, character=character, description=self._description
+        )
         self.check_is_possible(character, stuff)
 
     def get_cost(
@@ -157,6 +157,191 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     label="Voir l'inventaire",
                     form_action=f"/_describe/character/{character.id}/inventory",
                     classes=["primary"],
+                )
+            ],
+        )
+
+
+@dataclasses.dataclass
+class TransformStuffIntoStuffModel:
+    quantity: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+
+
+class TransformStuffIntoStuffAction(WithStuffAction):
+    input_model = TransformStuffIntoStuffModel
+    input_model_serializer = serpyco.Serializer(TransformStuffIntoStuffModel)
+
+    @classmethod
+    def get_properties_from_config(
+        cls, game_config: "GameConfig", action_config_raw: dict
+    ) -> dict:
+        properties = fill_base_action_properties(
+            cls, game_config, {}, action_config_raw
+        )
+        properties.update({"produce": action_config_raw["produce"]})
+        properties.update({"cost_per_unit": action_config_raw["cost_per_unit"]})
+        return properties
+
+    def check_is_possible(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> None:
+        if (
+            stuff.stuff_id
+            not in self._description.properties["required_one_of_stuff_ids"]
+        ):
+            raise ImpossibleAction("Non concerné")
+
+    def get_character_actions(
+        self, character: "CharacterModel", stuff: "StuffModel"
+    ) -> typing.List[CharacterActionLink]:
+        stuffs_str_parts = []
+        for produce in self._description.properties["produce"]:
+            stuff_id = produce["stuff"]
+            stuff_description = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            )
+            stuffs_str_parts.append(stuff_description.name)
+        stuff_str = ", ".join(stuffs_str_parts)
+
+        return [
+            CharacterActionLink(
+                name=self._description.name or f"Transformer en {stuff_str}",
+                link=get_with_stuff_action_url(
+                    character_id=character.id,
+                    stuff_id=stuff.id,
+                    action_type=ActionType.TRANSFORM_STUFF_TO_STUFF,
+                    query_params={},
+                    action_description_id=self._description.id,
+                ),
+            )
+        ]
+
+    async def check_request_is_possible(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: TransformStuffIntoResourcesModel,
+    ) -> None:
+        check_common_is_possible(
+            self._kernel, character=character, description=self._description
+        )
+        self.check_is_possible(character, stuff)
+
+    def get_cost(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: typing.Optional[TransformStuffIntoStuffModel] = None,
+    ) -> typing.Optional[float]:
+        if input_ is None:
+            return None
+
+        return self._description.base_cost + (
+            self._description.properties["cost_per_unit"] * (input_.quantity or 1)
+        )
+
+    async def perform(
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        input_: TransformStuffIntoResourcesModel,
+    ) -> Description:
+        await self.check_request_is_possible(character, stuff, input_)
+        stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff.stuff_id
+        )
+
+        illustration: typing.Optional[str] = None
+        for produce in self._description.properties["produce"]:
+            illustration = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                produce["stuff"]
+            ).illustration
+            if illustration:
+                break
+
+        max_quantity = self._kernel.stuff_lib.get_stuff_count(
+            character_id=character.id, stuff_id=stuff.stuff_id
+        )
+
+        if not input_.quantity:
+            return Description(
+                title=self._description.name,
+                illustration_name=illustration,
+                items=[
+                    Part(
+                        is_form=True,
+                        form_values_in_query=True,
+                        form_action=get_with_stuff_action_url(
+                            character_id=character.id,
+                            action_type=ActionType.TRANSFORM_STUFF_TO_STUFF,
+                            stuff_id=stuff.id,
+                            query_params=self.input_model_serializer.dump(input_),
+                            action_description_id=self._description.id,
+                        ),
+                        items=[
+                            Part(
+                                label=f"Quelle quantité ?",
+                                type_=Type.NUMBER,
+                                name="quantity",
+                                default_value=str(max_quantity),
+                            )
+                        ],
+                    )
+                ],
+            )
+
+        total_cost = self.get_cost(character, stuff=stuff, input_=input_)
+        if character.action_points < total_cost:
+            raise ImpossibleAction(
+                f"Pas assez de points d'actions ({total_cost} nécéssaires)"
+            )
+
+        await self._kernel.character_lib.reduce_action_points(
+            character_id=character.id, cost=self._description.base_cost
+        )
+
+        done_count = 0
+        produced: typing.DefaultDict[str, int] = defaultdict(lambda: 0)
+        for _ in range(input_.quantity):
+            try:
+                stuff_ = self._kernel.stuff_lib.get_carried_by(
+                    character_id=character.id, stuff_id=stuff.stuff_id
+                ).pop()
+            except IndexError:
+                break
+
+            self._kernel.stuff_lib.destroy(stuff_id=stuff_.id)
+
+            for produce in self._description.properties["produce"]:
+                stuff_id: str = produce["stuff"]
+                stuff_description = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+                )
+                new_stuff_doc = (
+                    self._kernel.stuff_lib.create_document_from_stuff_properties(
+                        stuff_description
+                    )
+                )
+                new_stuff_doc.carried_by_id = character.id
+                self._kernel.server_db_session.add(new_stuff_doc)
+                self._kernel.server_db_session.commit()
+                await self._kernel.character_lib.reduce_action_points(
+                    character_id=character.id,
+                    cost=self._description.properties["cost_per_unit"],
+                )
+                produced[stuff_description.name] += 1
+            done_count += 1
+
+        produced_str = ", ".join(
+            [f"{count} {name}" for name, count in produced.items()]
+        )
+        return Description(
+            title=self._description.name,
+            items=[
+                Part(
+                    text=f"{done_count} {stuff_properties.name} transformé(es) en {produced_str}"
                 )
             ],
         )

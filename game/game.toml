@@ -341,6 +341,16 @@ destroy_robustness_per_ap = 1
     illustration = "dirt.png"
     drop_to_nowhere = true
 
+  [resources.CLAY]
+    name = "Argile"
+    weight=1600.0
+    material="SANDY"
+    unit = "L"
+    clutter = 0.25
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
+    illustration = "clay.png"
+    drop_to_nowhere = false
+
   [resources.WET_SOIL]
     name = "Terre crue"
     weight=2000.0
@@ -1077,8 +1087,42 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="WOOD", quantity=0.002}
     ]
-    cost = 4.0
+    cost = 12.0
     link_group_name = "Matériel de guerre"
+
+  [ACTIONS.CRAFT_RAW_CLAY_JAR]
+    name = "Jarre de terre crue"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="RAW_CLAY_JAR", quantity=1.0},
+    ]
+    require = [
+      {resource="CLAY", quantity=250.0}
+    ]
+    cost = 10.0
+    link_group_name = "Utilitaire"
+
+  [ACTIONS.FIRE_CLAY_JAR]
+    name = "Cuire jarre de terre crue"
+    actions = ["TRANSFORM_STUFF_TO_STUFF"]
+    required_one_of_stuff_ids = ["RAW_CLAY_JAR"]
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_LOW_TEMP", "HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = []
+    produce = [
+      {stuff="CLAY_JAR", quantity=1.0},
+    ]
+    cost = 1.0
+    cost_per_unit = 0.25
+    link_group_name = "Utilitaire"
 
   [ACTIONS.CRAFT_HUNT_BOW]
     name = "Arc de chasse"
@@ -1095,7 +1139,7 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="WOOD", quantity=0.002}
     ]
-    cost = 4.0
+    cost = 14.0
     link_group_name = "Utilitaire"
 
   [ACTIONS.CRAFT_WOOD_MACE]
@@ -1113,7 +1157,7 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="WOOD", quantity=0.01}
     ]
-    cost = 4.0
+    cost = 8.0
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CRAFT_STONE_HAXE]
@@ -1131,7 +1175,7 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="WOOD", quantity=0.002}
     ]
-    cost = 6.0
+    cost = 15.0
     link_group_name = "Matériel de guerre"
 
   [ACTIONS.CRAFT_LITTLE_SKIN_CANTEEN]
@@ -1149,7 +1193,7 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="ANIMAL_SKIN", quantity=2}
     ]
-    cost = 6.0
+    cost = 18.0
     link_group_name = "Utilitaire"
 
   [ACTIONS.CRAFT_LITTLE_VEGETAL_CANTEEN]
@@ -1167,7 +1211,7 @@ destroy_robustness_per_ap = 1
     require = [
       {resource="VEGETAL_FOOD_FRESH", quantity=5.0}
     ]
-    cost = 6.0
+    cost = 10.0
     link_group_name = "Utilitaire"
 
   [ACTIONS.MAKE_DRIED_MEAT]
@@ -2020,6 +2064,20 @@ destroy_robustness_per_ap = 1
     required_all_ability_ids = []
     produce = [
       {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=90.0},
+    ]
+    cost = 0.0
+
+  [ACTIONS.SEARCH_CLAY]
+    name = "Chercher de l'argile"
+    actions = ["SEARCH_MATERIAL"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {resource="CLAY", quantity_per_hour=50.0, random_loss=10.0},
     ]
     cost = 0.0
 

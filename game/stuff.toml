@@ -26,6 +26,25 @@
   material_type = "OBJECT"
   classes = ["BOTTLE"]
   illustration = "vegetal_canteen.png"
+[RAW_CLAY_JAR]
+  name = "Jarre de terre crue"
+  weight = 5000.0
+  clutter = 5
+  actions = ["DROP_STUFF", "TRANSFORM_STUFF_TO_STUFF"]
+  material_type = "OBJECT"
+  classes = ["BOTTLE"]
+  illustration = "raw_clay_jar.png"
+[CLAY_JAR]
+  name = "Jarre"
+  filled_value = 0.0
+  filled_unity = "L"
+  filled_capacity = 30.0
+  weight = 4500.0
+  clutter = 5
+  actions = ["DROP_STUFF","FILL_STUFF","DRINK_STUFF","EMPTY_STUFF"]
+  material_type = "OBJECT"
+  classes = ["BOTTLE"]
+  illustration = "clay_jar.png"
 [BASKETRY_BAG]
   name = "Sac végétal"
   weight = 1000.0
