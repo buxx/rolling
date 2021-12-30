@@ -122,6 +122,11 @@ destroy_robustness_per_ap = 1
   type = "3.Spécifique"
   default = 0.0
 
+[skill.bow_fight]
+  name = "Combat a l'arc"
+  type = "3.Spécifique"
+  default = 0.0
+
 [skill.haxe_fight]
   name = "Combat a la hache"
   type = "3.Spécifique"
@@ -1068,6 +1073,23 @@ destroy_robustness_per_ap = 1
     required_all_ability_ids = []
     produce = [
       {stuff="STONE_SPEAR", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.002}
+    ]
+    cost = 4.0
+
+  [ACTIONS.CRAFT_HUNT_BOW]
+    name = "Fabriquer un arc de chasse"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="HUNT_BOW", quantity=1.0},
     ]
     require = [
       {resource="WOOD", quantity=0.002}

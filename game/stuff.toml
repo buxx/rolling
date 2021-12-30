@@ -188,7 +188,7 @@
   classes = ["SHIELD"]
 [STONE_SPEAR]
   name = "Lance de pierre"
-  weight = 1100.0
+  weight = 1200.0
   clutter = 1.0
   actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
   abilities = ["HUNT_SMALL_GAME", "FIGHT", "BORDER_FISHING"]
@@ -199,6 +199,20 @@
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "SPEAR"]
+[HUNT_BOW]
+  name = "Arc de chasse"
+  weight = 1000.0
+  clutter = 1.0
+  actions = ["DROP_STUFF", "CRAFT_STUFF_WITH_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON"]
+  abilities = ["HUNT_SMALL_GAME", "FIGHT", "BORDER_FISHING"]
+  weapon = true
+  skills_bonus = ["bow_fight"]
+  estoc = 10
+  blunt = 0
+  sharp = 0
+  damages = 1.0
+  classes = ["WEAPON", "BOW"]
+  illustration = "hunt_bow.png"
 [COPPER_SPEAR]
   name = "Lance de cuivre"
   weight = 1000.0
