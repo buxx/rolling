@@ -207,10 +207,10 @@
   abilities = ["HUNT_SMALL_GAME", "FIGHT", "BORDER_FISHING"]
   weapon = true
   skills_bonus = ["bow_fight"]
-  estoc = 10
+  estoc = 6
   blunt = 0
   sharp = 0
-  damages = 1.0
+  damages = 0.8
   classes = ["WEAPON", "BOW"]
   illustration = "hunt_bow.png"
 [COPPER_SPEAR]

@@ -57,14 +57,14 @@ class SearchMaterialAction(CharacterAction):
         return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        check_common_is_possible(
-            self._kernel, character=character, description=self._description
-        )
+        pass  # Always display these actions
 
     async def check_request_is_possible(
         self, character: "CharacterModel", input_: SearchMaterialModel
     ) -> None:
-        self.check_is_possible(character)
+        check_common_is_possible(
+            self._kernel, character=character, description=self._description
+        )
         if input_.ap and character.action_points < input_.ap:
             raise WrongInputError(
                 f"{character.name} ne possède pas assez de points d'actions"

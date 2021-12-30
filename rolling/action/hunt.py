@@ -45,14 +45,14 @@ class SearchFoodAction(CharacterAction):
         return properties
 
     def check_is_possible(self, character: "CharacterModel") -> None:
-        check_common_is_possible(
-            kernel=self._kernel, description=self._description, character=character
-        )
+        pass  # Always display these actions
 
     async def check_request_is_possible(
         self, character: "CharacterModel", input_: typing.Any
     ) -> None:
-        self.check_is_possible(character)
+        check_common_is_possible(
+            kernel=self._kernel, description=self._description, character=character
+        )
 
     def get_character_actions(
         self, character: "CharacterModel"
