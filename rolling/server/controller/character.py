@@ -544,9 +544,7 @@ class CharacterController(BaseController):
                 Part(label="Soif", text=str(round(character.thirst, 0))),
                 Part(label="Faim", text=str(round(character.hunger, 0))),
                 Part(label="Fatigué", text="oui" if character.tired else "non"),
-                Part(
-                    label="Exténué", text="oui" if character.is_exhausted else "non"
-                ),
+                Part(label="Exténué", text="oui" if character.is_exhausted else "non"),
                 Part(
                     label="Arme",
                     text=character.weapon.name if character.weapon else "aucune",
@@ -1226,6 +1224,7 @@ class CharacterController(BaseController):
                             form_action=character_action.link,
                             is_link=True,
                             link_group_name=character_action.group_name,
+                            classes=character_action.classes1,
                         )
                     )
 

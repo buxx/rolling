@@ -535,6 +535,10 @@ class BeginStuffConstructionAction(CharacterAction):
     def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
+        stuff_description = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            self._description.properties["produce_stuff_id"]
+        )
+
         return [
             CharacterActionLink(
                 name=f"{self._description.name}",
@@ -546,6 +550,7 @@ class BeginStuffConstructionAction(CharacterAction):
                 ),
                 group_name=self._description.properties["link_group_name"],
                 category="Artisanat",
+                classes1=stuff_description.classes + [stuff_description.id],
             )
         ]
 
