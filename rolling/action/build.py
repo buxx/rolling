@@ -101,6 +101,7 @@ class BeginBuildAction(CharacterAction):
                     query_params={},
                 ),
                 group_name=build_description.group_name,
+                classes1=build_description.classes + [build_description.id],
             )
         ]
 
@@ -265,6 +266,7 @@ class BringResourcesOnBuild(WithBuildAction):
                         query_params=query_params,
                     ),
                     cost=None,
+                    classes1=[resource_description.id],
                 )
             )
 
@@ -592,6 +594,7 @@ class BuildAction(CharacterAction):
                 link=self.get_base_url(character),
                 cost=self.get_cost(character),
                 group_name=build_description.group_name,
+                classes1=build_description.classes + [build_id],
             )
         ]
 

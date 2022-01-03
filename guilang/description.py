@@ -44,6 +44,7 @@ class Part:
     search_by_str: bool = False
     id: typing.Optional[int] = None
     classes: typing.List[str] = dataclasses.field(default_factory=list)
+    classes2: typing.List[str] = dataclasses.field(default_factory=list)
     is_web_browser_link: bool = False
     is_column: bool = False
     colspan: int = 1

@@ -83,6 +83,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                     action_description_id=self._description.id,
                 ),
                 cost=self.get_cost(character, stuff),
+                classes1=[resource_description.id],
             )
         ]
 
@@ -455,6 +456,11 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
+        classes: typing.Optional[typing.List[str]] = None
+        for produce in self._description.properties["produce"]:
+            classes = [produce["resource"]]
+            break
+
         return [
             CharacterActionLink(
                 name=self._description.name,
@@ -466,6 +472,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                     query_params={},
                 ),
                 cost=self.get_cost(character, resource_id),
+                classes1=classes,
             )
         ]
 

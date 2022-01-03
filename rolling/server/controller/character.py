@@ -1017,6 +1017,7 @@ class CharacterController(BaseController):
                         is_link=is_link,
                         align="left",
                         form_action=form_action,
+                        classes=stuff.classes + [stuff.stuff_id],
                     )
                 )
             else:
@@ -1053,6 +1054,7 @@ class CharacterController(BaseController):
                                         is_link=is_link,
                                         align="left",
                                         form_action=form_action,
+                                        classes=stuff.classes + [stuff.stuff_id],
                                     )
                                 ],
                             ),
@@ -1101,6 +1103,7 @@ class CharacterController(BaseController):
                         is_link=is_link,
                         align="left",
                         form_action=form_action,
+                        classes=[resource.id],
                     )
                 )
             else:
@@ -1143,6 +1146,7 @@ class CharacterController(BaseController):
                                         is_link=is_link,
                                         align="left",
                                         form_action=form_action,
+                                        classes=[resource.id],
                                     )
                                 ],
                             ),
@@ -1225,6 +1229,7 @@ class CharacterController(BaseController):
                             is_link=True,
                             link_group_name=character_action.group_name,
                             classes=character_action.classes1,
+                            classes2=character_action.classes2,
                         )
                     )
 
@@ -1322,6 +1327,7 @@ class CharacterController(BaseController):
                     form_action=action.link,
                     is_link=True,
                     link_group_name=action.group_name,
+                    classes=action.classes1,
                 )
                 for action in build_actions
             ],
@@ -1656,6 +1662,7 @@ class CharacterController(BaseController):
                     form_action=action.link,
                     is_link=True,
                     link_group_name=action.group_name,
+                    classes=action.classes1,
                 )
                 for action in actions
             ],

@@ -114,6 +114,7 @@ class SeedAction(CharacterAction):
                 cost=self.get_cost(character),
                 group_name="Semer",
                 category="Agriculture",
+                classes1=["SEEDS"],
             )
         ]
 

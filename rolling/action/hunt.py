@@ -62,6 +62,13 @@ class SearchFoodAction(CharacterAction):
         except ImpossibleAction:
             return []
 
+        classes: typing.Optional[typing.List[str]] = None
+        for production in self._description.properties["produce"]:
+            if "resource" in production:
+                classes = [production["resource"]]
+            elif "stuff" in production:
+                classes = [production["stuff"]]
+
         return [
             CharacterActionLink(
                 name=self._description.name,
@@ -73,6 +80,7 @@ class SearchFoodAction(CharacterAction):
                 ),
                 group_name="Chercher de la nourriture",
                 cost=self.get_cost(character),
+                classes1=classes,
             )
         ]
 

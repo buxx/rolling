@@ -121,6 +121,7 @@ class MixResourcesAction(WithResourceAction):
                         ),
                         cost=None,
                         category="Production",
+                        classes1=[resource_mix_description.produce_resource.id],
                     )
                 )
 

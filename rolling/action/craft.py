@@ -201,6 +201,14 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         except ImpossibleAction:
             return []
 
+        classes: typing.Optional[typing.List[str]] = None
+        for produce in self._description.properties["produce"]:
+            stuff_id = produce["stuff"]
+            classes = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            ).classes + [stuff_id]
+            break
+
         return [
             CharacterActionLink(
                 name=self._description.name,
@@ -214,6 +222,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                 group_name=self._description.properties["link_group_name"],
                 cost=self.get_cost(character, resource_id),
                 category="Artisanat",
+                classes1=classes,
             )
         ]
 
@@ -359,6 +368,14 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         except ImpossibleAction:
             return []
 
+        classes: typing.Optional[typing.List[str]] = None
+        for produce in self._description.properties["produce"]:
+            stuff_id = produce["stuff"]
+            classes = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+            ).classes + [stuff_id]
+            break
+
         return [
             # FIXME BS NOW: all CharacterActionLink must generate a can_be_back_url=True
             CharacterActionLink(
@@ -372,6 +389,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                 ),
                 cost=self.get_cost(character, stuff),
                 category="Artisanat",
+                classes1=classes,
             )
         ]
 
@@ -758,6 +776,12 @@ class ContinueStuffConstructionAction(WithStuffAction):
                 cost=self.get_cost(character, stuff),
                 merge_by="continue_craft",
                 category="Artisanat",
+                classes1=(
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                        stuff.stuff_id
+                    )
+                ).classes
+                + [stuff.stuff_id],
             )
         ]
 

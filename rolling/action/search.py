@@ -73,6 +73,11 @@ class SearchMaterialAction(CharacterAction):
     def get_character_actions(
         self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
+        classes: typing.Optional[typing.List[str]] = None
+        for produce in self._description.properties["produce"]:
+            classes = [produce["resource"]]
+            break
+
         return [
             CharacterActionLink(
                 name=self._description.name,
@@ -84,6 +89,7 @@ class SearchMaterialAction(CharacterAction):
                 ),
                 cost=self.get_cost(character),
                 group_name="Chercher du matériel/ressources",
+                classes1=classes,
             )
         ]
 
