@@ -62,3 +62,5 @@
 * raw_clay_jar.png by "Venice Pottery" par DragonWoman est sous licence CC BY-NC-ND 2.0
 * clay_jar.png by "Jars" par oatsy40 est sous licence CC BY 2.0
 * clay.png by "Clay" par shorty76 est sous licence CC BY-NC-ND 2.0
+* travois.png by https://commons.wikimedia.org/wiki/File:Kainai_travois.jpg?uselang=fr
+* basketry_bag.png by https://en.wikipedia.org/wiki/Basket_weaving#/media/File:Woman_weaving_baskets_near_Lake_Ossa.jpg

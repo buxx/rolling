@@ -54,6 +54,7 @@
   material_type = "OBJECT"
   is_bag = true
   classes = ["BAG", "LITTLE_BAG", "BASKETRY_BAG"]
+  illustration = "basketry_bag.png"
 [SKIN_BAG]
   name = "Sac de peaux"
   weight = 2000.0
@@ -81,6 +82,7 @@
   material_type = "OBJECT"
   is_bag = true
   classes = ["BAG"]
+  illustration = "travois.png"
 [CLOTH_BAG]
   name = "Sac de toile"
   weight = 1000.0
@@ -283,7 +285,7 @@
   blunt = 10
   sharp = 0
   damages = 1.0
-  classes = ["WEAPON", "SPEAR"]
+  classes = ["WEAPON", "MACE"]
 [STONE_HAXE]
   name = "Hache de pierre"
   weight = 1200.0
