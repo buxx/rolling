@@ -1455,7 +1455,7 @@ destroy_robustness_per_ap = 1
     cost = 6.0
 
   [ACTIONS.CONSTRUCT_LITTLE_WOOD_STATUETTE]
-    name = "Statuette de femme enceinte"
+    name = "Statuette de femme"
     actions = ["BEGIN_STUFF_CONSTRUCTION", "CONTINUE_STUFF_CONSTRUCTION"]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []

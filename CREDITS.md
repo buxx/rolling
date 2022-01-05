@@ -64,3 +64,11 @@
 * clay.png by "Clay" par shorty76 est sous licence CC BY-NC-ND 2.0
 * travois.png by https://commons.wikimedia.org/wiki/File:Kainai_travois.jpg?uselang=fr
 * basketry_bag.png by https://en.wikipedia.org/wiki/Basket_weaving#/media/File:Woman_weaving_baskets_near_Lake_Ossa.jpg
+* stone_spear.png by https://commons.wikimedia.org/wiki/File:Spear_and_knife_(Mesa_Verde_National_Park)-transparent.png
+* copper_spear.png by https://commons.wikimedia.org/wiki/File:Copper_spear_points,_Late_Archaic_period,_Wisconsin,_3000_BC-1000_BC_-_Wisconsin_Historical_Museum_-_Wisconsin_Historical_Museum_-_DSC03442.JPG
+* bronze_spear.png by https://picryl.com/media/bronze-spear-butt-463c9a
+* iron_spear.png by https://picryl.com/media/boar-spear-3e9a90
+* wood_mace.png by https://fr.wikipedia.org/wiki/Casse-t%C3%AAte_(Iroquois)#/media/Fichier:Casse-T%C3%AAte_(Fort_Niagara).jpg
+* anvil.png by https://commons.wikimedia.org/wiki/File:Enclume.JPG?uselang=fr
+* stone_anvil.png by https://commons.wikimedia.org/wiki/File:Roman_Stone_Anvil_for_Ore-Crushing_Stamp_Battery.jpg
+* venus.png by https://commons.wikimedia.org/wiki/File:Venus_von_Willendorf_01.jpg?uselang=fr

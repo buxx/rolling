@@ -220,6 +220,7 @@
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "SPEAR"]
+  illustration = "stone_spear.png"
 [HUNT_BOW]
   name = "Arc de chasse"
   weight = 1000.0
@@ -247,6 +248,7 @@
   sharp = 0
   damages = 2.0
   classes = ["WEAPON", "SPEAR"]
+  illustration = "copper_spear.png"
 [BRONZE_SPEAR]
   name = "Lance de bronze"
   weight = 1000.0
@@ -260,6 +262,7 @@
   sharp = 0
   damages = 2.2
   classes = ["WEAPON", "SPEAR"]
+  illustration = "bronze_spear.png"
 [IRON_SPEAR]
   name = "Lance de fer"
   weight = 800.0
@@ -273,6 +276,7 @@
   sharp = 0
   damages = 2.8
   classes = ["WEAPON", "SPEAR"]
+  illustration = "iron_spear.png"
 [WOOD_MACE]
   name = "Massue"
   weight = 5000.0
@@ -286,6 +290,7 @@
   sharp = 0
   damages = 1.0
   classes = ["WEAPON", "MACE"]
+  illustration = "wood_mace.png"
 [STONE_HAXE]
   name = "Hache de pierre"
   weight = 1200.0
@@ -475,6 +480,7 @@
   clutter = 0.5
   actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
   classes = ["CRAFT", "STATUETTE"]
+  illustration = "venus.png"
 [SPINDLE]
   name = "Fuseau"
   weight = 500.0
@@ -514,6 +520,7 @@
   actions = ["DROP_STUFF", "CONTINUE_STUFF_CONSTRUCTION"]
   classes = ["CRAFT"]
   abilities = ["HAMMERING1"]
+  illustration = "stone_anvil.png"
 [IRON_ANVIL]
   name = "Enclume"
   weight = 95000.0
