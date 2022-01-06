@@ -10,13 +10,14 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
-from rolling.exception import NotEnoughResource
+from rolling.exception import ImpossibleAction, NoCarriedResource, NotEnoughResource
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 from rolling.util import get_on_and_around_coordinates
+from rolling.compare import GroundResourceCompare
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -74,7 +75,10 @@ class TakeResourceAction(WithResourceAction):
             )
 
         # FIXME try/catch indexerror -> ImpossibleAction
-        ground_resource = copy.deepcopy(around_carried_resources[0])
+        try:
+            ground_resource = copy.deepcopy(around_carried_resources[0])
+        except IndexError:
+            raise ImpossibleAction("Ressource introuvable")
         ground_resource.quantity = sum(acr.quantity for acr in around_carried_resources)
 
         if not input_.quantity:
@@ -115,6 +119,15 @@ class TakeResourceAction(WithResourceAction):
             carried_resource=ground_resource,
         )
 
+        # Prepare to compare what have been taken
+        ground_resources_snapshot = GroundResourceCompare(
+            self._kernel,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=character.zone_row_i,
+            zone_col_i=character.zone_col_i,
+        ).snapshot()
+
         try:
             reduced_quantity = self._kernel.resource_lib.reduce(
                 world_row_i=character.world_row_i,
@@ -127,6 +140,11 @@ class TakeResourceAction(WithResourceAction):
             )
         except NotEnoughResource as exc:
             reduced_quantity = exc.available_quantity
+        except NoCarriedResource:
+            return Description(
+                title="Pas de ressources",
+                quick_action_response="Pas de ressources",
+            )
 
         self._kernel.resource_lib.add_resource_to(
             character_id=character.id,
@@ -135,7 +153,21 @@ class TakeResourceAction(WithResourceAction):
             commit=True,
         )
 
+        for (
+            row_i,
+            col_i,
+        ), resource_ids in ground_resources_snapshot.get_missing().items():
+            for resource_id in resource_ids:
+                await self._kernel.resource_lib.send_zone_ground_resource_removed(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                    resource_id=resource_id,
+                )
+
         return Description(
             title=f"{resource_description.name} récupéré",
+            quick_action_response=f"{resource_description.name} récupéré",
             redirect=input_.then_redirect_url,
         )

@@ -57,6 +57,7 @@ class TakeStuffAction(WithStuffAction):
         )
 
         around_stuffs_like_this: typing.List[StuffModel] = []
+        taken_stuffs: typing.List[StuffModel] = [stuff]
         if input_.quantity or 1 > 1:
             stuff_to_find = input_.quantity - 1
             scan_coordinates: typing.List[
@@ -78,10 +79,23 @@ class TakeStuffAction(WithStuffAction):
                     around_stuffs_like_this.append(around_stuff)
 
             for _ in range(min(stuff_to_find, len(around_stuffs_like_this))):
+                taken_stuff = around_stuffs_like_this.pop()
                 self._kernel.character_lib.take_stuff(
-                    character_id=character.id, stuff_id=around_stuffs_like_this.pop().id
+                    character_id=character.id, stuff_id=taken_stuff.id
                 )
+                taken_stuffs.append(taken_stuff)
+
+        for taken_stuff in taken_stuffs:
+            await self._kernel.stuff_lib.send_zone_ground_stuff_removed(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=taken_stuff.zone_row_i,
+                zone_col_i=taken_stuff.zone_col_i,
+                stuff_id=taken_stuff.id,
+            )
 
         return Description(
-            title="Objet(s) récupéré(s)", redirect=input_.then_redirect_url
+            title="Objet(s) récupéré(s)",
+            redirect=input_.then_redirect_url,
+            quick_action_response="Objet(s) récupéré(s)",
         )

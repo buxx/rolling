@@ -33,6 +33,11 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class ExplodeTakeQuery:
+    explode_take: int = serpyco.number_field(cast_on_load=True, default=1)
+
+
+@dataclasses.dataclass
 class GetCharacterQueryModel:
     compute_unread_event: int = serpyco.number_field(cast_on_load=True, default=0)
     compute_unread_zone_message: int = serpyco.number_field(

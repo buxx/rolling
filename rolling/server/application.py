@@ -137,7 +137,16 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         account_character_id = request.get("account_character_id")
         response = await handler(request)
 
-        if account_character_id and request.query.get("quick_action") == "1":
+        is_quick_action = request.query.get("quick_action", "0") == "1"
+        disable_resend_quick_actions = (
+            request.query.get("disable_resend_quick_actions", "0") == "1"
+        )
+        explode_take = request.query.get("explode_take", "0") == "1"
+        if (
+            account_character_id
+            and is_quick_action
+            and not disable_resend_quick_actions
+        ):
             character_doc = kernel.character_lib.get_document(account_character_id)
             character_socket = kernel.server_zone_events_manager.get_character_socket(
                 account_character_id,
@@ -151,6 +160,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                     col_i=character_doc.zone_col_i,
                     character_id=character_doc.id,
                     sender_socket=character_socket,
+                    explode_take=explode_take,
                 )
 
         return response

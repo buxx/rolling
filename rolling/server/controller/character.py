@@ -33,6 +33,7 @@ from rolling.model.character import (
     CharacterActionModel,
     CharacterModelApi,
     ChooseAvatarQuery,
+    ExplodeTakeQuery,
     GetCharacterQueryModel,
 )
 from rolling.model.character import CharacterModel
@@ -58,7 +59,7 @@ from rolling.model.character import WithCharacterActionModel
 from rolling.model.character import WithResourceActionModel
 from rolling.model.character import WithStuffActionModel
 from rolling.model.data import ListOfItemModel
-from rolling.model.event import CharacterEnterZoneData
+from rolling.model.event import CharacterEnterZoneData, ClientRequireAroundData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
@@ -2302,9 +2303,9 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        character_actions = self._kernel.character_lib.get_on_place_stuff_actions(
-            character
-        ) + self._kernel.character_lib.get_on_place_resource_actions(character)
+        character_actions = list(
+            self._kernel.character_lib.get_on_place_stuff_actions(character)
+        ) + list(self._kernel.character_lib.get_on_place_resource_actions(character))
         parts = [
             Part(
                 text=action.get_as_str(),
@@ -2557,6 +2558,37 @@ class CharacterController(BaseController):
             ],
         )
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(ExplodeTakeQuery)
+    @hapic.output_body(Description)
+    async def send_around(self, request: Request, hapic_data: HapicData) -> Response:
+        character_id = hapic_data.path.character_id
+        character = self._kernel.character_lib.get(character_id)
+        character_socket = self._kernel.server_zone_events_manager.get_character_socket(
+            character_id
+        )
+        character_socket is not None
+        await self._kernel.server_zone_events_manager._event_processor_factory.get_processor(
+            zone_event_type=ZoneEventType.CLIENT_REQUIRE_AROUND
+        ).process(
+            row_i=character.zone_row_i,
+            col_i=character.zone_col_i,
+            event=WebSocketEvent(
+                type=ZoneEventType.CLIENT_REQUIRE_AROUND,
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                data=ClientRequireAroundData(
+                    zone_row_i=character.zone_row_i,
+                    zone_col_i=character.zone_col_i,
+                    character_id=character_id,
+                    explode_take=bool(hapic_data.query.explode_take),
+                ),
+            ),
+            sender_socket=character_socket,
+        )
+        return Description(title="no content", quick_action_response="")
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -2703,5 +2735,6 @@ class CharacterController(BaseController):
                     self.describe_around_builds,
                 ),
                 web.post("/character/{character_id}/door/{door_id}", self.door),
+                web.post("/character/{character_id}/send-around", self.send_around),
             ]
         )

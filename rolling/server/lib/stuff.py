@@ -6,6 +6,12 @@ import typing
 
 from rolling.exception import ImpossibleAction
 from rolling.model.character import CharacterModel
+from rolling.model.event import (
+    WebSocketEvent,
+    ZoneEventType,
+    ZoneGroundStuffAppearData,
+    ZoneGroundStuffRemoveData,
+)
 from rolling.model.measure import Unit
 from rolling.model.stuff import StuffModel
 from rolling.model.stuff import StuffProperties
@@ -604,3 +610,51 @@ class StuffLib:
             query = query.filter(StuffDocument.stuff_id == stuff_id)
 
         return query.all()
+
+    async def send_zone_ground_stuff_removed(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        stuff_id: int,
+    ) -> None:
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.ZONE_GROUND_STUFF_REMOVE,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                data=ZoneGroundStuffRemoveData(
+                    zone_row_i=zone_row_i,
+                    zone_col_i=zone_col_i,
+                    stuff_id=stuff_id,
+                ),
+            ),
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )
+
+    async def send_zone_ground_stuff_added(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        stuff: StuffModel,
+    ) -> None:
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.ZONE_GROUND_STUFF_APPEAR,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                data=ZoneGroundStuffAppearData(
+                    zone_row_i=zone_row_i,
+                    zone_col_i=zone_col_i,
+                    id=stuff.id,
+                    stuff_id=stuff.stuff_id,
+                    classes=stuff.classes,
+                ),
+            ),
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )

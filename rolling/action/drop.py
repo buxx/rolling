@@ -109,6 +109,14 @@ class DropStuffAction(WithStuffAction):
                     zone_row_i=drop_to_row_i,
                     zone_col_i=drop_to_col_i,
                 )
+                await self._kernel.stuff_lib.send_zone_ground_stuff_added(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=drop_to_row_i,
+                    zone_col_i=drop_to_col_i,
+                    stuff=stuff_,
+                )
+
             return [Part(text=f"{stuff_.name} laissé ici")]
 
         return await with_multiple_carried_stuffs(
@@ -256,6 +264,14 @@ class DropResourceAction(WithResourceAction):
                 zone_row_i=drop_to_row_i,
                 zone_col_i=drop_to_col_i,
             )
+            await self._kernel.resource_lib.send_zone_ground_resource_added(
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+                zone_row_i=drop_to_row_i,
+                zone_col_i=drop_to_col_i,
+                resource_id=resource_id,
+            )
+
         return Description(
             title=f"Action effectué",
             back_url=f"/_describe/character/{character.id}/inventory",

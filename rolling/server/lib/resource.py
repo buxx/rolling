@@ -11,6 +11,12 @@ from rolling.exception import NoCarriedResource
 from rolling.exception import NotEnoughResource
 from rolling.log import server_logger
 from rolling.model.character import CharacterModel
+from rolling.model.event import (
+    WebSocketEvent,
+    ZoneEventType,
+    ZoneGroundResourceAppearData,
+    ZoneGroundResourceRemoveData,
+)
 from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.resource import ResourceDescriptionModel
@@ -612,3 +618,49 @@ class ResourceLib:
             query = query.filter(ResourceDocument.quantity >= quantity)
 
         return self._carried_resource_model_from_doc([query.one()])
+
+    async def send_zone_ground_resource_removed(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        resource_id: str,
+    ) -> None:
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.ZONE_GROUND_RESOURCE_REMOVE,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                data=ZoneGroundResourceRemoveData(
+                    zone_row_i=zone_row_i,
+                    zone_col_i=zone_col_i,
+                    resource_id=resource_id,
+                ),
+            ),
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )
+
+    async def send_zone_ground_resource_added(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: int,
+        zone_col_i: int,
+        resource_id: str,
+    ) -> None:
+        await self._kernel.server_zone_events_manager.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.ZONE_GROUND_RESOURCE_APPEAR,
+                world_row_i=world_row_i,
+                world_col_i=world_col_i,
+                data=ZoneGroundResourceAppearData(
+                    zone_row_i=zone_row_i,
+                    zone_col_i=zone_col_i,
+                    resource_id=resource_id,
+                ),
+            ),
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+        )

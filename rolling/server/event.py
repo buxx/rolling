@@ -1,6 +1,7 @@
 # coding: utf-8
 import abc
 from aiohttp import web
+from sqlalchemy.orm import exc
 from sqlalchemy.orm.exc import NoResultFound
 import typing
 
@@ -23,6 +24,7 @@ from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
+from rolling.server.link import CharacterActionLink
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
@@ -113,6 +115,7 @@ class ThereIsAroundProcessor(EventProcessor):
             col_i=col_i,
             character_id=event.data.character_id,
             sender_socket=sender_socket,
+            explode_take=event.data.explode_take,
         )
 
     async def send_around(
@@ -121,6 +124,7 @@ class ThereIsAroundProcessor(EventProcessor):
         col_i: int,
         character_id: str,
         sender_socket: web.WebSocketResponse,
+        explode_take: bool = False,
     ) -> None:
         character = self._kernel.character_lib.get_document(character_id)
         around_character = get_on_and_around_coordinates(
@@ -176,6 +180,48 @@ class ThereIsAroundProcessor(EventProcessor):
         quick_actions = self._kernel.character_lib.get_on_place_actions(
             character.id, quick_actions_only=True
         )
+
+        if explode_take:
+            quick_actions.extend(
+                (
+                    list(
+                        self._kernel.character_lib.get_on_place_stuff_actions(
+                            character, quick_actions=True
+                        )
+                    )
+                )
+                + (
+                    list(
+                        self._kernel.character_lib.get_on_place_resource_actions(
+                            character, quick_actions=True
+                        )
+                    )
+                )
+            )
+        else:
+            # If there is something to pick, add quick action
+            there_is_around = False
+            try:
+                next(self._kernel.character_lib.get_on_place_stuff_actions(character))
+                there_is_around = True
+            except StopIteration:
+                pass
+            try:
+                next(
+                    self._kernel.character_lib.get_on_place_resource_actions(character)
+                )
+                there_is_around = True
+            except StopIteration:
+                pass
+
+            if there_is_around:
+                quick_actions.append(
+                    CharacterActionLink(
+                        name="Regarder ce qu'il y a à ramasser autour",
+                        link=f"/character/{character_id}/send-around?explode_take=1&quick_action=1&disable_resend_quick_actions=1",
+                        classes1=["TAKE"],
+                    )
+                )
 
         around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,

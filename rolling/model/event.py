@@ -28,6 +28,10 @@ class ZoneEventType(Enum):
     TOP_BAR_MESSAGE = "TOP_BAR_MESSAGE"
     NEW_ANIMATED_CORPSE = "NEW_ANIMATED_CORPSE"
     ZONE_TILE_REPLACE = "ZONE_TILE_REPLACE"
+    ZONE_GROUND_RESOURCE_REMOVE = "ZONE_GROUND_RESOURCE_REMOVE"
+    ZONE_GROUND_RESOURCE_APPEAR = "ZONE_GROUND_RESOURCE_APPEAR"
+    ZONE_GROUND_STUFF_REMOVE = "ZONE_GROUND_STUFF_REMOVE"
+    ZONE_GROUND_STUFF_APPEAR = "ZONE_GROUND_STUFF_APPEAR"
 
 
 T = typing.TypeVar("T")
@@ -66,10 +70,41 @@ class CharacterEnterZoneData(WebSocketEventData):
 
 
 @dataclasses.dataclass
+class ZoneGroundResourceRemoveData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+    resource_id: str
+
+
+@dataclasses.dataclass
+class ZoneGroundResourceAppearData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+    resource_id: str
+
+
+@dataclasses.dataclass
+class ZoneGroundStuffRemoveData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+    stuff_id: int
+
+
+@dataclasses.dataclass
+class ZoneGroundStuffAppearData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+    id: str
+    stuff_id: str
+    classes: typing.List[str]
+
+
+@dataclasses.dataclass
 class ClientRequireAroundData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
     character_id: str
+    explode_take: bool = False
 
 
 @dataclasses.dataclass
@@ -197,6 +232,10 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.TOP_BAR_MESSAGE: TopBarMessageData,
     ZoneEventType.NEW_ANIMATED_CORPSE: NewAnimatedCorpseData,
     ZoneEventType.ZONE_TILE_REPLACE: ZoneTileReplaceData,
+    ZoneEventType.ZONE_GROUND_RESOURCE_REMOVE: ZoneGroundResourceRemoveData,
+    ZoneEventType.ZONE_GROUND_RESOURCE_APPEAR: ZoneGroundResourceAppearData,
+    ZoneEventType.ZONE_GROUND_STUFF_REMOVE: ZoneGroundStuffRemoveData,
+    ZoneEventType.ZONE_GROUND_STUFF_APPEAR: ZoneGroundStuffAppearData,
 }
 
 

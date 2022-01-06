@@ -1,4 +1,5 @@
 # coding: utf-8
+import collections
 import datetime
 import math
 import os
@@ -15,6 +16,7 @@ import uuid
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
+from rolling.action.base import get_with_resource_action_url
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
@@ -675,12 +677,46 @@ class CharacterLib:
         )
 
     def get_on_place_stuff_actions(
-        self, character: CharacterModel
-    ) -> typing.List[CharacterActionLink]:
+        self, character: CharacterModel, quick_actions: bool = False
+    ) -> typing.Generator[CharacterActionLink, None, None]:
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
-        character_actions_: typing.List[CharacterActionLink] = []
+
+        if quick_actions:
+            stuffs_by_type: typing.DefaultDict[
+                str, typing.List[StuffModel]
+            ] = collections.defaultdict(list)
+            for around_row_i, around_col_i in around_character:
+                for stuff in self._stuff_lib.get_zone_stuffs(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=around_row_i,
+                    zone_col_i=around_col_i,
+                ):
+                    stuffs_by_type[stuff.stuff_id].append(stuff)
+
+            for stuff_id, stuffs in stuffs_by_type.items():
+                stuff_description = (
+                    self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
+                )
+                yield CharacterActionLink(
+                    name=f"Ramasser {stuffs[0].stuff_id}",
+                    link=get_with_stuff_action_url(
+                        character_id=character.id,
+                        stuff_id=stuffs[0].id,
+                        action_type=ActionType.TAKE_STUFF,
+                        action_description_id="TAKE_STUFF",
+                        query_params={
+                            "quantity": len(stuffs),
+                            "quick_action": "1",
+                            "explode_take": "1",
+                        },
+                    ),
+                    classes1=["TAKE"],
+                    classes2=stuff_description.classes + [stuff_description.id],
+                )
+            return
 
         for around_row_i, around_col_i in around_character:
             on_same_position_items = self._stuff_lib.get_zone_stuffs(
@@ -690,25 +726,55 @@ class CharacterLib:
                 zone_col_i=around_col_i,
             )
             for item in on_same_position_items:
-                character_actions_.append(
-                    CharacterActionLink(
-                        name=f"Jeter un coup d'oeil sur {item.name}",
-                        link=DESCRIBE_LOOK_AT_STUFF_URL.format(
-                            character_id=character.id, stuff_id=item.id
-                        ),
-                        group_name="Voir les objets et bâtiments autour",
-                    )
+                yield CharacterActionLink(
+                    name=f"Jeter un coup d'oeil sur {item.name}",
+                    link=DESCRIBE_LOOK_AT_STUFF_URL.format(
+                        character_id=character.id, stuff_id=item.id
+                    ),
+                    group_name="Voir les objets et bâtiments autour",
                 )
 
-        return character_actions_
-
     def get_on_place_resource_actions(
-        self, character: CharacterModel
-    ) -> typing.List[CharacterActionLink]:
+        self, character: CharacterModel, quick_actions: bool = False
+    ) -> typing.Generator[CharacterActionLink, None, None]:
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
-        character_actions_: typing.List[CharacterActionLink] = []
+
+        if quick_actions:
+            resources_quantity_by_ids: typing.DefaultDict[
+                str, float
+            ] = collections.defaultdict(lambda: 0.0)
+            for around_row_i, around_col_i in around_character:
+                for resource_on_ground in self._kernel.resource_lib.get_ground_resource(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=around_row_i,
+                    zone_col_i=around_col_i,
+                ):
+                    resources_quantity_by_ids[
+                        resource_on_ground.id
+                    ] += resource_on_ground.quantity
+
+            for resource_id, quantity in resources_quantity_by_ids.items():
+                resource_description = self._kernel.game.config.resources[resource_id]
+                yield CharacterActionLink(
+                    name=f"Ramasser {resource_id}",
+                    link=get_with_resource_action_url(
+                        character_id=character.id,
+                        resource_id=resource_id,
+                        action_type=ActionType.TAKE_RESOURCE,
+                        action_description_id="TAKE_RESOURCE",
+                        query_params={
+                            "quantity": quantity,
+                            "quick_action": "1",
+                            "explode_take": "1",
+                        },
+                    ),
+                    classes1=["TAKE"],
+                    classes2=[resource_description.id],
+                )
+            return
 
         for around_row_i, around_col_i in around_character:
             on_same_position_resources = self._kernel.resource_lib.get_ground_resource(
@@ -718,20 +784,16 @@ class CharacterLib:
                 zone_col_i=around_col_i,
             )
             for resource in on_same_position_resources:
-                character_actions_.append(
-                    CharacterActionLink(
-                        name=f"Jeter un coup d'oeil sur {resource.name}",
-                        link=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
-                            character_id=character.id,
-                            resource_id=resource.id,
-                            row_i=resource.ground_row_i,
-                            col_i=resource.ground_col_i,
-                        ),
-                        group_name="Voir les objets et bâtiments autour",
-                    )
+                yield CharacterActionLink(
+                    name=f"Jeter un coup d'oeil sur {resource.name}",
+                    link=DESCRIBE_LOOK_AT_RESOURCE_URL.format(
+                        character_id=character.id,
+                        resource_id=resource.id,
+                        row_i=resource.ground_row_i,
+                        col_i=resource.ground_col_i,
+                    ),
+                    group_name="Voir les objets et bâtiments autour",
                 )
-
-        return character_actions_
 
     def get_on_place_build_actions(
         self, character: CharacterModel, only_quick_actions: bool = False
@@ -848,7 +910,7 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_on_place_stuff_actions(character),
+                    list(self.get_on_place_stuff_actions(character)),
                     "Objets, ressources et bâtiments autour",
                 )
             )
@@ -856,7 +918,7 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_on_place_resource_actions(character),
+                    list(self.get_on_place_resource_actions(character)),
                     "Objets, ressources et bâtiments autour",
                 )
             )
