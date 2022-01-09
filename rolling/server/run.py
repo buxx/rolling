@@ -13,6 +13,7 @@ import logging
 import os
 from serpyco import ValidationError
 import signal
+import asyncio
 
 from rolling.exception import UserDisplayError
 from rolling.log import configure_logging
@@ -106,9 +107,17 @@ def run(args: argparse.Namespace) -> None:
     kernel.init()
     kernel.ensure_avatar_medias()
     kernel.ensure_loading_medias()
+    kernel_tasks = kernel.tasks()
 
     server_logger.info("Start server listening on {}:{}".format(args.host, args.port))
     signal.signal(signal.SIGHUP, kernel.on_sighup_signal)
+
+    async def on_startup(app):
+        for task in kernel_tasks:
+            asyncio.create_task(task)
+
+    app.on_startup.append(on_startup)
+
     web.run_app(app, host=args.host, port=args.port, access_log=server_logger)
 
 

@@ -173,6 +173,12 @@ class Kernel:
         self.loadings_medias_names = []
         kernel_logger.info(f"Found {len(self.loadings_paths)} loading screens")
 
+    def tasks(self) -> typing.List[typing.Awaitable]:
+        return [
+            self._server_zone_events_manager.garbage_collector_task(),
+            self._server_world_events_manager.garbage_collector_task(),
+        ]
+
     def ensure_avatar_medias(self) -> None:
         # Anonymous avatar
         ensure_avatar_medias(
