@@ -32,13 +32,12 @@ class WorldEventsManager:
     async def garbage_collector_task(self) -> None:
         while True:
             await asyncio.sleep(1.0)
-            for sockets in self._sockets.values():
-                for socket in sockets:
-                    if socket.close_code:
-                        server_logger.debug(
-                            f"Garbage collector :: close websocket {socket}"
-                        )
-                        await self.close_websocket(socket)
+            for socket in self._sockets:
+                if socket.close_code:
+                    server_logger.debug(
+                        f"Garbage collector :: close websocket {socket}"
+                    )
+                    await self.close_websocket(socket)
 
     async def get_new_socket(self, request: Request) -> web.WebSocketResponse:
         server_logger.info(f"Create websocket for world")
