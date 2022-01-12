@@ -37,6 +37,7 @@ async def run(args: argparse.Namespace) -> None:
         character_lib=character_lib,
         stuff_lib=stuff_lib,
         logger=server_logger,
+        disable_natural_needs=args.disable_natural_needs,
     )
     turn_lib.execute_turn()
 
@@ -61,6 +62,11 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--sentry", type=str, help="Sentry address to use", default=None
+    )
+    parser.add_argument(
+        "--disable-natural-needs",
+        action="store_true",
+        help="Disable natural needs of characters",
     )
 
     args = parser.parse_args()

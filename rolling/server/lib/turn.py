@@ -27,16 +27,19 @@ class TurnLib:
         character_lib: CharacterLib,
         stuff_lib: StuffLib,
         logger: typing.Optional[Logger] = None,
+        disable_natural_needs: bool = False,
     ) -> None:
         self._kernel = kernel
         self._character_lib = character_lib
         self._stuff_lib = stuff_lib
         self._logger = logger or server_logger
+        self._disable_natural_needs = disable_natural_needs
 
     def execute_turn(self) -> None:
         # FIXME: update stuff generation for hour ticks
         # self._generate_stuff()
-        self._provide_for_natural_needs()
+        if not self._disable_natural_needs:
+            self._provide_for_natural_needs()
         self._improve_conditions()
         self._increment_age()
         self._kill()
