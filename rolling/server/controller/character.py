@@ -1490,6 +1490,7 @@ class CharacterController(BaseController):
                     form_action=action.link,
                     is_link=True,
                     link_group_name=action.group_name,
+                    is_web_browser_link=action.is_web_browser_link,
                 )
                 for action in actions
             ],

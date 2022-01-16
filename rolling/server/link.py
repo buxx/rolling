@@ -21,6 +21,7 @@ class CharacterActionLink:
     additional_link_parameters_for_quick_action: typing.Optional[
         typing.Dict[str, typing.Union[str, int, float]]
     ] = dataclasses.field(default_factory=dict)
+    is_web_browser_link: bool = False
 
     def get_as_str(self) -> str:
         if not self.cost:

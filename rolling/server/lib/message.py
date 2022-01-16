@@ -22,9 +22,12 @@ class MessageLib:
         self._kernel = kernel
 
     def _get_character_messages_query(
-        self, character_id: str, zone: typing.Optional[bool] = None
+        self,
+        character_id: str,
+        zone: typing.Optional[bool] = None,
+        select=MessageDocument,
     ) -> Query:
-        query = self._kernel.server_db_session.query(MessageDocument).filter(
+        query = self._kernel.server_db_session.query(select).filter(
             MessageDocument.character_id == character_id
         )
 
@@ -132,7 +135,7 @@ class MessageLib:
         is_first_message: bool = False,
     ) -> int:
         author_doc = self._kernel.character_lib.get_document(author_id)
-        concerned = [author_id] + concerned
+        concerned = list(set([author_id] + concerned))
         messages = []
         active_zone_characters_ids = (
             self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
@@ -215,9 +218,10 @@ class MessageLib:
         character_id: str,
         with_character_id: typing.Optional[str] = None,
         order_by=MessageDocument.datetime.asc(),
+        select=MessageDocument,
     ) -> Query:
         query = (
-            self._get_character_messages_query(character_id, zone=False)
+            self._get_character_messages_query(character_id, zone=False, select=select)
             .filter(MessageDocument.is_first_message == True)
             .order_by(order_by)
         )
@@ -234,11 +238,12 @@ class MessageLib:
         character_id: str,
         conversation_id: int,
         message_count: typing.Optional[int] = None,
+        order=MessageDocument.datetime.desc(),
     ) -> typing.List[MessageDocument]:
         query = (
             self._get_character_messages_query(character_id, zone=False)
             .filter(MessageDocument.first_message == conversation_id)
-            .order_by(MessageDocument.datetime.desc())
+            .order_by(order)
         )
         if message_count is not None:
             query = query.limit(message_count)
@@ -451,3 +456,11 @@ class MessageLib:
             query = query.filter(MessageDocument.first_message < conversation_id)
 
         return query.limit(1).one().first_message
+
+    def search_conversation_first_message_for_concerned(
+        self, character_id: str, concerned: typing.List[str]
+    ) -> typing.Optional[int]:
+        for message in self.get_conversation_first_messages(character_id):
+            if all([concern in message.concerned for concern in concerned]):
+                return message.first_message or message.id
+        return None

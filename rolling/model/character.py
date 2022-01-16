@@ -250,6 +250,23 @@ class GetConversationPathModel:
 
 
 @dataclasses.dataclass
+class GetConversationQueryModel:
+    conversation_id: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+
+
+@dataclasses.dataclass
+class PostConversationBodyModel:
+    message: typing.Optional[str] = serpyco.number_field(default=None)
+
+
+@dataclasses.dataclass
+class PostSetupConversationQueryModel:
+    character_id: typing.List[str] = serpyco.field(default_factory=list)
+
+
+@dataclasses.dataclass
 class GetMoveZoneInfosModel:
     character_id: str
     world_row_i: int = serpyco.number_field(cast_on_load=True)

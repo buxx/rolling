@@ -1430,14 +1430,10 @@ class CharacterLib:
                 cost=0.0,
             ),
             CharacterActionLink(
-                name="Voir les conversations",
-                link=f"/conversation/{character.id}?with_character_id={with_character.id}",
+                name="Conversation (page web)",
+                link=f"{self._kernel.server_config.base_url}/conversation/{character.id}/web/setup?character_id={character.id}&character_id={with_character.id}",
                 cost=0.0,
-            ),
-            CharacterActionLink(
-                name="Démarrer une nouvelle conversation",
-                link=f"/conversation/{character.id}/start?with_character_id={with_character.id}",
-                cost=0.0,
+                is_web_browser_link=True,
             ),
             CharacterActionLink(
                 name="Faire une proposition commerciale",

@@ -99,6 +99,7 @@ class ClientWantCloseProcessor(EventProcessor):
         event: WebSocketEvent[PlayerMoveData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
+        server_logger.error("DEBUG :: ClientWantCloseProcessor")
         raise DisconnectClient(sender_socket)
 
 

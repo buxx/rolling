@@ -1,7 +1,11 @@
 #  coding: utf-8
+import json
+import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
+from aiohttp.web_response import Response
+import aiohttp_jinja2
 from hapic.data import HapicData
 from json import JSONDecodeError
 
@@ -9,13 +13,19 @@ from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
 from rolling.kernel import Kernel
-from rolling.model.character import ConversationsQueryModel
+from rolling.model.character import (
+    ConversationsQueryModel,
+    GetConversationQueryModel,
+    PostConversationBodyModel,
+    PostSetupConversationQueryModel,
+)
 from rolling.model.character import GetCharacterPathModel
 from rolling.model.character import GetConversationPathModel
 from rolling.server.controller.base import BaseController
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.message import MessageDocument
 from rolling.server.extension import hapic
+from rolling.util import ORIGINAL_AVATAR_PATTERN, ZONE_THUMB_AVATAR_PATTERN
 
 
 class ConversationController(BaseController):
@@ -71,6 +81,138 @@ class ConversationController(BaseController):
             ]
             + conversation_parts,
             can_be_back_url=True,
+        )
+
+    @hapic.with_api_doc()
+    @aiohttp_jinja2.template("discussions.html")
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(GetConversationQueryModel)
+    @hapic.input_body(PostConversationBodyModel)
+    async def main_page_web(self, request: Request, hapic_data: HapicData) -> dict:
+        character_id: str = hapic_data.path.character_id
+        if character_id != request["account_character_id"]:
+            raise web.HTTPForbidden()
+        conversation_id: typing.Optional[int] = hapic_data.query.conversation_id
+        posted_message: typing.Optional[str] = hapic_data.body.message
+
+        conversation: typing.Optional[MessageDocument] = None
+        conversation_messages: typing.List[MessageDocument] = []
+
+        if conversation_id is not None:
+            conversation_messages = self._kernel.message_lib.get_conversation_messages(
+                character_id,
+                conversation_id=conversation_id,
+                order=MessageDocument.datetime.asc(),
+            )
+            conversation = conversation_messages[0]
+
+        if posted_message and conversation_id:
+            await self._kernel.message_lib.add_conversation_message(
+                character_id,
+                subject=conversation.subject,
+                message=posted_message,
+                # FIXME BS NOW : concerned : ça devrait être que les présents ?!
+                concerned=conversation.concerned,
+                conversation_id=conversation_id,
+            )
+            # Reload messages (because just added one)
+            conversation_messages = self._kernel.message_lib.get_conversation_messages(
+                character_id,
+                conversation_id=conversation_id,
+                order=MessageDocument.datetime.asc(),
+            )
+
+        topics = self._kernel.message_lib.get_conversation_first_messages(character_id)
+
+        all_character_ids = list(
+            set().union(*[message.concerned for message in topics])
+        )
+        characters_by_ids = {
+            character_id: self._kernel.character_lib.get_document(
+                character_id, dead=None
+            )
+            for character_id in all_character_ids
+        }
+
+        # Avatar thumbs
+        character_avatar_thumbs_by_ids = {}
+        for character in characters_by_ids.values():
+            if character.avatar_uuid and character.avatar_is_validated:
+                character_avatar_thumbs_by_ids[
+                    character.id
+                ] = ZONE_THUMB_AVATAR_PATTERN.format(avatar_uuid=character.avatar_uuid)
+            else:
+                character_avatar_thumbs_by_ids[
+                    character.id
+                ] = ZONE_THUMB_AVATAR_PATTERN.format(avatar_uuid="0000")
+
+        # Avatars
+        character_avatars_by_ids = {}
+        for character in characters_by_ids.values():
+            if character.avatar_uuid and character.avatar_is_validated:
+                character_avatars_by_ids[character.id] = ORIGINAL_AVATAR_PATTERN.format(
+                    avatar_uuid=character.avatar_uuid
+                )
+            else:
+                character_avatars_by_ids[character.id] = ORIGINAL_AVATAR_PATTERN.format(
+                    avatar_uuid="0000"
+                )
+
+        return {
+            "characters_by_ids": characters_by_ids,
+            "topics": topics,
+            "character_id": character_id,
+            "conversation": conversation,
+            "conversation_messages": conversation_messages,
+            "character_avatar_thumbs_by_ids": character_avatar_thumbs_by_ids,
+            "character_avatars_by_ids": character_avatars_by_ids,
+        }
+
+    @hapic.with_api_doc()
+    @aiohttp_jinja2.template("discussions.html")
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(PostSetupConversationQueryModel, as_list=["character_id"])
+    async def setup_web(self, request: Request, hapic_data: HapicData) -> Response:
+        character_id: str = hapic_data.path.character_id
+        if character_id != request["account_character_id"]:
+            raise web.HTTPForbidden()
+        concerned: typing.List[str] = list(
+            set(hapic_data.query.character_id + [character_id])
+        )
+        concerned_character_docs = {
+            character_id_: self._kernel.character_lib.get_document(character_id_)
+            for character_id_ in concerned
+        }
+
+        if not concerned:
+            raise web.HTTPBadRequest(body="Aucun personnage n'a été sélectionné")
+
+        existing_topic_id: typing.Optional[
+            int
+        ] = self._kernel.message_lib.search_conversation_first_message_for_concerned(
+            character_id, concerned=list(set(concerned + [character_id]))
+        )
+
+        if existing_topic_id is not None:
+            return web.HTTPFound(
+                f"/conversation/{character_id}/web?conversation_id={existing_topic_id}"
+            )
+
+        new_topic_id = await self._kernel.message_lib.add_conversation_message(
+            author_id=character_id,
+            subject=", ".join(
+                [
+                    concerned_character_docs[character_id_].name
+                    for character_id_ in concerned
+                ]
+            ),
+            is_first_message=True,
+            message="",
+            concerned=concerned,
+        )
+
+        return web.HTTPFound(
+            f"/conversation/{character_id}/web?conversation_id={new_topic_id}"
         )
 
     @hapic.with_api_doc()
@@ -327,6 +469,9 @@ class ConversationController(BaseController):
         app.add_routes(
             [
                 web.post("/conversation/{character_id}", self.main_page),
+                web.get("/conversation/{character_id}/web", self.main_page_web),
+                web.post("/conversation/{character_id}/web", self.main_page_web),
+                web.get("/conversation/{character_id}/web/setup", self.setup_web),
                 web.post("/conversation/{character_id}/start", self.start),
                 web.post(
                     "/conversation/{character_id}/read/{conversation_id}", self.read

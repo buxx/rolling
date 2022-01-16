@@ -1,0 +1,82 @@
+{% extends "character_base.html" %}
+{% block title %}Discussions{% endblock %}
+{% block head %}
+{{ super() }}
+<style type="text/css">
+    textarea {
+        width: 100%;
+    }
+
+    .textwrapper {
+        margin: 5px 0;
+        padding: 3px;
+    }
+
+    .avatar {
+        width: 200px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Conversations</h1>
+
+<ul>
+    {% for message in topics %}
+    <li>
+        {% for concerned in message.concerned %}
+        <img src="/media/{{ character_avatar_thumbs_by_ids[concerned] }}" alt="{{ characters_by_ids[concerned].name }}"
+            title="{{ characters_by_ids[concerned].name }}" />
+        {% endfor %}
+        <a href="/conversation/{{character_id}}/web?conversation_id={{message.id}}">
+            {% for concerned in message.concerned %}
+            {{ characters_by_ids[concerned].name }}
+            {% endfor %}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+{% if conversation %}
+<h2>
+    {% for concerned in conversation.concerned %}
+    {{ characters_by_ids[concerned].name }}
+    {% endfor %}
+</h2>
+
+<center>
+    {% for concerned in conversation.concerned %}
+    <img class="avatar" src="/media/{{ character_avatars_by_ids[concerned] }}"
+        alt="{{ characters_by_ids[concerned].name }}" title="{{ characters_by_ids[concerned].name }}" />
+    {% endfor %}
+</center>
+
+{% for conversation_message in conversation_messages %}
+{% if conversation_message.text|trim %}
+{% if conversation_message.is_outzone_message %}
+<hr />
+<p>
+    {{ conversation_message.text }}
+</p>
+{% else %}
+<p>
+    <img src="/media/{{ character_avatar_thumbs_by_ids[conversation_message.author_id] }}"
+        alt="{{ characters_by_ids[conversation_message.author_id].name }}" />
+    {{ characters_by_ids[conversation_message.author_id].name }} : {{ conversation_message.text }}
+</p>
+{% endif %}
+{% endif %}
+{% endfor %}
+
+<div style="display: block;" id="messageformitem" class="formitem">
+    <form method="post" action="">
+        <label for="message" id="messagelabel">Parler :</label>
+        <div class="textwrapper">
+            <textarea cols="35" rows="2" id="message" name="message" /></textarea>
+            <input type="submit" value="Envoyer" />
+        </div>
+        <form>
+</div>
+
+{% endif %}
+
+{% endblock %}
