@@ -29,3 +29,4 @@ class MessageDocument(Document):
     is_outzone_message = Column(Boolean, default=False)
     first_message = Column(Integer, ForeignKey("message.id"), nullable=True)
     is_first_message = Column(Boolean, nullable=False, default=False)
+    affinity_id = Column(String, nullable=True, default=None)
