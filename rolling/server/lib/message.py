@@ -37,10 +37,13 @@ class MessageLib:
         return query
 
     def get_character_zone_messages(
-        self, character_id: str, message_count: typing.Optional[int] = None
+        self,
+        character_id: str,
+        message_count: typing.Optional[int] = None,
+        order=MessageDocument.datetime.desc(),
     ) -> typing.List[MessageDocument]:
         query = self._get_character_messages_query(character_id, zone=True).order_by(
-            MessageDocument.datetime.desc()
+            order
         )
         if message_count is not None:
             query = query.limit(message_count)
@@ -73,6 +76,7 @@ class MessageLib:
         self,
         character_id: str,
         message: str,
+        # FIXME BS : rename these param ton world_row_i and world_col_i
         zone_row_i: int,
         zone_col_i: int,
         commit: bool = True,

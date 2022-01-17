@@ -18,10 +18,20 @@
 </style>
 {% endblock %}
 {% block content %}
-<h1>Conversations</h1>
+<h1>Conversations de groupes</h1>
 
 <ul>
-    {% for message in topics %}
+    <li>
+        <a href="/conversation/{{character_id}}/web?current_zone=1">
+            Zone
+        </a>
+    </li>
+</ul>
+
+<h1>Conversations à deux</h1>
+
+<ul>
+    {% for message in duo_topics %}
     <li>
         {% for concerned in message.concerned %}
         <img src="/media/{{ character_avatar_thumbs_by_ids[concerned] }}" alt="{{ characters_by_ids[concerned].name }}"
@@ -36,6 +46,7 @@
     {% endfor %}
 </ul>
 
+{% if conversation or current_zone %}
 {% if conversation %}
 <h2>
     {% for concerned in conversation.concerned %}
@@ -49,6 +60,18 @@
         alt="{{ characters_by_ids[concerned].name }}" title="{{ characters_by_ids[concerned].name }}" />
     {% endfor %}
 </center>
+{% endif %}
+
+{% if current_zone %}
+    <h2>Conversation de zone</h2>
+
+    <center>
+        {% for zone_character in zone_characters %}
+        <img class="avatar" src="/media/{{ character_avatars_by_ids[zone_character.id] }}"
+            alt="{{ characters_by_ids[zone_character.id].name }}" title="{{ characters_by_ids[zone_character.id].name }}" />
+        {% endfor %}
+    </center>
+{% endif %}
 
 {% for conversation_message in conversation_messages %}
 {% if conversation_message.text|trim %}

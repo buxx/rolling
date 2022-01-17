@@ -254,6 +254,7 @@ class GetConversationQueryModel:
     conversation_id: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+    current_zone: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
 @dataclasses.dataclass

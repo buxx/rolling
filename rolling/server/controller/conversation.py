@@ -97,13 +97,20 @@ class ConversationController(BaseController):
     @hapic.input_body(PostConversationBodyModel)
     async def main_page_web(self, request: Request, hapic_data: HapicData) -> dict:
         character_id: str = hapic_data.path.character_id
-        if character_id != request["account_character_id"]:
-            raise web.HTTPForbidden()
+        character_doc = self._kernel.character_lib.get_document(character_id)
         conversation_id: typing.Optional[int] = hapic_data.query.conversation_id
+        current_zone: bool = bool(hapic_data.query.current_zone)
         posted_message: typing.Optional[str] = hapic_data.body.message
 
         conversation: typing.Optional[MessageDocument] = None
         conversation_messages: typing.List[MessageDocument] = []
+        zone_characters: typing.List[CharacterDocument] = []
+
+        if character_id != request["account_character_id"]:
+            raise web.HTTPForbidden()
+
+        if conversation_id and current_zone:
+            raise web.HTTPBadRequest()
 
         if conversation_id is not None:
             conversation_messages = self._kernel.message_lib.get_conversation_messages(
@@ -113,12 +120,22 @@ class ConversationController(BaseController):
             )
             conversation = conversation_messages[0]
 
+        if current_zone:
+            conversation_messages = (
+                self._kernel.message_lib.get_character_zone_messages(
+                    character_id,
+                    order=MessageDocument.datetime.asc(),
+                )
+            )
+            zone_characters = self._kernel.character_lib.get_zone_characters(
+                row_i=character_doc.world_row_i, col_i=character_doc.world_col_i
+            )
+
         if posted_message and conversation_id:
             await self._kernel.message_lib.add_conversation_message(
                 character_id,
                 subject=conversation.subject,
                 message=posted_message,
-                # FIXME BS NOW : concerned : ça devrait être que les présents ?!
                 concerned=conversation.concerned,
                 conversation_id=conversation_id,
                 filter_by_same_zone_than_author=True,
@@ -130,10 +147,30 @@ class ConversationController(BaseController):
                 order=MessageDocument.datetime.asc(),
             )
 
-        topics = self._kernel.message_lib.get_conversation_first_messages(character_id)
+        if posted_message and current_zone:
+            await self._kernel.message_lib.add_zone_message(
+                character_id,
+                message=posted_message,
+                zone_row_i=character_doc.world_row_i,
+                zone_col_i=character_doc.world_col_i,
+            )
+            # Reload messages (because just added one)
+            conversation_messages = (
+                self._kernel.message_lib.get_character_zone_messages(
+                    character_id,
+                    order=MessageDocument.datetime.asc(),
+                )
+            )
+
+        duo_topics = self._kernel.message_lib.get_conversation_first_messages(
+            character_id
+        )
 
         all_character_ids = list(
-            set().union(*[message.concerned for message in topics])
+            set().union(
+                [c.id for c in zone_characters],
+                *[message.concerned for message in duo_topics],
+            )
         )
         characters_by_ids = {
             character_id: self._kernel.character_lib.get_document(
@@ -168,12 +205,14 @@ class ConversationController(BaseController):
 
         return {
             "characters_by_ids": characters_by_ids,
-            "topics": topics,
+            "duo_topics": duo_topics,
             "character_id": character_id,
             "conversation": conversation,
             "conversation_messages": conversation_messages,
             "character_avatar_thumbs_by_ids": character_avatar_thumbs_by_ids,
             "character_avatars_by_ids": character_avatars_by_ids,
+            "current_zone": current_zone,
+            "zone_characters": zone_characters,
         }
 
     @hapic.with_api_doc()
