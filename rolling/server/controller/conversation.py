@@ -37,49 +37,56 @@ class ConversationController(BaseController):
     @hapic.input_query(ConversationsQueryModel)
     @hapic.output_body(Description)
     async def main_page(self, request: Request, hapic_data: HapicData) -> Description:
-        messages = self._kernel.message_lib.get_conversation_first_messages(
-            hapic_data.path.character_id,
-            hapic_data.query.with_character_id,  # FIXME BS NOW: test it
-        )
-        conversation_parts = []
-        for message in messages:
-            unread = ""
-            if (
-                self._kernel.server_db_session.query(MessageDocument.id)
-                .filter(
-                    MessageDocument.first_message == message.first_message,
-                    MessageDocument.read == False,
-                    MessageDocument.character_id == hapic_data.path.character_id,
-                )
-                .count()
-            ):
-                unread = "*"
-            conversation_parts.append(
-                Part(
-                    is_link=True,
-                    form_action=f"/conversation/{hapic_data.path.character_id}/read/{message.first_message}",
-                    label=f"{unread}{message.subject}",
-                    align="left",
-                )
-            )
+        # messages = self._kernel.message_lib.get_conversation_first_messages(
+        #     hapic_data.path.character_id,
+        #     hapic_data.query.with_character_id,  # FIXME BS NOW: test it
+        # )
+        # conversation_parts = []
+        # for message in messages:
+        #     unread = ""
+        #     if (
+        #         self._kernel.server_db_session.query(MessageDocument.id)
+        #         .filter(
+        #             MessageDocument.first_message == message.first_message,
+        #             MessageDocument.read == False,
+        #             MessageDocument.character_id == hapic_data.path.character_id,
+        #         )
+        #         .count()
+        #     ):
+        #         unread = "*"
+        #     conversation_parts.append(
+        #         Part(
+        #             is_link=True,
+        #             form_action=f"/conversation/{hapic_data.path.character_id}/read/{message.first_message}",
+        #             label=f"{unread}{message.subject}",
+        #             align="left",
+        #         )
+        #     )
 
         return Description(
             title="Conversations",
             items=[
-                Part(
-                    text=(
-                        "Les conversations sont les échanges de paroles"
-                        " tenus avec d'autres personnages"
-                    )
-                ),
+                #     Part(
+                #         text=(
+                #             "Les conversations sont les échanges de paroles"
+                #             " tenus avec d'autres personnages"
+                #         )
+                #     ),
+                #     Part(
+                #         is_link=True,
+                #         label="Démarrer une nouvelle conversation",
+                #         form_action=f"/conversation/{hapic_data.path.character_id}/start",
+                #     ),
+                #     Part(text="Ci-dessous les conversations précédentes ou en cours"),
+                # ]
+                # + conversation_parts,*
                 Part(
                     is_link=True,
-                    label="Démarrer une nouvelle conversation",
-                    form_action=f"/conversation/{hapic_data.path.character_id}/start",
-                ),
-                Part(text="Ci-dessous les conversations précédentes ou en cours"),
-            ]
-            + conversation_parts,
+                    label="Afficher les conversations (web)",
+                    form_action=f"{self._kernel.server_config.base_url}/conversation/{hapic_data.path.character_id}/web",
+                    is_web_browser_link=True,
+                )
+            ],
             can_be_back_url=True,
         )
 
