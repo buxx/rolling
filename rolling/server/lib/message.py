@@ -133,6 +133,7 @@ class MessageLib:
         concerned: typing.List[str],
         conversation_id: typing.Optional[int] = None,
         is_first_message: bool = False,
+        filter_by_same_zone_than_author: bool = False,
     ) -> int:
         author_doc = self._kernel.character_lib.get_document(author_id)
         concerned = list(set([author_id] + concerned))
@@ -143,6 +144,14 @@ class MessageLib:
             )
         )
         for character_id in set(concerned):
+            if filter_by_same_zone_than_author:
+                character_doc = self._kernel.character_lib.get_document(character_id)
+                if (
+                    character_doc.world_row_i != author_doc.world_row_i
+                    or character_doc.world_col_i != author_doc.world_col_i
+                ):
+                    continue
+
             message_obj = MessageDocument(
                 subject=subject,
                 text=message,

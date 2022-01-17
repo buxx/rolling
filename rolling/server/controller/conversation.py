@@ -114,6 +114,7 @@ class ConversationController(BaseController):
                 # FIXME BS NOW : concerned : ça devrait être que les présents ?!
                 concerned=conversation.concerned,
                 conversation_id=conversation_id,
+                filter_by_same_zone_than_author=True,
             )
             # Reload messages (because just added one)
             conversation_messages = self._kernel.message_lib.get_conversation_messages(
