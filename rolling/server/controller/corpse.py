@@ -23,7 +23,7 @@ from rolling.server.processor import RollingSerpycoProcessor
 
 class AnimatedCorpseController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     def bind(self, app: Application) -> None:
         app.add_routes(

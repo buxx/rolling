@@ -400,7 +400,7 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
 
 class CharacterController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
         self._character_lib = CharacterLib(self._kernel)
         self._stuff_lib = StuffLib(self._kernel)
         self._effect_manager = EffectManager(self._kernel)

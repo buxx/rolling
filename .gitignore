@@ -121,3 +121,5 @@ game/media/loading__*
 server.ini
 .vscode
 avatars
+static/graphics.png
+static/engine.wasm

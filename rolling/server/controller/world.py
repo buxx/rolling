@@ -10,7 +10,7 @@ from rolling.server.extension import hapic
 
 class WorldController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     async def get_world_source(self, request: Request) -> web.Response:

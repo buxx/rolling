@@ -44,7 +44,7 @@ operand_str_to_enum = {ONE_OF_THEM: OfferOperand.OR, ALL_OF_THEM: OfferOperand.A
 
 class BusinessController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)

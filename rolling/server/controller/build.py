@@ -17,7 +17,6 @@ from rolling.util import quantity_to_str
 
 class BuildController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
         self._kernel = kernel
 
     @hapic.with_api_doc()

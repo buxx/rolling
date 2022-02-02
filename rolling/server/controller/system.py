@@ -1,6 +1,7 @@
 # coding: utf-8
 import dataclasses
 import json
+import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -26,12 +27,21 @@ class AvatarIndexPath:
 
 
 class SystemController(BaseController):
-    def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+    def __init__(
+        self,
+        kernel: Kernel,
+        serve_static_files: typing.Optional[str] = None,
+    ) -> None:
+        self._kernel = kernel
+        self._serve_static_files = serve_static_files
 
     @hapic.with_api_doc()
     async def version(self, request: Request) -> Response:
         return Response(status=200, body=version)
+
+    @aiohttp_jinja2.template("root.html")
+    async def root(self, request: Request) -> dict:
+        return {}
 
     @hapic.with_api_doc()
     @aiohttp_jinja2.template("infos.html")
@@ -76,9 +86,21 @@ class SystemController(BaseController):
                 web.get("/system/version", self.version),
                 web.post("/system/describe/infos", self.describe_infos),
                 web.get("/infos", self.infos),
-                web.static("/media", "game/media"),
-                web.static("/media_bg", "game/media/bg"),
                 web.get("/avatar/{index}", self.avatar),
                 web.get("/system/loadings", self.loadings),
             ]
         )
+
+        if self._serve_static_files:
+            app.add_routes(
+                [
+                    web.get("/", self.root),
+                    web.static(
+                        "/static",
+                        self._serve_static_files,
+                        follow_symlinks=True,
+                    ),
+                    web.static("/media", "game/media"),
+                    web.static("/media_bg", "game/media/bg"),
+                ]
+            )

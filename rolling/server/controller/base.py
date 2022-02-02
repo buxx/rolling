@@ -6,9 +6,6 @@ from rolling.kernel import Kernel
 
 
 class BaseController(metaclass=abc.ABCMeta):
-    def __init__(self, kernel: Kernel) -> None:
-        self._kernel = kernel
-
     @abc.abstractmethod
     def bind(self, app: Application) -> None:
         """

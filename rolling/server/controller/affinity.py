@@ -33,7 +33,7 @@ from rolling.server.extension import hapic
 
 class AffinityController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)

@@ -30,7 +30,7 @@ from rolling.util import ORIGINAL_AVATAR_PATTERN, ZONE_THUMB_AVATAR_PATTERN
 
 class ConversationController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)

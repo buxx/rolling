@@ -1,4 +1,5 @@
 # coding: utf-8
+import pathlib
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp_basicauth_middleware import basic_auth_middleware
@@ -68,7 +69,22 @@ def run(args: argparse.Namespace) -> None:
         args.server_config_file_path,
     )
     server_logger.info("Create web application")
-    app = get_application(kernel, disable_auth=args.disable_auth)
+
+    if args.serve_static_files:
+        for check_file_path in (
+            pathlib.Path(args.serve_static_files) / "engine.wasm",
+            pathlib.Path(args.serve_static_files) / "graphics.png",
+            pathlib.Path(args.serve_static_files) / "mq_js_bundle.js",
+        ):
+            if not check_file_path.exists():
+                print(f"'{check_file_path}' not found or not readable")
+                exit(1)
+
+    app = get_application(
+        kernel,
+        disable_auth=args.disable_auth,
+        serve_static_files=args.serve_static_files,
+    )
     aiohttp_jinja2.setup(
         app,
         loader=jinja2.FileSystemLoader(
@@ -141,6 +157,11 @@ def main() -> None:
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host")
     parser.add_argument("--port", type=str, default=5000, help="Server port")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--serve-static-files",
+        type=str,
+        help="Serve static files with python instead apache/nginx with given folder path",
+    )
     parser.add_argument(
         "--sentry", type=str, help="Sentry address to use", default=None
     )

@@ -15,7 +15,7 @@ from rolling.server.extension import hapic
 
 class AdminController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     def bind(self, app: Application) -> None:
         app.add_routes(

@@ -40,7 +40,7 @@ class ZoneController(BaseController):
         character_lib: typing.Optional[CharacterLib] = None,
         stuff_lib: typing.Optional[StuffLib] = None,
     ) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
         self._tile_lib = ZoneLib(self._kernel)
         self._character_lib = character_lib or CharacterLib(self._kernel)
         self._stuff_lib = stuff_lib or StuffLib(self._kernel)

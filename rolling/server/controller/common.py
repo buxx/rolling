@@ -14,7 +14,7 @@ from rolling.server.extension import hapic
 
 class CommonController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     @hapic.handle_exception(NoResultFound, http_code=404)

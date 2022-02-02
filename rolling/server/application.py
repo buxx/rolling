@@ -1,4 +1,5 @@
 # coding: utf-8
+import typing
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_middlewares import middleware
@@ -31,7 +32,11 @@ from rolling.server.lib.character import CharacterLib
 HEADER_NAME__DISABLE_AUTH_TOKEN = "DISABLE_AUTH_TOKEN"
 
 
-def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
+def get_application(
+    kernel: Kernel,
+    disable_auth: bool = False,
+    serve_static_files: typing.Optional[str] = None,
+) -> Application:
     character_lib = CharacterLib(kernel)
     description_serializer = serpyco.Serializer(Description)
 
@@ -52,6 +57,8 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
         if (
             request.path
             not in (
+                "/",
+                "/favicon.ico",
                 "/account/create",
                 "/system/version",
                 "/system/describe/infos",
@@ -70,6 +77,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
             and not request.path.startswith("/admin")
             and not request.path.startswith("/avatar")
             and not request.path.startswith("/media")
+            and not request.path.startswith("/static")
         ):
             try:
                 login, password = (
@@ -83,6 +91,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                     headers={
                         "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
                     },
+                    body="__AUTH_REQUIRED__",
                 )
             try:
                 account = kernel.account_lib.get_account_for_credentials(
@@ -94,6 +103,7 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                     headers={
                         "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
                     },
+                    body="__AUTH_REQUIRED__",
                 )
 
             request["account_id"] = account.id
@@ -179,8 +189,23 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
                 )
             raise exc
 
+    @middleware
+    async def allow_origin(request: Request, handler):
+        response = await handler(request)
+        response.headers[
+            "Access-Control-Allow-Origin"
+        ] = kernel.server_config.allow_origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
+
     app = web.Application(
-        middlewares=[auth, character_infos, rollback_session, quick_actions]
+        middlewares=[
+            auth,
+            character_infos,
+            rollback_session,
+            quick_actions,
+            allow_origin,
+        ]
     )
 
     # Bind routes
@@ -194,7 +219,10 @@ def get_application(kernel: Kernel, disable_auth: bool = False) -> Application:
     BusinessController(kernel).bind(app)
     BusinessController(kernel).bind(app)
     AdminController(kernel).bind(app)
-    SystemController(kernel).bind(app)
+    SystemController(
+        kernel,
+        serve_static_files=serve_static_files,
+    ).bind(app)
     AnimatedCorpseController(kernel).bind(app)
     AccountController(kernel).bind(app)
 

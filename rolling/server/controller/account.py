@@ -47,7 +47,7 @@ class GenerateNewPasswordQuery:
 
 class AccountController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
-        super().__init__(kernel)
+        self._kernel = kernel
 
     @hapic.with_api_doc()
     @hapic.handle_exception(AccountError, http_code=400)

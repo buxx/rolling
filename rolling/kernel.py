@@ -63,6 +63,7 @@ from rolling.util import ensure_avatar_medias
 class ServerConfig:
     base_url: str
     disable_auth_token: str
+    allow_origin: str
     sender_email: str
     smtp_server: str
     smtp_port: str
