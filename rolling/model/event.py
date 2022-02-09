@@ -4,7 +4,7 @@ import dataclasses
 import abc
 from enum import Enum
 import typing
-from rolling.server.link import CharacterActionLink
+from rolling.server.link import CharacterActionLink, QuickAction
 
 from rolling.model.build import ZoneBuildModel
 from rolling.model.data import ListOfItemModel
@@ -113,7 +113,7 @@ class ThereIsAroundData(WebSocketEventData):
     resource_count: int
     build_count: int
     character_count: int
-    quick_actions: typing.List[CharacterActionLink]
+    quick_actions: typing.List[QuickAction]
 
 
 class TopBarMessageType(Enum):

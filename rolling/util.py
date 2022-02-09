@@ -1,6 +1,9 @@
 # coding: utf-8
 import dataclasses
 import os
+from urllib import parse
+from urllib.parse import urlencode
+from urllib.parse import unquote
 
 from PIL import Image, ImageEnhance
 import enum
@@ -536,3 +539,14 @@ def square_walker(
         for modifier in modifiers:
             yield x + modifier[0], y + modifier[1]
         d += 1
+
+
+def url_without_zone_coordinates(url: str) -> str:
+    parsed_url = parse.urlparse(url)
+    query = dict(parse.parse_qsl(parsed_url.query))
+    query.pop("row_i", None)
+    query.pop("col_i", None)
+    query.pop("zone_row_i", None)
+    query.pop("zone_col_i", None)
+    parsed_url = parsed_url._replace(query=unquote(urlencode(query)))
+    return parsed_url.geturl()

@@ -24,8 +24,8 @@ from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
-from rolling.server.link import CharacterActionLink
-from rolling.util import get_on_and_around_coordinates
+from rolling.server.link import CharacterActionLink, QuickAction
+from rolling.util import get_on_and_around_coordinates, url_without_zone_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -224,6 +224,23 @@ class ThereIsAroundProcessor(EventProcessor):
                     )
                 )
 
+        # TODO : Quick action are rewrite for rollgui2. Simplify code when rollgui1 outdated
+        new_quick_actions = []
+        for quick_action in quick_actions:
+            new_quick_actions.append(
+                QuickAction(
+                    name=quick_action.name,
+                    base_url=url_without_zone_coordinates(quick_action.link),
+                    classes=quick_action.classes1,
+                    exploitable_tiles=quick_action.exploitable_tiles,
+                    all_tiles_at_once=quick_action.all_tiles_at_once,
+                    # rollgui1 compatibility bellow
+                    link=quick_action.link,
+                    classes1=quick_action.classes1,
+                    classes2=quick_action.classes2,
+                )
+            )
+
         around_event = WebSocketEvent(
             type=ZoneEventType.THERE_IS_AROUND,
             world_row_i=character.world_row_i,
@@ -233,7 +250,7 @@ class ThereIsAroundProcessor(EventProcessor):
                 resource_count=resource_count,
                 build_count=build_count,
                 character_count=character_count,
-                quick_actions=quick_actions,
+                quick_actions=new_quick_actions,
             ),
         )
         event_str = self._kernel.event_serializer_factory.get_serializer(

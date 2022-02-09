@@ -1721,6 +1721,12 @@ register_plugin = function (importObject) {
 
         return js_object(field);
     }
+
+    importObject.env.js_field_num = function (js_object, buf, length) {
+        var field_name = UTF8ToString(buf, length);
+
+        return js_objects[js_object][field_name];
+    }
 }
 miniquad_add_plugin({ register_plugin, version: "0.1.5", name: "sapp_jsutils" });
 

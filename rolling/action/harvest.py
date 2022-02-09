@@ -1,4 +1,5 @@
 # coding: utf-8
+import collections
 import dataclasses
 
 import serpyco
@@ -11,12 +12,15 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
 from rolling.exception import ImpossibleAction
 from rolling.rolling_types import ActionType
-from rolling.server.link import CharacterActionLink
+from rolling.server.link import CharacterActionLink, ExploitableTile
 from rolling.util import get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
     from rolling.model.character import CharacterModel
+
+
+DEFAULT_SPENT_TIME = 3.0
 
 
 @dataclasses.dataclass
@@ -77,7 +81,7 @@ class HarvestAction(CharacterAction):
         )
 
     def get_character_actions(
-        self, character: "CharacterModel", distinct_resource_ids: bool = False
+        self, character: "CharacterModel"
     ) -> typing.List[CharacterActionLink]:
         inspect_zone_positions = get_on_and_around_coordinates(
             character.zone_row_i, character.zone_col_i
@@ -88,6 +92,10 @@ class HarvestAction(CharacterAction):
             character.zone_row_i, character.zone_col_i
         )
         seen_resource_ids: typing.List[str] = []
+        resources_and_coordinates: typing.DefaultDict[
+            str, typing.List[typing.Tuple[int, int]]
+        ] = collections.defaultdict(list)
+
         for inspect_row_i, inspect_col_i in inspect_zone_positions:
             for build in self._kernel.build_lib.get_zone_build(
                 world_row_i=character.world_row_i,
@@ -96,31 +104,40 @@ class HarvestAction(CharacterAction):
                 zone_col_i=inspect_col_i,
                 with_seeded_with=True,
             ):
-                if distinct_resource_ids and build.seeded_with in seen_resource_ids:
-                    continue
-                seen_resource_ids.append(build.seeded_with)
-                resource_description = self._kernel.game.config.resources[
-                    build.seeded_with
-                ]
-                query_params = self.input_model(resource_id=build.seeded_with)
-                character_actions.append(
-                    CharacterActionLink(
-                        name=f"Récolter de {resource_description.name}",
-                        link=get_character_action_url(
-                            character_id=character.id,
-                            action_type=ActionType.HARVEST,
-                            action_description_id=self._description.id,
-                            query_params=self.input_model_serializer.dump(query_params),
-                        ),
-                        additional_link_parameters_for_quick_action={
-                            "ap": min(3.0, character.action_points)
-                        },
-                        cost=None,
-                        group_name="Récolter",
-                        classes1=["HARVEST"],
-                        classes2=[build.seeded_with],
-                    )
+                resources_and_coordinates[build.seeded_with].append(
+                    (build.zone_row_i, build.zone_col_i)
                 )
+        for resource_id, coordinates in resources_and_coordinates.items():
+            resource_description = self._kernel.game.config.resources[resource_id]
+            query_params = self.input_model(resource_id=resource_id)
+            character_actions.append(
+                CharacterActionLink(
+                    name=f"Récolter de {resource_description.name}",
+                    link=get_character_action_url(
+                        character_id=character.id,
+                        action_type=ActionType.HARVEST,
+                        action_description_id=self._description.id,
+                        query_params=self.input_model_serializer.dump(query_params),
+                    ),
+                    additional_link_parameters_for_quick_action={
+                        "ap": min(DEFAULT_SPENT_TIME, character.action_points)
+                    },
+                    cost=None,
+                    group_name="Récolter",
+                    classes1=["HARVEST"],
+                    classes2=[build.seeded_with],
+                    # rollgui2 compatibility
+                    all_tiles_at_once=True,
+                    exploitable_tiles=[
+                        ExploitableTile(
+                            zone_row_i=zone_row_i,
+                            zone_col_i=zone_col_i,
+                            classes=["resource_id"],
+                        )
+                        for (zone_row_i, zone_col_i) in coordinates
+                    ],
+                )
+            )
 
         return character_actions
 
@@ -129,9 +146,7 @@ class HarvestAction(CharacterAction):
     ) -> typing.List[CharacterActionLink]:
         return [
             link.clone_for_quick_action()
-            for link in self.get_character_actions(
-                character, distinct_resource_ids=True
-            )
+            for link in self.get_character_actions(character)
         ]
 
     async def perform(
