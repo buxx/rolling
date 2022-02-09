@@ -132,7 +132,7 @@ class HarvestAction(CharacterAction):
                         ExploitableTile(
                             zone_row_i=zone_row_i,
                             zone_col_i=zone_col_i,
-                            classes=["resource_id"],
+                            classes=[resource_id],
                         )
                         for (zone_row_i, zone_col_i) in coordinates
                     ],
