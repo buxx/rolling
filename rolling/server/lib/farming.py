@@ -59,6 +59,7 @@ class FarmingLib:
                 cost=resource_description.harvest_cost_per_tile,
             )
         ).action_points
+        produced_resource_id = build.seeded_with
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=build.seeded_with,
@@ -81,7 +82,10 @@ class FarmingLib:
                 world_row_i=character_doc.world_row_i,
                 world_col_i=character_doc.world_col_i,
                 data=NewBuildData(
-                    build=ZoneBuildModelContainer(doc=build, desc=build_description)
+                    build=ZoneBuildModelContainer(doc=build, desc=build_description),
+                    produced_resource_id=produced_resource_id,
+                    produced_stuff_id=None,
+                    producer_character_id=character_doc.id,
                 ),
             ),
             world_row_i=character_doc.world_row_i,

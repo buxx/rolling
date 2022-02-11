@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
 
 
-DEFAULT_SPENT_TIME = 3.0
+DEFAULT_SPENT_TIME = 10.0
 
 
 @dataclasses.dataclass
@@ -185,10 +185,13 @@ class HarvestAction(CharacterAction):
         expected_ap = input_.ap
         spent_ap = 0.0
         character_doc = self._kernel.character_lib.get_document(character.id)
+        not_enough_ap = False
         for inspect_row_i, inspect_col_i in inspect_zone_positions:
             if character.action_points < resource_description.harvest_cost_per_tile:
+                not_enough_ap = True
                 break
             if expected_ap < resource_description.harvest_cost_per_tile:
+                not_enough_ap = True
                 break
 
             # In reality, should be only one land per position
@@ -211,6 +214,10 @@ class HarvestAction(CharacterAction):
                         resource_description.harvest_production_per_tile
                     )
 
+        quick_action_response = "Récolte effectuée"
+        if not collected_quantity:
+            quick_action_response = "Rien récolté"
+
         return Description(
             title=f"Récolter de {resource_description.name}",
             items=[
@@ -219,5 +226,6 @@ class HarvestAction(CharacterAction):
                     "récoltés ({spent_ap} Point d'Actions dépensés)"
                 )
             ],
-            quick_action_response="Récolte effectuée",
+            quick_action_response=quick_action_response,
+            not_enough_ap=not_enough_ap,
         )

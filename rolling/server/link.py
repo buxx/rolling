@@ -16,6 +16,7 @@ class ExploitableTile:
 
 @dataclasses.dataclass
 class QuickAction:
+    uuid: str
     name: str
     base_url: str
     classes: typing.List[str]

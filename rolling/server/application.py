@@ -147,6 +147,7 @@ def get_application(
         account_character_id = request.get("account_character_id")
         response = await handler(request)
 
+        action_uuid = request.query.get("action_uuid", None)
         is_quick_action = request.query.get("quick_action", "0") == "1"
         disable_resend_quick_actions = (
             request.query.get("disable_resend_quick_actions", "0") == "1"
@@ -172,6 +173,24 @@ def get_application(
                     sender_socket=character_socket,
                     explode_take=explode_take,
                 )
+
+        if action_uuid is not None:
+            body_as_json = json.loads(response.body._value)
+            try:
+                description = description_serializer.load(body_as_json)
+            except serpyco.ValidationError:
+                return response
+
+            # Description is VERY permissive, consider is not a description if no title
+            if not description.title:
+                return response
+
+            description.action_uuid = action_uuid
+            return Response(
+                body=description_serializer.dump_json(description),
+                status=response.status,
+                content_type="application/json",
+            )
 
         return response
 

@@ -110,3 +110,6 @@ class Description:
     footer_with_affinity_id: typing.Optional[int] = None
     character_ap: typing.Optional[str] = None
     quick_action_response: typing.Optional[str] = None
+    action_uuid: typing.Optional[str] = None
+    not_enough_ap: bool = False
+    exploitable_success: typing.Optional[typing.Tuple[int, int]] = None

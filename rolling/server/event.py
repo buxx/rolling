@@ -1,5 +1,6 @@
 # coding: utf-8
 import abc
+import uuid
 from aiohttp import web
 from sqlalchemy.orm import exc
 from sqlalchemy.orm.exc import NoResultFound
@@ -229,6 +230,7 @@ class ThereIsAroundProcessor(EventProcessor):
         for quick_action in quick_actions:
             new_quick_actions.append(
                 QuickAction(
+                    uuid=uuid.uuid4().hex,
                     name=quick_action.name,
                     base_url=url_without_zone_coordinates(quick_action.link),
                     classes=quick_action.classes1,

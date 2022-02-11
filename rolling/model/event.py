@@ -196,6 +196,9 @@ class NewResumeTextData(WebSocketEventData):
 @dataclasses.dataclass
 class NewBuildData(WebSocketEventData):
     build: ZoneBuildModel
+    produced_resource_id: typing.Optional[str] = None
+    produced_stuff_id: typing.Optional[str] = None
+    producer_character_id: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
