@@ -678,6 +678,10 @@ destroy_robustness_per_ap = 1
     actions = ["COLLECT_RESOURCE"]
     cost = 0.0
 
+  [ACTIONS.TAKE_AROUND]
+    actions = ["TAKE_AROUND"]
+    cost = 0.0
+
   [ACTIONS.DROP_RESOURCE]
     actions = ["DROP_RESOURCE", "MIX_RESOURCES"]
     cost = 0.0

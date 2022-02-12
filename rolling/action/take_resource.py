@@ -51,7 +51,7 @@ class TakeResourceAction(WithResourceAction):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
-        pass  # do not display action in actions page
+        return []  # do not display action in actions page
 
     async def perform(
         self, character: "CharacterModel", resource_id: str, input_: TakeResourceModel

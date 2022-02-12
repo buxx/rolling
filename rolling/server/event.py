@@ -26,7 +26,11 @@ from rolling.rolling_types import ActionType
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.link import CharacterActionLink, QuickAction
-from rolling.util import get_on_and_around_coordinates, url_without_zone_coordinates
+from rolling.util import (
+    ROLLGUI1_COMPAT,
+    get_on_and_around_coordinates,
+    url_without_zone_coordinates,
+)
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -129,101 +133,108 @@ class ThereIsAroundProcessor(EventProcessor):
         explode_take: bool = False,
     ) -> None:
         character = self._kernel.character_lib.get_document(character_id)
-        around_character = get_on_and_around_coordinates(
-            x=character.zone_row_i, y=character.zone_col_i
-        )
 
-        stuff_count = 0
-        for row_i, col_i in around_character:
-            # FIXME BS: Optimisation here (give all coordinates and make only one query)
-            # And only id/name
-            stuff_count += self._kernel.stuff_lib.count_zone_stuffs(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
+        if ROLLGUI1_COMPAT:
+            around_character = get_on_and_around_coordinates(
+                x=character.zone_row_i, y=character.zone_col_i
             )
 
-        resource_count = 0
-        for row_i, col_i in around_character:
-            # FIXME BS: Optimisation here (give all coordinates and make only one query)
-            # And only id/name
-            resource_count += self._kernel.resource_lib.count_ground_resource(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
-            )
+            stuff_count = 0
+            for row_i, col_i in around_character:
+                # FIXME BS: Optimisation here (give all coordinates and make only one query)
+                # And only id/name
+                stuff_count += self._kernel.stuff_lib.count_zone_stuffs(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                )
 
-        build_count = 0
-        for row_i, col_i in around_character:
-            # FIXME BS: Optimisation here (give all coordinates and make only one query)
-            # And only id/name
-            build_count += self._kernel.build_lib.count_zone_build(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
-                is_floor=False,
-            )
+            resource_count = 0
+            for row_i, col_i in around_character:
+                # FIXME BS: Optimisation here (give all coordinates and make only one query)
+                # And only id/name
+                resource_count += self._kernel.resource_lib.count_ground_resource(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                )
 
-        character_count = 0
-        for row_i, col_i in around_character:
-            # FIXME BS: Optimisation here (give all coordinates and make only one query)
-            # And only id/name
-            character_count += self._kernel.character_lib.count_zone_characters(
-                row_i=character.world_row_i,
-                col_i=character.world_col_i,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
-                exclude_ids=[character.id],
-            )
+            build_count = 0
+            for row_i, col_i in around_character:
+                # FIXME BS: Optimisation here (give all coordinates and make only one query)
+                # And only id/name
+                build_count += self._kernel.build_lib.count_zone_build(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                    is_floor=False,
+                )
+
+            character_count = 0
+            for row_i, col_i in around_character:
+                # FIXME BS: Optimisation here (give all coordinates and make only one query)
+                # And only id/name
+                character_count += self._kernel.character_lib.count_zone_characters(
+                    row_i=character.world_row_i,
+                    col_i=character.world_col_i,
+                    zone_row_i=row_i,
+                    zone_col_i=col_i,
+                    exclude_ids=[character.id],
+                )
 
         quick_actions = self._kernel.character_lib.get_on_place_actions(
             character.id, quick_actions_only=True
         )
 
-        if explode_take:
-            quick_actions.extend(
-                (
-                    list(
-                        self._kernel.character_lib.get_on_place_stuff_actions(
-                            character, quick_actions=True
+        if ROLLGUI1_COMPAT:
+            if explode_take:
+                quick_actions.extend(
+                    (
+                        list(
+                            self._kernel.character_lib.get_on_place_stuff_actions(
+                                character, quick_actions=True
+                            )
+                        )
+                    )
+                    + (
+                        list(
+                            self._kernel.character_lib.get_on_place_resource_actions(
+                                character, quick_actions=True
+                            )
                         )
                     )
                 )
-                + (
-                    list(
+            else:
+                # If there is something to pick, add quick action
+                there_is_around = False
+                try:
+                    next(
+                        self._kernel.character_lib.get_on_place_stuff_actions(character)
+                    )
+                    there_is_around = True
+                except StopIteration:
+                    pass
+                try:
+                    next(
                         self._kernel.character_lib.get_on_place_resource_actions(
-                            character, quick_actions=True
+                            character
                         )
                     )
-                )
-            )
-        else:
-            # If there is something to pick, add quick action
-            there_is_around = False
-            try:
-                next(self._kernel.character_lib.get_on_place_stuff_actions(character))
-                there_is_around = True
-            except StopIteration:
-                pass
-            try:
-                next(
-                    self._kernel.character_lib.get_on_place_resource_actions(character)
-                )
-                there_is_around = True
-            except StopIteration:
-                pass
+                    there_is_around = True
+                except StopIteration:
+                    pass
 
-            if there_is_around:
-                quick_actions.append(
-                    CharacterActionLink(
-                        name="Regarder ce qu'il y a à ramasser autour",
-                        link=f"/character/{character_id}/send-around?explode_take=1&quick_action=1&disable_resend_quick_actions=1",
-                        classes1=["TAKE"],
+                if there_is_around:
+                    quick_actions.append(
+                        CharacterActionLink(
+                            name="Regarder ce qu'il y a à ramasser autour",
+                            link=f"/character/{character_id}/send-around?explode_take=1&quick_action=1&disable_resend_quick_actions=1",
+                            classes1=["TAKE"],
+                        )
                     )
-                )
 
         # TODO : Quick action are rewrite for rollgui2. Simplify code when rollgui1 outdated
         new_quick_actions = []

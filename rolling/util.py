@@ -28,6 +28,9 @@ if typing.TYPE_CHECKING:
     from rolling.model.stuff import StuffModel
 
 
+# This constat is used to indicate which code part can be removed when rollgui1 compat is droped
+ROLLGUI1_COMPAT = True
+
 ORIGINAL_AVATAR_PATTERN = "character_avatar__original__{avatar_uuid}.png"
 ILLUSTRATION_AVATAR_PATTERN = "character_avatar__illustration__{avatar_uuid}.png"
 ZONE_THUMB_AVATAR_PATTERN = "character_avatar__zone_thumb__{avatar_uuid}.png"
@@ -549,4 +552,7 @@ def url_without_zone_coordinates(url: str) -> str:
     query.pop("zone_row_i", None)
     query.pop("zone_col_i", None)
     parsed_url = parsed_url._replace(query=unquote(urlencode(query)))
-    return parsed_url.geturl()
+    url = parsed_url.geturl()
+    if "?" not in url:
+        url += "?"
+    return url
