@@ -89,11 +89,12 @@ class CollectResourceAction(CharacterAction):
                 zone_col_i=zone_col_i,
             ):
                 productions[production.resource.id].append((zone_row_i, zone_col_i))
+        del production
 
         for resource_id, coordinates in productions.items():
             resource_description = self._kernel.game.config.resources[resource_id]
             query_params = self.input_model(
-                resource_id=production.resource.id,
+                resource_id=resource_id,
                 zone_row_i=zone_row_i,
                 zone_col_i=zone_col_i,
             )
@@ -108,17 +109,17 @@ class CollectResourceAction(CharacterAction):
                     ),
                     additional_link_parameters_for_quick_action={"quantity_auto": 1},
                     cost=None,
-                    merge_by=(ActionType.COLLECT_RESOURCE, production.resource.id),
+                    merge_by=(ActionType.COLLECT_RESOURCE, resource_id),
                     group_name="Exploiter des ressources",
                     classes1=["COLLECT"],
-                    classes2=[production.resource.id],
+                    classes2=[resource_id],
                     # rollgui2 compatibility
                     all_tiles_at_once=False,
                     exploitable_tiles=[
                         ExploitableTile(
                             zone_row_i=zone_row_i,
                             zone_col_i=zone_col_i,
-                            classes=[production.resource.id],
+                            classes=[resource_id],
                         )
                         for (zone_row_i, zone_col_i) in coordinates
                     ],
