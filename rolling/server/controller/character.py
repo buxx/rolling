@@ -1782,6 +1782,7 @@ class CharacterController(BaseController):
                 type_=DescriptionType.ERROR,
                 items=[Part(text=line) for line in str(exc).split("\n")],
                 illustration_name=getattr(exc, "illustration_name", None),
+                not_enough_ap=True,
             )
 
         # FIXME BS 2019-10-03: check_request_is_possible must be done everywhere
