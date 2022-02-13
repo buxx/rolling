@@ -52,19 +52,13 @@ class PowerOnBuildAction(WithBuildAction):
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
         if not build_description.power_on_require_resources:
-            raise ImpossibleAction("Ce batiment ne se démarre pas")
-        if build_doc.is_on:
-            raise ImpossibleAction("Ce batiment est en fonctionnement")
-        if build_doc.under_construction:
-            raise ImpossibleAction("Ce batiment est en construction")
+            raise ImpossibleAction("Ne peut pas être démarré")
 
     async def check_request_is_possible(
         self, character: "CharacterModel", build_id: int, input_: EmptyModel
     ) -> None:
         self.check_is_possible(character, build_id)
-        build_doc = self._kernel.build_lib.get_build_doc(build_id)
-        if build_doc.is_on:
-            raise ImpossibleAction("Ce batiment est déjà démarré")
+        pass
 
     def get_character_actions(
         self, character: "CharacterModel", build_id: int
@@ -83,6 +77,7 @@ class PowerOnBuildAction(WithBuildAction):
                 ),
                 classes1=["ON"],
                 classes2=build_description.classes,
+                direct_action=True,
             )
         ]
 
@@ -102,6 +97,14 @@ class PowerOnBuildAction(WithBuildAction):
         missing_parts: typing.List[Part] = []
         parts: typing.List[Part] = []
 
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        if build_doc.is_on:
+            raise ImpossibleAction("Batiment en fonctionnement")
+        if build_doc.under_construction:
+            raise ImpossibleAction("Batiment en construction")
+        if build_doc.is_on:
+            raise ImpossibleAction("Batiment déjà démarré")
+
         for required in build_description.power_on_require_resources:
             resource_description = self._kernel.game.config.resources[
                 required.resource_id
@@ -111,28 +114,22 @@ class PowerOnBuildAction(WithBuildAction):
                 build_id=build_id,
                 quantity=required.quantity,
             ):
-                unit_str = self._kernel.translation.get(resource_description.unit)
-                missing_parts.append(
-                    Part(
-                        text=(
-                            f"Pas assez de {resource_description.name} "
-                            f"({required.quantity} {unit_str} requis)"
-                        )
-                    )
+                unit_str = self._kernel.translation.get(
+                    resource_description.unit, short=True
                 )
+                raise ImpossibleAction(f"{resource_description.name}{unit_str} requis")
 
-        if not missing_parts:
-            for required in build_description.power_on_require_resources:
-                self._kernel.resource_lib.reduce_stored_in(
-                    resource_id=required.resource_id,
-                    quantity=required.quantity,
-                    build_id=build_id,
-                    commit=False,
-                )
-            build_doc.is_on = True
-            self._kernel.server_db_session.commit()
-            parts.append(Part(text=f"{build_description.name} démarré avec succès"))
-            await send_new_build(self._kernel, character, build_doc)
+        for required in build_description.power_on_require_resources:
+            self._kernel.resource_lib.reduce_stored_in(
+                resource_id=required.resource_id,
+                quantity=required.quantity,
+                build_id=build_id,
+                commit=False,
+            )
+        build_doc.is_on = True
+        self._kernel.server_db_session.commit()
+        parts.append(Part(text=f"{build_description.name} démarré avec succès"))
+        await send_new_build(self._kernel, character, build_doc)
 
         quick_text = "Démarré" if not missing_parts else "Pas assez de stock"
         return Description(
@@ -186,6 +183,7 @@ class PowerOffBuildAction(WithBuildAction):
                 ),
                 classes1=["OFF"],
                 classes2=build_description.classes,
+                direct_action=True,
             )
         ]
 
