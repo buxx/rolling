@@ -126,6 +126,7 @@ class DrinkResourceAction(CharacterAction):
                         cost=self.get_cost(character),
                         classes1=["DRINK"],
                         classes2=[production.resource.id],
+                        direct_action=True,
                     )
                 )
 

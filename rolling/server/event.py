@@ -239,15 +239,20 @@ class ThereIsAroundProcessor(EventProcessor):
         # TODO : Quick action are rewrite for rollgui2. Simplify code when rollgui1 outdated
         new_quick_actions = []
         for quick_action in quick_actions:
+            if quick_action.direct_action:
+                url = quick_action.link
+            else:
+                url = url_without_zone_coordinates(quick_action.link)
             new_quick_actions.append(
                 QuickAction(
                     uuid=uuid.uuid4().hex,
                     name=quick_action.name,
-                    base_url=url_without_zone_coordinates(quick_action.link),
+                    base_url=url,
                     classes1=quick_action.classes1,
                     classes2=quick_action.classes2,
                     exploitable_tiles=quick_action.exploitable_tiles,
                     all_tiles_at_once=quick_action.all_tiles_at_once,
+                    direct_action=quick_action.direct_action,
                     # rollgui1 compatibility bellow
                     link=quick_action.link,
                 )

@@ -22,6 +22,7 @@ class QuickAction:
     # classes1: typing.List[str]
     exploitable_tiles: typing.List[ExploitableTile]
     all_tiles_at_once: bool
+    direct_action: bool
     # classes2: typing.List[str] = None
 
     # TODO : Bellow are the attributes of the rollgui1 compatibility. Remove them when rollgui1 is outdated
@@ -60,6 +61,8 @@ class CharacterActionLink:
     exploitable_tiles: typing.List[ExploitableTile] = dataclasses.field(
         default_factory=list
     )
+    # This attribute is used for rollgui2 compatibility
+    direct_action: bool = False
     # This attribute is used for rollgui2 compatibility
     all_tiles_at_once: bool = False
 
