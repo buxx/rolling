@@ -244,13 +244,12 @@ class ThereIsAroundProcessor(EventProcessor):
                     uuid=uuid.uuid4().hex,
                     name=quick_action.name,
                     base_url=url_without_zone_coordinates(quick_action.link),
-                    classes=quick_action.classes1,
+                    classes1=quick_action.classes1,
+                    classes2=quick_action.classes2,
                     exploitable_tiles=quick_action.exploitable_tiles,
                     all_tiles_at_once=quick_action.all_tiles_at_once,
                     # rollgui1 compatibility bellow
                     link=quick_action.link,
-                    classes1=quick_action.classes1,
-                    classes2=quick_action.classes2,
                 )
             )
 

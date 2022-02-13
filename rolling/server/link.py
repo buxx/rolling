@@ -19,9 +19,10 @@ class QuickAction:
     uuid: str
     name: str
     base_url: str
-    classes: typing.List[str]
+    # classes1: typing.List[str]
     exploitable_tiles: typing.List[ExploitableTile]
     all_tiles_at_once: bool
+    # classes2: typing.List[str] = None
 
     # TODO : Bellow are the attributes of the rollgui1 compatibility. Remove them when rollgui1 is outdated
     link: str
