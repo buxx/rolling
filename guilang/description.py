@@ -113,3 +113,4 @@ class Description:
     action_uuid: typing.Optional[str] = None
     not_enough_ap: bool = False
     exploitable_success: typing.Optional[typing.Tuple[int, int]] = None
+    is_error: bool = False

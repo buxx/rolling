@@ -143,7 +143,7 @@ class TakeResourceAction(WithResourceAction):
         except NoCarriedResource:
             return Description(
                 title="Pas de ressources",
-                quick_action_response="Pas de ressources",
+                quick_action_response="Rien ici",
             )
 
         self._kernel.resource_lib.add_resource_to(
@@ -167,7 +167,7 @@ class TakeResourceAction(WithResourceAction):
                 )
 
         return Description(
-            title=f"{resource_description.name} récupéré",
-            quick_action_response=f"{resource_description.name} récupéré",
+            title=f"{reduced_quantity}{self._kernel.translation.get(resource_description.unit)} {resource_description.name}",
+            quick_action_response=f"{resource_description.name}",
             redirect=input_.then_redirect_url,
         )

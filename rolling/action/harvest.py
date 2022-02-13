@@ -214,9 +214,9 @@ class HarvestAction(CharacterAction):
                         resource_description.harvest_production_per_tile
                     )
 
-        quick_action_response = "Récolte effectuée"
+        quick_action_response = f"{collected_quantity}{self._kernel.translation.get(resource_description.unit, short=True)} ({resource_description.name})"
         if not collected_quantity:
-            quick_action_response = "Rien récolté"
+            quick_action_response = "Rien à récolter"
 
         return Description(
             title=f"Récolter de {resource_description.name}",

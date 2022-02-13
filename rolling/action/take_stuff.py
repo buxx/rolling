@@ -97,5 +97,5 @@ class TakeStuffAction(WithStuffAction):
         return Description(
             title="Objet(s) récupéré(s)",
             redirect=input_.then_redirect_url,
-            quick_action_response="Objet(s) récupéré(s)",
+            quick_action_response=f"{len(taken_stuffs)} récupéré(s)",
         )
