@@ -36,6 +36,26 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     ground_row_i: typing.Optional[int] = None
     ground_col_i: typing.Optional[int] = None
 
+    @classmethod
+    def default(
+        cls, resource_id: str, resource_description: ResourceDescriptionModel
+    ) -> "CarriedResourceDescriptionModel":
+        return CarriedResourceDescriptionModel(
+            id=resource_id,
+            name=resource_description.name,
+            weight=0.0,
+            material_type=resource_description.material_type,
+            unit=resource_description.unit,
+            clutter=0.0,
+            quantity=0.0,
+            descriptions=resource_description.descriptions,
+            illustration=resource_description.illustration,
+            grow_speed=resource_description.grow_speed,
+            drop_to_nowhere=resource_description.drop_to_nowhere,
+            harvest_cost_per_tile=resource_description.harvest_cost_per_tile,
+            harvest_production_per_tile=resource_description.harvest_production_per_tile,
+        )
+
     def get_full_description(self, kernel: "Kernel") -> str:
         weight = display_g_or_kg(self.weight)
         quantity_str = quantity_to_str(self.quantity, self.unit, kernel=kernel)

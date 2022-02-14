@@ -264,20 +264,8 @@ class ResourceLib:
                 raise
 
             resource_description = self._kernel.game.config.resources[resource_id]
-            return CarriedResourceDescriptionModel(
-                id=resource_id,
-                name=resource_description.name,
-                weight=0.0,
-                material_type=resource_description.material_type,
-                unit=resource_description.unit,
-                clutter=0.0,
-                quantity=0.0,
-                descriptions=resource_description.descriptions,
-                illustration=resource_description.illustration,
-                grow_speed=resource_description.grow_speed,
-                drop_to_nowhere=resource_description.drop_to_nowhere,
-                harvest_cost_per_tile=resource_description.harvest_cost_per_tile,
-                harvest_production_per_tile=resource_description.harvest_production_per_tile,
+            return CarriedResourceDescriptionModel.default(
+                resource_id, resource_description
             )
 
     def _carried_resource_model_from_doc(
@@ -588,14 +576,6 @@ class ResourceLib:
         carried = self.get_base_query(in_built_id=build_id).all()
         return [self._carried_resource_model_from_doc([doc]) for doc in carried]
 
-    def get_one_stored_in_build(
-        self, build_id: int, resource_id: str
-    ) -> CarriedResourceDescriptionModel:
-        carried = self.get_base_query(
-            in_built_id=build_id, resource_id=resource_id
-        ).one()
-        return self._carried_resource_model_from_doc([carried])
-
     def get_shared_with_affinity(
         self, character_id: str, affinity_id: int
     ) -> typing.List[CarriedResourceDescriptionModel]:
@@ -611,13 +591,22 @@ class ResourceLib:
         build_id: int,
         resource_id: str,
         quantity: typing.Optional[float] = None,
+        empty_object_if_not: bool = False,
     ) -> CarriedResourceDescriptionModel:
         query = self.get_base_query(in_built_id=build_id, resource_id=resource_id)
 
         if quantity is not None:
             query = query.filter(ResourceDocument.quantity >= quantity)
 
-        return self._carried_resource_model_from_doc([query.one()])
+        try:
+            return self._carried_resource_model_from_doc([query.one()])
+        except NoResultFound:
+            if empty_object_if_not:
+                resource_description = self._kernel.game.config.resources[resource_id]
+                return CarriedResourceDescriptionModel.default(
+                    resource_id, resource_description
+                )
+            raise
 
     async def send_zone_ground_resource_removed(
         self,

@@ -44,6 +44,9 @@ if typing.TYPE_CHECKING:
     from rolling.model.character import CharacterModel
 
 
+QUICK_ACTION_COST_TO_SPENT = 5.0
+
+
 def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:
     if not build_doc.under_construction:
         return 100
@@ -426,6 +429,30 @@ class ConstructBuildAction(WithBuildAction):
 
         return []
 
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
+        if build_doc.under_construction:
+            return [
+                CharacterActionLink(
+                    name=f"Continuer la construction",
+                    link=get_with_build_action_url(
+                        character_id=character.id,
+                        build_id=build_id,
+                        action_type=ActionType.CONSTRUCT_BUILD,
+                        action_description_id=self._description.id,
+                        query_params={"cost_to_spent": QUICK_ACTION_COST_TO_SPENT},
+                    ),
+                    cost=None,
+                    direct_action=True,
+                    classes1=["DO_BUILD_WORK"],
+                    classes2=build_description.classes + [build_description.id],
+                )
+            ]
+        return []
+
     def _get_biggest_left_percent(
         self, build_doc: BuildDocument, raise_if_missing: bool = False
     ) -> float:
@@ -511,7 +538,7 @@ class ConstructBuildAction(WithBuildAction):
 
         consume_resources_percent = (real_progress_cost * 100) / build_description.cost
 
-        self._kernel.build_lib.progress_build(
+        await self._kernel.build_lib.progress_build(
             build_doc.id,
             real_progress_cost=real_progress_cost,
             consume_resources_percent=consume_resources_percent,
@@ -528,6 +555,7 @@ class ConstructBuildAction(WithBuildAction):
             back_url=DESCRIBE_BUILD.format(
                 build_id=build_doc.id, character_id=character.id
             ),
+            quick_action_response="Travail effectué",
         )
 
 

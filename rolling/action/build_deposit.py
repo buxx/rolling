@@ -9,6 +9,7 @@ from guilang.description import Description
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
+from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
@@ -132,7 +133,9 @@ class DepositStuffOrResources(TransferStuffOrResources):
         self, resource_id: str
     ) -> CarriedResourceDescriptionModel:
         return self._kernel.resource_lib.get_one_carried_by(
-            self._from_character.id, resource_id
+            self._from_character.id,
+            resource_id,
+            empty_object_if_not=True,
         )
 
     def check_can_transfer_stuff(self, stuff_id: int, quantity: int = 1) -> None:
@@ -181,6 +184,13 @@ class DepositStuffOrResources(TransferStuffOrResources):
             build_id=self._to_build.id, resource_id=resource_id, quantity=quantity
         )
 
+    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+        return self._to_build.zone_row_i, self._to_build.zone_col_i
+
+    def _get_classes(self) -> typing.List[str]:
+        build_description = self._kernel.game.config.builds[self._to_build.build_id]
+        return build_description.classes + [build_description.id]
+
 
 @dataclasses.dataclass
 class DepositToModel:
@@ -221,7 +231,9 @@ class DepositToBuildAction(WithBuildAction):
 
         if input_.deposit_resource_id is not None and input_.deposit_resource_quantity:
             carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                character_id=character.id, resource_id=input_.deposit_resource_id
+                character_id=character.id,
+                resource_id=input_.deposit_resource_id,
+                empty_object_if_not=True,
             )
             user_input_context = InputQuantityContext.from_carried_resource(
                 user_input=input_.deposit_resource_quantity,
@@ -253,6 +265,187 @@ class DepositToBuildAction(WithBuildAction):
         return [
             CharacterActionLink(name="Déposer", link=self._get_url(character, build_id))
         ]
+
+    def get_quick_actions(
+        self, character: "CharacterModel", build_id: int
+    ) -> typing.List[CharacterActionLink]:
+        build_doc = self._kernel.build_lib.get_build_doc(build_id)
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
+        quick_actions = []
+
+        # Determine which resources can be deposited
+        if build_doc.under_construction:
+
+            # Deposit for construction
+            turn_require_resource: BuildBuildRequireResourceDescription
+            for build_require_resource in build_description.build_require_resources:
+                resource_description = self._kernel.game.config.resources[
+                    build_require_resource.resource_id
+                ]
+                carried_quantity: float = (
+                    self._kernel.resource_lib.get_one_carried_by(
+                        character_id=character.id,
+                        resource_id=build_require_resource.resource_id,
+                        empty_object_if_not=True,
+                    )
+                ).quantity
+                required_quantity = build_require_resource.quantity
+                quantity_in_build = self._kernel.resource_lib.get_one_stored_in_build(
+                    build_id=build_doc.id,
+                    resource_id=build_require_resource.resource_id,
+                    empty_object_if_not=True,
+                ).quantity
+
+                # Generate quick action only if some of this resource is missing
+                if quantity_in_build < required_quantity:
+                    if not carried_quantity:
+                        quick_actions.append(
+                            CharacterActionLink(
+                                name=f"Déposer {resource_description.name}",
+                                link=self._get_url(
+                                    character,
+                                    build_id,
+                                    input_=DepositToModel(
+                                        deposit_resource_id=build_require_resource.resource_id,
+                                        deposit_resource_quantity=None,
+                                    ),
+                                ),
+                                direct_action=True,
+                                classes1=[build_description.id],
+                                classes2=[build_require_resource.resource_id],
+                            )
+                        )
+                    else:
+                        deposit_quantity = min(required_quantity, carried_quantity)
+                        quick_actions.append(
+                            CharacterActionLink(
+                                name=f"Déposer {resource_description.name}",
+                                link=self._get_url(
+                                    character,
+                                    build_id,
+                                    input_=DepositToModel(
+                                        deposit_resource_id=build_require_resource.resource_id,
+                                        deposit_resource_quantity=deposit_quantity,
+                                    ),
+                                ),
+                                direct_action=True,
+                                classes1=[build_description.id],
+                                classes2=[build_require_resource.resource_id],
+                            )
+                        )
+        # Not in construction
+        else:
+            if self._kernel.build_lib.can_be_powered_on(build_doc):
+                for (
+                    power_require_resource
+                ) in build_description.power_on_require_resources:
+                    resource_description = self._kernel.game.config.resources[
+                        power_require_resource.resource_id
+                    ]
+                    carried_quantity: float = (
+                        self._kernel.resource_lib.get_one_carried_by(
+                            character_id=character.id,
+                            resource_id=power_require_resource.resource_id,
+                            empty_object_if_not=True,
+                        )
+                    ).quantity
+                    required_quantity = power_require_resource.quantity
+                    quantity_in_build = (
+                        self._kernel.resource_lib.get_one_stored_in_build(
+                            build_id=build_doc.id,
+                            resource_id=power_require_resource.resource_id,
+                            empty_object_if_not=True,
+                        ).quantity
+                    )
+
+                    # Generate quick action only if some of this resource is missing
+                    if quantity_in_build < required_quantity:
+                        if not carried_quantity:
+                            quick_actions.append(
+                                CharacterActionLink(
+                                    name=f"Déposer {resource_description.name}",
+                                    link=self._get_url(
+                                        character,
+                                        build_id,
+                                        input_=DepositToModel(
+                                            deposit_resource_id=power_require_resource.resource_id,
+                                            deposit_resource_quantity=None,
+                                        ),
+                                    ),
+                                    direct_action=True,
+                                    classes1=[build_description.id],
+                                    classes2=[power_require_resource.resource_id],
+                                )
+                            )
+                        else:
+                            deposit_quantity = min(required_quantity, carried_quantity)
+                            quick_actions.append(
+                                CharacterActionLink(
+                                    name=f"Déposer {resource_description.name}",
+                                    link=self._get_url(
+                                        character,
+                                        build_id,
+                                        input_=DepositToModel(
+                                            deposit_resource_id=power_require_resource.resource_id,
+                                            deposit_resource_quantity=deposit_quantity,
+                                        ),
+                                    ),
+                                    direct_action=True,
+                                    classes1=[build_description.id],
+                                    classes2=[power_require_resource.resource_id],
+                                )
+                            )
+            else:
+                for turn_require_resource in build_description.turn_require_resources:
+                    resource_description = self._kernel.game.config.resources[
+                        turn_require_resource.resource_id
+                    ]
+                    carried_quantity: float = (
+                        self._kernel.resource_lib.get_one_carried_by(
+                            character_id=character.id,
+                            resource_id=turn_require_resource.resource_id,
+                            empty_object_if_not=True,
+                        )
+                    ).quantity
+                    required_quantity = turn_require_resource.quantity
+
+                    if not carried_quantity:
+                        quick_actions.append(
+                            CharacterActionLink(
+                                name=f"Déposer {resource_description.name}",
+                                link=self._get_url(
+                                    character,
+                                    build_id,
+                                    input_=DepositToModel(
+                                        deposit_resource_id=turn_require_resource.resource_id,
+                                        deposit_resource_quantity=None,
+                                    ),
+                                ),
+                                direct_action=True,
+                                classes1=[build_description.id],
+                                classes2=[turn_require_resource.resource_id],
+                            )
+                        )
+                    else:
+                        deposit_quantity = min(required_quantity, carried_quantity)
+                        quick_actions.append(
+                            CharacterActionLink(
+                                name=f"Déposer {resource_description.name}",
+                                link=self._get_url(
+                                    character,
+                                    build_id,
+                                    input_=DepositToModel(
+                                        deposit_resource_id=turn_require_resource.resource_id,
+                                        deposit_resource_quantity=deposit_quantity,
+                                    ),
+                                ),
+                                direct_action=True,
+                                classes1=[build_description.id],
+                                classes2=[turn_require_resource.resource_id],
+                            )
+                        )
+
+        return quick_actions
 
     def _get_url(
         self,

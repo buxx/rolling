@@ -102,6 +102,9 @@ class ZoneBuildModel:
     traversable: typing.Dict[TransportType, bool] = serpyco.field(
         default_factory=dict, getter=lambda b: b.traversable or b.desc.traversable
     )
+    under_construction: bool = serpyco.field(
+        getter=lambda b: b.doc.under_construction, default=False
+    )
 
 
 @dataclasses.dataclass

@@ -4,7 +4,9 @@ from sqlalchemy.orm import Query
 import typing
 
 from rolling.exception import ImpossibleAction
+from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
+from rolling.model.event import NewBuildData, WebSocketEvent, ZoneEventType
 from rolling.server.document.build import BuildDocument
 from rolling.server.link import CharacterActionLink
 
@@ -184,7 +186,7 @@ class BuildLib:
             is_floor=is_floor,
         ).count()
 
-    def progress_build(
+    async def progress_build(
         self,
         build_id: int,
         real_progress_cost: float,
@@ -211,6 +213,22 @@ class BuildLib:
             build_doc.under_construction = False
             if build_description.default_is_on:
                 build_doc.is_on = True
+
+                # Powered on, change display
+                await self._kernel.server_zone_events_manager.send_to_sockets(
+                    WebSocketEvent(
+                        type=ZoneEventType.NEW_BUILD,
+                        world_row_i=build_doc.world_row_i,
+                        world_col_i=build_doc.world_col_i,
+                        data=NewBuildData(
+                            build=ZoneBuildModelContainer(
+                                doc=build_doc, desc=build_description
+                            ),
+                        ),
+                    ),
+                    world_row_i=build_doc.world_row_i,
+                    world_col_i=build_doc.world_col_i,
+                )
 
         self._kernel.server_db_session.add(build_doc)
 
@@ -290,3 +308,14 @@ class BuildLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+    def can_be_powered_on(self, build_doc: BuildDocument) -> bool:
+        build_description = self._kernel.game.config.builds[build_doc.build_id]
+
+        for required in build_description.power_on_require_resources:
+            if not self._kernel.resource_lib.have_resource(
+                resource_id=required.resource_id,
+                build_id=build_doc.id,
+                quantity=required.quantity,
+            ):
+                return False

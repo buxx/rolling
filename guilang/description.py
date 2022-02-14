@@ -113,4 +113,7 @@ class Description:
     action_uuid: typing.Optional[str] = None
     not_enough_ap: bool = False
     exploitable_success: typing.Optional[typing.Tuple[int, int]] = None
-    is_error: bool = False
+    deposit_success: typing.Optional[
+        typing.Tuple[typing.Tuple[int, int], typing.List[str]]
+    ] = None
+    is_quick_error: bool = False

@@ -107,10 +107,22 @@ class TransferStuffOrResources(abc.ABC):
     def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
         return resource.name
 
+    @abc.abstractmethod
+    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+        pass
+
+    @abc.abstractmethod
+    def _get_classes(self) -> typing.List[str]:
+        pass
+
     def _get_choose_something_description(
         self,
         can_be_back_url: bool = False,
         text_parts: typing.Optional[typing.List[Part]] = None,
+        quick_action_response: typing.Optional[str] = None,
+        deposit_success: typing.Optional[
+            typing.Tuple[typing.Tuple[int, int], typing.List[str]]
+        ] = None,
     ) -> Description:
         text_parts = text_parts or []
         parts = text_parts
@@ -146,6 +158,8 @@ class TransferStuffOrResources(abc.ABC):
             footer_with_build_id=self._get_footer_build_id(False),
             footer_links=self._get_footer_links(False),
             can_be_back_url=can_be_back_url,
+            quick_action_response=quick_action_response,
+            deposit_success=deposit_success,
         )
 
     def get_description(
@@ -157,6 +171,10 @@ class TransferStuffOrResources(abc.ABC):
     ) -> Description:
         can_be_back_url = True
         text_parts: typing.List[Part] = []
+        quick_action_response: typing.Optional[str] = None
+        deposit_success: typing.Optional[
+            typing.Tuple[typing.Tuple[int, int], typing.List[str]]
+        ] = None
 
         if stuff_id is not None:
             stuff = self._get_stuff(stuff_id)
@@ -192,6 +210,8 @@ class TransferStuffOrResources(abc.ABC):
                         footer_with_build_id=self._get_footer_build_id(False),
                         footer_links=self._get_footer_links(False),
                         can_be_back_url=True,
+                        is_quick_error=True,
+                        quick_action_response=f"Pas de {stuff_description.name}",
                     )
                 stuff_quantity = 1
 
@@ -200,6 +220,7 @@ class TransferStuffOrResources(abc.ABC):
                 self.check_can_transfer_stuff(likes_this_stuff[i].id)
                 self._transfer_stuff(likes_this_stuff[i].id)
 
+            quick_action_response = f"{stuff_quantity} transféré(s)"
             text_parts.append(
                 Part(
                     text=(
@@ -239,6 +260,8 @@ class TransferStuffOrResources(abc.ABC):
                     footer_with_build_id=self._get_footer_build_id(False),
                     footer_links=self._get_footer_links(False),
                     can_be_back_url=True,
+                    is_quick_error=True,
+                    quick_action_response=f"Pas de {resource_description.name}",
                 )
 
             user_input_context = InputQuantityContext.from_carried_resource(
@@ -253,7 +276,12 @@ class TransferStuffOrResources(abc.ABC):
             )
             can_be_back_url = False
 
-            user_unit_str = self._kernel.translation.get(user_input_context.user_unit)
+            user_unit_str = self._kernel.translation.get(
+                user_input_context.user_unit, short=True
+            )
+            quick_action_response = (
+                f"{user_input_context.user_input}{user_unit_str} transféré(es)"
+            )
             text_parts.append(
                 Part(
                     text=(
@@ -262,9 +290,13 @@ class TransferStuffOrResources(abc.ABC):
                     )
                 )
             )
+            deposit_success = (self._get_zone_coordinates(), [resource_id])
 
         return self._get_choose_something_description(
-            can_be_back_url=can_be_back_url, text_parts=text_parts
+            can_be_back_url=can_be_back_url,
+            text_parts=text_parts,
+            quick_action_response=quick_action_response,
+            deposit_success=deposit_success,
         )
 
 

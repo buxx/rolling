@@ -65,21 +65,23 @@ class PowerOnBuildAction(WithBuildAction):
     ) -> typing.List[CharacterActionLink]:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
-        return [
-            CharacterActionLink(
-                name="Démarrer",
-                link=get_with_build_action_url(
-                    character_id=character.id,
-                    build_id=build_id,
-                    action_type=ActionType.POWER_ON_BUILD,
-                    query_params={},
-                    action_description_id=self._description.id,
-                ),
-                classes1=["ON"],
-                classes2=build_description.classes,
-                direct_action=True,
-            )
-        ]
+        if not build_doc.is_on:
+            return [
+                CharacterActionLink(
+                    name="Démarrer",
+                    link=get_with_build_action_url(
+                        character_id=character.id,
+                        build_id=build_id,
+                        action_type=ActionType.POWER_ON_BUILD,
+                        query_params={},
+                        action_description_id=self._description.id,
+                    ),
+                    classes1=["ON"],
+                    classes2=build_description.classes,
+                    direct_action=True,
+                )
+            ]
+        return []
 
     def get_quick_actions(
         self, character: "CharacterModel", build_id: int
@@ -117,7 +119,9 @@ class PowerOnBuildAction(WithBuildAction):
                 unit_str = self._kernel.translation.get(
                     resource_description.unit, short=True
                 )
-                raise ImpossibleAction(f"{resource_description.name}{unit_str} requis")
+                raise ImpossibleAction(
+                    f"{required.quantity}{unit_str} {resource_description.name} requis"
+                )
 
         for required in build_description.power_on_require_resources:
             self._kernel.resource_lib.reduce_stored_in(
