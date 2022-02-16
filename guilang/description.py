@@ -117,3 +117,4 @@ class Description:
         typing.Tuple[typing.Tuple[int, int], typing.List[str]]
     ] = None
     is_quick_error: bool = False
+    is_grid: bool = False

@@ -1,4 +1,5 @@
 # coding: utf-8
+import dataclasses
 from os import path
 import toml
 import typing
@@ -41,6 +42,13 @@ from rolling.util import generate_background_media
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+
+
+@dataclasses.dataclass
+class MainAction:
+    name: str
+    class_: str
+    action_types: typing.List[str]
 
 
 class GameConfig:
@@ -139,6 +147,10 @@ class GameConfig:
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
         self.tile_clutter_capacity: float = config_dict["tile_clutter_capacity"]
         self.destroy_robustness_per_ap: int = config_dict["destroy_robustness_per_ap"]
+        self.main_actions: typing.List[MainAction] = [
+            MainAction(name=m["name"], action_types=m["actions"], class_=m["class"])
+            for m in config_dict["main_actions"]
+        ]
 
         self._character_effects: typing.Dict[
             str, CharacterEffectDescriptionModel

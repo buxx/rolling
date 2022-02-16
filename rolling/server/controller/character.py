@@ -1190,6 +1190,32 @@ class CharacterController(BaseController):
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(Description)
+    async def _main_actions(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character_id = hapic_data.path.character_id
+        grid_buttons = []
+
+        for main_action in self._kernel.game.config.main_actions:
+            filter_action_types = ",".join(main_action.action_types)
+            grid_buttons.append(
+                Part(
+                    label=main_action.name,
+                    classes=[main_action.class_],
+                    form_action=f"/_describe/character/{character_id}/on_place_actions?filter_action_types={filter_action_types}",
+                    is_link=True,
+                )
+            )
+
+        return Description(
+            title="Actions principales",
+            is_grid=True,
+            items=grid_buttons,
+        )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
     async def _describe_on_place_actions(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
@@ -2642,6 +2668,10 @@ class CharacterController(BaseController):
                 web.post(
                     "/_describe/character/{character_id}/on_place_actions",
                     self._describe_on_place_actions,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/main_actions",
+                    self._main_actions,
                 ),
                 web.post(
                     "/_describe/character/{character_id}/pending_actions",

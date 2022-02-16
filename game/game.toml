@@ -49,6 +49,31 @@ max_action_propose_turns = 3
 tile_clutter_capacity = 25.0
 destroy_robustness_per_ap = 1
 
+[[main_actions]]
+name = "Chercher"
+class = "SEARCH"
+actions = ["SEARCH_FOOD", "SEARCH_MATERIAL"]
+
+[[main_actions]]
+name = "Mix"
+class = "MIX"
+actions = ["MIX_RESOURCES", "TRANSFORM_STUFF_TO_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+
+[[main_actions]]
+name = "Crafting"
+class = "CRAFT"
+actions = ["BEGIN_STUFF_CONSTRUCTION", "CRAFT_STUFF_WITH_STUFF", "CRAFT_STUFF_WITH_RESOURCE", "TRANSFORM_STUFF_TO_STUFF"]
+
+[[main_actions]]
+name = "Apprentissage"
+class = "KNOWLEDGE"
+actions = ["LEARN_KNOWLEDGE", "TEACH_KNOWLEDGE"]
+
+[[main_actions]]
+name = "Agriculture"
+class = "FARMING"
+actions = ["SEED"]
+
 [materials]
   [materials.LIQUID]
     name = "Liquide"
