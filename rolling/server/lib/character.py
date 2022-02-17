@@ -677,8 +677,17 @@ class CharacterLib:
         )
 
     def get_on_place_stuff_actions(
-        self, character: CharacterModel, quick_actions: bool = False
+        self,
+        character: CharacterModel,
+        quick_actions: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.Generator[CharacterActionLink, None, None]:
+        if (
+            filter_action_types is not None
+            and ActionType.TAKE_STUFF.value not in filter_action_types
+        ):
+            return
+
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
@@ -735,8 +744,17 @@ class CharacterLib:
                 )
 
     def get_on_place_resource_actions(
-        self, character: CharacterModel, quick_actions: bool = False
+        self,
+        character: CharacterModel,
+        quick_actions: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.Generator[CharacterActionLink, None, None]:
+        if (
+            filter_action_types is not None
+            and ActionType.TAKE_RESOURCE.value not in filter_action_types
+        ):
+            return
+
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
@@ -796,7 +814,10 @@ class CharacterLib:
                 )
 
     def get_on_place_build_actions(
-        self, character: CharacterModel, only_quick_actions: bool = False
+        self,
+        character: CharacterModel,
+        only_quick_actions: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         around_coordinates = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
@@ -818,10 +839,11 @@ class CharacterLib:
                             character=character,
                             build_id=build.id,
                             only_quick_actions=True,
+                            filter_action_types=filter_action_types,
                         )
                     )
 
-                else:
+                elif filter_action_types is None:
                     build_description = self._kernel.game.config.builds[build.build_id]
                     character_actions_.append(
                         CharacterActionLink(
@@ -836,7 +858,9 @@ class CharacterLib:
         return character_actions_
 
     def get_from_inventory_actions(
-        self, character: CharacterModel
+        self,
+        character: CharacterModel,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
 
@@ -846,6 +870,7 @@ class CharacterLib:
                     character_id=character.id,
                     resource_id=resource.id,
                     for_actions_page=True,
+                    filter_action_types=filter_action_types,
                 )
             )
 
@@ -857,14 +882,20 @@ class CharacterLib:
                     character=character,
                     stuff=stuff,
                     for_actions_page=True,
+                    filter_action_types=filter_action_types,
                 )
             )
 
         return actions
 
     def get_on_place_character_actions(
-        self, character: CharacterModel
+        self,
+        character: CharacterModel,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
+        if filter_action_types is not None:
+            return []
+
         around_character = get_on_and_around_coordinates(
             x=character.zone_row_i, y=character.zone_col_i
         )
@@ -902,7 +933,10 @@ class CharacterLib:
         return action_links
 
     def get_on_place_actions(
-        self, character_id: str, quick_actions_only: bool = False
+        self,
+        character_id: str,
+        quick_actions_only: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions_: typing.List[CharacterActionLink] = []
@@ -910,7 +944,12 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    list(self.get_on_place_stuff_actions(character)),
+                    list(
+                        self.get_on_place_stuff_actions(
+                            character,
+                            filter_action_types=filter_action_types,
+                        )
+                    ),
                     "Objets, ressources et bâtiments autour",
                 )
             )
@@ -918,7 +957,12 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    list(self.get_on_place_resource_actions(character)),
+                    list(
+                        self.get_on_place_resource_actions(
+                            character,
+                            filter_action_types=filter_action_types,
+                        )
+                    ),
                     "Objets, ressources et bâtiments autour",
                 )
             )
@@ -926,19 +970,29 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_on_place_build_actions(character),
+                    self.get_on_place_build_actions(
+                        character,
+                        filter_action_types=filter_action_types,
+                    ),
                     "Objets, ressources et bâtiments autour",
                 )
             )
         else:
             character_actions_.extend(
-                self.get_on_place_build_actions(character, only_quick_actions=True)
+                self.get_on_place_build_actions(
+                    character,
+                    only_quick_actions=True,
+                    filter_action_types=filter_action_types,
+                )
             )
 
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_on_place_character_actions(character),
+                    self.get_on_place_character_actions(
+                        character,
+                        filter_action_types=filter_action_types,
+                    ),
                     "Personnages",
                 )
             )
@@ -946,12 +1000,18 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_from_inventory_actions(character), "Inventaire"
+                    self.get_from_inventory_actions(
+                        character,
+                        filter_action_types=filter_action_types,
+                    ),
+                    "Inventaire",
                 )
             )
 
         # Actions with available character actions
-        for action in self._action_factory.get_all_character_actions():
+        for action in self._action_factory.get_all_character_actions(
+            filter_action_types=filter_action_types,
+        ):
             if not quick_actions_only:
                 character_actions_.extend(
                     self._add_category_to_action_links(
@@ -1004,10 +1064,14 @@ class CharacterLib:
         character_id: str,
         resource_id: str,
         for_actions_page: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions = self._kernel.resource_lib.get_carrying_actions(
-            character, resource_id, for_actions_page=for_actions_page
+            character,
+            resource_id,
+            for_actions_page=for_actions_page,
+            filter_action_types=filter_action_types,
         )
         return filter_action_links(character_actions)
 

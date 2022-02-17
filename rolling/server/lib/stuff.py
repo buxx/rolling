@@ -326,6 +326,7 @@ class StuffLib:
         character: CharacterModel,
         stuff: StuffModel,
         for_actions_page: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -333,6 +334,12 @@ class StuffLib:
         )
 
         for description in stuff_properties.descriptions:
+            if (
+                filter_action_types is not None
+                and description.action_type.value not in filter_action_types
+            ):
+                continue
+
             action = self._action_factory.get_with_stuff_action(description)
             if for_actions_page and action.exclude_from_actions_page:
                 continue

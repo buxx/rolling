@@ -35,6 +35,7 @@ from rolling.model.character import (
     ChooseAvatarQuery,
     ExplodeTakeQuery,
     GetCharacterQueryModel,
+    OnPlaceActionQuery,
 )
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
@@ -1215,12 +1216,17 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(OnPlaceActionQuery)
     @hapic.output_body(Description)
     async def _describe_on_place_actions(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
+        filter_action_types = None
+        if hapic_data.query.filter_action_types:
+            filter_action_types = hapic_data.query.filter_action_types.split(",")
         character_actions = self._character_lib.get_on_place_actions(
-            hapic_data.path.character_id
+            hapic_data.path.character_id,
+            filter_action_types=filter_action_types,
         )
         pending_actions_count = self._kernel.character_lib.get_pending_actions_count(
             hapic_data.path.character_id

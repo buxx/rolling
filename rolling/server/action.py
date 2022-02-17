@@ -241,10 +241,19 @@ class ActionFactory:
             self._kernel, description=action_description
         )
 
-    def get_all_character_actions(self) -> typing.List[CharacterAction]:
+    def get_all_character_actions(
+        self,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
+    ) -> typing.List[CharacterAction]:
         actions: typing.List[CharacterAction] = []
 
         for action_type, action_class in self._character_actions.items():
+            if (
+                filter_action_types is not None
+                and action_type.value not in filter_action_types
+            ):
+                continue
+
             for action_description in self._kernel.game.config.actions.get(
                 action_type, []
             ):
@@ -267,10 +276,19 @@ class ActionFactory:
 
         return actions
 
-    def get_all_with_build_actions(self) -> typing.List[WithBuildAction]:
+    def get_all_with_build_actions(
+        self,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
+    ) -> typing.List[WithBuildAction]:
         actions: typing.List[WithBuildAction] = []
 
         for action_type, action_class in self._with_build_actions.items():
+            if (
+                filter_action_types is not None
+                and action_type.value not in filter_action_types
+            ):
+                continue
+
             for action_description in self._kernel.game.config.actions.get(
                 action_type, []
             ):

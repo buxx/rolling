@@ -33,6 +33,11 @@ class GetCharacterPathModel:
 
 
 @dataclasses.dataclass
+class OnPlaceActionQuery:
+    filter_action_types: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
 class ExplodeTakeQuery:
     explode_take: int = serpyco.number_field(cast_on_load=True, default=1)
 

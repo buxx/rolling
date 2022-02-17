@@ -553,11 +553,18 @@ class ResourceLib:
         character: CharacterModel,
         resource_id: str,
         for_actions_page: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         resource_description = self._kernel.game.config.resources[resource_id]
 
         for description in resource_description.descriptions:
+            if (
+                filter_action_types is not None
+                and description.action_type.value not in filter_action_types
+            ):
+                continue
+
             action = self._action_factory.get_with_resource_action(description)
             if for_actions_page and action.exclude_from_actions_page:
                 continue

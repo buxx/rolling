@@ -71,13 +71,19 @@ class BuildLib:
         )
 
     def get_on_build_actions(
-        self, character: CharacterModel, build_id: int, only_quick_actions: bool = False
+        self,
+        character: CharacterModel,
+        build_id: int,
+        only_quick_actions: bool = False,
+        filter_action_types: typing.Optional[typing.List[str]] = None,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
 
-        for action in self._kernel.action_factory.get_all_with_build_actions():
+        for action in self._kernel.action_factory.get_all_with_build_actions(
+            filter_action_types=filter_action_types
+        ):
             try:
                 action.check_is_possible(character, build_id=build_id)
                 if only_quick_actions:
@@ -91,7 +97,11 @@ class BuildLib:
             except ImpossibleAction:
                 pass
 
-        if build_description.is_door and not build_doc.under_construction:
+        if (
+            filter_action_types is None
+            and build_description.is_door
+            and not build_doc.under_construction
+        ):
             actions.append(
                 CharacterActionLink(
                     name=f"Gestion de cette porte",
