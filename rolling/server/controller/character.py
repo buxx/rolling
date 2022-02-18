@@ -64,8 +64,15 @@ from rolling.model.event import CharacterEnterZoneData, ClientRequireAroundData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
-from rolling.model.resource import CarriedResourceDescriptionModel
-from rolling.model.stuff import CharacterInventoryModel
+from rolling.model.resource import (
+    CarriedResourceDescriptionModel,
+    CarriedResourceDescriptionModelApi,
+)
+from rolling.model.stuff import (
+    CharacterInventoryModel,
+    CharacterInventoryModelApi,
+    StuffModelApi,
+)
 from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.model.zone import ZoneRequiredPlayerData
@@ -682,6 +689,63 @@ class CharacterController(BaseController):
             items=[Part(text="Personnage"), Part(text=f"Nom: {with_character.name}")],
             can_be_back_url=True,
         )
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(CharacterInventoryModelApi)
+    async def _get_inventory_data(
+        self, request: Request, hapic_data: HapicData
+    ) -> CharacterInventoryModelApi:
+        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+        stuffs = []
+        resources = []
+
+        seen_stuffs: typing.Set[str] = set()
+        for stuff in inventory.stuff:
+            seen_id = f"{stuff.stuff_id}_{stuff.under_construction}"
+            if seen_id not in seen_stuffs:
+                seen_stuffs.add(seen_id)
+                similar_stuffs = [
+                    s
+                    for s in inventory.stuff
+                    if stuff.stuff_id == s.stuff_id
+                    and stuff.under_construction == s.under_construction
+                ]
+                count = len(similar_stuffs)
+                stuffs.append(
+                    StuffModelApi(
+                        ids=[s.id for s in similar_stuffs],
+                        stuff_id=stuff.stuff_id,
+                        name=stuff.name,
+                        infos="TODO",  # TODO
+                        under_construction=stuff.under_construction,
+                        classes=stuff.classes + [stuff.stuff_id],
+                        is_equipment=stuff.weapon or stuff.shield or stuff.armor,
+                        count=count,
+                    )
+                )
+
+        for resource in inventory.resource:
+            resources.append(
+                CarriedResourceDescriptionModelApi(
+                    id=resource.id,
+                    name=resource.name,
+                    weight=resource.weight,
+                    clutter=resource.clutter,
+                    info="TODO",  # TODO
+                    classes=[resource.id],
+                    quantity=resource.quantity,
+                )
+            )
+
+        inventory_api = CharacterInventoryModelApi(
+            stuff=stuffs,
+            resource=resources,
+            clutter=inventory.clutter,
+            weight=inventory.weight,
+        )
+
+        return inventory_api
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -2654,6 +2718,10 @@ class CharacterController(BaseController):
                 web.post(
                     "/_describe/character/{character_id}/inventory",
                     self._describe_inventory,
+                ),
+                web.get(
+                    "/character/{character_id}/inventory-data",
+                    self._get_inventory_data,
                 ),
                 web.post(
                     "/_describe/character/{character_id}/inventory/choose-between-stuff/{stuff_id}",

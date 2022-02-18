@@ -6,7 +6,10 @@ import typing
 
 from rolling.action.base import ActionDescriptionModel
 from rolling.model.measure import Unit
-from rolling.model.resource import CarriedResourceDescriptionModel
+from rolling.model.resource import (
+    CarriedResourceDescriptionModel,
+    CarriedResourceDescriptionModelApi,
+)
 from rolling.util import display_g_or_kg
 
 if typing.TYPE_CHECKING:
@@ -51,6 +54,18 @@ class StuffProperties:
             if ability_id in self.abilities:
                 have_abilities.append(ability_id)
         return have_abilities
+
+
+@dataclasses.dataclass
+class StuffModelApi:
+    ids: typing.List[int]
+    stuff_id: str
+    name: str
+    infos: str
+    under_construction: bool
+    classes: typing.List[str]
+    is_equipment: bool
+    count: int
 
 
 @dataclasses.dataclass
@@ -158,5 +173,13 @@ class ZoneGenerationStuff:
 class CharacterInventoryModel:
     stuff: typing.List[StuffModel]
     resource: typing.List[CarriedResourceDescriptionModel]
+    weight: float = 0.0
+    clutter: float = 0.0
+
+
+@dataclasses.dataclass
+class CharacterInventoryModelApi:
+    stuff: typing.List[StuffModelApi]
+    resource: typing.List[CarriedResourceDescriptionModelApi]
     weight: float = 0.0
     clutter: float = 0.0

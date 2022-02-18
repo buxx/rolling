@@ -30,6 +30,18 @@ class ResourceDescriptionModel:
 
 # FIXME BS: rename (can be in build)
 @dataclasses.dataclass
+class CarriedResourceDescriptionModelApi:
+    id: str
+    name: str
+    weight: float
+    clutter: float
+    info: str
+    classes: typing.List[str]
+    quantity: float
+
+
+# FIXME BS: rename (can be in build)
+@dataclasses.dataclass
 class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     quantity: float
     stored_in: typing.Optional[int] = None
