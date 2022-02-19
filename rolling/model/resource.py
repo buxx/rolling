@@ -35,9 +35,10 @@ class CarriedResourceDescriptionModelApi:
     name: str
     weight: float
     clutter: float
-    info: str
+    infos: str
     classes: typing.List[str]
     quantity: float
+    drop_base_url: str
 
 
 # FIXME BS: rename (can be in build)

@@ -64,6 +64,7 @@ from rolling.model.event import CharacterEnterZoneData, ClientRequireAroundData
 from rolling.model.event import CharacterExitZoneData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
+from rolling.model.measure import Unit
 from rolling.model.resource import (
     CarriedResourceDescriptionModel,
     CarriedResourceDescriptionModelApi,
@@ -712,29 +713,45 @@ class CharacterController(BaseController):
                     and stuff.under_construction == s.under_construction
                 ]
                 count = len(similar_stuffs)
+                weight = sum([s.weight for s in similar_stuffs])
+                clutter = sum([s.clutter for s in similar_stuffs])
+                unit_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
+                infos = f"{count}x {stuff.name}, {round(weight / 1000, 3)} {unit_str}, {clutter} d'encombrement"
                 stuffs.append(
                     StuffModelApi(
                         ids=[s.id for s in similar_stuffs],
                         stuff_id=stuff.stuff_id,
                         name=stuff.name,
-                        infos="TODO",  # TODO
+                        infos=infos,
                         under_construction=stuff.under_construction,
                         classes=stuff.classes + [stuff.stuff_id],
                         is_equipment=stuff.weapon or stuff.shield or stuff.armor,
                         count=count,
+                        drop_base_url="",  # FIXME BS NOW
                     )
                 )
 
         for resource in inventory.resource:
+            resource_description = self._kernel.game.config.resources[resource.id]
+            clutter = resource_description.clutter * resource.quantity
+            if resource_description.unit == Unit.GRAM:
+                kg_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
+                infos = f"{round(resource.quantity/1000, 3)}{kg_str} {resource.name}, {clutter} d'encombrement"
+            else:
+                unit_str = self._kernel.translation.get(
+                    resource_description.unit, short=True
+                )
+                infos = f"{round(resource.quantity, 5)}{unit_str} {resource.name}, {clutter} d'encombrement"
             resources.append(
                 CarriedResourceDescriptionModelApi(
                     id=resource.id,
                     name=resource.name,
                     weight=resource.weight,
                     clutter=resource.clutter,
-                    info="TODO",  # TODO
+                    infos=infos,
                     classes=[resource.id],
                     quantity=resource.quantity,
+                    drop_base_url="",  # FIXME BS NOW
                 )
             )
 

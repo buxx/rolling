@@ -66,6 +66,7 @@ class StuffModelApi:
     classes: typing.List[str]
     is_equipment: bool
     count: int
+    drop_base_url: str
 
 
 @dataclasses.dataclass
