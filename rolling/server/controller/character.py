@@ -727,7 +727,15 @@ class CharacterController(BaseController):
                         classes=stuff.classes + [stuff.stuff_id],
                         is_equipment=stuff.weapon or stuff.shield or stuff.armor,
                         count=count,
-                        drop_base_url="",  # FIXME BS NOW
+                        drop_base_url=get_with_stuff_action_url(
+                            character_id=hapic_data.path.character_id,
+                            stuff_id=stuff.id,
+                            action_type=ActionType.DROP_STUFF,
+                            action_description_id="DROP_STUFF",
+                            query_params={
+                                "quantity": count,
+                            },
+                        ),
                     )
                 )
 
@@ -751,7 +759,15 @@ class CharacterController(BaseController):
                     infos=infos,
                     classes=[resource.id],
                     quantity=resource.quantity,
-                    drop_base_url="",  # FIXME BS NOW
+                    drop_base_url=get_with_resource_action_url(
+                        character_id=hapic_data.path.character_id,
+                        resource_id=resource.id,
+                        action_type=ActionType.DROP_RESOURCE,
+                        action_description_id="DROP_RESOURCE",
+                        query_params={
+                            "quantity": resource.quantity,
+                        },
+                    ),
                 )
             )
 

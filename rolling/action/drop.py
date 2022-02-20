@@ -32,6 +32,13 @@ if typing.TYPE_CHECKING:
 class DropResourceModel:
     quantity: typing.Optional[str] = None
     then_redirect_url: typing.Optional[str] = None
+    zone_row_i: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    zone_col_i: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    quick_action: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
 @dataclasses.dataclass
@@ -40,6 +47,13 @@ class DropStuffModel:
         cast_on_load=True, default=None
     )
     then_redirect_url: typing.Optional[str] = None
+    zone_row_i: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    zone_col_i: typing.Optional[int] = serpyco.number_field(
+        cast_on_load=True, default=None
+    )
+    quick_action: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
 class DropStuffAction(WithStuffAction):
@@ -94,8 +108,16 @@ class DropStuffAction(WithStuffAction):
                     stuff_id=stuff_.stuff_id,
                     world_row_i=character.world_row_i,
                     world_col_i=character.world_col_i,
-                    start_from_zone_row_i=character.zone_row_i,
-                    start_from_zone_col_i=character.zone_col_i,
+                    start_from_zone_row_i=(
+                        input_.zone_row_i
+                        if input_.zone_row_i is not None
+                        else character.zone_row_i
+                    ),
+                    start_from_zone_col_i=(
+                        input_.zone_col_i
+                        if input_.zone_row_i is not None
+                        else character.zone_col_i
+                    ),
                     allow_fallback_on_start_coordinates=True,
                 )
             )
@@ -247,8 +269,16 @@ class DropResourceAction(WithResourceAction):
                 resource_quantity=user_input_context.real_quantity,
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,
-                start_from_zone_row_i=character.zone_row_i,
-                start_from_zone_col_i=character.zone_col_i,
+                start_from_zone_row_i=(
+                    input_.zone_row_i
+                    if input_.zone_row_i is not None
+                    else character.zone_row_i
+                ),
+                start_from_zone_col_i=(
+                    input_.zone_col_i
+                    if input_.zone_row_i is not None
+                    else character.zone_col_i
+                ),
                 allow_fallback_on_start_coordinates=True,
             )
         )

@@ -68,7 +68,11 @@ async def with_multiple_carried_stuffs(
     all_carried = kernel.stuff_lib.get_carried_by(
         character.id, stuff_id=stuff.stuff_id, exclude_crafting=False
     )
-    if len(all_carried) > 1 and input_.quantity is None:
+    if (
+        len(all_carried) > 1
+        and input_.quantity is None
+        and getattr("quick_action", 0) == 0
+    ):
         return Description(
             title=title,
             items=[
