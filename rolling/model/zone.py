@@ -35,6 +35,7 @@ class ZoneTileTypeModel(TileTypeModel):
     # https://gitlab.com/sgrignard/serpyco/issues/21
     # traversable: typing.Optional[typing.Dict[TransportType, bool]]
     traversable: typing.Optional[typing.Dict[str, bool]]
+    hump: typing.Optional[typing.Dict[str, str]]
 
 
 @dataclasses.dataclass(frozen=True)

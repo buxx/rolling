@@ -8,7 +8,10 @@ import typing
 from rolling.exception import NotEnoughResource
 from rolling.map.source import ZoneMap
 from rolling.map.type.base import MapTileType
-from rolling.map.type.property.traversable import traversable_properties
+from rolling.map.type.property.traversable import (
+    traversable_properties,
+    hump_properties,
+)
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.event import WebSocketEvent, ZoneEventType, ZoneTileReplaceData
@@ -48,6 +51,7 @@ class ZoneLib:
                     id=tile_id,
                     char=self._kernel.tile_map_legend.get_str_with_type(tile_class),
                     traversable=traversable_properties[tile_class],
+                    hump=hump_properties.get(tile_class, {}),
                     foreground_color=tile_class.foreground_color,
                     background_color=tile_class.background_color,
                     mono=tile_class.mono,
