@@ -24,6 +24,7 @@ class QuickAction:
     all_tiles_at_once: bool
     direct_action: bool
     # classes2: typing.List[str] = None
+    quick_action_key: typing.Optional[str]
 
     # TODO : Bellow are the attributes of the rollgui1 compatibility. Remove them when rollgui1 is outdated
     link: str
@@ -65,6 +66,8 @@ class CharacterActionLink:
     direct_action: bool = False
     # This attribute is used for rollgui2 compatibility
     all_tiles_at_once: bool = False
+    # This attribute is used for rollgui2 compatibility
+    quick_action_key: typing.Optional[str] = None
 
     def get_as_str(self) -> str:
         if not self.cost:

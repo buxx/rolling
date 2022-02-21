@@ -111,6 +111,7 @@ class TakeAction(CharacterAction):
                     classes1=["TAKE"],
                     all_tiles_at_once=False,
                     exploitable_tiles=exploitable_tiles,
+                    quick_action_key="P",
                 )
             ]
 

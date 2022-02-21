@@ -253,6 +253,7 @@ class ThereIsAroundProcessor(EventProcessor):
                     exploitable_tiles=quick_action.exploitable_tiles,
                     all_tiles_at_once=quick_action.all_tiles_at_once,
                     direct_action=quick_action.direct_action,
+                    quick_action_key=quick_action.quick_action_key,
                     # rollgui1 compatibility bellow
                     link=quick_action.link,
                 )
