@@ -5,6 +5,7 @@ from rolling.exception import RollingError
 from rolling.map.source import ZoneMap
 from rolling.map.type.base import MapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.model.stuff import StuffModel
 from rolling.model.world import World
 from rolling.model.zone import ZoneMapTileProduction
 from rolling.model.zone import ZoneProperties
@@ -210,15 +211,19 @@ class WorldManager:
         allow_fallback_on_start_coordinates: bool,
         resource_id: typing.Optional[str] = None,
         resource_quantity: typing.Optional[float] = None,
-        stuff_id: typing.Optional[str] = None,
+        stuff_id: typing.Optional[int] = None,
+        strict_place: bool = True,
     ) -> typing.List[typing.Tuple[typing.Tuple[int, int], typing.Optional[float]]]:
         assert (resource_id is not None and resource_quantity is not None) or stuff_id
-
+        stuff: typing.Optional[StuffModel] = None
         if stuff_id is not None:
+            stuff = self._kernel.stuff_lib.get_stuff_doc(stuff_id)
+
+        if stuff is not None:
             clutter_ref = 1.0
             clutter_to_place = (
                 self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                    stuff_id
+                    stuff.stuff_id
                 ).clutter
             )
             clutter_in_one_tile = True
@@ -252,12 +257,18 @@ class WorldManager:
             # Compute available space on this tile
             tile_used_clutter = 0.0
 
+            continue_ = False
             for tile_stuff in self._kernel.stuff_lib.get_zone_stuffs(
                 world_row_i=world_row_i,
                 world_col_i=world_col_i,
                 zone_row_i=test_tile_row_i,
                 zone_col_i=test_tile_col_i,
             ):
+                if strict_place:
+                    # In strict mode a stuff take all the place
+                    continue_ = True
+                    continue
+
                 stuff_properties = (
                     self._kernel.game.stuff_manager.get_stuff_properties_by_id(
                         tile_stuff.stuff_id
@@ -265,18 +276,38 @@ class WorldManager:
                 )
                 tile_used_clutter += stuff_properties.clutter
 
+            if continue_:
+                continue
+
             for carried_resource in self._kernel.resource_lib.get_ground_resource(
                 world_row_i=world_row_i,
                 world_col_i=world_col_i,
                 zone_row_i=test_tile_row_i,
                 zone_col_i=test_tile_col_i,
             ):
+                if strict_place and stuff is not None:
+                    # In strict mode, a resource here exclude this tile for a stuff deposit
+                    continue_ = True
+                    continue
+
+                if (
+                    strict_place
+                    and resource_id is not None
+                    and carried_resource.id != resource_id
+                ):
+                    # In strict mode, a different resource here exclude this tile for a resource deposit
+                    continue_ = True
+                    continue
+
                 resource_description = self._kernel.game.config.resources[
                     carried_resource.id
                 ]
                 tile_used_clutter += (
                     resource_description.clutter * carried_resource.quantity
                 )
+
+            if continue_:
+                continue
 
             # Continue with this tile only if there is enough clutter here
             tile_left_clutter = max(

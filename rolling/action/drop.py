@@ -105,7 +105,7 @@ class DropStuffAction(WithStuffAction):
         ) -> typing.List[Part]:
             places_to_drop = (
                 self._kernel.game.world_manager.find_available_place_where_drop(
-                    stuff_id=stuff_.stuff_id,
+                    stuff_id=stuff_.id,
                     world_row_i=character.world_row_i,
                     world_col_i=character.world_col_i,
                     start_from_zone_row_i=(
@@ -229,6 +229,7 @@ class DropResourceAction(WithResourceAction):
         # TODO BS 2019-09-09: perfs
         carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
         carried_resource = next((r for r in carried_resources if r.id == resource_id))
+        resource_description = self._kernel.game.config.resources[resource_id]
 
         if input_.quantity is None:
             expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
@@ -294,13 +295,15 @@ class DropResourceAction(WithResourceAction):
                 zone_row_i=drop_to_row_i,
                 zone_col_i=drop_to_col_i,
             )
-            await self._kernel.resource_lib.send_zone_ground_resource_added(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=drop_to_row_i,
-                zone_col_i=drop_to_col_i,
-                resource_id=resource_id,
-            )
+
+            if not resource_description.drop_to_nowhere:
+                await self._kernel.resource_lib.send_zone_ground_resource_added(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=drop_to_row_i,
+                    zone_col_i=drop_to_col_i,
+                    resource_id=resource_id,
+                )
 
         return Description(
             title=f"Action effectué",
