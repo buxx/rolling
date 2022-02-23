@@ -442,7 +442,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
     ) -> typing.Optional[float]:
         if input_ and input_.quantity is not None:
             carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                character.id, resource_id=resource_id
+                character.id, resource_id=resource_id, empty_object_if_not=True
             )
             user_input_context = InputQuantityContext.from_carried_resource(
                 user_input=input_.quantity, carried_resource=carried_resource
