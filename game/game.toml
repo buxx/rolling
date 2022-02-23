@@ -21,6 +21,8 @@ stop_auto_eat_hunger = 20.0
 stop_auto_drink_thirst = 20.0
 limit_warning_drink_left_tick = 15
 limit_warning_eat_left_tick = 15
+ratio_item_is_heavy = 0.5
+ratio_item_is_cumbersome = 0.5
 
 less_than_is_health2 = 3.0
 less_than_is_health3 = 2.0

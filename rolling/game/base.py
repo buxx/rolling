@@ -147,6 +147,11 @@ class GameConfig:
         self.max_action_propose_turns: int = config_dict["max_action_propose_turns"]
         self.tile_clutter_capacity: float = config_dict["tile_clutter_capacity"]
         self.destroy_robustness_per_ap: int = config_dict["destroy_robustness_per_ap"]
+        self.ratio_item_is_heavy: float = config_dict.get("ratio_item_is_heavy", 0.5)
+        self.ratio_item_is_cumbersome: float = config_dict.get(
+            "ratio_item_is_cumbersome", 0.5
+        )
+
         self.main_actions: typing.List[MainAction] = [
             MainAction(name=m["name"], action_types=m["actions"], class_=m["class"])
             for m in config_dict["main_actions"]

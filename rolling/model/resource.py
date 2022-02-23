@@ -40,6 +40,8 @@ class CarriedResourceDescriptionModelApi:
     quantity: float
     quantity_str: str
     drop_base_url: str
+    is_heavy: bool
+    is_cumbersome: bool
 
 
 # FIXME BS: rename (can be in build)

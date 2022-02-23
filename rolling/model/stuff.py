@@ -67,6 +67,8 @@ class StuffModelApi:
     is_equipment: bool
     count: int
     drop_base_url: str
+    is_heavy: bool
+    is_cumbersome: bool
 
 
 @dataclasses.dataclass

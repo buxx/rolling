@@ -697,6 +697,7 @@ class CharacterController(BaseController):
     async def _get_inventory_data(
         self, request: Request, hapic_data: HapicData
     ) -> CharacterInventoryModelApi:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
         inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
         stuffs = []
         resources = []
@@ -717,6 +718,14 @@ class CharacterController(BaseController):
                 clutter = sum([s.clutter for s in similar_stuffs])
                 unit_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
                 infos = f"{count}x {stuff.name}, {round(weight / 1000, 3)} {unit_str}, {clutter} d'encombrement"
+                is_heavy = (
+                    weight / character.get_weight_capacity(self._kernel)
+                    >= self._kernel.game.config.ratio_item_is_heavy
+                )
+                is_cumbersome = (
+                    clutter / character.get_clutter_capacity(self._kernel)
+                    >= self._kernel.game.config.ratio_item_is_cumbersome
+                )
                 stuffs.append(
                     StuffModelApi(
                         ids=[s.id for s in similar_stuffs],
@@ -736,6 +745,8 @@ class CharacterController(BaseController):
                                 "quantity": count,
                             },
                         ),
+                        is_heavy=is_heavy,
+                        is_cumbersome=is_cumbersome,
                     )
                 )
 
@@ -752,6 +763,14 @@ class CharacterController(BaseController):
                 )
                 quantity_str = f"{round(resource.quantity, 5)}{unit_str}"
                 infos = f"{quantity_str} {resource.name}, {clutter} d'encombrement"
+            is_heavy = (
+                weight / character.get_weight_capacity(self._kernel)
+                >= self._kernel.game.config.ratio_item_is_heavy
+            )
+            is_cumbersome = (
+                clutter / character.get_clutter_capacity(self._kernel)
+                >= self._kernel.game.config.ratio_item_is_cumbersome
+            )
             resources.append(
                 CarriedResourceDescriptionModelApi(
                     id=resource.id,
@@ -771,6 +790,8 @@ class CharacterController(BaseController):
                             "quantity": resource.quantity,
                         },
                     ),
+                    is_heavy=is_heavy,
+                    is_cumbersome=is_cumbersome,
                 )
             )
 
