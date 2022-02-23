@@ -3,6 +3,7 @@ import dataclasses
 import serpyco
 from rolling.action.base import CharacterAction, get_character_action_url
 import typing
+from rolling.model.measure import Unit
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
@@ -86,15 +87,29 @@ class TakeAction(CharacterAction):
                         zone_row_i=row_i,
                         zone_col_i=col_i,
                         classes=[stuff.stuff_id],
+                        infos=stuff.name,
                     )
                 )
 
             for (row_i, col_i), resource in resources:
+                resource_description = self._kernel.game.config.resources[resource.id]
+                if resource_description.unit == Unit.GRAM:
+                    kg_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
+                    quantity_str = f"{round(resource.quantity/1000, 3)}{kg_str}"
+                    infos = f"{quantity_str} {resource.name}"
+                else:
+                    unit_str = self._kernel.translation.get(
+                        resource_description.unit, short=True
+                    )
+                    quantity_str = f"{round(resource.quantity, 5)}{unit_str}"
+                    infos = f"{quantity_str} {resource.name}"
+
                 exploitable_tiles.append(
                     ExploitableTile(
                         zone_row_i=row_i,
                         zone_col_i=col_i,
                         classes=[resource.id],
+                        infos=infos,
                     )
                 )
 

@@ -12,6 +12,7 @@ class ExploitableTile:
     zone_row_i: int
     zone_col_i: int
     classes: typing.List[str]
+    infos: str = ""
 
 
 @dataclasses.dataclass
