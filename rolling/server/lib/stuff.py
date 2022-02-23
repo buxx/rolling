@@ -44,6 +44,7 @@ class StuffLib:
         exclude_crafting: bool = False,
         exclude_used_as: bool = False,
         only_columns: typing.Optional[typing.List[Column]] = None,
+        include_equip: bool = True,
     ) -> Query:
         if world_row_i is not None or world_col_i is not None:
             assert world_row_i is not None and world_col_i is not None
@@ -65,10 +66,19 @@ class StuffLib:
             query = query.filter(StuffDocument.shared_with_affinity_id == None)
 
         query = query.filter(
-            # Note: When carried_by_id is None, it exclude carried stuff
-            StuffDocument.carried_by_id == carried_by_id,
             StuffDocument.in_built_id == in_built_id,
         )
+
+        if not include_equip and carried_by_id is not None:
+            query = query.filter(
+                StuffDocument.carried_by_id == carried_by_id,
+            )
+        else:
+            query = query.filter(
+                # Note: When carried_by_id is None, it exclude carried stuff
+                StuffDocument.carried_by_id
+                == carried_by_id,
+            )
 
         if exclude_crafting:
             query = query.filter(StuffDocument.under_construction == False)
@@ -269,6 +279,7 @@ class StuffLib:
         shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
         exclude_shared_with_affinity: bool = False,
         stuff_id: typing.Optional[str] = None,
+        include_equip: bool = True,
     ) -> typing.List[StuffModel]:
         return [
             self.stuff_model_from_doc(doc)
@@ -278,6 +289,7 @@ class StuffLib:
                 stuff_id=stuff_id,
                 exclude_shared_with_affinity=exclude_shared_with_affinity,
                 shared_with_affinity_ids=shared_with_affinity_ids,
+                include_equip=include_equip,
             ).all()
         ]
 

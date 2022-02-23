@@ -651,9 +651,11 @@ class CharacterLib:
             .all()
         )
 
-    def get_inventory(self, character_id: str) -> CharacterInventoryModel:
+    def get_inventory(
+        self, character_id: str, include_equip: bool = True
+    ) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(
-            character_id, exclude_crafting=False
+            character_id, exclude_crafting=False, include_equip=include_equip
         )
         carried_resources = self._kernel.resource_lib.get_carried_by(character_id)
 

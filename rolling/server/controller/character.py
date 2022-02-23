@@ -698,13 +698,16 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> CharacterInventoryModelApi:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(
+            hapic_data.path.character_id, include_equip=True
+        )
         stuffs = []
         resources = []
 
         seen_stuffs: typing.Set[str] = set()
         for stuff in inventory.stuff:
-            seen_id = f"{stuff.stuff_id}_{stuff.under_construction}"
+            is_equip = bool(stuff.used_by)
+            seen_id = f"{stuff.stuff_id}_{stuff.under_construction}_{is_equip}"
             if seen_id not in seen_stuffs:
                 seen_stuffs.add(seen_id)
                 similar_stuffs = [
@@ -717,7 +720,8 @@ class CharacterController(BaseController):
                 weight = sum([s.weight for s in similar_stuffs])
                 clutter = sum([s.clutter for s in similar_stuffs])
                 unit_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
-                infos = f"{count}x {stuff.name}, {round(weight / 1000, 3)} {unit_str}, {clutter} d'encombrement"
+                equi_str = " (équipé)" if is_equip else ""
+                infos = f"{count}x {stuff.name}, {round(weight / 1000, 3)} {unit_str}, {clutter} d'encombrement{equi_str}"
                 is_heavy = (
                     weight / character.get_weight_capacity(self._kernel)
                     >= self._kernel.game.config.ratio_item_is_heavy
@@ -747,6 +751,7 @@ class CharacterController(BaseController):
                         ),
                         is_heavy=is_heavy,
                         is_cumbersome=is_cumbersome,
+                        is_equip=is_equip,
                     )
                 )
 

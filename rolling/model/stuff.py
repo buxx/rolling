@@ -69,6 +69,7 @@ class StuffModelApi:
     drop_base_url: str
     is_heavy: bool
     is_cumbersome: bool
+    is_equip: bool
 
 
 @dataclasses.dataclass
