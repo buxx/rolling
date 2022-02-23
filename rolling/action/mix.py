@@ -210,17 +210,17 @@ class MixResourcesAction(WithResourceAction):
                         items=[
                             Part(
                                 text=(
-                                    f"Quantité en {unit_name} "
-                                    f"(coût: {base_cost} + {cost_per_unit} par {unit_name}, "
-                                    f"avec {required_str}) ?"
+                                    f"Coût: {base_cost} + {cost_per_unit} par {unit_name}. Requiert {required_str}"
                                 )
                             ),
                             *have_parts,
                             Part(
-                                label=f"Quantité {expected_quantity_context.display_unit_name} ?",
+                                label=f"Quantité à produire ({expected_quantity_context.display_unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=expected_quantity_context.default_quantity,
+                                min_value=0.0,
+                                max_value=expected_quantity_context.default_quantity_float,
                             ),
                         ],
                     )

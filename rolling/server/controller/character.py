@@ -1313,9 +1313,9 @@ class CharacterController(BaseController):
                 Part(
                     is_link=True,
                     label="Toutes les actions",
-                    form_action=f"/_describe/character/{character_id}/on_place_actions"
+                    form_action=f"/_describe/character/{character_id}/on_place_actions",
                 )
-            ]
+            ],
         )
 
     @hapic.with_api_doc()

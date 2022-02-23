@@ -49,6 +49,8 @@ class Part:
     is_column: bool = False
     colspan: int = 1
     columns: int = 0
+    min_value: typing.Optional[float] = None
+    max_value: typing.Optional[float] = None
 
     @classmethod
     def from_dataclass_fields(

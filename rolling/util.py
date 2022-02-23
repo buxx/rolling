@@ -428,6 +428,7 @@ class ExpectedQuantityContext:
     display_unit_short_name: str
     real_unit: Unit
     default_quantity: str
+    default_quantity_float: float
     carried_quantity_str: str
 
     @classmethod
@@ -445,6 +446,9 @@ class ExpectedQuantityContext:
             if expect_kg
             else f"{carried_resource.quantity} {unit_short_name}"
         )
+        default_quantity_float = (
+            carried_resource.quantity / 1000 if expect_kg else carried_resource.quantity
+        )
         carried_quantity_str = quantity_to_str(
             carried_resource.quantity, carried_resource.unit, kernel
         )
@@ -455,6 +459,7 @@ class ExpectedQuantityContext:
             display_unit_short_name=unit_short_name,
             real_unit=carried_resource.unit,
             default_quantity=default_quantity,
+            default_quantity_float=default_quantity_float,
             carried_quantity_str=carried_quantity_str,
         )
 
