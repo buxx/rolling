@@ -776,6 +776,9 @@ class CharacterController(BaseController):
                 clutter / character.get_clutter_capacity(self._kernel)
                 >= self._kernel.game.config.ratio_item_is_cumbersome
             )
+            unit_str = self._kernel.translation.get(
+                resource_description.unit, short=True
+            )
             resources.append(
                 CarriedResourceDescriptionModelApi(
                     id=resource.id,
@@ -792,7 +795,7 @@ class CharacterController(BaseController):
                         action_type=ActionType.DROP_RESOURCE,
                         action_description_id="DROP_RESOURCE",
                         query_params={
-                            "quantity": resource.quantity,
+                            "quantity": f"{resource.quantity} {unit_str}",
                         },
                     ),
                     is_heavy=is_heavy,
