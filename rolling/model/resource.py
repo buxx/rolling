@@ -38,6 +38,7 @@ class CarriedResourceDescriptionModelApi:
     infos: str
     classes: typing.List[str]
     quantity: float
+    quantity_str: str
     drop_base_url: str
 
 

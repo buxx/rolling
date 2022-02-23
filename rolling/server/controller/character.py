@@ -744,12 +744,14 @@ class CharacterController(BaseController):
             clutter = resource_description.clutter * resource.quantity
             if resource_description.unit == Unit.GRAM:
                 kg_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
-                infos = f"{round(resource.quantity/1000, 3)}{kg_str} {resource.name}, {clutter} d'encombrement"
+                quantity_str = f"{round(resource.quantity/1000, 3)}{kg_str}"
+                infos = f"{quantity_str} {resource.name}, {clutter} d'encombrement"
             else:
                 unit_str = self._kernel.translation.get(
                     resource_description.unit, short=True
                 )
-                infos = f"{round(resource.quantity, 5)}{unit_str} {resource.name}, {clutter} d'encombrement"
+                quantity_str = f"{round(resource.quantity, 5)}{unit_str}"
+                infos = f"{quantity_str} {resource.name}, {clutter} d'encombrement"
             resources.append(
                 CarriedResourceDescriptionModelApi(
                     id=resource.id,
@@ -759,6 +761,7 @@ class CharacterController(BaseController):
                     infos=infos,
                     classes=[resource.id],
                     quantity=resource.quantity,
+                    quantity_str=quantity_str,
                     drop_base_url=get_with_resource_action_url(
                         character_id=hapic_data.path.character_id,
                         resource_id=resource.id,
