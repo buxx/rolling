@@ -652,12 +652,12 @@ class CharacterLib:
         )
 
     def get_inventory(
-        self, character_id: str, include_equip: bool = True
+        self, character: CharacterModel, include_equip: bool = True
     ) -> CharacterInventoryModel:
         carried_stuff = self._stuff_lib.get_carried_by(
-            character_id, exclude_crafting=False, include_equip=include_equip
+            character.id, exclude_crafting=False, include_equip=include_equip
         )
-        carried_resources = self._kernel.resource_lib.get_carried_by(character_id)
+        carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
 
         total_weight = sum([stuff.weight for stuff in carried_stuff if stuff.weight])
         total_weight += sum([r.weight for r in carried_resources if r.weight])
@@ -676,6 +676,8 @@ class CharacterLib:
             resource=carried_resources,
             weight=total_weight,
             clutter=total_clutter,
+            over_weight=total_weight > character.get_weight_capacity(self._kernel),
+            over_clutter=total_clutter > character.get_clutter_capacity(self._kernel),
         )
 
     def get_on_place_stuff_actions(
@@ -1236,7 +1238,7 @@ class CharacterLib:
             zone_type
         ).move_cost
         character = self.get(character_id)
-        inventory = self.get_inventory(character_id)
+        inventory = self.get_inventory(character)
         can_move = True
         cannot_move_reasons: typing.List[str] = []
 
@@ -1272,7 +1274,7 @@ class CharacterLib:
                 self.check_can_move_to_zone(world_row_i, world_col_i, follower)
             except CannotMoveToZoneError:
                 transport_type_ok = False
-            follower_inventory = self.get_inventory(follower.id)
+            follower_inventory = self.get_inventory(follower)
             if (
                 follower_inventory.weight > follower.get_weight_capacity(self._kernel)
                 or follower_inventory.clutter

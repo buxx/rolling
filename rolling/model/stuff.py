@@ -177,6 +177,8 @@ class ZoneGenerationStuff:
 class CharacterInventoryModel:
     stuff: typing.List[StuffModel]
     resource: typing.List[CarriedResourceDescriptionModel]
+    over_weight: bool
+    over_clutter: bool
     weight: float = 0.0
     clutter: float = 0.0
 
@@ -185,5 +187,7 @@ class CharacterInventoryModel:
 class CharacterInventoryModelApi:
     stuff: typing.List[StuffModelApi]
     resource: typing.List[CarriedResourceDescriptionModelApi]
+    over_weight: bool
+    over_clutter: bool
     weight: float = 0.0
     clutter: float = 0.0

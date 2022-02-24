@@ -698,9 +698,7 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> CharacterInventoryModelApi:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(
-            hapic_data.path.character_id, include_equip=True
-        )
+        inventory = self._character_lib.get_inventory(character, include_equip=True)
         stuffs = []
         resources = []
 
@@ -715,6 +713,7 @@ class CharacterController(BaseController):
                     for s in inventory.stuff
                     if stuff.stuff_id == s.stuff_id
                     and stuff.under_construction == s.under_construction
+                    and bool(stuff.used_by) == bool(s.used_by)
                 ]
                 count = len(similar_stuffs)
                 weight = sum([s.weight for s in similar_stuffs])
@@ -808,6 +807,8 @@ class CharacterController(BaseController):
             resource=resources,
             clutter=inventory.clutter,
             weight=inventory.weight,
+            over_weight=inventory.over_weight,
+            over_clutter=inventory.over_clutter,
         )
 
         return inventory_api
@@ -819,7 +820,7 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(character.id)
+        inventory = self._character_lib.get_inventory(character)
         inventory_parts = self._get_inventory_parts(
             request,
             character,
@@ -967,7 +968,7 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(character.id)
+        inventory = self._character_lib.get_inventory(character)
         form_parts = []
         form_action = (
             f"/_describe/character/{character.id}/pick_from_inventory"
@@ -1061,7 +1062,7 @@ class CharacterController(BaseController):
         with_character = self._kernel.character_lib.get(
             hapic_data.path.with_character_id
         )
-        inventory = self._character_lib.get_inventory(with_character.id)
+        inventory = self._character_lib.get_inventory(with_character)
         inventory_parts = self._get_inventory_parts(
             request,
             with_character,
@@ -2333,13 +2334,11 @@ class CharacterController(BaseController):
         self, request: Request, hapic_data: HapicData
     ) -> ZoneRequiredPlayerData:
         character = self._character_lib.get(hapic_data.path.character_id)
-        inventory = self._character_lib.get_inventory(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(character)
 
         return ZoneRequiredPlayerData(
-            weight_overcharge=inventory.weight
-            > character.get_weight_capacity(self._kernel),
-            clutter_overcharge=inventory.clutter
-            > character.get_clutter_capacity(self._kernel),
+            weight_overcharge=inventory.over_weight,
+            clutter_overcharge=inventory.over_clutter,
         )
 
     @hapic.with_api_doc()
