@@ -50,6 +50,8 @@ create_character_max_points = 10.0
 max_action_propose_turns = 3
 tile_clutter_capacity = 25.0
 destroy_robustness_per_ap = 1
+min_character_card_input_at_create = 0
+max_character_card_input_at_create = 5
 
 [[main_actions]]
 name = "Chercher"

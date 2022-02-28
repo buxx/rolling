@@ -151,6 +151,12 @@ class GameConfig:
         self.ratio_item_is_cumbersome: float = config_dict.get(
             "ratio_item_is_cumbersome", 0.5
         )
+        self.min_character_card_input_at_create = config_dict.get(
+            "min_character_card_input_at_create", 0
+        )
+        self.max_character_card_input_at_create = config_dict.get(
+            "max_character_card_input_at_create", 5
+        )
 
         self.main_actions: typing.List[MainAction] = [
             MainAction(name=m["name"], action_types=m["actions"], class_=m["class"])
