@@ -64,6 +64,7 @@ class GetZoneMessageQueryModel:
 @dataclasses.dataclass
 class ZoneMapModel:
     raw_source: str
+    zone_type_id: str
 
 
 @dataclasses.dataclass

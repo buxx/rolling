@@ -63,8 +63,13 @@ class ZoneLib:
         return tiles
 
     def get_zone(self, row_i: int, col_i: int) -> ZoneMapModel:
+        tile_map = self._kernel.get_tile_map(row_i, col_i)
+        zone_type_id = self._kernel.world_map_source.geography.get_tile_type(
+            row_i, col_i
+        )
         return ZoneMapModel(
-            raw_source=self._kernel.get_tile_map(row_i, col_i).source.raw_source
+            raw_source=tile_map.source.raw_source,
+            zone_type_id=zone_type_id.id,
         )
 
     def get_zone_ressource_doc(
