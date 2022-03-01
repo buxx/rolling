@@ -8,7 +8,7 @@ apispec-serpyco==0.19
 appdirs==1.4.4
 async-timeout==4.0.2
 attrs==21.4.0
-black==21.6b0
+black==22.1.0
 certifi==2021.5.30
 chardet==3.0.4
 click==8.0.1
