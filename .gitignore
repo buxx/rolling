@@ -123,4 +123,4 @@ server.ini
 avatars
 static/graphics.png
 static/engine.wasm
-static/text_input.js
+static/rollgui2.js

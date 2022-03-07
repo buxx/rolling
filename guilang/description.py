@@ -75,6 +75,11 @@ class Part:
 
         return items
 
+    def __post_init__(self) -> None:
+        if self.is_link and self.label is None and self.text is not None:
+            self.label = self.text
+            self.text = None
+
 
 @dataclasses.dataclass
 class RequestClicks:
