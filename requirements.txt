@@ -6,7 +6,7 @@ alembic==1.7.7
 apispec==5.1.1
 apispec-serpyco==0.19
 appdirs==1.4.4
-async-timeout==3.0.1
+async-timeout==4.0.2
 attrs==21.2.0
 black==21.6b0
 certifi==2021.5.30
