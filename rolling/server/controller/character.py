@@ -761,6 +761,7 @@ class CharacterController(BaseController):
         for resource in inventory.resource:
             resource_description = self._kernel.game.config.resources[resource.id]
             clutter = resource_description.clutter * resource.quantity
+            weight = resource_description.weight * resource.quantity
             if resource_description.unit == Unit.GRAM:
                 kg_str = self._kernel.translation.get(Unit.KILOGRAM, short=True)
                 quantity_str = f"{round(resource.quantity/1000, 3)}{kg_str}"
