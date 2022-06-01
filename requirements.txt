@@ -17,7 +17,7 @@ hapic==0.89
 http-basic-auth==1.2.0
 idna==3.3
 iniconfig==1.1.1
-isort==5.9.1
+isort==5.10.1
 Jinja2==3.0.1
 Mako==1.1.4
 MarkupSafe==2.0.1
