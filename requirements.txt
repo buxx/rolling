@@ -1,4 +1,4 @@
-aiohttp==3.7.3
+aiohttp==3.8.1
 aiohttp-basicauth-middleware==1.1.2
 aiohttp-jinja2==1.4.2
 aioresponses==0.7.2
