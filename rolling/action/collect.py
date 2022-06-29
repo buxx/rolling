@@ -141,7 +141,11 @@ class CollectResourceAction(CharacterAction):
         character: "CharacterModel",
         input_: typing.Optional[CollectResourceModel] = None,
     ) -> typing.Optional[float]:
-        if input_ and input_.quantity is not None and input_.resource_id is not None:
+        if (
+            input_
+            and (input_.quantity is not None or input_.quantity_auto)
+            and input_.resource_id is not None
+        ):
             try:
                 production = next(
                     production
@@ -155,6 +159,10 @@ class CollectResourceAction(CharacterAction):
                 )
             except StopIteration:
                 raise ImpossibleAction("Plus de ressource à cet endroit")
+
+            if input_.quantity_auto:
+                quantity = production.extract_quick_action_quantity
+                input_.quantity = quantity
 
             return input_.quantity * production.extract_cost_per_unit
 
