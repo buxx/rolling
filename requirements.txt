@@ -33,7 +33,7 @@ psycopg2==2.9.3
 py==1.11.0
 pyparsing==3.0.9
 pytest==7.1.2
-pytest-aiohttp==0.3.0
+pytest-aiohttp==1.0.4
 python-dateutil==2.8.1
 python-editor==1.0.4
 python-rapidjson==1.4
