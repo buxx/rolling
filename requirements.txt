@@ -30,7 +30,7 @@ Pillow==9.1.1
 pip-utils==0.0.6
 pluggy==1.0.0
 psycopg2==2.9.3
-py==1.10.0
+py==1.11.0
 pyparsing==2.4.7
 pytest==6.2.4
 pytest-aiohttp==0.3.0
