@@ -13,7 +13,7 @@ certifi==2022.6.15
 chardet==5.0.0
 click==8.1.3
 greenlet==1.1.2
-hapic==0.84
+hapic==0.91
 http-basic-auth==1.2.0
 idna==2.10
 iniconfig==1.1.1
