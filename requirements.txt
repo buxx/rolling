@@ -46,6 +46,6 @@ SQLAlchemy==1.4.39
 toml==0.10.2
 typing-extensions==4.2.0
 typing-inspect==0.7.1
-urllib3==1.26.5
+urllib3==1.26.9
 urwid==2.1.2
 yarl==1.6.3
