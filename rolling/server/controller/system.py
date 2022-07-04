@@ -17,6 +17,8 @@ from guilang.description import Part
 from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
+from rolling.log import server_logger
+
 
 version = pkg_resources.require("rolling")[0].version
 
@@ -92,15 +94,20 @@ class SystemController(BaseController):
         )
 
         if self._serve_static_files:
+            server_logger.info(f"Serve static files from '{self._serve_static_files}'")
             app.add_routes(
                 [
-                    web.get("/", self.root),
                     web.static(
                         "/static",
                         self._serve_static_files,
                         follow_symlinks=True,
                     ),
-                    web.static("/media", "game/media"),
-                    web.static("/media_bg", "game/media/bg"),
                 ]
             )
+        app.add_routes(
+            [
+                web.get("/", self.root),
+                web.static("/media", "game/media"),
+                web.static("/media_bg", "game/media/bg"),
+            ]
+        )
