@@ -12,7 +12,8 @@ from rolling.exception import DisconnectClient
 from rolling.exception import UnableToProcessEvent
 from rolling.exception import UnknownEvent
 from rolling.log import server_logger
-from rolling.model.event import EmptyData
+from rolling.model.data import ListOfItemModel
+from rolling.model.event import EmptyData, NewResumeTextData
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.model.serializer import ZoneEventSerializerFactory
@@ -87,6 +88,7 @@ class ZoneEventsManager:
         reader_token: typing.Optional[str] = None,
         token: typing.Optional[str] = None,
     ) -> web.WebSocketResponse:
+        character_doc = self._kernel.character_lib.get_document(character_id)
         server_logger.info(
             f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})"
         )
@@ -108,6 +110,23 @@ class ZoneEventsManager:
 
         if reader_token:
             self._sockets_associated_reader_token[socket] = reader_token
+
+        # FIXME : refactorize it
+        # Send immediately resume text
+        await self.send_to_sockets(
+            WebSocketEvent(
+                type=ZoneEventType.NEW_RESUME_TEXT,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=NewResumeTextData(
+                    resume=ListOfItemModel(
+                        self._kernel.character_lib.get_resume_text(character_id)
+                    )
+                ),
+            ),
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+        )
 
         # Start to listen client messages
         try:
