@@ -16,7 +16,7 @@ from rolling.exception import RollingError
 from rolling.rolling_types import ActionType
 from rolling.server.document.resource import ZoneResourceDocument
 from rolling.server.link import CharacterActionLink, ExploitableTile
-from rolling.util import get_on_and_around_coordinates
+from rolling.util import Quantity, QuantityEncoder, get_on_and_around_coordinates
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -28,16 +28,16 @@ class CollectResourceModel:
     resource_id: str
     zone_row_i: int = serpyco.number_field(cast_on_load=True)
     zone_col_i: int = serpyco.number_field(cast_on_load=True)
-    quantity: typing.Optional[float] = serpyco.number_field(
-        cast_on_load=True, default=None
-    )
+    quantity: typing.Optional[Quantity] = None
     quantity_auto: int = serpyco.number_field(cast_on_load=True, default=0)
 
 
 # FIXME BS 2019-08-29: Permit collect only some material (like no liquid)
 class CollectResourceAction(CharacterAction):
     input_model = CollectResourceModel
-    input_model_serializer = serpyco.Serializer(input_model)
+    input_model_serializer = serpyco.Serializer(
+        input_model, type_encoders={Quantity: QuantityEncoder()}
+    )
 
     @classmethod
     def get_properties_from_config(
@@ -162,9 +162,9 @@ class CollectResourceAction(CharacterAction):
 
             if input_.quantity_auto:
                 quantity = production.extract_quick_action_quantity
-                input_.quantity = quantity
+                input_.quantity = Quantity(quantity)
 
-            return input_.quantity * production.extract_cost_per_unit
+            return input_.quantity.real_value * production.extract_cost_per_unit
 
     async def perform(
         self, character: "CharacterModel", input_: CollectResourceModel
@@ -206,6 +206,9 @@ class CollectResourceAction(CharacterAction):
                                 label=f"Quantité (coût: {production.extract_cost_per_unit} par {unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value=production.ui_extract_default_quantity,
+                                min_value=production.ui_extract_min_quantity,
+                                max_value=production.ui_extract_max_quantity,
                             )
                         ],
                     )
@@ -214,8 +217,8 @@ class CollectResourceAction(CharacterAction):
 
         quantity = input_.quantity
         if input_.quantity_auto:
-            quantity = production.extract_quick_action_quantity
-            input_.quantity = quantity
+            quantity_ = production.extract_quick_action_quantity
+            input_.quantity = Quantity(quantity_)
 
         if not production.infinite:
             try:
@@ -238,12 +241,12 @@ class CollectResourceAction(CharacterAction):
                     f"resource_id:{input_.resource_id}"
                 )
 
-            if zone_resource_doc.quantity < quantity:
+            if zone_resource_doc.quantity < quantity.real_value:
                 input_ = CollectResourceModel(
                     resource_id=input_.resource_id,
                     zone_row_i=input_.zone_row_i,
                     zone_col_i=input_.zone_col_i,
-                    quantity=zone_resource_doc.quantity,
+                    quantity=Quantity(zone_resource_doc.quantity),
                 )
 
         cost = self.get_cost(character, input_=input_)
@@ -253,7 +256,7 @@ class CollectResourceAction(CharacterAction):
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=input_.resource_id,
-            quantity=quantity,
+            quantity=quantity.real_value,
             commit=False,
         )
         if not production.infinite:
@@ -263,7 +266,7 @@ class CollectResourceAction(CharacterAction):
                 zone_row_i=input_.zone_row_i,
                 zone_col_i=input_.zone_col_i,
                 resource_id=input_.resource_id,
-                quantity=quantity,
+                quantity=quantity.real_value,
                 allow_reduce_more_than_possible=True,
                 commit=False,
             )
@@ -273,7 +276,7 @@ class CollectResourceAction(CharacterAction):
         )
         self._kernel.server_db_session.commit()
 
-        text = f"{quantity}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
+        text = f"{round(quantity.real_value, 3)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
         return Description(
             title=f"Récupérer du {resource_description.name}",
             items=[Part(text=text)],

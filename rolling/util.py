@@ -12,6 +12,8 @@ from pathlib import Path
 import typing
 import shutil
 
+import serpyco
+
 from guilang.description import Description
 from guilang.description import Part
 from rolling.exception import WrongInputError
@@ -561,3 +563,26 @@ def url_without_zone_coordinates(url: str) -> str:
     if "?" not in url:
         url += "?"
     return url
+
+
+class Quantity:
+    def __init__(self, value: typing.Union[str, float, int]) -> None:
+        self.value = value
+
+    def __repr__(self) -> str:
+        return self.value
+
+    @property
+    def real_value(self) -> float:
+        return str_quantity_to_float(self.value)
+
+
+class QuantityEncoder(serpyco.FieldEncoder):
+    def load(self, value: typing.Union[str, float, int]) -> Quantity:
+        return Quantity(value)
+
+    def dump(self, quantity: Quantity) -> str:
+        return str(quantity.value)
+
+    def json_schema(self) -> dict:
+        return {"type": "string"}

@@ -131,6 +131,8 @@ class LearnKnowledgeAction(CharacterAction):
                                 label=f"Points d'actions à dépenser ?",
                                 type_=Type.NUMBER,
                                 name="ap",
+                                min_value=1.0,
+                                max_value=character.action_points,
                             )
                         ],
                     ),

@@ -122,6 +122,9 @@ class ZoneMapTileProduction:
     infinite: bool
     extract_cost_per_unit: float
     extract_quick_action_quantity: float
+    ui_extract_default_quantity: str
+    ui_extract_min_quantity: float
+    ui_extract_max_quantity: float
 
     def __eq__(self, other: "ZoneMapTileProduction") -> bool:
         return self.resource.id == other.resource.id

@@ -99,7 +99,12 @@ from rolling.server.extension import hapic
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.transfer import TransferStuffOrResources
-from rolling.util import ILLUSTRATION_AVATAR_PATTERN, ExpectedQuantityContext
+from rolling.util import (
+    ILLUSTRATION_AVATAR_PATTERN,
+    ExpectedQuantityContext,
+    Quantity,
+    QuantityEncoder,
+)
 from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
@@ -1857,7 +1862,10 @@ class CharacterController(BaseController):
             CharacterAction,
             self._action_factory.create_action(action_type, action_description_id),
         )
-        input_ = serpyco.Serializer(action.input_model).load(
+        # FIXME : instanciate serializer once and for all
+        input_ = serpyco.Serializer(
+            action.input_model, type_encoders={Quantity: QuantityEncoder()}
+        ).load(
             dict(request.query)
         )  # TODO perf
         character_model = self._kernel.character_lib.get(hapic_data.path.character_id)

@@ -568,6 +568,11 @@ class Game:
                         extract_quick_action_quantity=produce_raw[
                             "extract_quick_action_quantity"
                         ],
+                        ui_extract_default_quantity=produce_raw[
+                            "ui_extract_default_quantity"
+                        ],
+                        ui_extract_min_quantity=produce_raw["ui_extract_min_quantity"],
+                        ui_extract_max_quantity=produce_raw["ui_extract_max_quantity"],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],
