@@ -287,6 +287,8 @@ class TransformStuffIntoStuffAction(WithStuffAction):
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=str(max_quantity),
+                                min_value=0.0,
+                                max_value=max_quantity,
                             )
                         ],
                     )
@@ -530,6 +532,8 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=str(default_quantity),
+                                min_value=0.0,
+                                max_value=carried_resource.quantity,
                             ),
                         ],
                     )

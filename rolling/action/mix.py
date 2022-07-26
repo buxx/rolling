@@ -15,7 +15,7 @@ from rolling.exception import NoCarriedResource
 from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.util import ExpectedQuantityContext
+from rolling.util import ExpectedQuantityContext, Quantity, QuantityEncoder
 from rolling.util import InputQuantityContext
 
 if typing.TYPE_CHECKING:
@@ -26,12 +26,14 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class MixResourceModel:
     resource_mix_id: str
-    quantity: typing.Optional[str] = None
+    quantity: typing.Optional[Quantity] = None
 
 
 class MixResourcesAction(WithResourceAction):
     input_model: typing.Type[MixResourceModel] = MixResourceModel
-    input_model_serializer = serpyco.Serializer(input_model)
+    input_model_serializer = serpyco.Serializer(
+        input_model, type_encoders={Quantity: QuantityEncoder()}
+    )
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
         if not self._kernel.resource_lib.have_resource(
@@ -67,7 +69,8 @@ class MixResourcesAction(WithResourceAction):
                     character_id=character.id, resource_id=required_resource.resource.id
                 )
                 user_input_context = InputQuantityContext.from_carried_resource(
-                    user_input=input_.quantity, carried_resource=carried_resource
+                    user_input=input_.quantity.value,
+                    carried_resource=carried_resource,
                 )
                 required_quantity = (
                     required_resource.coeff * user_input_context.real_quantity
@@ -141,7 +144,7 @@ class MixResourcesAction(WithResourceAction):
                 character.id, resource_id=resource_id
             )
             user_input_context = InputQuantityContext.from_carried_resource(
-                user_input=input_.quantity, carried_resource=carried_resource
+                user_input=input_.quantity.value, carried_resource=carried_resource
             )
             return resource_mix_description.cost * user_input_context.real_quantity
         return self._description.base_cost
@@ -161,6 +164,7 @@ class MixResourcesAction(WithResourceAction):
         carried_resource = self._kernel.resource_lib.get_one_carried_by(
             character.id, resource_id=resource_id
         )
+        # FIXME : Compute maximum quantity
         expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
             self._kernel, carried_resource
         )
@@ -228,7 +232,7 @@ class MixResourcesAction(WithResourceAction):
             )
 
         user_input_context = InputQuantityContext.from_carried_resource(
-            user_input=input_.quantity, carried_resource=carried_resource
+            user_input=input_.quantity.value, carried_resource=carried_resource
         )
 
         # Make mix
@@ -257,6 +261,6 @@ class MixResourcesAction(WithResourceAction):
         self._kernel.server_db_session.commit()
 
         return Description(
-            title=f"{input_.quantity} {unit_name} produits",
+            title=f"{input_.quantity.real_value} {unit_name} produits",
             back_url=f"/_describe/character/{character.id}/inventory",
         )

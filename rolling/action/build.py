@@ -326,6 +326,8 @@ class BringResourcesOnBuild(WithBuildAction):
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=expected_quantity_context.default_quantity,
+                                min_value=0.0,
+                                max_value=min(left, carried_resource.quantity),
                             )
                         ],
                     )
@@ -518,6 +520,8 @@ class ConstructBuildAction(WithBuildAction):
                                 label=f"Y passer combien de temps (Point d'Actions) ?",
                                 type_=Type.NUMBER,
                                 name="cost_to_spent",
+                                min_value=1.0,
+                                max_value=min(character.action_points, max_pa_to_spent),
                             )
                         ],
                     )

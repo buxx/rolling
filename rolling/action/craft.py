@@ -273,9 +273,12 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                         ),
                         items=[
                             Part(
-                                label=f"Quelle quantité ?",
+                                label=f"Quelle quantité en produire ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value="1",
+                                min_value=1,
+                                max_value=100,
                             )
                         ],
                     )
@@ -424,9 +427,12 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
                         ),
                         items=[
                             Part(
-                                label=f"Quelle quantité ?",
+                                label=f"Quelle quantité en produire ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
+                                default_value="1",
+                                min_value=1,
+                                max_value=100,
                             )
                         ],
                     )
@@ -828,6 +834,9 @@ class ContinueStuffConstructionAction(WithStuffAction):
                                 label=f"Combien de points d'actions dépenser ?",
                                 type_=Type.NUMBER,
                                 name="ap",
+                                default_value="1.0",
+                                min_value=1.0,
+                                max_value=min(character.action_points, remain_ap),
                             ),
                         ],
                     )

@@ -574,6 +574,10 @@ class Quantity:
 
     @property
     def real_value(self) -> float:
+        if type(self.value) == float:
+            return self.value
+        elif type(self.value) == int:
+            return self.value
         return str_quantity_to_float(self.value)
 
 

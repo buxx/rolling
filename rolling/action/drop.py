@@ -254,6 +254,8 @@ class DropResourceAction(WithResourceAction):
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=expected_quantity_context.default_quantity,
+                                min_value=0.0,
+                                max_value=carried_resource.quantity,
                             )
                         ],
                     )

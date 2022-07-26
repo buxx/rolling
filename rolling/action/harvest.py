@@ -172,6 +172,9 @@ class HarvestAction(CharacterAction):
                                 label=f"Y passer combien de temps (Points d'Actions) ?",
                                 type_=Type.NUMBER,
                                 name="ap",
+                                default_value="5.0",
+                                min_value=1.0,
+                                max_value=character.action_points,
                             )
                         ],
                     )

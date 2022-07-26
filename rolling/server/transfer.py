@@ -201,6 +201,8 @@ class TransferStuffOrResources(abc.ABC):
                                         type_=Type.NUMBER,
                                         name=self.stuff_quantity_parameter_name,
                                         default_value=str(len(likes_this_stuff)),
+                                        min_value=0.0,
+                                        max_value=len(likes_this_stuff),
                                     )
                                 ],
                             )
@@ -251,6 +253,8 @@ class TransferStuffOrResources(abc.ABC):
                                     type_=Type.NUMBER,
                                     name=self.resource_quantity_parameter_name,
                                     default_value=expected_quantity_context.default_quantity,
+                                    min_value=0.0,
+                                    max_value=carried_resource.quantity,
                                 )
                             ],
                         )

@@ -107,6 +107,8 @@ class TakeResourceAction(WithResourceAction):
                                 name="quantity",
                                 type_=Type.NUMBER,
                                 default_value=expected_quantity_context.default_quantity,
+                                min_value=0.0,
+                                max_value=ground_resource.quantity,
                             )
                         ],
                     )

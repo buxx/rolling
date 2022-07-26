@@ -114,6 +114,9 @@ class SearchMaterialAction(CharacterAction):
                                 label=f"Y passer combien de temps (PA) ?",
                                 type_=Type.NUMBER,
                                 name="ap",
+                                default_value="1.0",
+                                min_value=1.0,
+                                max_value=character.action_points,
                             )
                         ],
                     )

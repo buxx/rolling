@@ -96,6 +96,8 @@ async def with_multiple_carried_stuffs(
                             name="quantity",
                             type_=Type.NUMBER,
                             default_value="1",
+                            min_value=1.0,
+                            max_value=len(all_carried),
                         )
                     ],
                 ),

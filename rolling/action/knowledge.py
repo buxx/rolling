@@ -247,15 +247,19 @@ class ProposeTeachKnowledgeAction(WithCharacterAction):
                                 label=f"Passer combien de points d'actions sur ce cours ?",
                                 type_=Type.NUMBER,
                                 name="ap",
+                                min_value=1.0,
+                                max_value=character.action_points,
                             ),
                             Part(
                                 label=(
-                                    f"Proposition valable combien de tours "
+                                    f"Proposition valable combien de cycles "
                                     f"(max {max_turns}, en cours compris) ?"
                                 ),
                                 type_=Type.NUMBER,
                                 name="expire",
                                 default_value="1",
+                                min_value=1.0,
+                                max_value=168.0,
                             ),
                         ],
                     )
