@@ -71,6 +71,24 @@ class SystemController(BaseController):
         return web.json_response(self._kernel.loadings_medias_names)
 
     @hapic.with_api_doc()
+    async def illustrations_names(self, request: Request) -> web.Response:
+        illustrations_names = []
+
+        for item in self._kernel.game.config.resources.values():
+            illustrations_names.append(item.illustration)
+
+        for item in self._kernel.game.config.builds.values():
+            illustrations_names.append(item.illustration)
+
+        for item in self._kernel.game.stuff_manager.items:
+            illustrations_names.append(item.illustration)
+
+        for item in self._kernel.game.world_manager.world.zones_properties:
+            illustrations_names.append(item.illustration)
+
+        return web.json_response(list(set(filter(bool, illustrations_names))))
+
+    @hapic.with_api_doc()
     @hapic.input_path(AvatarIndexPath)
     async def avatar(self, request: Request, hapic_data: HapicData) -> web.Response:
         index = hapic_data.path.index
@@ -90,6 +108,7 @@ class SystemController(BaseController):
                 web.get("/infos", self.infos),
                 web.get("/avatar/{index}", self.avatar),
                 web.get("/system/loadings", self.loadings),
+                web.get("/system/illustrations-names", self.illustrations_names),
             ]
         )
 

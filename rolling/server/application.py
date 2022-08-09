@@ -63,6 +63,7 @@ def get_application(
                 "/system/version",
                 "/system/describe/infos",
                 "/system/loadings",
+                "/system/illustrations-names",
                 "/infos",
                 "/media",
                 "/media_bg",
