@@ -62,12 +62,12 @@ class SearchFoodAction(CharacterAction):
         except ImpossibleAction:
             return []
 
-        classes: typing.Optional[typing.List[str]] = None
+        classes: typing.List[str] = []
         for production in self._description.properties["produce"]:
             if "resource" in production:
-                classes = [production["resource"]]
+                classes.append(production["resource"])
             elif "stuff" in production:
-                classes = [production["stuff"]]
+                classes.append(production["stuff"])
 
         return [
             CharacterActionLink(
