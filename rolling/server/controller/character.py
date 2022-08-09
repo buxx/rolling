@@ -1410,6 +1410,7 @@ class CharacterController(BaseController):
                             link_group_name=character_action.group_name,
                             classes=character_action.classes1,
                             classes2=character_action.classes2,
+                            cost=character_action.cost,
                         )
                     )
 
