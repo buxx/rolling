@@ -1399,7 +1399,8 @@ class CharacterController(BaseController):
         action_parts = []
         action_categories = list(sorted(set([a.category for a in character_actions])))
         for action_category in action_categories:
-            action_parts.append(Part(classes=["h2"], text=action_category or "Autres"))
+            # TODO : for now, dont add a text line with category
+            # action_parts.append(Part(classes=["h2"], text=action_category or "Autres"))
             for character_action in character_actions:
                 if character_action.category == action_category:
                     action_parts.append(

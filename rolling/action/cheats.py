@@ -75,6 +75,7 @@ class CheatsCharacterAction(CharacterAction):
                         action_description_id=self._description.id,
                         query_params={"cheat_id": "increase_ap"},
                     ),
+                    group_name="Triche",
                 )
             )
 
@@ -88,6 +89,7 @@ class CheatsCharacterAction(CharacterAction):
                         action_description_id=self._description.id,
                         query_params={"cheat_id": "reduce_tiredness"},
                     ),
+                    group_name="Triche",
                 )
             )
 

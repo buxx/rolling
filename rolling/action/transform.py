@@ -84,6 +84,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
                 ),
                 cost=self.get_cost(character, stuff),
                 classes1=[resource_description.id],
+                group_name="Produire des ressources à partir d'objets de l'inventaire",
             )
         ]
 
@@ -215,6 +216,7 @@ class TransformStuffIntoStuffAction(WithStuffAction):
                     action_type=ActionType.TRANSFORM_STUFF_TO_STUFF,
                     query_params={},
                     action_description_id=self._description.id,
+                    group_name="Produire des objets à partir d'objets de l'inventaire",
                 ),
             )
         ]
@@ -475,6 +477,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                 ),
                 cost=self.get_cost(character, resource_id),
                 classes1=classes,
+                group_name="Produire des ressources à partir de ressources de l'inventaire",
             )
         ]
 

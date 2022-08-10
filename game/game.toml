@@ -59,7 +59,7 @@ class = "SEARCH"
 actions = ["SEARCH_FOOD", "SEARCH_MATERIAL"]
 
 [[main_actions]]
-name = "Mélanges"
+name = "Mélanges/Productions"
 class = "MIX"
 actions = ["MIX_RESOURCES", "TRANSFORM_STUFF_TO_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
