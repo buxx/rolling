@@ -216,8 +216,8 @@ class TransformStuffIntoStuffAction(WithStuffAction):
                     action_type=ActionType.TRANSFORM_STUFF_TO_STUFF,
                     query_params={},
                     action_description_id=self._description.id,
-                    group_name="Produire des objets à partir d'objets de l'inventaire",
                 ),
+                group_name="Produire des objets à partir d'objets de l'inventaire",
             )
         ]
 
