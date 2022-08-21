@@ -14,7 +14,7 @@ from rolling.action.base import WithStuffAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.action.base import get_with_stuff_action_url
-from rolling.action.utils import ConfirmModel
+from rolling.action.utils import BeginBuildModel
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ImpossibleAction
@@ -461,7 +461,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
 
 
 @dataclasses.dataclass
-class BeginStuffModel(ConfirmModel):
+class BeginStuffModel(BeginBuildModel):
     description: typing.Optional[str] = None
 
 

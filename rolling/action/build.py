@@ -12,7 +12,7 @@ from rolling.action.base import CharacterAction
 from rolling.action.base import WithBuildAction
 from rolling.action.base import get_character_action_url
 from rolling.action.base import get_with_build_action_url
-from rolling.action.utils import ConfirmModel
+from rolling.action.utils import BeginBuildModel
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
 from rolling.action.utils import get_build_description_parts
@@ -57,8 +57,8 @@ def get_build_progress(build_doc: BuildDocument, kernel: "Kernel") -> float:
 
 
 class BeginBuildAction(CharacterAction):
-    input_model = ConfirmModel
-    input_model_serializer = serpyco.Serializer(ConfirmModel)
+    input_model = BeginBuildModel
+    input_model_serializer = serpyco.Serializer(BeginBuildModel)
 
     @classmethod
     def get_properties_from_config(
@@ -109,7 +109,7 @@ class BeginBuildAction(CharacterAction):
         ]
 
     async def perform(
-        self, character: "CharacterModel", input_: ConfirmModel
+        self, character: "CharacterModel", input_: BeginBuildModel
     ) -> Description:
         build_id = self._description.properties["build_id"]
         build_description = self._kernel.game.config.builds[build_id]
@@ -118,12 +118,6 @@ class BeginBuildAction(CharacterAction):
             items = get_build_description_parts(
                 self._kernel, build_description, include_build_parts=True
             )
-
-            if not build_description.many:
-                items.append(Part(text=""))
-                items.append(
-                    Part(text="Cera consruit là où se trouve votre personnage")
-                )
 
             cost = self.get_cost(character, input_=input_)
             items.append(
@@ -144,21 +138,59 @@ class BeginBuildAction(CharacterAction):
                 items=items,
                 illustration_name=build_description.illustration,
             )
+
+        return Description(
+            request_clicks=RequestClicks(
+                action_type=ActionType.BEGIN_BUILD,
+                action_description_id=self._description.id,
+                cursor_classes=build_description.classes + [build_id],
+                many=build_description.many,
+            ),
+        )
+
+    async def perform_from_event(
+        self, character: "CharacterModel", input_: BeginBuildModel
+    ) -> typing.Tuple[typing.List[WebSocketEvent], typing.List[WebSocketEvent]]:
+        build_id = self._description.properties["build_id"]
+        build_description = self._kernel.game.config.builds[build_id]
+
         build_doc = self._kernel.build_lib.place_build(
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
-            zone_row_i=character.zone_row_i,
-            zone_col_i=character.zone_col_i,
+            zone_row_i=input_.row_i,
+            zone_col_i=input_.col_i,
             build_id=build_description.id,
             under_construction=True,
         )
         await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=self.get_cost(character, input_)
         )
-        return Description(
-            title=f"{build_description.name} commencé",
-            footer_with_build_id=build_doc.id,
-            back_url=f"/_describe/character/{character.id}/build_actions",
+
+        return (
+            [
+                WebSocketEvent(
+                    type=ZoneEventType.NEW_BUILD,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    data=NewBuildData(
+                        build=ZoneBuildModelContainer(
+                            doc=build_doc, desc=build_description
+                        )
+                    ),
+                )
+            ],
+            [
+                WebSocketEvent(
+                    type=ZoneEventType.NEW_RESUME_TEXT,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    data=NewResumeTextData(
+                        resume=ListOfItemModel(
+                            self._kernel.character_lib.get_resume_text(character.id)
+                        )
+                    ),
+                )
+            ],
         )
 
 

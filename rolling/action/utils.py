@@ -195,8 +195,10 @@ def in_percent(reference: float, number: float, percent: int) -> AroundPercent:
 
 
 @dataclasses.dataclass
-class ConfirmModel:
+class BeginBuildModel:
     confirm: int = serpyco.number_field(cast_on_load=True, default=0)
+    row_i: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
+    col_i: typing.Optional[int] = serpyco.number_field(cast_on_load=True, default=None)
 
 
 def get_build_description_parts(
