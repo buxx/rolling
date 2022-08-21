@@ -435,7 +435,8 @@ class GameConfig:
                 is_floor=build_raw.get("is_floor", False),
                 is_door=bool(build_raw.get("door", None)),
                 door_type=build_raw.get("door", None),
-                robustness=build_raw.get("robustness"),
+                robustness=build_raw.get("robustness", None),
+                spawn_point=build_raw.get("spawn_point", False),
             )
 
         return builds

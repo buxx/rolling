@@ -3,7 +3,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Query
 import typing
 
-from rolling.exception import ImpossibleAction
+from rolling.exception import ImpossibleAction, NotEnoughResource
 from rolling.model.build import ZoneBuildModelContainer
 from rolling.model.character import CharacterModel
 from rolling.model.event import NewBuildData, WebSocketEvent, ZoneEventType
@@ -210,12 +210,18 @@ class BuildLib:
             quantity_to_reduce = required_resource.quantity * (
                 consume_resources_percent / 100
             )
-            self._kernel.resource_lib.reduce_stored_in(
-                build_id,
-                resource_id=required_resource.resource_id,
-                quantity=quantity_to_reduce,
-                commit=False,
-            )
+            try:
+                self._kernel.resource_lib.reduce_stored_in(
+                    build_id,
+                    resource_id=required_resource.resource_id,
+                    quantity=quantity_to_reduce,
+                    commit=False,
+                )
+            except NotEnoughResource:
+                resource_name = self._kernel.game.config.resources[
+                    required_resource.resource_id
+                ].name
+                raise ImpossibleAction(f"Pas assez de {resource_name}")
 
         build_doc.ap_spent = float(build_doc.ap_spent) + real_progress_cost
 

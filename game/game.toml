@@ -992,6 +992,17 @@ actions = ["SEED"]
     build = "SIMPLE_WOOD_DOOR"
     cost = 0.1
 
+  [ACTIONS.BUILD_TOTEM]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    actions = ["BEGIN_BUILD"]
+    build = "TOTEM"
+    cost = 0.1
+
   [ACTIONS.BUILD_STRONG_WOOD_DOOR]
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
@@ -2239,6 +2250,7 @@ actions = ["SEED"]
   cost = 50.0
   classes = ["LOOM"]
   many = false
+  allow_deposit_limited = true
   group_name = "Utilitaire"
   description = "Un outil indispensable pour produire du tissu"
   robustness = 2
@@ -2256,6 +2268,21 @@ actions = ["SEED"]
   door = "SIMPLE"
   many = false
   robustness = 5
+  allow_deposit_limited = true
+[build.TOTEM]
+  name = "Totem"
+  char = "-"
+  building_char = "x"
+  build_require_resources = [{resource="WOOD", quantity=5.0}]
+  turn_require_resources = []
+  power_on_require_resources = []
+  abilities = []
+  cost = 32.0
+  classes = ["TOTEM"]
+  group_name = "Spécial"
+  many = false
+  robustness = 2
+  allow_deposit_limited = true
 [build.STRONG_WOOD_DOOR]
   name = "Porte en bois solide"
   char = "-"
@@ -2270,6 +2297,7 @@ actions = ["SEED"]
   door = "SIMPLE"
   many = false
   robustness = 16
+  allow_deposit_limited = true
 [build.BRUSHWOOD_EDGE]
   name = "Haie de branchages"
   char = "/"

@@ -158,7 +158,7 @@ class DepositStuffOrResources(TransferStuffOrResources):
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         build_description = self._kernel.game.config.builds[self._to_build.build_id]
-        if not build_description.allow_deposit or (
+        if not build_description.allow_deposit and (
             build_description.allow_deposit_limited
             and resource_id
             not in self._kernel.game.config.builds[
@@ -219,7 +219,7 @@ class DepositToBuildAction(WithBuildAction):
     def check_is_possible(self, character: "CharacterModel", build_id: int) -> None:
         build_doc = self._kernel.build_lib.get_build_doc(build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
-        if not build_description.allow_deposit:
+        if not build_description.allow_deposit and not build_doc.under_construction:
             raise ImpossibleAction("Ce batiment ne permet pas de déposer")
         pass  # TODO: check build is accessible
 
