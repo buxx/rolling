@@ -256,6 +256,7 @@ class ThereIsAroundProcessor(EventProcessor):
                     quick_action_key=quick_action.quick_action_key,
                     # rollgui1 compatibility bellow
                     link=quick_action.link,
+                    force_open_description=quick_action.force_open_description,
                 )
             )
 

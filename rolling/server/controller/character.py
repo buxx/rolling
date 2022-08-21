@@ -1411,6 +1411,7 @@ class CharacterController(BaseController):
                             classes=character_action.classes1,
                             classes2=character_action.classes2,
                             cost=character_action.cost,
+                            force_open_description=character_action.force_open_description,
                         )
                     )
 

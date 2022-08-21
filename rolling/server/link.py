@@ -42,6 +42,7 @@ class QuickAction:
         typing.Dict[str, typing.Union[str, int, float]]
     ] = dataclasses.field(default_factory=dict)
     is_web_browser_link: bool = False
+    force_open_description: bool = False
 
 
 @dataclasses.dataclass
@@ -69,6 +70,7 @@ class CharacterActionLink:
     all_tiles_at_once: bool = False
     # This attribute is used for rollgui2 compatibility
     quick_action_key: typing.Optional[str] = None
+    force_open_description: bool = False
 
     def get_as_str(self) -> str:
         if not self.cost:

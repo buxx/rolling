@@ -847,15 +847,19 @@ class CharacterLib:
                         )
                     )
 
-                elif filter_action_types is None:
+                if filter_action_types is None:
                     build_description = self._kernel.game.config.builds[build.build_id]
                     character_actions_.append(
                         CharacterActionLink(
-                            name=f"Jeter un coup d'oeil sur {build_description.name}",
+                            name=f"{build_description.name}",
                             link=DESCRIBE_BUILD.format(
                                 character_id=character.id, build_id=build.id
                             ),
-                            group_name="Voir les objets et bâtiments autour",
+                            group_name="Voir",
+                            classes1=["LOOK"],
+                            classes2=build_description.classes,
+                            direct_action=True,
+                            force_open_description=True,
                         )
                     )
 
