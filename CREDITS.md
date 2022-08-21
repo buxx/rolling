@@ -77,3 +77,4 @@
 * dofoin.png by https://commons.wikimedia.org/wiki/File:Julien-Dupre-La-Faneuse-The-Haymaker.jpg?uselang=fr
 * fourche.png by https://en.wikipedia.org/wiki/File:Peasants_3French_Best.jpg
 * fleaugrain.png by https://commons.wikimedia.org/wiki/File:Lucien_Simon_Le_battage_des_bl%C3%A9s.jpg?uselang=fr
+* totem.png from "Totem Polls" by kasio69 is licensed under CC BY 2.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/2.0/?ref=openverse.

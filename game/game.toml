@@ -2283,6 +2283,7 @@ actions = ["SEED"]
   many = false
   robustness = 2
   allow_deposit_limited = true
+  illustration = "totem.png"
 [build.STRONG_WOOD_DOOR]
   name = "Porte en bois solide"
   char = "-"
