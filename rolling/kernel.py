@@ -51,6 +51,7 @@ from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from .server.lib.world import WorldLib
 from rolling.server.lib.zone import ZoneLib
 from rolling.server.world.websocket import WorldEventsManager
 from rolling.server.zone.websocket import ZoneEventsManager
@@ -152,6 +153,7 @@ class Kernel:
         self._zone_lib: typing.Optional[ZoneLib] = None
         self._door_lib: typing.Optional[DoorLib] = None
         self._farming_lib: typing.Optional[FarmingLib] = None
+        self._world_lib: typing.Optional[WorldLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -319,6 +321,12 @@ class Kernel:
         if self._farming_lib is None:
             self._farming_lib = FarmingLib(self)
         return self._farming_lib
+
+    @property
+    def world_lib(self) -> WorldLib:
+        if self._world_lib is None:
+            self._world_lib = WorldLib(self)
+        return self._world_lib
 
     @property
     def action_factory(self) -> ActionFactory:

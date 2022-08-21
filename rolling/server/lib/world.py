@@ -1,16 +1,16 @@
 # coding: utf-8
 import typing
 
-from rolling.client.http.client import HttpClient
 from rolling.exception import NoDefaultTileType
-from rolling.kernel import Kernel
-from rolling.model.world import WorldMapLegendModel
-from rolling.model.world import WorldMapModel
+from rolling.model.world import WorldAsCharacter, WorldMapLegendModel
 from rolling.model.zone import WorldTileTypeModel
+
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
 
 
 class WorldLib:
-    def __init__(self, kernel: Kernel) -> None:
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
     def get_legend(self) -> WorldMapLegendModel:
@@ -44,3 +44,15 @@ class WorldLib:
 
         legend = WorldMapLegendModel(default_type=default_type, all_types=all_types)
         return legend
+
+    def get_world_as_character(self, character_id: str) -> WorldAsCharacter:
+        # TODO : World will not be entirely visible for a character
+        rows_as_character = []
+
+        for original_row in self._kernel.world_map_source.geography.rows:
+            row_as_character = []
+            for original_tile_type in original_row:
+                row_as_character.append(original_tile_type.id)
+            rows_as_character.append(row_as_character)
+
+        return WorldAsCharacter(rows=rows_as_character)

@@ -36,3 +36,8 @@ class World:
 #
 #     def __hash__(self) -> int:
 #         return hash(self.id + self.material_type)
+
+
+@dataclasses.dataclass
+class WorldAsCharacter:
+    rows: typing.List[typing.List[str]]
