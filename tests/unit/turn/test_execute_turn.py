@@ -514,3 +514,9 @@ class TestExecuteTurn:
             zone_row_i=1,
             zone_col_i=1,
         )
+
+    def test_turn_delete_affinity(self) -> None:
+        pass
+
+    def test_turn_delete_affinity_with_spawn_point(self) -> None:
+        pass

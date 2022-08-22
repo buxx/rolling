@@ -49,6 +49,7 @@ from rolling.server.lib.farming import FarmingLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
 from rolling.server.lib.resource import ResourceLib
+from rolling.server.lib.spawn import SpawnPointLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
 from .server.lib.world import WorldLib
@@ -154,6 +155,7 @@ class Kernel:
         self._door_lib: typing.Optional[DoorLib] = None
         self._farming_lib: typing.Optional[FarmingLib] = None
         self._world_lib: typing.Optional[WorldLib] = None
+        self._spawn_point_lib: typing.Optional[SpawnPointLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
 
@@ -327,6 +329,12 @@ class Kernel:
         if self._world_lib is None:
             self._world_lib = WorldLib(self)
         return self._world_lib
+
+    @property
+    def spawn_point_lib(self) -> SpawnPointLib:
+        if self._spawn_point_lib is None:
+            self._spawn_point_lib = SpawnPointLib(self)
+        return self._spawn_point_lib
 
     @property
     def action_factory(self) -> ActionFactory:

@@ -62,6 +62,7 @@ class BuildDescription:
     group_name: typing.Optional[str] = None
     description: typing.Optional[str] = None
     door_type: typing.Optional[str] = None
+    spawn_point: bool = False
 
     @property
     def allowed_resource_ids(self) -> typing.List[str]:

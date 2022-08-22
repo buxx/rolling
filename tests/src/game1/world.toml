@@ -42,7 +42,13 @@
 
 [TILES]
   [TILES.DEAD_TREE]
-    produce = [
-      {resource="WOOD", start_capacity=1.0, regeneration=0.0, destroy_when_empty=true, extract_cost_per_unit=0.01, extract_quick_action_quantity=0.25},
-    ]
-    replace_by_when_destroy = "DIRT"
+    [[TILES.DEAD_TREE.produce]]
+      resource="WOOD"
+      start_capacity=1.0
+      regeneration=0.0
+      destroy_when_empty=true
+      extract_cost_per_unit=0.01
+      extract_quick_action_quantity=0.25
+      ui_extract_default_quantity="0.25m³"
+      ui_extract_min_quantity=0.01
+      ui_extract_max_quantity=500.0

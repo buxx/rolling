@@ -47,6 +47,8 @@ reduce_tiredness_per_turn = 50
 tile_clutter_capacity = 10.0
 destroy_robustness_per_ap = 1
 
+[main_actions]
+
 [materials]
   [materials.MIDDLE_PIECE]
     name = "Moyen morceau"

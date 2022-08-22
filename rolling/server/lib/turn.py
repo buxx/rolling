@@ -46,6 +46,7 @@ class TurnLib:
         self._manage_characters_props()
         self._builds_consumptions()
         self._grow()
+        self._delete_empty_affinities()
         self._clean()
         self._universe_turn()
 
@@ -429,6 +430,12 @@ class TurnLib:
             )
             self._kernel.server_db_session.add(build_doc)
             self._kernel.server_db_session.commit()
+
+    def _delete_empty_affinities(self) -> None:
+        for affinity in self._kernel.affinity_lib.get_all():
+            if not self._kernel.affinity_lib.count_members(affinity.id):
+                self._logger.info(f"Delete affinity '{affinity.id}'")
+                self._kernel.affinity_lib.delete_affinity(affinity.id)
 
     def _clean(self) -> None:
         for resource_doc in (

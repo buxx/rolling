@@ -97,6 +97,7 @@ class BuildLib:
             except ImpossibleAction:
                 pass
 
+        # Door
         if (
             filter_action_types is None
             and build_description.is_door
@@ -108,6 +109,24 @@ class BuildLib:
                     link=f"/character/{character.id}/door/{build_id}",
                 )
             )
+
+        # Spawn point
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+            character_id=character.id
+        ):
+            if (
+                build_description.spawn_point
+                and self._kernel.affinity_lib.character_can_manage_spawn_point(
+                    affinity_relation.affinity_id, character.id
+                )
+            ):
+                actions.append(
+                    CharacterActionLink(
+                        name="Gestion du point d'apparition",
+                        link=f"/spawn/{character.id}/from-build/{build_id}",
+                    )
+                )
+                break
 
         return actions
 

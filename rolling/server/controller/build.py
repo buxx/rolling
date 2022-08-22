@@ -27,7 +27,6 @@ class BuildController(BaseController):
         character = self._kernel.character_lib.get(hapic_data.path.character_id)
         build_doc = self._kernel.build_lib.get_build_doc(hapic_data.path.build_id)
         build_description = self._kernel.game.config.builds[build_doc.build_id]
-        # FIXME BS NOW: ajouter action de démarrer, aouter / récup ressources
         character_actions = self._kernel.build_lib.get_on_build_actions(
             character, hapic_data.path.build_id
         )

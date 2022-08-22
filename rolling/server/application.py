@@ -23,6 +23,7 @@ from rolling.server.controller.character import CharacterController
 from rolling.server.controller.common import CommonController
 from rolling.server.controller.conversation import ConversationController
 from rolling.server.controller.corpse import AnimatedCorpseController
+from rolling.server.controller.spawn import SpawnPointController
 from rolling.server.controller.system import SystemController
 from rolling.server.controller.world import WorldController
 from rolling.server.controller.zone import ZoneController
@@ -245,5 +246,6 @@ def get_application(
     ).bind(app)
     AnimatedCorpseController(kernel).bind(app)
     AccountController(kernel).bind(app)
+    SpawnPointController(kernel).bind(app)
 
     return app

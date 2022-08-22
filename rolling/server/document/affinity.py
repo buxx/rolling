@@ -9,6 +9,8 @@ from sqlalchemy import Integer
 from sqlalchemy import JSON
 from sqlalchemy import String
 from sqlalchemy import Text
+from sqlalchemy import DateTime
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
 
 from rolling.server.document.character import CharacterDocument
@@ -58,6 +60,7 @@ class AffinityDocument(Document):
     )
     statuses = Column(JSON, nullable=False, default=json.dumps(statuses))
     default_status_id = Column(String, nullable=False, default=MEMBER_STATUS[0])
+    creation_datetime = Column(DateTime(), server_default=func.now(), nullable=False)
 
     def __eq__(self, other: "AffinityDocument") -> bool:
         return self.id == other.id and self.id is not None

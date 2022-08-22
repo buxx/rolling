@@ -75,6 +75,9 @@ class AffinityLib:
             .one()
         )
 
+    def get_all(self) -> typing.List[AffinityDocument]:
+        return self._kernel.server_db_session.query(AffinityDocument).all()
+
     def get_multiple(
         self, affinity_ids: typing.List[int]
     ) -> typing.List[AffinityDocument]:
@@ -210,6 +213,7 @@ class AffinityLib:
         world_row_i: typing.Optional[int] = None,
         world_col_i: typing.Optional[int] = None,
         exclude_character_ids: typing.Optional[typing.List[str]] = None,
+        exclude_deads: bool = True,
     ) -> Query:
         if not fighter:
             query = self._kernel.server_db_session.query(
@@ -241,6 +245,15 @@ class AffinityLib:
         if exclude_character_ids:
             query = query.filter(
                 AffinityRelationDocument.character_id.notin_(exclude_character_ids)
+            )
+
+        if exclude_deads:
+            query = query.filter(
+                AffinityRelationDocument.character_id.not_in(
+                    self._kernel.server_db_session.query(CharacterDocument.id).filter(
+                        CharacterDocument.alive == False
+                    )
+                )
             )
 
         return query
@@ -395,6 +408,18 @@ class AffinityLib:
 
         return [self._kernel.character_lib.get(r[0]) for r in query.all()]
 
+    def get_chief_of_affinity(
+        self,
+        affinity_id: int,
+    ) -> typing.List[AffinityRelationDocument]:
+        query = self._kernel.server_db_session.query(AffinityRelationDocument).filter(
+            AffinityRelationDocument.affinity_id == affinity_id,
+            AffinityRelationDocument.status_id == CHIEF_STATUS[0],
+            AffinityRelationDocument.accepted == True,
+        )
+
+        return query.one()
+
     def get_zone_relations(
         self,
         row_i: int,
@@ -474,3 +499,25 @@ class AffinityLib:
                     raise exc
 
         return affinity_names
+
+    def character_can_manage_spawn_point(
+        self, affinity_id: int, character_id: str
+    ) -> bool:
+        try:
+            return self.get_chief_of_affinity(affinity_id).character_id == character_id
+        except NoResultFound:
+            return False
+
+    def delete_affinity(self, affinity_id: int) -> None:
+        self._kernel.spawn_point_lib.delete_for_affinity(affinity_id)
+        # TODO : Use SQL delete for optimize
+        for relation in (
+            self._kernel.server_db_session.query(AffinityRelationDocument)
+            .filter(AffinityRelationDocument.affinity_id == affinity_id)
+            .all()
+        ):
+            self._kernel.server_db_session.delete(relation)
+
+        affinity = self.get_affinity(affinity_id)
+        self._kernel.server_db_session.delete(affinity)
+        self._kernel.server_db_session.commit()
