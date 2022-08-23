@@ -283,7 +283,7 @@ class TakeFromCharacterAction(WithCharacterAction):
     def check_is_possible(
         self, character: "CharacterModel", with_character: "CharacterModel"
     ) -> None:
-        # TODO BS: Add possibiity to take when chief or warlord
+        # TODO BS: Add possibility to take when chief or warlord
         take = TakeStuffOrResources(
             self._kernel,
             character=character,
