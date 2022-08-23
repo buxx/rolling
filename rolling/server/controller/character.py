@@ -32,6 +32,7 @@ from rolling.model.character import (
     CharacterActionModel,
     CharacterModelApi,
     ChooseAvatarQuery,
+    CreateCharacterQueryModel,
     ExplodeTakeQuery,
     GetCharacterQueryModel,
     OnPlaceActionQuery,
@@ -420,8 +421,53 @@ class CharacterController(BaseController):
         self._action_factory = ActionFactory(self._kernel)
 
     @hapic.with_api_doc()
+    @hapic.input_query(CreateCharacterQueryModel)
     @hapic.output_body(Description)
-    async def _describe_create_character(self, request: Request) -> Description:
+    async def _describe_create_character(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        if hapic_data.query.spawn_to == 0:
+            spawn_points = self._kernel.spawn_point_lib.get_all()
+            spawn_points_parts = []
+            for spawn_point in spawn_points:
+                affinity = self._kernel.affinity_lib.get_affinity(
+                    spawn_point.affinity_id
+                )
+                spawn_points_parts.append(
+                    Part(
+                        is_link=True,
+                        label=f"Choisir '{affinity.name}'",
+                        form_action=f"/_describe/character/create?spawn_to={spawn_point.id}",
+                    )
+                )
+
+            if not spawn_points:
+                spawn_points_parts.append(
+                    Part(text="Aucun lieu d'apparition à cet instant")
+                )
+
+            return Description(
+                title="Créer votre personnage",
+                items=[
+                    Part(
+                        text=(
+                            "Vous vous apprêtez à donner vie à un personnage dans cet univers. "
+                            "En premier lieu, vous pouvez choisir où votre personnage sera envoyé. "
+                        )
+                    ),
+                    Part(text=" "),
+                ]
+                + spawn_points_parts
+                + [
+                    Part(text=" "),
+                    Part(
+                        is_link=True,
+                        label="Choisir une destination inconnue",
+                        form_action="/_describe/character/create?spawn_to=-1",
+                    ),
+                ],
+            )
+
         maximum_points = self._kernel.game.config.create_character_max_points
         parts = [Part(label="Traits physionomiques", classes=["h2"])]
 
@@ -487,7 +533,7 @@ class CharacterController(BaseController):
                 ),
                 Part(
                     is_form=True,
-                    form_action="/_describe/character/create/do",
+                    form_action=f"/_describe/character/create/do?spawn_to={hapic_data.query.spawn_to}",
                     items=[
                         Part(label="Nom du personnage", type_=Type.STRING, name="name")
                     ]
@@ -2085,8 +2131,11 @@ class CharacterController(BaseController):
             )
 
     @hapic.with_api_doc()
+    @hapic.input_query(CreateCharacterQueryModel)
     @hapic.output_body(Description)
-    async def create_character_do(self, request: Request) -> Description:
+    async def create_character_do(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
         data = await request.json()
         skills: typing.Dict[str, float] = {}
         skills_total = 0.0
@@ -2138,7 +2187,14 @@ class CharacterController(BaseController):
                 ):
                     knowledges.append(knowledge_id)
 
-        character_id = self._character_lib.create(data["name"], skills, knowledges)
+        character_id = self._character_lib.create(
+            data["name"],
+            skills,
+            knowledges,
+            spawn_to=(
+                hapic_data.query.spawn_to if hapic_data.query.spawn_to != -1 else None
+            ),
+        )
         character_doc = self._kernel.character_lib.get_document(character_id)
         account = self._kernel.account_lib.get_account_for_id(request["account_id"])
         account.current_character_id = character_id

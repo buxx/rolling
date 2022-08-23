@@ -18,6 +18,16 @@ class SpawnPointLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
+    def get_all(self) -> typing.List[SpawnPointDocument]:
+        return self._kernel.server_db_session.query(SpawnPointDocument).all()
+
+    def get_one(self, spawn_point_id: int) -> SpawnPointDocument:
+        return (
+            self._kernel.server_db_session.query(SpawnPointDocument)
+            .filter(SpawnPointDocument.id == spawn_point_id)
+            .one()
+        )
+
     def spawn_point_exist_for_build_id(self, build_id: int) -> bool:
         try:
             self.get_from_build(build_id)

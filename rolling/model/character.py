@@ -85,6 +85,11 @@ class GetCharacterAndPendingActionPathModel:
 
 
 @dataclasses.dataclass
+class CreateCharacterQueryModel:
+    spawn_to: typing.Optional[int] = serpyco.field(cast_on_load=True, default=0)
+
+
+@dataclasses.dataclass
 class PendingActionQueryModel:
     do: int = serpyco.field(cast_on_load=True, default=0)
 

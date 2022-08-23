@@ -120,7 +120,11 @@ class CharacterLib:
         return self._kernel.server_db_session.query(CharacterDocument)
 
     def create(
-        self, name: str, skills: typing.Dict[str, float], knowledges: typing.List[str]
+        self,
+        name: str,
+        skills: typing.Dict[str, float],
+        knowledges: typing.List[str],
+        spawn_to: typing.Optional[int],
     ) -> str:
         character = CharacterDocument()
         character.id = uuid.uuid4().hex
@@ -134,20 +138,28 @@ class CharacterLib:
         character.hunger = self._kernel.game.config.start_hunger
 
         # Place on zone
-        (
-            world_row_i,
-            world_col_i,
-        ) = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
-            self._kernel.world_map_source
-        )
-        traversable_coordinates = self._kernel.get_traversable_coordinates(
-            world_row_i, world_col_i
-        )
-        if not traversable_coordinates:
-            raise RollingError(
-                f"No traversable coordinate in zone {world_row_i},{world_col_i}"
+        if spawn_to:
+            spawn_point = self._kernel.spawn_point_lib.get_one(spawn_to)
+            build_document = self._kernel.build_lib.get_build_doc(spawn_point.build_id)
+            world_row_i = build_document.world_row_i
+            world_col_i = build_document.world_col_i
+            zone_row_i = build_document.zone_row_i
+            zone_col_i = build_document.zone_col_i
+        else:
+            (
+                world_row_i,
+                world_col_i,
+            ) = self._kernel.world_map_source.meta.spawn.get_spawn_coordinates(
+                self._kernel.world_map_source
             )
-        zone_row_i, zone_col_i = random.choice(traversable_coordinates)
+            traversable_coordinates = self._kernel.get_traversable_coordinates(
+                world_row_i, world_col_i
+            )
+            if not traversable_coordinates:
+                raise RollingError(
+                    f"No traversable coordinate in zone {world_row_i},{world_col_i}"
+                )
+            zone_row_i, zone_col_i = random.choice(traversable_coordinates)
 
         character.world_row_i = world_row_i
         character.world_col_i = world_col_i
