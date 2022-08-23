@@ -146,6 +146,12 @@ class GiveStuffOrResources(TransferStuffOrResources):
             quantity=quantity,
         )
 
+    def _get_classes(self) -> typing.List[str]:
+        return []
+
+    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+        return self._to_character.zone_row_i, self._to_character.zone_col_i
+
 
 @dataclasses.dataclass
 class GiveToModel:
