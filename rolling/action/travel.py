@@ -60,13 +60,6 @@ class TravelAction(CharacterAction):
                         f"/_describe/character/{character.id}"
                         f"/move-to-zone/{new_world_row_i}/{new_world_col_i}"
                     ),
-                    # FIXME BS NOW: pas ici on dirait ...
-                    # back_url=get_character_action_url(
-                    #     character_id=character.id,
-                    #     action_type=ActionType.TRAVEL,
-                    #     query_params={},
-                    #     action_description_id=self._description.id,
-                    # ),
                     group_name="Voyager",
                 )
             )
