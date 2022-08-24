@@ -78,6 +78,11 @@ name = "Agriculture"
 class = "FARMING"
 actions = ["SEED"]
 
+[[main_actions]]
+name = "Voyager"
+class = "COMPASS"
+actions = ["TRAVEL"]
+
 [materials]
   [materials.LIQUID]
     name = "Liquide"
