@@ -74,9 +74,7 @@ def run(args: argparse.Namespace) -> None:
         for check_file_path in (
             pathlib.Path(args.serve_static_files) / "engine.wasm",
             pathlib.Path(args.serve_static_files) / "graphics.png",
-            pathlib.Path(args.serve_static_files)
-            / "not-fl3.github.io__miniquad-samples__mq_js_bundle.js",
-            pathlib.Path(args.serve_static_files) / "more.js",
+            pathlib.Path(args.serve_static_files) / "mq_js_bundle.js",
             pathlib.Path(args.serve_static_files) / "rollgui2.js",
         ):
             if not check_file_path.exists():
