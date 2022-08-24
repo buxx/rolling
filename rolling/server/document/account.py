@@ -18,3 +18,5 @@ class AccountDocument(Document):
     current_character_id = Column(String(255), nullable=True)
     reset_password_token = Column(String(255), nullable=True)
     reset_password_expire = Column(Integer, nullable=True)
+    authentication_token = Column(String(32), nullable=True)
+    authentication_expire = Column(Integer(), nullable=True)

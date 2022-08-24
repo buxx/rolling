@@ -24,6 +24,17 @@ class AccountLib:
     def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
+    def get_account_for_token(self, token: str) -> AccountDocument:
+        try:
+            return (
+                self._kernel.server_db_session.query(AccountDocument)
+                .filter(AccountDocument.authentication_token == token)
+                .filter(AccountDocument.authentication_expire > round(time.time()))
+                .one()
+            )
+        except NoResultFound:
+            raise AccountNotFound()
+
     def get_account_for_credentials(self, login: str, password: str) -> AccountDocument:
         try:
             try_account: AccountDocument = (

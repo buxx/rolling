@@ -81,32 +81,40 @@ def get_application(
             and not request.path.startswith("/media")
             and not request.path.startswith("/static")
         ):
-            try:
-                login, password = (
-                    base64.b64decode(request.headers["Authorization"][6:])
-                    .decode()
-                    .split(":")
-                )
-            except (KeyError, IndexError, ValueError):
-                return Response(
-                    status=401,
-                    headers={
-                        "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
-                    },
-                    body="__AUTH_REQUIRED__",
-                )
-            try:
-                account = kernel.account_lib.get_account_for_credentials(
-                    login=login, password=password
-                )
-            except AccountNotFound:
-                return Response(
-                    status=401,
-                    headers={
-                        "WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'
-                    },
-                    body="__AUTH_REQUIRED__",
-                )
+            response_401 = Response(
+                status=401,
+                headers={"WWW-Authenticate": 'Basic realm="Veuillez vous identifier"'},
+                body="__AUTH_REQUIRED__",
+            )
+
+            if "Authorization" in request.headers:
+                if request.headers["Authorization"].lower().startswith("basic"):
+                    try:
+                        login, password = (
+                            base64.b64decode(request.headers["Authorization"][6:])
+                            .decode()
+                            .split(":")
+                        )
+                    except (KeyError, IndexError, ValueError):
+                        return response_401
+                    try:
+                        account = kernel.account_lib.get_account_for_credentials(
+                            login=login, password=password
+                        )
+                    except AccountNotFound:
+                        return response_401
+                elif request.headers["Authorization"].lower().startswith("token"):
+                    try:
+                        token = request.headers["Authorization"][6:]
+                    except (KeyError, IndexError, ValueError):
+                        return response_401
+
+                    try:
+                        account = kernel.account_lib.get_account_for_token(token)
+                    except AccountNotFound:
+                        return response_401
+                else:
+                    return response_401
 
             request["account_id"] = account.id
             request["account_character_id"] = account.current_character_id
