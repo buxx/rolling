@@ -2321,6 +2321,7 @@ class CharacterController(BaseController):
     async def describe_move(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
+        move_done = False
         character = self._character_lib.get(hapic_data.path.character_id)
         to_world_row = hapic_data.query.to_world_row
         to_world_col = hapic_data.query.to_world_col
@@ -2338,6 +2339,7 @@ class CharacterController(BaseController):
 
         if move_info.can_move:
             messages = ["Le voyage c'est bien déroulé"]
+            move_done = True
         else:
             messages = list(move_info.cannot_move_reasons)
 
@@ -2395,6 +2397,7 @@ class CharacterController(BaseController):
         return Description(
             title="Effectuer un voyage ...",
             items=[Part(text=message) for message in messages],
+            reload_zone=move_done,
         )
 
     @hapic.with_api_doc()
