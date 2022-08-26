@@ -256,6 +256,11 @@ class AccountController(BaseController):
             "message_type": message_type,
         }
 
+    @hapic.with_api_doc()
+    def generate_auth_token(self, request: Request) -> web.Response:
+        token = self._kernel.account_lib.generate_new_auth_token(request["account_id"])
+        return web.Response(status=200, body=token)
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -265,5 +270,6 @@ class AccountController(BaseController):
                 web.get("/account/generate_new_password", self.generate_new_password),
                 web.get("/account/manage", self.manage_account),
                 web.post("/account/manage", self.manage_account),
+                web.get("/account/auth-token", self.generate_auth_token),
             ]
         )

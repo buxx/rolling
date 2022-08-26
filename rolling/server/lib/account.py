@@ -177,3 +177,12 @@ Si vous êtes bien l'auteur de cette demande, suivez ce lien: {generate_new_pass
         self._kernel.server_db_session.add(account)
         self._kernel.server_db_session.commit()
         return password
+
+    def generate_new_auth_token(self, account_id: int) -> str:
+        new_token = uuid4().hex.replace("-", "")
+        account = self.get_account_for_id(account_id)
+        account.authentication_token = new_token
+        account.authentication_expire = round(time.time()) + (3600 * 24 * 30)
+        self._kernel.server_db_session.add(account)
+        self._kernel.server_db_session.commit()
+        return new_token
