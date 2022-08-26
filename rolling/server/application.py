@@ -115,6 +115,8 @@ def get_application(
                         return response_401
                 else:
                     return response_401
+            else:
+                return response_401
 
             request["account_id"] = account.id
             request["account_character_id"] = account.current_character_id
