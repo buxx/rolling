@@ -14,7 +14,7 @@ import uuid
 from uuid import uuid4
 
 from rolling.exception import AccountNotFound
-from rolling.server.document.account import AccountDocument
+from rolling.server.document.account import AccountDocument, AccountAuthTokenDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -26,12 +26,15 @@ class AccountLib:
 
     def get_account_for_token(self, token: str) -> AccountDocument:
         try:
-            return (
-                self._kernel.server_db_session.query(AccountDocument)
-                .filter(AccountDocument.authentication_token == token)
-                .filter(AccountDocument.authentication_expire > round(time.time()))
+            account_token = (
+                self._kernel.server_db_session.query(AccountAuthTokenDocument)
+                .filter(AccountAuthTokenDocument.authentication_token == token)
+                .filter(
+                    AccountAuthTokenDocument.authentication_expire > round(time.time())
+                )
                 .one()
             )
+            return self.get_account_for_id(account_token.account_id)
         except NoResultFound:
             raise AccountNotFound()
 
@@ -180,9 +183,11 @@ Si vous êtes bien l'auteur de cette demande, suivez ce lien: {generate_new_pass
 
     def generate_new_auth_token(self, account_id: int) -> str:
         new_token = uuid4().hex.replace("-", "")
-        account = self.get_account_for_id(account_id)
-        account.authentication_token = new_token
-        account.authentication_expire = round(time.time()) + (3600 * 24 * 30)
-        self._kernel.server_db_session.add(account)
+        account_token = AccountAuthTokenDocument(
+            account_id=account_id,
+            authentication_token=new_token,
+            authentication_expire=round(time.time()) + (3600 * 24 * 30),
+        )
+        self._kernel.server_db_session.add(account_token)
         self._kernel.server_db_session.commit()
         return new_token
