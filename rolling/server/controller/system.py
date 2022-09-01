@@ -43,7 +43,7 @@ class SystemController(BaseController):
 
     @aiohttp_jinja2.template("root.html")
     async def root(self, request: Request) -> dict:
-        return {}
+        return {"title": self._kernel.server_config.name}
 
     @hapic.with_api_doc()
     @aiohttp_jinja2.template("infos.html")

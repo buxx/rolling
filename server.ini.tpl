@@ -13,3 +13,4 @@ anonymous_media_file_name = anonymous.png
 admin_login = admin
 # CHANGE THIS PASSWORD !
 admin_password = admin
+name = Rolling

@@ -76,6 +76,7 @@ class ServerConfig:
     anonymous_media_file_name: str
     admin_login: str
     admin_password: str
+    name: str
 
 
 class Kernel:
