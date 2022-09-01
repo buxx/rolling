@@ -76,7 +76,7 @@ def run(args: argparse.Namespace) -> None:
             pathlib.Path(args.serve_static_files) / "graphics.png",
             pathlib.Path(args.serve_static_files) / "mq_js_bundle.js",
             pathlib.Path(args.serve_static_files) / "rollgui2.js",
-            pathlib.Path(args.serve_static_files) / "icon.ico",
+            pathlib.Path(args.serve_static_files) / "favicon.ico",
         ):
             if not check_file_path.exists():
                 print(f"'{check_file_path}' not found or not readable")
