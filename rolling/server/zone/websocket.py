@@ -313,10 +313,14 @@ class ZoneEventsManager:
                 reader_socket = self._sockets_by_token.get(reader_token)
                 if reader_socket is not None and reader_socket.close_code is None:
                     found_sockets.append(reader_socket)
+                # With rollgui2 there is no more reader token
+                else:
+                    found_sockets.append(socket)
 
         if len(found_sockets) > 1:
             server_logger.warning(
                 f"Found more than one socket for character '{character_id}' !"
             )
+            return found_sockets[-1]
         elif len(found_sockets) == 1:
             return found_sockets[0]
