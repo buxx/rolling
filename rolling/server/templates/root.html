@@ -22,10 +22,12 @@
 
 <body>
     <canvas id="glcanvas" tabindex='1'></canvas>
-    <script src="/static/mq_js_bundle.js"></script>
-    <script src="/static/more.js"></script>
-    <script src="/static/rollgui2.js"></script>
-    <script>load("/static/engine.wasm");</script>
+    <center id="loader" style="color: white; z-index: 1; position: absolute; width: 100%"><h1>Chargement ...</h1></center>
+
+    <script src="/static/mq_js_bundle.js?v={{ version }}"></script>
+    <script src="/static/more.js?v={{ version }}"></script>
+    <script src="/static/rollgui2.js?v={{ version }}"></script>
+    <script>load("/static/engine.wasm?v={{ version }}");</script>
 </body>
 
 </html>
