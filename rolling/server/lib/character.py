@@ -869,7 +869,7 @@ class CharacterLib:
                             ),
                             group_name="Voir",
                             classes1=["LOOK"],
-                            classes2=build_description.classes,
+                            classes2=build_description.classes + [build.build_id],
                             direct_action=True,
                             force_open_description=True,
                         )
