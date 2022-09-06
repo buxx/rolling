@@ -311,7 +311,8 @@ class DepositToBuildAction(WithBuildAction):
                                     ),
                                 ),
                                 direct_action=True,
-                                classes1=[build_description.id],
+                                classes1=build_description.classes
+                                + [build_description.id],
                                 classes2=[build_require_resource.resource_id],
                             )
                         )
@@ -329,7 +330,8 @@ class DepositToBuildAction(WithBuildAction):
                                     ),
                                 ),
                                 direct_action=True,
-                                classes1=[build_description.id],
+                                classes1=build_description.classes
+                                + [build_description.id],
                                 classes2=[build_require_resource.resource_id],
                             )
                         )
@@ -373,7 +375,8 @@ class DepositToBuildAction(WithBuildAction):
                                         ),
                                     ),
                                     direct_action=True,
-                                    classes1=[build_description.id],
+                                    classes1=build_description.classes
+                                    + [build_description.id],
                                     classes2=[power_require_resource.resource_id],
                                 )
                             )
@@ -391,7 +394,8 @@ class DepositToBuildAction(WithBuildAction):
                                         ),
                                     ),
                                     direct_action=True,
-                                    classes1=[build_description.id],
+                                    classes1=build_description.classes
+                                    + [build_description.id],
                                     classes2=[power_require_resource.resource_id],
                                 )
                             )
@@ -422,7 +426,8 @@ class DepositToBuildAction(WithBuildAction):
                                     ),
                                 ),
                                 direct_action=True,
-                                classes1=[build_description.id],
+                                classes1=build_description.classes
+                                + [build_description.id],
                                 classes2=[turn_require_resource.resource_id],
                             )
                         )
@@ -440,7 +445,8 @@ class DepositToBuildAction(WithBuildAction):
                                     ),
                                 ),
                                 direct_action=True,
-                                classes1=[build_description.id],
+                                classes1=build_description.classes
+                                + [build_description.id],
                                 classes2=[turn_require_resource.resource_id],
                             )
                         )
