@@ -10,6 +10,13 @@ from rolling.action.base import get_with_build_action_url
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import WrongInputError
+from rolling.model.build import ZoneBuildModelContainer
+from rolling.model.event import (
+    NewBuildData,
+    RemoveBuildData,
+    WebSocketEvent,
+    ZoneEventType,
+)
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
 from rolling.util import get_health_percent_sentence
@@ -107,7 +114,43 @@ class DestroyBuildAction(WithBuildAction):
 
         if build_doc.health <= 0:
             self._kernel.build_lib.delete(build_id)
-            return Description(back_to_zone=True)
+
+            await self._kernel.server_zone_events_manager.send_to_sockets(
+                WebSocketEvent(
+                    type=ZoneEventType.REMOVE_BUILD,
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    data=RemoveBuildData(
+                        zone_row_i=build_doc.zone_row_i,
+                        zone_col_i=build_doc.zone_col_i,
+                    ),
+                ),
+                world_row_i=character.world_row_i,
+                world_col_i=character.world_col_i,
+            )
+
+            character_socket = (
+                self._kernel.server_zone_events_manager.get_character_socket(
+                    character.id
+                )
+            )
+
+            from rolling.server.event import ThereIsAroundProcessor
+
+            await ThereIsAroundProcessor(
+                kernel=self._kernel,
+                zone_events_manager=self._kernel.server_zone_events_manager,
+            ).send_around(
+                row_i=character.zone_row_i,
+                col_i=character.zone_col_i,
+                character_id=character.id,
+                sender_socket=character_socket,
+                explode_take=False,
+            )
+
+            return Description(
+                title="Bâtiment détruit",
+            )
 
         build_health_percent = int(
             round((build_doc.health / build_description.robustness) * 100)

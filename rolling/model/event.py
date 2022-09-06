@@ -22,6 +22,7 @@ class ZoneEventType(Enum):
     CLICK_ACTION_EVENT = "CLICK_ACTION_EVENT"
     NEW_RESUME_TEXT = "NEW_RESUME_TEXT"
     NEW_BUILD = "NEW_BUILD"
+    REMOVE_BUILD = "REMOVE_BUILD"
     REQUEST_CHAT = "REQUEST_CHAT"
     NEW_CHAT_MESSAGE = "NEW_CHAT_MESSAGE"
     ANIMATED_CORPSE_MOVE = "ANIMATED_CORPSE_MOVE"
@@ -202,6 +203,12 @@ class NewBuildData(WebSocketEventData):
 
 
 @dataclasses.dataclass
+class RemoveBuildData(WebSocketEventData):
+    zone_row_i: int
+    zone_col_i: int
+
+
+@dataclasses.dataclass
 class ZoneTileReplaceData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
@@ -229,6 +236,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.CLICK_ACTION_EVENT: ClickActionData,
     ZoneEventType.NEW_RESUME_TEXT: NewResumeTextData,
     ZoneEventType.NEW_BUILD: NewBuildData,
+    ZoneEventType.REMOVE_BUILD: RemoveBuildData,
     ZoneEventType.REQUEST_CHAT: RequestChatData,
     ZoneEventType.NEW_CHAT_MESSAGE: NewChatMessageData,
     ZoneEventType.ANIMATED_CORPSE_MOVE: AnimatedCorpseMoveData,
