@@ -71,7 +71,7 @@ async def with_multiple_carried_stuffs(
     if (
         len(all_carried) > 1
         and input_.quantity is None
-        and getattr("quick_action", 0) == 0
+        and getattr(input_, "quick_action", 0) == 0
     ):
         return Description(
             title=title,
