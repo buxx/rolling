@@ -2780,7 +2780,7 @@ class CharacterController(BaseController):
             self._kernel.character_lib.setup_avatar_from_pool(
                 character.id, avatar_index=hapic_data.query.choose
             )
-            return Description(redirect=f"/_describe/character/{character.id}/card")
+            return Description(reload_zone=True)
 
         return Description(
             title=f"Choix de l'avatar de {character.name}",
