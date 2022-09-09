@@ -31,6 +31,7 @@ class Part:
     submit_label: typing.Optional[str] = None
     items: typing.List["Part"] = dataclasses.field(default_factory=list)
     type_: typing.Optional[Type] = None
+    expect_integer: bool = False
     label: typing.Optional[str] = None
     name: typing.Optional[str] = None
     is_link: bool = False

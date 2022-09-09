@@ -1076,6 +1076,7 @@ class CharacterController(BaseController):
                 ]
                 unit_str = self._kernel.translation.get(resource_description.unit)
                 quantity_prefix = "resource_"
+                expect_integer = False
             else:
                 form_action = f"{form_action}&stuff_id={hapic_data.query.stuff_id}"
                 default_value = self._kernel.stuff_lib.get_stuff_count(
@@ -1083,6 +1084,7 @@ class CharacterController(BaseController):
                 )
                 unit_str = "unité"
                 quantity_prefix = "stuff_"
+                expect_integer = True
 
             form_parts.append(
                 Part(
@@ -1090,6 +1092,7 @@ class CharacterController(BaseController):
                     name=f"{quantity_prefix}quantity",
                     type_=Type.NUMBER,
                     default_value=str(default_value),
+                    expect_integer=expect_integer,
                 )
             )
 

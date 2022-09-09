@@ -203,6 +203,7 @@ class TransferStuffOrResources(abc.ABC):
                                         default_value=str(len(likes_this_stuff)),
                                         min_value=0.0,
                                         max_value=len(likes_this_stuff),
+                                        expect_integer=True,
                                     )
                                 ],
                             )
