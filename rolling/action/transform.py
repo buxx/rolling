@@ -534,7 +534,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                                 ),
                                 type_=Type.NUMBER,
                                 name="quantity",
-                                default_value=str(default_quantity),
+                                default_value=str(
+                                    expected_quantity_context.default_quantity_float
+                                ),
                                 min_value=0.0,
                                 max_value=carried_resource.quantity,
                             ),
