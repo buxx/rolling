@@ -232,6 +232,8 @@ def get_application(
     @web.middleware
     async def cache_control(request: web.Request, handler):
         response: web.Response = await handler(request)
+        if not request.match_info.route.resource:
+            return response
         canonical = request.match_info.route.resource.canonical
         if canonical and (
             canonical.startswith("/static") or canonical.startswith("/media")
