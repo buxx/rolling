@@ -500,7 +500,6 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
             if expected_quantity_context.display_kg
             else cost_per_unit
         )
-        default_quantity = expected_quantity_context.default_quantity
 
         if input_.quantity is None:
             return Description(
@@ -534,11 +533,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                                 ),
                                 type_=Type.NUMBER,
                                 name="quantity",
-                                default_value=str(
-                                    expected_quantity_context.default_quantity_float
-                                ),
                                 min_value=0.0,
-                                max_value=carried_resource.quantity,
+                                max_value=expected_quantity_context.default_quantity_float,
+                                default_value=expected_quantity_context.default_quantity,
                             ),
                         ],
                     )

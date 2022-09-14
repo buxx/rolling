@@ -253,9 +253,9 @@ class TransferStuffOrResources(abc.ABC):
                                     label=f"Quantité ({expected_quantity_context.display_unit_name}) ?",
                                     type_=Type.NUMBER,
                                     name=self.resource_quantity_parameter_name,
-                                    default_value=expected_quantity_context.default_quantity,
                                     min_value=0.0,
-                                    max_value=carried_resource.quantity,
+                                    max_value=expected_quantity_context.default_quantity_float,
+                                    default_value=expected_quantity_context.default_quantity,
                                 )
                             ],
                         )

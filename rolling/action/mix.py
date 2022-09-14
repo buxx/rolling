@@ -223,9 +223,9 @@ class MixResourcesAction(WithResourceAction):
                                 label=f"Quantité à produire ({expected_quantity_context.display_unit_name}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
-                                default_value=expected_quantity_context.default_quantity,
                                 min_value=0.0,
                                 max_value=expected_quantity_context.default_quantity_float,
+                                default_value=expected_quantity_context.default_quantity,
                             ),
                         ],
                     )

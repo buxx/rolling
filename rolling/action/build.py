@@ -357,9 +357,9 @@ class BringResourcesOnBuild(WithBuildAction):
                                 label=f"Quantité ({expected_quantity_context.display_unit}) ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
-                                default_value=expected_quantity_context.default_quantity,
                                 min_value=0.0,
-                                max_value=min(left, carried_resource.quantity),
+                                max_value=expected_quantity_context.default_quantity_float,
+                                default_value=expected_quantity_context.default_quantity,
                             )
                         ],
                     )

@@ -1775,6 +1775,8 @@ class CharacterController(BaseController):
                                 ),
                                 name="quantity",
                                 type_=Type.NUMBER,
+                                min=0.0,
+                                max=expected_quantity_context.default_quantity_float,
                                 default_value=expected_quantity_context.default_quantity,
                             )
                         ],
