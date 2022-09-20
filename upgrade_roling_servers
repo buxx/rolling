@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Stop if any error
+set -e
+
+echo "Current statuses :"
+supervisorctl status rolling_heritage:rolling_heritage_1
+supervisorctl status rolling_creatif:rolling_creatif_1
+
+echo "Stop Rollac clients"
+supervisorctl stop rollac_heritage:rollac_heritage_1
+supervisorctl stop rollac_creatif:rollac_creatif_1
+
+echo "Stop Rolling servers"
+supervisorctl stop rolling_heritage:rolling_heritage_1
+supervisorctl stop rolling_creatif:rolling_creatif_1
+
+echo "Upgrade servers"
+su - rolling -c "cd /home/rolling/servers/heritage && source venv3.7/bin/activate && git stash save && git pull origin && pip install -r requirements.txt && alembic upgrade head && python setup.py develop && git stash pop"
+su - rolling -c "cd /home/rolling/servers/creatif && source venv3.7/bin/activate && git stash save && git pull origin && pip install -r requirements.txt && alembic upgrade head && python setup.py develop && git stash pop"
+
+echo compile wasm clients
+su - rolling -c "cd /home/rolling/rollgui2_heritage && git pull && SERVER_ADDRESS=https://heritage.bux.fr cargo build  --target wasm32-unknown-unknown --release && cp target/wasm32-unknown-unknown/release/rollgui2.wasm ~/servers/heritage/static/engine.wasm"
+su - rolling -c "cd /home/rolling/rollgui2_creatif && git pull && SERVER_ADDRESS=https://creatif.bux.fr cargo build  --target wasm32-unknown-unknown --release && cp target/wasm32-unknown-unknown/release/rollgui2.wasm ~/servers/creatif/static/engine.wasm"
+
+echo "Start Rolling servers"
+supervisorctl start rolling_heritage:rolling_heritage_1
+supervisorctl start rolling_creatif:rolling_creatif_1
+
+sleep 2
+echo "Start Rollac clients"
+supervisorctl start rollac_heritage:rollac_heritage_1
+supervisorctl start rollac_creatif:rollac_creatif_1
