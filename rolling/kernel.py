@@ -88,13 +88,23 @@ class Kernel:
         game_config_folder: typing.Optional[str] = None,
         client_db_path: str = "client.db",
         server_config_file_path: str = "./server.ini",
-        server_db_user: str = "rolling",
-        server_db_password: str = "rolling",
-        server_db_name: str = "rolling",
+        server_db_user: typing.Optional[str] = None,
+        server_db_password: typing.Optional[str] = None,
+        server_db_name: typing.Optional[str] = None,
+        server_db_host: typing.Optional[str] = None,
     ) -> None:
-        self.server_db_user = server_db_user
-        self.server_db_password = server_db_password
-        self.server_db_name = server_db_name
+        self.server_db_user = server_db_user or os.environ.get(
+            "SERVER_DB_USER", "rolling"
+        )
+        self.server_db_password = server_db_password or os.environ.get(
+            "SERVER_DB_PASSWORD", "rolling"
+        )
+        self.server_db_name = server_db_name or os.environ.get(
+            "SERVER_DB_NAME", "rolling"
+        )
+        self.server_db_host = server_db_host or os.environ.get(
+            "SERVER_DB_HOST", "127.0.0.1:5432"
+        )
         self._zone_maps_folder = zone_maps_folder
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
@@ -474,8 +484,9 @@ class Kernel:
     def init_server_db_session(self) -> None:
         kernel_logger.info("Initialize database connection to server database")
         self._server_db_engine = create_engine(
-            f"postgresql+psycopg2://{self.server_db_user}:{self.server_db_password}@"
-            f"127.0.0.1:5432/{self.server_db_name}"
+            f"postgresql+psycopg2://"
+            f"{self.server_db_user}:{self.server_db_password}"
+            f"@{self.server_db_host}/{self.server_db_name}"
         )
         self._server_db_session = sessionmaker(bind=self._server_db_engine)()
         ServerSideDocument.metadata.create_all(self._server_db_engine)

@@ -269,7 +269,7 @@ class TestMessage:
         text = await resp.text()
         assert 200 == resp.status
 
-    @pytest.mark.skip(msg="Conversations have been moved on web")
+    @pytest.mark.skip(reason="Conversations have been moved on web")
     async def test_unit__conversation__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,

@@ -31,32 +31,37 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes postgresql-client
+
+    - name: Install database
+      run: |
+        psql -h localhost -d postgres_db -U postgres_user -c  'CREATE DATABASE rolling_test;'
+        psql -h localhost -d postgres_db -U postgres_user -c  "CREATE USER rolling WITH PASSWORD 'rolling';"
+        psql -h localhost -d postgres_db -U postgres_user -c  'GRANT ALL PRIVILEGES ON DATABASE rolling_test TO rolling;'
+      env:
+        PGPASSWORD: postgres_password
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install PostgreSQL client   
-      run: |
-        apt-get update
-        apt-get install --yes postgresql-client
-
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip wheel
         pip install -r requirements.txt
         pip install -e ".[dev]"
         python setup.py develop
         cp server.ini.tpl server.ini
 
-    - name: Install database
-      run: |
-        psql -h postgres -d postgres_db -U postgres_user -c  'CREATE DATABASE rolling_test;' -U postgres
-        psql -h postgres -d postgres_db -U postgres_user -c  "CREATE USER rolling WITH PASSWORD 'rolling';" -U postgres
-        psql -h postgres -d postgres_db -U postgres_user -c  'GRANT ALL PRIVILEGES ON DATABASE rolling_test TO rolling;' -U postgres
-      env:
-        PGPASSWORD: postgres_password
-
     - name: Tests
       run: |
         pytest tests --disable-pytest-warnings -vvvvv
+      env:
+        SERVER_DB_NAME: postgres_db
+        SERVER_DB_PASSWORD: postgres_password
+        SERVER_DB_HOST: localhost
+        SERVER_DB_USER: postgres_user
