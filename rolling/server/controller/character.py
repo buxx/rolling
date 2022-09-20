@@ -254,6 +254,12 @@ class ShareWithAffinityStuffOrResources(TransferStuffOrResources):
     def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
         return resource.get_light_description(self._kernel)
 
+    def _get_zone_coordinates(self) -> typing.Optional[typing.Tuple[int, int]]:
+        return None
+
+    def _get_classes(self) -> typing.List[str]:
+        return []
+
 
 class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
     def __init__(
@@ -410,6 +416,12 @@ class SeeSharedWithAffinityStuffOrResources(TransferStuffOrResources):
 
     def _get_resource_name(self, resource: CarriedResourceDescriptionModel) -> str:
         return resource.get_light_description(self._kernel)
+
+    def _get_zone_coordinates(self) -> typing.Optional[typing.Tuple[int, int]]:
+        return None
+
+    def _get_classes(self) -> typing.List[str]:
+        return []
 
 
 class CharacterController(BaseController):

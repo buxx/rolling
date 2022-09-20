@@ -158,7 +158,14 @@ class DepositStuffOrResources(TransferStuffOrResources):
 
     def check_can_transfer_resource(self, resource_id: str, quantity: float) -> None:
         build_description = self._kernel.game.config.builds[self._to_build.build_id]
-        if not build_description.allow_deposit and (
+
+        if (
+            not build_description.allow_deposit
+            and not build_description.allow_deposit_limited
+        ):
+            raise ImpossibleAction("Vous ne pouvez pas déposer de cela ici")
+
+        if (
             build_description.allow_deposit_limited
             and resource_id
             not in self._kernel.game.config.builds[
@@ -184,7 +191,7 @@ class DepositStuffOrResources(TransferStuffOrResources):
             build_id=self._to_build.id, resource_id=resource_id, quantity=quantity
         )
 
-    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+    def _get_zone_coordinates(self) -> typing.Optional[typing.Tuple[int, int]]:
         return self._to_build.zone_row_i, self._to_build.zone_col_i
 
     def _get_classes(self) -> typing.List[str]:

@@ -33,6 +33,8 @@ def jose(
     session.add(arthur)
     session.commit()
 
+    worldmapc_kernel.character_lib.ensure_skills_for_character(arthur.id)
+    session.commit()
     return arthur
 
 
@@ -82,7 +84,8 @@ class TestCharacterLib:
         empty_plastic_bottle: StuffDocument,
         character_lib: CharacterLib,
     ) -> None:
-        inventory = character_lib.get_inventory(jose)
+        jose_ = worldmapc_kernel.character_lib.get(jose.id)
+        inventory = character_lib.get_inventory(jose_)
         assert 0 == inventory.clutter
         assert 0 == inventory.weight
         assert not inventory.stuff
@@ -90,7 +93,7 @@ class TestCharacterLib:
         empty_plastic_bottle.carried_by_id = jose.id
         worldmapc_kernel.server_db_session.commit()
 
-        inventory = character_lib.get_inventory(jose)
+        inventory = character_lib.get_inventory(jose_)
         assert 1.0 == inventory.clutter
         assert 0 == inventory.weight
         assert inventory.stuff
@@ -104,7 +107,8 @@ class TestCharacterLib:
         half_filled_plastic_bottle: StuffDocument,
         character_lib: CharacterLib,
     ) -> None:
-        inventory = character_lib.get_inventory(jose)
+        jose_ = worldmapc_kernel.character_lib.get(jose.id)
+        inventory = character_lib.get_inventory(jose_)
         assert 0 == inventory.clutter
         assert 0 == inventory.weight
         assert not inventory.stuff
@@ -112,7 +116,7 @@ class TestCharacterLib:
         half_filled_plastic_bottle.carried_by_id = jose.id
         worldmapc_kernel.server_db_session.commit()
 
-        inventory = character_lib.get_inventory(jose)
+        inventory = character_lib.get_inventory(jose_)
         assert 1.0 == inventory.clutter
         assert 0.50 == inventory.weight
         assert inventory.stuff
@@ -127,7 +131,8 @@ class TestCharacterLib:
         half_filled_plastic_bottle: StuffDocument,
         character_lib: CharacterLib,
     ) -> None:
-        inventory = character_lib.get_inventory(jose)
+        jose_ = worldmapc_kernel.character_lib.get(jose.id)
+        inventory = character_lib.get_inventory(jose_)
         assert 0 == inventory.clutter
         assert 0 == inventory.weight
         assert not inventory.stuff
@@ -136,7 +141,7 @@ class TestCharacterLib:
         empty_plastic_bottle.carried_by_id = jose.id
         worldmapc_kernel.server_db_session.commit()
 
-        inventory = character_lib.get_inventory(jose)
+        inventory = character_lib.get_inventory(jose_)
         assert 2.0 == inventory.clutter
         assert 0.50 == inventory.weight
         assert inventory.stuff

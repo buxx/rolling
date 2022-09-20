@@ -108,7 +108,7 @@ class TransferStuffOrResources(abc.ABC):
         return resource.name
 
     @abc.abstractmethod
-    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+    def _get_zone_coordinates(self) -> typing.Optional[typing.Tuple[int, int]]:
         pass
 
     @abc.abstractmethod
@@ -295,7 +295,8 @@ class TransferStuffOrResources(abc.ABC):
                     )
                 )
             )
-            deposit_success = (self._get_zone_coordinates(), [resource_id])
+            if zone_coordinates := self._get_zone_coordinates():
+                deposit_success = (zone_coordinates, [resource_id])
 
         return self._get_choose_something_description(
             can_be_back_url=can_be_back_url,
