@@ -9,6 +9,7 @@ from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
 from rolling.server.document.build import BuildDocument
 from rolling.util import EmptyModel
+from rolling.exception import ImpossibleAction
 
 
 @pytest.fixture
@@ -107,7 +108,8 @@ class TestPowerBuild:
         )
 
         # When
-        await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        with pytest.raises(ImpossibleAction):
+            await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
@@ -129,7 +131,8 @@ class TestPowerBuild:
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
 
         # When
-        await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
+        with pytest.raises(ImpossibleAction):
+            await power_on_action.perform(xena, build_id=build1.id, input_=EmptyModel())
 
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on

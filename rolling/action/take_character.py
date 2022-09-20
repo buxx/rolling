@@ -266,7 +266,7 @@ class TakeStuffOrResources(TransferStuffOrResources):
     def _get_classes(self) -> typing.List[str]:
         return []
 
-    def _get_zone_coordinates(self) -> typing.Tuple[int, int]:
+    def _get_zone_coordinates(self) -> typing.Optional[typing.Tuple[int, int]]:
         return self._from_character.zone_row_i, self._from_character.zone_col_i
 
 

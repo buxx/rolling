@@ -242,11 +242,12 @@ class CollectResourceAction(CharacterAction):
                 )
 
             if zone_resource_doc.quantity < quantity.real_value:
+                quantity = Quantity(zone_resource_doc.quantity)
                 input_ = CollectResourceModel(
                     resource_id=input_.resource_id,
                     zone_row_i=input_.zone_row_i,
                     zone_col_i=input_.zone_col_i,
-                    quantity=Quantity(zone_resource_doc.quantity),
+                    quantity=quantity,
                 )
 
         cost = self.get_cost(character, input_=input_)

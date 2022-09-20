@@ -9,10 +9,11 @@ from rolling.map.type.zone import DeadTree
 from rolling.map.type.zone import Dirt
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
+from rolling.util import Quantity
 
 
 @pytest.fixture
-def follow_action(worldmapc_kernel: Kernel) -> CollectResourceAction:
+def collect_action(worldmapc_kernel: Kernel) -> CollectResourceAction:
     return CollectResourceAction(
         kernel=worldmapc_kernel,
         description=ActionDescriptionModel(
@@ -38,7 +39,7 @@ class TestCollectResourceAction:
         self,
         worldmapc_kernel: Kernel,
         worldmapc_xena_model: CharacterModel,
-        follow_action: CollectResourceAction,
+        collect_action: CollectResourceAction,
     ) -> None:
         # Given
         kernel = worldmapc_kernel
@@ -62,7 +63,7 @@ class TestCollectResourceAction:
         )
 
         # check fixtures
-        follow_action.check_is_possible(xena)
+        collect_action.check_is_possible(xena)
         assert (
             kernel.tile_maps_by_position[(1, 2)].source.geography.rows[0][160]
             == DeadTree
@@ -75,13 +76,13 @@ class TestCollectResourceAction:
         )
 
         # When
-        await follow_action.perform(
+        await collect_action.perform(
             xena,
             input_=CollectResourceModel(
                 resource_id="WOOD",
-                quantity=3.0,  # More than in dead tree,
-                row_i=0,
-                col_i=160,
+                quantity=Quantity(3.0),  # More than in dead tree,
+                zone_row_i=0,
+                zone_col_i=160,
             ),
         )
 

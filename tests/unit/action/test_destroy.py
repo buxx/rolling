@@ -63,7 +63,6 @@ class TestDestroyBuildAction:
         # Then
         assert not kernel.door_lib.get_door_relations_query(door.id).count()
         assert not kernel.build_lib.get_all_ids(None)
-        assert description.back_to_zone
 
     async def test_destroy_door_one_ap(
         self,
@@ -96,7 +95,6 @@ class TestDestroyBuildAction:
 
         # Then
         assert kernel.build_lib.get_all_ids(None)
-        assert not description.back_to_zone
 
         # When
         description = await power_off_action.perform(
@@ -109,7 +107,6 @@ class TestDestroyBuildAction:
 
         # Then
         assert not kernel.build_lib.get_all_ids(None)
-        assert description.back_to_zone
 
     async def test_destroy_build_with_ressource_and_stuffs(
         self,
@@ -151,7 +148,6 @@ class TestDestroyBuildAction:
 
         # Then
         assert not kernel.build_lib.get_all_ids(None)
-        assert description.back_to_zone
         assert kernel.resource_lib.get_ground_resource(
             world_row_i=1,
             world_col_i=1,
