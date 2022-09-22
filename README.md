@@ -1,6 +1,6 @@
 # Rolling
 
-[![Build Status](https://travis-ci.com/buxx/rolling.svg?branch=master)](https://travis-ci.com/buxx/rolling)
+[![Python tests](https://github.com/buxx/rolling/actions/workflows/tests.yml/badge.svg?branch=master&event=push)](https://github.com/buxx/rolling/actions/workflows/tests.yml)
 
 Server side of [rolling](https://redbricks.games/home/rolling-117) game. See [rollgui](https://github.com/buxx/rollgui) for client side.
 
