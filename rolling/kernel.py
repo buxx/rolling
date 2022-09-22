@@ -71,6 +71,10 @@ class ServerConfig:
     smtp_port: str
     smtp_user: str
     smtp_password: str
+    db_user: str
+    db_name: str
+    db_password: str
+    db_address: str
     avatars_folder_path: str
     loading_folder_path: str
     anonymous_media_file_name: str
