@@ -102,16 +102,16 @@ class Kernel:
         self.server_config = ServerConfig(**server_config_reader["default"])
 
         self.server_db_user = server_db_user or os.environ.get(
-            "SERVER_DB_USER", self.server_config["db_user"]
+            "SERVER_DB_USER", self.server_config.db_user
         )
         self.server_db_password = server_db_password or os.environ.get(
-            "SERVER_DB_PASSWORD", self.server_config["db_password"]
+            "SERVER_DB_PASSWORD", self.server_config.db_password
         )
         self.server_db_name = server_db_name or os.environ.get(
-            "SERVER_DB_NAME", self.server_config["db_name"]
+            "SERVER_DB_NAME", self.server_config.db_name
         )
         self.server_db_host = server_db_host or os.environ.get(
-            "SERVER_DB_HOST", self.server_config["db_address"]
+            "SERVER_DB_HOST", self.server_config.db_address
         )
         self._zone_maps_folder = zone_maps_folder
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
