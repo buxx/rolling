@@ -93,17 +93,21 @@ class Kernel:
         server_db_name: typing.Optional[str] = None,
         server_db_host: typing.Optional[str] = None,
     ) -> None:
+        server_config_reader = configparser.ConfigParser()
+        server_config_reader.read(server_config_file_path)
+        self.server_config = ServerConfig(**server_config_reader["default"])
+
         self.server_db_user = server_db_user or os.environ.get(
-            "SERVER_DB_USER", "rolling"
+            "SERVER_DB_USER", self.server_config["db_user"]
         )
         self.server_db_password = server_db_password or os.environ.get(
-            "SERVER_DB_PASSWORD", "rolling"
+            "SERVER_DB_PASSWORD", self.server_config["db_password"]
         )
         self.server_db_name = server_db_name or os.environ.get(
-            "SERVER_DB_NAME", "rolling"
+            "SERVER_DB_NAME", self.server_config["db_name"]
         )
         self.server_db_host = server_db_host or os.environ.get(
-            "SERVER_DB_HOST", "127.0.0.1:5432"
+            "SERVER_DB_HOST", self.server_config["db_address"]
         )
         self._zone_maps_folder = zone_maps_folder
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
@@ -116,10 +120,6 @@ class Kernel:
             typing.Dict[typing.Tuple[int, int], ZoneMap]
         ] = None
         self._game: typing.Optional[Game] = None
-
-        server_config_reader = configparser.ConfigParser()
-        server_config_reader.read(server_config_file_path)
-        self.server_config = ServerConfig(**server_config_reader["default"])
 
         # Database stuffs
         self._client_db_path = client_db_path
