@@ -134,6 +134,20 @@ destroy_robustness_per_ap = 1
     unit = "L"
     clutter = 1.0
     actions = []
+  [resources.SOIL]
+    name = "Terre"
+    weight=1500.0
+    material="SANDY"
+    unit = "L"
+    clutter = 0.05
+    actions = []
+  [resources.WET_SOIL]
+    name = "Terre crue"
+    weight=2000.0
+    material="SANDY"
+    unit = "L"
+    clutter = 0.05
+    actions = []
   [resources.RED_WINE]
     name = "Vin rouge"
     weight=1000.0
@@ -217,6 +231,29 @@ destroy_robustness_per_ap = 1
 
 
 [resource_mix]
+  [resource_mix.MIX1]
+    require = [{resource_id="FRESH_WATER", quantity=0.25}, {resource_id="SOIL", quantity=0.75}]
+    produce = "WET_SOIL"
+    quantity = 1.0
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    cost = 0.01
+
+  [resource_mix.MIX2]
+    require = [{resource_id="FRESH_WATER", quantity=1.0}, {resource_id="STONE", quantity=1.0}]
+    produce = "WET_SOIL"
+    quantity = 1.0
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    cost = 10.0
 
 [extractions]
 [extractions.DEAD_TREE]

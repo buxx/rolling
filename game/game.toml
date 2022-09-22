@@ -565,8 +565,9 @@ actions = ["TRAVEL"]
 
 [resource_mix]
   [resource_mix.WET_SOIL_WITH_FRESH_WATER]
-    require = [{resource_id="FRESH_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
+    require = [{resource_id="FRESH_WATER", quantity=0.25}, {resource_id="SOIL", quantity=0.75}]
     produce = "WET_SOIL"
+    quantity = 1.0
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
@@ -575,8 +576,9 @@ actions = ["TRAVEL"]
     required_all_ability_ids = []
     cost = 0.01
   [resource_mix.WET_SOIL_WITH_SALTED_WATER]
-    require = [{resource_id="SALTED_WATER", coeff=0.25}, {resource_id="SOIL", coeff=0.75}]
+    require = [{resource_id="SALTED_WATER", quantity=0.25}, {resource_id="SOIL", quantity=0.75}]
     produce = "WET_SOIL"
+    quantity = 1.0
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
@@ -585,15 +587,16 @@ actions = ["TRAVEL"]
     required_all_ability_ids = []
     cost = 0.01
   [resource_mix.COPPER_WITH_TIN]
-    require = [{resource_id="COPPER", coeff=0.80}, {resource_id="TIN", coeff=0.20}]
+    require = [{resource_id="COPPER", quantity=80.0}, {resource_id="TIN", quantity=20.0}]
     produce = "BRONZE"
+    quantity = 100.0
     required_one_of_stuff_ids = []
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
     required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
     required_all_ability_ids = []
-    cost = 0.001
+    cost = 0.1
 
 [ACTIONS]
   [ACTIONS.ATTACK_CHARACTER]

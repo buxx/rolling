@@ -10,7 +10,7 @@ from rolling.model.resource import ResourceDescriptionModel
 @dataclasses.dataclass
 class RequiredResourceForMix:
     resource: ResourceDescriptionModel
-    coeff: float
+    quantity: float
 
     def __hash__(self):
         return hash((self.resource.id, self.coeff))
@@ -21,7 +21,8 @@ class ResourceMixDescription:
     id: str
     required_resources: typing.List[RequiredResourceForMix]
     produce_resource: ResourceDescriptionModel
-    cost: float
+    produce_quantity: float
+    cost_per_quantity: float
     properties: dict
 
     @property

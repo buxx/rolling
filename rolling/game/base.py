@@ -300,7 +300,7 @@ class GameConfig:
                 required_resources.append(
                     RequiredResourceForMix(
                         resource=self.resources[required_resource_raw["resource_id"]],
-                        coeff=required_resource_raw["coeff"],
+                        quantity=required_resource_raw["quantity"],
                     )
                 )
             properties = {}
@@ -312,7 +312,8 @@ class GameConfig:
                 id=mix_id,
                 required_resources=required_resources,
                 produce_resource=self.resources[mix_raw["produce"]],
-                cost=mix_raw["cost"],
+                cost_per_quantity=mix_raw["cost"],
+                produce_quantity=mix_raw["quantity"],
                 properties=properties,
             )
 

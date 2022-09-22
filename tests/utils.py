@@ -1,6 +1,6 @@
 import typing
 
-from guilang.description import Part
+from guilang.description import Description, Part
 from rolling.model.character import CharacterModel
 from rolling.kernel import Kernel
 from rolling.server.document.build import BuildDocument
@@ -39,3 +39,16 @@ def place_build_on_character_position(
         zone_col_i=character.zone_col_i + zone_col_modifier,
         build_id=build_id,
     )
+
+
+def find_part(parts: typing.List[Part], **kwargs: typing.Any) -> typing.Optional[Part]:
+    for part in parts:
+        if items := part.items:
+            if found := find_part(items, **kwargs):
+                return found
+
+        for key, value in kwargs.items():
+            if getattr(part, key) == value:
+                return part
+
+    return None
