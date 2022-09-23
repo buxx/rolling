@@ -16,7 +16,7 @@ import serpyco
 
 from guilang.description import Description
 from guilang.description import Part
-from rolling.exception import WrongInputError
+from rolling.exception import RollingError, WrongInputError
 from rolling.log import server_logger
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.model.measure import Unit
@@ -305,6 +305,12 @@ def str_quantity_unit(quantity: str) -> typing.Optional[Unit]:
         return Unit.KILOGRAM
     if quantity.endswith("g"):
         return Unit.GRAM
+    if quantity.endswith("u"):
+        return Unit.UNIT
+    if quantity.endswith("l"):
+        return Unit.LITTER
+    if quantity.endswith("m³"):
+        return Unit.CUBIC
     return None
 
 
@@ -483,9 +489,19 @@ class InputQuantityContext:
         user_input: str,
         carried_resource: "CarriedResourceDescriptionModel",
     ) -> "InputQuantityContext":
-        expect_kg: bool = is_expect_kg(carried_resource.quantity, carried_resource.unit)
-        default_unit = Unit.KILOGRAM if expect_kg else carried_resource.unit
-        user_input = adapt_str_quantity(user_input, carried_resource.unit, default_unit)
+        return cls.new(
+            user_input=user_input,
+            default_quantity=carried_resource.quantity,
+            base_unit=carried_resource.unit,
+        )
+
+    @classmethod
+    def new(
+        cls, user_input: str, default_quantity: float, base_unit: Unit
+    ) -> "InputQuantityContext":
+        expect_kg: bool = is_expect_kg(default_quantity, base_unit)
+        default_unit = Unit.KILOGRAM if expect_kg else base_unit
+        user_input = adapt_str_quantity(user_input, base_unit, default_unit)
         real_quantity = str_quantity_to_float(user_input)
         user_unit = str_quantity_unit(user_input) or default_unit
 
@@ -493,7 +509,7 @@ class InputQuantityContext:
             user_input=user_input,
             user_unit=user_unit,
             real_quantity=real_quantity,
-            real_unit=carried_resource.unit,
+            real_unit=base_unit,
         )
 
 
@@ -566,19 +582,46 @@ def url_without_zone_coordinates(url: str) -> str:
 
 
 class Quantity:
-    def __init__(self, value: typing.Union[str, float, int]) -> None:
+    def __init__(
+        self,
+        value: typing.Union[str, float, int],
+        default_unit: typing.Optional[Unit] = None,
+    ) -> None:
         self.value = value
+
+        self.unit: typing.Optional[Unit] = default_unit
+        if type(value) == str:
+            self.unit = str_quantity_unit(self.value)
 
     def __repr__(self) -> str:
         return self.value
 
-    @property
-    def real_value(self) -> float:
+    def as_real_float(self) -> float:
+        """return float, and *1000 if kg"""
         if type(self.value) == float:
             return self.value
         elif type(self.value) == int:
             return self.value
         return str_quantity_to_float(self.value)
+
+    def zero_str(self) -> str:
+        if self.unit is not None:
+            return f"0.0 {self.unit.as_str()}"
+        return "0.0"
+
+    def assert_unit(self, exception: Exception) -> None:
+        if self.unit is None:
+            raise exception
+
+    def convert(self) -> "Quantity":
+        if self.unit is None:
+            raise RollingError("Can't convert quantity without unit")
+
+        real_float_value = self.as_real_float()
+        if self.unit == Unit.GRAM and real_float_value >= 1000.0:
+            return Quantity(real_float_value / 1000.0, default_unit=Unit.KILOGRAM)
+
+        return Quantity(real_float_value, self.unit)
 
 
 class QuantityEncoder(serpyco.FieldEncoder):

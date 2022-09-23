@@ -218,6 +218,13 @@ destroy_robustness_per_ap = 1
     unit = "G"
     clutter = 0.001
     actions = ["EAT_RESOURCE"]
+  [resources.RES3]
+    name = "Ressource3"
+    weight=1.0
+    material="MIDDLE_PIECE"
+    unit = "G"
+    clutter = 0.001
+    actions = ["EAT_RESOURCE"]
   [resources.CEREAL]
     name = "Céréales"
     weight=1000.0
@@ -254,6 +261,18 @@ destroy_robustness_per_ap = 1
     required_one_of_ability_ids = []
     required_all_ability_ids = []
     cost = 10.0
+
+  [resource_mix.MIX3]
+    require = [{resource_id="RES1", quantity=1.0}, {resource_id="RES2", quantity=1.0}]
+    produce = "RES3"
+    quantity = 1.0
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    cost = 0.001
 
 [extractions]
 [extractions.DEAD_TREE]
