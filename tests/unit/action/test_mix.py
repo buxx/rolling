@@ -41,10 +41,16 @@ class TestMixAction:
             ("MIX2", {"FRESH_WATER": 0.0, "STONE": 1.0}, 0.0),
             # enough for 1
             ("MIX2", {"FRESH_WATER": 1.0, "STONE": 1.0}, 1.0),
-            # enough for 5
-            ("MIX2", {"FRESH_WATER": 5.0, "STONE": 5.0}, 5.0),
+            # enough for 2
+            ("MIX2", {"FRESH_WATER": 2.0, "STONE": 2.0}, 2.0),
             # enough for 1 (much more water than stone)
-            ("MIX2", {"FRESH_WATER": 10.0, "STONE": 5.0}, 5.0),
+            ("MIX2", {"FRESH_WATER": 10.0, "STONE": 1.0}, 1.0),
+            # enough for 2 (not enough AP)
+            ("MIX2", {"FRESH_WATER": 100.0, "STONE": 100.0}, 2.0),
+            # Test display as grams
+            ("MIX3", {"RES1": 1.0, "RES2": 1.0}, 1.0),
+            # Test display as kilo grams
+            ("MIX3", {"RES1": 2500.0, "RES2": 2500.0}, 2.5),
         ],
     )
     async def test_production_capacities(
@@ -89,7 +95,7 @@ class TestMixAction:
             (
                 "MIX1",
                 {"FRESH_WATER": 0.25, "SOIL": 0.75},
-                1.0,
+                "1.0l",
                 {"FRESH_WATER": 0.0, "SOIL": 0.0, "WET_SOIL": 1.0},
                 0.01 * 1.0,
             ),
@@ -97,23 +103,23 @@ class TestMixAction:
             (
                 "MIX2",
                 {"FRESH_WATER": 1.0, "STONE": 1.0},
-                1.0,
+                "1.0l",
                 {"FRESH_WATER": 0.0, "STONE": 0.0, "WET_SOIL": 1.0},
                 10.0 * 1.0,
             ),
-            # Not enough AP to do all (MIX2 cost is 10.0)
+            # Not enough AP (MIX2 cost is 10.0)
             (
                 "MIX2",
                 {"FRESH_WATER": 10.0, "STONE": 10.0},
-                10.0,
-                {"FRESH_WATER": 8.0, "STONE": 8.0, "WET_SOIL": 2.0},
+                "10.0l",
+                {"FRESH_WATER": 10.0, "STONE": 10.0, "WET_SOIL": 0.0},
                 10.0 * 10.0,
             ),
             # Not enough resource (0.0)
             (
                 "MIX1",
                 {"FRESH_WATER": 0.10, "SOIL": 0.75},
-                1.0,
+                "1.0l",
                 None,
                 0.01 * 1.0,
             ),
@@ -121,9 +127,24 @@ class TestMixAction:
             (
                 "MIX1",
                 {"SOIL": 0.75},
-                1.0,
+                "1.0l",
                 None,
                 0.01 * 1.0,
+            ),
+            # Test Kg conversions
+            (
+                "MIX3",
+                {"RES1": 1000.0, "RES2": 1000.0},
+                "1.0kg",
+                {"RES1": 0.0, "RES2": 0.0, "RES3": 1000.0},
+                0.001 * 1000.0,
+            ),
+            (
+                "MIX3",
+                {"RES1": 1000.0, "RES2": 1000.0},
+                "1000.0g",
+                {"RES1": 0.0, "RES2": 0.0, "RES3": 1000.0},
+                0.001 * 1000.0,
             ),
         ],
     )

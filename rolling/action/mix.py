@@ -64,7 +64,9 @@ class MixResourcesAction(WithResourceAction):
 
         if input_.quantity is not None:
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
-            multiplier = int(input_.quantity.real_value / resource_mix.produce_quantity)
+            multiplier = int(
+                input_.quantity.as_real_float() / resource_mix.produce_quantity
+            )
 
             for required_resource in resource_mix.required_resources:
                 carried_resource = self._kernel.resource_lib.get_one_carried_by(
@@ -72,10 +74,6 @@ class MixResourcesAction(WithResourceAction):
                     resource_id=required_resource.resource.id,
                     empty_object_if_not=True,
                 )
-                # user_input_context = InputQuantityContext.from_carried_resource(
-                #     user_input=input_.quantity.value,
-                #     carried_resource=carried_resource,
-                # )
                 required_quantity = required_resource.quantity * multiplier
                 if carried_resource.quantity < required_quantity:
                     raise WrongInputError(
@@ -143,23 +141,49 @@ class MixResourcesAction(WithResourceAction):
             resource_mix_description = self._kernel.game.config.resource_mixs[
                 input_.resource_mix_id
             ]
-            # user_input_context = InputQuantityContext.from_carried_resource(
-            #     user_input=input_.quantity.value, carried_resource=carried_resource
-            # )
             return (
                 self._description.base_cost
                 + resource_mix_description.cost_per_quantity
                 * int(
-                    input_.quantity.real_value
+                    input_.quantity.as_real_float()
                     / resource_mix_description.produce_quantity
                 )
             )
         return self._description.base_cost
 
+    def _get_maximum_multiplier_capacity(
+        self, character: "CharacterModel", mix_id: str
+    ) -> int:
+        mix_description = self._kernel.game.config.resource_mixs[mix_id]
+        carried_resources = [
+            self._kernel.resource_lib.get_one_carried_by(
+                character_id=character.id,
+                resource_id=required_resource.resource.id,
+                empty_object_if_not=True,
+            )
+            for required_resource in mix_description.required_resources
+        ]
+        available_quantities = {
+            carried_resource.id: carried_resource.quantity
+            for carried_resource in carried_resources
+        }
+
+        available_counts = [
+            int(
+                available_quantities[required_resource.resource.id]
+                / required_resource.quantity
+            )
+            for required_resource in mix_description.required_resources
+        ]
+        available_counts.append(
+            int(character.action_points / mix_description.cost_per_quantity)
+        )
+
+        return min(available_counts)
+
     async def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
-        # FIXME BS NOW : Quantités str (kg, etc) (InputQuantityContext)
         base_cost = self.get_cost(character, resource_id=resource_id)
         mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
         produce_unit_name = self._kernel.translation.get(
@@ -168,27 +192,11 @@ class MixResourcesAction(WithResourceAction):
         produce_quantity = mix_description.produce_quantity
 
         if input_.quantity is None:
-            carried_resources = [
-                self._kernel.resource_lib.get_one_carried_by(
-                    character_id=character.id,
-                    resource_id=required_resource.resource.id,
-                    empty_object_if_not=True,
-                )
-                for required_resource in mix_description.required_resources
-            ]
-            available_quantities = {
-                carried_resource.id: carried_resource.quantity
-                for carried_resource in carried_resources
-            }
-
-            available_counts = [
-                int(
-                    available_quantities[required_resource.resource.id]
-                    / required_resource.quantity
-                )
-                for required_resource in mix_description.required_resources
-            ]
-            maximum_produce_quantity = produce_quantity * float(min(available_counts))
+            multiplier = self._get_maximum_multiplier_capacity(
+                character,
+                mix_id=input_.resource_mix_id,
+            )
+            maximum_produce_quantity = produce_quantity * float(multiplier)
 
             parts = [
                 Part(
@@ -242,6 +250,10 @@ class MixResourcesAction(WithResourceAction):
             produce_resource_description = self._kernel.game.config.resources[
                 produce_resource_id
             ]
+            maximum = Quantity(
+                maximum_produce_quantity,
+                default_unit=mix_description.produce_resource.unit,
+            ).convert()
             return Description(
                 title=f"Produire {mix_description.produce_resource.name}",
                 illustration_name=produce_resource_description.illustration,
@@ -263,75 +275,71 @@ class MixResourcesAction(WithResourceAction):
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 min_value=0.0,
-                                max_value=maximum_produce_quantity,
-                                default_value="0.0",
+                                max_value=maximum.as_real_float(),
+                                default_value=maximum.zero_str(),
                             ),
                         ],
                     )
                 ],
             )
 
-        async def _one_iteration():
+        input_.quantity.assert_unit(ImpossibleAction("Vous devez saisir une unité"))
+        parts = []
+        desired_multiplier = int(
+            input_.quantity.as_real_float() / mix_description.produce_quantity
+        )
+        required_ap = self.get_cost(character, resource_id=resource_id, input_=input_)
+
+        try:
             # AP
             await self._kernel.character_lib.reduce_action_points(
                 character_id=character.id,
-                cost=mix_description.cost_per_quantity,
+                cost=required_ap,
                 check=True,
+                commit=False,
             )
             # Reduce
             for required_resource in mix_description.required_resources:
                 self._kernel.resource_lib.reduce_carried_by(
                     character.id,
                     required_resource.resource.id,
-                    required_resource.quantity,
+                    required_resource.quantity * desired_multiplier,
                     commit=False,
                 )
             # Create
+            produced_quantity = mix_description.produce_quantity * desired_multiplier
             self._kernel.resource_lib.add_resource_to(
                 character_id=character.id,
                 resource_id=mix_description.produce_resource.id,
-                quantity=mix_description.produce_quantity,
+                quantity=produced_quantity,
                 commit=False,
             )
-
-        parts = []
-        production_count = int(input_.quantity.real_value / produce_quantity)
-        produced_quantity = 0.0
-        for _ in range(production_count):
-            try:
-                await _one_iteration()
-                produced_quantity += mix_description.produce_quantity
-            except (NoCarriedResource, NotEnoughResource):
-                parts.append(
-                    Part(
-                        text=(
-                            f"Vous n'avez pas pu produire la quantité demandé : "
-                            "Pas assez de resources"
-                        )
+            parts.append(
+                Part(
+                    text=(
+                        f"Vous avez produit {produced_quantity} {produce_unit_name} "
+                        f"de {mix_description.produce_resource.name}"
                     )
-                )
-                break
-            except NotEnoughActionPoints:
-                parts.append(
-                    Part(
-                        text=(
-                            f"Vous n'avez pas pu produire la quantité demandé : "
-                            "Pas assez de Points d'Actions"
-                        )
-                    )
-                )
-                break
-
-        self._kernel.server_db_session.commit()
-
-        parts.append(
-            Part(
-                text=(
-                    f"Vous avez produit {produced_quantity} {produce_unit_name} "
-                    f"de {mix_description.produce_resource.name}"
                 )
             )
-        )
+        except (NoCarriedResource, NotEnoughResource):
+            parts.append(
+                Part(
+                    text=(
+                        f"Vous n'avez pas pu produire la quantité demandé : "
+                        "Pas assez de resources"
+                    )
+                )
+            )
+        except NotEnoughActionPoints:
+            parts.append(
+                Part(
+                    text=(
+                        f"Vous n'avez pas pu produire la quantité demandé : "
+                        "Pas assez de Points d'Actions"
+                    )
+                )
+            )
 
         return Description(
             title=f"Produire {mix_description.produce_resource.name}",

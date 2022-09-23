@@ -26,7 +26,6 @@ class ResourceMixDescription:
     properties: dict
 
     @property
-    @lru_cache()
     def required_resources_ids(self) -> typing.Tuple[str]:
         return tuple([d.resource.id for d in self.required_resources])
 

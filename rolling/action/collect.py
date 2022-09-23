@@ -164,7 +164,7 @@ class CollectResourceAction(CharacterAction):
                 quantity = production.extract_quick_action_quantity
                 input_.quantity = Quantity(quantity)
 
-            return input_.quantity.real_value * production.extract_cost_per_unit
+            return input_.quantity.as_real_float() * production.extract_cost_per_unit
 
     async def perform(
         self, character: "CharacterModel", input_: CollectResourceModel
@@ -241,7 +241,7 @@ class CollectResourceAction(CharacterAction):
                     f"resource_id:{input_.resource_id}"
                 )
 
-            if zone_resource_doc.quantity < quantity.real_value:
+            if zone_resource_doc.quantity < quantity.as_real_float():
                 quantity = Quantity(zone_resource_doc.quantity)
                 input_ = CollectResourceModel(
                     resource_id=input_.resource_id,
@@ -257,7 +257,7 @@ class CollectResourceAction(CharacterAction):
         self._kernel.resource_lib.add_resource_to(
             character_id=character_doc.id,
             resource_id=input_.resource_id,
-            quantity=quantity.real_value,
+            quantity=quantity.as_real_float(),
             commit=False,
         )
         if not production.infinite:
@@ -267,7 +267,7 @@ class CollectResourceAction(CharacterAction):
                 zone_row_i=input_.zone_row_i,
                 zone_col_i=input_.zone_col_i,
                 resource_id=input_.resource_id,
-                quantity=quantity.real_value,
+                quantity=quantity.as_real_float(),
                 allow_reduce_more_than_possible=True,
                 commit=False,
             )
@@ -277,7 +277,7 @@ class CollectResourceAction(CharacterAction):
         )
         self._kernel.server_db_session.commit()
 
-        text = f"{round(quantity.real_value, 3)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
+        text = f"{round(quantity.as_real_float(), 3)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
         return Description(
             title=f"Récupérer du {resource_description.name}",
             items=[Part(text=text)],
