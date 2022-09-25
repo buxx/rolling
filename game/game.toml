@@ -54,7 +54,7 @@ min_character_card_input_at_create = 0
 max_character_card_input_at_create = 5
 
 [[main_actions]]
-name = "Chercher"
+name = "Chercher/Chasser"
 class = "SEARCH"
 actions = ["SEARCH_FOOD", "SEARCH_MATERIAL"]
 
@@ -77,6 +77,11 @@ actions = ["LEARN_KNOWLEDGE", "TEACH_KNOWLEDGE"]
 name = "Agriculture"
 class = "FARMING"
 actions = ["SEED"]
+
+[[main_actions]]
+name = "Exploitation"
+class = "COLLECT"
+actions = ["COLLECT_RESOURCE"]
 
 [[main_actions]]
 name = "Voyager"
