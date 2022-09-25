@@ -311,4 +311,5 @@ class DropResourceAction(WithResourceAction):
             title=f"Action effectué",
             back_url=f"/_describe/character/{character.id}/inventory",
             redirect=input_.then_redirect_url,
+            reload_inventory=True,
         )

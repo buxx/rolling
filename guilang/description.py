@@ -129,3 +129,4 @@ class Description:
     is_quick_error: bool = False
     is_grid: bool = False
     reload_zone: bool = False
+    reload_inventory: bool = False

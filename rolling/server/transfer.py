@@ -160,6 +160,7 @@ class TransferStuffOrResources(abc.ABC):
             can_be_back_url=can_be_back_url,
             quick_action_response=quick_action_response,
             deposit_success=deposit_success,
+            reload_inventory=True,
         )
 
     def get_description(
