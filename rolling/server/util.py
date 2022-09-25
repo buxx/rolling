@@ -118,7 +118,12 @@ async def with_multiple_carried_stuffs(
         except NotEnoughActionPoints:
             parts.append(Part(text="Plus assez de Points d'Actions !"))
 
-    return Description(title=title, items=parts + success_parts, redirect=redirect)
+    return Description(
+        title=title,
+        items=parts + success_parts,
+        redirect=redirect,
+        reload_inventory=True,
+    )
 
 
 def get_round_resource_quantity(quantity: float) -> str:

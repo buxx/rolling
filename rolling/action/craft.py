@@ -303,6 +303,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return Description(
             title="Action effectué avec succès",
             back_url=f"/_describe/character/{character.id}/on_place_actions",
+            reload_inventory=True,
         )
 
 
@@ -457,6 +458,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         return Description(
             title="Action effectué avec succès",
             back_url=f"/_describe/character/{character.id}/on_place_actions",
+            reload_inventory=True,
         )
 
 
@@ -880,4 +882,5 @@ class ContinueStuffConstructionAction(WithStuffAction):
                 )
             ],
             back_url=f"/_describe/character/{character.id}/on_place_actions",
+            reload_inventory=True,
         )

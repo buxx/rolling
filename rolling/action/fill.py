@@ -103,4 +103,5 @@ class FillStuffAction(WithStuffAction):
         return Description(
             title=f"{stuff.name} rempli(e) avec {resource_description.name}",
             footer_links=footer_links,
+            reload_inventory=True,
         )

@@ -80,4 +80,8 @@ class EmptyStuffAction(WithStuffAction):
             self._kernel.stuff_lib.empty_stuff(stuff)
         except CantEmpty as exc:
             return Description(title=str(exc), footer_links=footer_links)
-        return Description(title=f"{stuff.name} vidé(e)", footer_links=footer_links)
+        return Description(
+            title=f"{stuff.name} vidé(e)",
+            footer_links=footer_links,
+            reload_inventory=True,
+        )

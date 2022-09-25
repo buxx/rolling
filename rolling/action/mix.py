@@ -345,4 +345,5 @@ class MixResourcesAction(WithResourceAction):
             title=f"Produire {mix_description.produce_resource.name}",
             back_url=f"/_describe/character/{character.id}/inventory",
             items=parts,
+            reload_inventory=True,
         )

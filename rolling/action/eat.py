@@ -211,4 +211,5 @@ class EatResourceAction(WithResourceAction):
                 ),
             ],
             back_url=f"/_describe/character/{character.id}/inventory",
+            reload_inventory=True,
         )
