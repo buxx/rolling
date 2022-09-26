@@ -89,7 +89,6 @@ class CollectResourceAction(CharacterAction):
                 zone_col_i=zone_col_i,
             ):
                 productions[production.resource.id].append((zone_row_i, zone_col_i))
-        del production
 
         for resource_id, coordinates in productions.items():
             resource_description = self._kernel.game.config.resources[resource_id]
