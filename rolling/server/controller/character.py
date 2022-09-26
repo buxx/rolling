@@ -1403,7 +1403,11 @@ class CharacterController(BaseController):
                 Part(
                     label=main_action.name,
                     classes=[main_action.class_],
-                    form_action=f"/_describe/character/{character_id}/on_place_actions?filter_action_types={filter_action_types}",
+                    form_action=(
+                        f"/_describe/character/{character_id}/on_place_actions"
+                        f"?filter_action_types={filter_action_types}"
+                        f"&from_main_action_name={main_action.name}"
+                    ),
                     is_link=True,
                 )
             )
@@ -1447,7 +1451,7 @@ class CharacterController(BaseController):
         )
 
         parts = []
-        if pending_actions_count:
+        if filter_action_types is None and pending_actions_count:
             parts.append(
                 Part(
                     is_link=True,
@@ -1455,6 +1459,15 @@ class CharacterController(BaseController):
                     label=f"{pending_actions_count} propositions d'actions",
                 )
             )
+
+        if from_main_action_name := hapic_data.query.from_main_action_name:
+            main_action = next(
+                main_action
+                for main_action in self._kernel.game.config.main_actions
+                if main_action.name == from_main_action_name
+            )
+            if main_action_description := main_action.description:
+                parts.append(Part(text=main_action_description))
 
         action_parts = []
         action_categories = list(sorted(set([a.category for a in character_actions])))

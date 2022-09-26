@@ -49,6 +49,7 @@ class MainAction:
     name: str
     class_: str
     action_types: typing.List[str]
+    description: typing.Optional[str]
 
 
 class GameConfig:
@@ -159,7 +160,12 @@ class GameConfig:
         )
 
         self.main_actions: typing.List[MainAction] = [
-            MainAction(name=m["name"], action_types=m["actions"], class_=m["class"])
+            MainAction(
+                name=m["name"],
+                action_types=m["actions"],
+                class_=m["class"],
+                description=m.get("description"),
+            )
             for m in config_dict["main_actions"]
         ]
 

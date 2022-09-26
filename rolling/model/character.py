@@ -35,6 +35,7 @@ class GetCharacterPathModel:
 @dataclasses.dataclass
 class OnPlaceActionQuery:
     filter_action_types: typing.Optional[str] = None
+    from_main_action_name: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
