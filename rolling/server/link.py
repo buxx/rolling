@@ -71,6 +71,7 @@ class CharacterActionLink:
     # This attribute is used for rollgui2 compatibility
     quick_action_key: typing.Optional[str] = None
     force_open_description: bool = False
+    use_classes2_for_button: bool = False
 
     def get_as_str(self) -> str:
         if not self.cost:

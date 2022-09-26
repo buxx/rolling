@@ -1485,6 +1485,7 @@ class CharacterController(BaseController):
                             classes=character_action.classes1,
                             classes2=character_action.classes2,
                             cost=character_action.cost,
+                            use_classes2_for_button=character_action.use_classes2_for_button,
                         )
                     )
 
