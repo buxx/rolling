@@ -54,6 +54,7 @@ class Part:
     max_value: typing.Optional[float] = None
     display_int_buttons: bool = False
     cost: typing.Optional[float] = None
+    use_classes2_for_button: bool = False
 
     @classmethod
     def from_dataclass_fields(

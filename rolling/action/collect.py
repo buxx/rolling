@@ -112,6 +112,7 @@ class CollectResourceAction(CharacterAction):
                     group_name="Exploiter des ressources",
                     classes1=["COLLECT"],
                     classes2=[resource_id],
+                    use_classes2_for_button=True,
                     # rollgui2 compatibility
                     all_tiles_at_once=False,
                     exploitable_tiles=[
