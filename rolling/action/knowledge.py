@@ -132,7 +132,7 @@ class LearnKnowledgeAction(CharacterAction):
                                 type_=Type.NUMBER,
                                 name="ap",
                                 min_value=1.0,
-                                max_value=character.action_points,
+                                max_value=left,
                             )
                         ],
                     ),
@@ -140,7 +140,7 @@ class LearnKnowledgeAction(CharacterAction):
             )
 
         if self._kernel.character_lib.increase_knowledge_progress(
-            character.id, input_.knowledge_id, input_.ap
+            character.id, input_.knowledge_id, min(left, input_.ap)
         ):
             title = "Connaissance acquise !"
         else:
