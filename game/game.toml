@@ -57,11 +57,13 @@ max_character_card_input_at_create = 5
 name = "Chercher/Chasser"
 class = "SEARCH"
 actions = ["SEARCH_FOOD", "SEARCH_MATERIAL"]
+description = "Ces actions seront effectué à travers la zone entière. Leurs succèes dépend de la phaune, de la flore, etc. ainsi que du renouvellement naturel de ceux-ci."
 
 [[main_actions]]
 name = "Mélanges/Productions"
 class = "MIX"
 actions = ["MIX_RESOURCES", "TRANSFORM_STUFF_TO_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+description = "Les actions ci-dessous dépendent des objets et ressources que vous possèdez dans votre inventaire."
 
 [[main_actions]]
 name = "Crafting"
@@ -72,6 +74,7 @@ actions = ["BEGIN_STUFF_CONSTRUCTION", "CRAFT_STUFF_WITH_STUFF", "CRAFT_STUFF_WI
 name = "Apprentissage"
 class = "KNOWLEDGE"
 actions = ["LEARN_KNOWLEDGE", "TEACH_KNOWLEDGE"]
+description = "Les apprentissages peuvent être long. Pensez à y consacrer du temps régulièrement."
 
 [[main_actions]]
 name = "Agriculture"
@@ -82,6 +85,7 @@ actions = ["SEED"]
 name = "Exploitation"
 class = "COLLECT"
 actions = ["COLLECT_RESOURCE"]
+description = "Les actions ci-dessous dépendent de l'emplacement de votre personnage et de ce qui se trouve autour de lui."
 
 [[main_actions]]
 name = "Voyager"
