@@ -289,7 +289,7 @@
       extract_quick_action_quantity=1000.0
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
-      ui_extract_max_quantity=500.0
+      ui_extract_max_quantity=50.0
       skills_bonus = {}
     
   [TILES.TIN_DEPOSIT]
@@ -302,7 +302,7 @@
       extract_quick_action_quantity=1000.0
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
-      ui_extract_max_quantity=500.0
+      ui_extract_max_quantity=50.0
       skills_bonus = {}
 
   [TILES.IRON_DEPOSIT]
@@ -315,7 +315,7 @@
       extract_quick_action_quantity=1000.0
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
-      ui_extract_max_quantity=500.0
+      ui_extract_max_quantity=50.0
       skills_bonus = {}
     
   [TILES.DIRT]
