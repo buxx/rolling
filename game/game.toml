@@ -159,6 +159,16 @@ actions = ["TRAVEL"]
   name = "Poterie"
   type = "2.Metiers2"
   default = 0.0
+  
+[skill.logging]
+  name = "Bûcheronnage"
+  type = "2.Metiers2"
+  default = 0.0
+
+[skill.stone_work]
+  name = "Extraction et taille de la pierre"
+  type = "2.Metiers2"
+  default = 0.0
 
 [skill.spear_fight]
   name = "Combat a la lance"
@@ -500,7 +510,7 @@ actions = ["TRAVEL"]
     weight=2500.0
     material="MIDDLE_PIECE"
     unit = "U"
-    clutter = 1.0
+    clutter = 0.25
     actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
 
   [resources.LEATHER_PIECE]
@@ -2035,6 +2045,42 @@ actions = ["TRAVEL"]
     craft_ap = 20.0
     cost = 0.0
     link_group_name = "Utilitaire"
+
+  [ACTIONS.BUILD_WOOD_QUARRY_TOOLS]
+    name = "Outils de carrière (bois)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="WOOD_QUARRY_TOOLS", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.01}
+    ]
+    cost = 5.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_IRON_QUARRY_TOOLS]
+    name = "Outils de carrière (fer)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="IRON_QUARRY_TOOLS", quantity=1.0},
+    ]
+    require = [
+      {resource="IRON", quantity=1500.0}
+    ]
+    cost = 15.0
+    link_group_name = "Artisanat"
 
   [ACTIONS.BUILD_ROUET]
     name = "Rouet"

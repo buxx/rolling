@@ -125,6 +125,7 @@ class ZoneMapTileProduction:
     ui_extract_default_quantity: str
     ui_extract_min_quantity: float
     ui_extract_max_quantity: float
+    skills_bonus: typing.Dict[str, float]
 
     def __eq__(self, other: "ZoneMapTileProduction") -> bool:
         return self.resource.id == other.resource.id

@@ -245,11 +245,12 @@
       start_capacity=1.7
       regeneration=0.001
       destroy_when_empty=true
-      extract_cost_per_unit=6.0
+      extract_cost_per_unit=11.0
       extract_quick_action_quantity=0.25
       ui_extract_default_quantity="0.25m³"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {logging=1.0}
 
     
   [TILES.TROPICAL_TREE]
@@ -258,11 +259,12 @@
       start_capacity=1.8
       regeneration=0.002
       destroy_when_empty=true
-      extract_cost_per_unit=6.0
+      extract_cost_per_unit=11.0
       extract_quick_action_quantity=0.25
       ui_extract_default_quantity="0.25m³"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {logging=1.0}
     
   [TILES.DEAD_TREE]
     [[TILES.DEAD_TREE.produce]]
@@ -270,11 +272,12 @@
       start_capacity=1.0
       regeneration=0.0
       destroy_when_empty=true
-      extract_cost_per_unit=5.0
+      extract_cost_per_unit=10.0
       extract_quick_action_quantity=0.25
       ui_extract_default_quantity="0.25m³"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {logging=1.0}
     
   [TILES.COPPER_DEPOSIT]
     [[TILES.COPPER_DEPOSIT.produce]]
@@ -287,6 +290,7 @@
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {}
     
   [TILES.TIN_DEPOSIT]
     [[TILES.TIN_DEPOSIT.produce]]
@@ -299,6 +303,7 @@
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {}
 
   [TILES.IRON_DEPOSIT]
     [[TILES.IRON_DEPOSIT.produce]]
@@ -311,6 +316,7 @@
       ui_extract_default_quantity="0.5kg"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {}
     
   [TILES.DIRT]
     [[TILES.DIRT.produce]]
@@ -321,6 +327,7 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
+      skills_bonus = {}
     
   [TILES.FRESH_WATER_TILE]
     [[TILES.FRESH_WATER_TILE.produce]]
@@ -331,6 +338,7 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
+      skills_bonus = {}
     
   [TILES.SEA_WATER]
     [[TILES.SEA_WATER.produce]]
@@ -341,6 +349,7 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
+      skills_bonus = {}
 
   [TILES.SAND]
     [[TILES.SAND.produce]]
@@ -351,6 +360,7 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
+      skills_bonus = {}
 
   [TILES.HIGH_GRASS]
     [[TILES.HIGH_GRASS.produce]]
@@ -361,6 +371,7 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
+      skills_bonus = {}
 
   [TILES.SHORT_GRASS]
     [[TILES.SHORT_GRASS.produce]]
@@ -371,4 +382,17 @@
       ui_extract_default_quantity="1l"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=1000.0
-    
+      skills_bonus = {}
+
+  [TILES.ROCK]
+    [[TILES.ROCK.produce]]
+      resource="RAW_STONE"
+      start_capacity=500.0
+      infinite=false
+      destroy_when_empty=true
+      extract_cost_per_unit=0.10
+      extract_quick_action_quantity=10.0
+      ui_extract_default_quantity="5u"
+      ui_extract_min_quantity=1.0
+      ui_extract_max_quantity=500.0
+      skills_bonus = {stone_work=0.01}

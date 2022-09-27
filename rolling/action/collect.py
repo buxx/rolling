@@ -11,8 +11,10 @@ from guilang.description import Part
 from guilang.description import Type
 from rolling.action.base import CharacterAction
 from rolling.action.base import get_character_action_url
+from rolling.bonus import Bonus, Bonuses
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
+from rolling.model.zone import ZoneMapTileProduction
 from rolling.rolling_types import ActionType
 from rolling.server.document.resource import ZoneResourceDocument
 from rolling.server.link import CharacterActionLink, ExploitableTile
@@ -94,8 +96,8 @@ class CollectResourceAction(CharacterAction):
             resource_description = self._kernel.game.config.resources[resource_id]
             query_params = self.input_model(
                 resource_id=resource_id,
-                zone_row_i=zone_row_i,
-                zone_col_i=zone_col_i,
+                zone_row_i=coordinates[0][0],
+                zone_col_i=coordinates[0][1],
             )
             character_actions.append(
                 CharacterActionLink(
@@ -147,16 +149,7 @@ class CollectResourceAction(CharacterAction):
             and input_.resource_id is not None
         ):
             try:
-                production = next(
-                    production
-                    for production in self._kernel.game.world_manager.get_resources_at(
-                        world_row_i=character.world_row_i,
-                        world_col_i=character.world_col_i,
-                        zone_row_i=input_.zone_row_i,
-                        zone_col_i=input_.zone_col_i,
-                    )
-                    if production.resource.id == input_.resource_id
-                )
+                production = self._get_production(character, input_=input_)
             except StopIteration:
                 raise ImpossibleAction("Plus de ressource à cet endroit")
 
@@ -164,18 +157,32 @@ class CollectResourceAction(CharacterAction):
                 quantity = production.extract_quick_action_quantity
                 input_.quantity = Quantity(quantity)
 
-            return input_.quantity.as_real_float() * production.extract_cost_per_unit
+            return self._bonuses(character, input_=input_).apply(
+                input_.quantity.as_real_float() * production.extract_cost_per_unit
+            )
 
-    async def perform(
+    def _bonuses(
         self, character: "CharacterModel", input_: CollectResourceModel
-    ) -> Description:
-        assert input_.resource_id is not None
-        assert input_.zone_row_i is not None
-        assert input_.zone_col_i is not None
+    ) -> Bonuses:
+        bonuses = []
+        if stuff_bonus := self._kernel._character_lib.get_stuff_bonus(
+            character.id,
+            qualifiers=[ActionType.COLLECT_RESOURCE, input_.resource_id],
+        ):
+            bonuses.append(stuff_bonus)
 
-        character_doc = self._kernel.character_lib.get_document(character.id)
-        resource_description = self._kernel.game.config.resources[input_.resource_id]
-        production = next(
+        production = self._get_production(character, input_=input_)
+        if skill_bonus := self._kernel._character_lib.get_skill_bonus(
+            character, skills_ids=list(production.skills_bonus.keys())
+        ):
+            bonuses.append(skill_bonus)
+
+        return Bonuses(bonuses)
+
+    def _get_production(
+        self, character: "CharacterModel", input_: CollectResourceModel
+    ) -> ZoneMapTileProduction:
+        return next(
             production
             for production in self._kernel.game.world_manager.get_resources_at(
                 world_row_i=character.world_row_i,
@@ -186,11 +193,29 @@ class CollectResourceAction(CharacterAction):
             if production.resource.id == input_.resource_id
         )
 
+    async def perform(
+        self, character: "CharacterModel", input_: CollectResourceModel
+    ) -> Description:
+        assert input_.resource_id is not None
+        assert input_.zone_row_i is not None
+        assert input_.zone_col_i is not None
+
+        character_doc = self._kernel.character_lib.get_document(character.id)
+        resource_description = self._kernel.game.config.resources[input_.resource_id]
+        production = self._get_production(character, input_=input_)
+
         if input_.quantity is None and not input_.quantity_auto:
             unit_name = self._kernel.translation.get(resource_description.unit)
 
+            bonuses = self._bonuses(character, input_=input_)
+            extract_cost_per_unit = bonuses.apply(production.extract_cost_per_unit)
+            bonuses_sentences = [f"Bonus appliqués :"]
+            if bonuses_names := bonuses.names():
+                bonuses_sentences.extend([f" - {name}" for name in bonuses_names])
+            else:
+                bonuses_sentences.append(" - aucun")
             return Description(
-                title=f"Récupérer du {resource_description.name}",
+                title=f"Extraire {resource_description.name}",
                 items=[
                     Part(
                         is_form=True,
@@ -203,13 +228,17 @@ class CollectResourceAction(CharacterAction):
                         ),
                         items=[
                             Part(
-                                label=f"Quantité (coût: {production.extract_cost_per_unit} par {unit_name}) ?",
+                                text=f"Extraire 1 {unit_name} demande {round(extract_cost_per_unit, 3)} PA"
+                            ),
+                            *[Part(text=text) for text in bonuses_sentences],
+                            Part(
+                                label=f"Quantité à extraire ?",
                                 type_=Type.NUMBER,
                                 name="quantity",
                                 default_value=production.ui_extract_default_quantity,
                                 min_value=production.ui_extract_min_quantity,
                                 max_value=production.ui_extract_max_quantity,
-                            )
+                            ),
                         ],
                     )
                 ],
@@ -275,6 +304,15 @@ class CollectResourceAction(CharacterAction):
         await self._kernel.character_lib.reduce_action_points(
             character.id, cost, commit=False
         )
+        for (
+            bonis_skill_id,
+            bonus_increment_coefficient,
+        ) in production.skills_bonus.items():
+            self._kernel.character_lib.increase_skill(
+                character.id,
+                skill_id=bonis_skill_id,
+                increment=input_.quantity.as_real_float() * bonus_increment_coefficient,
+            )
         self._kernel.server_db_session.commit()
 
         text = f"{round(quantity.as_real_float(), 3)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"

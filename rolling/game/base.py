@@ -581,6 +581,7 @@ class Game:
                         ],
                         ui_extract_min_quantity=produce_raw["ui_extract_min_quantity"],
                         ui_extract_max_quantity=produce_raw["ui_extract_max_quantity"],
+                        skills_bonus=produce_raw["skills_bonus"],
                     )
                     for produce_raw in tile_properties_raw["produce"]
                 ],

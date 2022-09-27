@@ -52,3 +52,16 @@ def find_part(parts: typing.List[Part], **kwargs: typing.Any) -> typing.Optional
                 return part
 
     return None
+
+
+def parts_text(parts: typing.List[Part]) -> str:
+    def _find_texts(items: typing.List[Part]) -> typing.List[str]:
+        texts = []
+        for item in items:
+            if items := item.items:
+                texts.extend(_find_texts(items))
+            if text := item.text:
+                texts.append(text)
+        return texts
+
+    return "\n".join(_find_texts(parts))
