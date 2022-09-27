@@ -17,6 +17,7 @@ from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.base import get_with_resource_action_url
+from rolling.bonus import Bonus, Bonuses
 from rolling.exception import CannotMoveToZoneError
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
@@ -270,6 +271,7 @@ class CharacterLib:
                 id=skill_document.skill_id,
                 name=self._kernel.game.config.skills[skill_document.skill_id].name,
                 value=float(skill_document.value),
+                counter=float(skill_document.counter),
             )
             for skill_document in self._kernel.server_db_session.query(
                 CharacterSkillDocument
@@ -1555,7 +1557,7 @@ class CharacterLib:
         )
 
     def increase_skill(
-        self, character_id: str, skill_id: str, increment: int, commit: bool = True
+        self, character_id: str, skill_id: str, increment: float, commit: bool = True
     ) -> None:
         skill_doc: CharacterSkillDocument = (
             self._kernel.server_db_session.query(CharacterSkillDocument)
@@ -1565,8 +1567,10 @@ class CharacterLib:
             )
             .one()
         )
+        counter_as_int_before = int(skill_doc.counter)
         skill_doc.counter += increment
-        skill_doc.value = math.log(skill_doc.counter, DEFAULT_LOG_BASE)
+        if counter_as_int_before != int(skill_doc.counter):
+            skill_doc.value = math.log(skill_doc.counter, DEFAULT_LOG_BASE)
 
         self._kernel.server_db_session.add(skill_doc)
         if commit:
@@ -2108,3 +2112,51 @@ class CharacterLib:
             world_col_i=character_doc.world_col_i,
             character_ids=[character_doc.id],
         )
+
+    def get_skill_bonus(
+        self, character: CharacterModel, skills_ids: typing.List[str]
+    ) -> typing.Optional[Bonus]:
+        bonuses: typing.List[Bonus] = []
+        for skill_id in skills_ids:
+            skill = character.skills[skill_id]
+            if skill.as_ap_bonus() < 1.0:
+                bonuses.append(Bonus(from_skill=skill, coefficient=skill.as_ap_bonus()))
+
+        # Keep only one (the best) bonus
+        if bonuses:
+            return list(sorted(bonuses, key=lambda b: b.coefficient))[0]
+
+        return None
+
+    def get_stuff_bonus(
+        self, character_id: str, qualifiers: typing.List[str]
+    ) -> typing.Optional[Bonus]:
+        bonuses: typing.List[Bonus] = []
+        for stuff in self._kernel.stuff_lib.get_carried_by(
+            character_id,
+            exclude_crafting=True,
+        ):
+            stuff_properties = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    stuff.stuff_id
+                )
+            )
+            if not stuff_properties.bonuses:
+                continue
+
+            bonus_value: typing.Optional[float] = None
+            qualified: typing.Any = stuff_properties.bonuses
+            for qualifier in qualifiers:
+                if qualified := qualified.get(qualifier):
+                    if type(qualified) == float:
+                        bonus_value = qualified
+                        break
+
+            if bonus_value is not None:
+                bonuses.append(Bonus(from_stuff=stuff, coefficient=bonus_value))
+
+        # Keep only one (the best) bonus
+        if bonuses:
+            return list(sorted(bonuses, key=lambda b: b.coefficient))[0]
+
+        return None

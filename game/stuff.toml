@@ -305,8 +305,9 @@
   damages = 1.0
   classes = ["WEAPON", "HAXE"]
   illustration = "stone_axe.png"
+  bonuses = {COLLECT_RESOURCE={WOOD=0.70}}
 [COPPER_HAXE]
-  name = "Hache de cuivre"
+  name = "Hache de guerre (cuivre)"
   weight = 1000.0
   clutter = 1.0
   actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
@@ -319,8 +320,9 @@
   damages = 2.0
   classes = ["WEAPON", "HAXE"]
   illustration = "clutter_axe.png"
+  bonuses = {COLLECT_RESOURCE={WOOD=0.65}}
 [BRONZE_HAXE]
-  name = "Hache de bronze"
+  name = "Hache de guerre (bronze)"
   weight = 1000.0
   clutter = 1.0
   actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
@@ -333,8 +335,9 @@
   damages = 2.2
   classes = ["WEAPON", "HAXE"]
   illustration = "bronze_axe.png"
+  bonuses = {COLLECT_RESOURCE={WOOD=0.60}}
 [IRON_HAXE]
-  name = "Hache de fer"
+  name = "Hache de guerre (fer)"
   weight = 900.0
   clutter = 1.0
   actions = ["DROP_STUFF", "USE_AS_WEAPON", "NOT_USE_AS_WEAPON", "CONTINUE_STUFF_CONSTRUCTION"]
@@ -347,6 +350,7 @@
   damages = 2.8
   classes = ["WEAPON", "HAXE"]
   illustration = "iron_axe.png"
+  bonuses = {COLLECT_RESOURCE={WOOD=0.55}}
 [STONE_DAGGER]
   name = "Dague de pierre"
   weight = 400.0
@@ -529,3 +533,21 @@
   classes = ["CRAFT"]
   illustration = "anvil.png"
   abilities = ["HAMMERING1", "HAMMERING2"]
+[WOOD_QUARRY_TOOLS]
+  name = "Outils de carrière (bois)"
+  weight = 1000.0
+  clutter = 0.5
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  illustration = "wood_quarry_tools.png"
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={RAW_STONE=0.9}}
+[IRON_QUARRY_TOOLS]
+  name = "Outils de carrière (fer)"
+  weight = 2000.0
+  clutter = 0.5
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  illustration = "iron_quarry_tools.png"
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={RAW_STONE=0.7}}

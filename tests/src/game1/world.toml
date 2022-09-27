@@ -52,3 +52,4 @@
       ui_extract_default_quantity="0.25m³"
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=500.0
+      skills_bonus = {logging=1.0}

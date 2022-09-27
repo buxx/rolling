@@ -78,3 +78,5 @@
 * fourche.png by https://en.wikipedia.org/wiki/File:Peasants_3French_Best.jpg
 * fleaugrain.png by https://commons.wikimedia.org/wiki/File:Lucien_Simon_Le_battage_des_bl%C3%A9s.jpg?uselang=fr
 * totem.png from "Totem Polls" by kasio69 is licensed under CC BY 2.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/2.0/?ref=openverse.
+* wood_quarry_tools.png from https://commons.wikimedia.org/wiki/File:Wedge_(wig).jpg, https://en.wikipedia.org/wiki/File:Post_maul_-_20040819.jpg
+* iron_quarry_tools.png from https://en.wikipedia.org/wiki/Wedge#/media/File:Wedge-1.jpg, https://en.wikipedia.org/wiki/Sledgehammer#/media/File:Sledgehammers-1.jpg

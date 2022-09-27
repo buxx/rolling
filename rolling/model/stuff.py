@@ -47,6 +47,7 @@ class StuffProperties:
     classes: typing.List[str] = serpyco.field(default_factory=list)
     skills_bonus: typing.List[str] = serpyco.field(default_factory=list)
     illustration: typing.Optional[str] = None
+    bonuses: typing.Dict[str, typing.Any] = serpyco.field(default_factory=dict)
 
     def have_abilities(self, abilities: typing.List[str]) -> typing.List[str]:
         have_abilities = []
