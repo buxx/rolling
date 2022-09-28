@@ -279,6 +279,19 @@
       ui_extract_max_quantity=500.0
       skills_bonus = {logging=1.0}
     
+  [TILES.DRY_BUSH]
+    [[TILES.DRY_BUSH.produce]]
+      resource="WOOD"
+      start_capacity=0.05
+      regeneration=0.001
+      destroy_when_empty=true
+      extract_cost_per_unit=0.001
+      extract_quick_action_quantity=0.05
+      ui_extract_default_quantity="0.05m³"
+      ui_extract_min_quantity=0.01
+      ui_extract_max_quantity=0.05
+      skills_bonus = {}
+    
   [TILES.COPPER_DEPOSIT]
     [[TILES.COPPER_DEPOSIT.produce]]
       resource="RAW_COPPER"
