@@ -11,6 +11,10 @@ pub enum ZoneTile {
     TropicalTree,
     DeadTree,
     FreshWater,
+    CopperDeposit,
+    TinDeposit,
+    IronDeposit,
+    ClayDeposit,
 }
 
 pub fn get_char_for_tile(tile: &ZoneTile) -> char {
@@ -27,5 +31,9 @@ pub fn get_char_for_tile(tile: &ZoneTile) -> char {
         ZoneTile::TropicalTree => 'ፆ',
         ZoneTile::DeadTree => 'آ',
         ZoneTile::FreshWater => 'ގ',
+        ZoneTile::CopperDeposit => 'c',
+        ZoneTile::TinDeposit => 't',
+        ZoneTile::IronDeposit => 'i',
+        ZoneTile::ClayDeposit => 'y',
     }
 }

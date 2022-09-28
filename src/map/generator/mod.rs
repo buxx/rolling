@@ -173,13 +173,33 @@ impl<'a> Generator<'a> {
                 default_tile: &zone_types::ZoneTile::RockyGround,
                 random: Some(vec![
                     (3.0, &zone_types::ZoneTile::Rock),
-                    (0.01, &zone_types::ZoneTile::FreshWater),
+                    (0.03, &zone_types::ZoneTile::FreshWater),
+                    (0.01, &zone_types::ZoneTile::CopperDeposit),
+                    (0.01, &zone_types::ZoneTile::TinDeposit),
+                    (0.01, &zone_types::ZoneTile::IronDeposit),
                 ]),
-                random_near: Some(vec![zone::RandomNear {
-                    near: &zone_types::ZoneTile::Rock,
-                    tile: &zone_types::ZoneTile::Rock,
-                    probability: 40,
-                }]),
+                random_near: Some(vec![
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::Rock,
+                        tile: &zone_types::ZoneTile::Rock,
+                        probability: 40,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::CopperDeposit,
+                        tile: &zone_types::ZoneTile::CopperDeposit,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::TinDeposit,
+                        tile: &zone_types::ZoneTile::TinDeposit,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::IronDeposit,
+                        tile: &zone_types::ZoneTile::IronDeposit,
+                        probability: 10,
+                    },
+                ]),
                 allow_overflow: None,
             },
             world_types::WorldTile::Plain => zone::DefaultGenerator {
@@ -190,6 +210,7 @@ impl<'a> Generator<'a> {
                     (30.0, &zone_types::ZoneTile::HightGrass),
                     (2.0, &zone_types::ZoneTile::DeadTree),
                     (0.01, &zone_types::ZoneTile::FreshWater),
+                    (0.01, &zone_types::ZoneTile::ClayDeposit),
                 ]),
                 random_near: Some(vec![
                     zone::RandomNear {
@@ -202,6 +223,11 @@ impl<'a> Generator<'a> {
                         tile: &zone_types::ZoneTile::HightGrass,
                         probability: 35,
                     },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::ClayDeposit,
+                        tile: &zone_types::ZoneTile::ClayDeposit,
+                        probability: 50,
+                    },
                 ]),
                 allow_overflow: None,
             },
@@ -213,6 +239,7 @@ impl<'a> Generator<'a> {
                     (7.0, &zone_types::ZoneTile::LeafTree),
                     (30.0, &zone_types::ZoneTile::HightGrass),
                     (0.05, &zone_types::ZoneTile::FreshWater),
+                    (0.01, &zone_types::ZoneTile::ClayDeposit),
                 ]),
                 random_near: Some(vec![
                     zone::RandomNear {
@@ -230,6 +257,11 @@ impl<'a> Generator<'a> {
                         tile: &zone_types::ZoneTile::LeafTree,
                         probability: 5,
                     },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::ClayDeposit,
+                        tile: &zone_types::ZoneTile::ClayDeposit,
+                        probability: 60,
+                    },
                 ]),
                 allow_overflow: None,
             },
@@ -240,6 +272,10 @@ impl<'a> Generator<'a> {
                     (60.0, &zone_types::ZoneTile::HightGrass),
                     (7.0, &zone_types::ZoneTile::LeafTree),
                     (0.01, &zone_types::ZoneTile::FreshWater),
+                    (0.01, &zone_types::ZoneTile::CopperDeposit),
+                    (0.01, &zone_types::ZoneTile::TinDeposit),
+                    (0.01, &zone_types::ZoneTile::IronDeposit),
+                    (0.01, &zone_types::ZoneTile::ClayDeposit),
                 ]),
                 random_near: Some(vec![
                     zone::RandomNear {
@@ -251,6 +287,26 @@ impl<'a> Generator<'a> {
                         near: &zone_types::ZoneTile::FreshWater,
                         tile: &zone_types::ZoneTile::FreshWater,
                         probability: 35,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::CopperDeposit,
+                        tile: &zone_types::ZoneTile::CopperDeposit,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::TinDeposit,
+                        tile: &zone_types::ZoneTile::TinDeposit,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::IronDeposit,
+                        tile: &zone_types::ZoneTile::IronDeposit,
+                        probability: 10,
+                    },
+                    zone::RandomNear {
+                        near: &zone_types::ZoneTile::ClayDeposit,
+                        tile: &zone_types::ZoneTile::ClayDeposit,
+                        probability: 30,
                     },
                 ]),
                 allow_overflow: None,
