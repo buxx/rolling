@@ -386,6 +386,19 @@
       ui_extract_max_quantity=1000.0
       skills_bonus = {}
 
+    [[TILES.HIGH_GRASS.produce]]
+      resource="VEGETAL_FIBER"
+      start_capacity=0.1
+      regeneration=0.001
+      destroy_when_empty=true
+      replace_by_when_destroyed="SHORT_GRASS"
+      extract_cost_per_unit=0.001
+      extract_quick_action_quantity=0.1
+      ui_extract_default_quantity="0.1m³"
+      ui_extract_min_quantity=0.1
+      ui_extract_max_quantity=1.0
+      skills_bonus = {}
+
   [TILES.SHORT_GRASS]
     [[TILES.SHORT_GRASS.produce]]
       resource="SOIL"

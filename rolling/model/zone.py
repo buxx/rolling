@@ -119,6 +119,7 @@ class ZoneMapTileProduction:
     start_capacity: float
     regeneration: float
     destroy_when_empty: bool
+    replace_by_when_destroyed: typing.Optional[typing.Type[MapTileType]]
     infinite: bool
     extract_cost_per_unit: float
     extract_quick_action_quantity: float

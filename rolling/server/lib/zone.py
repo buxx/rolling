@@ -103,6 +103,7 @@ class ZoneLib:
         resource_id: str,
         quantity: float,
         destroy_when_empty: bool,
+        replace_by_when_destroyed: typing.Optional[typing.Type[MapTileType]],
     ) -> ZoneResourceDocument:
         zone_resource_document = ZoneResourceDocument(
             world_row_i=world_row_i,
@@ -112,6 +113,9 @@ class ZoneLib:
             resource_id=resource_id,
             quantity=quantity,
             destroy_tile_when_empty=destroy_when_empty,
+            replace_by_when_destroyed=replace_by_when_destroyed.id
+            if replace_by_when_destroyed
+            else None,
         )
         self._kernel.server_db_session.add(zone_resource_document)
         self._kernel.server_db_session.commit()
@@ -156,6 +160,7 @@ class ZoneLib:
                     world_col_i=world_col_i,
                     zone_row_i=zone_row_i,
                     zone_col_i=zone_col_i,
+                    replace_by=zone_resource_doc.replace_by_when_destroyed,
                 )
 
         if commit:
@@ -167,6 +172,7 @@ class ZoneLib:
         world_col_i: int,
         zone_row_i: int,
         zone_col_i: int,
+        replace_by: typing.Optional[str],
     ) -> None:
         with self.lock(world_row_i, world_col_i):
             zone_type: typing.Type[
@@ -182,15 +188,19 @@ class ZoneLib:
             with open(zone_file_path) as zone_file:
                 zone_raw = zone_file.read()
 
+            replacement_type = (
+                ZoneMapTileType.get_for_id(replace_by)
+                if replace_by is not None
+                else ZoneMapTileType.get_for_id(zone_type.default_tile_id)
+            )
+            replacement_str = zone_map.source.geography.legend.get_str_with_type(
+                replacement_type
+            )
             zone_raw_by_lines = zone_raw.splitlines()
             # FIXME BS NOW: zones txt file start with ::GEO ... this is dangerous :s
             line = zone_raw_by_lines[zone_row_i + 1]
             line_as_char_list = list(line)
-            line_as_char_list[
-                zone_col_i
-            ] = zone_map.source.geography.legend.get_str_with_type(
-                ZoneMapTileType.get_for_id(zone_type.default_tile_id)
-            )
+            line_as_char_list[zone_col_i] = replacement_str
             line_rewrote = "".join(line_as_char_list)
             # FIXME BS NOW: zones txt file start with ::GEO ... this is dangerous :s
             zone_raw_by_lines[zone_row_i + 1] = line_rewrote
@@ -208,7 +218,7 @@ class ZoneLib:
                     data=ZoneTileReplaceData(
                         zone_row_i=zone_row_i,
                         zone_col_i=zone_col_i,
-                        new_tile_id=zone_type.default_tile_id,
+                        new_tile_id=replacement_type.id,
                     ),
                 ),
                 world_row_i=world_row_i,

@@ -11,6 +11,7 @@ from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
+from rolling.map.type.zone import MapTileType
 from rolling.model.ability import AbilityDescription
 from rolling.model.build import BuildBuildRequireResourceDescription
 from rolling.model.build import BuildDescription
@@ -571,6 +572,13 @@ class Game:
                         start_capacity=produce_raw.get("start_capacity", 0.0),
                         regeneration=produce_raw.get("regeneration", 0.0),
                         destroy_when_empty=produce_raw.get("destroy_when_empty", False),
+                        replace_by_when_destroyed=(
+                            ZoneMapTileType.get_for_id(
+                                produce_raw.get("replace_by_when_destroyed")
+                            )
+                            if produce_raw.get("replace_by_when_destroyed")
+                            else None
+                        ),
                         infinite=produce_raw.get("infinite", False),
                         extract_cost_per_unit=produce_raw["extract_cost_per_unit"],
                         extract_quick_action_quantity=produce_raw[

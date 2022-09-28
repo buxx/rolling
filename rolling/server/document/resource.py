@@ -54,7 +54,9 @@ class ZoneResourceDocument(Document):
 
     # properties
     quantity = Column(Numeric(24, 6, asdecimal=False), nullable=False)
+    # TODO : these columns should by read from RAM
     destroy_tile_when_empty = Column(Boolean(), nullable=False)
+    replace_by_when_destroyed = Column(String(255), nullable=True)
 
 
 # FIXME BS NOW floor:
