@@ -152,49 +152,54 @@ def sync_zone_resources(
     )
 
     def _work(coordinates: typing.Tuple[int, int]):
-        world_row_i, world_col_i = coordinates
-        click.echo(f"Process {world_row_i}.{world_col_i} ...")
+        async def _job():
+            world_row_i, world_col_i = coordinates
+            click.echo(f"Process {world_row_i}.{world_col_i} ...")
 
-        zone_map: ZoneMap = main_kernel.tile_maps_by_position[
-            (world_row_i, world_col_i)
-        ]
-        # Use dedicated process to ensure db session is not shared
-        process_kernel = get_kernel(
-            game_config_folder=game_config_dir,
-            world_map_source_path=world_map_source,
-            tile_maps_folder_path=zone_map_folder,
-        )
-        for zone_row_i, zone_row in enumerate(zone_map.source.geography.rows):
-            for zone_col_i, tile_type in enumerate(zone_row):
-                tiles_properties = main_kernel.game.world_manager.world.tiles_properties
-                try:
-                    tile_properties = tiles_properties[tile_type]
-                except KeyError:
-                    continue
-
-                production: ZoneMapTileProduction
-                for production in tile_properties.produce:
-                    if production.infinite:
-                        continue
+            zone_map: ZoneMap = main_kernel.tile_maps_by_position[
+                (world_row_i, world_col_i)
+            ]
+            # Use dedicated process to ensure db session is not shared
+            process_kernel = get_kernel(
+                game_config_folder=game_config_dir,
+                world_map_source_path=world_map_source,
+                tile_maps_folder_path=zone_map_folder,
+            )
+            for zone_row_i, zone_row in enumerate(zone_map.source.geography.rows):
+                for zone_col_i, tile_type in enumerate(zone_row):
+                    tiles_properties = (
+                        main_kernel.game.world_manager.world.tiles_properties
+                    )
                     try:
-                        _ = process_kernel.zone_lib.get_zone_ressource_doc(
-                            world_row_i=world_row_i,
-                            world_col_i=world_col_i,
-                            zone_row_i=zone_row_i,
-                            zone_col_i=zone_col_i,
-                            resource_id=production.resource.id,
-                        )
-                    except NoResultFound:
-                        _ = process_kernel.zone_lib.create_zone_ressource_doc(
-                            world_row_i=world_row_i,
-                            world_col_i=world_col_i,
-                            zone_row_i=zone_row_i,
-                            zone_col_i=zone_col_i,
-                            resource_id=production.resource.id,
-                            quantity=production.start_capacity,
-                            destroy_when_empty=production.destroy_when_empty,
-                            replace_by_when_destroyed=production.replace_by_when_destroyed,
-                        )
+                        tile_properties = tiles_properties[tile_type]
+                    except KeyError:
+                        continue
+
+                    production: ZoneMapTileProduction
+                    for production in tile_properties.produce:
+                        if production.infinite:
+                            continue
+                        try:
+                            _ = process_kernel.zone_lib.get_zone_ressource_doc(
+                                world_row_i=world_row_i,
+                                world_col_i=world_col_i,
+                                zone_row_i=zone_row_i,
+                                zone_col_i=zone_col_i,
+                                resource_id=production.resource.id,
+                            )
+                        except NoResultFound:
+                            _ = process_kernel.zone_lib.create_zone_ressource_doc(
+                                world_row_i=world_row_i,
+                                world_col_i=world_col_i,
+                                zone_row_i=zone_row_i,
+                                zone_col_i=zone_col_i,
+                                resource_id=production.resource.id,
+                                quantity=production.start_capacity,
+                                destroy_when_empty=production.destroy_when_empty,
+                                replace_by_when_destroyed=production.replace_by_when_destroyed,
+                            )
+
+        asyncio.run(_job())
 
     coordinates = []
     for world_row_i, world_row in enumerate(

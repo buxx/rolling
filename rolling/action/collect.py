@@ -264,7 +264,7 @@ class CollectResourceAction(CharacterAction):
                 raise RollingError(
                     "No zone resource found around : "
                     f"world_row_i:{character.world_row_i}, "
-                    f"world_row_i:{character.world_col_i}, "
+                    f"world_col_i:{character.world_col_i}, "
                     f"zone_row_i:{input_.zone_row_i}, "
                     f"zone_col_i:{input_.zone_col_i}, "
                     f"resource_id:{input_.resource_id}"
