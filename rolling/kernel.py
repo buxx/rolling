@@ -453,6 +453,7 @@ class Kernel:
                     "c": "COPPER_DEPOSIT",
                     "t": "TIN_DEPOSIT",
                     "i": "IRON_DEPOSIT",
+                    "y": "CLAY_DEPOSIT",
                 },
                 ZoneMapTileType,
             )

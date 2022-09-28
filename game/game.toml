@@ -2118,33 +2118,33 @@ actions = ["TRAVEL"]
     cost = 0.0
     link_group_name = "Utilitaire"
 
-  [ACTIONS.SEARCH_WOOD]
-    name = "Chercher du bois (construction/artisanat)"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="WOOD", quantity_per_hour=0.01, random_loss=30.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_WOOD]
+  #   name = "Chercher du bois (construction/artisanat)"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="WOOD", quantity_per_hour=0.01, random_loss=30.0},
+  #   ]
+  #   cost = 0.0
 
-  [ACTIONS.SEARCH_RAW_STONE]
-    name = "Chercher de la pierre brute (petite constructions)"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="RAW_STONE", quantity_per_hour=100, random_loss=30.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_RAW_STONE]
+  #   name = "Chercher de la pierre brute (petite constructions)"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="RAW_STONE", quantity_per_hour=100, random_loss=30.0},
+  #   ]
+  #   cost = 0.0
 
   [ACTIONS.SEARCH_VEGETAL_FIBER]
     name = "Chercher de la fibre végétale"
@@ -2160,61 +2160,61 @@ actions = ["TRAVEL"]
     ]
     cost = 0.0
 
-  [ACTIONS.SEARCH_RAW_COPPER]
-    name = "Chercher du cuivre"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=90.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_RAW_COPPER]
+  #   name = "Chercher du cuivre"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="RAW_COPPER", quantity_per_hour=1000.0, random_loss=90.0},
+  #   ]
+  #   cost = 0.0
 
-  [ACTIONS.SEARCH_CLAY]
-    name = "Chercher de l'argile"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="CLAY", quantity_per_hour=50.0, random_loss=10.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_CLAY]
+  #   name = "Chercher de l'argile"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="CLAY", quantity_per_hour=50.0, random_loss=10.0},
+  #   ]
+  #   cost = 0.0
 
-  [ACTIONS.SEARCH_RAW_TIN]
-    name = "Chercher de l'étain"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="RAW_TIN", quantity_per_hour=1000.0, random_loss=90.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_RAW_TIN]
+  #   name = "Chercher de l'étain"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="RAW_TIN", quantity_per_hour=1000.0, random_loss=90.0},
+  #   ]
+  #   cost = 0.0
 
-  [ACTIONS.SEARCH_RAW_IRON]
-    name = "Chercher du fer"
-    actions = ["SEARCH_MATERIAL"]
-    required_one_of_stuff_ids = []
-    required_all_stuff_ids = []
-    required_one_of_skill_ids = []
-    required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
-    produce = [
-      {resource="RAW_IRON", quantity_per_hour=1000.0, random_loss=90.0},
-    ]
-    cost = 0.0
+  # [ACTIONS.SEARCH_RAW_IRON]
+  #   name = "Chercher du fer"
+  #   actions = ["SEARCH_MATERIAL"]
+  #   required_one_of_stuff_ids = []
+  #   required_all_stuff_ids = []
+  #   required_one_of_skill_ids = []
+  #   required_all_skill_ids = []
+  #   required_one_of_ability_ids = []
+  #   required_all_ability_ids = []
+  #   produce = [
+  #     {resource="RAW_IRON", quantity_per_hour=1000.0, random_loss=90.0},
+  #   ]
+  #   cost = 0.0
 
   [ACTIONS.SEED_CEREAL]
     name = "Semer des céréales"

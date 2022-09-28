@@ -228,7 +228,7 @@ class CollectResourceAction(CharacterAction):
                         ),
                         items=[
                             Part(
-                                text=f"Extraire 1 {unit_name} demande {round(extract_cost_per_unit, 3)} PA"
+                                text=f"Extraire 1 {unit_name} demande {round(extract_cost_per_unit, 4)} PA"
                             ),
                             *[Part(text=text) for text in bonuses_sentences],
                             Part(
@@ -315,7 +315,7 @@ class CollectResourceAction(CharacterAction):
             )
         self._kernel.server_db_session.commit()
 
-        text = f"{round(quantity.as_real_float(), 3)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
+        text = f"{round(quantity.as_real_float(), 4)}{self._kernel.translation.get(resource_description.unit, short=True)} {resource_description.name}"
         return Description(
             title=f"Récupérer du {resource_description.name}",
             items=[Part(text=text)],

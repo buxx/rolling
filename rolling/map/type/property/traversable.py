@@ -28,6 +28,7 @@ traversable_properties = {
     zone.CopperDeposit: {TransportType.WALKING.value: True},
     zone.TinDeposit: {TransportType.WALKING.value: True},
     zone.IronDeposit: {TransportType.WALKING.value: True},
+    zone.ClayDeposit: {TransportType.WALKING.value: True},
 }
 
 hump_properties = {

@@ -317,6 +317,19 @@
       ui_extract_min_quantity=0.01
       ui_extract_max_quantity=50.0
       skills_bonus = {}
+
+  [TILES.CLAY_DEPOSIT]
+    [[TILES.CLAY_DEPOSIT.produce]]
+      resource="CLAY"
+      start_capacity=50000.0
+      regeneration=0.0
+      destroy_when_empty=true
+      extract_cost_per_unit=0.2
+      extract_quick_action_quantity=5.0
+      ui_extract_default_quantity="5.0l"
+      ui_extract_min_quantity=1.0
+      ui_extract_max_quantity=500.0
+      skills_bonus = {}
     
   [TILES.DIRT]
     [[TILES.DIRT.produce]]

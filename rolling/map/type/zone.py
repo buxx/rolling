@@ -30,6 +30,7 @@ class ZoneMapTileType(MapTileType):
                 CopperDeposit.id: CopperDeposit,
                 TinDeposit.id: TinDeposit,
                 IronDeposit.id: IronDeposit,
+                ClayDeposit.id: ClayDeposit,
             }
 
         return cls._list_cache
@@ -133,4 +134,10 @@ class TinDeposit(ZoneMapTileType):
 class IronDeposit(ZoneMapTileType):
     id = "IRON_DEPOSIT"
     name = "Gisement de fer"
+    foreground_high_color = "#08f"
+
+
+class ClayDeposit(ZoneMapTileType):
+    id = "CLAY_DEPOSIT"
+    name = "Argile"
     foreground_high_color = "#08f"
