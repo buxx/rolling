@@ -33,7 +33,7 @@ def get_kernel(
     kernel = Kernel(
         world_map_source_raw,
         loop=loop,
-        config=config,
+        server_config_file_path=server_config_file_path,
     )
 
     kernel.init_server_db_session()

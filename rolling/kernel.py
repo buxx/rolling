@@ -152,18 +152,15 @@ class Kernel:
         self._server_zone_events_manager = ZoneEventsManager(self, loop=loop)
         self._server_world_events_manager = WorldEventsManager(self, loop=loop)
 
-        # Generate tile maps if tile map folder given
-        if zone_maps_folder is not None:
-            self._tile_maps_by_position: typing.Dict[
-                typing.Tuple[int, int], ZoneMap
-            ] = {}
-
-            for zone_file_path in glob.glob(os.path.join(zone_maps_folder, "*.txt")):
-                self.load_zone_from_file_path(zone_file_path)
+        # Generate tile maps
+        self._tile_maps_by_position: typing.Dict[typing.Tuple[int, int], ZoneMap] = {}
+        for zone_file_path in glob.glob(
+            os.path.join(self.server_config.zones, "*.txt")
+        ):
+            self.load_zone_from_file_path(zone_file_path)
 
         # Generate game info if config given
-        if game_config_folder is not None:
-            self._game = Game(self, game_config_folder)
+        self._game = Game(self, self.server_config.game)
 
         # FIXME BS 2019-07-28: use these everywhere
         self._stuff_lib: typing.Optional["StuffLib"] = None
