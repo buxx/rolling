@@ -104,9 +104,6 @@ class Kernel:
         self,
         world_map_str: str = None,
         loop: AbstractEventLoop = None,
-        zone_maps_folder: typing.Optional[str] = None,
-        game_config_folder: typing.Optional[str] = None,
-        client_db_path: str = "client.db",
         server_config_file_path: str = "./server.ini",
         server_db_user: typing.Optional[str] = None,
         server_db_password: typing.Optional[str] = None,
@@ -127,7 +124,7 @@ class Kernel:
         self.server_db_host = server_db_host or os.environ.get(
             "SERVER_DB_HOST", self.server_config.db_address
         )
-        self._zone_maps_folder = zone_maps_folder
+        self._zone_maps_folder = self.server_config.zones
         self._tile_map_legend: typing.Optional[ZoneMapLegend] = None
         self._world_map_legend: typing.Optional[WorldMapLegend] = None
         self._world_map_source: typing.Optional[WorldMapSource] = (
@@ -140,11 +137,6 @@ class Kernel:
         self._game: typing.Optional[Game] = None
 
         # Database stuffs
-        self._client_db_path = client_db_path
-
-        self._client_db_session: typing.Optional[Session] = None
-        self._client_db_engine: typing.Optional[Engine] = None
-
         self._server_db_session: typing.Optional[Session] = None
         self._server_db_engine: typing.Optional[Engine] = None
 
