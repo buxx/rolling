@@ -1,5 +1,6 @@
 # coding: utf-8
 import asyncio
+from sqlalchemy import and_, or_
 import click
 from random import choice
 import requests
@@ -14,6 +15,7 @@ from rolling.server.application import HEADER_NAME__DISABLE_AUTH_TOKEN
 from rolling.server.base import get_kernel
 from rolling.server.document.corpse import AnimatedCorpseDocument
 from rolling.server.document.corpse import AnimatedCorpseType
+from rolling.server.document.resource import ZoneResourceDocument
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
@@ -151,55 +153,105 @@ def sync_zone_resources(
         tile_maps_folder_path=zone_map_folder,
     )
 
+    errors = []
+
     def _work(coordinates: typing.Tuple[int, int]):
         async def _job():
-            world_row_i, world_col_i = coordinates
-            click.echo(f"Process {world_row_i}.{world_col_i} ...")
+            try:
+                world_row_i, world_col_i = coordinates
+                click.echo(f"Process {world_row_i}.{world_col_i} ...")
 
-            zone_map: ZoneMap = main_kernel.tile_maps_by_position[
-                (world_row_i, world_col_i)
-            ]
-            # Use dedicated process to ensure db session is not shared
-            process_kernel = get_kernel(
-                game_config_folder=game_config_dir,
-                world_map_source_path=world_map_source,
-                tile_maps_folder_path=zone_map_folder,
-            )
-            for zone_row_i, zone_row in enumerate(zone_map.source.geography.rows):
-                for zone_col_i, tile_type in enumerate(zone_row):
-                    tiles_properties = (
-                        main_kernel.game.world_manager.world.tiles_properties
-                    )
-                    try:
-                        tile_properties = tiles_properties[tile_type]
-                    except KeyError:
-                        continue
+                zone_map: ZoneMap = main_kernel.tile_maps_by_position[
+                    (world_row_i, world_col_i)
+                ]
+                # Use dedicated process to ensure db session is not shared
+                process_kernel = get_kernel(
+                    game_config_folder=game_config_dir,
+                    world_map_source_path=world_map_source,
+                    tile_maps_folder_path=zone_map_folder,
+                )
 
-                    production: ZoneMapTileProduction
-                    for production in tile_properties.produce:
-                        if production.infinite:
-                            continue
+                tiles_coordinates = []
+                for zone_row_i, zone_row in enumerate(zone_map.source.geography.rows):
+                    for zone_col_i, tile_type in enumerate(zone_row):
+                        tiles_properties = (
+                            main_kernel.game.world_manager.world.tiles_properties
+                        )
                         try:
-                            _ = process_kernel.zone_lib.get_zone_ressource_doc(
-                                world_row_i=world_row_i,
-                                world_col_i=world_col_i,
-                                zone_row_i=zone_row_i,
-                                zone_col_i=zone_col_i,
-                                resource_id=production.resource.id,
+                            tile_properties = tiles_properties[tile_type]
+                        except KeyError:
+                            continue
+
+                        production: ZoneMapTileProduction
+                        for production in tile_properties.produce:
+                            if production.infinite:
+                                continue
+
+                            tiles_coordinates.append(
+                                (zone_row_i, zone_col_i, production.resource.id)
                             )
-                        except NoResultFound:
-                            _ = process_kernel.zone_lib.create_zone_ressource_doc(
-                                world_row_i=world_row_i,
-                                world_col_i=world_col_i,
-                                zone_row_i=zone_row_i,
-                                zone_col_i=zone_col_i,
-                                resource_id=production.resource.id,
-                                quantity=production.start_capacity,
-                                destroy_when_empty=production.destroy_when_empty,
-                                replace_by_when_destroyed=production.replace_by_when_destroyed,
-                            )
+
+                if not tiles_coordinates:
+                    return
+
+                filters = []
+                for zone_row_i_, zone_col_i_, resource_id_ in tiles_coordinates:
+                    filters.append(
+                        and_(
+                            ZoneResourceDocument.world_row_i == world_row_i,
+                            ZoneResourceDocument.world_col_i == world_col_i,
+                            ZoneResourceDocument.zone_row_i == zone_row_i_,
+                            ZoneResourceDocument.zone_col_i == zone_col_i_,
+                            ZoneResourceDocument.resource_id == resource_id_,
+                        )
+                    )
+                zone_resource_documents = [
+                    (
+                        row[0],
+                        row[1],
+                        row[2],
+                        row[3],
+                        row[4],
+                    )
+                    for row in (
+                        process_kernel.server_db_session.query(
+                            ZoneResourceDocument.world_row_i,
+                            ZoneResourceDocument.world_col_i,
+                            ZoneResourceDocument.zone_row_i,
+                            ZoneResourceDocument.zone_col_i,
+                            ZoneResourceDocument.resource_id,
+                        )
+                        .filter(or_(*filters))
+                        .all()
+                    )
+                ]
+
+                for zone_row_i_, zone_col_i_, resource_id_ in tiles_coordinates:
+                    if (
+                        world_row_i,
+                        world_col_i,
+                        zone_row_i_,
+                        zone_col_i_,
+                        resource_id_,
+                    ) not in zone_resource_documents:
+                        _ = process_kernel.zone_lib.create_zone_ressource_doc(
+                            world_row_i=world_row_i,
+                            world_col_i=world_col_i,
+                            zone_row_i=zone_row_i,
+                            zone_col_i=zone_col_i,
+                            resource_id=production.resource.id,
+                            quantity=production.start_capacity,
+                            destroy_when_empty=production.destroy_when_empty,
+                            replace_by_when_destroyed=production.replace_by_when_destroyed,
+                        )
+            except Exception as exc:
+                errors.append(exc)
 
         asyncio.run(_job())
+
+        if errors:
+            for error in errors:
+                print(error)
 
     coordinates = []
     for world_row_i, world_row in enumerate(
@@ -209,7 +261,7 @@ def sync_zone_resources(
             coordinates.append((world_row_i, world_col_i))
 
     click.echo("Start execution ...")
-    with ThreadPoolExecutor(max_workers=16) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         executor.map(_work, coordinates)
 
     click.echo("Finished ...")
