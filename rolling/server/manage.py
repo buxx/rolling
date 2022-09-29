@@ -4,9 +4,8 @@ from sqlalchemy import and_, or_
 import click
 from random import choice
 import requests
-from sqlalchemy.exc import NoResultFound
 import typing
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 from rolling.map.source import ZoneMap
 from rolling.map.type.world import WorldMapTileType
@@ -19,6 +18,7 @@ from rolling.server.document.resource import ZoneResourceDocument
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
+from rolling.kernel import ServerConfig
 
 
 @click.group()
@@ -47,12 +47,14 @@ def knowledge():
 
 
 @stuff.command()
-@click.argument("game-config-dir")
 @click.argument("character-name")
 @click.argument("stuff-id")
-def create(game_config_dir: str, character_name: str, stuff_id: str) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def create(character_name: str, stuff_id: str, config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing libs ...")
-    kernel = get_kernel(game_config_folder=game_config_dir)
+    kernel = get_kernel(game_config_folder=config.game)
     stuff_lib = StuffLib(kernel)
     character_lib = CharacterLib(kernel)
 
@@ -70,15 +72,17 @@ def create(game_config_dir: str, character_name: str, stuff_id: str) -> None:
 
 
 @resource.command()
-@click.argument("game-config-dir")
 @click.argument("character-name")
 @click.argument("resource-id")
 @click.argument("quantity", type=float)
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
 def create(
-    game_config_dir: str, character_name: str, resource_id: str, quantity: float
+    character_name: str, resource_id: str, quantity: float, config_file_path: str
 ) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=game_config_dir)
+    kernel = get_kernel(game_config_folder=config.game)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
 
@@ -89,15 +93,17 @@ def create(
 
 
 @character.command()
-@click.argument("game-config-dir")
 @click.argument("character-name")
 @click.argument("world_row_i", type=int)
 @click.argument("world_col_i", type=int)
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
 def move(
-    game_config_dir: str, character_name: str, world_row_i: int, world_col_i: int
+    character_name: str, world_row_i: int, world_col_i: int, config_file_path: str
 ) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=game_config_dir)
+    kernel = get_kernel(game_config_folder=config.game)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
 
@@ -106,12 +112,14 @@ def move(
 
 
 @character.command()
-@click.argument("game-config-dir")
 @click.argument("character-name")
 @click.argument("action_points", type=int)
-def ap(game_config_dir: str, character_name: str, action_points: int) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def ap(character_name: str, action_points: int, config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=game_config_dir)
+    kernel = get_kernel(game_config_folder=config.game)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
     character_doc = kernel.character_lib.get_document(character_.id)
@@ -122,12 +130,14 @@ def ap(game_config_dir: str, character_name: str, action_points: int) -> None:
 
 
 @knowledge.command()
-@click.argument("game-config-dir")
 @click.argument("character-name")
 @click.argument("knowledge-id")
-def setup(game_config_dir: str, character_name: str, knowledge_id: str) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def setup(character_name: str, knowledge_id: str, config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=game_config_dir)
+    kernel = get_kernel(game_config_folder=config.game)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
     character_doc = kernel.character_lib.get_document(character_.id)
@@ -140,18 +150,12 @@ def setup(game_config_dir: str, character_name: str, knowledge_id: str) -> None:
 
 
 @main.command()
-@click.argument("game-config-dir")
-@click.argument("world-map-source")
-@click.argument("zone-map-folder")
-def sync_zone_resources(
-    game_config_dir: str, world_map_source: str, zone_map_folder: str
-) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def sync_zone_resources(config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel ...")
-    main_kernel = get_kernel(
-        game_config_folder=game_config_dir,
-        world_map_source_path=world_map_source,
-        tile_maps_folder_path=zone_map_folder,
-    )
+    main_kernel = get_kernel(server_config_file_path=config_file_path)
 
     errors = []
 
@@ -166,9 +170,9 @@ def sync_zone_resources(
                 ]
                 # Use dedicated process to ensure db session is not shared
                 process_kernel = get_kernel(
-                    game_config_folder=game_config_dir,
-                    world_map_source_path=world_map_source,
-                    tile_maps_folder_path=zone_map_folder,
+                    game_config_folder=config.game,
+                    world_map_source_path=config.worldmap,
+                    tile_maps_folder_path=config.zones,
                 )
 
                 tiles_coordinates = []
@@ -268,33 +272,31 @@ def sync_zone_resources(
 
 
 @main.command()
-@click.argument("game-config-dir")
-@click.argument("world-map-source")
-@click.argument("zone-map-folder")
 @click.argument("zone_type")
 @click.argument("ac_type")
 @click.argument("count", type=int)
 @click.option("--host", default="127.0.0.1")
 @click.option("--port", default=5000, type=int)
 @click.option("--disable-sync", is_flag=True)
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
 def populate_ac(
-    game_config_dir: str,
-    world_map_source: str,
-    zone_map_folder: str,
     zone_type: str,
     ac_type: str,
     count: int,
     host: str,
     port: int,
     disable_sync: bool,
+    config_file_path: str,
 ) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
     animated_corpse_type = AnimatedCorpseType(ac_type)
     filter_zone_type = WorldMapTileType.get_for_id(zone_type)
     kernel = get_kernel(
-        game_config_folder=game_config_dir,
-        world_map_source_path=world_map_source,
-        tile_maps_folder_path=zone_map_folder,
+        game_config_folder=config.game,
+        world_map_source_path=config.worldmap,
+        tile_maps_folder_path=config.zones,
     )
     universe_state = kernel.universe_lib.get_last_state()
 
@@ -358,17 +360,15 @@ def populate_ac(
 
 
 @main.command()
-@click.argument("game-config-dir")
-@click.argument("world-map-source")
-@click.argument("zone-map-folder")
-def sync_build_health(
-    game_config_dir: str, world_map_source: str, zone_map_folder: str
-) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def sync_build_health(config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
     kernel = get_kernel(
-        game_config_folder=game_config_dir,
-        world_map_source_path=world_map_source,
-        tile_maps_folder_path=zone_map_folder,
+        game_config_folder=config.game,
+        world_map_source_path=config.worldmap,
+        tile_maps_folder_path=config.zones,
     )
 
     for build_id in kernel.build_lib.get_all_ids(is_on=None):
@@ -382,17 +382,15 @@ def sync_build_health(
 
 
 @main.command()
-@click.argument("game-config-dir")
-@click.argument("world-map-source")
-@click.argument("zone-map-folder")
-def sync_character_skill(
-    game_config_dir: str, world_map_source: str, zone_map_folder: str
-) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def sync_character_skill(config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
     kernel = get_kernel(
-        game_config_folder=game_config_dir,
-        world_map_source_path=world_map_source,
-        tile_maps_folder_path=zone_map_folder,
+        game_config_folder=config.game,
+        world_map_source_path=config.worldmap,
+        tile_maps_folder_path=config.zones,
     )
 
     available_skills = list(kernel.game.config.skills.keys())
@@ -407,17 +405,15 @@ def sync_character_skill(
 
 
 @main.command()
-@click.argument("game-config-dir")
-@click.argument("world-map-source")
-@click.argument("zone-map-folder")
-def sync_drop_resource_nowhere(
-    game_config_dir: str, world_map_source: str, zone_map_folder: str
-) -> None:
+@click.option("--config-file-path", "-c", type=str, default="./server.ini")
+def sync_drop_resource_nowhere(config_file_path: str) -> None:
+    config = ServerConfig.from_config_file_path(config_file_path)
+
     click.echo("Preparing kernel")
     kernel = get_kernel(
-        game_config_folder=game_config_dir,
-        world_map_source_path=world_map_source,
-        tile_maps_folder_path=zone_map_folder,
+        game_config_folder=config.game,
+        world_map_source_path=config.worldmap,
+        tile_maps_folder_path=config.zones,
     )
 
     for resource_description in kernel.game.config.resources.values():

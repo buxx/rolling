@@ -1,4 +1,5 @@
 # coding: utf-8
+import copy
 import dataclasses
 
 from asyncio import AbstractEventLoop
@@ -8,6 +9,7 @@ import glob
 import ntpath
 import hashlib
 import os
+import pathlib
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
@@ -81,6 +83,20 @@ class ServerConfig:
     admin_login: str
     admin_password: str
     name: str
+    game: str
+    worldmap: str
+    zones: str
+
+    @classmethod
+    def from_config_file_path(
+        cls, file_path: typing.Union[pathlib.Path, str]
+    ) -> "ServerConfig":
+        if type(file_path) == str:
+            file_path = pathlib.Path(file_path).absolute()
+
+        server_config_reader = configparser.ConfigParser()
+        server_config_reader.read(file_path)
+        return ServerConfig(**server_config_reader["default"])
 
 
 class Kernel:
@@ -97,9 +113,7 @@ class Kernel:
         server_db_name: typing.Optional[str] = None,
         server_db_host: typing.Optional[str] = None,
     ) -> None:
-        server_config_reader = configparser.ConfigParser()
-        server_config_reader.read(server_config_file_path)
-        self.server_config = ServerConfig(**server_config_reader["default"])
+        self.server_config = ServerConfig.from_config_file_path(server_config_file_path)
 
         self.server_db_user = server_db_user or os.environ.get(
             "SERVER_DB_USER", self.server_config.db_user

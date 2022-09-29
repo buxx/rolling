@@ -18,3 +18,8 @@ admin_login = admin
 # CHANGE THIS PASSWORD !
 admin_password = admin
 name = Rolling
+
+# Path must be relative to this config file or absolute
+game=./game
+worldmap=./worldmap.txt
+zones=./zones

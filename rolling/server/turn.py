@@ -25,9 +25,6 @@ async def run(args: argparse.Namespace) -> None:
         sentry_sdk.init(dsn=args.sentry, integrations=[SqlalchemyIntegration()])
 
     kernel = get_kernel(
-        world_map_source_path=args.world_map_source,
-        tile_maps_folder_path=args.tile_maps_folder,
-        game_config_folder=args.game_config_folder,
         server_config_file_path=args.server_config_file_path,
     )
     character_lib = CharacterLib(kernel)
@@ -44,15 +41,6 @@ async def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Pass the game turn")
-    parser.add_argument(
-        "world_map_source", type=str, help="Raw world source map file path"
-    )
-    parser.add_argument(
-        "tile_maps_folder", type=str, help="Tile maps sources files folder path"
-    )
-    parser.add_argument(
-        "game_config_folder", type=str, help="Directory path with game configs"
-    )
     parser.add_argument(
         "server_config_file_path",
         type=str,

@@ -63,9 +63,6 @@ def run(args: argparse.Namespace) -> None:
         configure_logging(logging.INFO)
 
     kernel = get_kernel(
-        args.world_map_source,
-        args.tile_maps_folder,
-        args.game_config_folder,
         args.server_config_file_path,
     )
     server_logger.info("Create web application")
@@ -141,15 +138,6 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Start Rolling interface")
-    parser.add_argument(
-        "world_map_source", type=str, help="Raw world source map file path"
-    )
-    parser.add_argument(
-        "tile_maps_folder", type=str, help="Tile maps sources files folder path"
-    )
-    parser.add_argument(
-        "game_config_folder", type=str, help="Directory path with game configs"
-    )
     parser.add_argument(
         "server_config_file_path",
         type=str,
