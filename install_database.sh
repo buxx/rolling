@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO : prepare script for following usage : cat install_database.sh | sudo -u postgres bash
-
 sudo su -c "psql -lqt | cut -d \| -f 1 | grep -qw rolling" postgres
 
 if [ "$?" -eq "0" ]; then
@@ -25,3 +23,8 @@ else
 fi
 
 sudo su -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE rolling TO rolling\"" postgres
+
+# stamp database head with alembic
+alembic stamp head
+
+echo "WARNING : nee to sync resource docs with command `rolling-server-manage sync-zone-resources`"
