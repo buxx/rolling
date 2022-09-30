@@ -275,11 +275,11 @@ Pour participer, rendez-vous sur la page des [briques](https://redbricks.games/h
   * ☐ Page de vote pour les améliorations
 
 # ROLLING
-0 * * * * cd /home/rolling/servers/heritage && venv3.7/bin/rolling-server-turn --sentry "https://a1551a66db394e28add2672d170576fe@o433154.ingest.sentry.io/5387767" worldmap.txt ./zones ./game server.ini &>> turn.logs
+0 * * * * cd /home/rolling/servers/heritage && venv3.7/bin/rolling-server-turn --sentry "https://x@x.ingest.sentry.io/x" worldmap.txt ./zones ./game server.ini &>> turn.logs
 
 # ROLLING CREATIF
-* * * * * cd /home/rolling/servers/creatif && venv3.7/bin/rolling-server-turn --disable-natural-needs --sentry "https://x@x.ingest.sentry.io/5387767" worldmap.txt ./zones ./game server.ini &>> turn.logs 
-* * * * * sleep 30; cd /home/rolling/servers/creatif && venv3.7/bin/rolling-server-turn --disable-natural-needs --sentry "https://x@x.ingest.sentry.io/5387767" worldmap.txt ./zones ./game server.ini &>> turn.logs
+* * * * * cd /home/rolling/servers/creatif && venv3.7/bin/rolling-server-turn --disable-natural-needs --sentry "https://x@x.ingest.sentry.io/x" worldmap.txt ./zones ./game server.ini &>> turn.logs 
+* * * * * sleep 30; cd /home/rolling/servers/creatif && venv3.7/bin/rolling-server-turn --disable-natural-needs --sentry "https://x@x.ingest.sentry.io/x" worldmap.txt ./zones ./game server.ini &>> turn.logs
 
 
     ProxyPass / http://127.0.0.1:7431/
