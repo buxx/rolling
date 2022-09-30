@@ -150,14 +150,6 @@ class DropStuffAction(WithStuffAction):
             action_type=ActionType.DROP_STUFF,
             do_for_one_func=do_for_one,
             title="Laisser quelque-chose ici",
-            success_parts=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
             redirect=input_.then_redirect_url,
         )
 
@@ -260,7 +252,6 @@ class DropResourceAction(WithResourceAction):
                         ],
                     )
                 ],
-                back_url=f"/_describe/character/{character.id}/inventory",
             )
 
         user_input_context = InputQuantityContext.from_carried_resource(
@@ -309,7 +300,6 @@ class DropResourceAction(WithResourceAction):
 
         return Description(
             title=f"Action effectué",
-            back_url=f"/_describe/character/{character.id}/inventory",
             redirect=input_.then_redirect_url,
             reload_inventory=True,
         )

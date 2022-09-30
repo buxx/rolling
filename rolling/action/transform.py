@@ -153,14 +153,6 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             action_type=ActionType.TRANSFORM_STUFF_TO_RESOURCES,
             do_for_one_func=do_for_one,
             title="Transformation effectué",
-            success_parts=[
-                Part(
-                    is_link=True,
-                    label="Voir l'inventaire",
-                    form_action=f"/_describe/character/{character.id}/inventory",
-                    classes=["primary"],
-                )
-            ],
         )
 
 
