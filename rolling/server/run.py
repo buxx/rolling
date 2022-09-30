@@ -17,6 +17,7 @@ import signal
 import asyncio
 
 from rolling.exception import UserDisplayError
+from rolling.kernel import ServerConfig
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.application import get_application
@@ -62,9 +63,8 @@ def run(args: argparse.Namespace) -> None:
     else:
         configure_logging(logging.INFO)
 
-    kernel = get_kernel(
-        args.server_config_file_path,
-    )
+    config = ServerConfig.from_config_file_path(args.server_config_file_path)
+    kernel = get_kernel(config)
     server_logger.info("Create web application")
 
     if args.serve_static_files:

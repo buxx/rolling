@@ -102,15 +102,15 @@ class ServerConfig:
 class Kernel:
     def __init__(
         self,
+        server_config: ServerConfig,
         world_map_str: str = None,
         loop: AbstractEventLoop = None,
-        server_config_file_path: str = "./server.ini",
         server_db_user: typing.Optional[str] = None,
         server_db_password: typing.Optional[str] = None,
         server_db_name: typing.Optional[str] = None,
         server_db_host: typing.Optional[str] = None,
     ) -> None:
-        self.server_config = ServerConfig.from_config_file_path(server_config_file_path)
+        self.server_config = server_config
 
         self.server_db_user = server_db_user or os.environ.get(
             "SERVER_DB_USER", self.server_config.db_user

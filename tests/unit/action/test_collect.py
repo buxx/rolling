@@ -61,6 +61,7 @@ class TestCollectResourceAction:
             resource_id="WOOD",
             quantity=1.0,
             destroy_when_empty=True,
+            replace_by_when_destroyed=None,
         )
 
         # check fixtures
@@ -124,6 +125,7 @@ class TestCollectResourceAction:
             resource_id="WOOD",
             quantity=10.0,  # This is a big tree :)
             destroy_when_empty=True,
+            replace_by_when_destroyed=None,
         )
         original_ap = xena.action_points
         extract_cost_per_unit = 0.01
@@ -177,7 +179,7 @@ class TestCollectResourceAction:
         # Then
         assert (
             parts_text(description.items)
-            == "Extraire 1 mètre cubes demande 0.009 PA\nBonus appliqués :\n - Bûcheronnage (PAx0.871)"
+            == "Extraire 1 mètre cubes demande 0.0087 PA\nBonus appliqués :\n - Bûcheronnage (PAx0.871)"
         )
 
         # When

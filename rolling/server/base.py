@@ -12,12 +12,8 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
-def get_kernel(
-    server_config_file_path: str = "./server.ini",
-) -> "Kernel":
+def get_kernel(config: ServerConfig) -> "Kernel":
     from rolling.kernel import Kernel
-
-    config = ServerConfig.from_config_file_path(server_config_file_path)
 
     world_map_source_raw = None
 
@@ -31,9 +27,9 @@ def get_kernel(
 
     loop = asyncio.get_event_loop()
     kernel = Kernel(
-        world_map_source_raw,
+        server_config=config,
+        world_map_str=world_map_source_raw,
         loop=loop,
-        server_config_file_path=server_config_file_path,
     )
 
     kernel.init_server_db_session()

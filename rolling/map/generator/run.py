@@ -2,7 +2,7 @@
 import argparse
 import os
 
-from rolling.kernel import Kernel
+from rolling.kernel import Kernel, ServerConfig
 from rolling.map.generator.filler.simple import SimpleFillerFactory
 from rolling.map.generator.generator import FromWorldMapGenerator
 from rolling.map.source import WorldMapSource
@@ -14,7 +14,8 @@ def run(args: argparse.Namespace) -> None:
     with open(args.source, "r") as f:
         raw_world = f.read()
 
-    kernel = Kernel(raw_world)
+    config = ServerConfig.from_config_file_path(args.server_config_file_path)
+    kernel = Kernel(server_config=config, world_map_str=raw_world)
     world_map_source = WorldMapSource(kernel, raw_world)
     generator = FromWorldMapGenerator(
         kernel,
@@ -51,6 +52,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--map-heights", type=int, default=129, help="Default generated map heights"
+    )
+    parser.add_argument(
+        "--server-config-file-path",
+        type=str,
+        help="server config file path",
+        default="./server.ini",
     )
     # TODO BS 2018-12-29: Permit choose filler factory
 

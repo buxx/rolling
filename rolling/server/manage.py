@@ -54,7 +54,7 @@ def create(character_name: str, stuff_id: str, config_file_path: str) -> None:
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing libs ...")
-    kernel = get_kernel(game_config_folder=config.game)
+    kernel = get_kernel(config)
     stuff_lib = StuffLib(kernel)
     character_lib = CharacterLib(kernel)
 
@@ -82,7 +82,7 @@ def create(
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=config.game)
+    kernel = get_kernel(config)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
 
@@ -103,7 +103,7 @@ def move(
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=config.game)
+    kernel = get_kernel(config)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
 
@@ -119,7 +119,7 @@ def ap(character_name: str, action_points: int, config_file_path: str) -> None:
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=config.game)
+    kernel = get_kernel(config)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
     character_doc = kernel.character_lib.get_document(character_.id)
@@ -137,7 +137,7 @@ def setup(character_name: str, knowledge_id: str, config_file_path: str) -> None
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(game_config_folder=config.game)
+    kernel = get_kernel(config)
     click.echo("Search character by name")
     character_ = kernel.character_lib.get_by_name(character_name)
     character_doc = kernel.character_lib.get_document(character_.id)
@@ -293,11 +293,7 @@ def populate_ac(
     click.echo("Preparing kernel")
     animated_corpse_type = AnimatedCorpseType(ac_type)
     filter_zone_type = WorldMapTileType.get_for_id(zone_type)
-    kernel = get_kernel(
-        game_config_folder=config.game,
-        world_map_source_path=config.worldmap,
-        tile_maps_folder_path=config.zones,
-    )
+    kernel = get_kernel(config)
     universe_state = kernel.universe_lib.get_last_state()
 
     zone_type: typing.Type[WorldMapTileType]
@@ -365,11 +361,7 @@ def sync_build_health(config_file_path: str) -> None:
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(
-        game_config_folder=config.game,
-        world_map_source_path=config.worldmap,
-        tile_maps_folder_path=config.zones,
-    )
+    kernel = get_kernel(config)
 
     for build_id in kernel.build_lib.get_all_ids(is_on=None):
         build_doc = kernel.build_lib.get_build_doc(build_id)
@@ -387,11 +379,7 @@ def sync_character_skill(config_file_path: str) -> None:
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(
-        game_config_folder=config.game,
-        world_map_source_path=config.worldmap,
-        tile_maps_folder_path=config.zones,
-    )
+    kernel = get_kernel(config)
 
     available_skills = list(kernel.game.config.skills.keys())
     for skill_doc in (
@@ -410,11 +398,7 @@ def sync_drop_resource_nowhere(config_file_path: str) -> None:
     config = ServerConfig.from_config_file_path(config_file_path)
 
     click.echo("Preparing kernel")
-    kernel = get_kernel(
-        game_config_folder=config.game,
-        world_map_source_path=config.worldmap,
-        tile_maps_folder_path=config.zones,
-    )
+    kernel = get_kernel(config)
 
     for resource_description in kernel.game.config.resources.values():
         if resource_description.drop_to_nowhere:

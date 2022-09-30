@@ -11,7 +11,7 @@ import typing
 
 from guilang.description import Description
 from rolling import kernel
-from rolling.kernel import Kernel
+from rolling.kernel import Kernel, ServerConfig
 from rolling.map.generator.filler.dummy import DummyTileMapFiller
 from rolling.map.generator.generator import TileMapGenerator
 from rolling.map.source import WorldMapSource
@@ -86,8 +86,13 @@ def _erase_db(kernel: Kernel) -> Kernel:
 
 @pytest.fixture
 def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
+    config = ServerConfig.from_config_file_path("server_tests.ini")
     kernel = _erase_db(
-        Kernel(worldmapsourcea_txt, loop=loop, server_db_name="rolling_test")
+        Kernel(
+            server_config=config,
+            world_map_str=worldmapsourcea_txt,
+            loop=loop,
+        )
     )
     yield kernel
     kernel.server_db_session.rollback()
@@ -96,8 +101,13 @@ def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
+    config = ServerConfig.from_config_file_path("server_tests.ini")
     kernel = _erase_db(
-        Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test")
+        Kernel(
+            server_config=config,
+            world_map_str=worldmapsourceb2_txt,
+            loop=loop,
+        )
     )
     yield kernel
     kernel.server_db_session.rollback()
@@ -106,8 +116,13 @@ def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
+    config = ServerConfig.from_config_file_path("server_tests.ini")
     kernel = _erase_db(
-        Kernel(worldmapsourceb2_txt, loop=loop, server_db_name="rolling_test")
+        Kernel(
+            server_config=config,
+            world_map_str=worldmapsourceb2_txt,
+            loop=loop,
+        )
     )
     yield kernel
     kernel.server_db_session.rollback()
@@ -116,12 +131,11 @@ def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
 
 @pytest.fixture
 def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
+    config = ServerConfig.from_config_file_path("server_tests.ini")
     kernel = Kernel(
-        worldmapsourcec_txt,
-        zone_maps_folder="tests/src/worldmapc_zones",
-        game_config_folder="tests/src/game1",
+        server_config=config,
+        world_map_str=worldmapsourcec_txt,
         loop=loop,
-        server_db_name="rolling_test",
     )
     _erase_db(kernel)
     yield kernel
