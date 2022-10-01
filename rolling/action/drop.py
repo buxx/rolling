@@ -151,6 +151,7 @@ class DropStuffAction(WithStuffAction):
             do_for_one_func=do_for_one,
             title="Laisser quelque-chose ici",
             redirect=input_.then_redirect_url,
+            success_parts=[],
         )
 
 
