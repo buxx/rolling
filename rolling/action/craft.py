@@ -72,6 +72,8 @@ class BaseCraftStuff:
         cost: float,
         dry_run: bool = True,
     ) -> None:
+        assert input_.quantity is not None
+
         if character.action_points < cost:
             raise ImpossibleAction(
                 f"{character.name} no possède pas assez de points d'actions "
@@ -135,7 +137,7 @@ class BaseCraftStuff:
 
         for produce in description.properties["produce"]:
             stuff_id = produce["stuff"]
-            quantity = produce["quantity"]
+            quantity = produce["quantity"] * input_.quantity
             stuff_properties = (
                 self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
             )
@@ -279,6 +281,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                                 default_value="1",
                                 min_value=1,
                                 max_value=100,
+                                expect_integer=True,
                             )
                         ],
                     )
@@ -286,13 +289,6 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             )
 
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
-        await self._perform(
-            character,
-            description=self._description,
-            input_=input_,
-            cost=cost,
-            dry_run=True,
-        )
         await self._perform(
             character,
             description=self._description,
