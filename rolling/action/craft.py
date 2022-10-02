@@ -173,11 +173,8 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        for require in self._description.properties["require"]:
-            if "resource" in require and resource_id in require["resource"]:
-                return
-
-        raise ImpossibleAction("non concerné")
+        # Display all possible crafts in actions pages
+        pass
 
     async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
