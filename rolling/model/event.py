@@ -20,6 +20,7 @@ class ZoneEventType(Enum):
     CLIENT_REQUIRE_AROUND = "CLIENT_REQUIRE_AROUND"
     THERE_IS_AROUND = "THERE_IS_AROUND"
     CLICK_ACTION_EVENT = "CLICK_ACTION_EVENT"
+    CLIENT_REQUIRE_NEW_RESUME_TEXT = "CLIENT_REQUIRE_NEW_RESUME_TEXT"
     NEW_RESUME_TEXT = "NEW_RESUME_TEXT"
     NEW_BUILD = "NEW_BUILD"
     REMOVE_BUILD = "REMOVE_BUILD"
@@ -190,6 +191,11 @@ class AnimatedCorpseMoveData(WebSocketEventData):
 
 
 @dataclasses.dataclass
+class ClientRequireNewResumeTextData(WebSocketEventData):
+    pass
+
+
+@dataclasses.dataclass
 class NewResumeTextData(WebSocketEventData):
     resume: ListOfItemModel
 
@@ -234,6 +240,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.CLIENT_REQUIRE_AROUND: ClientRequireAroundData,
     ZoneEventType.THERE_IS_AROUND: ThereIsAroundData,
     ZoneEventType.CLICK_ACTION_EVENT: ClickActionData,
+    ZoneEventType.CLIENT_REQUIRE_NEW_RESUME_TEXT: ClientRequireNewResumeTextData,
     ZoneEventType.NEW_RESUME_TEXT: NewResumeTextData,
     ZoneEventType.NEW_BUILD: NewBuildData,
     ZoneEventType.REMOVE_BUILD: RemoveBuildData,
