@@ -300,6 +300,18 @@ class ZoneEventsManager:
         except Exception:
             server_logger.exception("Error when respond to socket")
 
+    def change_socket_zone_to(
+        self, socket: web.WebSocketResponse, world_row_i: int, world_col_i: int
+    ) -> None:
+        for position, sockets in self._sockets.items():
+            for socket_ in sockets:
+                if socket_ == socket:
+                    self._sockets[position].remove(socket_)
+                    self._sockets.setdefault((world_row_i, world_col_i), []).append(
+                        socket_
+                    )
+                    return None
+
     def get_character_socket(
         self,
         character_id: str,
