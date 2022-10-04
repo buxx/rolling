@@ -598,6 +598,16 @@ class CharacterController(BaseController):
                 )
             )
 
+        inventory = self._kernel.character_lib.get_inventory(character)
+        inventory_weight = inventory.weight
+        inventory_weight_str = f"{round(inventory_weight/1000,3)}kg"
+        weight_capacity = character.get_weight_capacity(self._kernel)
+        weight_capacity_str = f"{round(weight_capacity/1000,3)}kg"
+        inventory_clutter = inventory.clutter
+        clutter_capacity = character.get_clutter_capacity(self._kernel)
+        weight_over_str = " (surcharge !)" if inventory.over_weight else ""
+        clutter_over_str = " (surcharge !)" if inventory.over_clutter else ""
+
         illustration_name = (
             ILLUSTRATION_AVATAR_PATTERN.format(avatar_uuid=character.avatar_uuid)
             if character.avatar_uuid
@@ -668,6 +678,12 @@ class CharacterController(BaseController):
                     if character.bags
                     else None,
                     classes=["link"],
+                ),
+                Part(
+                    text=f"Poids transporté : {inventory_weight_str}/{weight_capacity_str}{weight_over_str}"
+                ),
+                Part(
+                    text=f"Encombrement transporté : {inventory_clutter}/{clutter_capacity}{clutter_over_str}"
                 ),
                 Part(text=""),
                 # Part(
@@ -1884,10 +1900,41 @@ class CharacterController(BaseController):
         actions = self._character_lib.get_on_stuff_actions(
             character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id
         )
+        text_lines = stuff.get_full_description(self._kernel)
+        props = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+            stuff.stuff_id
+        )
+
+        if props.is_bag:
+            text_lines.append(f"- Sac capacité de {props.clutter_capacity}l")
+
+        for ability_id in props.abilities:
+            ability_description = self._kernel.game.config.abilities[ability_id]
+            text_lines.append(f" - Permet {ability_description.name}")
+
+        if props.weapon:
+            text_lines.append(f" - Est une arme")
+
+        if props.shield:
+            text_lines.append(f" - Est un bouclier")
+
+        if props.armor:
+            text_lines.append(f" - Est une armure")
+
+        for skill_bonus_id in props.skills_bonus:
+            skill_bonus_description = self._kernel.game.config.skills[skill_bonus_id]
+            text_lines.append(f" - Compétence associé : {skill_bonus_description.name}")
+
+        for bonus_string in props.bonuses_strings():
+            text_lines.append(f" - Bonus : {bonus_string}")
+
+        text_lines.append("")
+
         return Description(
             title=stuff.get_name_and_light_description(self._kernel),
             illustration_name=stuff.illustration,
-            items=[
+            items=[Part(text=line) for line in text_lines]
+            + [
                 Part(
                     text=action.get_as_str(),
                     form_action=action.link,
@@ -1896,7 +1943,6 @@ class CharacterController(BaseController):
                 )
                 for action in actions
             ],
-            can_be_back_url=True,
         )
 
     @hapic.with_api_doc()
@@ -1912,10 +1958,16 @@ class CharacterController(BaseController):
             character_id=hapic_data.path.character_id,
             resource_id=hapic_data.path.resource_id,
         )
+        carried = self._kernel.resource_lib.get_one_carried_by(
+            character_id=hapic_data.path.character_id,
+            resource_id=hapic_data.path.resource_id,
+        )
+
         return Description(
             title=resource_description.name,  # TODO BS 2019-09-05: add quantity in name
             illustration_name=resource_description.illustration,
-            items=[
+            items=[Part(text=carried.get_full_description(self._kernel))]
+            + [
                 Part(
                     text=action.get_as_str(),
                     form_action=action.link,

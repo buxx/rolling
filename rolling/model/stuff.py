@@ -56,6 +56,22 @@ class StuffProperties:
                 have_abilities.append(ability_id)
         return have_abilities
 
+    def bonuses_strings(self) -> typing.List[str]:
+        lines = []
+
+        def walk(
+            obj: typing.Dict[str, typing.Any]
+        ) -> typing.Generator[str, None, None]:
+            for key, value in obj.items():
+                yield key
+                if isinstance(value, dict):
+                    yield from walk(key, value)
+
+        for key, value in self.bonuses.items():
+            lines.append(" -> ".join([key] + list(walk(value))))
+
+        return lines
+
 
 @dataclasses.dataclass
 class StuffModelApi:
