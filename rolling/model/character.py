@@ -489,8 +489,8 @@ class CharacterModel:
         return self._display_object
 
     def get_weight_capacity(self, kernel: "Kernel") -> float:
-        return kernel.game.config.default_weight_capacity * self.get_skill_value(
-            STRENGTH_SKILL_ID
+        return kernel.game.config.default_weight_capacity * max(
+            1.0, self.get_skill_value(STRENGTH_SKILL_ID)
         )
 
     def get_clutter_capacity(self, kernel: "Kernel") -> float:
