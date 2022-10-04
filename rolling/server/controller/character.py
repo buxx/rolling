@@ -2469,6 +2469,15 @@ class CharacterController(BaseController):
                 )
                 # FIXME BS NOW: si connecté, event pour voyage !
 
+            # If character own socket, consider it in new zone
+            socket = self._kernel.server_zone_events_manager.get_character_socket(
+                character_.id
+            )
+            if socket is not None:
+                self._kernel.server_zone_events_manager.change_socket_zone_to(
+                    socket, hapic_data.query.to_world_row, hapic_data.query.to_world_col
+                )
+
         for character_ in (
             move_info.followers_cannot + move_info.followers_discreetly_cannot
         ):
