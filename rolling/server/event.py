@@ -11,7 +11,8 @@ from rolling.exception import DisconnectClient
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownEvent
 from rolling.log import server_logger
-from rolling.model.event import AnimatedCorpseMoveData
+from rolling.model.data import ListOfItemModel
+from rolling.model.event import AnimatedCorpseMoveData, NewResumeTextData
 from rolling.model.event import ClickActionData
 from rolling.model.event import ClientRequireAroundData
 from rolling.model.event import NewChatMessageData
@@ -281,6 +282,39 @@ class ThereIsAroundProcessor(EventProcessor):
         )
 
 
+class SendResumeTextProcessor(EventProcessor):
+    async def _process(
+        self,
+        row_i: int,
+        col_i: int,
+        event: WebSocketEvent[ClientRequireAroundData],
+        sender_socket: web.WebSocketResponse,
+    ) -> None:
+        character_id = (
+            self._kernel._server_zone_events_manager.get_character_id_for_socket(
+                sender_socket
+            )
+        )
+        character = self._kernel.character_lib.get_document(character_id)
+        event = WebSocketEvent(
+            type=ZoneEventType.NEW_RESUME_TEXT,
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            data=NewResumeTextData(
+                resume=ListOfItemModel(
+                    self._kernel.character_lib.get_resume_text(character.id)
+                )
+            ),
+        )
+        event_str = self._kernel.event_serializer_factory.get_serializer(
+            ZoneEventType.NEW_RESUME_TEXT
+        ).dump_json(event)
+        await self._kernel.server_zone_events_manager.respond_to_socket(
+            socket=sender_socket,
+            event_str=event_str,
+        )
+
+
 class ClickActionProcessor(EventProcessor):
     async def _process(
         self,
@@ -515,6 +549,7 @@ class EventProcessorFactory:
             (ZoneEventType.PLAYER_MOVE, PlayerMoveProcessor),
             (ZoneEventType.CLIENT_WANT_CLOSE, ClientWantCloseProcessor),
             (ZoneEventType.CLIENT_REQUIRE_AROUND, ThereIsAroundProcessor),
+            (ZoneEventType.CLIENT_REQUIRE_NEW_RESUME_TEXT, SendResumeTextProcessor),
             (ZoneEventType.CLICK_ACTION_EVENT, ClickActionProcessor),
             (ZoneEventType.REQUEST_CHAT, RequestChatProcessor),
             (ZoneEventType.NEW_CHAT_MESSAGE, NewChatMessageProcessor),
