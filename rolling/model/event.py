@@ -4,7 +4,7 @@ import dataclasses
 import abc
 from enum import Enum
 import typing
-from rolling.server.link import CharacterActionLink, QuickAction
+from rolling.server.link import QuickAction
 
 from rolling.model.build import ZoneBuildModel
 from rolling.model.data import ListOfItemModel
