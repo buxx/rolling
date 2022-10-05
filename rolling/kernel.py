@@ -564,7 +564,9 @@ class Kernel:
             zone_col_i=zone_col_i,
             alive=True,
         ):
-            return False
+            # Block construction only if build don't permit walk
+            if not build_description.traversable.get(TransportType.WALKING.value, True):
+                return False
 
         return True
 
