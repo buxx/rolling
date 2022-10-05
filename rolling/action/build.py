@@ -122,7 +122,7 @@ class BeginBuildAction(CharacterAction):
             cost = self.get_cost(character, input_=input_)
             items.append(
                 Part(
-                    label=f"Construire ({cost} points d'actions)",
+                    label=f"Construire ({cost} PA)",
                     is_link=True,
                     form_action=get_character_action_url(
                         character_id=character.id,

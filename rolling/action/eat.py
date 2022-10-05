@@ -189,7 +189,7 @@ class EatResourceAction(WithResourceAction):
             items=[
                 Part(
                     text=(
-                        f"Etat de votre faim: "
+                        f"État de votre faim: "
                         f"{self._kernel.character_lib.get_hunger_sentence(character_doc.hunger)}"
                     )
                 ),

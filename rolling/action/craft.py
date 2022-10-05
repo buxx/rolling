@@ -604,11 +604,11 @@ class BeginStuffConstructionAction(CharacterAction):
             start_cost = self.get_cost(character, input_=input_)
             craft_ap_cost = self.description.properties["craft_ap"]
             items = [
-                Part(
-                    text=f"Temps de travail nécessaire : {start_cost} + {craft_ap_cost} points d'actions"
-                ),
+                Part(text=f"Temps de travail nécessaire :"),
+                Part(text=f"{start_cost} PA tout de suite"),
+                Part(text=f"{craft_ap_cost} PA à répartir ensuite"),
                 Part(text=""),
-                Part(text="Nécessite : "),
+                Part(text="Nécessite en ressources : "),
             ]
 
             for require_txt in require_txts:

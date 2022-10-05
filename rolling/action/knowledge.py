@@ -118,7 +118,7 @@ class LearnKnowledgeAction(CharacterAction):
                 items=[
                     Part(
                         text=(
-                            f"Il reste {left} points d'actions à "
+                            f"Il reste {left} PA à "
                             f"dépenser pour apprendre {knowledge_description.name}"
                         )
                     ),
