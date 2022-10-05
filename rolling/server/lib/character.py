@@ -68,7 +68,7 @@ from rolling.server.document.knowledge import CharacterKnowledgeDocument
 from rolling.server.document.message import MessageDocument
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
-from rolling.server.link import CharacterActionLink
+from rolling.server.link import CharacterActionLink, ExploitableTile
 from rolling.server.util import register_image
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
@@ -842,40 +842,46 @@ class CharacterLib:
         )
         character_actions_: typing.List[CharacterActionLink] = []
 
+        builds = []
         for around_row_i, around_col_i in around_coordinates:
-            on_same_position_builds = self._kernel.build_lib.get_zone_build(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=around_row_i,
-                zone_col_i=around_col_i,
-                is_floor=False,
+            builds.extend(
+                self._kernel.build_lib.get_zone_build(
+                    world_row_i=character.world_row_i,
+                    world_col_i=character.world_col_i,
+                    zone_row_i=around_row_i,
+                    zone_col_i=around_col_i,
+                    is_floor=False,
+                )
             )
-            for build in on_same_position_builds:
-                if only_quick_actions:
-                    character_actions_.extend(
-                        self._kernel.build_lib.get_on_build_actions(
-                            character=character,
-                            build_id=build.id,
-                            only_quick_actions=True,
-                            filter_action_types=filter_action_types,
-                        )
-                    )
 
-                if filter_action_types is None:
-                    build_description = self._kernel.game.config.builds[build.build_id]
-                    character_actions_.append(
-                        CharacterActionLink(
-                            name=f"{build_description.name}",
-                            link=DESCRIBE_BUILD.format(
-                                character_id=character.id, build_id=build.id
-                            ),
-                            group_name="Voir",
-                            classes1=["LOOK"],
-                            classes2=build_description.classes + [build.build_id],
-                            direct_action=True,
-                            force_open_description=True,
-                        )
+        for build in builds:
+            if only_quick_actions:
+                character_actions_.extend(
+                    self._kernel.build_lib.get_on_build_actions(
+                        character=character,
+                        build_id=build.id,
+                        only_quick_actions=True,
+                        filter_action_types=filter_action_types,
                     )
+                )
+
+        if filter_action_types is None and builds:
+            character_actions_.append(
+                CharacterActionLink(
+                    name=f"Détails d'un bâtiment",
+                    link=f"/character/{character.id}/look-build-from-quick-action",
+                    group_name="Voir",
+                    classes1=["LOOK"],
+                    exploitable_tiles=[
+                        ExploitableTile(
+                            zone_row_i=build.zone_row_i,
+                            zone_col_i=build.zone_col_i,
+                            classes=[],
+                        )
+                        for build in builds
+                    ],
+                )
+            )
 
         return character_actions_
 

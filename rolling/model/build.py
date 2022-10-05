@@ -76,6 +76,17 @@ class BuildDescription:
 
 
 @dataclasses.dataclass
+class LookBuildFromQuickActionQuery:
+    zone_row_i: int = serpyco.number_field(cast_on_load=True)
+    zone_col_i: int = serpyco.number_field(cast_on_load=True)
+
+
+@dataclasses.dataclass
+class LookBuildFromQuickActionPath:
+    character_id: str
+
+
+@dataclasses.dataclass
 class DescribeBuildInputPath:
     character_id: str
     build_id: int = serpyco.number_field(cast_on_load=True)

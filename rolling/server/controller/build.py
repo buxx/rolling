@@ -8,7 +8,11 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.utils import get_build_description_parts
 from rolling.kernel import Kernel
-from rolling.model.build import DescribeBuildInputPath
+from rolling.model.build import (
+    DescribeBuildInputPath,
+    LookBuildFromQuickActionPath,
+    LookBuildFromQuickActionQuery,
+)
 from rolling.server.controller.base import BaseController
 from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.extension import hapic
@@ -18,6 +22,40 @@ from rolling.util import quantity_to_str
 class BuildController(BaseController):
     def __init__(self, kernel: Kernel) -> None:
         self._kernel = kernel
+
+    @hapic.with_api_doc()
+    @hapic.input_path(LookBuildFromQuickActionPath)
+    @hapic.input_query(LookBuildFromQuickActionQuery)
+    @hapic.output_body(Description)
+    async def look_build_from_quick_action(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id
+        )
+
+        for build in self._kernel.build_lib.get_zone_build(
+            world_row_i=character.world_row_i,
+            world_col_i=character.world_col_i,
+            zone_row_i=hapic_data.query.zone_row_i,
+            zone_col_i=hapic_data.query.zone_col_i,
+        ):
+            if not build.is_floor:
+                build_description = self._kernel.game.config.builds[build.build_id]
+                return Description(
+                    title=build_description.name,
+                    items=[],
+                    redirect=DESCRIBE_BUILD.format(
+                        character_id=hapic_data.path.character_id,
+                        build_id=build.id,
+                    ),
+                )
+
+        return Description(
+            title="Pas de bâtiment ici",
+            is_quick_error=True,
+            items=[],
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(DescribeBuildInputPath)
@@ -88,4 +126,12 @@ class BuildController(BaseController):
         )
 
     def bind(self, app: Application) -> None:
-        app.add_routes([web.post(DESCRIBE_BUILD, self._describe)])
+        app.add_routes(
+            [
+                web.post(DESCRIBE_BUILD, self._describe),
+                web.post(
+                    "/character/{character_id}/look-build-from-quick-action",
+                    self.look_build_from_quick_action,
+                ),
+            ]
+        )
