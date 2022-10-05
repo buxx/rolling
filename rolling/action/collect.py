@@ -82,6 +82,8 @@ class CollectResourceAction(CharacterAction):
         productions: typing.DefaultDict[
             str, typing.List[typing.Tuple[int, int]]
         ] = collections.defaultdict(list)
+        allowed_keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        used_keys = []
 
         for zone_row_i, zone_col_i in inspect_zone_positions:
             for production in self._kernel.game.world_manager.get_resources_at(
@@ -92,8 +94,14 @@ class CollectResourceAction(CharacterAction):
             ):
                 productions[production.resource.id].append((zone_row_i, zone_col_i))
 
-        for resource_id, coordinates in productions.items():
+        for resource_id, coordinates in sorted(productions.items(), key=lambda i: i[0]):
             resource_description = self._kernel.game.config.resources[resource_id]
+            quick_action_key = None
+            first_letter = resource_description.name[0].upper()
+            if first_letter not in used_keys and first_letter in allowed_keys:
+                used_keys.append(first_letter)
+                quick_action_key = first_letter
+
             query_params = self.input_model(
                 resource_id=resource_id,
                 zone_row_i=coordinates[0][0],
@@ -125,6 +133,7 @@ class CollectResourceAction(CharacterAction):
                         )
                         for (zone_row_i, zone_col_i) in coordinates
                     ],
+                    quick_action_key=quick_action_key,
                 )
             )
 
