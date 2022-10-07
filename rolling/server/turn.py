@@ -6,6 +6,7 @@ import asyncio
 from rolling.log import configure_logging
 from rolling.log import server_logger
 from rolling.server.base import get_kernel
+from rolling.kernel import ServerConfig
 from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.turn import TurnLib
@@ -24,9 +25,8 @@ async def run(args: argparse.Namespace) -> None:
 
         sentry_sdk.init(dsn=args.sentry, integrations=[SqlalchemyIntegration()])
 
-    kernel = get_kernel(
-        server_config_file_path=args.server_config_file_path,
-    )
+    config = ServerConfig.from_config_file_path(args.server_config_file_path)
+    kernel = get_kernel(config)
     character_lib = CharacterLib(kernel)
     stuff_lib = StuffLib(kernel)
     turn_lib = TurnLib(
