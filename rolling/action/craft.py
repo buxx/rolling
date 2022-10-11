@@ -174,7 +174,11 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
         # Display all possible crafts in actions pages
-        pass
+        for require in self.description.properties["require"]:
+            if require.get("resource") == resource_id:
+                return
+
+        raise ImpossibleAction("Non concerné")
 
     async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
