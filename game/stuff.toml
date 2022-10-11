@@ -551,3 +551,52 @@
   illustration = "iron_quarry_tools.png"
   abilities = []
   bonuses = {COLLECT_RESOURCE={RAW_STONE=0.7}}
+[STONE_SICKLE]
+  name = "Faucille (pierre)"
+  weight = 800.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  illustration = "stone_sickle.png"
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.7}}
+[COPPER_SICKLE]
+  name = "Faucille (cuivre)"
+  weight = 700.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.6}}
+[BRONZE_SICKLE]
+  name = "Faucille (bronze)"
+  weight = 600.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.55}}
+[IRON_SICKLE]
+  name = "Faucille (fer)"
+  weight = 500.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.50}}
+[BRONZE_SCYTHE]
+  name = "Faux (bronze)"
+  weight = 1200.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.40}}
+[IRON_SCYTHE]
+  name = "Faucille (fer)"
+  weight = 1000.0
+  clutter = 0.2
+  actions = ["DROP_STUFF"]
+  classes = ["CRAFT"]
+  abilities = []
+  bonuses = {COLLECT_RESOURCE={VEGETAL_FIBER=0.30}}

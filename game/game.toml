@@ -2071,8 +2071,8 @@ actions = ["TRAVEL"]
     required_all_stuff_ids = []
     required_one_of_skill_ids = []
     required_all_skill_ids = []
-    required_one_of_ability_ids = []
-    required_all_ability_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH2", "HAMMERING2"]
     produce = [
       {stuff="IRON_QUARRY_TOOLS", quantity=1.0},
     ]
@@ -2080,6 +2080,114 @@ actions = ["TRAVEL"]
       {resource="IRON", quantity=1500.0}
     ]
     cost = 15.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_STONE_SICKLE]
+    name = "Faucille (bois & pierre)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = []
+    required_all_ability_ids = []
+    produce = [
+      {stuff="STONE_SICKLE", quantity=1.0},
+    ]
+    require = [
+      {resource="WOOD", quantity=0.1}
+    ]
+    cost = 10.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_COPPER_SICKLE]
+    name = "Faucille (cuivre)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH", "HAMMERING1"]
+    produce = [
+      {stuff="COPPER_SICKLE", quantity=1.0},
+    ]
+    require = [
+      {resource="COPPER", quantity=500.0}
+    ]
+    cost = 10.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_BRONZE_SICKLE]
+    name = "Faucille (bronze)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH", "HAMMERING1"]
+    produce = [
+      {stuff="BRONZE_SICKLE", quantity=1.0},
+    ]
+    require = [
+      {resource="BRONZE", quantity=500.0}
+    ]
+    cost = 11.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_IRON_SICKLE]
+    name = "Faucille (fer)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH2", "HAMMERING2"]
+    produce = [
+      {stuff="IRON_SICKLE", quantity=1.0},
+    ]
+    require = [
+      {resource="IRON", quantity=500.0}
+    ]
+    cost = 12.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_BRONZE_SCYTHE]
+    name = "Faux (bronze)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH", "HAMMERING1"]
+    produce = [
+      {stuff="BRONZE_SCYTHE", quantity=1.0},
+    ]
+    require = [
+      {resource="BRONZE", quantity=800.0}
+    ]
+    cost = 13.0
+    link_group_name = "Artisanat"
+
+  [ACTIONS.BUILD_IRON_SCYTHE]
+    name = "Faux (fer)"
+    actions = ["CRAFT_STUFF_WITH_RESOURCE"]
+    required_one_of_stuff_ids = []
+    required_all_stuff_ids = []
+    required_one_of_skill_ids = []
+    required_all_skill_ids = []
+    required_one_of_ability_ids = ["HEAT_UP_MIDDLE_TEMP", "HEAT_UP_HIGH_TEMP"]
+    required_all_ability_ids = ["BLACKSMITH2", "HAMMERING2"]
+    produce = [
+      {stuff="IRON_SCYTHE", quantity=1.0},
+    ]
+    require = [
+      {resource="IRON", quantity=800.0}
+    ]
+    cost = 14.0
     link_group_name = "Artisanat"
 
   [ACTIONS.BUILD_ROUET]
