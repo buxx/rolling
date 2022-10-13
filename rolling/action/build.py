@@ -524,7 +524,7 @@ class ConstructBuildAction(WithBuildAction):
 
         able_to_percent = 100 - lowest_required_left_percent
         maximum_pa_to_reach = build_description.cost * (able_to_percent / 100)
-        max_pa_to_spent = maximum_pa_to_reach - float(build_doc.ap_spent)
+        max_pa_to_spent = round(maximum_pa_to_reach - float(build_doc.ap_spent), 2)
 
         if input_.cost_to_spent is None:
             title = (
@@ -559,6 +559,11 @@ class ConstructBuildAction(WithBuildAction):
                     )
                 ],
             )
+
+        # TODO : There is a bug in this code, rewrite the logic
+        # For now, hack :
+        if not max_pa_to_spent:
+            raise ImpossibleAction(f"Pas assez ede matière")
 
         input_cost_to_spent = input_.cost_to_spent
 
