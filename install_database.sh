@@ -27,4 +27,4 @@ sudo su -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE rolling TO rolling\"" pos
 # stamp database head with alembic
 alembic stamp head
 
-echo "WARNING : nee to sync resource docs with command `rolling-server-manage sync-zone-resources`"
+echo "WARNING : nee to sync resource docs with command 'rolling-server-manage sync-zone-resources'"
