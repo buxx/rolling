@@ -169,6 +169,7 @@ class DrinkResourceAction(CharacterAction):
             ),
             world_row_i=character.world_row_i,
             world_col_i=character.world_col_i,
+            character_ids=[character_doc.id],
         )
 
         return Description(title="Vous avez bu", quick_action_response="Vous avez bu")

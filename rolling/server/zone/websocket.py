@@ -126,6 +126,7 @@ class ZoneEventsManager:
             ),
             world_row_i=character_doc.world_row_i,
             world_col_i=character_doc.world_col_i,
+            character_ids=[character_id],
         )
 
         # Start to listen client messages
@@ -238,20 +239,30 @@ class ZoneEventsManager:
             event.type
         ).dump_json(event)
 
-        for socket in self.get_sockets(world_row_i, world_col_i):
-            if (
-                character_ids is not None
-                and self.get_character_id_for_socket(socket) not in character_ids
-            ):
-                continue
+        if character_ids is not None:
+            sockets = [
+                self.get_character_socket(character_id)
+                for character_id in character_ids
+            ]
+            sockets = [socket for socket in sockets if socket is not None]
+        else:
+            sockets = self.get_sockets(world_row_i, world_col_i)
 
-            try:
-                server_logger.debug(event_str)
-                await socket.send_str(event_str)
-            except ConnectionResetError as exc:
-                server_logger.debug(exc)
-            except Exception as exc:
-                server_logger.exception(exc)
+        if sockets:
+            for socket in sockets:
+                if (
+                    character_ids is not None
+                    and self.get_character_id_for_socket(socket) not in character_ids
+                ):
+                    continue
+
+                try:
+                    server_logger.debug(event_str)
+                    await socket.send_str(event_str)
+                except ConnectionResetError as exc:
+                    server_logger.debug(exc)
+                except Exception as exc:
+                    server_logger.exception(exc)
 
         # Replicate message on world websockets
         if repeat_to_world:
