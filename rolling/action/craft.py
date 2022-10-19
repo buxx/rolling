@@ -34,7 +34,7 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class CraftInput:
-    quantity: typing.Optional[int] = serpyco.number_field(
+    quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
 
@@ -85,7 +85,7 @@ class BaseCraftStuff:
 
         for require in description.properties["require"]:
             if "stuff" in require:
-                required_quantity = input_.quantity * int(require["quantity"])
+                required_quantity = int(input_.quantity) * int(require["quantity"])
                 stuff_id = require["stuff"]
                 stuff_properties = (
                     self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
@@ -104,7 +104,7 @@ class BaseCraftStuff:
                         self._kernel.stuff_lib.destroy(stuff_to_destroy.id)
 
             elif "resource" in require:
-                required_quantity = input_.quantity * require["quantity"]
+                required_quantity = int(input_.quantity) * require["quantity"]
                 resource_id = require["resource"]
                 resource_properties = self._kernel.game.config.resources[resource_id]
                 try:
@@ -137,7 +137,7 @@ class BaseCraftStuff:
 
         for produce in description.properties["produce"]:
             stuff_id = produce["stuff"]
-            quantity = produce["quantity"] * input_.quantity
+            quantity = produce["quantity"] * int(input_.quantity)
             stuff_properties = (
                 self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
             )
@@ -242,7 +242,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             self._description.base_cost / 2, self._description.base_cost - bonus
         )
         if input_ and input_.quantity:
-            return base_cost * input_.quantity
+            return base_cost * int(input_.quantity)
         return base_cost
 
     async def perform(
@@ -341,7 +341,7 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
             self._description.base_cost / 2, self._description.base_cost - bonus
         )
         if input_ and input_.quantity:
-            return base_cost * input_.quantity
+            return base_cost * int(input_.quantity)
         return base_cost
 
     async def check_request_is_possible(
