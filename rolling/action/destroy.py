@@ -174,7 +174,7 @@ class DestroyBuildAction(WithBuildAction):
                 ),
                 Part(
                     is_link=True,
-                    label="Dépenser maximum 6 AP",
+                    label="Dépenser maximum 6 PA",
                     form_action=self._get_url(
                         character=character,
                         build_id=build_id,

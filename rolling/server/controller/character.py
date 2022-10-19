@@ -621,7 +621,7 @@ class CharacterController(BaseController):
                 Part(label="Nom", text=character.name),
                 Part(
                     label="Points d'actions restants",
-                    text=f"{str(character.action_points)}/24.0",
+                    text=f"{str(character.action_points)}",
                 ),
                 Part(
                     label="Points de vie",
