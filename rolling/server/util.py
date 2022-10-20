@@ -107,7 +107,7 @@ async def with_multiple_carried_stuffs(
         )
 
     if input_.quantity is not None:
-        do_it_count = input_.quantity
+        do_it_count = int(input_.quantity)
     else:
         do_it_count = 1
 

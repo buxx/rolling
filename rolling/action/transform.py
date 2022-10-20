@@ -34,9 +34,16 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class TransformStuffIntoResourcesModel:
-    quantity: typing.Optional[int] = serpyco.number_field(
+    quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+
+    @property
+    def quantity_int(self) -> typing.Optional[int]:
+        if self.quantity is None:
+            return None
+
+        return int(self.quantity)
 
 
 class TransformStuffIntoResourcesAction(WithStuffAction):
@@ -159,9 +166,16 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
 
 @dataclasses.dataclass
 class TransformStuffIntoStuffModel:
-    quantity: typing.Optional[int] = serpyco.number_field(
+    quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+
+    @property
+    def quantity_int(self) -> typing.Optional[int]:
+        if self.quantity is None:
+            return None
+
+        return int(self.quantity)
 
 
 class TransformStuffIntoStuffAction(WithStuffAction):
@@ -235,7 +249,7 @@ class TransformStuffIntoStuffAction(WithStuffAction):
             return None
 
         return self._description.base_cost + (
-            self._description.properties["cost_per_unit"] * (input_.quantity or 1)
+            self._description.properties["cost_per_unit"] * (input_.quantity_int or 1)
         )
 
     async def perform(
@@ -302,7 +316,7 @@ class TransformStuffIntoStuffAction(WithStuffAction):
 
         done_count = 0
         produced: typing.DefaultDict[str, int] = defaultdict(lambda: 0)
-        for _ in range(input_.quantity):
+        for _ in range(input_.quantity_int):
             try:
                 stuff_ = self._kernel.stuff_lib.get_carried_by(
                     character_id=character.id, stuff_id=stuff.stuff_id

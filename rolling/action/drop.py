@@ -43,7 +43,7 @@ class DropResourceModel:
 
 @dataclasses.dataclass
 class DropStuffModel:
-    quantity: typing.Optional[int] = serpyco.number_field(
+    quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     then_redirect_url: typing.Optional[str] = None

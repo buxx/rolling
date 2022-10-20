@@ -25,7 +25,7 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass
 class LearnKnowledgeModel:
     knowledge_id: str
-    ap: typing.Optional[int] = serpyco.field(cast_on_load=True, default=None)
+    ap: typing.Optional[float] = serpyco.field(cast_on_load=True, default=None)
 
 
 class LearnKnowledgeAction(CharacterAction):
