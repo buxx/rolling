@@ -356,6 +356,7 @@ class TransformStuffIntoStuffAction(WithStuffAction):
                     text=f"{done_count} {stuff_properties.name} transformé(es) en {produced_str}"
                 )
             ],
+            reload_inventory=True,
         )
 
 
