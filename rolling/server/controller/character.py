@@ -896,71 +896,71 @@ class CharacterController(BaseController):
 
         return inventory_api
 
-    # @hapic.with_api_doc()
-    # @hapic.input_path(GetCharacterPathModel)
-    # @hapic.output_body(Description)
-    # async def _describe_inventory(
-    #     self, request: Request, hapic_data: HapicData
-    # ) -> Description:
-    #     character = self._kernel.character_lib.get(hapic_data.path.character_id)
-    #     inventory = self._character_lib.get_inventory(character)
-    #     inventory_parts = self._get_inventory_parts(
-    #         request,
-    #         character,
-    #         inventory,
-    #         then_redirect_url=f"/_describe/character/{character.id}/inventory",
-    #     )
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def _describe_inventory(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character = self._kernel.character_lib.get(hapic_data.path.character_id)
+        inventory = self._character_lib.get_inventory(character)
+        inventory_parts = self._get_inventory_parts(
+            request,
+            character,
+            inventory,
+            then_redirect_url=f"/_describe/character/{character.id}/inventory",
+        )
 
-    #     max_weight = character.get_weight_capacity(self._kernel)
-    #     max_clutter = character.get_clutter_capacity(self._kernel)
+        max_weight = character.get_weight_capacity(self._kernel)
+        max_clutter = character.get_clutter_capacity(self._kernel)
 
-    #     weight_overcharge = ""
-    #     clutter_overcharge = ""
+        weight_overcharge = ""
+        clutter_overcharge = ""
 
-    #     if inventory.weight > character.get_weight_capacity(self._kernel):
-    #         weight_overcharge = " surcharge!"
+        if inventory.weight > character.get_weight_capacity(self._kernel):
+            weight_overcharge = " surcharge!"
 
-    #     if inventory.clutter > character.get_clutter_capacity(self._kernel):
-    #         clutter_overcharge = " surcharge!"
+        if inventory.clutter > character.get_clutter_capacity(self._kernel):
+            clutter_overcharge = " surcharge!"
 
-    #     weight_str = display_g_or_kg(inventory.weight)
-    #     max_weight_str = display_g_or_kg(max_weight)
+        weight_str = display_g_or_kg(inventory.weight)
+        max_weight_str = display_g_or_kg(max_weight)
 
-    #     footer_links = []
+        footer_links = []
 
-    #     count_things_shared_withs = 0
-    #     for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
-    #         character_id=character.id
-    #     ):
-    #         count_things_shared_withs += (
-    #             self._kernel.affinity_lib.count_things_shared_with_affinity(
-    #                 character_id=character.id, affinity_id=affinity_relation.affinity_id
-    #             )
-    #         )
+        count_things_shared_withs = 0
+        for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
+            character_id=character.id
+        ):
+            count_things_shared_withs += (
+                self._kernel.affinity_lib.count_things_shared_with_affinity(
+                    character_id=character.id, affinity_id=affinity_relation.affinity_id
+                )
+            )
 
-    #     if count_things_shared_withs:
-    #         footer_links.append(
-    #             Part(
-    #                 is_link=True,
-    #                 label=f"Voir ce qui est paratgé ({count_things_shared_withs})",
-    #                 form_action=f"/_describe/character/{character.id}/inventory/shared-with",
-    #             )
-    #         )
+        if count_things_shared_withs:
+            footer_links.append(
+                Part(
+                    is_link=True,
+                    label=f"Voir ce qui est paratgé ({count_things_shared_withs})",
+                    form_action=f"/_describe/character/{character.id}/inventory/shared-with",
+                )
+            )
 
-    #     return Description(
-    #         title="Inventaire",
-    #         items=[
-    #             Part(
-    #                 text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
-    #             ),
-    #             Part(
-    #                 text=f"Encombrement: {round(inventory.clutter, 2)} ({round(max_clutter, 2)} max{clutter_overcharge})"
-    #             ),
-    #         ]
-    #         + inventory_parts,
-    #         footer_links=footer_links,
-    #         can_be_back_url=True,
-    #     )
+        return Description(
+            title="Inventaire",
+            items=[
+                Part(
+                    text=f"Poids transporté: {weight_str} ({max_weight_str} max{weight_overcharge})"
+                ),
+                Part(
+                    text=f"Encombrement: {round(inventory.clutter, 2)} ({round(max_clutter, 2)} max{clutter_overcharge})"
+                ),
+            ]
+            + inventory_parts,
+            footer_links=footer_links,
+            can_be_back_url=True,
+        )
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
@@ -2947,14 +2947,14 @@ class CharacterController(BaseController):
                     "/character/{character_id}/card/{with_character_id}",
                     self.with_character_card,
                 ),
-                # web.get(
-                #     "/_describe/character/{character_id}/inventory",
-                #     self._describe_inventory,
-                # ),
-                # web.post(
-                #     "/_describe/character/{character_id}/inventory",
-                #     self._describe_inventory,
-                # ),
+                web.get(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
+                web.post(
+                    "/_describe/character/{character_id}/inventory",
+                    self._describe_inventory,
+                ),
                 web.get(
                     "/character/{character_id}/inventory-data",
                     self._get_inventory_data,
