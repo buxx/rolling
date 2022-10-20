@@ -74,9 +74,16 @@ class SharedInventoryQueryModel:
     stuff_id: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+
+    @property
+    def stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.stuff_quantity is None:
+            return None
+
+        return int(self.stuff_quantity)
 
 
 @dataclasses.dataclass
@@ -105,9 +112,16 @@ class PickFromInventoryQueryModel:
         cast_on_load=True, default=None
     )
     stuff_id: typing.Optional[str] = None
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+
+    @property
+    def stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.stuff_quantity is None:
+            return None
+
+        return int(self.stuff_quantity)
 
 
 @dataclasses.dataclass
@@ -180,9 +194,16 @@ class AddOfferItemQuery:
         cast_on_load=True, default=None
     )
     stuff_id: typing.Optional[str] = None
-    stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
+
+    @property
+    def stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.stuff_quantity is None:
+            return None
+
+        return int(self.stuff_quantity)
 
 
 @dataclasses.dataclass

@@ -17,10 +17,17 @@ if typing.TYPE_CHECKING:
 
 @dataclasses.dataclass
 class TakeStuffModel:
-    quantity: typing.Optional[int] = serpyco.number_field(
+    quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     then_redirect_url: typing.Optional[str] = None
+
+    @property
+    def quantity_int(self) -> typing.Optional[int]:
+        if self.quantity is None:
+            return None
+
+        return int(self.quantity)
 
 
 class TakeStuffAction(WithStuffAction):
@@ -58,8 +65,8 @@ class TakeStuffAction(WithStuffAction):
 
         around_stuffs_like_this: typing.List[StuffModel] = []
         taken_stuffs: typing.List[StuffModel] = [stuff]
-        if input_.quantity or 1 > 1:
-            stuff_to_find = input_.quantity - 1
+        if input_.quantity_int:
+            stuff_to_find = input_.quantity_int - 1
             scan_coordinates: typing.List[
                 typing.Tuple[int, int]
             ] = get_on_and_around_coordinates(

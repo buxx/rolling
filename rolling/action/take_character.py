@@ -31,13 +31,20 @@ class TakeFromModel:
     take_stuff_id: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    take_stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    take_stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     take_resource_id: typing.Optional[str] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     take_resource_quantity: typing.Optional[str] = None
+
+    @property
+    def take_stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.take_stuff_quantity is None:
+            return None
+
+        return int(self.take_stuff_quantity)
 
 
 class TakeStuffOrResources(TransferStuffOrResources):
@@ -327,7 +334,7 @@ class TakeFromCharacterAction(WithCharacterAction):
 
         if input_.take_stuff_id:
             take.check_can_transfer_stuff(
-                input_.take_stuff_id, quantity=input_.take_stuff_quantity
+                input_.take_stuff_id, quantity=input_.take_stuff_quantity_int
             )
 
     def get_character_actions(
@@ -366,7 +373,7 @@ class TakeFromCharacterAction(WithCharacterAction):
             description_id=self._description.id,
         ).get_description(
             stuff_id=input_.take_stuff_id,
-            stuff_quantity=input_.take_stuff_quantity,
+            stuff_quantity=input_.take_stuff_quantity_int,
             resource_id=input_.take_resource_id,
             resource_quantity=input_.take_resource_quantity,
         )

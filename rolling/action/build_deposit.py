@@ -204,13 +204,20 @@ class DepositToModel:
     deposit_stuff_id: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    deposit_stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    deposit_stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     deposit_resource_id: typing.Optional[str] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     deposit_resource_quantity: typing.Optional[str] = None
+
+    @property
+    def deposit_stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.deposit_stuff_quantity is None:
+            return None
+
+        return int(self.deposit_stuff_quantity)
 
 
 class DepositToBuildAction(WithBuildAction):
@@ -263,7 +270,8 @@ class DepositToBuildAction(WithBuildAction):
                 to_build=build_doc,
                 description_id=self._description.id,
             ).check_can_transfer_stuff(
-                stuff_id=input_.deposit_stuff_id, quantity=input_.deposit_stuff_quantity
+                stuff_id=input_.deposit_stuff_id,
+                quantity=input_.deposit_stuff_quantity_int,
             )
 
     def get_character_actions(
@@ -485,7 +493,7 @@ class DepositToBuildAction(WithBuildAction):
             description_id=self._description.id,
         ).get_description(
             stuff_id=input_.deposit_stuff_id,
-            stuff_quantity=input_.deposit_stuff_quantity,
+            stuff_quantity=input_.deposit_stuff_quantity_int,
             resource_id=input_.deposit_resource_id,
             resource_quantity=input_.deposit_resource_quantity,
         )

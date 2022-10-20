@@ -158,13 +158,20 @@ class GiveToModel:
     give_stuff_id: typing.Optional[int] = serpyco.number_field(
         cast_on_load=True, default=None
     )
-    give_stuff_quantity: typing.Optional[int] = serpyco.number_field(
+    give_stuff_quantity: typing.Optional[float] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     give_resource_id: typing.Optional[str] = serpyco.number_field(
         cast_on_load=True, default=None
     )
     give_resource_quantity: typing.Optional[str] = None
+
+    @property
+    def give_stuff_quantity_int(self) -> typing.Optional[int]:
+        if self.give_stuff_quantity is None:
+            return None
+
+        return int(self.give_stuff_quantity)
 
 
 class GiveToCharacterAction(WithCharacterAction):
@@ -208,14 +215,14 @@ class GiveToCharacterAction(WithCharacterAction):
                 quantity=user_input_context.real_quantity,
             )
 
-        if input_.give_stuff_id and input_.give_stuff_quantity:
+        if input_.give_stuff_id and input_.give_stuff_quantity_int:
             GiveStuffOrResources(
                 self._kernel,
                 from_character=character,
                 to_character=with_character,
                 description_id=self._description.id,
             ).check_can_transfer_stuff(
-                stuff_id=input_.give_stuff_id, quantity=input_.give_stuff_quantity
+                stuff_id=input_.give_stuff_id, quantity=input_.give_stuff_quantity_int
             )
 
     def get_character_actions(
@@ -254,7 +261,7 @@ class GiveToCharacterAction(WithCharacterAction):
             description_id=self._description.id,
         ).get_description(
             stuff_id=input_.give_stuff_id,
-            stuff_quantity=input_.give_stuff_quantity,
+            stuff_quantity=input_.give_stuff_quantity_int,
             resource_id=input_.give_resource_id,
             resource_quantity=input_.give_resource_quantity,
         )

@@ -1016,7 +1016,7 @@ class CharacterController(BaseController):
             kernel=self._kernel, character=character, affinity=affinity
         ).get_description(
             stuff_id=input_.stuff_id,
-            stuff_quantity=input_.stuff_quantity,
+            stuff_quantity=input_.stuff_quantity_int,
             resource_id=input_.resource_id,
             resource_quantity=input_.resource_quantity,
         )
@@ -1038,7 +1038,7 @@ class CharacterController(BaseController):
             kernel=self._kernel, character=character, affinity=affinity
         ).get_description(
             stuff_id=input_.stuff_id,
-            stuff_quantity=input_.stuff_quantity,
+            stuff_quantity=input_.stuff_quantity_int,
             resource_id=input_.resource_id,
             resource_quantity=input_.resource_quantity,
         )
