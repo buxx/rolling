@@ -57,7 +57,7 @@ max_character_card_input_at_create = 5
 name = "Chercher/Chasser"
 class = "SEARCH"
 actions = ["SEARCH_FOOD", "SEARCH_MATERIAL"]
-description = "Ces actions seront effectué à travers la zone entière. Leurs succèes dépend de la phaune, de la flore, etc. ainsi que du renouvellement naturel de ceux-ci."
+description = "Ces actions seront effectué à travers la zone entière. Leurs succèes dépend de la faune, de la flore, etc. ainsi que du renouvellement naturel de ceux-ci."
 
 [[main_actions]]
 name = "Mélanges/Productions"
