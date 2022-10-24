@@ -318,7 +318,7 @@ actions = ["TRAVEL"]
     material="SANDY"
     unit = "L"
     clutter = 0.05
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "sand.png"
     drop_to_nowhere = true
 
@@ -355,7 +355,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.00011
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "copper.png"
 
   [resources.TIN]
@@ -364,7 +364,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.00014
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "tin.png"
 
   [resources.IRON]
@@ -373,7 +373,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.00013
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "iron.png"
 
   [resources.BRONZE]
@@ -382,7 +382,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "G"
     clutter = 0.00011
-    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.SOIL]
     name = "Terre"
@@ -511,7 +511,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.25
-    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.LEATHER_PIECE]
     name = "Pièce de cuir"
@@ -519,7 +519,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.5
-    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
 
   [resources.VEGETAL_FIBER]
     name = "Fibre végétale"
@@ -570,7 +570,7 @@ actions = ["TRAVEL"]
     material="MIDDLE_PIECE"
     unit = "U"
     clutter = 0.125
-    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES"]
+    actions = ["DROP_RESOURCE", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
     illustration = "wool.png"
 
   [resources.CHARCOAL]
