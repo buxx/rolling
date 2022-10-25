@@ -52,6 +52,15 @@ class ZoneEventsManager:
     def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
         return self._sockets_character_id[socket]
 
+    def get_world_coordinates_for_socket(
+        self, socket: web.WebSocketResponse
+    ) -> typing.Optional[typing.Tuple[int, int]]:
+        for coordinates, sockets in self._sockets.items():
+            if socket in sockets:
+                return coordinates
+
+        return None
+
     async def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
         server_logger.debug(f"Close_websocket {socket_to_remove}")
         try:
@@ -155,6 +164,11 @@ class ZoneEventsManager:
                     f"Zone websocket closed with exception {socket.exception()}"
                 )
             else:
+                # If socket is known, use known world coordinates : they can change when character travel
+                if world_coordinates := self.get_world_coordinates_for_socket(socket):
+                    row_i = world_coordinates[0]
+                    col_i = world_coordinates[1]
+
                 try:
                     await self._process_msg(row_i, col_i, msg, socket)
                 except DisconnectClient as exc:
