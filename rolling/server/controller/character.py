@@ -629,7 +629,11 @@ class CharacterController(BaseController):
                 ),
                 Part(label="Soif", text=str(round(character.thirst, 0))),
                 Part(label="Faim", text=str(round(character.hunger, 0))),
-                Part(label="Fatigué", text="oui" if character.tired else "non"),
+                Part(
+                    label="Fatigué",
+                    text=("oui" if character.tired else "non")
+                    + f" {character.tiredness}",
+                ),
                 Part(label="Exténué", text="oui" if character.is_exhausted else "non"),
                 Part(
                     label="Arme",
