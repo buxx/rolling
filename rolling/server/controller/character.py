@@ -625,7 +625,7 @@ class CharacterController(BaseController):
                 ),
                 Part(
                     label="Points de vie",
-                    text=self._kernel.character_lib.get_health_text(character),
+                    text=f"{self._kernel.character_lib.get_health_text(character)} ({character.life_points})",
                 ),
                 Part(label="Soif", text=str(round(character.thirst, 0))),
                 Part(label="Faim", text=str(round(character.hunger, 0))),
