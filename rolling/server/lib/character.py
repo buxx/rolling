@@ -2166,3 +2166,12 @@ class CharacterLib:
             return list(sorted(bonuses, key=lambda b: b.coefficient))[0]
 
         return None
+
+    def get_world_coordinates(self, character_id: str) -> typing.Tuple[int, int]:
+        return (
+            self._kernel.server_db_session.query(
+                CharacterDocument.world_row_i, CharacterDocument.world_col_i
+            )
+            .filter(CharacterDocument.id == character_id)
+            .one()
+        )

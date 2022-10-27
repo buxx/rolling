@@ -24,6 +24,7 @@ from rolling.model.event import TopBarMessageType
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
 from rolling.rolling_types import ActionType
+from rolling.server.chat import LiveChatOperator
 from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.link import CharacterActionLink, QuickAction
@@ -380,85 +381,86 @@ class ClickActionProcessor(EventProcessor):
             )
 
 
-class RequestChatProcessor(EventProcessor):
-    async def _process(
-        self,
-        row_i: int,
-        col_i: int,
-        event: WebSocketEvent[RequestChatData],
-        sender_socket: web.WebSocketResponse,
-    ) -> None:
-        conversation_id = None
-        conversation_title = None
-        if (
-            event.data.previous_conversation_id is None
-            and not event.data.next
-            and not event.data.previous
-        ):
-            messages = self._kernel.message_lib.get_character_zone_messages(
-                event.data.character_id, message_count=event.data.message_count
-            )
-            conversation_title = "Chat de la zone"
-        elif (
-            event.data.previous_conversation_id is not None
-            and not event.data.next
-            and not event.data.previous
-        ):
-            conversation_id = event.data.previous_conversation_id
-            messages = self._kernel.message_lib.get_conversation_messages(
-                character_id=event.data.character_id,
-                conversation_id=event.data.previous_conversation_id,
-                message_count=event.data.message_count,
-            )
-        else:
-            try:
-                if event.data.next:
-                    conversation_id = self._kernel.message_lib.get_next_conversation_id(
-                        character_id=event.data.character_id,
-                        conversation_id=event.data.previous_conversation_id,
-                    )
-                else:
-                    conversation_id = (
-                        self._kernel.message_lib.get_previous_conversation_id(
-                            character_id=event.data.character_id,
-                            conversation_id=event.data.previous_conversation_id,
-                        )
-                    )
-                messages = self._kernel.message_lib.get_conversation_messages(
-                    character_id=event.data.character_id,
-                    conversation_id=conversation_id,
-                    message_count=event.data.message_count,
-                )
-            except NoResultFound:
-                messages = self._kernel.message_lib.get_character_zone_messages(
-                    event.data.character_id, message_count=event.data.message_count
-                )
-                conversation_title = "Chat de la zone"
+# FIXME BS NOW : still used ?
+# class RequestChatProcessor(EventProcessor):
+#     async def _process(
+#         self,
+#         row_i: int,
+#         col_i: int,
+#         event: WebSocketEvent[RequestChatData],
+#         sender_socket: web.WebSocketResponse,
+#     ) -> None:
+#         conversation_id = None
+#         conversation_title = None
+#         if (
+#             event.data.previous_conversation_id is None
+#             and not event.data.next
+#             and not event.data.previous
+#         ):
+#             messages = self._kernel.message_lib.get_character_zone_messages(
+#                 event.data.character_id, message_count=event.data.message_count
+#             )
+#             conversation_title = "Chat de la zone"
+#         elif (
+#             event.data.previous_conversation_id is not None
+#             and not event.data.next
+#             and not event.data.previous
+#         ):
+#             conversation_id = event.data.previous_conversation_id
+#             messages = self._kernel.message_lib.get_conversation_messages(
+#                 character_id=event.data.character_id,
+#                 conversation_id=event.data.previous_conversation_id,
+#                 message_count=event.data.message_count,
+#             )
+#         else:
+#             try:
+#                 if event.data.next:
+#                     conversation_id = self._kernel.message_lib.get_next_conversation_id(
+#                         character_id=event.data.character_id,
+#                         conversation_id=event.data.previous_conversation_id,
+#                     )
+#                 else:
+#                     conversation_id = (
+#                         self._kernel.message_lib.get_previous_conversation_id(
+#                             character_id=event.data.character_id,
+#                             conversation_id=event.data.previous_conversation_id,
+#                         )
+#                     )
+#                 messages = self._kernel.message_lib.get_conversation_messages(
+#                     character_id=event.data.character_id,
+#                     conversation_id=conversation_id,
+#                     message_count=event.data.message_count,
+#                 )
+#             except NoResultFound:
+#                 messages = self._kernel.message_lib.get_character_zone_messages(
+#                     event.data.character_id, message_count=event.data.message_count
+#                 )
+#                 conversation_title = "Chat de la zone"
 
-        if not messages:
-            messages.append(MessageDocument(text="", author_id=event.data.character_id))
+#         if not messages:
+#             messages.append(MessageDocument(text="", author_id=event.data.character_id))
 
-        for message in reversed(messages):
-            new_chat_message_event = WebSocketEvent(
-                type=ZoneEventType.NEW_CHAT_MESSAGE,
-                world_row_i=row_i,
-                world_col_i=col_i,
-                data=NewChatMessageData(
-                    character_id=message.author_id,
-                    message=f"{message.author_name}: {message.text}"
-                    if message.author_name
-                    else message.text,
-                    conversation_id=conversation_id,
-                    conversation_title=conversation_title or message.subject,
-                ),
-            )
-            event_str = self._kernel.event_serializer_factory.get_serializer(
-                ZoneEventType.NEW_CHAT_MESSAGE
-            ).dump_json(new_chat_message_event)
-            await self._kernel.server_zone_events_manager.respond_to_socket(
-                socket=sender_socket,
-                event_str=event_str,
-            )
+#         for message in reversed(messages):
+#             new_chat_message_event = WebSocketEvent(
+#                 type=ZoneEventType.NEW_CHAT_MESSAGE,
+#                 world_row_i=row_i,
+#                 world_col_i=col_i,
+#                 data=NewChatMessageData(
+#                     character_id=message.author_id,
+#                     message=f"{message.author_name}: {message.text}"
+#                     if message.author_name
+#                     else message.text,
+#                     conversation_id=conversation_id,
+#                     conversation_title=conversation_title or message.subject,
+#                 ),
+#             )
+#             event_str = self._kernel.event_serializer_factory.get_serializer(
+#                 ZoneEventType.NEW_CHAT_MESSAGE
+#             ).dump_json(new_chat_message_event)
+#             await self._kernel.server_zone_events_manager.respond_to_socket(
+#                 socket=sender_socket,
+#                 event_str=event_str,
+#             )
 
 
 class NewChatMessageProcessor(EventProcessor):
@@ -469,24 +471,28 @@ class NewChatMessageProcessor(EventProcessor):
         event: WebSocketEvent[NewChatMessageData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        if event.data.conversation_id is None:
-            await self._kernel.message_lib.add_zone_message(
-                character_id=event.data.character_id,
-                message=event.data.message,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
-            )
-        else:
-            last_message = self._kernel.message_lib.get_last_conversation_message(
-                event.data.conversation_id
-            )
-            await self._kernel.message_lib.add_conversation_message(
-                author_id=event.data.character_id,
-                concerned=last_message.concerned,
-                message=event.data.message,
-                subject=last_message.subject,
-                conversation_id=event.data.conversation_id,
-            )
+        # if event.data.conversation_id is None:
+        #     await self._kernel.message_lib.add_zone_message(
+        #         character_id=event.data.character_id,
+        #         message=event.data.message,
+        #         zone_row_i=row_i,
+        #         zone_col_i=col_i,
+        #     )
+        # else:
+        #     last_message = self._kernel.message_lib.get_last_conversation_message(
+        #         event.data.conversation_id
+        #     )
+        #     await self._kernel.message_lib.add_conversation_message(
+        #         author_id=event.data.character_id,
+        #         concerned=last_message.concerned,
+        #         message=event.data.message,
+        #         subject=last_message.subject,
+        #         conversation_id=event.data.conversation_id,
+        #     )
+        await LiveChatOperator(self._kernel).received_message(
+            character_id=event.data.character_id,
+            message=event.data.message,
+        )
 
 
 class AnimatedCorpseMoveProcessor(EventProcessor):
@@ -551,7 +557,7 @@ class EventProcessorFactory:
             (ZoneEventType.CLIENT_REQUIRE_AROUND, ThereIsAroundProcessor),
             (ZoneEventType.CLIENT_REQUIRE_NEW_RESUME_TEXT, SendResumeTextProcessor),
             (ZoneEventType.CLICK_ACTION_EVENT, ClickActionProcessor),
-            (ZoneEventType.REQUEST_CHAT, RequestChatProcessor),
+            # (ZoneEventType.REQUEST_CHAT, RequestChatProcessor),
             (ZoneEventType.NEW_CHAT_MESSAGE, NewChatMessageProcessor),
             (ZoneEventType.ANIMATED_CORPSE_MOVE, AnimatedCorpseMoveProcessor),
         ]:

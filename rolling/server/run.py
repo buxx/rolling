@@ -65,6 +65,7 @@ def run(args: argparse.Namespace) -> None:
 
     config = ServerConfig.from_config_file_path(args.server_config_file_path)
     kernel = get_kernel(config)
+    kernel.test()
     server_logger.info("Create web application")
 
     if args.serve_static_files:

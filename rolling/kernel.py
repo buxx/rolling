@@ -62,6 +62,8 @@ from rolling.trad import GlobalTranslation
 from rolling.util import generate_avatar_illustration_media, generate_loading_media
 from rolling.util import ensure_avatar_medias
 
+import rrolling
+
 
 @dataclasses.dataclass
 class ServerConfig:
@@ -615,3 +617,6 @@ class Kernel:
                 for character_id in character_ids:
                     character_doc = self.character_lib.get_document(character_id)
                     await self._character_lib.refresh_character(character_doc)
+
+    def test(self) -> None:
+        rrolling.TracimDealer().ensure_account("foo", "bar")

@@ -1,11 +1,13 @@
 [package]
-name = "rolling"
+name = "rrolling"
 version = "0.1.0"
-authors = ["Bastien Sevajol <sevajol.bastien@gmail.com>"]
-edition = "2018"
+edition = "2021"
+
+[lib]
+name = "rrolling"
+crate-type = ["cdylib"]
 
 [dependencies]
-structopt = "0.2"
-crossbeam = "0.7.1"
-num_cpus = "1.10.0"
-rand = "0.6.5"
+pyo3 = { version = "0.17.1", features = ["extension-module"] }
+log = "~0.4"
+pyo3-log = "0.7.0"
