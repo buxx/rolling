@@ -21,7 +21,7 @@ class LiveChatOperator:
             type=ZoneEventType.NEW_CHAT_MESSAGE,
             world_row_i=world_row_i,
             world_col_i=world_col_i,
-            data=NewChatMessageData(
+            data=NewChatMessageData.new_character(
                 character_id=character_id,
                 message=message,
             ),

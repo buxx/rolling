@@ -303,6 +303,7 @@ class ZoneController(BaseController):
             can_be_back_url=True,
         )
 
+    # FIXME : delete this view by conversation reforming
     @hapic.with_api_doc()
     @hapic.handle_exception(NoZoneMapError, http_code=404)
     @hapic.input_path(GetZonePathModel)

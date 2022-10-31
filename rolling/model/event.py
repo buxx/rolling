@@ -143,27 +143,35 @@ class ClickActionData(WebSocketEventData):
 
 @dataclasses.dataclass
 class RequestChatData(WebSocketEventData):
-    character_id: str
-    message_count: int
-    next: bool
-    previous: bool
-    previous_conversation_id: typing.Optional[int] = None
-
     # TODO BS: use automatic compiled serpyco serializer
     def to_dict(self) -> dict:
-        return {
-            "previous_conversation_id": self.previous_conversation_id,
-            "character_id": self.character_id,
-            "message_count": self.message_count,
-        }
+        return {}
 
 
 @dataclasses.dataclass
 class NewChatMessageData(WebSocketEventData):
-    character_id: str
     message: str
-    conversation_id: typing.Optional[int] = None
-    conversation_title: typing.Optional[str] = None
+    silent: bool
+    system: bool
+    character_id: typing.Optional[str]
+
+    @classmethod
+    def new_character(cls, character_id: str, message: str) -> "NewChatMessageData":
+        return cls(
+            character_id=character_id,
+            message=message,
+            silent=False,
+            system=False,
+        )
+
+    @classmethod
+    def new_system(cls, message: str, silent: bool) -> "NewChatMessageData":
+        return cls(
+            character_id=None,
+            message=message,
+            silent=silent,
+            system=True,
+        )
 
     # TODO BS: use automatic compiled serpyco serializer
     def to_dict(self) -> dict:

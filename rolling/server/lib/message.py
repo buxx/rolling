@@ -3,6 +3,7 @@ from sqlalchemy import String
 from sqlalchemy import cast
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
+from aiohttp import web
 import typing
 
 from rolling.log import server_logger
@@ -72,6 +73,7 @@ class MessageLib:
             .one()
         )
 
+    # FIXME : delete this view by conversation reforming
     async def add_zone_message(
         self,
         character_id: str,
@@ -129,6 +131,7 @@ class MessageLib:
             .one()
         )
 
+    # FIXME : delete this view by conversation reforming
     async def add_conversation_message(
         self,
         author_id: str,
@@ -193,6 +196,81 @@ class MessageLib:
         )
 
         return conversation_id
+
+    async def send_character_chat_message(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        message: str,
+        character_id: str,
+        only_to: typing.Optional[web.WebSocketResponse] = None,
+        to_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> None:
+        event = WebSocketEvent(
+            type=ZoneEventType.NEW_CHAT_MESSAGE,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            data=NewChatMessageData.new_character(
+                character_id=character_id,
+                message=message,
+            ),
+        )
+        await self._send_chat_message(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            message=message,
+            event=event,
+            only_to=only_to,
+            to_character_ids=to_character_ids,
+        )
+
+    async def send_system_chat_message(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        message: str,
+        silent: bool,
+        only_to: typing.Optional[web.WebSocketResponse] = None,
+        to_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> None:
+        event = WebSocketEvent(
+            type=ZoneEventType.NEW_CHAT_MESSAGE,
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            data=NewChatMessageData.new_system(
+                message=message,
+                silent=silent,
+            ),
+        )
+        await self._send_chat_message(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            event=event,
+            only_to=only_to,
+            to_character_ids=to_character_ids,
+        )
+
+    async def _send_chat_message(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        event: WebSocketEvent,
+        only_to: typing.Optional[web.WebSocketResponse] = None,
+        to_character_ids: typing.Optional[typing.List[str]] = None,
+    ) -> None:
+        if only_to is not None:
+            await only_to.send_str(
+                self._kernel.event_serializer_factory.get_serializer(
+                    ZoneEventType.NEW_CHAT_MESSAGE
+                ).dump_json(event)
+            )
+        else:
+            await self._kernel.send_to_zone_sockets(
+                row_i=world_row_i,
+                col_i=world_col_i,
+                event=event,
+                to_character_ids=to_character_ids,
+            )
 
     async def send_new_message_events(
         self,
@@ -270,181 +348,20 @@ class MessageLib:
         to_world_row_i: int,
         to_world_col_i: int,
     ) -> None:
-        # Zone message
-        try:
-            last_character_message = (
-                self._kernel.message_lib.get_last_character_zone_messages(
-                    character_id=character.id, zone=True
-                )
-            )
-            if not last_character_message.is_outzone_message:
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text="Vous avez changé de zone",
-                        character_id=character.id,
-                        author_id=character.id,
-                        author_name=character.name,
-                        read=True,
-                        zone_row_i=character.zone_row_i,
-                        zone_col_i=character.zone_col_i,
-                        concerned=[character.id],
-                        is_outzone_message=True,
-                        zone=True,
-                        subject=last_character_message.subject,
-                    )
-                )
-        except NoResultFound:
-            pass
-
-        from_character_ids = self._kernel.character_lib.get_zone_character_ids(
-            row_i=from_world_row_i, col_i=from_world_col_i, alive=True
-        )
-        await self.send_new_message_events(
+        # Message for which stay in left zone
+        await self.send_system_chat_message(
             world_row_i=from_world_row_i,
             world_col_i=from_world_col_i,
-            author_id=character.id,
             message=f"{character.name} a quitté la zone",
-            concerned=from_character_ids,
+            silent=False,
         )
-
-        to_character_ids = self._kernel.character_lib.get_zone_character_ids(
-            row_i=to_world_row_i, col_i=to_world_col_i, alive=True
-        )
-        await self.send_new_message_events(
+        # Message for which are here in arrival zone
+        await self.send_system_chat_message(
             world_row_i=to_world_row_i,
             world_col_i=to_world_col_i,
-            author_id=character.id,
-            message=f"{character.name} a rejoins la zone",
-            concerned=to_character_ids,
+            message=f"{character.name} a rejoint la zone",
+            silent=False,
         )
-
-        # TODO BS: limit active conversations ?
-        # conversations
-        for (message_id, concerned, subject) in (
-            self._kernel.server_db_session.query(
-                MessageDocument.first_message,
-                MessageDocument.concerned,
-                MessageDocument.subject,
-            )
-            .filter(cast(MessageDocument.concerned, String).contains(character.id))
-            .filter(MessageDocument.first_message != None)
-            .filter(MessageDocument.is_first_message == True)
-            .distinct(MessageDocument.first_message)
-            .all()
-        ):
-            left_names = []
-            new_concerned = list(set(concerned) - {character.id})
-            message = f"{character.name} n'est plus là pour parler"
-            for (before_character_id, before_character_name) in (
-                self._kernel.server_db_session.query(
-                    CharacterDocument.id, CharacterDocument.name
-                )
-                .filter(
-                    CharacterDocument.world_row_i == from_world_row_i,
-                    CharacterDocument.world_col_i == from_world_col_i,
-                    CharacterDocument.id.in_(new_concerned),
-                )
-                .order_by(CharacterDocument.name)
-                .all()
-            ):
-                left_names.append(before_character_name)
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text=message,
-                        character_id=before_character_id,
-                        author_id=character.id,
-                        author_name=character.name,
-                        read=True,
-                        concerned=concerned,
-                        is_outzone_message=True,
-                        zone=False,
-                        first_message=message_id,
-                        subject=subject,
-                    )
-                )
-
-            await self.send_new_message_events(
-                world_row_i=from_world_row_i,
-                world_col_i=from_world_col_i,
-                author_id=character.id,
-                message=message,
-                conversation_id=message_id,
-                concerned=concerned,
-            )
-
-            if left_names:
-                left_names_str = ", ".join(left_names)
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text=f"Vous etes partis et ne pouvez plus parler avec {left_names_str}",
-                        character_id=character.id,
-                        author_id=character.id,
-                        author_name=character.name,
-                        read=True,
-                        concerned=concerned,
-                        is_outzone_message=True,
-                        zone=False,
-                        first_message=message_id,
-                        subject=subject,
-                    )
-                )
-
-            after_names = []
-            message = f"{character.name} vous à rejoin"
-            new_concerned = list(set(concerned) - {character.id})
-            for (after_character_id, after_character_name) in (
-                self._kernel.server_db_session.query(
-                    CharacterDocument.id, CharacterDocument.name
-                )
-                .filter(
-                    CharacterDocument.world_row_i == to_world_row_i,
-                    CharacterDocument.world_col_i == to_world_col_i,
-                    CharacterDocument.id.in_(new_concerned),
-                )
-                .order_by(CharacterDocument.name)
-                .all()
-            ):
-                after_names.append(after_character_name)
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text=message,
-                        character_id=after_character_id,
-                        author_id=character.id,
-                        author_name=character.name,
-                        read=True,
-                        concerned=concerned,
-                        is_outzone_message=True,
-                        zone=False,
-                        first_message=message_id,
-                        subject=subject,
-                    )
-                )
-
-            await self.send_new_message_events(
-                world_row_i=to_world_row_i,
-                world_col_i=to_world_col_i,
-                author_id=character.id,
-                message=message,
-                conversation_id=message_id,
-                concerned=new_concerned,
-            )
-
-            if after_names:
-                after_names_str = ", ".join(after_names)
-                self._kernel.server_db_session.add(
-                    MessageDocument(
-                        text=f"Vous avez rejoins {after_names_str}",
-                        character_id=character.id,
-                        author_id=character.id,
-                        author_name=character.name,
-                        read=True,
-                        concerned=concerned,
-                        is_outzone_message=True,
-                        zone=False,
-                        first_message=message_id,
-                        subject=subject,
-                    )
-                )
 
     def get_next_conversation_id(
         self, character_id: str, conversation_id: typing.Optional[int]

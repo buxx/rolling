@@ -1,5 +1,4 @@
 # coding: utf-8
-import logging
 import aiohttp
 from aiohttp import web
 from aiohttp.web_request import Request
@@ -62,7 +61,9 @@ class ZoneEventsManager:
         return None
 
     async def close_websocket(self, socket_to_remove: web.WebSocketResponse) -> None:
-        server_logger.debug(f"Close_websocket {socket_to_remove}")
+        character_id = self.get_character_id_for_socket(socket_to_remove)
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        server_logger.debug(f"Close_websocket {socket_to_remove} ('{character_id}')")
         try:
             await socket_to_remove.close()
         except CancelledError:
@@ -88,6 +89,13 @@ class ZoneEventsManager:
             if socket == socket_to_remove:
                 del self._sockets_by_token[token]
 
+        await self._kernel.message_lib.send_system_chat_message(
+            world_row_i=character_doc.world_row_i,
+            world_col_i=character_doc.world_col_i,
+            message=f"Le joueur de {character_doc.name} est déconnecté",
+            silent=False,
+        )
+
     async def get_new_socket(
         self,
         request: Request,
@@ -97,7 +105,7 @@ class ZoneEventsManager:
         reader_token: typing.Optional[str] = None,
         token: typing.Optional[str] = None,
     ) -> web.WebSocketResponse:
-        character_doc = self._kernel.character_lib.get_document(character_id)
+        sender_character_doc = self._kernel.character_lib.get_document(character_id)
         server_logger.info(
             f"Create websocket for zone {row_i},{col_i} ({reader_token},{token})"
         )
@@ -120,22 +128,24 @@ class ZoneEventsManager:
         if reader_token:
             self._sockets_associated_reader_token[socket] = reader_token
 
-        # FIXME : refactorize it
-        # Send immediately resume text
-        await self.send_to_sockets(
-            WebSocketEvent(
-                type=ZoneEventType.NEW_RESUME_TEXT,
-                world_row_i=character_doc.world_row_i,
-                world_col_i=character_doc.world_col_i,
-                data=NewResumeTextData(
-                    resume=ListOfItemModel(
-                        self._kernel.character_lib.get_resume_text(character_id)
-                    )
-                ),
-            ),
-            world_row_i=character_doc.world_row_i,
-            world_col_i=character_doc.world_col_i,
-            character_ids=[character_id],
+        # Inform them about this connection
+        here_character_ids = (
+            self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
+                world_row_i=sender_character_doc.world_row_i,
+                world_col_i=sender_character_doc.world_col_i,
+            )
+        )
+        other_here_character_ids = [
+            here_character_id
+            for here_character_id in here_character_ids
+            if here_character_id != sender_character_doc.id
+        ]
+        await self._kernel.message_lib.send_system_chat_message(
+            world_row_i=sender_character_doc.world_row_i,
+            world_col_i=sender_character_doc.world_col_i,
+            message=f"Le joueur de {sender_character_doc.name} est connecté",
+            silent=False,
+            to_character_ids=other_here_character_ids,
         )
 
         # Start to listen client messages
