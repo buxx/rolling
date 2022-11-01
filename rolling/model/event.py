@@ -156,11 +156,16 @@ class NewChatMessageData(WebSocketEventData):
     character_id: typing.Optional[str]
 
     @classmethod
-    def new_character(cls, character_id: str, message: str) -> "NewChatMessageData":
+    def new_character(
+        cls,
+        character_id: str,
+        message: str,
+        silent: bool = False,
+    ) -> "NewChatMessageData":
         return cls(
             character_id=character_id,
             message=message,
-            silent=False,
+            silent=silent,
             system=False,
         )
 

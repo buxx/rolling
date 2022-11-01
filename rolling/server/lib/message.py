@@ -205,21 +205,21 @@ class MessageLib:
         character_id: str,
         only_to: typing.Optional[web.WebSocketResponse] = None,
         to_character_ids: typing.Optional[typing.List[str]] = None,
+        silent: bool = False,
     ) -> None:
-        character_name = self._kernel.character_lib.get_name(character_id)
         event = WebSocketEvent(
             type=ZoneEventType.NEW_CHAT_MESSAGE,
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             data=NewChatMessageData.new_character(
                 character_id=character_id,
-                message=f"📝 {character_name}: {message}",
+                message=message,
+                silent=silent,
             ),
         )
         await self._send_chat_message(
             world_row_i=world_row_i,
             world_col_i=world_col_i,
-            message=message,
             event=event,
             only_to=only_to,
             to_character_ids=to_character_ids,
@@ -239,7 +239,7 @@ class MessageLib:
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             data=NewChatMessageData.new_system(
-                message=f"💡 {message}",
+                message=message,
                 silent=silent,
             ),
         )
@@ -355,14 +355,14 @@ class MessageLib:
         await self.send_system_chat_message(
             world_row_i=from_world_row_i,
             world_col_i=from_world_col_i,
-            message=f"{character.name} a quitté la zone",
+            message=f"💡 {character.name} a quitté la zone",
             silent=False,
         )
         # Message for which are here in arrival zone
         await self.send_system_chat_message(
             world_row_i=to_world_row_i,
             world_col_i=to_world_col_i,
-            message=f"{character.name} a rejoint la zone",
+            message=f"💡 {character.name} a rejoint la zone",
             silent=False,
         )
 

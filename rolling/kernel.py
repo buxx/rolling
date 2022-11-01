@@ -61,6 +61,7 @@ from rolling.server.zone.websocket import ZoneEventsManager
 from rolling.trad import GlobalTranslation
 from rolling.util import generate_avatar_illustration_media, generate_loading_media
 from rolling.util import ensure_avatar_medias
+from rolling.server.chat import State as ChatState
 
 
 @dataclasses.dataclass
@@ -176,6 +177,7 @@ class Kernel:
         self._spawn_point_lib: typing.Optional[SpawnPointLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
+        self.chat_state = ChatState(3600 * 24 * 4)
 
         self.avatars_paths: typing.List[str] = [
             avatar_path

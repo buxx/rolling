@@ -1,5 +1,7 @@
 # coding: utf-8
 import abc
+import datetime
+import time
 import uuid
 from aiohttp import web
 from sqlalchemy.orm import exc
@@ -26,6 +28,7 @@ from rolling.model.event import ZoneEventType
 from rolling.server.chat import LiveChatOperator
 from rolling.server.lib.character import CharacterLib
 from rolling.server.link import CharacterActionLink, QuickAction
+from rolling.types import WorldPoint
 from rolling.util import (
     ROLLGUI1_COMPAT,
     get_on_and_around_coordinates,
@@ -396,6 +399,38 @@ class RequestChatProcessor(EventProcessor):
             sender_character_id
         )
 
+        # Send previous messages (TODO: optimize with one ws object)
+        cached_messages = self._kernel.chat_state.messages(WorldPoint((row_i, col_i)))
+        for cached_message in cached_messages:
+            await self._kernel.message_lib.send_character_chat_message(
+                world_row_i=row_i,
+                world_col_i=col_i,
+                character_id=cached_message.author_id,
+                message=cached_message.message,
+                silent=True,
+                only_to=sender_socket,
+            )
+
+        if cached_messages:
+            last_cached_message = cached_messages[-1]
+            since_seconds = int(time.time()) - last_cached_message.timestamp
+            if since_seconds < 60:
+                message = "🕐 Dernier message il a quelque secondes"
+            elif since_seconds < 60 * 10:
+                message = "🕐 Dernier message il a quelques minutes"
+            elif since_seconds < 3600:
+                message = "🕐 Dernier message il a moins d'une heure"
+            else:
+                message = "🕐 Dernier message il a plus d'une heure"
+
+            await self._kernel.message_lib.send_system_chat_message(
+                world_row_i=row_i,
+                world_col_i=col_i,
+                message=message,
+                silent=True,
+                only_to=sender_socket,
+            )
+
         # Send chat system message for each connected player
         here_character_ids = (
             self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
@@ -415,7 +450,7 @@ class RequestChatProcessor(EventProcessor):
             await self._kernel.message_lib.send_system_chat_message(
                 world_row_i=other_character_doc_.world_row_i,
                 world_col_i=other_character_doc_.world_col_i,
-                message=f"Le joueur de {other_character_doc_.name} est connecté",
+                message=f"💡 Le joueur de {other_character_doc_.name} est connecté",
                 silent=True,
                 only_to=sender_socket,
             )
