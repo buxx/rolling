@@ -74,53 +74,53 @@ class MessageLib:
         )
 
     # FIXME : delete this view by conversation reforming
-    async def add_zone_message(
-        self,
-        character_id: str,
-        message: str,
-        # FIXME BS : rename these param ton world_row_i and world_col_i
-        zone_row_i: int,
-        zone_col_i: int,
-        commit: bool = True,
-    ) -> None:
-        if not message.strip():
-            return
+    # async def add_zone_message(
+    #     self,
+    #     character_id: str,
+    #     message: str,
+    #     # FIXME BS : rename these param ton world_row_i and world_col_i
+    #     zone_row_i: int,
+    #     zone_col_i: int,
+    #     commit: bool = True,
+    # ) -> None:
+    #     if not message.strip():
+    #         return
 
-        author_doc = self._kernel.character_lib.get_document(character_id)
-        zone_characters = self._kernel.character_lib.get_zone_characters(
-            row_i=zone_row_i, col_i=zone_col_i
-        )
-        active_zone_characters_ids = (
-            self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
-                author_doc.world_row_i, author_doc.world_col_i
-            )
-        )
-        zone_characters_ids = [c.id for c in zone_characters]
-        for zone_character in zone_characters:
-            self._kernel.server_db_session.add(
-                MessageDocument(
-                    text=message,
-                    character_id=zone_character.id,
-                    author_id=character_id,
-                    author_name=author_doc.name,
-                    read=author_doc.id == zone_character.id
-                    or zone_character.id in active_zone_characters_ids,
-                    zone=True,
-                    zone_row_i=zone_row_i,
-                    zone_col_i=zone_col_i,
-                    concerned=zone_characters_ids,
-                )
-            )
+    #     author_doc = self._kernel.character_lib.get_document(character_id)
+    #     zone_characters = self._kernel.character_lib.get_zone_characters(
+    #         row_i=zone_row_i, col_i=zone_col_i
+    #     )
+    #     active_zone_characters_ids = (
+    #         self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
+    #             author_doc.world_row_i, author_doc.world_col_i
+    #         )
+    #     )
+    #     zone_characters_ids = [c.id for c in zone_characters]
+    #     for zone_character in zone_characters:
+    #         self._kernel.server_db_session.add(
+    #             MessageDocument(
+    #                 text=message,
+    #                 character_id=zone_character.id,
+    #                 author_id=character_id,
+    #                 author_name=author_doc.name,
+    #                 read=author_doc.id == zone_character.id
+    #                 or zone_character.id in active_zone_characters_ids,
+    #                 zone=True,
+    #                 zone_row_i=zone_row_i,
+    #                 zone_col_i=zone_col_i,
+    #                 concerned=zone_characters_ids,
+    #             )
+    #         )
 
-        if commit:
-            self._kernel.server_db_session.commit()
+    #     if commit:
+    #         self._kernel.server_db_session.commit()
 
-        await self.send_new_message_events(
-            world_row_i=author_doc.world_row_i,
-            world_col_i=author_doc.world_col_i,
-            author_id=character_id,
-            message=f"{author_doc.name}: {message}",
-        )
+    #     await self.send_new_message_events(
+    #         world_row_i=author_doc.world_row_i,
+    #         world_col_i=author_doc.world_col_i,
+    #         author_id=character_id,
+    #         message=f"{author_doc.name}: {message}",
+    #     )
 
     def get_last_conversation_message(self, conversation_id: int) -> MessageDocument:
         return (
@@ -132,70 +132,70 @@ class MessageLib:
         )
 
     # FIXME : delete this view by conversation reforming
-    async def add_conversation_message(
-        self,
-        author_id: str,
-        subject: str,
-        message: str,
-        concerned: typing.List[str],
-        conversation_id: typing.Optional[int] = None,
-        is_first_message: bool = False,
-        filter_by_same_zone_than_author: bool = False,
-    ) -> int:
-        author_doc = self._kernel.character_lib.get_document(author_id)
-        concerned = list(set([author_id] + concerned))
-        messages = []
-        active_zone_characters_ids = (
-            self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
-                author_doc.world_row_i, author_doc.world_col_i
-            )
-        )
-        for character_id in set(concerned):
-            if filter_by_same_zone_than_author:
-                character_doc = self._kernel.character_lib.get_document(character_id)
-                if (
-                    character_doc.world_row_i != author_doc.world_row_i
-                    or character_doc.world_col_i != author_doc.world_col_i
-                ):
-                    continue
+    # async def add_conversation_message(
+    #     self,
+    #     author_id: str,
+    #     subject: str,
+    #     message: str,
+    #     concerned: typing.List[str],
+    #     conversation_id: typing.Optional[int] = None,
+    #     is_first_message: bool = False,
+    #     filter_by_same_zone_than_author: bool = False,
+    # ) -> int:
+    #     author_doc = self._kernel.character_lib.get_document(author_id)
+    #     concerned = list(set([author_id] + concerned))
+    #     messages = []
+    #     active_zone_characters_ids = (
+    #         self._kernel.server_zone_events_manager.get_active_zone_characters_ids(
+    #             author_doc.world_row_i, author_doc.world_col_i
+    #         )
+    #     )
+    #     for character_id in set(concerned):
+    #         if filter_by_same_zone_than_author:
+    #             character_doc = self._kernel.character_lib.get_document(character_id)
+    #             if (
+    #                 character_doc.world_row_i != author_doc.world_row_i
+    #                 or character_doc.world_col_i != author_doc.world_col_i
+    #             ):
+    #                 continue
 
-            message_obj = MessageDocument(
-                subject=subject,
-                text=message,
-                character_id=character_id,
-                author_id=author_id,
-                author_name=author_doc.name,
-                read=author_doc.id == character_id
-                or character_id in active_zone_characters_ids,
-                zone=False,
-                concerned=concerned,
-                first_message=conversation_id,
-                is_first_message=is_first_message,
-            )
-            messages.append(message_obj)
-            self._kernel.server_db_session.add(message_obj)
+    #         message_obj = MessageDocument(
+    #             subject=subject,
+    #             text=message,
+    #             character_id=character_id,
+    #             author_id=author_id,
+    #             author_name=author_doc.name,
+    #             read=author_doc.id == character_id
+    #             or character_id in active_zone_characters_ids,
+    #             zone=False,
+    #             concerned=concerned,
+    #             first_message=conversation_id,
+    #             is_first_message=is_first_message,
+    #         )
+    #         messages.append(message_obj)
+    #         self._kernel.server_db_session.add(message_obj)
 
-        self._kernel.server_db_session.commit()
+    #     self._kernel.server_db_session.commit()
 
-        if not conversation_id:
-            first_message = messages[0]
+    #     if not conversation_id:
+    #         first_message = messages[0]
 
-            for message_ in messages:
-                message_.first_message = first_message.id
+    #         for message_ in messages:
+    #             message_.first_message = first_message.id
 
-            self._kernel.server_db_session.commit()
-            conversation_id = first_message.id
+    #         self._kernel.server_db_session.commit()
+    #         conversation_id = first_message.id
 
-        await self.send_new_message_events(
-            world_row_i=author_doc.world_row_i,
-            world_col_i=author_doc.world_col_i,
-            author_id=author_id,
-            message=f"{author_doc.name}: {message}",
-            conversation_id=conversation_id,
-            concerned=concerned,
-        )
+    #     await self.send_new_message_events(
+    #         world_row_i=author_doc.world_row_i,
+    #         world_col_i=author_doc.world_col_i,
+    #         author_id=author_id,
+    #         message=f"{author_doc.name}: {message}",
+    #         conversation_id=conversation_id,
+    #         concerned=concerned,
+    #     )
 
-        return conversation_id
+    #     return conversation_id
 
     async def send_character_chat_message(
         self,
@@ -206,13 +206,14 @@ class MessageLib:
         only_to: typing.Optional[web.WebSocketResponse] = None,
         to_character_ids: typing.Optional[typing.List[str]] = None,
     ) -> None:
+        character_name = self._kernel.character_lib.get_name(character_id)
         event = WebSocketEvent(
             type=ZoneEventType.NEW_CHAT_MESSAGE,
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             data=NewChatMessageData.new_character(
                 character_id=character_id,
-                message=message,
+                message=f"📝 {character_name}: {message}",
             ),
         )
         await self._send_chat_message(
@@ -238,7 +239,7 @@ class MessageLib:
             world_row_i=world_row_i,
             world_col_i=world_col_i,
             data=NewChatMessageData.new_system(
-                message=message,
+                message=f"💡 {message}",
                 silent=silent,
             ),
         )
@@ -272,30 +273,32 @@ class MessageLib:
                 to_character_ids=to_character_ids,
             )
 
-    async def send_new_message_events(
-        self,
-        world_row_i: int,
-        world_col_i: int,
-        author_id: str,
-        message: str,
-        conversation_id: typing.Optional[int] = None,
-        concerned: typing.Optional[typing.List[str]] = None,
-    ) -> None:
-        event = WebSocketEvent(
-            type=ZoneEventType.NEW_CHAT_MESSAGE,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-            data=NewChatMessageData(
-                character_id=author_id, message=message, conversation_id=conversation_id
-            ),
-        )
+        # async def send_new_message_events(
+        #     self,
+        #     world_row_i: int,
+        #     world_col_i: int,
+        #     author_id: str,
+        #     message: str,
+        #     conversation_id: typing.Optional[int] = None,
+        #     concerned: typing.Optional[typing.List[str]] = None,
+        # ) -> None:
+        #     character_name = self._kernel.character_lib.get_name(author_id)
+        #     event = WebSocketEvent(
+        #         type=ZoneEventType.NEW_CHAT_MESSAGE,
+        #         world_row_i=world_row_i,
+        #         world_col_i=world_col_i,
+        #         data=NewChatMessageData(
+        #             message=message,
+        #             conversation_id=conversation_id,
+        #         ),
+        #     )
 
-        await self._kernel.server_zone_events_manager.send_to_sockets(
-            event,
-            world_row_i=world_row_i,
-            world_col_i=world_col_i,
-            character_ids=concerned,
-        )
+        # await self._kernel.server_zone_events_manager.send_to_sockets(
+        #     event,
+        #     world_row_i=world_row_i,
+        #     world_col_i=world_col_i,
+        #     character_ids=concerned,
+        # )
 
     def get_conversation_first_messages(
         self, character_id: str, with_character_id: typing.Optional[str] = None

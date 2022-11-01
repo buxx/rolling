@@ -2,8 +2,6 @@
 import abc
 from aiohttp.web_app import Application
 
-from rolling.kernel import Kernel
-
 
 class BaseController(metaclass=abc.ABCMeta):
     @abc.abstractmethod

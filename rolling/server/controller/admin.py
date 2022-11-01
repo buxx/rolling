@@ -6,15 +6,18 @@ from aiohttp.web_response import Response
 import aiohttp_jinja2
 import datetime
 import os
+import typing
 
 from rolling.game.base import Game
-from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
 
 class AdminController(BaseController):
-    def __init__(self, kernel: Kernel) -> None:
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
     def bind(self, app: Application) -> None:

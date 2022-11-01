@@ -173,15 +173,6 @@ class NewChatMessageData(WebSocketEventData):
             system=True,
         )
 
-    # TODO BS: use automatic compiled serpyco serializer
-    def to_dict(self) -> dict:
-        return {
-            "character_id": self.character_id,
-            "conversation_id": self.conversation_id,
-            "conversation_title": self.conversation_title,
-            "message": self.message,
-        }
-
 
 @dataclasses.dataclass
 class AnimatedCorpseMoveData(WebSocketEventData):

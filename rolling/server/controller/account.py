@@ -21,9 +21,11 @@ from rolling.exception import EmailAlreadyUsed
 from rolling.exception import EmailWrongFormat
 from rolling.exception import NotSamePassword
 from rolling.exception import UsernameAlreadyUsed
-from rolling.kernel import Kernel
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
+
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
 
 
 @dataclass
@@ -46,7 +48,7 @@ class GenerateNewPasswordQuery:
 
 
 class AccountController(BaseController):
-    def __init__(self, kernel: Kernel) -> None:
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
     @hapic.with_api_doc()

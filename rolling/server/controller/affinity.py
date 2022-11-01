@@ -13,7 +13,6 @@ from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
 from rolling.exception import RollingError
-from rolling.kernel import Kernel
 from rolling.model.character import GetAffinityPathModel
 from rolling.model.character import GetAffinityRelationPathModel
 from rolling.model.character import GetCharacterPathModel
@@ -30,9 +29,12 @@ from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
 
 class AffinityController(BaseController):
-    def __init__(self, kernel: Kernel) -> None:
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
 
     @hapic.with_api_doc()

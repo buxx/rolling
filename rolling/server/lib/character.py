@@ -2175,3 +2175,10 @@ class CharacterLib:
             .filter(CharacterDocument.id == character_id)
             .one()
         )
+
+    def get_name(self, character_id: str) -> str:
+        return (
+            self._kernel.server_db_session.query(CharacterDocument.name)
+            .filter(CharacterDocument.id == character_id)
+            .one()
+        )[0]

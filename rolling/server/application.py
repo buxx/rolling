@@ -12,7 +12,6 @@ import serpyco
 from guilang.description import Description
 from rolling.exception import AccountNotFound
 from rolling.exception import ComponentNotPrepared
-from rolling.kernel import Kernel
 from rolling.log import server_logger
 from rolling.server.controller.account import AccountController
 from rolling.server.controller.admin import AdminController
@@ -30,11 +29,15 @@ from rolling.server.controller.zone import ZoneController
 from rolling.server.event import ThereIsAroundProcessor
 from rolling.server.lib.character import CharacterLib
 
+if typing.TYPE_CHECKING:
+    from rolling.kernel import Kernel
+
+
 HEADER_NAME__DISABLE_AUTH_TOKEN = "DISABLE_AUTH_TOKEN"
 
 
 def get_application(
-    kernel: Kernel,
+    kernel: "Kernel",
     disable_auth: bool = False,
     serve_static_files: typing.Optional[str] = None,
 ) -> Application:

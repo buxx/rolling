@@ -23,9 +23,7 @@ from rolling.model.event import TopBarMessageData
 from rolling.model.event import TopBarMessageType
 from rolling.model.event import WebSocketEvent
 from rolling.model.event import ZoneEventType
-from rolling.rolling_types import ActionType
 from rolling.server.chat import LiveChatOperator
-from rolling.server.document.message import MessageDocument
 from rolling.server.lib.character import CharacterLib
 from rolling.server.link import CharacterActionLink, QuickAction
 from rolling.util import (
@@ -431,10 +429,17 @@ class NewChatMessageProcessor(EventProcessor):
         event: WebSocketEvent[NewChatMessageData],
         sender_socket: web.WebSocketResponse,
     ) -> None:
-        await LiveChatOperator(self._kernel).received_message(
-            character_id=event.data.character_id,
-            message=event.data.message,
+        character_id = (
+            self._kernel.server_zone_events_manager.get_character_id_for_socket(
+                sender_socket
+            )
         )
+        if character_id is not None:
+            character_name = self._kernel.character_lib.get_name(character_id)
+            await LiveChatOperator(self._kernel).received_message(
+                character_id=character_id,
+                message=f"📝 {character_name}: {event.data.message}",
+            )
 
 
 class AnimatedCorpseMoveProcessor(EventProcessor):
