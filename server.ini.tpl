@@ -23,3 +23,8 @@ name = Rolling
 game=./game
 worldmap=./worldmap.txt
 zones=./zones
+
+[tracim]
+api_address=https://127.0.0.1:8080/api/
+api_key=xxxxxxxxxxxxxxxxxxxxxxxx
+admin_email=admin@admin.admin

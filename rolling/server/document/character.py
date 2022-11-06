@@ -68,6 +68,11 @@ class CharacterDocument(CorpseMixin, Document):
     avatar_uuid = Column(String(255), nullable=True)
     avatar_is_validated = Column(Boolean(), nullable=False, default=False)
 
+    account_id = Column(String(255), ForeignKey("account.id"), nullable=True)
+    tracim_password = Column(String(255), nullable=True)
+    tracim_user_id = Column(Integer(), nullable=True)
+    tracim_home_space_id = Column(Integer(), nullable=True)
+
     @property
     def is_alive(self) -> bool:
         return self.life_points > 0

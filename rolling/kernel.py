@@ -63,6 +63,8 @@ from rolling.util import generate_avatar_illustration_media, generate_loading_me
 from rolling.util import ensure_avatar_medias
 from rolling.server.chat import State as ChatState
 
+import rrolling
+
 
 @dataclasses.dataclass
 class ServerConfig:

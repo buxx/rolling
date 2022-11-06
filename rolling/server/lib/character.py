@@ -657,11 +657,11 @@ class CharacterLib:
             .count()
         )
 
-    def get_all_character_ids(self) -> typing.Iterable[str]:
+    def get_all_character_ids(self, alive: bool = True) -> typing.Iterable[str]:
         return (
             row[0]
             for row in self._kernel.server_db_session.query(CharacterDocument.id)
-            .filter(CharacterDocument.alive == True)
+            .filter(CharacterDocument.alive == alive)
             .all()
         )
 
