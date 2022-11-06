@@ -45,3 +45,20 @@
   </form>
 
 </body>
+
+<h2>Personnages</h2>
+
+<ul>
+{% for character_doc in characters %}
+  <li>
+    {% if character.alive %}
+      💙
+    {% else %}
+      💀
+    {% endif %}
+    {{ character.name }}
+    :
+    <a href="/account/character/{{ character.id }}/open-rp" title="RP" target="_blank">Espace RP</a>
+  </li>
+{% endfor %}
+</ul>

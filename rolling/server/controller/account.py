@@ -23,6 +23,7 @@ from rolling.exception import NotSamePassword
 from rolling.exception import UsernameAlreadyUsed
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
+import rrolling
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -217,7 +218,23 @@ class AccountController(BaseController):
                 else:
                     account.email = new_email
                     self._kernel.server_db_session.add(account)
+
+                    character_doc = self._kernel.character_lib.get_document(
+                        account.current_character_id
+                    )
+                    tracim_account = self._kernel.character_lib.get_tracim_account(
+                        account.current_character_id
+                    )
+                    rrolling.tracim.Dealer(
+                        self._kernel.server_config.tracim_config
+                    ).set_account_email(
+                        tracim_account,
+                        rrolling.tracim.AccountId(character_doc.tracim_user_id),
+                        rrolling.tracim.Email(new_email),
+                    )
+
                     self._kernel.server_db_session.commit()
+
                     message_type = "success"
                     message = "Email mis à jour"
 
@@ -249,6 +266,8 @@ class AccountController(BaseController):
                     message_type = "success"
                     message = "Mot de passe modifié"
 
+        characters = self._kernel.character_lib.get_documents_by_account_id(account.id)
+
         return {
             "account": account,
             "character": self._kernel.character_lib.get(request["account_character_id"])
@@ -256,12 +275,39 @@ class AccountController(BaseController):
             else None,
             "message": message,
             "message_type": message_type,
+            "characters": characters,
         }
 
     @hapic.with_api_doc()
     def generate_auth_token(self, request: Request) -> web.Response:
         token = self._kernel.account_lib.generate_new_auth_token(request["account_id"])
         return web.Response(status=200, body=token)
+
+    @hapic.with_api_doc()
+    def open_character_rp(self, request: Request) -> web.Response:
+        account = self._kernel.account_lib.get_account_for_id(request["account_id"])
+        character = self._kernel.character_lib.get_document(
+            request.match_info["character_id"]
+        )
+        tracim_account = self._kernel.character_lib.get_tracim_account(character.id)
+
+        if character.account_id != account.id:
+            return web.Response(status=404)
+
+        session_key = rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_new_session_key(tracim_account)
+
+        response = web.HTTPTemporaryRedirect(self._kernel.server_config.rp_url)
+        response.set_cookie(
+            "session_key",
+            session_key,
+            # expires="Sat, 12-Nov-2022 21:45:47 GMT",
+            httponly=True,
+            path="/",
+            samesite="Lax",
+        )
+        return response
 
     def bind(self, app: Application) -> None:
         app.add_routes(
@@ -273,5 +319,8 @@ class AccountController(BaseController):
                 web.get("/account/manage", self.manage_account),
                 web.post("/account/manage", self.manage_account),
                 web.get("/account/auth-token", self.generate_auth_token),
+                web.get(
+                    "/account/character/{character_id}/open-rp", self.open_character_rp
+                ),
             ]
         )

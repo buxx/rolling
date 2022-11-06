@@ -11,9 +11,9 @@ from rolling.model.skill import CharacterSkillModel
 from rolling.model.stuff import StuffModel
 from rolling.rolling_types import ActionType
 from rolling.server.document.business import OfferItemPosition
+import slugify
 
 if typing.TYPE_CHECKING:
-    from rolling.gui.map.object import DisplayObject
     from rolling.kernel import Kernel
     from rolling.model.fight import Weapon
 
@@ -413,6 +413,11 @@ class DescribeStoryQueryModel:
 class CharacterModel:
     id: str
     name: str
+
+    @property
+    def name_slug(self) -> str:
+        return slugify.slugify(self.name)
+
     alive: bool
 
     background_story: str
@@ -467,6 +472,10 @@ class CharacterModel:
     # Must match with data/character_avatar/{uuid}.png
     avatar_uuid: typing.Optional[str] = None
     avatar_is_validated: bool = False
+
+    tracim_user_id: typing.Optional[int] = None
+    tracim_home_space_id: typing.Optional[int] = None
+    tracim_password: typing.Optional[str] = None
 
     @property
     def tired(self) -> bool:

@@ -241,7 +241,7 @@ class BusinessLib:
         self._kernel.character_lib.add_event(
             offer.character_id,
             title=f"Un affaire à été conclu: {offer.title}",
-            story_pages=[StoryPageDocument(text="\n".join(event_texts))],
+            message=f"<p>{'</p></p>'.join(event_texts)}</p>",
         )
         self._kernel.server_db_session.commit()
 

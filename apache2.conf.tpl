@@ -1,19 +1,26 @@
-<IfModule mod_ssl.c>
-<VirtualHost *:443>
-    ServerName creatif.bux.fr
+<VirtualHost *:80>
+    ServerName rolling.local
 
-    ProxyPass / http://127.0.0.1:7432/
+    # Tracim
+    ProxyPass /assets http://127.0.0.1:8080/assets
+    ProxyPassReverse /assets http://127.0.0.1:8080/assets
+    ProxyPass /app http://127.0.0.1:8080/app
+    ProxyPassReverse /app http://127.0.0.1:8080/app
+    ProxyPass /api http://127.0.0.1:8080/api
+    ProxyPassReverse /api http://127.0.0.1:8080/api
+    ProxyPass /ui http://127.0.0.1:8080/ui
+    ProxyPassReverse /ui http://127.0.0.1:8080/ui
+
+    # Rolling
+    ProxyPass / http://127.0.0.1:5000/
+    ProxyPassReverse / http://127.0.0.1:5000/
+    # Require a2enmod proxy_wstunnel
     RewriteEngine on
     RewriteCond %{HTTP:Upgrade} websocket [NC]
     RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule ^/?(.*) "ws://127.0.0.1:7432/$1" [P,L]
+    RewriteRule ^/?(.*) "ws://127.0.0.1:5000/$1" [P,L]
 
     LogLevel warn
-    CustomLog /var/log/apache2/creatif.bux.fr-access.log combined
-    ErrorLog /var/log/apache2/creatif.bux.fr-error.log
-
-SSLCertificateFile /etc/letsencrypt/live/creatif.bux.fr/fullchain.pem
-SSLCertificateKeyFile /etc/letsencrypt/live/creatif.bux.fr/privkey.pem
-Include /etc/letsencrypt/options-ssl-apache.conf
+    CustomLog /var/log/apache2/rolling.local-access.log combined
+    ErrorLog /var/log/apache2/rolling.local-error.log
 </VirtualHost>
-</IfModule>

@@ -27,10 +27,10 @@ def main():
     config = configparser.ConfigParser()
     config.read("./server.ini")
 
-    server_db_user = config["default"]["server_db_user"]
-    server_db_name = config["default"]["server_db_name"]
-    server_db_host = config["default"]["server_db_host"]
-    server_db_password = config["default"]["server_db_password"]
+    server_db_user = config["default"]["db_user"]
+    server_db_name = config["default"]["db_name"]
+    server_db_host = config["default"]["db_address"]
+    server_db_password = config["default"]["db_password"]
 
     engine = create_engine(
         "postgresql+psycopg2://"
@@ -44,5 +44,4 @@ def main():
             context.run_migrations()
 
 
-if __name__ == "__main__":
-    main()
+main()

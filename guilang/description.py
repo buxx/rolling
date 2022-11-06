@@ -3,6 +3,7 @@
 import dataclasses
 import enum
 import typing
+import serpyco
 
 from rolling.rolling_types import ActionType
 
@@ -98,7 +99,7 @@ class DescriptionType(str, enum.Enum):
 
 
 @dataclasses.dataclass
-class Description:
+class Description(serpyco.SerializerMixin):
     type_: DescriptionType = DescriptionType.DEFAULT
     title: typing.Optional[str] = None
     items: typing.List[Part] = dataclasses.field(default_factory=list)
@@ -131,3 +132,4 @@ class Description:
     is_grid: bool = False
     reload_zone: bool = False
     reload_inventory: bool = False
+    open_new_tab: typing.Optional[str] = None

@@ -63,10 +63,13 @@ from rolling.util import generate_avatar_illustration_media, generate_loading_me
 from rolling.util import ensure_avatar_medias
 from rolling.server.chat import State as ChatState
 
+import rrolling
+
 
 @dataclasses.dataclass
 class ServerConfig:
     base_url: str
+    rp_url: str
     disable_auth_token: str
     allow_origin: str
     sender_email: str
@@ -87,6 +90,8 @@ class ServerConfig:
     game: str
     worldmap: str
     zones: str
+    tracim_config: rrolling.tracim.Config
+    tracim_common_spaces: typing.List[typing.Tuple[int, str]]
 
     @classmethod
     def from_config_file_path(
@@ -97,7 +102,29 @@ class ServerConfig:
 
         server_config_reader = configparser.ConfigParser()
         server_config_reader.read(file_path)
-        return ServerConfig(**server_config_reader["default"])
+
+        tracim_api_key = server_config_reader["tracim"]["api_key"]
+        tracim_api_address = server_config_reader["tracim"]["api_address"]
+        tracim_admin_email = server_config_reader["tracim"]["admin_email"]
+        tracim_config = rrolling.tracim.Config(
+            api_key=rrolling.tracim.ApiKey(tracim_api_key),
+            api_address=rrolling.tracim.ApiAddress(tracim_api_address),
+            admin_email=rrolling.tracim.Email(tracim_admin_email),
+        )
+
+        tracim_common_space_id = []
+        for item in filter(
+            lambda v: bool(len(v.strip())),
+            server_config_reader["tracim"].get("common_spaces", "").split(","),
+        ):
+            space_id, role = item.split(":")
+            tracim_common_space_id.append((int(space_id), role))
+
+        return ServerConfig(
+            tracim_config=tracim_config,
+            tracim_common_spaces=tracim_common_space_id,
+            **server_config_reader["default"],
+        )
 
 
 class Kernel:
@@ -201,6 +228,7 @@ class Kernel:
     def tasks(self) -> typing.List[typing.Awaitable]:
         return [
             self._server_zone_events_manager.garbage_collector_task(),
+            self._server_zone_events_manager.characters_events_task(),
             self._server_world_events_manager.garbage_collector_task(),
         ]
 

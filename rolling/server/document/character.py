@@ -8,6 +8,7 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 import typing
+import slugify
 
 from sqlalchemy.sql.expression import null
 
@@ -21,6 +22,10 @@ class CharacterDocument(CorpseMixin, Document):
     __tablename__ = "character"
     id = Column(String(255), primary_key=True)
     name = Column(String(255), nullable=False)
+
+    @property
+    def name_slug(self) -> str:
+        return slugify.slugify(self.name)
 
     # role play characteristics
     background_story = Column(Text, nullable=False, default="")
@@ -67,6 +72,11 @@ class CharacterDocument(CorpseMixin, Document):
     # Must match with data/character_avatar/{uuid}.png
     avatar_uuid = Column(String(255), nullable=True)
     avatar_is_validated = Column(Boolean(), nullable=False, default=False)
+
+    account_id = Column(String(255), ForeignKey("account.id"), nullable=True)
+    tracim_password = Column(String(255), nullable=True)
+    tracim_user_id = Column(Integer(), nullable=True)
+    tracim_home_space_id = Column(Integer(), nullable=True)
 
     @property
     def is_alive(self) -> bool:

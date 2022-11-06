@@ -151,11 +151,13 @@ def get_application(
         character = character_lib.get(account_character_id)
         description.character_ap = str(round(character.action_points, 1))
 
-        return Response(
+        new_response = Response(
             body=description_serializer.dump_json(description),
             status=response.status,
             content_type="application/json",
         )
+        new_response._cookies = response._cookies
+        return new_response
 
     @middleware
     async def quick_actions(request: Request, handler):

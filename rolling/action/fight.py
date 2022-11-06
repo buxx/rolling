@@ -280,13 +280,10 @@ class AttackCharacterAction(WithCharacterAction):
     ) -> None:
         for character in characters:
             title = attacker_title if character == author else attacked_title
-            read = character == author
-
             self._kernel.character_lib.add_event(
                 character.id,
                 title=title,
-                read=read,
-                story_pages=[StoryPageDocument(text="\n".join([p for p in story]))],
+                message=f"<p>{'</p></p>'.join(story)}</p>",
             )
 
     def _get_attack_defense_pair(

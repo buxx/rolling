@@ -1,3 +1,4 @@
+import pathlib
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -109,6 +110,7 @@ from rolling.util import InputQuantityContext
 from rolling.util import clamp
 from rolling.util import display_g_or_kg
 from rolling.util import get_exception_for_not_enough_ap
+import rrolling
 
 base_skills = ["strength", "endurance", "intelligence", "agility"]
 
@@ -2231,6 +2233,9 @@ class CharacterController(BaseController):
                 f"Le nom du personnage doit faire entre 3 et 21 caractères"
             )
 
+        if not self._kernel.character_lib.name_available(data["name"]):
+            raise UserDisplayError(f"Le nom du personnage n'est pas disponible")
+
         for skill_id in base_skills + self._kernel.game.config.create_character_skills:
             value = float(data[f"skill__{skill_id}"])
 
@@ -2284,8 +2289,54 @@ class CharacterController(BaseController):
         character_doc = self._kernel.character_lib.get_document(character_id)
         account = self._kernel.account_lib.get_account_for_id(request["account_id"])
         account.current_character_id = character_id
+        character_doc.account_id = account.id
         self._kernel.server_db_session.add(account)
+        self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
+
+        # Create Tracim account
+        tracim_account = rrolling.tracim.Account(
+            username=rrolling.tracim.Username(character_doc.name_slug),
+            password=rrolling.tracim.Password(character_doc.tracim_password),
+            email=rrolling.tracim.Email(account.email),
+        )
+        tracim_user_id = rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).ensure_account(tracim_account)
+        character_doc.tracim_user_id = tracim_user_id
+
+        # Create Tracim space and access
+        space_name = self._kernel.character_lib.character_home_space_name(character_doc)
+        tracim_home_space_id = rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).ensure_space(rrolling.tracim.SpaceName(space_name))
+        character_doc.tracim_home_space_id = tracim_home_space_id
+
+        rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).ensure_space_role(
+            rrolling.tracim.SpaceId(tracim_home_space_id),
+            rrolling.tracim.AccountId(character_doc.tracim_user_id),
+            "reader",
+        )
+
+        for space_id, role in self._kernel.server_config.tracim_common_spaces:
+            rrolling.tracim.Dealer(
+                self._kernel.server_config.tracim_config
+            ).ensure_space_role(
+                rrolling.tracim.SpaceId(space_id),
+                rrolling.tracim.AccountId(character_doc.tracim_user_id),
+                role,
+            )
+
+        self._kernel.server_db_session.add(character_doc)
+        self._kernel.server_db_session.commit()
+
+        self._character_lib.add_event(
+            character_doc.id,
+            title=self._kernel.game.config.create_character_event_title,
+            message=f"<p>{self._kernel.game.config.create_character_event_story_text}</p>",
+        )
 
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
@@ -2469,7 +2520,9 @@ class CharacterController(BaseController):
 
             if character_ != character:
                 self._kernel.character_lib.add_event(
-                    character_.id, f"Vous avez suivis {character.name}"
+                    character_.id,
+                    title=f"Vous avez suivis {character.name}",
+                    message="",
                 )
                 # FIXME BS NOW: si connecté, event pour voyage !
 
@@ -2488,6 +2541,7 @@ class CharacterController(BaseController):
             self._kernel.character_lib.add_event(
                 character_.id,
                 f"Vous n'avez pas pu suivre {character.name} (fatigue ou surcharge)",
+                message="",
             )
 
         return Description(
@@ -2928,6 +2982,58 @@ class CharacterController(BaseController):
         )
         return Description(title="no content", quick_action_response="")
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    async def open_rp(self, request: Request, hapic_data: HapicData) -> Response:
+        character_id = hapic_data.path.character_id
+        tracim_account = self._kernel.character_lib.get_tracim_account(character_id)
+
+        description = Description(
+            title="Open RP",
+            open_new_tab=self._kernel.server_config.rp_url,
+        )
+
+        session_key = rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_new_session_key(tracim_account)
+
+        response = web.Response(
+            status=200,
+            body=Description.serializer().dump_json(description),
+            content_type="application/json",
+        )
+        response.set_cookie(
+            "session_key",
+            session_key,
+            # expires="Sat, 12-Nov-2022 21:45:47 GMT",
+            httponly=True,
+            path="/",
+            samesite="Lax",
+        )
+        return response
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    async def unread_messages_count(
+        self, request: Request, hapic_data: HapicData
+    ) -> Response:
+        character_id = hapic_data.path.character_id
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        tracim_account = self._kernel.character_lib.get_tracim_account(character_id)
+        count = rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_unread_messages_count(
+            tracim_account,
+            rrolling.tracim.AccountId(character_doc.tracim_user_id),
+        )
+
+        response = web.Response(
+            status=200,
+            body=str(count),
+        )
+
+        return response
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -3083,5 +3189,10 @@ class CharacterController(BaseController):
                 ),
                 web.post("/character/{character_id}/door/{door_id}", self.door),
                 web.post("/character/{character_id}/send-around", self.send_around),
+                web.post("/character/{character_id}/open-rp", self.open_rp),
+                web.get(
+                    "/character/{character_id}/unread-messages-count",
+                    self.unread_messages_count,
+                ),
             ]
         )
