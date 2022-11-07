@@ -8,6 +8,7 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.orm import relationship
 import typing
+import slugify
 
 from sqlalchemy.sql.expression import null
 
@@ -21,6 +22,10 @@ class CharacterDocument(CorpseMixin, Document):
     __tablename__ = "character"
     id = Column(String(255), primary_key=True)
     name = Column(String(255), nullable=False)
+
+    @property
+    def name_slug(self) -> str:
+        return slugify.slugify(self.name)
 
     # role play characteristics
     background_story = Column(Text, nullable=False, default="")

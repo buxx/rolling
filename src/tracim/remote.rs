@@ -25,3 +25,10 @@ pub struct SpaceMember {
     pub user_id: i32,
     pub role: String,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Content {
+    pub workspace_id: i32,
+    pub label: String,
+    pub content_id: i32,
+}

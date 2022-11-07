@@ -6,8 +6,11 @@ use serde_json::{json, Map};
 use super::{
     account::Account,
     config::Config,
-    remote::{CreatedUser, Space, SpaceMember, UserDigest},
-    types::{AccountId, RoleInSpace, SessionKey, SpaceAccessType, SpaceId, SpaceName},
+    remote::{Content, CreatedUser, Space, SpaceMember, UserDigest},
+    types::{
+        AccountId, ContentNamespace, ContentType, Email, Password, RoleInSpace, SessionKey,
+        SpaceAccessType, SpaceId, SpaceName,
+    },
 };
 
 const DEFAULT_CLIENT_TIMEOUT: u64 = 30;
@@ -77,6 +80,52 @@ impl Client {
             .send()?
             .error_for_status()?
             .json::<CreatedUser>()?)
+    }
+
+    pub fn update_user_password(
+        self,
+        account: &Account,
+        account_id: AccountId,
+        new_password: Password,
+    ) -> Result<(), Error> {
+        let url = format!(
+            "{}/users/{}/password",
+            self.config.api_address.0, account_id.0
+        );
+        let mut data = Map::new();
+        data.insert(
+            "loggedin_user_password".to_string(),
+            json!(account.password.0),
+        );
+        data.insert("new_password".to_string(), json!(new_password.0));
+        data.insert("new_password2".to_string(), json!(new_password.0));
+        self.authenticated_by_api_key(Method::PUT, url)?
+            .json(&data)
+            .send()?
+            .error_for_status()?;
+        Ok(())
+    }
+
+    pub fn update_user_email(
+        self,
+        account: &Account,
+        account_id: AccountId,
+        new_email: Email,
+    ) -> Result<(), Error> {
+        let url = format!("{}/users/{}/email", self.config.api_address.0, account_id.0);
+        let mut data = Map::new();
+        data.insert(
+            "loggedin_user_password".to_string(),
+            json!(account.password.0),
+        );
+        data.insert("email".to_string(), json!(new_email.0));
+        self.client()?
+            .request(Method::PUT, url)
+            .basic_auth(&account.username.0, Some(&account.password.0))
+            .json(&data)
+            .send()?
+            .error_for_status()?;
+        Ok(())
     }
 
     pub fn create_space(
@@ -195,6 +244,54 @@ impl Client {
                 "Auth login response don't contains Set-Cookie header".to_string(),
             )),
         }
+    }
+
+    pub fn create_publication(
+        &self,
+        space_id: SpaceId,
+        title: &str,
+        message: &str,
+    ) -> Result<i32, Error> {
+        // Create publication content
+        let url = format!(
+            "{}/workspaces/{}/contents",
+            self.config.api_address.0, space_id.0
+        );
+        let mut data = Map::new();
+        data.insert(
+            "content_namespace".to_string(),
+            json!(ContentNamespace::Publication.as_str()),
+        );
+        data.insert(
+            "content_type".to_string(),
+            json!(ContentType::Thread.as_str()),
+        );
+        data.insert("label".to_string(), json!(title));
+        let value = self
+            .authenticated_by_api_key(Method::POST, url)?
+            .json(&data)
+            .send()?
+            .error_for_status()?
+            .json()?;
+        let content: Content = serde_json::from_value(value)?;
+
+        // Create content (first comment)
+        let url = format!(
+            "{}/workspaces/{}/contents/{}/comments",
+            self.config.api_address.0, space_id.0, content.content_id
+        );
+        let mut data = Map::new();
+        data.insert(
+            "content_namespace".to_string(),
+            json!(ContentNamespace::Publication.as_str()),
+        );
+        data.insert("raw_content".to_string(), json!(message));
+        self.authenticated_by_api_key(Method::POST, url)?
+            .json(&data)
+            .send()?
+            .error_for_status()?;
+
+        Ok(content.content_id)
     }
 }
 

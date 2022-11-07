@@ -1,3 +1,4 @@
+import pathlib
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
@@ -2232,6 +2233,9 @@ class CharacterController(BaseController):
                 f"Le nom du personnage doit faire entre 3 et 21 caractères"
             )
 
+        if not self._kernel.character_lib.name_available(data["name"]):
+            raise UserDisplayError(f"Le nom du personnage n'est pas disponible")
+
         for skill_id in base_skills + self._kernel.game.config.create_character_skills:
             value = float(data[f"skill__{skill_id}"])
 
@@ -2286,6 +2290,32 @@ class CharacterController(BaseController):
         account = self._kernel.account_lib.get_account_for_id(request["account_id"])
         account.current_character_id = character_id
         self._kernel.server_db_session.add(account)
+        self._kernel.server_db_session.commit()
+
+        # Create Tracim account
+        tracim_account = rrolling.Account(
+            username=rrolling.Username(character_doc.name_slug),
+            password=rrolling.Password(character_doc.tracim_password),
+            email=rrolling.Email(account.email),
+        )
+        tracim_user_id = rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).ensure_account(tracim_account)
+        character_doc.tracim_user_id = tracim_user_id
+
+        # Create Tracim space and access
+        space_name = self._kernel.character_lib.character_home_space_name(character_doc)
+        tracim_home_space_id = rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).ensure_space(rrolling.SpaceName(space_name))
+        character_doc.tracim_home_space_id = tracim_home_space_id
+
+        rrolling.Dealer(self._kernel.server_config.tracim_config).ensure_space_role(
+            rrolling.SpaceId(tracim_home_space_id),
+            rrolling.AccountId(character_doc.tracim_user_id),
+            "reader",
+        )
+        self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
 
         await self._kernel.send_to_zone_sockets(

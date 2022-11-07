@@ -160,3 +160,62 @@ impl SpaceAccessType {
         }
     }
 }
+
+pub enum ContentType {
+    Thread,
+    File,
+    Note,
+    Folder,
+    Kanban,
+    Todo,
+    Comment,
+}
+
+impl ContentType {
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "thread" => Some(Self::Thread),
+            "file" => Some(Self::File),
+            "html-document" => Some(Self::Note),
+            "folder" => Some(Self::Folder),
+            "kanban" => Some(Self::Kanban),
+            "todo" => Some(Self::Todo),
+            "comment" => Some(Self::Comment),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Thread => "thread",
+            Self::File => "file",
+            Self::Note => "html-document",
+            Self::Folder => "folder",
+            Self::Kanban => "kanban",
+            Self::Todo => "todo",
+            Self::Comment => "comment",
+        }
+    }
+}
+
+pub enum ContentNamespace {
+    Content,
+    Publication,
+}
+
+impl ContentNamespace {
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "content" => Some(Self::Content),
+            "publication" => Some(Self::Publication),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Content => "content",
+            Self::Publication => "publication",
+        }
+    }
+}

@@ -9,10 +9,6 @@ pub struct Dealer {
     config: Config,
 }
 
-// FIXME :
-// - unicite des nom de perso (mort ou vif) pour pouvoir configurer login tracim
-// - immutabilité du nom des espaces, car utilisé comme clef
-
 #[pymethods]
 impl Dealer {
     #[new]
@@ -45,11 +41,26 @@ impl Dealer {
 
     pub fn set_account_password(
         &self,
-        account_id: Email,
-        current_password: Password,
+        account: Account,
+        account_id: AccountId,
         new_password: Password,
     ) -> PyResult<()> {
-        todo!()
+        Client::new(self.config.clone()).update_user_password(
+            &account,
+            account_id,
+            new_password,
+        )?;
+        Ok(())
+    }
+
+    pub fn set_account_email(
+        &self,
+        account: Account,
+        account_id: AccountId,
+        new_email: Email,
+    ) -> PyResult<()> {
+        Client::new(self.config.clone()).update_user_email(&account, account_id, new_email)?;
+        Ok(())
     }
 
     pub fn get_new_session_key(&self, account: Account) -> PyResult<String> {
@@ -112,6 +123,16 @@ impl Dealer {
             account_id,
             role_,
         )?;
+        return Ok(());
+    }
+
+    pub fn create_publication(
+        &self,
+        space_id: SpaceId,
+        title: &str,
+        message: &str,
+    ) -> PyResult<()> {
+        Client::new(self.config.clone()).create_publication(space_id.clone(), title, message)?;
         return Ok(());
     }
 }

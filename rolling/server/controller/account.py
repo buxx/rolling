@@ -23,6 +23,7 @@ from rolling.exception import NotSamePassword
 from rolling.exception import UsernameAlreadyUsed
 from rolling.server.controller.base import BaseController
 from rolling.server.extension import hapic
+import rrolling
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -217,7 +218,23 @@ class AccountController(BaseController):
                 else:
                     account.email = new_email
                     self._kernel.server_db_session.add(account)
+
+                    character_doc = self._kernel.character_lib.get_document(
+                        account.current_character_id
+                    )
+                    tracim_account = self._kernel.character_lib.get_tracim_account(
+                        account.current_character_id
+                    )
+                    rrolling.Dealer(
+                        self._kernel.server_config.tracim_config
+                    ).set_account_email(
+                        tracim_account,
+                        rrolling.AccountId(character_doc.tracim_user_id),
+                        rrolling.Email(new_email),
+                    )
+
                     self._kernel.server_db_session.commit()
+
                     message_type = "success"
                     message = "Email mis à jour"
 

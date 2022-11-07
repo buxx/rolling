@@ -89,6 +89,7 @@ class ServerConfig:
     game: str
     worldmap: str
     zones: str
+    tracim_config: rrolling.Config
 
     @classmethod
     def from_config_file_path(
@@ -99,7 +100,20 @@ class ServerConfig:
 
         server_config_reader = configparser.ConfigParser()
         server_config_reader.read(file_path)
-        return ServerConfig(**server_config_reader["default"])
+
+        tracim_api_key = server_config_reader["tracim"]["api_key"]
+        tracim_api_address = server_config_reader["tracim"]["api_address"]
+        tracim_admin_email = server_config_reader["tracim"]["admin_email"]
+        tracim_config = rrolling.Config(
+            api_key=rrolling.ApiKey(tracim_api_key),
+            api_address=rrolling.ApiAddress(tracim_api_address),
+            admin_email=rrolling.Email(tracim_admin_email),
+        )
+
+        return ServerConfig(
+            tracim_config=tracim_config,
+            **server_config_reader["default"],
+        )
 
 
 class Kernel:

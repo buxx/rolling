@@ -4,6 +4,7 @@ import datetime
 import math
 import os
 import random
+import uuid
 import sqlalchemy
 from sqlalchemy import Float
 from sqlalchemy import and_
@@ -11,8 +12,9 @@ from sqlalchemy import cast
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
-import uuid
+import slugify
 
+import rrolling
 from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
@@ -137,6 +139,7 @@ class CharacterLib:
         character.max_action_points = self._kernel.game.config.default_maximum_ap
         character.thirst = self._kernel.game.config.start_thirst
         character.hunger = self._kernel.game.config.start_hunger
+        character.tracim_password = uuid.uuid4().hex
 
         # Place on zone
         if spawn_to:
@@ -244,6 +247,16 @@ class CharacterLib:
         else:
             query = self.alive_query
         return query.filter(CharacterDocument.id == id_).one()
+
+    def get_tracim_account(self, character_id: str) -> rrolling.Account:
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        assert character_doc.account_id is not None
+        account = self._kernel.account_lib.get_account_for_id(character_doc.account_id)
+        return rrolling.Account(
+            username=rrolling.Username(character_doc.name_slug),
+            password=rrolling.Password(character_doc.tracim_password),
+            email=rrolling.Email(account.email),
+        )
 
     def get_document_by_name(self, name: str) -> CharacterDocument:
         return self.alive_query.filter(CharacterDocument.name == name).one()
@@ -2182,3 +2195,22 @@ class CharacterLib:
             .filter(CharacterDocument.id == character_id)
             .one()
         )[0]
+
+    def name_available(self, name: str) -> bool:
+        name_to_test = slugify.slugify(name)
+        names = [
+            row[0]
+            for row in self._kernel.server_db_session.query(
+                CharacterDocument.name
+            ).all()
+        ]
+        # Must use slug name to ensure no conflict with external tools like Tracim
+        for name_ in names:
+            if slugify.slugify(name_) == name_to_test:
+                return False
+        return True
+
+    def character_home_space_name(
+        self, character: typing.Union[CharacterDocument, CharacterModel]
+    ) -> str:
+        return f"🏠 Journal personnel de {character.name}"
