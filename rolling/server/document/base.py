@@ -5,7 +5,7 @@ from sqlalchemy import String
 
 from rolling.server.extension import ServerSideDocument as Document
 
-
+# FIXME BS NOW: Delete that
 class ImageDocument(Document):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True, autoincrement=True)

@@ -10,7 +10,7 @@ from sqlalchemy import Text
 
 from rolling.server.extension import ServerSideDocument as Document
 
-
+# FIXME BS NOW : drop events because now in Tracim
 class EventDocument(Document):
     __tablename__ = "event"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -21,6 +21,7 @@ class EventDocument(Document):
     read = Column(Boolean, default=False)
 
 
+# FIXME BS NOW : drop events because now in Tracim
 class StoryPageDocument(Document):
     __tablename__ = "story_page"
     id = Column(Integer, primary_key=True, autoincrement=True)

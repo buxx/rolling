@@ -2289,7 +2289,9 @@ class CharacterController(BaseController):
         character_doc = self._kernel.character_lib.get_document(character_id)
         account = self._kernel.account_lib.get_account_for_id(request["account_id"])
         account.current_character_id = character_id
+        character_doc.account_id = account.id
         self._kernel.server_db_session.add(account)
+        self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
 
         # Create Tracim account
@@ -2317,6 +2319,12 @@ class CharacterController(BaseController):
         )
         self._kernel.server_db_session.add(character_doc)
         self._kernel.server_db_session.commit()
+
+        self._character_lib.add_event(
+            character_doc.id,
+            title=self._kernel.game.config.create_character_event_title,
+            message=f"<p>{self._kernel.game.config.create_character_event_story_text}</p>",
+        )
 
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
@@ -2500,7 +2508,9 @@ class CharacterController(BaseController):
 
             if character_ != character:
                 self._kernel.character_lib.add_event(
-                    character_.id, f"Vous avez suivis {character.name}"
+                    character_.id,
+                    title=f"Vous avez suivis {character.name}",
+                    message="",
                 )
                 # FIXME BS NOW: si connecté, event pour voyage !
 
@@ -2519,6 +2529,7 @@ class CharacterController(BaseController):
             self._kernel.character_lib.add_event(
                 character_.id,
                 f"Vous n'avez pas pu suivre {character.name} (fatigue ou surcharge)",
+                message="",
             )
 
         return Description(
@@ -2963,37 +2974,21 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     async def open_rp(self, request: Request, hapic_data: HapicData) -> Response:
         character_id = hapic_data.path.character_id
-        character_doc = self._kernel.character_lib.get_document(character_id)
-        account = self._kernel.account_lib.get_account_for_id(character_doc.account_id)
+        tracim_account = self._kernel.character_lib.get_tracim_account(character_id)
+
         description = Description(
-            title="Open RP", open_new_tab="http://rolling.local/ui"
+            title="Open RP",
+            open_new_tab=self._kernel.server_config.rp_url,
         )
 
-        import configparser
-
-        server_config_reader = configparser.ConfigParser()
-        server_config_reader.read("server.ini")
-        tracim_api_key = server_config_reader["tracim"]["api_key"]
-        tracim_api_address = server_config_reader["tracim"]["api_address"]
-        tracim_admin_email = server_config_reader["tracim"]["admin_email"]
-        tracim_config = rrolling.Config(
-            api_key=rrolling.ApiKey(tracim_api_key),
-            api_address=rrolling.ApiAddress(tracim_api_address),
-            admin_email=rrolling.Email(tracim_admin_email),
-        )
-
-        tracim_account = rrolling.Account(
-            username=rrolling.Username(character_doc.name),
-            password=rrolling.Password(character_doc.tracim_password),
-            email=rrolling.Email(account.email),
-        )
-
-        session_key = rrolling.Dealer(tracim_config).get_new_session_key(tracim_account)
+        session_key = rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_new_session_key(tracim_account)
 
         response = web.Response(
             status=200,
-            # body=Description.serializer().dump_json(description),
-            # content_type="application/json",
+            body=Description.serializer().dump_json(description),
+            content_type="application/json",
         )
         response.set_cookie(
             "session_key",
@@ -3001,8 +2996,26 @@ class CharacterController(BaseController):
             expires="Sat, 12-Nov-2022 21:45:47 GMT",
             httponly=True,
             path="/",
-            samesite="LAa",
+            samesite="Lax",
         )
+        return response
+
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    async def unread_messages_count(
+        self, request: Request, hapic_data: HapicData
+    ) -> Response:
+        character_id = hapic_data.path.character_id
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        count = rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_unread_messages_count(rrolling.AccountId(character_doc.tracim_user_id))
+
+        response = web.Response(
+            status=200,
+            body=str(count),
+        )
+
         return response
 
     def bind(self, app: Application) -> None:
@@ -3161,5 +3174,9 @@ class CharacterController(BaseController):
                 web.post("/character/{character_id}/door/{door_id}", self.door),
                 web.post("/character/{character_id}/send-around", self.send_around),
                 web.post("/character/{character_id}/open-rp", self.open_rp),
+                web.get(
+                    "/character/{character_id}/unread-messages-count",
+                    self.unread_messages_count,
+                ),
             ]
         )

@@ -189,27 +189,6 @@ class CharacterLib:
                 ap=int(self._kernel.game.config.knowledge[knowledge_id].ap_required),
             )
 
-        image_id = None
-        if self._kernel.game.config.create_character_event_story_image:
-            image_id = register_image(
-                self._kernel,
-                os.path.join(
-                    self._kernel.game.config.folder_path,
-                    "media",
-                    self._kernel.game.config.create_character_event_story_image,
-                ),
-            )
-
-        event = self.add_event(
-            character.id, self._kernel.game.config.create_character_event_title
-        )
-        first_story_page = StoryPageDocument(
-            event_id=event.id,
-            text=self._kernel.game.config.create_character_event_story_text,
-            image_id=image_id,
-        )
-        self.add_story_pages([first_story_page])
-
         self.ensure_skills_for_character(character.id)
         return character.id
 
@@ -342,6 +321,9 @@ class CharacterLib:
             alive=character_document.alive,
             avatar_uuid=character_document.avatar_uuid,
             avatar_is_validated=character_document.avatar_is_validated,
+            tracim_user_id=character_document.tracim_user_id,
+            tracim_home_space_id=character_document.tracim_home_space_id,
+            tracim_password=character_document.tracim_password,
         )
 
     def get_multiple(
@@ -1221,26 +1203,14 @@ class CharacterLib:
         self,
         character_id: str,
         title: str,
-        story_pages: typing.Optional[typing.List[StoryPageDocument]] = None,
-        read: bool = False,
-    ) -> EventDocument:
-        story_pages = story_pages or []
-        turn = self._kernel.universe_lib.get_last_state().turn
-        event_doc = EventDocument(
-            character_id=character_id, text=title, turn=turn, read=read
+        message: str,
+    ) -> None:
+        character_doc = self.get_document(character_id)
+        rrolling.Dealer(self._kernel.server_config.tracim_config).create_publication(
+            rrolling.SpaceId(character_doc.tracim_home_space_id),
+            title,
+            message,
         )
-        self._kernel.server_db_session.add(event_doc)
-        self._kernel.server_db_session.commit()
-        if story_pages:
-            for story_page in story_pages:
-                story_page.event_id = event_doc.id
-            self.add_story_pages(story_pages)
-        return event_doc
-
-    def add_story_pages(self, story_pages: typing.List[StoryPageDocument]) -> None:
-        for story_page in story_pages:
-            self._kernel.server_db_session.add(story_page)
-        self._kernel.server_db_session.commit()
 
     def get_used_bags(self, character_id: str) -> typing.List[StuffModel]:
         return self._stuff_lib.get_carried_and_used_bags(character_id)
@@ -1686,6 +1656,10 @@ class CharacterLib:
         elif character.tired:
             tiredness_class = "yellow"
 
+        unread_messages = rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).get_unread_messages_count(rrolling.AccountId(character.tracim_user_id))
+
         return [
             ItemModel(
                 "PV", value_is_str=True, value_str=self.get_health_text(character)
@@ -1721,6 +1695,9 @@ class CharacterLib:
             ),
             ItemModel(
                 "Combattants", value_is_float=True, value_float=float(fighter_with_him)
+            ),
+            ItemModel(
+                "Messages", value_is_float=True, value_float=float(unread_messages)
             ),
         ]
 

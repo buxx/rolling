@@ -32,3 +32,10 @@ pub struct Content {
     pub label: String,
     pub content_id: i32,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MessageSummary {
+    pub messages_count: i32,
+    pub read_messages_count: i32,
+    pub unread_messages_count: i32,
+}

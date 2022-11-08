@@ -6,7 +6,7 @@ use serde_json::{json, Map};
 use super::{
     account::Account,
     config::Config,
-    remote::{Content, CreatedUser, Space, SpaceMember, UserDigest},
+    remote::{Content, CreatedUser, MessageSummary, Space, SpaceMember, UserDigest},
     types::{
         AccountId, ContentNamespace, ContentType, Email, Password, RoleInSpace, SessionKey,
         SpaceAccessType, SpaceId, SpaceName,
@@ -292,6 +292,35 @@ impl Client {
             .error_for_status()?;
 
         Ok(content.content_id)
+    }
+
+    pub fn get_message_summary(
+        &self,
+        account_id: AccountId,
+        exclude_author_id: Option<AccountId>,
+        exclude_event_types: Option<String>,
+    ) -> Result<MessageSummary, Error> {
+        let exclude_author_id_ = if let Some(exclude_author_id) = exclude_author_id {
+            format!("&exclude_author_ids={}", exclude_author_id.0)
+        } else {
+            "".to_string()
+        };
+        let exclude_event_types_ = if let Some(exclude_event_types) = exclude_event_types {
+            format!("&exclude_event_types={}", exclude_event_types)
+        } else {
+            "".to_string()
+        };
+        let url = format!(
+            "{}/users/{}/messages/summary?{}{}",
+            self.config.api_address.0, account_id.0, exclude_author_id_, exclude_event_types_
+        );
+        let value = self
+            .authenticated_by_api_key(Method::GET, url)?
+            .send()?
+            .error_for_status()?
+            .json()?;
+        let summary: MessageSummary = serde_json::from_value(value)?;
+        Ok(summary)
     }
 }
 

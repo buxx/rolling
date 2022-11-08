@@ -1,6 +1,7 @@
 [default]
-base_url = http://127.0.0.1:5000
-allow_origin = http://127.0.0.1:5000
+base_url = http://rolling.local
+allow_origin = http://rolling.local
+rp_url = http://rolling.local/ui/
 disable_auth_token = __CHANGE_THIS_SECURITY_TOKEN__
 sender_email = xxxxx@xxxxx.xxx
 smtp_server = xxxxxxxxxx

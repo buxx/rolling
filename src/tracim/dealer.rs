@@ -135,4 +135,10 @@ impl Dealer {
         Client::new(self.config.clone()).create_publication(space_id.clone(), title, message)?;
         return Ok(());
     }
+
+    pub fn get_unread_messages_count(&self, account_id: AccountId) -> PyResult<i32> {
+        return Ok(Client::new(self.config.clone())
+            .get_message_summary(account_id.clone(), Some(account_id.clone()), Some("user_call.created,user.*,workspace.modified,workspace.deleted,workspace.undeleted,workspace_member.modified,workspace_member.deleted,content.modified,reaction.*,tag.*,content_tag.*".to_string(),))?
+            .unread_messages_count);
+    }
 }

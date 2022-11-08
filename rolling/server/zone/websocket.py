@@ -48,6 +48,17 @@ class ZoneEventsManager:
                         )
                         await self.close_websocket(socket)
 
+    async def characters_events_task(self) -> None:
+        while True:
+            await asyncio.sleep(60.0)
+            for sockets in self._sockets.values():
+                for socket in sockets:
+                    character_id = self.get_character_id_for_socket(socket)
+                    character_doc = self._kernel.character_lib.get_document(
+                        character_id
+                    )
+                    await self._kernel.character_lib.refresh_character(character_doc)
+
     def get_character_id_for_socket(self, socket: web.WebSocketResponse) -> str:
         return self._sockets_character_id[socket]
 

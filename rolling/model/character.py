@@ -473,6 +473,10 @@ class CharacterModel:
     avatar_uuid: typing.Optional[str] = None
     avatar_is_validated: bool = False
 
+    tracim_user_id: typing.Optional[int] = None
+    tracim_home_space_id: typing.Optional[int] = None
+    tracim_password: typing.Optional[str] = None
+
     @property
     def tired(self) -> bool:
         return self.tiredness > MINIMUM_BEFORE_TIRED

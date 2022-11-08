@@ -69,6 +69,7 @@ import rrolling
 @dataclasses.dataclass
 class ServerConfig:
     base_url: str
+    rp_url: str
     disable_auth_token: str
     allow_origin: str
     sender_email: str
@@ -217,6 +218,7 @@ class Kernel:
     def tasks(self) -> typing.List[typing.Awaitable]:
         return [
             self._server_zone_events_manager.garbage_collector_task(),
+            self._server_zone_events_manager.characters_events_task(),
             self._server_world_events_manager.garbage_collector_task(),
         ]
 
