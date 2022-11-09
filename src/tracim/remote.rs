@@ -17,6 +17,7 @@ pub struct CreatedUser {
 pub struct Space {
     pub workspace_id: i32,
     pub label: String,
+    pub slug: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

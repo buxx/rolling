@@ -20,7 +20,7 @@ from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.base import get_with_resource_action_url
 from rolling.bonus import Bonus, Bonuses
-from rolling.exception import CannotMoveToZoneError
+from rolling.exception import CannotMoveToZoneError, CharacterHaveNoAccountId
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import RollingError
@@ -229,6 +229,10 @@ class CharacterLib:
 
     def get_tracim_account(self, character_id: str) -> rrolling.Account:
         character_doc = self._kernel.character_lib.get_document(character_id)
+
+        if character_doc.account_id is None:
+            raise CharacterHaveNoAccountId()
+
         assert character_doc.account_id is not None
         account = self._kernel.account_lib.get_account_for_id(character_doc.account_id)
         return rrolling.Account(

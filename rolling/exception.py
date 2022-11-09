@@ -208,3 +208,7 @@ class EmailWrongFormat(AccountError):
 
 class NotSamePassword(AccountError):
     pass
+
+
+class CharacterHaveNoAccountId(AccountError):
+    pass

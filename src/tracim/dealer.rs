@@ -95,6 +95,7 @@ impl Dealer {
         &self,
         space_id: SpaceId,
         account_id: AccountId,
+        // TODO : role as enum
         role: &str,
     ) -> PyResult<()> {
         let role_ = match RoleInSpace::from_str(&role) {
@@ -123,7 +124,21 @@ impl Dealer {
             account_id,
             role_,
         )?;
-        return Ok(());
+
+        Ok(())
+    }
+
+    pub fn ensure_not_in_space(&self, space_id: SpaceId, account_id: AccountId) -> PyResult<()> {
+        let space_members = Client::new(self.config.clone()).space_members(space_id.clone())?;
+
+        for space_member in &space_members {
+            if &space_member.user_id == &account_id.0 {
+                Client::new(self.config.clone())
+                    .remove_space_member(space_id.clone(), account_id.clone())?;
+            }
+        }
+
+        Ok(())
     }
 
     pub fn create_publication(
@@ -140,5 +155,17 @@ impl Dealer {
         return Ok(Client::new(self.config.clone())
             .get_message_summary(account_id.clone(), Some(account_id.clone()), Some("user_call.created,user.*,workspace.modified,workspace.deleted,workspace.undeleted,workspace_member.modified,workspace_member.deleted,content.modified,reaction.*,tag.*,content_tag.*".to_string(),))?
             .unread_messages_count);
+    }
+
+    pub fn space_slug_used(&self, slug: String) -> PyResult<bool> {
+        let spaces = Client::new(self.config.clone()).get_spaces()?;
+
+        for space in &spaces {
+            if space.slug == slug {
+                return PyResult::Ok(true);
+            }
+        }
+
+        PyResult::Ok(false)
     }
 }

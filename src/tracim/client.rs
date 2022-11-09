@@ -185,6 +185,21 @@ impl Client {
         Ok(())
     }
 
+    pub fn remove_space_member(
+        &self,
+        space_id: SpaceId,
+        account_id: AccountId,
+    ) -> Result<(), Error> {
+        let url = format!(
+            "{}/workspaces/{}/members/{}",
+            self.config.api_address.0, space_id.0, account_id.0
+        );
+        self.authenticated_by_api_key(Method::DELETE, url)?
+            .send()?
+            .error_for_status()?;
+        Ok(())
+    }
+
     pub fn create_space_member(
         &self,
         space_id: SpaceId,

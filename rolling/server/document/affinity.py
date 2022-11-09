@@ -62,6 +62,8 @@ class AffinityDocument(Document):
     default_status_id = Column(String, nullable=False, default=MEMBER_STATUS[0])
     creation_datetime = Column(DateTime(), server_default=func.now(), nullable=False)
 
+    tracim_space_id = Column(Integer(), nullable=True)
+
     def __eq__(self, other: "AffinityDocument") -> bool:
         return self.id == other.id and self.id is not None
 

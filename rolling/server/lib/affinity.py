@@ -4,6 +4,7 @@ import sqlalchemy
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.exc import NoResultFound
 import typing
+import slugify
 
 from rolling.model.character import CharacterModel
 from rolling.server.document.affinity import AffinityDirectionType
@@ -14,6 +15,7 @@ from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import MEMBER_STATUS
 from rolling.server.document.affinity import WARLORD_STATUS
 from rolling.server.document.character import CharacterDocument
+import rrolling
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -42,6 +44,25 @@ class AffinityLib:
             self._kernel.server_db_session.commit()
 
         return doc
+
+    def name_available(self, name: str) -> bool:
+        name_to_test = slugify.slugify(name)
+        names = [
+            row[0]
+            for row in self._kernel.server_db_session.query(AffinityDocument.name).all()
+        ]
+        # Must use slug name to ensure no conflict with external tools like Tracim
+        for name_ in names:
+            if slugify.slugify(name_) == name_to_test:
+                return False
+
+        # Affinities can be deleted but Tracim spaces still exists, so check if name is available
+        return not rrolling.Dealer(
+            self._kernel.server_config.tracim_config
+        ).space_slug_used(name_to_test)
+
+    def affinity_space_name(self, affinity: AffinityDocument) -> str:
+        return f"🏰 Organisation de {affinity.name}"
 
     def join(
         self,

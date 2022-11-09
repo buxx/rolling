@@ -12,7 +12,7 @@ import urllib
 from guilang.description import Description
 from guilang.description import Part
 from guilang.description import Type
-from rolling.exception import RollingError
+from rolling.exception import RollingError, UserDisplayError
 from rolling.model.character import GetAffinityPathModel
 from rolling.model.character import GetAffinityRelationPathModel
 from rolling.model.character import GetCharacterPathModel
@@ -28,6 +28,7 @@ from rolling.server.document.affinity import CHIEF_STATUS
 from rolling.server.document.affinity import affinity_join_str
 from rolling.server.document.character import CharacterDocument
 from rolling.server.extension import hapic
+import rrolling
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
@@ -250,6 +251,9 @@ class AffinityController(BaseController):
             data = {}
 
         if data.get("name"):
+            if not self._kernel.affinity_lib.name_available(data["name"]):
+                raise UserDisplayError(f"Le nom n'est pas disponible")
+
             affinity_doc = self._kernel.affinity_lib.create(
                 name=data["name"],
                 join_type=AffinityJoinType.ONE_CHIEF_ACCEPT,
@@ -265,6 +269,27 @@ class AffinityController(BaseController):
                 commit=True,
                 request=True,  # creator is chief
             )
+
+            space_id = rrolling.Dealer(
+                self._kernel.server_config.tracim_config
+            ).ensure_space(
+                rrolling.SpaceName(
+                    self._kernel.affinity_lib.affinity_space_name(affinity_doc)
+                ),
+            )
+            affinity_doc.tracim_space_id = space_id
+            self._kernel.server_db_session.add(affinity_doc)
+            self._kernel.server_db_session.commit()
+
+            character_doc = self._kernel.character_lib.get_document(
+                hapic_data.path.character_id
+            )
+            rrolling.Dealer(self._kernel.server_config.tracim_config).ensure_space_role(
+                rrolling.SpaceId(space_id),
+                rrolling.AccountId(character_doc.tracim_user_id),
+                "workspace-manager",
+            )
+
             return Description(
                 title="Affinités créée",
                 items=[Part(text="Et vous en êtes le chef")],
@@ -436,6 +461,10 @@ class AffinityController(BaseController):
             affinity_id=hapic_data.path.affinity_id,
             character_id=hapic_data.path.character_id,
         )
+        character_doc = self._kernel.character_lib.get_document(
+            hapic_data.path.character_id
+        )
+        tracim_space_member: typing.Optional[bool] = None
 
         if (
             hapic_data.query.request is not None
@@ -446,10 +475,11 @@ class AffinityController(BaseController):
             return_ = False
             if hapic_data.query.request and relation:
                 title = f"Requete pour etre membre de {affinity.name} exprimé"
-                if affinity.join_type == AffinityJoinType.ACCEPT_ALL and not (
+                if affinity.join_type == AffinityJoinType.ACCEPT_ALL.value and not (
                     relation.disallowed or relation.rejected
                 ):
                     relation.accepted = True
+                    tracim_space_member = True
                 else:
                     relation.request = True
                 return_ = True
@@ -459,12 +489,17 @@ class AffinityController(BaseController):
                 return_ = True
             elif hapic_data.query.request and not relation:
                 title = f"Requete pour etre membre de {affinity.name} exprimé"
+                accepted = (
+                    True
+                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
+                    else False
+                )
+                if accepted:
+                    tracim_space_member = True
                 self._kernel.affinity_lib.join(
                     character_id=hapic_data.path.character_id,
                     affinity_id=hapic_data.path.affinity_id,
-                    accepted=True
-                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
-                    else False,
+                    accepted=accepted,
                     fighter=True if hapic_data.query.fighter else False,
                     request=True,
                 )
@@ -477,14 +512,20 @@ class AffinityController(BaseController):
                 relation.request = False
                 relation.rejected = True
                 return_ = True
+                tracim_space_member = False
             elif hapic_data.query.fighter and not relation:
                 title = f"Vous vous battez désormais pour {affinity.name}"
+                accepted = (
+                    True
+                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL.value
+                    else False
+                )
+                if accepted:
+                    tracim_space_member = True
                 self._kernel.affinity_lib.join(
                     character_id=hapic_data.path.character_id,
                     affinity_id=hapic_data.path.affinity_id,
-                    accepted=True
-                    if affinity.join_type == AffinityJoinType.ACCEPT_ALL
-                    else False,
+                    accepted=accepted,
                     fighter=True,
                     request=False,
                 )
@@ -506,6 +547,24 @@ class AffinityController(BaseController):
 
             if return_:
                 self._kernel.server_db_session.commit()
+
+                if tracim_space_member is not None:
+                    if tracim_space_member:
+                        rrolling.Dealer(
+                            self._kernel.server_config.tracim_config
+                        ).ensure_space_role(
+                            rrolling.SpaceId(affinity.tracim_space_id),
+                            rrolling.AccountId(character_doc.tracim_user_id),
+                            "content-manager",
+                        )
+                    else:
+                        rrolling.Dealer(
+                            self._kernel.server_config.tracim_config
+                        ).ensure_not_in_space(
+                            rrolling.SpaceId(affinity.tracim_space_id),
+                            rrolling.AccountId(character_doc.tracim_user_id),
+                        )
+
                 return Description(title=title, footer_with_affinity_id=affinity.id)
 
         items = []
@@ -786,7 +845,7 @@ class AffinityController(BaseController):
             )
             .all()
         )
-
+        tracim_space_member: typing.Optional[bool] = None
         data = {}
         try:
             data = await request.json()
@@ -802,14 +861,36 @@ class AffinityController(BaseController):
                         request.accepted = True
                         request.request = False
                         request.status_id = affinity.default_status_id
+                        tracim_space_member = True
                     elif choose == "Refuser":
                         request.accepted = False
                         request.request = False
                         request.disallowed = True
+                        tracim_space_member = False
 
                     self._kernel.server_db_session.add(request)
                     self._kernel.server_db_session.commit()
                     requests.remove(request)
+
+                    if tracim_space_member is not None:
+                        character_doc = self._kernel.character_lib.get_document(
+                            request.character_id
+                        )
+                        if tracim_space_member:
+                            rrolling.Dealer(
+                                self._kernel.server_config.tracim_config
+                            ).ensure_space_role(
+                                rrolling.SpaceId(affinity.tracim_space_id),
+                                rrolling.AccountId(character_doc.tracim_user_id),
+                                "content-manager",
+                            )
+                        else:
+                            rrolling.Dealer(
+                                self._kernel.server_config.tracim_config
+                            ).ensure_not_in_space(
+                                rrolling.SpaceId(affinity.tracim_space_id),
+                                rrolling.AccountId(character_doc.tracim_user_id),
+                            )
 
         form_parts = []
         for request in requests:
@@ -849,10 +930,6 @@ class AffinityController(BaseController):
     ) -> Description:
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
-        relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id,
-            character_id=hapic_data.path.character_id,
-        )
 
         parts = []
         for character_id, character_name, status_id in (
@@ -897,10 +974,6 @@ class AffinityController(BaseController):
     ) -> Description:
         # TODO BS: only chief (or ability) can display this
         affinity = self._kernel.affinity_lib.get_affinity(hapic_data.path.affinity_id)
-        displayer_relation = self._kernel.affinity_lib.get_character_relation(
-            affinity_id=hapic_data.path.affinity_id,
-            character_id=hapic_data.path.character_id,
-        )
         relation = self._kernel.affinity_lib.get_character_relation(
             affinity_id=hapic_data.path.affinity_id,
             character_id=hapic_data.path.relation_character_id,
@@ -921,6 +994,14 @@ class AffinityController(BaseController):
             relation.accepted = False
             self._kernel.server_db_session.add(relation)
             self._kernel.server_db_session.commit()
+
+            rrolling.Dealer(
+                self._kernel.server_config.tracim_config
+            ).ensure_not_in_space(
+                rrolling.SpaceId(affinity.tracim_space_id),
+                rrolling.AccountId(character_doc.tracim_user_id),
+            )
+
             return Description(redirect=f"/affinity/{hapic_data.path.character_id}")
 
         if hapic_data.body.status:
