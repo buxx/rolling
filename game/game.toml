@@ -229,7 +229,7 @@ actions = ["TRAVEL"]
   name = "Forgeron2"
   ap_required = 300.0
   abilities = ["BLACKSMITH2"]
-  requires = ["BLACKSMITH"]
+  requires = ["blacksmith"]
 
 [knowledge.leatherwork]
   name = "Maroquinerie"

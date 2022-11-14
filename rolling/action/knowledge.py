@@ -74,7 +74,7 @@ class LearnKnowledgeAction(CharacterAction):
             if knowledge_id in character.knowledges:
                 continue_ = True
             for required_knowledge_id in knowledge_description.requires:
-                if required_knowledge_id not in character.knowledges:
+                if required_knowledge_id not in character.knowledges.keys():
                     continue_ = True
 
             if continue_:
