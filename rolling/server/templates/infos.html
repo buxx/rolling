@@ -156,7 +156,7 @@
           {% endif %}
           {% if action_description.properties.required_one_of_abilities %}
             <li>
-              Requiert une des abilités :
+              Requiert une des habilités :
               {% for ability in action_description.properties.required_one_of_abilities %}
                 {{ ability.name }},
               {% endfor %}
@@ -164,7 +164,7 @@
           {% endif %}
           {% if action_description.properties.required_all_abilities %}
             <li>
-              Requiert les abilités :
+              Requiert les habilités :
               {% for ability in action_description.properties.required_all_abilities %}
                 {{ ability.name }},
               {% endfor %}

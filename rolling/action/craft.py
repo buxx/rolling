@@ -260,6 +260,67 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                 if illustration:
                     break
 
+            produce_txts = ["Production de :"]
+            for produce in self._description.properties["produce"]:
+                if "resource" in produce:
+                    resource_description = self._kernel.game.config.resources[
+                        produce["resource"]
+                    ]
+                    produce_txts.append(f" - {resource_description.name}")
+                elif "stuff" in produce:
+                    stuff_properties = (
+                        self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                            produce["stuff"]
+                        )
+                    )
+                    produce_txts.append(f" - {stuff_properties.name}")
+            produce_txts.append("")
+
+            cost = self.get_cost(character, resource_id=resource_id, input_=input_)
+            require_txts = ["Requiert :", f" - {cost} PA"]
+            for consume in self._description.properties["require"]:
+                if "resource" in consume:
+                    resource_id = consume["resource"]
+                    resource_description = self._kernel.game.config.resources[
+                        resource_id
+                    ]
+                    quantity_str = quantity_to_str(
+                        consume["quantity"], resource_description.unit, self._kernel
+                    )
+                    require_txts.append(
+                        f" - {quantity_str} de {resource_description.name}"
+                    )
+
+                elif "stuff" in consume:
+                    stuff_id = consume["stuff"]
+                    stuff_properties = (
+                        self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                            stuff_id
+                        )
+                    )
+                    require_txts.append(
+                        f" - {consume['quantity']} de {stuff_properties.name}"
+                    )
+
+            require_txts.append("")
+
+            # Indicate required abilities too
+            if required_one_of_abilities := self._description.properties.get(
+                "required_one_of_abilities"
+            ):
+                require_txts.append("Requiert une des habilités :")
+                for required_one_of_ability in required_one_of_abilities:
+                    require_txts.append(f" - {required_one_of_ability.name}")
+                require_txts.append("")
+
+            if required_all_abilities := self._description.properties.get(
+                "required_all_abilities"
+            ):
+                require_txts.append("Requiert les habilités :")
+                for required_all_ability in required_all_abilities:
+                    require_txts.append(f" - {required_all_ability.name}")
+                require_txts.append("")
+
             return Description(
                 title=self._description.name,
                 illustration_name=illustration,
@@ -274,7 +335,9 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                             query_params=self.input_model_serializer.dump(input_),
                             action_description_id=self._description.id,
                         ),
-                        items=[
+                        items=[Part(text=text) for text in produce_txts]
+                        + [Part(text=text) for text in require_txts]
+                        + [
                             Part(
                                 label=f"Quelle quantité en produire ?",
                                 type_=Type.NUMBER,
@@ -624,7 +687,7 @@ class BeginStuffConstructionAction(CharacterAction):
             if required_one_of_abilities := self._description.properties.get(
                 "required_one_of_abilities"
             ):
-                items.append(Part(text="Requiert une des abilités :"))
+                items.append(Part(text="Requiert une des habilités :"))
                 for required_one_of_ability in required_one_of_abilities:
                     items.append(Part(text=f" - {required_one_of_ability.name}"))
                 items.append(Part(text=""))
@@ -632,7 +695,7 @@ class BeginStuffConstructionAction(CharacterAction):
             if required_all_abilities := self._description.properties.get(
                 "required_all_abilities"
             ):
-                items.append(Part(text="Requiert les abilités :"))
+                items.append(Part(text="Requiert les habilités :"))
                 for required_all_ability in required_all_abilities:
                     items.append(Part(text=f" - {required_all_ability.name}"))
                 items.append(Part(text=""))
