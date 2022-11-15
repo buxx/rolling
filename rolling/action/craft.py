@@ -609,14 +609,33 @@ class BeginStuffConstructionAction(CharacterAction):
             craft_ap_cost = self.description.properties["craft_ap"]
             items = [
                 Part(text=f"Temps de travail nécessaire :"),
-                Part(text=f"{start_cost} PA tout de suite"),
-                Part(text=f"{craft_ap_cost} PA à répartir ensuite"),
+                Part(text=f" - {start_cost} PA tout de suite"),
+                Part(text=f" - {craft_ap_cost} PA à répartir ensuite"),
                 Part(text=""),
                 Part(text="Nécessite en ressources : "),
             ]
 
             for require_txt in require_txts:
                 items.append(Part(text=require_txt))
+
+            items.append(Part(text=""))
+
+            # Indicate required abilities too
+            if required_one_of_abilities := self._description.properties.get(
+                "required_one_of_abilities"
+            ):
+                items.append(Part(text="Requiert une des abilités :"))
+                for required_one_of_ability in required_one_of_abilities:
+                    items.append(Part(text=f" - {required_one_of_ability.name}"))
+                items.append(Part(text=""))
+
+            if required_all_abilities := self._description.properties.get(
+                "required_all_abilities"
+            ):
+                items.append(Part(text="Requiert les abilités :"))
+                for required_all_ability in required_all_abilities:
+                    items.append(Part(text=f" - {required_all_ability.name}"))
+                items.append(Part(text=""))
 
             items.append(
                 Part(
