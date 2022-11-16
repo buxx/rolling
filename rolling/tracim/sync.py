@@ -26,9 +26,15 @@ def main():
         except CharacterHaveNoAccountId:
             print(f"  ❌ {character_doc.name} -> ERROR (no account_id)")
             continue
-        tracim_user_id = rrolling.tracim.Dealer(config.tracim_config).ensure_account(
-            tracim_account
-        )
+
+        try:
+            tracim_user_id = rrolling.tracim.Dealer(
+                config.tracim_config
+            ).ensure_account(tracim_account)
+        except Exception as exc:
+            print(f"  ❌ {character_doc.name} -> ERROR ({exc})")
+            continue
+
         character_doc.tracim_user_id = tracim_user_id
         kernel.server_db_session.add(character_doc)
         print(f"  ✅ {character_doc.name} -> {tracim_user_id}")
@@ -40,19 +46,29 @@ def main():
     for character_id in kernel.character_lib.get_all_character_ids(alive=True):
         character_doc = kernel.character_lib.get_document(character_id)
         space_name = kernel.character_lib.character_home_space_name(character_doc)
-        tracim_home_space_id = rrolling.tracim.Dealer(
-            config.tracim_config
-        ).ensure_space(rrolling.tracim.SpaceName(space_name))
 
         if character_doc.tracim_user_id is None:
             print(f"  ❌ {character_doc.name} -> ERROR (no tracim_user_id)")
             continue
 
-        rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
-            rrolling.tracim.SpaceId(tracim_home_space_id),
-            rrolling.tracim.AccountId(character_doc.tracim_user_id),
-            "reader",
-        )
+        try:
+            tracim_home_space_id = rrolling.tracim.Dealer(
+                config.tracim_config
+            ).ensure_space(rrolling.tracim.SpaceName(space_name))
+        except Exception as exc:
+            print(f"  ❌ {character_doc.name} -> ERROR ({exc})")
+            continue
+
+        try:
+            rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
+                rrolling.tracim.SpaceId(tracim_home_space_id),
+                rrolling.tracim.AccountId(character_doc.tracim_user_id),
+                "reader",
+            )
+        except Exception as exc:
+            print(f"  ❌ {character_doc.name} -> ERROR ({exc})")
+            continue
+
         character_doc.tracim_home_space_id = tracim_home_space_id
         kernel.server_db_session.add(character_doc)
         print(f"  ✅ {character_doc.name} -> {tracim_home_space_id} (reader)")
@@ -65,11 +81,16 @@ def main():
                 print(f"  ❌ {character_doc.name} -> ERROR (no tracim_user_id)")
                 continue
 
-            rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
-                rrolling.tracim.SpaceId(space_id),
-                rrolling.tracim.AccountId(character_doc.tracim_user_id),
-                role,
-            )
+            try:
+                rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
+                    rrolling.tracim.SpaceId(space_id),
+                    rrolling.tracim.AccountId(character_doc.tracim_user_id),
+                    role,
+                )
+            except Exception as exc:
+                print(f"  ❌ {character_doc.name} -> ERROR ({exc})")
+                continue
+
             kernel.server_db_session.add(character_doc)
             print(f"  ✅ {character_doc.name} -> {tracim_home_space_id} ({role})")
 
@@ -78,11 +99,16 @@ def main():
 
     print("Ensure affinities spaces and roles")
     for affinity in kernel.affinity_lib.get_all():
-        space_id = rrolling.tracim.Dealer(config.tracim_config).ensure_space(
-            rrolling.tracim.SpaceName(
-                kernel.affinity_lib.affinity_space_name(affinity)
-            ),
-        )
+        try:
+            space_id = rrolling.tracim.Dealer(config.tracim_config).ensure_space(
+                rrolling.tracim.SpaceName(
+                    kernel.affinity_lib.affinity_space_name(affinity)
+                ),
+            )
+        except Exception as exc:
+            print(f"  ❌ {affinity.name} -> ERROR ({exc})")
+            continue
+
         affinity.tracim_space_id = space_id
         kernel.server_db_session.add(affinity)
         kernel.server_db_session.commit()
@@ -96,11 +122,16 @@ def main():
             print(f"  ❌ {chief_character_doc.name} -> ERROR (no tracim_user_id)")
             continue
 
-        rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
-            rrolling.tracim.SpaceId(space_id),
-            rrolling.tracim.AccountId(chief_character_doc.tracim_user_id),
-            "contributor",
-        )
+        try:
+            rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
+                rrolling.tracim.SpaceId(space_id),
+                rrolling.tracim.AccountId(chief_character_doc.tracim_user_id),
+                "contributor",
+            )
+        except Exception as exc:
+            print(f"  ❌ {chief_character_doc.name} -> ERROR ({exc})")
+            continue
+
         kernel.server_db_session.add(character_doc)
         print(f"    ✅ {chief_character_doc.name} -> {space_id} (contributor)")
 
@@ -113,11 +144,16 @@ def main():
                 print(f"  ❌ {character_doc.name} -> ERROR (no tracim_user_id)")
                 continue
 
-            rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
-                rrolling.tracim.SpaceId(space_id),
-                rrolling.tracim.AccountId(character_doc.tracim_user_id),
-                "contributor",
-            )
+            try:
+                rrolling.tracim.Dealer(config.tracim_config).ensure_space_role(
+                    rrolling.tracim.SpaceId(space_id),
+                    rrolling.tracim.AccountId(character_doc.tracim_user_id),
+                    "contributor",
+                )
+            except Exception as exc:
+                print(f"  ❌ {character_doc.name} -> ERROR ({exc})")
+                continue
+
             kernel.server_db_session.add(character_doc)
             print(f"    ✅ {character_doc.name} -> {space_id} (contributor)")
 
