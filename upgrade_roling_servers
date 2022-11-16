@@ -16,8 +16,8 @@ supervisorctl stop rolling_heritage:rolling_heritage_1
 supervisorctl stop rolling_creatif:rolling_creatif_1
 
 echo "Upgrade servers"
-su - rolling -c "cd /home/rolling/servers/heritage && source venv3.7/bin/activate && git pull origin && pip install -r requirements.txt && alembic upgrade head && python setup.py develop"
-su - rolling -c "cd /home/rolling/servers/creatif && source venv3.7/bin/activate && git pull origin && pip install -r requirements.txt && alembic upgrade head && python setup.py develop"
+su - rolling -c "cd /home/rolling/servers/heritage && source venv3.7/bin/activate && git pull origin && pip install -r requirements.txt && alembic upgrade head && maturin develop && python setup.py develop"
+su - rolling -c "cd /home/rolling/servers/creatif && source venv3.7/bin/activate && git pull origin && pip install -r requirements.txt && alembic upgrade head && maturin develop && python setup.py develop"
 
 echo compile wasm clients
 su - rolling -c "cd /home/rolling/rollgui2_heritage && git pull && SERVER_ADDRESS=https://heritage.bux.fr cargo build  --target wasm32-unknown-unknown --release && cp target/wasm32-unknown-unknown/release/rollgui2.wasm ~/servers/heritage/static/engine.wasm"
