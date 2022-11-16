@@ -2200,7 +2200,7 @@ class CharacterLib:
     def character_home_space_name(
         self, character: typing.Union[CharacterDocument, CharacterModel]
     ) -> str:
-        return f"🏠 Journal personnel de {character.name}"
+        return f"🏠 Journal de {character.name}"
 
     def get_documents_by_account_id(
         self, account_id: str

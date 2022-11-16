@@ -62,7 +62,7 @@ class AffinityLib:
         ).space_slug_used(name_to_test)
 
     def affinity_space_name(self, affinity: AffinityDocument) -> str:
-        return f"🏰 Organisation de {affinity.name}"
+        return f"🏰 {affinity.name}"
 
     def join(
         self,
