@@ -206,6 +206,11 @@ class AttackCharacterAction(WithCharacterAction):
                 conflicts,
             )
 
+        if not defense.ready_fighters:
+            raise ImpossibleAttack(
+                "Le parti adverse ne compte aucun combattant en état de se battre"
+            )
+
     def _get_attackers_conflicts_str(
         self,
         attackers: typing.List[CharacterModel],
