@@ -1426,6 +1426,13 @@ class CharacterLib:
             AffinityRelationDocument.character_id == character_doc.id
         ).update({"accepted": False, "request": False, "fighter": False})
 
+        tracim_account = self.get_tracim_account(character_id)
+        rrolling.Dealer(self._kernel.server_config.tracim_config).set_account_email(
+            tracim_account,
+            rrolling.AccountId(character_doc.tracim_user_id),
+            f"{uuid.uuid4().hex}@local",
+        )
+
     def increase_tiredness(
         self, character_id: str, value: int, commit: bool = True
     ) -> None:
