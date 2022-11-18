@@ -253,25 +253,25 @@ class AttackCharacterAction(WithCharacterAction):
         aff = ", ".join([a.name for a in defense_description.affinities])
         self._check_attack_lonely(character, defense_description, aff)
 
-        story = await self._kernel.fight_lib.fight(
+        details = await self._kernel.fight_lib.fight(
             attack=AttackDescription(
                 all_fighters=[character], ready_fighters=[character]
             ),
             defense=defense_description,
         )
-        parts = [Part(text=p) for p in story]
+        parts = [Part(text=p) for p in details.debug_story]
 
         self._proceed_events(
             attacker_title="Vous avez participé à un combat",
             attacked_title="Vous avez subit une attaque",
             characters=[character] + defense_description.all_fighters,
             author=character,
-            story=story,
+            story=details.debug_story,
         )
         self._kill_deads([character] + defense_description.all_fighters)
 
         return Description(
-            title=f"Attaquer {with_character.name} seul",
+            title=f"Attaque de {with_character.name} seul",
             footer_with_character_id=with_character.id,
             items=parts,
         )
@@ -286,10 +286,11 @@ class AttackCharacterAction(WithCharacterAction):
     ) -> None:
         for character in characters:
             title = attacker_title if character == author else attacked_title
+            date_ = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self._kernel.character_lib.add_event(
                 character.id,
-                title=title,
-                message=f"<p>{'</p></p>'.join(story)}</p>",
+                title=f"{title} ({date_})",
+                message=f"<p>{'</p><p>'.join(story)}</p>",
             )
 
     def _get_attack_defense_pair(
@@ -460,10 +461,10 @@ class AttackCharacterAction(WithCharacterAction):
         if resp:
             return resp
 
-        story = await self._kernel.fight_lib.fight(
+        details = await self._kernel.fight_lib.fight(
             attack=attack_description, defense=defense_description
         )
-        parts = [Part(text=p) for p in story]
+        parts = [Part(text=p) for p in details.debug_story]
 
         self._proceed_events(
             attacker_title="Vous avez participé à une attaque",
@@ -471,7 +472,7 @@ class AttackCharacterAction(WithCharacterAction):
             characters=attack_description.all_fighters
             + defense_description.all_fighters,
             author=character,
-            story=story,
+            story=details.debug_story,
         )
         self._kill_deads(
             attack_description.all_fighters + defense_description.all_fighters

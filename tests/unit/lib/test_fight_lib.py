@@ -669,7 +669,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = await worldmapc_kernel.fight_lib.fight(
+            details = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord], ready_fighters=[france_warlord]
                 ),
@@ -680,7 +680,7 @@ class TestFightLib:
                 ),
             )
 
-        assert story == produced_story
+        assert story == details.story
 
         for character_id, expected_life_point in expected_life_points.items():
             character_doc = worldmapc_kernel.character_lib.get_document(character_id)
@@ -760,7 +760,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = await worldmapc_kernel.fight_lib.fight(
+            details = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord] + france_fighters,
                     ready_fighters=[france_warlord] + france_fighters,
@@ -773,7 +773,7 @@ class TestFightLib:
                 ),
             )
 
-        assert story == produced_story
+        assert story == details.story
 
     @pytest.mark.parametrize(
         "weapons,defense,evades,protect,damages,not_ready,story",
@@ -960,7 +960,7 @@ class TestFightLib:
             protect=protect,
             damages=damages,
         ):
-            produced_story = await worldmapc_kernel.fight_lib.fight(
+            details = await worldmapc_kernel.fight_lib.fight(
                 attack=AttackDescription(
                     all_fighters=[france_warlord] + france_fighters,
                     ready_fighters=(
@@ -979,7 +979,7 @@ class TestFightLib:
                 ),
             )
 
-        assert story == produced_story
+        assert story == details.story
 
     def test_unit__get_attack_weapon__ok__no_weapon(
         self,
@@ -1046,7 +1046,7 @@ class TestFightLib:
             "rolling.model.fight.Weapon._get_around_percent_absorb",
             new=lambda *_, **__: (around, around, around),
         ), patch("random.randrange", new=lambda *_, **__: 80):
-            armor, damages = kernel.fight_lib.opponent_equipment_protect(
+            armor, damages = kernel.fight_lib.opponent_equipment_passes(
                 arthur, from_=xena, weapon=Weapon("haxe", haxe), damage=damages
             )
             assert damages == expected_damages

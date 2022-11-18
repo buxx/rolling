@@ -1,4 +1,5 @@
 # coding: utf-8
+import dataclasses
 import random
 import typing
 
@@ -19,6 +20,24 @@ EVADE_SKILL_ID = "agility"
 PROBABILITY_TO_EVADE_MULTIPLIER = 6
 PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY = 90  # percent
 PROBABILITY_TO_EVADE_START_PROBABILITY = 50  # percent
+
+
+@dataclasses.dataclass
+class FightDetails:
+    story: typing.List[str]
+    debug_story: typing.List[str]
+    groups: typing.List[typing.List[CharacterModel]]
+
+    @classmethod
+    def new(cls, groups: typing.List[typing.List[CharacterModel]]) -> "FightDetails":
+        return cls(story=[], debug_story=[], groups=groups)
+
+    def new_story_line(self, line: str) -> None:
+        self.story.append(line)
+        self.debug_story.append(line)
+
+    def new_debug_story_line(self, line: str) -> None:
+        self.debug_story.append(line)
 
 
 class FightLib:
@@ -168,8 +187,9 @@ class FightLib:
 
     async def fight(
         self, attack: AttackDescription, defense: DefendDescription
-    ) -> typing.List[str]:
-        story: typing.List[str] = []
+    ) -> FightDetails:
+        groups = self.get_fight_groups(attack, defense)
+        details = FightDetails.new(groups)
         attack_affinity_str = f" ({attack.affinity.name})" if attack.affinity else ""
         defense_affinities_str = (
             f" (" + ", ".join([a.name for a in defense.affinities]) + ")"
@@ -177,24 +197,26 @@ class FightLib:
             else ""
         )
 
-        story.append(
+        details.new_story_line(
             f"Un affrontement débute: {len(attack.ready_fighters)} "
             f"combattant(s){attack_affinity_str} "
             f"se lance(nt) à l'assault de {len(defense.all_fighters)} "
             f"combattant(s){defense_affinities_str}."
         )
 
+        details.new_story_line("")
+
         if len(defense.ready_fighters) == 0:
-            story.append(
+            details.new_story_line(
                 f"Aucun des combattants du parti attaqué n'est en état de se battre. Ils sont à la "
                 f"mercie des attaquants."
             )
-            return story
+            return details
         elif len(defense.ready_fighters) < len(defense.all_fighters):
             no_ready_to_fight_len = len(defense.all_fighters) - len(
                 defense.ready_fighters
             )
-            story.append(
+            details.new_story_line(
                 f"{no_ready_to_fight_len} combattant(s) du parti attaqué ne sont pas en "
                 f"état de se battre."
             )
@@ -217,17 +239,33 @@ class FightLib:
                         if fighter_ in attack.all_fighters:
                             return fighter_
 
+        details.new_story_line("Groupe(s) de combat : ")
+        for i, group in enumerate(groups):
+            attackers = [f for f in group if f in attack.all_fighters]
+            defensers = [f for f in group if f in defense.all_fighters]
+            details.new_story_line(f" - Groupe {i+1}")
+            details.new_story_line(
+                f"   - Attaquants : {', '.join([f.name for f in attackers])}"
+            )
+            details.new_story_line(
+                f"   - Défenseurs : {', '.join([f.name for f in defensers])}"
+            )
+
+        details.new_story_line("")
+
         # start the battle ...
-        groups = self.get_fight_groups(attack, defense)
-        for group in groups:
+        for i, group in enumerate(groups):
+            details.new_story_line(f"Combat dans le groupe {i+1} :")
+
             random.shuffle(group)
             for fighter in group:
                 if fighter.life_points < 0:
+                    details.new_story_line(f" - {fighter.name} est hors de combat")
                     continue
 
-                story_sentences: typing.List[str] = []
                 opponent = await get_alive_opponent_in_group(group, for_=fighter)
                 if not opponent:
+                    details.new_story_line(f" - {fighter.name} n'a pas d'opposant")
                     continue
 
                 attacker_weapon = self.get_attack_weapon(fighter, against=opponent)
@@ -237,33 +275,41 @@ class FightLib:
 
                 if self.defenser_evade(
                     opponent,
-                    from_=fighter,
+                    attacker=fighter,
                     weapon=attacker_weapon,
                     defenser_weapon=defenser_weapon,
+                    details=details,
                 ):
-                    story_sentences.append(
-                        f"{fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
+                    details.new_story_line(
+                        f"  - {fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
                         f"{opponent.name} parvient à esquiver."
                     )
                 else:
-                    story_sentences.append(
-                        f"{fighter.name} attaque {opponent.name} avec {attacker_weapon.name}."
+                    details.new_story_line(
+                        f"  - {fighter.name} attaque {opponent.name} avec {attacker_weapon.name}."
                     )
-                    damage = self.get_damage(fighter, weapon=attacker_weapon)
-                    opponent_equipment, pass_damages = self.opponent_equipment_protect(
-                        opponent, from_=fighter, weapon=attacker_weapon, damage=damage
+                    damage = self.get_damage(
+                        fighter, weapon=attacker_weapon, details=details
+                    )
+                    details.new_story_line(f"  - Calcul de defense :")
+                    opponent_equipment, pass_damages = self.opponent_equipment_passes(
+                        opponent,
+                        from_=fighter,
+                        weapon=attacker_weapon,
+                        damage=damage,
+                        details=details,
                     )
                     if damage and pass_damages == damage:
-                        story_sentences.append(
-                            f"{opponent_equipment.name} n'a en rien protégé {opponent.name}."
+                        details.new_story_line(
+                            f"  - {opponent_equipment.name} n'a en rien protégé {opponent.name}."
                         )
                     elif pass_damages and pass_damages < damage:
-                        story_sentences.append(
-                            f"{opponent_equipment.name} à en partie protégé {opponent.name}."
+                        details.new_story_line(
+                            f"  - {opponent_equipment.name} à en partie protégé {opponent.name}."
                         )
                     else:
-                        story_sentences.append(
-                            f"{opponent_equipment.name} à protégé {opponent.name}."
+                        details.new_story_line(
+                            f"  - {opponent_equipment.name} à protégé {opponent.name}."
                         )
 
                     self.apply_damage_on_equipment(
@@ -272,14 +318,13 @@ class FightLib:
                     self.apply_damage_on_character(opponent, damages=pass_damages)
 
                     if opponent.life_points < 0:
-                        story_sentences.append(
-                            f"Le coup à été fatal pour {opponent.name}."
+                        details.new_story_line(
+                            f"  - Le coup à été fatal pour {opponent.name}."
                         )
 
                     # FIXME BS NOW: write test about this
                     self.increase_attacker_skills(fighter, attacker_weapon)
 
-                story.append(" ".join(story_sentences))
                 await self._kernel.character_lib.reduce_action_points(
                     fighter.id, FIGHT_AP_CONSUME
                 )
@@ -287,7 +332,7 @@ class FightLib:
                     fighter.id, FIGHT_TIREDNESS_INCREASE
                 )
 
-        return story
+        return details
 
     def get_attack_weapon(
         self, fighter: CharacterModel, against: CharacterModel
@@ -306,43 +351,93 @@ class FightLib:
             return Weapon(name=opponent.weapon.name, stuff=opponent.weapon)
         return Weapon(name="Main nue")
 
-    def opponent_equipment_protect(
+    def opponent_equipment_passes(
         self,
         opponent: CharacterModel,
         from_: CharacterModel,
         weapon: Weapon,
         damage: float,
+        details: typing.Optional[FightDetails] = None,
     ) -> typing.Tuple[Weapon, float]:
         if opponent.armor:
             armor = Weapon(name=opponent.armor.name, stuff=opponent.armor)
-            return armor, armor.how_much_absorb(weapon, damage)
-        return Weapon(name="Peau nue"), damage * (random.randrange(0, 100, 1) / 100)
+            details.new_debug_story_line(f"    armor is {armor.name}")
+            return armor, armor.how_much_damages_passes(weapon, damage, details=details)
+
+        details.new_debug_story_line(f"    no armor")
+        details.new_debug_story_line(f"    damage = {damage}")
+        return Weapon(name="Peau nue"), damage
 
     def defenser_evade(
         self,
-        opponent: CharacterModel,
-        from_: CharacterModel,
+        evader: CharacterModel,
+        attacker: CharacterModel,
         weapon: Weapon,
         defenser_weapon: Weapon,
+        details: FightDetails,
     ) -> bool:
-        probability_to_evade = PROBABILITY_TO_EVADE_START_PROBABILITY  # percent
-        probability_to_evade += (
-            opponent.get_skill_value(EVADE_SKILL_ID)
-            - from_.get_skill_value(EVADE_SKILL_ID)
-        ) * PROBABILITY_TO_EVADE_MULTIPLIER
-        probability_to_evade = min(
-            PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY, probability_to_evade
+        probability_to_evade0 = PROBABILITY_TO_EVADE_START_PROBABILITY  # percent
+        evader_evade_skill_value = evader.get_skill_value(EVADE_SKILL_ID)
+        attacker_evade_skill_value = attacker.get_skill_value(EVADE_SKILL_ID)
+        probability_to_evade1 = (
+            probability_to_evade0
+            + (evader_evade_skill_value - attacker_evade_skill_value)
+            * PROBABILITY_TO_EVADE_MULTIPLIER
+        )
+        probability_to_evade2 = min(
+            PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY, probability_to_evade1
+        )
+        rand_value = random.randint(0, 100)
+        evade = bool(rand_value < probability_to_evade2)
+
+        details.new_debug_story_line(
+            f" - {attacker.name} attaque {evader.name} : calcul d'esquive : "
+        )
+        details.new_debug_story_line(f"    random = [0, 100] -> {rand_value}")
+        details.new_debug_story_line(
+            f"    probability_to_evade = {PROBABILITY_TO_EVADE_START_PROBABILITY} + "
+            f"'({evader.name}'.{EVADE_SKILL_ID}({evader_evade_skill_value}) - "
+            f"'{attacker.name}'.{EVADE_SKILL_ID}({attacker_evade_skill_value})) * "
+            f"{PROBABILITY_TO_EVADE_MULTIPLIER}"
+            f" -> {probability_to_evade1}"
+        )
+        details.new_debug_story_line(
+            f"    probability_to_evade = min({PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY}, {probability_to_evade1}) -> {probability_to_evade2}"
+        )
+        details.new_debug_story_line(
+            f"    evade if random({rand_value}) < probability_to_evade({probability_to_evade2}) -> {evade}"
         )
 
-        return bool(random.randint(0, 100) < probability_to_evade)
+        return evade
 
-    def get_damage(self, fighter: CharacterModel, weapon: Weapon) -> float:
+    def get_damage(
+        self, fighter: CharacterModel, weapon: Weapon, details: FightDetails
+    ) -> float:
+        details.new_debug_story_line(f" - Calcul de dommages : ")
+
+        random_ = random.randrange(8, 12, 1) / 10
+        details.new_debug_story_line(f"    random_ = [8, 12] / 10 -> {random_}")
+        force_weapon_multiplier = fighter.force_weapon_multiplier(details=details)
+        weapon_damage = max(weapon.base_damage, DEFAULT_WEAPON_DAMAGE)
+        details.new_debug_story_line(
+            f"    weapon_damage = max(weapon.base_damage({weapon.base_damage}), {DEFAULT_WEAPON_DAMAGE}) -> {weapon_damage}"
+        )
+        with_weapon_coeff = fighter.get_with_weapon_coeff(
+            weapon, self._kernel, details=details
+        )
+
         damages = (
-            fighter.force_weapon_multiplier
-            * max(weapon.base_damage, DEFAULT_WEAPON_DAMAGE)
-            * fighter.get_with_weapon_coeff(weapon, self._kernel)
-        ) * (random.randrange(8, 12, 1) / 10)
-        return round(damages, 2)
+            force_weapon_multiplier * weapon_damage * with_weapon_coeff
+        ) * random_
+        damages = round(damages, 2)
+
+        details.new_debug_story_line(
+            f"    damages = (force_weapon_multiplier({force_weapon_multiplier}) * "
+            f"weapon_damage({weapon_damage}) * "
+            f"with_weapon_coeff({with_weapon_coeff})) * random_({random_}) -> {damages}"
+        )
+
+        return damages
 
     def apply_damage_on_equipment(
         self, opponent: CharacterModel, equipment: Weapon

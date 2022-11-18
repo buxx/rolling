@@ -16,6 +16,7 @@ import slugify
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.fight import Weapon
+    from rolling.server.lib.fight import FightDetails
 
 
 MINIMUM_BEFORE_TIRED = 49
@@ -505,11 +506,18 @@ class CharacterModel:
     def associate_display_object(self, display_object: "DisplayObject") -> None:
         self._display_object = display_object
 
-    @property
-    def force_weapon_multiplier(self) -> float:
-        return min(
-            MAXIMUM_FORCE_WEAPON_MULTIPLIER, self.get_skill_value(STRENGTH_SKILL_ID)
-        )
+    def force_weapon_multiplier(
+        self, details: typing.Optional["FightDetails"] = None
+    ) -> float:
+        skill_value = self.get_skill_value(STRENGTH_SKILL_ID)
+        force_weapon_multiplier_ = min(MAXIMUM_FORCE_WEAPON_MULTIPLIER, skill_value)
+
+        if details is not None:
+            details.new_debug_story_line(
+                f"    - force_weapon_multiplier = min({MAXIMUM_FORCE_WEAPON_MULTIPLIER}, '{self.name}'.{STRENGTH_SKILL_ID}({skill_value})) -> {force_weapon_multiplier_}"
+            )
+
+        return force_weapon_multiplier_
 
     @property
     def display_object(self) -> "DisplayObject":
@@ -541,12 +549,25 @@ class CharacterModel:
     def have_knowledge(self, knowledge_id: str) -> bool:
         return knowledge_id in self.knowledges
 
-    def get_with_weapon_coeff(self, weapon: "Weapon", kernel: "Kernel") -> float:
+    def get_with_weapon_coeff(
+        self,
+        weapon: "Weapon",
+        kernel: "Kernel",
+        details: typing.Optional["FightDetails"] = None,
+    ) -> float:
         better_coeff = 1.0
+        better_coeff_skill_name = ""
         for bonus_skill_id in weapon.get_bonus_with_skills(kernel):
             with_this_skill_bonus = self.get_skill_value(bonus_skill_id) / 2
             if with_this_skill_bonus > better_coeff:
                 better_coeff = with_this_skill_bonus
+                better_coeff_skill_name = bonus_skill_id
+
+        if details is not None:
+            details.new_debug_story_line(
+                f"    with_weapon_coeff = {better_coeff_skill_name}({better_coeff})"
+            )
+
         return better_coeff
 
 

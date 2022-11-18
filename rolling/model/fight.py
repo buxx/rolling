@@ -12,6 +12,7 @@ from rolling.server.document.affinity import AffinityDocument
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+    from rolling.server.lib.fight import FightDetails
 
 DEFAULT_WEAPON_DAMAGE = 0.5
 
@@ -103,22 +104,64 @@ class Weapon:
             return stuff_properties.skills_bonus
         return []
 
-    def _get_around_percent_absorb(
-        self, weapon: "Weapon"
+    def _does_weapon_over(
+        self,
+        weapon: "Weapon",
+        details: typing.Optional["FightDetails"] = None,
     ) -> typing.Tuple[AroundPercent, AroundPercent, AroundPercent]:
+        """Determine if weapon is OVER, In or LESS vs this"""
         estoc_is = in_percent(self.protect_estoc, weapon.estoc, 20)
         blunt_is = in_percent(self.protect_blunt, weapon.blunt, 20)
         sharp_is = in_percent(self.protect_sharp, weapon.sharp, 20)
+
+        if details is not None:
+            details.new_debug_story_line(
+                f"    estoc = "
+                f"'{self.name}'({self.protect_estoc}) vs "
+                f"'{weapon.name}'({weapon.estoc}) "
+                f"-> {weapon.name} is {estoc_is.value}"
+            )
+            details.new_debug_story_line(
+                f"    blunt = "
+                f"'{self.name}'({self.protect_blunt}) vs "
+                f"'{weapon.name}'({weapon.blunt}) "
+                f"-> {weapon.name} is  {blunt_is.value}"
+            )
+            details.new_debug_story_line(
+                f"    sharp = "
+                f"'{self.name}'({self.protect_sharp}) vs "
+                f"'{weapon.name}'({weapon.sharp}) "
+                f"-> {weapon.name} is  {sharp_is.value}"
+            )
+
         return estoc_is, blunt_is, sharp_is
 
-    def how_much_absorb(self, weapon: "Weapon", damage: float) -> float:
-        results = self._get_around_percent_absorb(weapon)
+    def how_much_damages_passes(
+        self,
+        weapon: "Weapon",
+        damage: float,
+        details: typing.Optional["FightDetails"] = None,
+    ) -> float:
+        results = self._does_weapon_over(weapon, details=details)
 
         if AroundPercent.MORE in results:
+            if details is not None:
+                details.new_debug_story_line(
+                    f"    damage = {damage} (full damage on armor)"
+                )
+
             return damage
 
         if AroundPercent.IN in results:
-            return damage * (random.randrange(0, 100, 1) / 100)
+            damage_ = damage * (random.randrange(0, 100, 1) / 100)
+
+            if details is not None:
+                details.new_debug_story_line(
+                    f"    damage = {damage_} ({damage} * random[0.0, 1.0])"
+                )
+
+            return damage_
 
         # LESS
+        details.new_debug_story_line(f"    damage = 0 (can't damage this armor)")
         return 0.0
