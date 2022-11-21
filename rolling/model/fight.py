@@ -146,9 +146,11 @@ class Weapon:
 
         if AroundPercent.MORE in results:
             if details is not None:
+                details.new_debug_story_line("<li>")
                 details.new_debug_story_line(
-                    f"    damage = {damage} (full damage on armor)"
+                    f"damage = {damage} (full damage on armor)"
                 )
+                details.new_debug_story_line("</li>")
 
             return damage
 
@@ -156,12 +158,16 @@ class Weapon:
             damage_ = damage * (random.randrange(0, 100, 1) / 100)
 
             if details is not None:
+                details.new_debug_story_line("<li>")
                 details.new_debug_story_line(
-                    f"    damage = {damage_} ({damage} * random[0.0, 1.0])"
+                    f"damage = {damage_} ({damage} * random[0.0, 1.0])"
                 )
+                details.new_debug_story_line("</li>")
 
             return damage_
 
         # LESS
-        details.new_debug_story_line(f"    damage = 0 (can't damage this armor)")
+        details.new_debug_story_line("<li>")
+        details.new_debug_story_line(f"damage = 0 (can't damage this armor)")
+        details.new_debug_story_line("</li>")
         return 0.0

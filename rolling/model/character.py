@@ -513,9 +513,11 @@ class CharacterModel:
         force_weapon_multiplier_ = min(MAXIMUM_FORCE_WEAPON_MULTIPLIER, skill_value)
 
         if details is not None:
+            details.new_debug_story_line("<li>")
             details.new_debug_story_line(
-                f"    - force_weapon_multiplier = min({MAXIMUM_FORCE_WEAPON_MULTIPLIER}, '{self.name}'.{STRENGTH_SKILL_ID}({skill_value})) -> {force_weapon_multiplier_}"
+                f"force_weapon_multiplier = min({MAXIMUM_FORCE_WEAPON_MULTIPLIER}, '{self.name}'.{STRENGTH_SKILL_ID}({skill_value})) -> {force_weapon_multiplier_}"
             )
+            details.new_debug_story_line("</li>")
 
         return force_weapon_multiplier_
 
@@ -556,7 +558,7 @@ class CharacterModel:
         details: typing.Optional["FightDetails"] = None,
     ) -> float:
         better_coeff = 1.0
-        better_coeff_skill_name = ""
+        better_coeff_skill_name = "no special skill"
         for bonus_skill_id in weapon.get_bonus_with_skills(kernel):
             with_this_skill_bonus = self.get_skill_value(bonus_skill_id) / 2
             if with_this_skill_bonus > better_coeff:
@@ -564,9 +566,11 @@ class CharacterModel:
                 better_coeff_skill_name = bonus_skill_id
 
         if details is not None:
+            details.new_debug_story_line("<li>")
             details.new_debug_story_line(
-                f"    with_weapon_coeff = {better_coeff_skill_name}({better_coeff})"
+                f"with_weapon_coeff = {better_coeff_skill_name}({better_coeff})"
             )
+            details.new_debug_story_line("</li>")
 
         return better_coeff
 

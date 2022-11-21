@@ -5,6 +5,7 @@ import datetime
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
+import html2text
 
 from guilang.description import Description
 from guilang.description import Part
@@ -259,14 +260,16 @@ class AttackCharacterAction(WithCharacterAction):
             ),
             defense=defense_description,
         )
-        parts = [Part(text=p) for p in details.debug_story]
+        html_story = "".join(details.debug_story)
+        text_story = html2text.HTML2Text().handle(html_story)
+        parts = [Part(text=p) for p in text_story.split("\n")]
 
         self._proceed_events(
             attacker_title="Vous avez participé à un combat",
             attacked_title="Vous avez subit une attaque",
             characters=[character] + defense_description.all_fighters,
             author=character,
-            story=details.debug_story,
+            story=html_story,
         )
         self._kill_deads([character] + defense_description.all_fighters)
 
@@ -282,7 +285,7 @@ class AttackCharacterAction(WithCharacterAction):
         attacked_title: str,
         characters: typing.List[CharacterModel],
         author: CharacterModel,
-        story: typing.List[str],
+        story: str,
     ) -> None:
         for character in characters:
             title = attacker_title if character == author else attacked_title
@@ -290,7 +293,7 @@ class AttackCharacterAction(WithCharacterAction):
             self._kernel.character_lib.add_event(
                 character.id,
                 title=f"{title} ({date_})",
-                message=f"<p>{'</p><p>'.join(story)}</p>",
+                message=story,
             )
 
     def _get_attack_defense_pair(
@@ -464,7 +467,9 @@ class AttackCharacterAction(WithCharacterAction):
         details = await self._kernel.fight_lib.fight(
             attack=attack_description, defense=defense_description
         )
-        parts = [Part(text=p) for p in details.debug_story]
+        html_story = "".join(details.debug_story)
+        text_story = html2text.HTML2Text().handle(html_story)
+        parts = [Part(text=p) for p in text_story.split("\n")]
 
         self._proceed_events(
             attacker_title="Vous avez participé à une attaque",
@@ -472,7 +477,7 @@ class AttackCharacterAction(WithCharacterAction):
             characters=attack_description.all_fighters
             + defense_description.all_fighters,
             author=character,
-            story=details.debug_story,
+            story=html_story,
         )
         self._kill_deads(
             attack_description.all_fighters + defense_description.all_fighters
