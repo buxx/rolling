@@ -652,5 +652,10 @@ class Kernel:
                     )
                 )
                 for character_id in character_ids:
-                    character_doc = self.character_lib.get_document(character_id)
-                    await self._character_lib.refresh_character(character_doc)
+                    try:
+                        character_doc = self.character_lib.get_document(character_id)
+                        await self._character_lib.refresh_character(character_doc)
+                    except NoResultFound:
+                        kernel_logger.error(
+                            f"Character '{character_id}' cant be refreshed"
+                        )
