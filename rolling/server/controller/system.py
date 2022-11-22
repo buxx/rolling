@@ -115,6 +115,7 @@ class SystemController(BaseController):
         details = []
         debug = False
         post_data = {}
+        passes = 1
         if request.method == "POST":
             post_data = await request.post()
             debug = post_data.get("debug", "") == "on"
