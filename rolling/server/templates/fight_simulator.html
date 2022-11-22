@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% block head %}
+    <title>Simulateur de combat</title>
+    {% endblock %}
+</head>
+
+<body>
+    <div id="content">
+        <h1>Rolling - Simulateur de combat</h1>
+
+        Légende :
+
+        <ul>
+            <li>E : Estoc (estoque)</li>
+            <li>B : Blunt (frappe)</li>
+            <li>S : Sharp (coupant)</li>
+        </ul>
+
+        <form method="POST">
+            {% for i in range(1, 3) %}
+            
+                <h2>Personnage {{ i }}</h2>
+
+                <h3>Base</h3>
+
+                <ul>
+                    <li>
+                        <label for="c{{ i }}_life_points">💙 Points de vie</label>
+                        <input id="c{{ i }}_life_points" type="number" step="0.1" name="c{{ i }}_life_points" value="{{ post_data['c{}_life_points'.format(i)]|default('5.0') }}" min="0.0" max="10.0" />
+                    </li>
+                </ul>
+
+                <h3>Compétences</h3>
+
+                <ul>
+
+                    {% for skill in skills %}
+                        <li>
+                            <label for="c{{ i }}_skill_{{ skill.id }}">📏 {{ skill.name }}</label>
+                            <input id="c{{ i }}_skill_{{ skill.id }}" type="number" step="0.1" name="c{{ i }}_skill_{{ skill.id }}" value="{{ post_data['c{}_skill_{}'.format(i, skill.id)]|default(skill.default) }}" max="{{ skill.maximum }}" min="0.0" />
+                        </li>
+                    {% endfor %}
+
+                </ul>
+
+                <h3>Armement</h3>
+
+                <ul>
+                    <li>
+                        <label for="c{{ i }}_primary_weapon">🏹 Arme</label>
+                        <select id="c{{ i }}_primary_weapon" name="c{{ i }}_primary_weapon">
+                            <option label="no selection" value=""></option>
+                            {% for weapon_description in weapon_descriptions %}
+                                <option value="{{ weapon_description.id }}" {% if post_data['c{}_primary_weapon'.format(i)] == weapon_description.id %}selected{% endif %}>
+                                    {{ weapon_description.name }}
+                                    (
+                                        E:{{ weapon_description.estoc }}
+                                        B:{{ weapon_description.blunt }}
+                                        S:{{ weapon_description.sharp }}
+                                    )
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </li>
+
+                    <li>
+                        <label for="c{{ i }}_armor">🥋 Armure</label>
+                        <select id="c{{ i }}_armor" name="c{{ i }}_armor">
+                            <option label="no selection" value=""></option>
+                            {% for armor_description in armor_descriptions %}
+                                <option value="{{ armor_description.id }}" {% if post_data['c{}_armor'.format(i)] == armor_description.id %}selected{% endif %}>
+                                    {{ armor_description.name }}
+                                    (
+                                        E:{{ armor_description.protect_estoc }}
+                                        B:{{ armor_description.protect_blunt }}
+                                        S:{{ armor_description.protect_sharp }}
+                                    )
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </li>
+
+                    <li>
+                        <label for="c{{ i }}_shield">🛡 Bouclier</label>
+                        <select id="c{{ i }}_shield" name="c{{ i }}_shield">
+                            <option label="no selection" value=""></option>
+                            {% for shield_description in shield_descriptions %}
+                                <option value="{{ shield_description.id }}" {% if post_data['c{}_shield'.format(i)] == shield_description.id %}selected{% endif %}>
+                                    {{ shield_description.name }}
+                                    (
+                                        E:{{ shield_description.protect_estoc }}
+                                        B:{{ shield_description.protect_blunt }}
+                                        S:{{ shield_description.protect_sharp }}
+                                    )
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </li>
+
+                </ul>
+            
+            {% endfor %}
+
+            <h2>Paramètres du combat</h2>
+
+            <ul>
+                <li>
+                    <label for="passes">Nombre de passes</label>
+                    <input id="passes" type="number" step="1" min="1" max="100" name="passes" value="{{ passes|default('1') }}" />
+                </li>
+                <li>
+                    <label for="debug">Debug</label>
+                    <input id="debug" type="checkbox" name="debug" {% if debug %}checked{% endif %} />
+                </li>
+                <li>
+                    <input type="submit" value="Lancer la simulation" />
+                </li>
+            </ul>
+
+        </form>
+
+        {% if fight_details %}
+            
+            <h2>Compte-rendu</h2>
+
+            {% for detail in fight_details %}
+
+                <h3>Passe {{ loop.index }}</h3>
+
+                {% if not debug %}
+                    {% for line in detail.story %}
+                        {{ line|safe }}
+                    {% endfor %}
+                {% else %}
+                    {% for line in detail.debug_story %}
+                        {{ line|safe }}
+                    {% endfor %}
+                {% endif %}
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+</body>
+
+</html>

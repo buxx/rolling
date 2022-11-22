@@ -83,6 +83,7 @@ def get_application(
             and not request.path.startswith("/avatar")
             and not request.path.startswith("/media")
             and not request.path.startswith("/static")
+            and not request.path.startswith("/simulator")
         ):
             response_401 = Response(
                 status=401,

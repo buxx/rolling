@@ -23,3 +23,30 @@ class StuffManager:
             return self._items_by_id[stuff_id]
         except KeyError:
             raise UnknownStuffError(f'Unknown stuff "{stuff_id}"')
+
+    def get_weapon_descriptions(self) -> typing.List["StuffProperties"]:
+        weapons = []
+
+        for item in self._items:
+            if item.weapon:
+                weapons.append(item)
+
+        return weapons
+
+    def get_shield_descriptions(self) -> typing.List["StuffProperties"]:
+        shields = []
+
+        for item in self._items:
+            if item.shield:
+                shields.append(item)
+
+        return shields
+
+    def get_armor_descriptions(self) -> typing.List["StuffProperties"]:
+        armors = []
+
+        for item in self._items:
+            if item.armor:
+                armors.append(item)
+
+        return armors

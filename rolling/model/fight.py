@@ -115,24 +115,30 @@ class Weapon:
         sharp_is = in_percent(self.protect_sharp, weapon.sharp, 20)
 
         if details is not None:
+            details.new_debug_story_line("<li>")
             details.new_debug_story_line(
-                f"    estoc = "
+                f"estoc = "
                 f"'{self.name}'({self.protect_estoc}) vs "
                 f"'{weapon.name}'({weapon.estoc}) "
                 f"-> {weapon.name} is {estoc_is.value}"
             )
+            details.new_debug_story_line("</li>")
+            details.new_debug_story_line("<li>")
             details.new_debug_story_line(
-                f"    blunt = "
+                f"blunt = "
                 f"'{self.name}'({self.protect_blunt}) vs "
                 f"'{weapon.name}'({weapon.blunt}) "
                 f"-> {weapon.name} is  {blunt_is.value}"
             )
+            details.new_debug_story_line("</li>")
+            details.new_debug_story_line("<li>")
             details.new_debug_story_line(
-                f"    sharp = "
+                f"sharp = "
                 f"'{self.name}'({self.protect_sharp}) vs "
                 f"'{weapon.name}'({weapon.sharp}) "
                 f"-> {weapon.name} is  {sharp_is.value}"
             )
+            details.new_debug_story_line("</li>")
 
         return estoc_is, blunt_is, sharp_is
 
@@ -142,7 +148,9 @@ class Weapon:
         damage: float,
         details: typing.Optional["FightDetails"] = None,
     ) -> float:
+        details.new_debug_story_line("<ul>")
         results = self._does_weapon_over(weapon, details=details)
+        details.new_debug_story_line("</ul>")
 
         if AroundPercent.MORE in results:
             if details is not None:

@@ -18,8 +18,8 @@ if typing.TYPE_CHECKING:
 
 EVADE_SKILL_ID = "agility"
 PROBABILITY_TO_EVADE_MULTIPLIER = 6
-PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY = 90  # percent
-PROBABILITY_TO_EVADE_START_PROBABILITY = 50  # percent
+PROBABILITY_TO_EVADE_MAXIMUM_PROBABILITY = 80  # percent
+PROBABILITY_TO_EVADE_START_PROBABILITY = 15  # percent
 
 
 @dataclasses.dataclass
@@ -41,8 +41,9 @@ class FightDetails:
 
 
 class FightLib:
-    def __init__(self, kernel: "Kernel") -> None:
+    def __init__(self, kernel: "Kernel", dont_touch_db: bool = False) -> None:
         self._kernel = kernel
+        self._dont_touch_db = dont_touch_db
 
     def get_defense_description(
         self,
@@ -188,6 +189,23 @@ class FightLib:
     async def fight(
         self, attack: AttackDescription, defense: DefendDescription
     ) -> FightDetails:
+        if len(defense.ready_fighters) == 0:
+            details = FightDetails.new([])
+            details.new_story_line(
+                "<p>"
+                f"Aucun des combattants du parti attaqué n'est en état de se battre. Ils sont à la "
+                f"mercie des attaquants."
+                "</p>"
+            )
+            return details
+
+        if len(attack.ready_fighters) == 0:
+            details = FightDetails.new([])
+            details.new_story_line(
+                "<p>" f"Aucun des attaquants n'est en état de se battre.</p>"
+            )
+            return details
+
         groups = self.get_fight_groups(attack, defense)
         details = FightDetails.new(groups)
         attack_affinity_str = f" ({attack.affinity.name})" if attack.affinity else ""
@@ -206,15 +224,7 @@ class FightLib:
             "</p>"
         )
 
-        if len(defense.ready_fighters) == 0:
-            details.new_story_line(
-                "<p>"
-                f"Aucun des combattants du parti attaqué n'est en état de se battre. Ils sont à la "
-                f"mercie des attaquants."
-                "</p>"
-            )
-            return details
-        elif len(defense.ready_fighters) < len(defense.all_fighters):
+        if len(defense.ready_fighters) < len(defense.all_fighters):
             no_ready_to_fight_len = len(defense.all_fighters) - len(
                 defense.ready_fighters
             )
@@ -243,7 +253,6 @@ class FightLib:
                         if fighter_ in attack.all_fighters:
                             return fighter_
 
-        details.new_story_line("<p>")
         details.new_story_line("Groupe(s) de combat : ")
         details.new_story_line("<ul>")
         for i, group in enumerate(groups):
@@ -262,7 +271,6 @@ class FightLib:
             details.new_story_line("</li>")
 
         details.new_story_line("</ul>")
-        details.new_story_line("</p>")
 
         # start the battle ...
         for i, group in enumerate(groups):
@@ -274,8 +282,9 @@ class FightLib:
             for fighter in group:
                 if fighter.life_points < 0:
                     details.new_story_line("<li>")
-                    details.new_story_line("{fighter.name} est hors de combat")
+                    details.new_story_line(f"{fighter.name} est hors de combat")
                     details.new_story_line("</li>")
+                    details.new_story_line("</ul>")
                     continue
 
                 opponent = await get_alive_opponent_in_group(group, for_=fighter)
@@ -283,10 +292,14 @@ class FightLib:
                     details.new_story_line("<li>")
                     details.new_story_line(f"{fighter.name} n'a pas d'opposant")
                     details.new_story_line("</li>")
+                    details.new_story_line("</ul>")
                     continue
 
                 attacker_weapon = self.get_attack_weapon(fighter, against=opponent)
                 defenser_weapon = self.get_defense_weapon(
+                    opponent, from_=fighter, attacked_with=attacker_weapon
+                )
+                defenser_shield = self.get_defense_shield(
                     opponent, from_=fighter, attacked_with=attacker_weapon
                 )
 
@@ -295,18 +308,32 @@ class FightLib:
                     attacker=fighter,
                     weapon=attacker_weapon,
                     defenser_weapon=defenser_weapon,
+                    defenser_shield=defenser_shield,
                     details=details,
                 ):
                     details.new_story_line(
                         "<li>"
-                        f"🥋 {fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
+                        f"🛡🛡 {fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
                         f"{opponent.name} parvient à esquiver."
                         "</li>"
                     )
+                # elif defenser_shield is not None and self.defenser_shield_protect(
+                #     opponent,
+                #     attacker=fighter,
+                #     weapon=attacker_weapon,
+                #     defenser_shield=defenser_shield,
+                #     details=details,
+                # ):
+                #     details.new_story_line(
+                #         "<li>"
+                #         f"🛡🛡 {fighter.name} attaque {opponent.name} avec {attacker_weapon.name} mais "
+                #         f"{opponent.name} parvient à se protéger ({defenser_shield.name})."
+                #         "</li>"
+                #     )
                 else:
                     details.new_story_line(
                         "<li>"
-                        f"⚔ {fighter.name} attaque {opponent.name} avec {attacker_weapon.name}."
+                        f"⚔ <b>{fighter.name} attaque {opponent.name} avec {attacker_weapon.name}</b>"
                         "</li>"
                     )
                     damage = self.get_damage(
@@ -339,9 +366,15 @@ class FightLib:
                         details.new_story_line("</li>")
 
                     self.apply_damage_on_equipment(
-                        opponent, equipment=opponent_equipment
+                        opponent,
+                        equipment=opponent_equipment,
+                        dont_touch_db=self._dont_touch_db,
                     )
-                    self.apply_damage_on_character(opponent, damages=pass_damages)
+                    self.apply_damage_on_character(
+                        opponent,
+                        damages=pass_damages,
+                        dont_touch_db=self._dont_touch_db,
+                    )
 
                     if opponent.life_points < 0:
                         details.new_story_line("<li>")
@@ -350,15 +383,17 @@ class FightLib:
                         )
                         details.new_story_line("</li>")
 
-                    # FIXME BS NOW: write test about this
-                    self.increase_attacker_skills(fighter, attacker_weapon)
+                    if not self._dont_touch_db:
+                        # FIXME BS NOW: write test about this
+                        self.increase_attacker_skills(fighter, attacker_weapon)
 
-                await self._kernel.character_lib.reduce_action_points(
-                    fighter.id, FIGHT_AP_CONSUME
-                )
-                self._kernel.character_lib.increase_tiredness(
-                    fighter.id, FIGHT_TIREDNESS_INCREASE
-                )
+                if not self._dont_touch_db:
+                    await self._kernel.character_lib.reduce_action_points(
+                        fighter.id, FIGHT_AP_CONSUME
+                    )
+                    self._kernel.character_lib.increase_tiredness(
+                        fighter.id, FIGHT_TIREDNESS_INCREASE
+                    )
 
             details.new_story_line("</ul>")
 
@@ -374,12 +409,16 @@ class FightLib:
     def get_defense_weapon(
         self, opponent: CharacterModel, from_: CharacterModel, attacked_with: Weapon
     ) -> Weapon:
-        # TODO BS: optimize weapon choice against attacked_with
-        if opponent.shield:
-            return Weapon(name=opponent.shield.name, stuff=opponent.shield)
         if opponent.weapon:
             return Weapon(name=opponent.weapon.name, stuff=opponent.weapon)
         return Weapon(name="Main nue")
+
+    def get_defense_shield(
+        self, opponent: CharacterModel, from_: CharacterModel, attacked_with: Weapon
+    ) -> typing.Optional[Weapon]:
+        if opponent.shield:
+            return Weapon(name=opponent.shield.name, stuff=opponent.shield)
+        return None
 
     def opponent_equipment_passes(
         self,
@@ -389,26 +428,30 @@ class FightLib:
         damage: float,
         details: typing.Optional[FightDetails] = None,
     ) -> typing.Tuple[Weapon, float]:
-        details.new_story_line("<li>")
-        details.new_story_line(f"Calcul de defense")
+        details.new_debug_story_line("<li>")
+        details.new_debug_story_line(f"Calcul de defense")
 
-        details.new_story_line("<ul>")
+        details.new_debug_story_line("<ul>")
         if opponent.armor:
             armor = Weapon(name=opponent.armor.name, stuff=opponent.armor)
             details.new_debug_story_line("<li>")
             details.new_debug_story_line(f"armor is {armor.name}")
+            details.new_debug_story_line("<ul>")
+            passes = armor.how_much_damages_passes(weapon, damage, details=details)
+            details.new_debug_story_line("</ul>")
             details.new_debug_story_line("</li>")
-            return armor, armor.how_much_damages_passes(weapon, damage, details=details)
+            details.new_debug_story_line("</ul>")
+            return armor, passes
 
         details.new_debug_story_line("<li>")
         details.new_debug_story_line(f"no armor")
         details.new_debug_story_line("</li>")
         details.new_debug_story_line("<li>")
-        details.new_debug_story_line(f"damage = {damage}")
+        details.new_debug_story_line(f"<b>damage = {damage}</b>")
         details.new_debug_story_line("</li>")
 
-        details.new_story_line("</ul>")
-        details.new_story_line("</li>")
+        details.new_debug_story_line("</ul>")
+        details.new_debug_story_line("</li>")
         return Weapon(name="Peau nue"), damage
 
     def defenser_evade(
@@ -417,6 +460,8 @@ class FightLib:
         attacker: CharacterModel,
         weapon: Weapon,
         defenser_weapon: Weapon,
+        # TODO : have a shield reduce chance to evade
+        defenser_shield: Weapon,
         details: FightDetails,
     ) -> bool:
         probability_to_evade0 = PROBABILITY_TO_EVADE_START_PROBABILITY  # percent
@@ -457,7 +502,7 @@ class FightLib:
         details.new_debug_story_line("</li>")
         details.new_debug_story_line("<li>")
         details.new_debug_story_line(
-            f"evade if random({rand_value}) < probability_to_evade({probability_to_evade2}) -> {evade}"
+            f"evade if random({rand_value}) &lt; probability_to_evade({probability_to_evade2}) -> {evade}"
         )
         details.new_debug_story_line("</li>")
 
@@ -506,18 +551,21 @@ class FightLib:
         return damages
 
     def apply_damage_on_equipment(
-        self, opponent: CharacterModel, equipment: Weapon
+        self, opponent: CharacterModel, equipment: Weapon, dont_touch_db: bool = False
     ) -> None:
         # Use updated stuff model infos
         pass  # TODO: Code it; display state
 
     def apply_damage_on_character(
-        self, opponent: CharacterModel, damages: float
+        self, opponent: CharacterModel, damages: float, dont_touch_db: bool = False
     ) -> None:
-        new_life_points = self._kernel.character_lib.reduce_life_points(
-            opponent.id, value=damages
-        )
-        opponent.life_points = new_life_points
+        if not dont_touch_db:
+            new_life_points = self._kernel.character_lib.reduce_life_points(
+                opponent.id, value=damages
+            )
+            opponent.life_points = new_life_points
+        else:
+            opponent.life_points -= damages
 
     def increase_attacker_skills(self, fighter: CharacterModel, weapon: Weapon) -> None:
         for skill_id in weapon.get_bonus_with_skills(self._kernel):

@@ -250,8 +250,8 @@ class StuffLib:
             image=doc.image if doc.image else None,
             carried_by=doc.carried_by_id,
             stuff_id=doc.stuff_id,
-            ap_required=float(doc.ap_required),
-            ap_spent=float(doc.ap_spent),
+            ap_required=float(doc.ap_required) if doc.ap_required else 0.0,
+            ap_spent=float(doc.ap_spent) if doc.ap_spent else 0.0,
             under_construction=doc.under_construction,
             weapon=stuff_properties.weapon,
             armor=stuff_properties.armor,
@@ -270,6 +270,7 @@ class StuffLib:
                 or doc.used_as_armor_by_id
             ),
             illustration=stuff_properties.illustration,
+            damages=stuff_properties.damages,
         )
 
     def get_carried_by(
