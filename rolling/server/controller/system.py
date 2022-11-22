@@ -148,6 +148,7 @@ class SystemController(BaseController):
             "fight_details": details,
             "debug": debug,
             "post_data": post_data,
+            "passes": passes,
         }
 
     def _generate_character(
