@@ -391,9 +391,9 @@ class FightLib:
                     await self._kernel.character_lib.reduce_action_points(
                         fighter.id, FIGHT_AP_CONSUME
                     )
-                    self._kernel.character_lib.increase_tiredness(
-                        fighter.id, FIGHT_TIREDNESS_INCREASE
-                    )
+                    # self._kernel.character_lib.increase_tiredness(
+                    #     fighter.id, FIGHT_TIREDNESS_INCREASE
+                    # )
 
             details.new_story_line("</ul>")
 

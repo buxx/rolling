@@ -1,4 +1,5 @@
 # coding: utf-8
+import copy
 import dataclasses
 import json
 import typing
@@ -134,7 +135,10 @@ class SystemController(BaseController):
                     affinities=[],
                     helpers={},
                 )
-                details.append(await fight_lib.fight(attackers, defensers))
+                detail = await fight_lib.fight(attackers, defensers)
+                details.append(
+                    ((copy.deepcopy(character1), copy.deepcopy(character2)), detail)
+                )
 
         return {
             "skills": self._kernel.game.config.skills.values(),
@@ -151,7 +155,7 @@ class SystemController(BaseController):
     ) -> CharacterModel:
         character = CharacterModel(
             id="n/a",
-            name=f"Personnage {i}",
+            name=f"Personnage{i}",
             alive=True,
             background_story="n/a",
             max_life_comp=0.0,

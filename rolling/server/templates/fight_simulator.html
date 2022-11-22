@@ -126,7 +126,7 @@
             
             <h2>Compte-rendu</h2>
 
-            {% for detail in fight_details %}
+            {% for (character1, character2), detail in fight_details %}
 
                 <h3>Passe {{ loop.index }}</h3>
 
@@ -139,6 +139,17 @@
                         {{ line|safe }}
                     {% endfor %}
                 {% endif %}
+
+                <h4>Etat des personnages</h4>
+
+                <ul>
+                    <li>
+                        {{ character1.name }} : {{ character1.life_points }} PV
+                    </li>
+                    <li>
+                        {{ character2.name }} : {{ character2.life_points }} PV
+                    </li>
+                </ul>
 
             {% endfor %}
 
