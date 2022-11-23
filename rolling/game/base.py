@@ -100,6 +100,8 @@ class GameConfig:
         ]
         self.stop_auto_drink_thirst: float = config_dict["stop_auto_drink_thirst"]
         self.stop_auto_eat_hunger: float = config_dict["stop_auto_eat_hunger"]
+        self.limit_is_thirsty: float = config_dict["limit_is_thirsty"]
+        self.limit_is_hunger: float = config_dict["limit_is_hunger"]
         self.limit_warning_drink_left_tick: int = config_dict[
             "limit_warning_drink_left_tick"
         ]

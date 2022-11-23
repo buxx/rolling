@@ -447,10 +447,8 @@ class CharacterLib:
                 character_document.id
             )
 
-        model.is_hunger = model.hunger > self._kernel.game.config.stop_auto_eat_hunger
-        model.is_thirsty = (
-            model.thirst > self._kernel.game.config.stop_auto_drink_thirst
-        )
+        model.is_hunger = model.hunger > self._kernel.game.config.limit_is_thirsty
+        model.is_thirsty = model.thirst > self._kernel.game.config.limit_is_thirsty
 
         return model
 
@@ -1653,7 +1651,7 @@ class CharacterLib:
             >= self._kernel.game.config.limit_hunger_increase_life_point
         ):
             hunger_class = "red"
-        elif character.hunger >= self._kernel.game.config.stop_auto_eat_hunger:
+        elif character.hunger >= self._kernel.game.config.limit_is_hunger:
             hunger_class = "yellow"
 
         if (
@@ -1661,7 +1659,7 @@ class CharacterLib:
             >= self._kernel.game.config.limit_thirst_increase_life_point
         ):
             thirst_class = "red"
-        elif character.thirst >= self._kernel.game.config.stop_auto_drink_thirst:
+        elif character.thirst >= self._kernel.game.config.limit_is_thirsty:
             thirst_class = "yellow"
 
         if character.is_exhausted:
