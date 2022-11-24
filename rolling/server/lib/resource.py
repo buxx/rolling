@@ -214,6 +214,21 @@ class ResourceLib:
             carried_models.append(self._carried_resource_model_from_doc(resource_docs_))
         return carried_models
 
+    def get_carried_by_ids(
+        self,
+        character_id: str,
+        exclude_shared_with_affinity: bool = False,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+    ) -> typing.List[str]:
+        rows = self.get_base_query(
+            carried_by_id=character_id,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_ids=shared_with_affinity_ids,
+            only_columns=[ResourceDocument.resource_id],
+        ).all()
+
+        return list(set(row[0] for row in rows))
+
     def get_ground_resource(
         self,
         world_row_i: int,
@@ -554,6 +569,7 @@ class ResourceLib:
         resource_id: str,
         for_actions_page: bool = False,
         filter_action_types: typing.Optional[typing.List[str]] = None,
+        disable_checks: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         resource_description = self._kernel.game.config.resources[resource_id]
@@ -570,7 +586,8 @@ class ResourceLib:
                 continue
 
             try:
-                action.check_is_possible(character, resource_id=resource_id)
+                if not disable_checks:
+                    action.check_is_possible(character, resource_id=resource_id)
                 actions.extend(action.get_character_actions(character, resource_id))
             except ImpossibleAction:
                 pass

@@ -173,12 +173,23 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        # Display all possible crafts in actions pages
+        carried_resource_ids = self._kernel.resource_lib.get_carried_by_ids(
+            character.id
+        )
+
+        required_txts = []
         for require in self.description.properties["require"]:
-            if require.get("resource") == resource_id:
+            if require["resource"] in carried_resource_ids:
                 return
 
-        raise ImpossibleAction("Non concerné")
+            resource_description = self._kernel.game.config.resources[
+                require["resource"]
+            ]
+            required_txts.append(resource_description.name)
+
+        raise ImpossibleAction(
+            f"Vous devez posséder au moins l'une des ressources suivantes : {', '.join(required_txts)}"
+        )
 
     async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: CraftInput
@@ -199,11 +210,6 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
-        try:
-            self.check_is_possible(character, resource_id)
-        except ImpossibleAction:
-            return []
-
         classes: typing.Optional[typing.List[str]] = None
         for produce in self._description.properties["produce"]:
             stuff_id = produce["stuff"]
@@ -427,11 +433,6 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
     def get_character_actions(
         self, character: "CharacterModel", stuff: "StuffModel"
     ) -> typing.List[CharacterActionLink]:
-        try:
-            self.check_is_possible(character, stuff)
-        except ImpossibleAction:
-            return []
-
         classes: typing.Optional[typing.List[str]] = None
         for produce in self._description.properties["produce"]:
             stuff_id = produce["stuff"]

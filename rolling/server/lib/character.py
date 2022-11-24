@@ -862,7 +862,7 @@ class CharacterLib:
                     )
                 )
 
-        if filter_action_types is None and builds:
+        if filter_action_types is None and only_quick_actions and builds:
             character_actions_.append(
                 CharacterActionLink(
                     name=f"Détails d'un bâtiment",
@@ -886,6 +886,7 @@ class CharacterLib:
         self,
         character: CharacterModel,
         filter_action_types: typing.Optional[typing.List[str]] = None,
+        disable_checks: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
 
@@ -896,6 +897,7 @@ class CharacterLib:
                     resource_id=resource.id,
                     for_actions_page=True,
                     filter_action_types=filter_action_types,
+                    disable_checks=disable_checks,
                 )
             )
 
@@ -1028,6 +1030,7 @@ class CharacterLib:
                     self.get_from_inventory_actions(
                         character,
                         filter_action_types=filter_action_types,
+                        disable_checks=True,
                     ),
                     "Inventaire",
                 )
@@ -1090,6 +1093,7 @@ class CharacterLib:
         resource_id: str,
         for_actions_page: bool = False,
         filter_action_types: typing.Optional[typing.List[str]] = None,
+        disable_checks: bool = False,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions = self._kernel.resource_lib.get_carrying_actions(
@@ -1097,6 +1101,7 @@ class CharacterLib:
             resource_id,
             for_actions_page=for_actions_page,
             filter_action_types=filter_action_types,
+            disable_checks=disable_checks,
         )
         return filter_action_links(character_actions)
 

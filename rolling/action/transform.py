@@ -366,6 +366,7 @@ class QuantityModel:
 
 
 class TransformResourcesIntoResourcesAction(WithResourceAction):
+    exclude_from_actions_page = True
     input_model = QuantityModel
     input_model_serializer = serpyco.Serializer(QuantityModel)
 
