@@ -1430,9 +1430,11 @@ class CharacterLib:
         ).update({"accepted": False, "request": False, "fighter": False})
 
         tracim_account = self.get_tracim_account(character_id)
-        rrolling.Dealer(self._kernel.server_config.tracim_config).set_account_email(
+        rrolling.tracim.Dealer(
+            self._kernel.server_config.tracim_config
+        ).set_account_email(
             tracim_account,
-            rrolling.AccountId(character_doc.tracim_user_id),
+            rrolling.tracim.AccountId(character_doc.tracim_user_id),
             f"{uuid.uuid4().hex}@local",
         )
 
