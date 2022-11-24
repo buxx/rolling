@@ -94,7 +94,9 @@ def xena_permanent_and_offer(
     return offer_doc
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestBusiness:
+    @pytest.mark.asyncio
     async def _assert_owned_offers(
         self,
         kernel: Kernel,
@@ -125,6 +127,7 @@ class TestBusiness:
         for name in names:
             assert next(l for l in item_labels if name in str(l))
 
+    @pytest.mark.asyncio
     async def _assert_edit_offer(
         self,
         kernel: Kernel,
@@ -171,6 +174,7 @@ class TestBusiness:
         else:
             assert "Désactiver" == descr.items[1].label
 
+    @pytest.mark.asyncio
     async def _assert_read_offer(
         self,
         kernel: Kernel,
@@ -220,6 +224,7 @@ class TestBusiness:
         else:
             assert f"{owner.name} ne peut pas assurer cette opération"
 
+    @pytest.mark.asyncio
     async def test_create_offer__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -254,6 +259,7 @@ class TestBusiness:
             open_=False,
         )
 
+    @pytest.mark.asyncio
     async def test_create_offer__change_operands(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -289,6 +295,7 @@ class TestBusiness:
             offer_operand_str=ALL_OF_THEM,
         )
 
+    @pytest.mark.asyncio
     async def test_create_offer__open_close(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -323,6 +330,7 @@ class TestBusiness:
             kernel, web, xena, count=1, names=["(X) My offer"]
         )
 
+    @pytest.mark.asyncio
     async def test_add_items__check_form(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -361,6 +369,7 @@ class TestBusiness:
             assert name in descr.items[0].items[0].choices
         assert descr.items[0].items[1].name == "quantity"
 
+    @pytest.mark.asyncio
     async def test_update_offer__have_some_required__request_and(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -413,6 +422,7 @@ class TestBusiness:
             ],
         )
 
+    @pytest.mark.asyncio
     async def test_update_offer__have_some_required__remove_item(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -459,6 +469,7 @@ class TestBusiness:
             request_item_names_not=[EXPECTED_PLASTIC_BOTTLE_NAME],
         )
 
+    @pytest.mark.asyncio
     async def test_edit_offer__test_owner_have_display(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -510,6 +521,7 @@ class TestBusiness:
             open_=True,
         )
 
+    @pytest.mark.asyncio
     async def test_read_offer__have_some_required_items__and(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -597,6 +609,7 @@ class TestBusiness:
             can_make_deal=True,
         )
 
+    @pytest.mark.asyncio
     async def test_read_offer__have_some_required_items__or(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -659,6 +672,7 @@ class TestBusiness:
             can_make_deal=True,
         )
 
+    @pytest.mark.asyncio
     async def test_read_offer__make_transaction__missing_request_and(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -690,6 +704,7 @@ class TestBusiness:
         item_labels = [i.label or i.text for i in descr.items]
         assert "Vous ne possédez pas ce qu'il faut pour faire ce marché" in item_labels
 
+    @pytest.mark.asyncio
     async def test_read_offer__make_transaction__owner_missing_offer_and(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -716,6 +731,7 @@ class TestBusiness:
         item_labels = [i.label or i.text for i in descr.items]
         assert f"{xena.name} ne peut pas assurer cette opération" in item_labels
 
+    @pytest.mark.asyncio
     async def test_read_offer__make_transaction__request_and(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -812,6 +828,7 @@ class TestBusiness:
             character_id=arthur.id, stuff_id="STONE_HAXE"
         )
 
+    @pytest.mark.asyncio
     async def test_read_offer__make_transaction__missing_all_request_or(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -840,6 +857,7 @@ class TestBusiness:
         item_labels = [i.label or i.text for i in descr.items]
         assert "Vous ne possédez pas ce qu'il faut pour faire ce marché" in item_labels
 
+    @pytest.mark.asyncio
     async def test_read_offer__make_transaction__request_or(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -943,6 +961,7 @@ class TestBusiness:
             character_id=arthur.id, stuff_id="STONE_HAXE"
         )
 
+    @pytest.mark.asyncio
     async def test_create_with_character_transaction(
         self,
         worldmapc_xena_model: CharacterModel,

@@ -34,6 +34,7 @@ def transform_rtr_action2(
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestTransformAction:
     @pytest.mark.parametrize(
         "input_quantity,expected_left_quantity,expected_produced_quantity,consumed_ap",
@@ -46,6 +47,7 @@ class TestTransformAction:
             ("2.0", 3.0, 4, 10.0),
         ],
     )
+    @pytest.mark.asyncio
     async def test_unit__transform_resource_to_resource__ok__m3_to_unit(
         self,
         worldmapc_kernel: Kernel,
@@ -119,6 +121,7 @@ class TestTransformAction:
             (500.0, "500.0 g", "500.0 g", [("250", 250.0), ("0.250kg", 0)]),
         ],
     )
+    @pytest.mark.asyncio
     async def test_transform_with_kg_or_g_input(
         self,
         worldmapc_kernel: Kernel,

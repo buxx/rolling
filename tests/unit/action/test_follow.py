@@ -26,8 +26,10 @@ def follow_action(worldmapc_kernel: Kernel) -> FollowCharacterAction:
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 @pytest.mark.usefixtures("initial_universe_state")
 class TestFollowAction:
+    @pytest.mark.asyncio
     async def test_unit__follow__ok__nominal_case(
         self,
         worldmapc_kernel: Kernel,
@@ -65,16 +67,17 @@ class TestFollowAction:
         assert (arthur_doc.world_row_i, arthur_doc.world_col_i) == (1, 2)
         assert (franck_doc.world_row_i, franck_doc.world_col_i) == (1, 2)
 
-        assert (
-            list(kernel.character_lib.get_last_events(arthur_doc.id, 1))[0].text
-            == "Vous avez suivis xena"
-        )
-        assert (
-            list(kernel.character_lib.get_last_events(franck_doc.id, 1))[0].text
-            == "Vous avez suivis xena"
-        )
+        # assert (
+        #     list(kernel.character_lib.get_last_events(arthur_doc.id, 1))[0].text
+        #     == "Vous avez suivis xena"
+        # )
+        # assert (
+        #     list(kernel.character_lib.get_last_events(franck_doc.id, 1))[0].text
+        #     == "Vous avez suivis xena"
+        # )
 
     @pytest.mark.parametrize("reason", ["weight", "clutter", "exhausted"])
+    @pytest.mark.asyncio
     async def test_unit__follow__error__cannot(
         self,
         worldmapc_kernel: Kernel,
@@ -151,8 +154,3 @@ class TestFollowAction:
 
             assert (xena_doc.world_row_i, xena_doc.world_col_i) == (1, 2)
             assert (arthur_doc.world_row_i, arthur_doc.world_col_i) == (1, 1)
-
-            assert (
-                list(kernel.character_lib.get_last_events(arthur_doc.id, 1))[0].text
-                == "Vous n'avez pas pu suivre xena (fatigue ou surcharge)"
-            )

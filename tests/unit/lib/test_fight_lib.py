@@ -14,6 +14,7 @@ from rolling.model.stuff import StuffModel
 from rolling.server.document.affinity import AffinityDocument
 from rolling.server.document.affinity import AffinityRelationDocument
 from rolling.server.document.affinity import MEMBER_STATUS
+from rolling.server.lib.fight import FightDetails
 
 
 def make_fake_get_attack_weapon(params: typing.Dict[str, Weapon]):
@@ -37,36 +38,44 @@ def make_fake_get_defense_weapon(params: typing.Dict[str, Weapon]):
 def make_fake_defenser_evade(params: typing.Dict[str, bool]):
     def fake_defenser_evade(
         self,
-        opponent: CharacterModel,
-        from_: CharacterModel,
+        evader: CharacterModel,
+        attacker: CharacterModel,
         weapon: Weapon,
         defenser_weapon: Weapon,
+        defenser_shield: Weapon,
+        details: FightDetails,
     ) -> bool:
-        return params[opponent.id]
+        return params[evader.id]
 
     return fake_defenser_evade
 
 
-def make_fake_opponent_equipment_protect(
+def make_fake_opponent_equipment_passes(
     params: typing.Dict[str, typing.Tuple[Weapon, float]]
 ):
-    def fake_opponent_equipment_protect(
+    def fake_opponent_equipment_passes(
         self,
         opponent: CharacterModel,
         from_: CharacterModel,
         weapon: Weapon,
         damage: float,
+        details: typing.Optional[FightDetails] = None,
     ) -> typing.Tuple[Weapon, float]:
         weapon, damages = params[opponent.id]
         if damages is None:
             damages = damage
         return weapon, damages
 
-    return fake_opponent_equipment_protect
+    return fake_opponent_equipment_passes
 
 
 def make_fake_get_damage(params: typing.Dict[str, float]):
-    def fake_get_damage(self, fighter: CharacterModel, weapon: Weapon) -> float:
+    def fake_get_damage(
+        self,
+        fighter: CharacterModel,
+        weapon: Weapon,
+        details: typing.Optional[FightDetails],
+    ) -> float:
         return params[fighter.id]
 
     return fake_get_damage
@@ -90,8 +99,8 @@ def patch_fight(
         "rolling.server.lib.fight.FightLib.defenser_evade",
         new=make_fake_defenser_evade(evades),
     ), patch(
-        "rolling.server.lib.fight.FightLib.opponent_equipment_protect",
-        new=make_fake_opponent_equipment_protect(protect),
+        "rolling.server.lib.fight.FightLib.opponent_equipment_passes",
+        new=make_fake_opponent_equipment_passes(protect),
     ), patch(
         "rolling.server.lib.fight.FightLib.get_damage",
         new=make_fake_get_damage(damages),
@@ -103,6 +112,7 @@ def patch_fight(
         yield
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestFightLib:
     def test_unit__fight_description__ok__simple_lonely_opposition(
         self,
@@ -244,6 +254,7 @@ class TestFightLib:
             [f.id for f in attack.ready_fighters]
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__simple_armies_with_some_no_more_ap(
         self,
         france_affinity: AffinityDocument,
@@ -592,8 +603,8 @@ class TestFightLib:
                 {"france_warlord0": 0.8, "england_warlord0": 1.0},
                 [
                     "Un affrontement débute: 1 combattant(s) se lance(nt) à l'assault de 1 combattant(s).",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue mais EnglandWarlord0 parvient à esquiver.",
-                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver.",
+                    "🛡🛡 FranceWarlord0 attaque EnglandWarlord0 avec Main nue mais EnglandWarlord0 parvient à esquiver",
+                    "🛡🛡 EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver",
                 ],
                 {"england_warlord0": 0.0, "france_warlord0": 0.0},
             ),
@@ -614,8 +625,10 @@ class TestFightLib:
                 {"france_warlord0": 0.8, "england_warlord0": 1.0},
                 [
                     "Un affrontement débute: 1 combattant(s) se lance(nt) à l'assault de 1 combattant(s).",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue. Peau nue à en partie protégé EnglandWarlord0.",
-                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue. Peau nue à protégé FranceWarlord0.",
+                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue à en partie protégé EnglandWarlord0",
+                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue",
+                    "Peau nue à protégé FranceWarlord0",
                 ],
                 {"england_warlord0": 0.7, "france_warlord0": 0.0},
             ),
@@ -636,12 +649,16 @@ class TestFightLib:
                 {"france_warlord0": 100.0, "england_warlord0": 1.0},
                 [
                     "Un affrontement débute: 1 combattant(s) se lance(nt) à l'assault de 1 combattant(s).",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0. Le coup à été fatal pour EnglandWarlord0.",
+                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "Le coup à été fatal pour EnglandWarlord0",
+                    "EnglandWarlord0 est hors de combat",
                 ],
                 {"england_warlord0": 100.0, "france_warlord0": 0.0},
             ),
         ],
     )
+    @pytest.mark.asyncio
     async def test_unit__fight__ok__one_vs_one(
         self,
         france_warlord: CharacterModel,
@@ -680,7 +697,10 @@ class TestFightLib:
                 ),
             )
 
-        assert story == details.story
+        for line in story:
+            assert any(
+                [line in story_line for story_line in details.story]
+            ), f"line '{line}' not found in story"
 
         for character_id, expected_life_point in expected_life_points.items():
             character_doc = worldmapc_kernel.character_lib.get_document(character_id)
@@ -739,6 +759,7 @@ class TestFightLib:
             )
         ],
     )
+    @pytest.mark.asyncio
     async def test_unit__fight__ok__army_vs_one(
         self,
         france_affinity: AffinityDocument,
@@ -936,6 +957,7 @@ class TestFightLib:
             ),
         ],
     )
+    @pytest.mark.asyncio
     async def test_unit__fight__ok__army_vs_army(
         self,
         france_affinity: AffinityDocument,

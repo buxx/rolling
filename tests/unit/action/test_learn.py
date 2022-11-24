@@ -35,8 +35,10 @@ def propose_teach_action(worldmapc_kernel: Kernel) -> ProposeTeachKnowledgeActio
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 @pytest.mark.usefixtures("initial_universe_state")
 class TestLearnKnowledgeAction:
+    @pytest.mark.asyncio
     async def test_unit__learn__ok__nominal_case(
         self,
         worldmapc_kernel: Kernel,
@@ -82,6 +84,7 @@ class TestLearnKnowledgeAction:
         franck = kernel.character_lib.get(franck.id)
         assert "blacksmith" in franck.knowledges
 
+    @pytest.mark.asyncio
     async def test_unit__learn__err__not_enough_ap(
         self,
         worldmapc_kernel: Kernel,
@@ -98,6 +101,7 @@ class TestLearnKnowledgeAction:
             )
         assert str(caught.value) == "Pas assez de points d'actions"
 
+    @pytest.mark.asyncio
     async def test_unit__learn__err__already_knew(
         self,
         worldmapc_kernel: Kernel,
@@ -114,6 +118,7 @@ class TestLearnKnowledgeAction:
             )
         assert str(caught.value) == "Connaissance déjà acquise"
 
+    @pytest.mark.asyncio
     async def test_unit__learn__err__require_other_knowledge(
         self,
         worldmapc_kernel: Kernel,
@@ -129,6 +134,7 @@ class TestLearnKnowledgeAction:
             )
         assert str(caught.value) == "Cette connaissance ne peut pas encore etre abordé"
 
+    @pytest.mark.asyncio
     async def test_unit__propose_and_teach__ok__nominal_case(
         self,
         worldmapc_kernel: Kernel,

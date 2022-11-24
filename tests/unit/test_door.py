@@ -49,6 +49,7 @@ def socket_send_str_mock() -> typing.Generator[unittest.mock.AsyncMock, None, No
         yield mock_
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestDoor:
     def _place_door(self, kernel: Kernel) -> DoorDocument:
         build = kernel.build_lib.place_build(
@@ -179,6 +180,7 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_two_rule_lock__author_first_travel__stranger_second_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -233,6 +235,7 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_one_rule_lock__author_first_travel__stranger_second_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -284,6 +287,7 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_one_rule_lock__author_dead__stranger_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -316,6 +320,7 @@ class TestDoor:
             build_id=door.id, character_id=arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_one_rule_lock__author_vulnerable__stranger_can(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -356,6 +361,7 @@ class TestDoor:
     @pytest.mark.usefixtures("websocket_prepare_mock")
     @pytest.mark.usefixtures("zone_event_manager_listen_mock")
     @pytest.mark.usefixtures("zone_event_manager_close_mock")
+    @pytest.mark.asyncio
     async def test_events_when_door_author_left_when_back_in_zone(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -410,6 +416,7 @@ class TestDoor:
     @pytest.mark.usefixtures("websocket_prepare_mock")
     @pytest.mark.usefixtures("zone_event_manager_listen_mock")
     @pytest.mark.usefixtures("zone_event_manager_close_mock")
+    @pytest.mark.asyncio
     async def test_events_when_door_author_update_rule(
         self,
         worldmapc_xena_model: CharacterModel,

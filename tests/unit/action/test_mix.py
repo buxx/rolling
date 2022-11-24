@@ -24,6 +24,7 @@ def mix_action(worldmapc_kernel: Kernel) -> MixResourcesAction:
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestMixAction:
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -53,6 +54,7 @@ class TestMixAction:
             ("MIX3", {"RES1": 2500.0, "RES2": 2500.0}, 2.5),
         ],
     )
+    @pytest.mark.asyncio
     async def test_production_capacities(
         self,
         worldmapc_kernel: Kernel,
@@ -148,6 +150,7 @@ class TestMixAction:
             ),
         ],
     )
+    @pytest.mark.asyncio
     async def test_produce(
         self,
         worldmapc_kernel: Kernel,

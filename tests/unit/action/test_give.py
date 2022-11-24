@@ -26,6 +26,7 @@ def give_action(worldmapc_kernel: Kernel) -> GiveToCharacterAction:
 
 
 class TestGiveAction:
+    @pytest.mark.asyncio
     async def test_unit__list_give__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -65,6 +66,7 @@ class TestGiveAction:
             "?give_resource_id=WOOD",
         ) in item_label_and_urls
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_one_then_one_shield__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -124,6 +126,7 @@ class TestGiveAction:
             == arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_two_shields__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -165,6 +168,7 @@ class TestGiveAction:
             == arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_one_jacket__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -188,6 +192,7 @@ class TestGiveAction:
             == arthur.id
         )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_wood__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -234,6 +239,7 @@ class TestGiveAction:
             character_id=xena.id, resource_id="WOOD"
         )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_wood__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -256,6 +262,7 @@ class TestGiveAction:
                 ),
             )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_shield__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -277,6 +284,7 @@ class TestGiveAction:
                 ),
             )
 
+    @pytest.mark.asyncio
     async def test_unit__list_give_shield__err__dont_have(
         self,
         worldmapc_kernel: Kernel,

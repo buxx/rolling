@@ -240,6 +240,7 @@ class TestBringResourcesOnBuild:
         character_actions = action.get_character_actions(xena, build.id)
         assert not character_actions
 
+    @pytest.mark.asyncio
     async def test_unit__perform__nothing_on_place_and_no_progress(
         self,
         action: BringResourcesOnBuild,
@@ -270,6 +271,7 @@ class TestBringResourcesOnBuild:
         assert 0.00025 == resource.quantity
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
+    @pytest.mark.asyncio
     async def test_deposit_resource_on_build_allowing_it_because_allow_all(
         self,
         worldmapc_kernel: Kernel,
@@ -299,6 +301,7 @@ class TestBringResourcesOnBuild:
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
     @pytest.mark.usefixtures("worldmapc_xena_stone")
+    @pytest.mark.asyncio
     async def test_deposit_resource_on_build_allowing_it_because_allow_limit(
         self,
         worldmapc_kernel: Kernel,
@@ -335,6 +338,7 @@ class TestBringResourcesOnBuild:
         assert kernel.resource_lib.get_stored_in_build(build6.id)[0].id == "STONE"
 
     @pytest.mark.usefixtures("worldmapc_xena_stone")
+    @pytest.mark.asyncio
     async def test_deposit_resource_on_build_refusing_it_because_not_allow(
         self,
         worldmapc_kernel: Kernel,
@@ -361,6 +365,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.resource_lib.get_stored_in_build(build4.id)
 
+    @pytest.mark.asyncio
     async def test_deposit_stuff_on_build_allowing_it_because_allow_all(
         self,
         worldmapc_kernel: Kernel,
@@ -390,6 +395,7 @@ class TestBringResourcesOnBuild:
         assert 1 == len(kernel.stuff_lib.get_from_build(build5.id))
         assert kernel.stuff_lib.get_from_build(build5.id)[0].id == haxe.id
 
+    @pytest.mark.asyncio
     async def test_deposit_stuff_on_build_refusing_it_because_allow_limit(
         self,
         worldmapc_kernel: Kernel,
@@ -418,6 +424,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.stuff_lib.get_from_build(build6.id)
 
+    @pytest.mark.asyncio
     async def test_deposit_stuff_on_build_refusing_it_because_not_allow(
         self,
         worldmapc_kernel: Kernel,
@@ -447,6 +454,7 @@ class TestBringResourcesOnBuild:
         assert not kernel.stuff_lib.get_from_build(build4.id)
 
     @pytest.mark.usefixtures("worldmapc_xena_wood")
+    @pytest.mark.asyncio
     async def test_take_resource_from_build(
         self,
         worldmapc_kernel: Kernel,
@@ -478,6 +486,7 @@ class TestBringResourcesOnBuild:
         # Then
         assert not kernel.resource_lib.get_stored_in_build(build5.id)
 
+    @pytest.mark.asyncio
     async def test_take_stuff_from_build(
         self,
         worldmapc_kernel: Kernel,

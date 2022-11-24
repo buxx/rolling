@@ -65,6 +65,7 @@ def build_a_off(worldmapc_kernel: Kernel) -> BuildDocument:
     return build_doc
 
 
+@pytest.mark.usefixtures("disable_tracim")
 @pytest.mark.usefixtures("initial_universe_state")
 class TestExecuteTurn:
     def test_alive_since_evolution(
@@ -89,6 +90,8 @@ class TestExecuteTurn:
         assert 1 == xena.alive_since
         assert 1 == arthur.alive_since
 
+    @pytest.mark.usefixtures("affinity_name_available")
+    @pytest.mark.asyncio
     async def test_unit__character_die__ok__affinity_relations_discard(
         self,
         worldmapc_kernel: Kernel,
@@ -97,12 +100,14 @@ class TestExecuteTurn:
         arthur: CharacterDocument,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         session = worldmapc_kernel.server_db_session
         session.refresh(xena)
         session.refresh(arthur)
         web = worldmapc_web_app
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
 
         # fixtures
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
@@ -151,8 +156,8 @@ class TestExecuteTurn:
         "after_thirst,"
         "after_bottle_filled",
         [
-            (1.0, 0.0, 1.0, 1.05, 2.0, 1.0),
-            (1.0, 20.0, 1.0, 1.05, 20.0, 0.96),
+            (1.0, 0.0, 1.0, 1.05, 0.0, 0.96),
+            (1.0, 20.0, 1.0, 1.05, 0.0, 0.56),
             (1.0, 90.0, 1.0, 1.05, 42.0, 0.0),
             (1.0, 100.0, 0.04, 1.05, 50.0, 0.0),
             (1.0, 100.0, 0.0, 0.8, 100.0, 0.0),
@@ -268,7 +273,7 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert float(xena.life_points) == 1.05
-        assert float(xena.thirst) == 20.0
+        assert float(xena.thirst) == 0.0
 
     # This test depend on game1 config !
     @pytest.mark.parametrize(
@@ -279,8 +284,8 @@ class TestExecuteTurn:
         "after_hunger,"
         "after_vegetal_food_quantity",
         [
-            (1.0, 0.0, 1.0, 1.05, 1.0, 1.0),
-            (1.0, 20.0, 1.0, 1.05, 20.0, 0.96),
+            (1.0, 0.0, 1.0, 1.05, 0.0, 0.96),
+            (1.0, 20.0, 1.0, 1.05, 0.0, 0.16),
             (1.0, 90.0, 1.0, 1.05, 66.0, 0.0),
             (1.0, 100.0, 0.04, 1.0, 99.0, 0.0),
             (1.0, 100.0, 0.0, 0.9, 100.0, 0.0),
@@ -351,7 +356,7 @@ class TestExecuteTurn:
         # Then
         xena = kernel.character_lib.get_document(xena.id)
         assert float(xena.life_points) == 1.05
-        assert round(xena.hunger, 1) == 19.8
+        assert round(xena.hunger, 1) == 0.0
         with pytest.raises(NoCarriedResource):
             kernel.resource_lib.get_one_carried_by(
                 xena.id, resource_id="VEGETAL_FOOD_FRESH"
@@ -359,9 +364,9 @@ class TestExecuteTurn:
         r = kernel.resource_lib.get_one_carried_by(
             xena.id, resource_id="VEGETAL_FOOD_FRESH2"
         )
-        assert round(r.quantity, 1) == 97.8
+        assert round(r.quantity, 1) == 97.0
 
-    def test_eat__ko__eat_resource_but_not_enough(
+    def test_eat__ok__eat_resource_but_not_enough(
         self, worldmapc_kernel: Kernel, turn_lib: TurnLib, xena: CharacterDocument
     ) -> None:
         kernel = worldmapc_kernel
@@ -369,15 +374,15 @@ class TestExecuteTurn:
         kernel.resource_lib.add_resource_to(
             character_id=xena.id,
             resource_id="VEGETAL_FOOD_FRESH",
-            quantity=0.5,  # not enough
+            quantity=0.5,
         )
         with unittest.mock.patch(
             "rolling.server.effect.EffectManager.enable_effect"
         ) as fake_enable_effect:
             turn_lib.execute_turn()
 
-        assert kernel.resource_lib.have_resource(
-            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH", quantity=0.46
+        assert not kernel.resource_lib.have_resource(
+            character_id=xena.id, resource_id="VEGETAL_FOOD_FRESH"
         )
         assert not fake_enable_effect.called
 

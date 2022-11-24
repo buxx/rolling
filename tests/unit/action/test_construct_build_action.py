@@ -57,6 +57,7 @@ def action(worldmapc_kernel: Kernel) -> ConstructBuildAction:
     yield action
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestConstructBuildAction:
     def test__get_character_actions__build_finished(
         self,
@@ -90,6 +91,7 @@ class TestConstructBuildAction:
         )
         assert "Faire avancer la construction" == action.name
 
+    @pytest.mark.asyncio
     async def test__perform_some_hours__build_not_started_no_resources(
         self,
         action: ConstructBuildAction,
@@ -109,6 +111,7 @@ class TestConstructBuildAction:
             )
         assert "Il manque Petit bois" == str(exc.value)
 
+    @pytest.mark.asyncio
     async def test__perform__build_not_started_with_some_resources(
         self,
         action: ConstructBuildAction,
@@ -186,6 +189,7 @@ class TestConstructBuildAction:
         assert 2.0 == float(build.ap_spent)
         assert not kernel.resource_lib.get_stored_in_build(build_id=build.id)
 
+    @pytest.mark.asyncio
     async def test__perform__build_not_started_with_multiple_resources(
         self,
         action: ConstructBuildAction,

@@ -24,7 +24,9 @@ def power_off_action(worldmapc_kernel: Kernel) -> DestroyBuildAction:
     yield action
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestDestroyBuildAction:
+    @pytest.mark.asyncio
     async def test_destroy_door_with_relations(
         self,
         worldmapc_kernel: Kernel,
@@ -64,6 +66,7 @@ class TestDestroyBuildAction:
         assert not kernel.door_lib.get_door_relations_query(door.id).count()
         assert not kernel.build_lib.get_all_ids(None)
 
+    @pytest.mark.asyncio
     async def test_destroy_door_one_ap(
         self,
         worldmapc_kernel: Kernel,
@@ -108,6 +111,7 @@ class TestDestroyBuildAction:
         # Then
         assert not kernel.build_lib.get_all_ids(None)
 
+    @pytest.mark.asyncio
     async def test_destroy_build_with_ressource_and_stuffs(
         self,
         worldmapc_kernel: Kernel,

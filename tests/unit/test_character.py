@@ -32,6 +32,7 @@ class TestCharacter:
             (-1, -1, 0, 0),
         ],
     )
+    @pytest.mark.asyncio
     async def test_unit__update_retreat__ok__nominal_cases(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -76,6 +77,7 @@ class TestCharacter:
         assert expected_attack == doc.attack_allowed_loss_rate
         assert expected_defend == doc.defend_allowed_loss_rate
 
+    @pytest.mark.asyncio
     async def _get_card_item(
         self, web: TestClient, character_id: str, item_label: str
     ) -> Part:
@@ -85,6 +87,7 @@ class TestCharacter:
         item_by_label = {i.label: i for i in descr.items if i.label}
         return item_by_label[item_label]
 
+    @pytest.mark.asyncio
     async def _use_as(
         self, web: TestClient, action: ActionType, character_id: str, stuff_id: int
     ):
@@ -100,6 +103,7 @@ class TestCharacter:
         )
         assert 200 == resp.status
 
+    @pytest.mark.asyncio
     async def test_unit__card_weapons__ok__set_then_unset(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -147,6 +151,7 @@ class TestCharacter:
         armor = await self._get_card_item(web, xena.id, "Armure")
         assert armor.text == "aucune"
 
+    @pytest.mark.asyncio
     async def test_unit__pick_from_inventory(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -197,6 +202,7 @@ class TestCharacter:
 
     # FIXME BS NOW: Ajouter les trucs partagés avec l'affinité au TAKE
     @pytest.mark.parametrize("arthur_take", [False])
+    @pytest.mark.asyncio
     async def test_unit__share_with_affinity_then_take(
         self,
         worldmapc_xena_model: CharacterModel,

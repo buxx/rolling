@@ -1,4 +1,5 @@
 # coding: utf-8
+import unittest
 from aiohttp.test_utils import TestClient
 import pytest
 import serpyco
@@ -20,16 +21,20 @@ from tests.utils import in_one_of
 
 
 class TestAffinity:
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__create_affinity__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
 
         #  reation page affinity
         resp = await web.post(f"/affinity/{xena.id}/new")
@@ -39,7 +44,10 @@ class TestAffinity:
         assert "name" == descr.items[0].items[0].name
 
         # create affinity
-        await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
+        response = await web.post(
+            f"/affinity/{xena.id}/new", json={"name": "MyAffinity"}
+        )
+        response_text = await response.text()
         affinity = kernel.server_db_session.query(AffinityDocument).one()
         assert "MyAffinity" == affinity.name
         assert "ONE_CHIEF_ACCEPT" == affinity.join_type
@@ -83,9 +91,11 @@ class TestAffinity:
         assert "/affinity/xena/manage/1" in form_actions
         assert "/affinity/xena/edit-relation/1" in form_actions
 
+    @pytest.mark.usefixtures("affinity_name_available")
     @pytest.mark.parametrize(
         "request_,fighter", [(False, True), (True, True), (True, False)]
     )
+    @pytest.mark.asyncio
     async def test_unit__join_affinity__ok__as_non_member(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -95,11 +105,13 @@ class TestAffinity:
         worldmapc_kernel: Kernel,
         request_: bool,
         fighter: bool,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
 
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
@@ -233,6 +245,8 @@ class TestAffinity:
     @pytest.mark.parametrize(
         "disallowed,rejected", [(False, True), (True, False), (True, True)]
     )
+    @pytest.mark.usefixtures("affinity_name_available")
+    @pytest.mark.asyncio
     async def test_unit__join_affinity__ok__as_old_member(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -242,11 +256,13 @@ class TestAffinity:
         worldmapc_kernel: Kernel,
         disallowed: bool,
         rejected: bool,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
 
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         affinity: AffinityDocument = kernel.server_db_session.query(
@@ -281,6 +297,8 @@ class TestAffinity:
         assert not arthur_relation.accepted
 
     @pytest.mark.parametrize("fighter", [True, False])
+    @pytest.mark.usefixtures("affinity_name_available")
+    @pytest.mark.asyncio
     async def test_unit__reject_affinity__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -289,11 +307,14 @@ class TestAffinity:
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
         fighter: bool,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         await web.post(
             f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}"
@@ -334,6 +355,8 @@ class TestAffinity:
         assert "/affinity/arthur/edit-relation/1" in form_actions
 
     @pytest.mark.parametrize("fighter", [True, False])
+    @pytest.mark.usefixtures("affinity_name_available")
+    @pytest.mark.asyncio
     async def test_unit__discard_request__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -342,11 +365,14 @@ class TestAffinity:
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
         fighter: bool,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         await web.post(
             f"/affinity/arthur/edit-relation/1?request=1&fighter={int(fighter)}"
@@ -399,6 +425,8 @@ class TestAffinity:
         labels = extract_description_properties(descr.items, "label")
         assert f"MyAffinity{expected_str} 1|1" in labels
 
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__only_fight_for_ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -406,11 +434,14 @@ class TestAffinity:
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
         resp = await web.post(f"/affinity/arthur/edit-relation/1?fighter=1")
@@ -448,6 +479,8 @@ class TestAffinity:
         assert "1 membre(s)" in descr.items[1].text
         assert f"1 prêt(s)" in descr.items[1].text
 
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__manage_ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -455,10 +488,13 @@ class TestAffinity:
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
         affinity: AffinityDocument = kernel.server_db_session.query(
@@ -520,6 +556,8 @@ class TestAffinity:
             == descr.items[0].items[0].value
         )
 
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__manage_ok__to_accept_all_with_requests(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -527,11 +565,14 @@ class TestAffinity:
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
 
         affinity: AffinityDocument = kernel.server_db_session.query(
@@ -578,6 +619,8 @@ class TestAffinity:
         assert arthur_relation.accepted
 
     @pytest.mark.parametrize("accept", [True, False])
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__join_with_type_one_chief_ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -586,11 +629,14 @@ class TestAffinity:
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
         accept: bool,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         affinity: AffinityDocument = kernel.server_db_session.query(
             AffinityDocument
@@ -691,6 +737,8 @@ class TestAffinity:
         assert not arthur_relation.request
 
     @pytest.mark.parametrize("to_status_str", [CHIEF_STATUS[1], WARLORD_STATUS[1]])
+    @pytest.mark.asyncio
+    @pytest.mark.usefixtures("affinity_name_available")
     async def test_unit__change_member_status__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -699,11 +747,14 @@ class TestAffinity:
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
         to_status_str: str,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         affinity: AffinityDocument = kernel.server_db_session.query(
             AffinityDocument
@@ -762,6 +813,8 @@ class TestAffinity:
         ]
         assert arthur_relation.status_id == expected
 
+    @pytest.mark.usefixtures("affinity_name_available")
+    @pytest.mark.asyncio
     async def test_unit__disallow_member__ok__nominal_case(
         self,
         worldmapc_xena_model: CharacterModel,
@@ -769,11 +822,14 @@ class TestAffinity:
         worldmapc_web_app: TestClient,
         descr_serializer: serpyco.Serializer,
         worldmapc_kernel: Kernel,
+        disable_tracim: unittest.mock.MagicMock,
     ) -> None:
         web = worldmapc_web_app
         xena = worldmapc_xena_model
         arthur = worldmapc_arthur_model
         kernel = worldmapc_kernel
+        disable_tracim.Dealer().ensure_space.return_value = 42
+
         await web.post(f"/affinity/{xena.id}/new", json={"name": "MyAffinity"})
         affinity: AffinityDocument = kernel.server_db_session.query(
             AffinityDocument

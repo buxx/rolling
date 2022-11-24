@@ -127,6 +127,7 @@ class TestTakeFromCharacterAction:
         assert str(caught.value) == "arthur ne peut contraindre xena"
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -170,6 +171,7 @@ class TestTakeFromCharacterAction:
         ) in item_label_and_urls
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_one_then_one_shield__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -231,6 +233,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_two_shields__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -274,6 +277,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_one_jacket__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -299,6 +303,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_wood__ok(
         self,
         worldmapc_kernel: Kernel,
@@ -347,6 +352,7 @@ class TestTakeFromCharacterAction:
         )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_wood__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -371,6 +377,7 @@ class TestTakeFromCharacterAction:
             )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_shield__err__require_more(
         self,
         worldmapc_kernel: Kernel,
@@ -394,6 +401,7 @@ class TestTakeFromCharacterAction:
             )
 
     @pytest.mark.parametrize("modifier", [_apply_low_lp, _apply_shares])
+    @pytest.mark.asyncio
     async def test_unit__list_take_shield__err__dont_have(
         self,
         worldmapc_kernel: Kernel,
@@ -411,6 +419,7 @@ class TestTakeFromCharacterAction:
                 arthur, xena, TakeFromModel(take_stuff_id=42, take_stuff_quantity=1)
             )
 
+    @pytest.mark.asyncio
     async def test_take_more_than_ground_is_working(
         self,
         take_resource_action: TakeResourceAction,

@@ -1,4 +1,5 @@
 # coding: utf-8
+import unittest
 from aiohttp import web
 from aiohttp.test_utils import TestClient
 from aiohttp.web_exceptions import HTTPNotFound
@@ -542,3 +543,30 @@ def worldmapc_arthur_leather_jacket_armor(
 
     kernel.stuff_lib.set_as_used_as_armor(arthur.id, leather_jacket.id)
     return leather_jacket
+
+
+# @pytest.fixture
+# def disable_tracim() -> typing.Generator[None, None, None]:
+#     with unittest.mock.patch(
+#         "rolling.server.lib.character.CharacterLib.get_tracim_account"
+#     ), unittest.mock.patch("rrolling.tracim.Dealer"), unittest.mock.patch(
+#         "rrolling.tracim.AccountId"
+#     ):
+#         yield None
+
+
+@pytest.fixture
+def disable_tracim() -> typing.Generator[unittest.mock.MagicMock, None, None]:
+    with unittest.mock.patch(
+        "rolling.server.lib.character.CharacterLib.get_tracim_account"
+    ), unittest.mock.patch("rrolling.tracim") as rrolling_tracim_mock:
+        yield rrolling_tracim_mock
+
+
+@pytest.fixture
+def affinity_name_available() -> typing.Generator[None, None, None]:
+    with unittest.mock.patch(
+        "rolling.server.lib.affinity.AffinityLib.name_available",
+        return_value=True,
+    ):
+        yield None

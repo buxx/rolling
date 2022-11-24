@@ -32,6 +32,7 @@ def attack_action(worldmapc_kernel: Kernel) -> AttackCharacterAction:
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestFightAction:
     def _active_relation_with(
         self, kernel: Kernel, character: CharacterModel, affinity: AffinityDocument
@@ -47,6 +48,7 @@ class TestFightAction:
         )
         kernel.server_db_session.commit()
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__simple_lonely_opposition(
         self,
         france_affinity: AffinityDocument,
@@ -66,6 +68,7 @@ class TestFightAction:
             == descr.items[0].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__simple_armies_opposition(
         self,
         france_affinity: AffinityDocument,
@@ -92,6 +95,7 @@ class TestFightAction:
             == descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__armies_opposition_some_less_lp_both(
         self,
         france_affinity: AffinityDocument,
@@ -123,6 +127,7 @@ class TestFightAction:
             == descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__armies_opposition_some_exhausted_both(
         self,
         france_affinity: AffinityDocument,
@@ -154,6 +159,7 @@ class TestFightAction:
             == descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__one_army_vs_2_armies_opposition_but_no_participate(
         self,
         france_affinity: AffinityDocument,
@@ -182,6 +188,7 @@ class TestFightAction:
             == descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__one_army_vs_2_armies_opposition_and_participate(
         self,
         worldmapc_arthur_model: CharacterModel,
@@ -221,6 +228,7 @@ class TestFightAction:
             or "Burgundian, England" in descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__one_army_vs_2_armies_opposition_and_no_participate_because_link_not_here(
         self,
         worldmapc_arthur_model: CharacterModel,
@@ -261,6 +269,7 @@ class TestFightAction:
             == descr.items[1].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__simple_armies_opposition_with_fighter_direct_conflict(
         self,
         england_affinity: AffinityDocument,
@@ -289,6 +298,7 @@ class TestFightAction:
             "- FranceSoldier1 à cause de son lien avec England",
         ] == [item.text for item in descr.items]
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__simple_armies_opposition_with_fighter_indirect_conflict(
         self,
         worldmapc_arthur_model: CharacterModel,
@@ -324,6 +334,7 @@ class TestFightAction:
             "- FranceSoldier1 à cause de son lien avec Burgundian",
         ] == [item.text for item in descr.items]
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__one_armies_vs_alone_guy(
         self,
         france_affinity: AffinityDocument,
@@ -346,6 +357,7 @@ class TestFightAction:
         )
         assert "Le parti adverse compte 1 combattant(s)" == descr.items[1].text
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__attack_our_guy(
         self,
         france_affinity: AffinityDocument,
@@ -367,6 +379,7 @@ class TestFightAction:
             "affilié à France" == descr.items[0].text
         )
 
+    @pytest.mark.asyncio
     async def test_unit__fight_description__ok__attacker_is_affiliate_in_opposite_army(
         self,
         england_affinity: AffinityDocument,
@@ -392,6 +405,7 @@ class TestFightAction:
             == str(exc.value)
         )
 
+    @pytest.mark.asyncio
     async def test_unit__check_request__ok__attack_lonely_but_exhausted(
         self,
         france_warlord: CharacterModel,
@@ -416,6 +430,7 @@ class TestFightAction:
             exc.value
         )
 
+    @pytest.mark.asyncio
     async def test_unit__check_request__ok__attack_as_affinity_but_all_exhausted(
         self,
         france_affinity: AffinityDocument,
@@ -449,6 +464,7 @@ class TestFightAction:
             )
         assert "Personne n'est en état de se battre actuellement" == str(exc.value)
 
+    @pytest.mark.asyncio
     async def test_unit__check_request__ok__attack_as_affinity_but_target_in_affinity(
         self,
         france_affinity: AffinityDocument,
@@ -469,6 +485,7 @@ class TestFightAction:
             exc.value
         )
 
+    @pytest.mark.asyncio
     async def test_unit__descriptions__ok__root_description(
         self,
         france_affinity: AffinityDocument,
@@ -495,6 +512,7 @@ class TestFightAction:
             "ATTACK_CHARACTER/england_warlord0/FIGHT?&as_affinity=1" in item_urls
         )
 
+    @pytest.mark.asyncio
     async def test_unit__descriptions__ok__attack_lonely(
         self,
         france_affinity: AffinityDocument,
@@ -515,37 +533,7 @@ class TestFightAction:
         )
 
     @pytest.mark.usefixtures("initial_universe_state")
-    async def test_unit__descriptions__ok__confirm_attack_lonely(
-        self,
-        france_affinity: AffinityDocument,
-        france_warlord: CharacterModel,
-        england_warlord: CharacterModel,
-        worldmapc_kernel: Kernel,
-        attack_action: AttackCharacterAction,
-    ) -> None:
-        descr = await attack_action.perform(
-            france_warlord,
-            with_character=england_warlord,
-            input_=AttackModel(lonely=1, confirm=1),
-        )
-        f_warlord_e = list(
-            worldmapc_kernel.character_lib.get_last_events(france_warlord.id, 1)
-        )
-        e_warlord_e = list(
-            worldmapc_kernel.character_lib.get_last_events(england_warlord.id, 1)
-        )
-
-        assert f_warlord_e
-        assert 1 == len(f_warlord_e)
-        assert "Vous avez participé à un combat" == f_warlord_e[0].text
-        assert not f_warlord_e[0].unread
-
-        assert e_warlord_e
-        assert 1 == len(e_warlord_e)
-        assert "Vous avez subit une attaque" == e_warlord_e[0].text
-        assert e_warlord_e[0].unread
-
-    @pytest.mark.usefixtures("initial_universe_state")
+    @pytest.mark.asyncio
     async def test_unit__descriptions__ok__confirm_attack_lonely_and_dead(
         self,
         france_affinity: AffinityDocument,
@@ -601,6 +589,7 @@ class TestFightAction:
             ]
         ),
     )
+    @pytest.mark.asyncio
     async def test_fight_to_death__one_vs_one(
         self,
         france_affinity: AffinityDocument,

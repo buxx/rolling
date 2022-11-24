@@ -27,7 +27,9 @@ def seed_action(worldmapc_kernel: Kernel) -> SeedAction:
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestSeedAction:
+    @pytest.mark.asyncio
     async def test_check_request_is_possible_without_coordinates__cant_because_no_resource(
         self,
         worldmapc_kernel: Kernel,
@@ -42,6 +44,7 @@ class TestSeedAction:
                 input_=SeedModel(),
             )
 
+    @pytest.mark.asyncio
     async def test_event_perform_success(
         self,
         worldmapc_kernel: Kernel,
@@ -81,6 +84,7 @@ class TestSeedAction:
         assert len(sender_events) == 1
         assert sender_events[0].type == ZoneEventType.NEW_RESUME_TEXT
 
+    @pytest.mark.asyncio
     async def test_event_perform__not_enough_cereal(
         self,
         worldmapc_kernel: Kernel,
@@ -115,6 +119,7 @@ class TestSeedAction:
                 ),
             )
 
+    @pytest.mark.asyncio
     async def test_event_perform__already_seeded_build(
         self,
         worldmapc_kernel: Kernel,
@@ -152,6 +157,7 @@ class TestSeedAction:
                 ),
             )
 
+    @pytest.mark.asyncio
     async def test_event_perform__no_build(
         self,
         worldmapc_kernel: Kernel,

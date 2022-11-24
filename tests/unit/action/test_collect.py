@@ -34,8 +34,10 @@ def tmp_zone_folder(worldmapc_kernel: Kernel):
     worldmapc_kernel._zone_maps_folder = tmp_zone_folder_
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestCollectResourceAction:
     @pytest.mark.usefixtures("tmp_zone_folder")
+    @pytest.mark.asyncio
     async def test_collect_more_than_tile_capacity(
         self,
         worldmapc_kernel: Kernel,
@@ -100,6 +102,7 @@ class TestCollectResourceAction:
         )
 
     @pytest.mark.usefixtures("tmp_zone_folder")
+    @pytest.mark.asyncio
     async def test_collect_bonuses(
         self,
         worldmapc_kernel: Kernel,

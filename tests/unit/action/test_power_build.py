@@ -56,6 +56,7 @@ def power_on_action(worldmapc_kernel: Kernel) -> PowerOnBuildAction:
 
 
 class TestPowerBuild:
+    @pytest.mark.asyncio
     async def test_power_on_build_with_enough_resources(
         self,
         worldmapc_kernel: Kernel,
@@ -86,6 +87,7 @@ class TestPowerBuild:
             resource_id="BRANCHES", build_id=build1.id, quantity=0.001
         )
 
+    @pytest.mark.asyncio
     async def test_power_on_build_with_not_enough_resources(
         self,
         worldmapc_kernel: Kernel,
@@ -117,6 +119,7 @@ class TestPowerBuild:
             resource_id="BRANCHES", build_id=build1.id, quantity=0.0005
         )
 
+    @pytest.mark.asyncio
     async def test_power_on_build_with_no_resources(
         self,
         worldmapc_kernel: Kernel,
@@ -137,6 +140,7 @@ class TestPowerBuild:
         # Then
         assert not kernel.build_lib.get_build_doc(build1.id).is_on
 
+    @pytest.mark.asyncio
     async def test_power_off_build(
         self,
         worldmapc_kernel: Kernel,

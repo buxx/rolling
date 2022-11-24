@@ -142,6 +142,7 @@ class TestTransfertGround:
             ),
         ],
     )
+    @pytest.mark.asyncio
     async def test_transfer_partial_resource(
         self,
         worldmapc_kernel: Kernel,
@@ -283,6 +284,7 @@ class TestTransfertGround:
                 else:
                     assert get_carried_quantity() == transfer.after_carried_quantity
 
+    @pytest.mark.asyncio
     async def test_transfer_stuff(
         self,
         worldmapc_kernel: Kernel,

@@ -26,7 +26,9 @@ def harvest_action(worldmapc_kernel: Kernel) -> HarvestAction:
     )
 
 
+@pytest.mark.usefixtures("disable_tracim")
 class TestHarvestAction:
+    @pytest.mark.asyncio
     async def test_collect_cereals_from_field_with_one_ready_ploughed_land(
         self,
         worldmapc_kernel: Kernel,
@@ -79,6 +81,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 1.0
 
+    @pytest.mark.asyncio
     async def test_collect_cereals_from_fields_with_all_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
@@ -142,6 +145,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 2.0
 
+    @pytest.mark.asyncio
     async def test_collect_cereals_from_fields_with_some_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
@@ -205,6 +209,7 @@ class TestHarvestAction:
         # see tests/src/game1/game.toml
         assert xena_doc.action_points == original_xena_ap - 1.0
 
+    @pytest.mark.asyncio
     async def test_collect_cereals_from_fields_with_no_ready_ploughed_lands(
         self,
         worldmapc_kernel: Kernel,
