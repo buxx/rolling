@@ -1435,7 +1435,7 @@ class CharacterLib:
         ).set_account_email(
             tracim_account,
             rrolling.tracim.AccountId(character_doc.tracim_user_id),
-            f"{uuid.uuid4().hex}@local",
+            rrolling.tracim.Email(f"{uuid.uuid4().hex}@local"),
         )
 
     def increase_tiredness(
