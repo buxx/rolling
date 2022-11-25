@@ -2597,8 +2597,8 @@ class CharacterController(BaseController):
             title=f"{character_doc.name} est mort",
             items=[
                 Part(
-                    label="Voir les évènements",
-                    form_action=f"/_describe/character/{hapic_data.path.character_id}/events",
+                    f"Ouvrir l'espace RP de {character_doc.name}",
+                    form_action=f"/character/{character_doc.id}/open-rp",
                     is_link=True,
                 ),
                 Part(
@@ -3190,6 +3190,7 @@ class CharacterController(BaseController):
                 web.post("/character/{character_id}/door/{door_id}", self.door),
                 web.post("/character/{character_id}/send-around", self.send_around),
                 web.post("/character/{character_id}/open-rp", self.open_rp),
+                web.get("/character/{character_id}/open-rp", self.open_rp),
                 web.get(
                     "/character/{character_id}/unread-messages-count",
                     self.unread_messages_count,

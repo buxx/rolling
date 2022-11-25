@@ -228,7 +228,7 @@ class CharacterLib:
         return query.filter(CharacterDocument.id == id_).one()
 
     def get_tracim_account(self, character_id: str) -> rrolling.tracim.Account:
-        character_doc = self._kernel.character_lib.get_document(character_id)
+        character_doc = self._kernel.character_lib.get_document(character_id, dead=None)
 
         if character_doc.account_id is None:
             raise CharacterHaveNoAccountId()
