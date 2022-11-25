@@ -426,7 +426,7 @@ class FightLib:
         from_: CharacterModel,
         weapon: Weapon,
         damage: float,
-        details: typing.Optional[FightDetails] = None,
+        details: FightDetails,
     ) -> typing.Tuple[Weapon, float]:
         details.new_debug_story_line("<li>")
         details.new_debug_story_line(f"Calcul de defense")

@@ -748,13 +748,19 @@ class TestFightLib:
                     "england_warlord0": 0.5,
                 },
                 [
-                    "Un affrontement débute: 6 combattant(s) (France) se lance(nt) à l'assault de 1 combattant(s).",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver.",
-                    "FranceSoldier0 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "FranceSoldier1 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "FranceSoldier2 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "FranceSoldier3 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0. Le coup à été fatal pour EnglandWarlord0.",
+                    "Un affrontement débute: 6 combattant(s) (France) se lance(nt) à l'assault de 1 combattant(s)",
+                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver",
+                    "FranceSoldier0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "FranceSoldier1 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "FranceSoldier2 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "FranceSoldier3 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "Le coup à été fatal pour EnglandWarlord0",
                 ],
             )
         ],
@@ -794,7 +800,10 @@ class TestFightLib:
                 ),
             )
 
-        assert story == details.story
+        for line in story:
+            assert any(
+                [line in story_line for story_line in details.story]
+            ), f"line '{line}' not found in story"
 
     @pytest.mark.parametrize(
         "weapons,defense,evades,protect,damages,not_ready,story",
@@ -872,18 +881,26 @@ class TestFightLib:
                 },
                 [],
                 [
-                    "Un affrontement débute: 6 combattant(s) (France) se lance(nt) à l'assault de 6 combattant(s) (England).",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver.",
-                    "FranceSoldier0 attaque EnglandSoldier0 avec Main nue mais EnglandSoldier0 parvient à esquiver.",
-                    "EnglandSoldier0 attaque FranceSoldier0 avec Main nue mais FranceSoldier0 parvient à esquiver.",
-                    "FranceSoldier1 attaque EnglandSoldier1 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier1.",
-                    "EnglandSoldier1 attaque FranceSoldier1 avec Main nue. Peau nue n'a en rien protégé FranceSoldier1. Le coup à été fatal pour FranceSoldier1.",
-                    "FranceSoldier2 attaque EnglandSoldier2 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier2.",
-                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue. Peau nue à protégé FranceSoldier2.",
-                    "FranceSoldier3 attaque EnglandSoldier3 avec Main nue. Peau nue n'a en rien protégé EnglandSoldier3. Le coup à été fatal pour EnglandSoldier3.",
-                    "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver.",
-                    "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver.",
+                    "Un affrontement débute: 6 combattant(s) (France) se lance(nt) à l'assault de 6 combattant(s) (England)",
+                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver",
+                    "FranceSoldier0 attaque EnglandSoldier0 avec Main nue mais EnglandSoldier0 parvient à esquiver",
+                    "EnglandSoldier0 attaque FranceSoldier0 avec Main nue mais FranceSoldier0 parvient à esquiver",
+                    "FranceSoldier1 attaque EnglandSoldier1 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandSoldier1",
+                    "EnglandSoldier1 attaque FranceSoldier1 avec Main nue",
+                    "Peau nue n'a en rien protégé FranceSoldier1",
+                    "Le coup à été fatal pour FranceSoldier1",
+                    "FranceSoldier2 attaque EnglandSoldier2 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandSoldier2",
+                    "EnglandSoldier2 attaque FranceSoldier2 avec Main nue",
+                    "Peau nue à protégé FranceSoldier2",
+                    "FranceSoldier3 attaque EnglandSoldier3 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandSoldier3",
+                    "Le coup à été fatal pour EnglandSoldier3",
+                    "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver",
+                    "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver",
                 ],
             ),
             (
@@ -928,12 +945,13 @@ class TestFightLib:
                     "england_soldier3",
                 ],
                 [
-                    "Un affrontement débute: 2 combattant(s) (France) se lance(nt) à l'assault de 6 combattant(s) (England).",
-                    "4 combattant(s) du parti attaqué ne sont pas en état de se battre.",
-                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue. Peau nue n'a en rien protégé EnglandWarlord0.",
-                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver.",
-                    "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver.",
-                    "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver.",
+                    "Un affrontement débute: 2 combattant(s) (France) se lance(nt) à l'assault de 6 combattant(s) (England)",
+                    "4 combattant(s) du parti attaqué ne sont pas en état de se battre",
+                    "FranceWarlord0 attaque EnglandWarlord0 avec Main nue",
+                    "Peau nue n'a en rien protégé EnglandWarlord0",
+                    "EnglandWarlord0 attaque FranceWarlord0 avec Main nue mais FranceWarlord0 parvient à esquiver",
+                    "FranceSoldier4 attaque EnglandSoldier4 avec Main nue mais EnglandSoldier4 parvient à esquiver",
+                    "EnglandSoldier4 attaque FranceSoldier4 avec Main nue mais FranceSoldier4 parvient à esquiver",
                 ],
             ),
             (
@@ -951,8 +969,7 @@ class TestFightLib:
                     "england_soldier4",
                 ],
                 [
-                    "Un affrontement débute: 6 combattant(s) (France) se lance(nt) à l'assault de 6 combattant(s) (England).",
-                    "Aucun des combattants du parti attaqué n'est en état de se battre. Ils sont à la mercie des attaquants.",
+                    "Aucun des combattants du parti attaqué n'est en état de se battre. Ils sont à la mercie des attaquants",
                 ],
             ),
         ],
@@ -1001,7 +1018,10 @@ class TestFightLib:
                 ),
             )
 
-        assert story == details.story
+        for line in story:
+            assert any(
+                [line in story_line for story_line in details.story]
+            ), f"line '{line}' not found in story"
 
     def test_unit__get_attack_weapon__ok__no_weapon(
         self,
@@ -1065,10 +1085,14 @@ class TestFightLib:
         haxe = worldmapc_xena_haxe_weapon
 
         with patch(
-            "rolling.model.fight.Weapon._get_around_percent_absorb",
+            "rolling.model.fight.Weapon._does_weapon_over",
             new=lambda *_, **__: (around, around, around),
         ), patch("random.randrange", new=lambda *_, **__: 80):
             armor, damages = kernel.fight_lib.opponent_equipment_passes(
-                arthur, from_=xena, weapon=Weapon("haxe", haxe), damage=damages
+                arthur,
+                from_=xena,
+                weapon=Weapon("haxe", haxe),
+                damage=damages,
+                details=FightDetails.new([]),
             )
             assert damages == expected_damages
