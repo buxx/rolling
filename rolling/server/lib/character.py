@@ -25,8 +25,6 @@ from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
 from rolling.exception import RollingError
 from rolling.map.type.property.traversable import traversable_properties
-from rolling.model.ability import AbilityDescription
-from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterEventModel
 from rolling.model.character import CharacterModel
 from rolling.model.character import FIGHT_AP_CONSUME
@@ -39,8 +37,6 @@ from rolling.model.event import (
     ZoneEventType,
 )
 from rolling.model.knowledge import KnowledgeDescription
-from rolling.model.meta import FromType
-from rolling.model.meta import RiskType
 from rolling.model.meta import TransportType
 from rolling.model.resource import CarriedResourceDescriptionModel
 from rolling.model.skill import CharacterSkillModel
@@ -1318,76 +1314,6 @@ class CharacterLib:
             followers_discreetly_can=followers_discreetly_can,
             followers_discreetly_cannot=followers_discreetly_cannot,
         )
-
-    def have_from_of_abilities(
-        self, character: CharacterModel, abilities: typing.List[AbilityDescription]
-    ) -> typing.List[HaveAbility]:
-        around_character = get_on_and_around_coordinates(
-            x=character.zone_row_i, y=character.zone_col_i
-        )
-        haves: typing.List[HaveAbility] = []
-
-        for have_ability_id in character.have_abilities(
-            [ability.id for ability in abilities]
-        ):
-            haves.append(
-                HaveAbility(
-                    ability_id=have_ability_id,
-                    from_=FromType.HIMSELF,
-                    risk=RiskType.NONE,
-                )
-            )
-
-        carried_or_around_stuffs = self._kernel.stuff_lib.get_carried_by(character.id)
-        for row_i, col_i in around_character:
-            # FIXME BS : optimize by permitting give list of coordinates
-            carried_or_around_stuffs += self._kernel.stuff_lib.get_zone_stuffs(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=row_i,
-                zone_col_i=col_i,
-            )
-        for stuff in carried_or_around_stuffs:
-            stuff_properties = (
-                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
-                    stuff.stuff_id
-                )
-            )
-            for have_ability_id in stuff_properties.have_abilities(
-                [ability.id for ability in abilities]
-            ):
-                haves.append(
-                    HaveAbility(
-                        ability_id=have_ability_id,
-                        from_=FromType.STUFF,
-                        risk=RiskType.NONE,
-                    )
-                )
-
-        for around_row_i, around_col_i in around_character:
-            for build in self._kernel.build_lib.get_zone_build(
-                world_row_i=character.world_row_i,
-                world_col_i=character.world_col_i,
-                zone_row_i=around_row_i,
-                zone_col_i=around_col_i,
-            ):
-                build_description = self._kernel.game.config.builds[build.build_id]
-                if not build.under_construction and (
-                    (build_description.abilities_if_is_on and build.is_on)
-                    or (not build_description.abilities_if_is_on)
-                ):
-                    for ability in abilities:
-                        if ability.id in build_description.ability_ids:
-                            # TODO BS 20200220: implement risks
-                            haves.append(
-                                HaveAbility(
-                                    ability_id=ability.id,
-                                    from_=FromType.BUILD,
-                                    risk=RiskType.NONE,
-                                )
-                            )
-
-        return haves
 
     def kill(self, character_id: str) -> None:
         character_doc = self.get_document(character_id)

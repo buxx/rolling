@@ -7,6 +7,7 @@ import typing
 from urllib.parse import urlencode
 
 from guilang.description import Description
+from rolling.cache import RequestCache
 from rolling.model.event import WebSocketEvent
 from rolling.rolling_types import ActionType
 from rolling.server.controller.url import CHARACTER_ACTION

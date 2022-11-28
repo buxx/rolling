@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 import enum
 import json
 from sqlalchemy import Boolean
@@ -93,4 +94,15 @@ class AffinityRelationDocument(Document):
         "AffinityDocument",
         foreign_keys=[affinity_id],
         primaryjoin=AffinityDocument.id == affinity_id,
+    )
+
+
+class AffinityProtectorate(Document):
+    __tablename__ = "affinity_protectorate"
+
+    affinity_id = Column(Integer, ForeignKey("affinity.id"), primary_key=True)
+    world_row_i = Column(Integer, primary_key=True)
+    world_col_i = Column(Integer, primary_key=True)
+    updated_datetime = Column(
+        DateTime, default=datetime.datetime.utcnow, nullable=False
     )

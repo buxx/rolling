@@ -1,4 +1,5 @@
 # coding: utf-8
+from contextvars import ContextVar
 import copy
 import dataclasses
 
@@ -50,10 +51,12 @@ from rolling.server.lib.door import DoorLib
 from rolling.server.lib.farming import FarmingLib
 from rolling.server.lib.fight import FightLib
 from rolling.server.lib.message import MessageLib
+from rolling.server.lib.protectorate import ProtectorateLib
 from rolling.server.lib.resource import ResourceLib
 from rolling.server.lib.spawn import SpawnPointLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.universe import UniverseLib
+from rolling.types import WorldColI, WorldPoint, WorldRowI
 from .server.lib.world import WorldLib
 from rolling.server.lib.zone import ZoneLib
 from rolling.server.world.websocket import WorldEventsManager
@@ -62,6 +65,7 @@ from rolling.trad import GlobalTranslation
 from rolling.util import generate_avatar_illustration_media, generate_loading_media
 from rolling.util import ensure_avatar_medias
 from rolling.server.chat import State as ChatState
+from rolling.cache import RequestCache
 
 import rrolling
 
@@ -165,7 +169,8 @@ class Kernel:
         self._game: typing.Optional[Game] = None
 
         # Database stuffs
-        self._server_db_session: typing.Optional[Session] = None
+        self._server_db_session: ContextVar = ContextVar("Session", default=None)
+        self._server_db_session_maker = None
         self._server_db_engine: typing.Optional[Engine] = None
 
         # Websocket managers
@@ -202,6 +207,7 @@ class Kernel:
         self._farming_lib: typing.Optional[FarmingLib] = None
         self._world_lib: typing.Optional[WorldLib] = None
         self._spawn_point_lib: typing.Optional[SpawnPointLib] = None
+        self._protectorate_lib: typing.Optional[ProtectorateLib] = None
 
         self.event_serializer_factory = ZoneEventSerializerFactory()
         self.chat_state = ChatState(3600 * 24 * 4)
@@ -224,6 +230,24 @@ class Kernel:
         ]
         self.loadings_medias_names = []
         kernel_logger.info(f"Found {len(self.loadings_paths)} loading screens")
+
+        self._caches = {}
+        for row_i, row in enumerate(self._world_map_source.geography.rows):
+            self._caches[row_i] = {}
+            for col_i, _ in enumerate(row):
+                self._caches[row_i][col_i] = ContextVar("RequestCache", default=None)
+
+    def cache(self, world_point: WorldPoint) -> "RequestCache":
+        cache = self._caches[world_point[0]][world_point[1]]
+        if cache.get() is None:
+            cache.set(
+                RequestCache(
+                    self,
+                    world_point,
+                )
+            )
+
+        return cache.get()
 
     def tasks(self) -> typing.List[typing.Awaitable]:
         return [
@@ -385,6 +409,12 @@ class Kernel:
         return self._spawn_point_lib
 
     @property
+    def protectorate_lib(self) -> ProtectorateLib:
+        if self._protectorate_lib is None:
+            self._protectorate_lib = ProtectorateLib(self)
+        return self._protectorate_lib
+
+    @property
     def action_factory(self) -> ActionFactory:
         if self._action_factory is None:
             self._action_factory = ActionFactory(self)
@@ -502,10 +532,10 @@ class Kernel:
 
     @property
     def server_db_session(self) -> Session:
-        if self._server_db_session is None:
-            raise ComponentNotPrepared("server_db_session is not created yet")
+        if not self._server_db_session.get():
+            self._server_db_session.set(self._server_db_session_maker())
 
-        return self._server_db_session
+        return self._server_db_session.get()
 
     def get_tile_map(self, row_i: int, col_i: int) -> ZoneMap:
         try:
@@ -526,7 +556,7 @@ class Kernel:
             f"{self.server_db_user}:{self.server_db_password}"
             f"@{self.server_db_host}/{self.server_db_name}"
         )
-        self._server_db_session = sessionmaker(bind=self._server_db_engine)()
+        self._server_db_session_maker = sessionmaker(bind=self._server_db_engine)
         ServerSideDocument.metadata.create_all(self._server_db_engine)
 
     def init(self) -> None:

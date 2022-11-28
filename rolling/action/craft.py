@@ -1,4 +1,5 @@
 # coding: utf-8
+import collections
 import dataclasses
 
 import serpyco
@@ -17,6 +18,7 @@ from rolling.action.base import get_with_stuff_action_url
 from rolling.action.utils import BeginBuildModel
 from rolling.action.utils import check_common_is_possible
 from rolling.action.utils import fill_base_action_properties
+from rolling.availability import Availability
 from rolling.exception import ImpossibleAction
 from rolling.exception import RollingError
 from rolling.exception import WrongInputError
@@ -71,7 +73,8 @@ class BaseCraftStuff:
         input_: CraftInput,
         cost: float,
         dry_run: bool = True,
-    ) -> None:
+    ) -> typing.List[Part]:
+        parts = []
         assert input_.quantity is not None
 
         if character.action_points < cost:
@@ -80,8 +83,8 @@ class BaseCraftStuff:
                 f"({round(cost, 2)} nécessaires)"
             )
 
-        carried_resources = self._kernel.resource_lib.get_carried_by(character.id)
-        carried_stuffs = self._kernel.stuff_lib.get_carried_by(character.id)
+        availability = Availability.new(self._kernel, character)
+        available_resources = availability.resources()
 
         for require in description.properties["require"]:
             if "stuff" in require:
@@ -90,8 +93,10 @@ class BaseCraftStuff:
                 stuff_properties = (
                     self._kernel.game.stuff_manager.get_stuff_properties_by_id(stuff_id)
                 )
-                carried_stuffs = [c for c in carried_stuffs if c.stuff_id == stuff_id]
-                owned_quantity = len(carried_stuffs)
+                available_stuffs = availability.stuffs(
+                    under_construction=False, stuff_id=stuff_id
+                )
+                owned_quantity = len(available_stuffs)
 
                 if owned_quantity < required_quantity:
                     raise ImpossibleAction(
@@ -100,41 +105,48 @@ class BaseCraftStuff:
 
                 if not dry_run:
                     for i in range(required_quantity):
-                        stuff_to_destroy = carried_stuffs[i]
-                        self._kernel.stuff_lib.destroy(stuff_to_destroy.id)
+                        stuff_to_destroy = available_stuffs[i]
+                        self._kernel.stuff_lib.destroy(
+                            stuff_to_destroy.id, commit=False
+                        )
 
             elif "resource" in require:
                 required_quantity = int(input_.quantity) * require["quantity"]
                 resource_id = require["resource"]
                 resource_properties = self._kernel.game.config.resources[resource_id]
                 try:
-                    carried_resource = next(
-                        (c for c in carried_resources if c.id == resource_id)
+                    available_resource = next(
+                        (
+                            c
+                            for c in available_resources.resources
+                            if c.id == resource_id
+                        )
                     )
                 except StopIteration:
                     raise WrongInputError(
                         f"Vous ne possédez pas de {resource_properties.name}"
                     )
-                if carried_resource.quantity < required_quantity:
+                if available_resource.quantity < required_quantity:
                     missing_quantity_str = quantity_to_str(
                         kernel=self._kernel,
-                        quantity=(required_quantity - carried_resource.quantity),
-                        unit=carried_resource.unit,
+                        quantity=(required_quantity - available_resource.quantity),
+                        unit=available_resource.unit,
                     )
                     raise ImpossibleAction(
-                        f"Vous ne possédez pas assez de {carried_resource.name}: {missing_quantity_str} de plus nécessaire(s)"
+                        f"Vous ne possédez pas assez de {available_resource.name}: {missing_quantity_str} de plus nécessaire(s)"
                     )
 
                 if not dry_run:
-                    self._kernel.resource_lib.reduce_carried_by(
-                        character_id=character.id,
-                        resource_id=resource_id,
-                        quantity=required_quantity,
+                    reductions = availability.reduce_resource(
+                        resource_id,
+                        required_quantity,
                     )
+                    parts.extend(reductions.resume_parts(self._kernel))
 
         if dry_run:
-            return
+            return []
 
+        produced_counts_txts = collections.defaultdict(lambda: 0)
         for produce in description.properties["produce"]:
             stuff_id = produce["stuff"]
             quantity = produce["quantity"] * int(input_.quantity)
@@ -156,10 +168,18 @@ class BaseCraftStuff:
                 self._kernel.stuff_lib.set_carried_by__from_doc(
                     stuff_doc, character_id=character.id, commit=False
                 )
+                produced_counts_txts[stuff_properties.name] += 1
         await self._kernel.character_lib.reduce_action_points(
             character_id=character.id, cost=cost, commit=False
         )
         self._kernel.server_db_session.commit()
+
+        parts.append(Part(""))
+        parts.append(Part("Objet(s) produit(s) :"))
+        for name, count in produced_counts_txts.items():
+            parts.append(Part(f"  - {count} {name}"))
+
+        return parts
 
 
 class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
@@ -173,9 +193,12 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        carried_resource_ids = self._kernel.resource_lib.get_carried_by_ids(
-            character.id
-        )
+        carried_resource_ids = [
+            resource.id
+            for resource in Availability.new(self._kernel, character)
+            .resources()
+            .resources
+        ]
 
         required_txts = []
         for require in self.description.properties["require"]:
@@ -325,7 +348,10 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                 require_txts.append("Requiert les habilités :")
                 for required_all_ability in required_all_abilities:
                     require_txts.append(f" - {required_all_ability.name}")
-                require_txts.append("")
+
+            take_from_parts = Availability.new(
+                self._kernel, character
+            ).take_from_parts()
 
             return Description(
                 title=self._description.name,
@@ -343,6 +369,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
                         ),
                         items=[Part(text=text) for text in produce_txts]
                         + [Part(text=text) for text in require_txts]
+                        + [Part(text=""), *take_from_parts, Part(text="")]
                         + [
                             Part(
                                 label=f"Quelle quantité en produire ?",
@@ -359,7 +386,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             )
 
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
-        await self._perform(
+        parts = await self._perform(
             character,
             description=self._description,
             input_=input_,
@@ -370,6 +397,7 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
             title="Action effectué avec succès",
             back_url=f"/_describe/character/{character.id}/on_place_actions",
             reload_inventory=True,
+            items=parts,
         )
 
 
@@ -558,6 +586,8 @@ class BeginStuffConstructionAction(CharacterAction):
     async def check_request_is_possible(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> None:
+        availability = Availability.new(self._kernel, character)
+
         if input_.confirm:
             self.check_is_possible(character)
             stuff_description = (
@@ -589,10 +619,11 @@ class BeginStuffConstructionAction(CharacterAction):
                     quantity_str = quantity_to_str(
                         quantity, resource_description.unit, self._kernel
                     )
-                    if not self._kernel.resource_lib.have_resource(
-                        character_id=character.id,
-                        resource_id=resource_id,
-                        quantity=quantity,
+                    if quantity > sum(
+                        r.quantity
+                        for r in availability.resources(
+                            resource_id=resource_id
+                        ).resources
                     ):
                         resource_description = self._kernel.game.config.resources[
                             resource_id
@@ -604,11 +635,13 @@ class BeginStuffConstructionAction(CharacterAction):
                 elif "stuff" in consume:
                     stuff_id = consume["stuff"]
                     quantity = consume["quantity"]
-                    if (
-                        self._kernel.stuff_lib.get_stuff_count(
-                            character_id=character.id, stuff_id=stuff_id
-                        )
-                        < quantity
+                    if quantity > len(
+                        [
+                            s
+                            for s in availability.stuffs(
+                                under_construction=False, stuff_id=stuff_id
+                            ).stuffs
+                        ]
                     ):
                         stuff_properties = (
                             self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -644,6 +677,7 @@ class BeginStuffConstructionAction(CharacterAction):
     async def perform(
         self, character: "CharacterModel", input_: BeginStuffModel
     ) -> Description:
+        availability = Availability.new(self._kernel, character)
         require_txts = []
         for consume in self._description.properties["consume"]:
             if "resource" in consume:
@@ -674,7 +708,7 @@ class BeginStuffConstructionAction(CharacterAction):
             items = [
                 Part(text=f"Temps de travail nécessaire :"),
                 Part(text=f" - {start_cost} PA tout de suite"),
-                Part(text=f" - {craft_ap_cost} PA à répartir ensuite"),
+                Part(text=f" - {craft_ap_cost} PA à effectuer ensuite"),
                 Part(text=""),
                 Part(text="Nécessite en ressources : "),
             ]
@@ -700,6 +734,9 @@ class BeginStuffConstructionAction(CharacterAction):
                 for required_all_ability in required_all_abilities:
                     items.append(Part(text=f" - {required_all_ability.name}"))
                 items.append(Part(text=""))
+
+            items.extend(availability.take_from_parts())
+            items.append(Part(""))
 
             items.append(
                 Part(
@@ -749,23 +786,31 @@ class BeginStuffConstructionAction(CharacterAction):
                 ],
             )
 
+        parts = []
         for consume in self._description.properties["consume"]:
             if "resource" in consume:
+                parts.append(Part(""))
                 resource_id = consume["resource"]
-                self._kernel.resource_lib.reduce_carried_by(
-                    character.id,
-                    resource_id=resource_id,
-                    quantity=consume["quantity"],
-                    commit=False,
+                ###########################################
+                resource_reductions = availability.reduce_resource(
+                    resource_id, consume["quantity"]
                 )
+                parts.extend(resource_reductions.resume_parts(self._kernel))
 
             elif "stuff" in consume:
+                parts.append(Part(""))
+                parts.append(
+                    Part(
+                        f"Objets utilisés ( (depuis {availability.take_from_one_line_txt()})) :"
+                    )
+                )
                 stuff_id = consume["stuff"]
-                carried_stuffs = self._kernel.stuff_lib.get_carried_by(
-                    character.id, stuff_id=stuff_id
+                stuffs = availability.stuffs(
+                    under_construction=False, stuff_id=stuff_id
                 )
                 for i in range(consume["quantity"]):
-                    self._kernel.stuff_lib.destroy(carried_stuffs[i].id, commit=False)
+                    self._kernel.stuff_lib.destroy(stuffs[i].id, commit=False)
+                    parts.append(f"  - {stuffs[i].name}")
 
         stuff_id = self._description.properties["produce_stuff_id"]
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -791,7 +836,7 @@ class BeginStuffConstructionAction(CharacterAction):
 
         return Description(
             title=f"{stuff_properties.name} commencé",
-            footer_links=[
+            items=[
                 Part(
                     is_link=True,
                     label="Voir l'objet commencé",

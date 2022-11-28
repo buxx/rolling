@@ -25,8 +25,11 @@ from rolling.server.document.resource import ResourceDocument
 from rolling.server.link import CharacterActionLink
 from rolling.server.util import get_round_resource_quantity
 
+
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
+    from rolling.types import Quantity
+    from rolling.types import ResourceId
 
 
 class ResourceLib:
@@ -191,6 +194,18 @@ class ResourceLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+    def get_carried_by_docs(
+        self,
+        character_id: str,
+        exclude_shared_with_affinity: bool = False,
+        shared_with_affinity_ids: typing.Optional[typing.List[int]] = None,
+    ) -> typing.List[CarriedResourceDescriptionModel]:
+        return self.get_base_query(
+            carried_by_id=character_id,
+            exclude_shared_with_affinity=exclude_shared_with_affinity,
+            shared_with_affinity_ids=shared_with_affinity_ids,
+        ).all()
+
     def get_carried_by(
         self,
         character_id: str,
@@ -203,8 +218,13 @@ class ResourceLib:
             shared_with_affinity_ids=shared_with_affinity_ids,
         ).all()
 
+        return self.merge_resource_documents(resource_docs)
+
+    def merge_resource_documents(
+        self, resource_documents: typing.List[ResourceDocument]
+    ) -> typing.List[CarriedResourceDescriptionModel]:
         resource_docs_by_resource_id = {}
-        for resource_doc in resource_docs:
+        for resource_doc in resource_documents:
             resource_docs_by_resource_id.setdefault(
                 resource_doc.resource_id, []
             ).append(resource_doc)
@@ -212,6 +232,7 @@ class ResourceLib:
         carried_models = []
         for resource_docs_ in resource_docs_by_resource_id.values():
             carried_models.append(self._carried_resource_model_from_doc(resource_docs_))
+
         return carried_models
 
     def get_carried_by_ids(
@@ -229,6 +250,11 @@ class ResourceLib:
 
         return list(set(row[0] for row in rows))
 
+    def get_accessible_ids(
+        self, character: CharacterModel
+    ) -> typing.List["ResourceId"]:
+        return character
+
     def get_ground_resource(
         self,
         world_row_i: int,
@@ -243,6 +269,20 @@ class ResourceLib:
             zone_col_i=zone_col_i,
         ).all()
         return [self._carried_resource_model_from_doc([doc]) for doc in carried]
+
+    def get_ground_resource_docs(
+        self,
+        world_row_i: int,
+        world_col_i: int,
+        zone_row_i: typing.Optional[int] = None,
+        zone_col_i: typing.Optional[int] = None,
+    ) -> typing.List[CarriedResourceDescriptionModel]:
+        return self.get_base_query(
+            world_row_i=world_row_i,
+            world_col_i=world_col_i,
+            zone_row_i=zone_row_i,
+            zone_col_i=zone_col_i,
+        ).all()
 
     def count_ground_resource(
         self,
@@ -677,3 +717,24 @@ class ResourceLib:
             world_row_i=world_row_i,
             world_col_i=world_col_i,
         )
+
+    def reduce_from_docs(
+        self, docs: typing.List[ResourceDocument], quantity: "Quantity"
+    ) -> "Quantity":
+        to_reduce = quantity
+        reduced_quantity = 0.0
+
+        for doc in docs:
+            if not to_reduce:
+                break
+
+            if doc.quantity <= to_reduce:
+                self._kernel.server_db_session.delete(doc)
+                to_reduce -= doc.quantity
+                reduced_quantity += doc.quantity
+            else:
+                doc.quantity = float(doc.quantity) - to_reduce
+                reduced_quantity += to_reduce
+                to_reduce = 0.0
+
+        return reduced_quantity

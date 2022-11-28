@@ -2,11 +2,8 @@
 import pytest
 
 from rolling.kernel import Kernel
-from rolling.model.ability import HaveAbility
 from rolling.model.character import CharacterModel
 from rolling.model.measure import Unit
-from rolling.model.meta import FromType
-from rolling.model.meta import RiskType
 from rolling.server.document.character import CharacterDocument
 from rolling.server.document.stuff import StuffDocument
 from rolling.server.lib.character import CharacterLib

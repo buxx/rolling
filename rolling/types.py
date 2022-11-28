@@ -11,6 +11,11 @@ MessageTimestamp = typing.NewType("MessageTimestamp", int)
 MessageAuthorId = typing.NewType("MessageAuthorId", str)
 MessageContent = typing.NewType("MessageContent", str)
 
+CharacterId: typing.NewType("CharacterId", str)
+ResourceId: typing.NewType("ResourceId", str)
+Quantity: typing.NewType("Quantity", float)
+StuffType: typing.NewType("StuffType", str)
+
 
 @dataclass
 class CachedMessage:

@@ -98,6 +98,7 @@ def worldmapa_kernel(worldmapsourcea_txt, loop) -> Kernel:
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
+    kernel._server_db_engine.dispose()
 
 
 @pytest.fixture
@@ -113,6 +114,7 @@ def worldmapb_kernel(worldmapsourceb2_txt, loop) -> Kernel:
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
+    kernel._server_db_engine.dispose()
 
 
 @pytest.fixture
@@ -128,6 +130,7 @@ def worldmapb2_kernel(worldmapsourceb2_txt, loop) -> Kernel:
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
+    kernel._server_db_engine.dispose()
 
 
 @pytest.fixture
@@ -142,6 +145,7 @@ def worldmapc_kernel(worldmapsourcec_txt, tmp_path, loop) -> Kernel:
     yield kernel
     kernel.server_db_session.rollback()
     kernel.server_db_session.close()
+    kernel._server_db_engine.dispose()
 
 
 @pytest.fixture

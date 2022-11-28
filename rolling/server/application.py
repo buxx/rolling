@@ -213,9 +213,10 @@ def get_application(
         return response
 
     @middleware
-    async def rollback_session(request: Request, handler):
+    async def session(request: Request, handler):
         try:
-            return await handler(request)
+            response = await handler(request)
+            kernel.server_db_session.commit()
         except Exception as exc:
             try:
                 server_logger.warning("Error happen over web handler, rollback session")
@@ -225,6 +226,8 @@ def get_application(
                     f"Trying to rollback session on error but session not prepared !"
                 )
             raise exc
+
+        return response
 
     @middleware
     async def allow_origin(request: Request, handler):
@@ -251,7 +254,7 @@ def get_application(
         middlewares=[
             auth,
             character_infos,
-            rollback_session,
+            session,
             quick_actions,
             allow_origin,
             cache_control,

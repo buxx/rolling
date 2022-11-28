@@ -212,7 +212,6 @@ class DoorLib:
     ) -> None:
         """When character enter in zone, update door rules to indicate character want to apply
         again his rules. Current zone websocket clients must receive new version of door builds"""
-        character_doc = self._kernel.character_lib.get_document(id_=character_id)
         rule: DoorDocument
         for rule in self.get_character_relations_query(character_id=character_id):
             build_doc = self._kernel.build_lib.get_build_doc(rule.build_id)

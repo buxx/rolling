@@ -6,6 +6,7 @@ import serpyco
 import typing
 
 from guilang.description import Part
+from rolling.availability import Availability
 from rolling.exception import ConfigurationError
 from rolling.exception import ImpossibleAction
 from rolling.exception import UnknownStuffError
@@ -29,9 +30,11 @@ def check_common_is_possible(
     character: "CharacterModel",
     illustration_name: typing.Optional[str] = None,
 ) -> None:
+    availability = Availability.new(kernel, character)
     character_stuff_ids = [
-        s.stuff_id for s in kernel.stuff_lib.get_carried_by(character.id)
+        stuff.stuff_id for stuff in availability.stuffs(under_construction=False).stuffs
     ]
+    abilities_ids = [a.id for a in availability.abilities().abilities]
     error_messages: typing.List[str] = []
 
     # One or more stuff are required
@@ -54,28 +57,29 @@ def check_common_is_possible(
                     )
                 )
                 error_messages.append(f" - {stuff_description.name}")
+            error_messages.append("")
 
     # One or more ability is required
     if description.properties["required_one_of_abilities"]:
-        abilities_from_requirement = kernel.character_lib.have_from_of_abilities(
-            character, abilities=description.properties["required_one_of_abilities"]
-        )
-        if not abilities_from_requirement:
+        if not any(
+            ability_id in abilities_ids
+            for ability_id in description.properties["required_one_of_abilities"]
+        ):
             error_messages.append("Il vous faut au moins une des habilités suivantes :")
             for ability in description.properties["required_one_of_abilities"]:
                 error_messages.append(f" - {ability.name}")
+            error_messages.append("")
 
     # All abilities
     if description.properties["required_all_abilities"]:
-        abilities_from_requirement = kernel.character_lib.have_from_of_abilities(
-            character, abilities=description.properties["required_all_abilities"]
-        )
-        if len(abilities_from_requirement) != len(
-            description.properties["required_all_abilities"]
+        if not all(
+            ability_id in abilities_ids
+            for ability_id in description.properties["required_all_abilities"]
         ):
             error_messages.append("Il vous faut toute les habilités suivantes :")
             for ability in description.properties["required_all_abilities"]:
                 error_messages.append(f" - {ability.name}")
+            error_messages.append("")
 
     # Zone type
     if description.properties.get("required_one_of_zones"):
@@ -88,6 +92,7 @@ def check_common_is_possible(
             error_messages.append(
                 f"Impossible de faire ça dans {current_zone_type.name}"
             )
+            error_messages.append("")
 
     if error_messages:
         raise ImpossibleAction(
