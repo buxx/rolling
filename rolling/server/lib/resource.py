@@ -610,6 +610,7 @@ class ResourceLib:
         for_actions_page: bool = False,
         filter_action_types: typing.Optional[typing.List[str]] = None,
         disable_checks: bool = False,
+        from_inventory_only: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         resource_description = self._kernel.game.config.resources[resource_id]
@@ -627,7 +628,11 @@ class ResourceLib:
 
             try:
                 if not disable_checks:
-                    action.check_is_possible(character, resource_id=resource_id)
+                    action.check_is_possible(
+                        character,
+                        resource_id=resource_id,
+                        from_inventory_only=from_inventory_only,
+                    )
                 actions.extend(action.get_character_actions(character, resource_id))
             except ImpossibleAction:
                 pass

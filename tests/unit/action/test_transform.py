@@ -8,6 +8,7 @@ from rolling.exception import NoCarriedResource
 from rolling.kernel import Kernel
 from rolling.model.character import CharacterModel
 from rolling.rolling_types import ActionType
+from tests.utils import find_part
 
 
 @pytest.fixture
@@ -147,10 +148,9 @@ class TestTransformAction:
             description.items[0].items[0].text
             == f"Vous possedez {expected_unit_sentence} de Ressource1"
         )
-        assert (
-            description.items[0].items[1].default_value.lower()
-            == expected_default_quantity
-        )
+        assert find_part(
+            description.items, default_value=expected_default_quantity
+        ), f"Can't found part with '{expected_default_quantity}' default value "
 
         for input_quantity, after_quantity in reduce_and_after:
             await action.perform(

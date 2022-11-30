@@ -1,3 +1,10 @@
+[LAMBDA]  # system required
+  name = "LAMBDA"
+  weight = 0.0
+  clutter = 0.0
+  actions = []
+  material_type = "SOLID"
+  
 [CORPSE]  # system required
   name = "Corps"
   weight = 80000.0

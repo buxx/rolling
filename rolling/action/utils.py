@@ -62,8 +62,8 @@ def check_common_is_possible(
     # One or more ability is required
     if description.properties["required_one_of_abilities"]:
         if not any(
-            ability_id in abilities_ids
-            for ability_id in description.properties["required_one_of_abilities"]
+            ability.id in abilities_ids
+            for ability in description.properties["required_one_of_abilities"]
         ):
             error_messages.append("Il vous faut au moins une des habilités suivantes :")
             for ability in description.properties["required_one_of_abilities"]:
@@ -73,8 +73,8 @@ def check_common_is_possible(
     # All abilities
     if description.properties["required_all_abilities"]:
         if not all(
-            ability_id in abilities_ids
-            for ability_id in description.properties["required_all_abilities"]
+            ability.id in abilities_ids
+            for ability in description.properties["required_all_abilities"]
         ):
             error_messages.append("Il vous faut toute les habilités suivantes :")
             for ability in description.properties["required_all_abilities"]:

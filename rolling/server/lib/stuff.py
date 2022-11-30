@@ -340,6 +340,7 @@ class StuffLib:
         stuff: StuffModel,
         for_actions_page: bool = False,
         filter_action_types: typing.Optional[typing.List[str]] = None,
+        from_inventory_only: bool = False,
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
@@ -358,7 +359,9 @@ class StuffLib:
                 continue
 
             try:
-                action.check_is_possible(character, stuff)
+                action.check_is_possible(
+                    character, stuff, from_inventory_only=from_inventory_only
+                )
                 actions.extend(action.get_character_actions(character, stuff))
             except ImpossibleAction:
                 pass

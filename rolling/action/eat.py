@@ -50,7 +50,12 @@ class EatResourceAction(WithResourceAction):
             "consume_per_tick": action_config_raw["consume_per_tick"],
         }
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
         accept_resources_ids = [
             rd.id for rd in self._description.properties["accept_resources"]
         ]

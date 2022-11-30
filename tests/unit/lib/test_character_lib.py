@@ -1,7 +1,9 @@
 # coding: utf-8
 import pytest
+from rolling.availability import Availability
 
 from rolling.kernel import Kernel
+from rolling.model.ability import AbilityDescription
 from rolling.model.character import CharacterModel
 from rolling.model.measure import Unit
 from rolling.server.document.character import CharacterDocument
@@ -146,7 +148,7 @@ class TestCharacterLib:
         assert "Plastic bottle" == inventory.stuff[0].name
         assert "Plastic bottle" == inventory.stuff[1].name
 
-    def test_have_from_of_abilities__around_ground_stuffs(
+    def test_have_abilities(
         self,
         worldmapc_xena_model: CharacterModel,
         worldmapc_kernel: Kernel,
@@ -165,22 +167,13 @@ class TestCharacterLib:
         )
 
         # When
-        have_abilities = kernel.character_lib.have_from_of_abilities(
-            character=xena,
-            abilities=[
-                kernel.game.config.abilities["BLACKSMITH"],
-                kernel.game.config.abilities["HUNT_SMALL_GAME"],
-            ],
-        )
+        abilities_availability = Availability.new(kernel, xena).abilities()
+        abilities = abilities_availability.abilities
+        origins = abilities_availability.origins
 
         # Then
-        assert have_abilities
-        assert len(have_abilities) == 2
-        assert have_abilities == [
-            HaveAbility(
-                ability_id="BLACKSMITH", from_=FromType.HIMSELF, risk=RiskType.NONE
-            ),
-            HaveAbility(
-                ability_id="HUNT_SMALL_GAME", from_=FromType.STUFF, risk=RiskType.NONE
-            ),
-        ]
+        assert abilities
+        assert len(abilities) == 3
+        assert "BLACKSMITH" in [a.id for a in abilities]
+        assert "HUNT_SMALL_GAME" in [a.id for a in abilities]
+        assert "FIGHT" in [a.id for a in abilities]

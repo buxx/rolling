@@ -1,6 +1,7 @@
 # coding: utf-8
 from collections import defaultdict
 import dataclasses
+from itertools import cycle
 
 import serpyco
 import typing
@@ -25,6 +26,7 @@ from rolling.server.util import with_multiple_carried_stuffs
 from rolling.util import ExpectedQuantityContext
 from rolling.util import InputQuantityContext
 from rolling.util import quantity_to_str
+from rolling.availability import Availability
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -61,7 +63,10 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
         return properties
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if (
             stuff.stuff_id
@@ -161,6 +166,7 @@ class TransformStuffIntoResourcesAction(WithStuffAction):
             do_for_one_func=do_for_one,
             title="Transformation effectué",
             success_parts=[],
+            under_construction=False,
         )
 
 
@@ -194,7 +200,10 @@ class TransformStuffIntoStuffAction(WithStuffAction):
         return properties
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if (
             stuff.stuff_id
@@ -258,6 +267,7 @@ class TransformStuffIntoStuffAction(WithStuffAction):
         stuff: "StuffModel",
         input_: TransformStuffIntoResourcesModel,
     ) -> Description:
+        availability = Availability.new(self._kernel, character)
         await self.check_request_is_possible(character, stuff, input_)
         stuff_properties = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
             stuff.stuff_id
@@ -271,10 +281,11 @@ class TransformStuffIntoStuffAction(WithStuffAction):
             if illustration:
                 break
 
-        max_quantity = self._kernel.stuff_lib.get_stuff_count(
-            character_id=character.id, stuff_id=stuff.stuff_id
+        max_quantity = len(
+            availability.stuffs(
+                under_construction=False, stuff_id=stuff.stuff_id
+            ).stuffs
         )
-
         if not input_.quantity:
             return Description(
                 title=self._description.name,
@@ -316,12 +327,13 @@ class TransformStuffIntoStuffAction(WithStuffAction):
 
         done_count = 0
         produced: typing.DefaultDict[str, int] = defaultdict(lambda: 0)
+        stuffs = cycle(
+            availability.stuffs(under_construction=False, stuff_id=stuff.stuff_id)
+        )
         for _ in range(input_.quantity_int):
             try:
-                stuff_ = self._kernel.stuff_lib.get_carried_by(
-                    character_id=character.id, stuff_id=stuff.stuff_id
-                ).pop()
-            except IndexError:
+                stuff_ = stuffs.next()
+            except StopIteration:
                 break
 
             self._kernel.stuff_lib.destroy(stuff_id=stuff_.id)
@@ -388,13 +400,19 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         properties["cost_per_unit"] = action_config_raw["cost_per_unit"]
         return properties
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
         if resource_id != self._description.properties["required_resource_id"]:
             raise ImpossibleAction("Non concerné")
 
     async def check_request_is_possible(
         self, character: "CharacterModel", resource_id: str, input_: QuantityModel
     ) -> None:
+        availability = Availability.new(self._kernel, character)
         self.check_is_possible(character, resource_id)
         check_common_is_possible(
             kernel=self._kernel, description=self._description, character=character
@@ -402,9 +420,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
 
         required_resource_id = self._description.properties["required_resource_id"]
         if input_.quantity is not None:
-            carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                character.id, resource_id=required_resource_id
-            )
+            carried_resource = availability.resource(required_resource_id).resource
             user_input_context = InputQuantityContext.from_carried_resource(
                 user_input=input_.quantity, carried_resource=carried_resource
             )
@@ -453,10 +469,9 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         resource_id: str,
         input_: typing.Optional[QuantityModel] = None,
     ) -> typing.Optional[float]:
+        availability = Availability.new(self._kernel, character)
         if input_ and input_.quantity is not None:
-            carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                character.id, resource_id=resource_id, empty_object_if_not=True
-            )
+            carried_resource = availability.resource(resource_id).resource
             user_input_context = InputQuantityContext.from_carried_resource(
                 user_input=input_.quantity, carried_resource=carried_resource
             )
@@ -493,14 +508,15 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
     async def perform(
         self, character: "CharacterModel", resource_id: str, input_: QuantityModel
     ) -> Description:
+        availability = Availability.new(self._kernel, character)
         base_cost = self.get_cost(character, resource_id=resource_id)
         cost_per_unit = self._description.properties["cost_per_unit"]
         required_resource_description = self._kernel.game.config.resources[
             self._description.properties["required_resource_id"]
         ]
-        carried_resource = self._kernel.resource_lib.get_one_carried_by(
-            character.id, resource_id=required_resource_description.id
-        )
+        carried_resource = availability.resource(
+            required_resource_description.id
+        ).resource
         expected_quantity_context = ExpectedQuantityContext.from_carried_resource(
             self._kernel, carried_resource
         )
@@ -534,9 +550,14 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
                                     f"de {carried_resource.name}"
                                 )
                             ),
+                        ]
+                        + [Part("")]
+                        + availability.take_from_parts()
+                        + [Part("")]
+                        + [
                             Part(
                                 label=(
-                                    f"Quantité en {expected_quantity_context.display_unit_name} "
+                                    f"Quantité à transformer, en {expected_quantity_context.display_unit_name} "
                                     f"(coût: {base_cost} + {cost_per_unit} par "
                                     f"{expected_quantity_context.display_unit_name}) ?"
                                 ),
@@ -556,9 +577,7 @@ class TransformResourcesIntoResourcesAction(WithResourceAction):
         )
         real_quantity = self._adapt_quantity(user_input_context.real_quantity)
         cost = self.get_cost(character, resource_id=resource_id, input_=input_)
-        self._kernel.resource_lib.reduce_carried_by(
-            character.id, carried_resource.id, quantity=real_quantity, commit=False
-        )
+        availability.reduce_resource(carried_resource.id, quantity=real_quantity)
         produced_resources_txts = []
         for produce in self._description.properties["produce"]:
             produce_resource = self._kernel.game.config.resources[produce["resource"]]

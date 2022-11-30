@@ -192,13 +192,27 @@ class CraftStuffWithResourceAction(WithResourceAction, BaseCraftStuff):
     ) -> dict:
         return cls._get_properties_from_config(game_config, action_config_raw)
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        carried_resource_ids = [
-            resource.id
-            for resource in Availability.new(self._kernel, character)
-            .resources()
-            .resources
-        ]
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
+        if from_inventory_only:
+            carried_resource_ids = [
+                resource.id
+                for resource in Availability.new(self._kernel, character)
+                .resources(from_inventory_only=True)
+                .resources
+                if resource.id == resource_id
+            ]
+        else:
+            carried_resource_ids = [
+                resource.id
+                for resource in Availability.new(self._kernel, character)
+                .resources()
+                .resources
+            ]
 
         required_txts = []
         for require in self.description.properties["require"]:
@@ -412,11 +426,17 @@ class CraftStuffWithStuffAction(WithStuffAction, BaseCraftStuff):
         return cls._get_properties_from_config(game_config, action_config_raw)
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         # Consider action ca be possible (displayed in interface) if at least one of required stuff
         # is owned by character
-        carried = self._kernel.stuff_lib.get_carried_by(character.id)
+        availability = Availability.new(self._kernel, character)
+        carried = availability.stuffs(
+            under_construction=False, from_inventory_only=from_inventory_only
+        )
         carried_stuff_ids = [r.stuff_id for r in carried]
 
         for require in self._description.properties["require"]:
@@ -619,11 +639,12 @@ class BeginStuffConstructionAction(CharacterAction):
                     quantity_str = quantity_to_str(
                         quantity, resource_description.unit, self._kernel
                     )
-                    if quantity > sum(
-                        r.quantity
-                        for r in availability.resources(
-                            resource_id=resource_id
-                        ).resources
+                    if (
+                        quantity
+                        > availability.resource(
+                            resource_id,
+                            empty_object_if_not=True,
+                        ).resource.quantity
                     ):
                         resource_description = self._kernel.game.config.resources[
                             resource_id
@@ -870,7 +891,10 @@ class ContinueStuffConstructionAction(WithStuffAction):
         return properties
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if not stuff.under_construction:
             raise ImpossibleAction("Non concérné")

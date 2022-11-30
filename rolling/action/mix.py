@@ -16,8 +16,8 @@ from rolling.exception import NoCarriedResource
 from rolling.exception import WrongInputError
 from rolling.rolling_types import ActionType
 from rolling.server.link import CharacterActionLink
-from rolling.util import ExpectedQuantityContext, Quantity, QuantityEncoder
-from rolling.util import InputQuantityContext
+from rolling.util import Quantity, QuantityEncoder
+from rolling.availability import Availability
 
 if typing.TYPE_CHECKING:
     from rolling.game.base import GameConfig
@@ -36,17 +36,28 @@ class MixResourcesAction(WithResourceAction):
         input_model, type_encoders={Quantity: QuantityEncoder()}
     )
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
-        if not self._kernel.resource_lib.have_resource(
-            character_id=character.id, resource_id=resource_id
-        ):
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
+        availability = Availability.new(self._kernel, character)
+        if from_inventory_only:
+            available_resources = [
+                r
+                for r in availability.resources(from_inventory_only=True).resources
+                if r.id == resource_id
+            ]
+        else:
+            available_resources = [r for r in availability.resources().resources]
+
+        if resource_id not in [r.id for r in available_resources]:
             raise ImpossibleAction("Vous ne possedez pas cette resource")
 
         # TODO BS 2019-09-10: manage more than two resource mix
-        for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
-            for (
-                resource_mix_description
-            ) in self._kernel.game.config.get_resource_mixs_with(
+        for carried_resource in available_resources:
+            for _ in self._kernel.game.config.get_resource_mixs_with(
                 [resource_id, carried_resource.id]
             ):
                 return
@@ -63,17 +74,16 @@ class MixResourcesAction(WithResourceAction):
         )
 
         if input_.quantity is not None:
+            availability = Availability.new(self._kernel, character)
             unit_name = self._kernel.translation.get(resource_mix.produce_resource.unit)
             multiplier = int(
                 input_.quantity.as_real_float() / resource_mix.produce_quantity
             )
 
             for required_resource in resource_mix.required_resources:
-                carried_resource = self._kernel.resource_lib.get_one_carried_by(
-                    character_id=character.id,
-                    resource_id=required_resource.resource.id,
-                    empty_object_if_not=True,
-                )
+                carried_resource = availability.resource(
+                    required_resource.resource.id
+                ).resource
                 required_quantity = required_resource.quantity * multiplier
                 if carried_resource.quantity < required_quantity:
                     raise WrongInputError(
@@ -91,9 +101,10 @@ class MixResourcesAction(WithResourceAction):
     def get_character_actions(
         self, character: "CharacterModel", resource_id: str
     ) -> typing.List[CharacterActionLink]:
+        availability = Availability.new(self._kernel, character)
         actions: typing.List[CharacterActionLink] = []
 
-        for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
+        for carried_resource in availability.resources().resources:
             if carried_resource.id == resource_id:
                 continue
 
@@ -154,13 +165,10 @@ class MixResourcesAction(WithResourceAction):
     def _get_maximum_multiplier_capacity(
         self, character: "CharacterModel", mix_id: str
     ) -> int:
+        availability = Availability.new(self._kernel, character)
         mix_description = self._kernel.game.config.resource_mixs[mix_id]
         carried_resources = [
-            self._kernel.resource_lib.get_one_carried_by(
-                character_id=character.id,
-                resource_id=required_resource.resource.id,
-                empty_object_if_not=True,
-            )
+            availability.resource(required_resource.resource.id).resource
             for required_resource in mix_description.required_resources
         ]
         available_quantities = {
@@ -184,6 +192,7 @@ class MixResourcesAction(WithResourceAction):
     async def perform(
         self, character: "CharacterModel", resource_id: str, input_: input_model
     ) -> Description:
+        availability = Availability.new(self._kernel, character)
         base_cost = self.get_cost(character, resource_id=resource_id)
         mix_description = self._kernel.game.config.resource_mixs[input_.resource_mix_id]
         produce_unit_name = self._kernel.translation.get(
@@ -220,15 +229,14 @@ class MixResourcesAction(WithResourceAction):
                     )
                 )
 
+            parts.append(Part(""))
             parts.append(Part(text="Vous possédez :"))
 
             for required in mix_description.required_resources:
                 unit_str = self._kernel.translation.get(required.resource.unit)
-                have_quantity = self._kernel.resource_lib.get_one_carried_by(
-                    character_id=character.id,
-                    resource_id=required.resource.id,
-                    empty_object_if_not=True,
-                ).quantity
+                have_quantity = availability.resource(
+                    required.resource.id
+                ).resource.quantity
 
                 parts.append(
                     Part(
@@ -236,6 +244,7 @@ class MixResourcesAction(WithResourceAction):
                     )
                 )
 
+            parts.append(Part(""))
             parts.append(
                 Part(
                     text=(
@@ -270,6 +279,7 @@ class MixResourcesAction(WithResourceAction):
                         ),
                         items=[
                             *parts,
+                            Part(""),
                             Part(
                                 label=f"Produire combien de {mix_description.produce_resource.name} ({unit_name}) ?",
                                 type_=Type.NUMBER,
@@ -300,11 +310,9 @@ class MixResourcesAction(WithResourceAction):
             )
             # Reduce
             for required_resource in mix_description.required_resources:
-                self._kernel.resource_lib.reduce_carried_by(
-                    character.id,
+                availability.reduce_resource(
                     required_resource.resource.id,
-                    required_resource.quantity * desired_multiplier,
-                    commit=False,
+                    quantity=required_resource.quantity * desired_multiplier,
                 )
             # Create
             produced_quantity = mix_description.produce_quantity * desired_multiplier

@@ -12,6 +12,7 @@ from guilang.description import Type
 from rolling.action.base import get_with_stuff_action_url
 from rolling.exception import NotEnoughActionPoints
 from rolling.server.document.base import ImageDocument
+from rolling.availability import Availability
 
 if typing.TYPE_CHECKING:
     from rolling.action.base import WithStuffAction
@@ -64,10 +65,14 @@ async def with_multiple_carried_stuffs(
     title: str,
     success_parts: typing.List["Part"],
     redirect: typing.Optional[str] = None,
+    under_construction: typing.Optional[bool] = None,
 ) -> Description:
-    all_carried = kernel.stuff_lib.get_carried_by(
-        character.id, stuff_id=stuff.stuff_id, exclude_crafting=False
-    )
+    availability = Availability.new(kernel, character)
+    all_carried = availability.stuffs(
+        under_construction=under_construction,
+        stuff_id=stuff.stuff_id,
+    ).stuffs
+
     if (
         len(all_carried) > 1
         and input_.quantity is None
@@ -79,6 +84,11 @@ async def with_multiple_carried_stuffs(
                 Part(
                     text=f"Vous possedez {len(all_carried)} {stuff.name}, éxécuter cette action sur combien ?"
                 ),
+            ]
+            + [Part("")]
+            + availability.take_from_parts()
+            + [Part("")]
+            + [
                 Part(
                     is_form=True,
                     form_action=get_with_stuff_action_url(

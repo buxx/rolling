@@ -26,7 +26,10 @@ class EmptyStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(input_model)
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if not stuff.filled_with_resource:
             raise ImpossibleAction("Ne contient rien")

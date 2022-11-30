@@ -878,7 +878,7 @@ class CharacterLib:
 
         return character_actions_
 
-    def get_from_inventory_actions(
+    def get_from_lambdas_actions(
         self,
         character: CharacterModel,
         filter_action_types: typing.Optional[typing.List[str]] = None,
@@ -886,7 +886,7 @@ class CharacterLib:
     ) -> typing.List[CharacterActionLink]:
         actions: typing.List[CharacterActionLink] = []
 
-        for resource in self._kernel.resource_lib.get_carried_by(character.id):
+        for resource in [CarriedResourceDescriptionModel.lambda_()]:
             actions.extend(
                 self._kernel.character_lib.get_on_resource_actions(
                     character_id=character.id,
@@ -897,9 +897,7 @@ class CharacterLib:
                 )
             )
 
-        for stuff in self._kernel.stuff_lib.get_carried_by(
-            character.id, exclude_crafting=False
-        ):
+        for stuff in [StuffModel.lambda_()]:
             actions.extend(
                 self._kernel.stuff_lib.get_carrying_actions(
                     character=character,
@@ -1023,7 +1021,7 @@ class CharacterLib:
         if not quick_actions_only:
             character_actions_.extend(
                 self._add_category_to_action_links(
-                    self.get_from_inventory_actions(
+                    self.get_from_lambdas_actions(
                         character,
                         filter_action_types=filter_action_types,
                         disable_checks=True,
@@ -1057,7 +1055,10 @@ class CharacterLib:
         return filter_action_links(character_actions_)
 
     def get_on_stuff_actions(
-        self, character_id: str, stuff_id: int
+        self,
+        character_id: str,
+        stuff_id: int,
+        from_inventory_only: bool = False,
     ) -> typing.List[CharacterActionLink]:
         stuff = self._stuff_lib.get_stuff(stuff_id)
         character = self.get(character_id)
@@ -1078,7 +1079,11 @@ class CharacterLib:
             )
         elif stuff.carried_by == character_id:
             character_actions.extend(
-                self._stuff_lib.get_carrying_actions(character, stuff)
+                self._stuff_lib.get_carrying_actions(
+                    character,
+                    stuff,
+                    from_inventory_only=from_inventory_only,
+                )
             )
 
         return filter_action_links(character_actions)
@@ -1090,6 +1095,7 @@ class CharacterLib:
         for_actions_page: bool = False,
         filter_action_types: typing.Optional[typing.List[str]] = None,
         disable_checks: bool = False,
+        from_inventory_only: bool = False,
     ) -> typing.List[CharacterActionLink]:
         character = self.get(character_id)
         character_actions = self._kernel.resource_lib.get_carrying_actions(
@@ -1098,6 +1104,7 @@ class CharacterLib:
             for_actions_page=for_actions_page,
             filter_action_types=filter_action_types,
             disable_checks=disable_checks,
+            from_inventory_only=from_inventory_only,
         )
         return filter_action_links(character_actions)
 

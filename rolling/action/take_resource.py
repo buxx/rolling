@@ -40,7 +40,12 @@ class TakeResourceAction(WithResourceAction):
     ) -> dict:
         return {}
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
         pass
 
     async def check_request_is_possible(

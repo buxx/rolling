@@ -120,20 +120,59 @@ destroy_robustness_per_ap = 1
   abilities = ["BLACKSMITH2"]
   requires = ["BLACKSMITH"]
 
-[ability]
 
+[ability]
+[ability.HEAT_UP_LOW_TEMP]
+  name = "Cuisson basse température"
+[ability.HEAT_UP_MIDDLE_TEMP]
+  name = "Cuisson moyenne température"
+[ability.HEAT_UP_HIGH_TEMP]
+  name = "Cuisson haute température"
+[ability.FIGHT]
+  name = "Se battre"
+[ability.HUNT_SMALL_GAME]
+  name = "Chasse de petit gibier"
+[ability.POTTERY]
+  name = "Frabrication de poterie"
+[ability.BASKETRY]
+  name = "Vannerie"
+[ability.TANNERY]
+  name = "Tannerie"
 [ability.BLACKSMITH]
   name = "Maitrise de la forge"
 [ability.BLACKSMITH2]
   name = "Maitrise de la forge avancé"
-[ability.HUNT_SMALL_GAME]
-  name = "Chasse gibier"
+[ability.LEATHERWORK]
+  name = "Maroquinerie"
+[ability.LOOMING]
+  name = "Tissage"
+[ability.GRIND]
+  name = "Concassage"
+[ability.SPIN1]
+  name = "Filage manuel"
+[ability.SPIN2]
+  name = "Filage mécanisé"
+[ability.HAMMERING1]
+  name = "Martelage"
+[ability.HAMMERING2]
+  name = "Martelage sur enclume"
+[ability.BORDER_FISHING]
+  name = "Pêche en bordure"
+
 
 [character_effects]
   [character_effects.HUNGRY_SATISFIED]
     attributes_to_false = ["starved", "feel_hungry"]
 
 [resources]
+  [resources.LAMBDA]
+    name = "LAMBDA"
+    weight=0.0
+    material="LIQUID"
+    unit = "L"
+    clutter = 0.00
+    actions = []
+    drop_to_nowhere = false
   [resources.FRESH_WATER]
     name = "Eau potable"
     weight=1000.0

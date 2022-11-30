@@ -160,7 +160,10 @@ class Action(abc.ABC):
 class WithStuffAction(Action):
     @abc.abstractmethod
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         pass
 
@@ -235,7 +238,12 @@ class WithBuildAction(Action):
 
 class WithResourceAction(Action):
     @abc.abstractmethod
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
         pass
 
     @abc.abstractmethod

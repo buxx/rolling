@@ -1,16 +1,16 @@
 import abc
 import dataclasses
 import typing
-from rolling.exception import NotEnoughResource
+from rolling.exception import NoCarriedResource, NotEnoughResource
 
 from rolling.types import WorldPoint
 from guilang.description import Part
 from rolling.model.ability import AbilityDescription
+from rolling.model.resource import CarriedResourceDescriptionModel
 
 if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
     from rolling.model.character import CharacterModel
-    from rolling.model.resource import CarriedResourceDescriptionModel
     from rolling.model.stuff import StuffModel
     from rolling.server.document.affinity import AffinityDocument
     from rolling.server.document.build import BuildDocument
@@ -64,19 +64,25 @@ class Ground(OriginInterface):
 
 
 @dataclasses.dataclass
-class ResourceAvailability:
+class ResourcesAvailability:
     resources: typing.List["CarriedResourceDescriptionModel"]
     origins: typing.List[OriginInterface]
 
 
 @dataclasses.dataclass
-class StuffAvailability:
+class ResourceAvailability:
+    resource: "CarriedResourceDescriptionModel"
+    origins: typing.List[OriginInterface]
+
+
+@dataclasses.dataclass
+class StuffsAvailability:
     stuffs: typing.List["StuffModel"]
     origins: typing.List[OriginInterface]
 
 
 @dataclasses.dataclass
-class AbilityAvailability:
+class AbilitiesAvailability:
     abilities: typing.List["AbilityDescription"]
     origins: typing.List[OriginInterface]
 
@@ -122,45 +128,78 @@ class Availability:
         )
 
     def resources(
-        self, resource_id: typing.Optional["ResourceId"] = None
-    ) -> ResourceAvailability:
+        self,
+        from_inventory_only: bool = False,
+    ) -> ResourcesAvailability:
         origins = []
         resource_docs = []
         cache = self._kernel.cache(self._world_point)
+
+        resource_docs.extend(cache.get_carried_resources(self._character.id))
+        origins.append(Inventory())
+
+        if from_inventory_only:
+            resources = self._kernel.resource_lib.merge_resource_documents(
+                resource_docs
+            )
+            return ResourcesAvailability(
+                resources,
+                origins,
+            )
 
         protectorate_state = cache.protectorat_state()
         if protectorate_state.allow_ground_resources(self._character):
             origins.append(Ground(protectorate_state.affinity()))
             resource_docs.extend(cache.get_ground_resources())
 
-        resource_docs.extend(cache.get_carried_resources(self._character.id))
-        origins.append(Inventory())
-
-        if resource_id is not None:
-            resource_docs = [r for r in resource_docs if r.resource_id == resource_id]
-
         resources = self._kernel.resource_lib.merge_resource_documents(resource_docs)
-        return ResourceAvailability(
+        return ResourcesAvailability(
             resources,
             origins,
+        )
+
+    def resource(
+        self, resource_id: "ResourceId", empty_object_if_not: bool = True
+    ) -> ResourceAvailability:
+        resources_availability = self.resources()
+        resources = resources_availability.resources
+        resources = [r for r in resources if r.id == resource_id]
+
+        if not resources:
+            if not empty_object_if_not:
+                raise NoCarriedResource()
+
+            resource_description = self._kernel.game.config.resources[resource_id]
+            return ResourceAvailability(
+                CarriedResourceDescriptionModel.default(
+                    resource_id, resource_description
+                ),
+                origins=resources_availability.origins,
+            )
+
+        return ResourceAvailability(
+            resources[0],
+            origins=resources_availability.origins,
         )
 
     def stuffs(
         self,
         under_construction: typing.Optional[bool] = None,
         stuff_id: typing.Optional["StuffType"] = None,
-    ) -> StuffAvailability:
+        from_inventory_only: bool = False,
+    ) -> StuffsAvailability:
         origins = []
         stuffs = []
         cache = self._kernel.cache(self._world_point)
 
-        protectorate_state = cache.protectorat_state()
-        if protectorate_state.allow_ground_stuffs(self._character):
-            origins.append(Ground(protectorate_state.affinity()))
-            stuffs.extend(cache.get_ground_stuffs())
-
         stuffs.extend(cache.get_carried_stuffs(self._character.id))
         origins.append(Inventory())
+
+        if not from_inventory_only:
+            protectorate_state = cache.protectorat_state()
+            if protectorate_state.allow_ground_stuffs(self._character):
+                origins.append(Ground(protectorate_state.affinity()))
+                stuffs.extend(cache.get_ground_stuffs())
 
         if under_construction is not None:
             stuffs = [s for s in stuffs if s.under_construction == under_construction]
@@ -168,7 +207,7 @@ class Availability:
         if stuff_id is not None:
             stuffs = [s for s in stuffs if s.stuff_id == stuff_id]
 
-        return StuffAvailability(
+        return StuffsAvailability(
             stuffs,
             origins,
         )
@@ -262,7 +301,7 @@ class Availability:
 
     def abilities(
         self,
-    ) -> AbilityAvailability:
+    ) -> AbilitiesAvailability:
         origins = []
         abilities = []
 
@@ -289,7 +328,7 @@ class Availability:
                     abilities.append(self._kernel.game.config.abilities[ability_id])
                     origins.append(Build(build_description.name))
 
-        return AbilityAvailability(
+        return AbilitiesAvailability(
             abilities,
             origins,
         )

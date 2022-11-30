@@ -29,7 +29,10 @@ class NotUseAsBagAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         bag_ids = [bag.id for bag in character.bags]
         if stuff.id not in bag_ids:
@@ -78,7 +81,10 @@ class UseAsBagAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         # TODO BS 2019-09-03: permit multiple bags ?
         if not stuff.ready_for_use:
@@ -131,7 +137,10 @@ class UseAsWeaponAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if not stuff.weapon:
             raise ImpossibleAction("Ce n'est pas une arme")
@@ -184,7 +193,10 @@ class NotUseAsWeaponAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if character.weapon and character.weapon.id == stuff.id:
             return
@@ -233,7 +245,10 @@ class UseAsShieldAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if not stuff.shield:
             raise ImpossibleAction("Ce n'est pas un bouclier")
@@ -286,7 +301,10 @@ class NotUseAsShieldAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if character.shield and character.shield.id == stuff.id:
             return
@@ -335,7 +353,10 @@ class UseAsArmorAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if not stuff.armor:
             raise ImpossibleAction("Ce n'est pas une armure/protection")
@@ -388,7 +409,10 @@ class NotUseAsArmorAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if character.armor and character.armor.id == stuff.id:
             return

@@ -285,6 +285,15 @@ actions = ["TRAVEL"]
     factors = [{"attribute"="life_points", "factor"=0.0}]
 
 [resources]
+  [resources.LAMBDA]
+    name = "LAMBDA"
+    weight=0.0
+    material="LIQUID"
+    unit = "L"
+    clutter = 0.00
+    actions = ["MIX_RESOURCES", "TRANSFORM_RESOURCES_TO_RESOURCES", "CRAFT_STUFF_WITH_RESOURCE"]
+    drop_to_nowhere = false
+
   [resources.FRESH_WATER]
     name = "Eau potable"
     weight=1000.0
@@ -1428,7 +1437,7 @@ actions = ["TRAVEL"]
       {resource="CLOTH", coeff=0.02}
     ]
     required_resource_id = "WOOL"
-    cost_per_unit = 5
+    cost_per_unit = 0.2
     cost = 0.0
 
   [ACTIONS.MAKE_RAW_BRICK]

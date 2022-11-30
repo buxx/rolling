@@ -163,6 +163,7 @@ class TestLearnKnowledgeAction:
         assert arthur.pending_actions == 1
 
         resp = await web.post(f"/_describe/character/{arthur.id}/on_place_actions")
+        t = await resp.text()
         assert 200 == resp.status
         descr = description_serializer.load(await resp.json())
         item_urls = [p.form_action for p in descr.items]

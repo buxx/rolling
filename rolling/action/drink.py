@@ -197,7 +197,10 @@ class DrinkStuffAction(WithStuffAction):
         }
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         # TODO BS 2019-07-31: check is owned stuff
         accept_resources_ids = [

@@ -41,7 +41,10 @@ class TakeStuffAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         pass  # TODO: check if stuff is near, is not carried, is not protected ...
 

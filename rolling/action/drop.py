@@ -62,7 +62,10 @@ class DropStuffAction(WithStuffAction):
     input_model_serializer = serpyco.Serializer(DropStuffModel)
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
         if stuff.carried_by != character.id:
             raise ImpossibleAction("Vous ne possedez pas cet objet")
@@ -160,7 +163,12 @@ class DropResourceAction(WithResourceAction):
     input_model: typing.Type[DropResourceModel] = DropResourceModel
     input_model_serializer = serpyco.Serializer(input_model)
 
-    def check_is_possible(self, character: "CharacterModel", resource_id: str) -> None:
+    def check_is_possible(
+        self,
+        character: "CharacterModel",
+        resource_id: str,
+        from_inventory_only: bool = False,
+    ) -> None:
         if not self._kernel.resource_lib.have_resource(
             character_id=character.id, resource_id=resource_id
         ):

@@ -31,9 +31,12 @@ class FillStuffAction(WithStuffAction):
         return {}
 
     def check_is_possible(
-        self, character: "CharacterModel", stuff: "StuffModel"
+        self,
+        character: "CharacterModel",
+        stuff: "StuffModel",
+        from_inventory_only: bool = False,
     ) -> None:
-        for fill_acceptable_type in self._kernel.game.config.fill_with_material_ids:
+        for _ in self._kernel.game.config.fill_with_material_ids:
             for _ in self._kernel.game.world_manager.get_resource_on_or_around(
                 world_row_i=character.world_row_i,
                 world_col_i=character.world_col_i,

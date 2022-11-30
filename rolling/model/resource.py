@@ -12,6 +12,9 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
+LAMBDA_RESOURCE_ID = "LAMBDA"
+
+
 @dataclasses.dataclass
 class ResourceDescriptionModel:
     id: str
@@ -56,7 +59,7 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
     def default(
         cls, resource_id: str, resource_description: ResourceDescriptionModel
     ) -> "CarriedResourceDescriptionModel":
-        return CarriedResourceDescriptionModel(
+        return cls(
             id=resource_id,
             name=resource_description.name,
             weight=0.0,
@@ -70,6 +73,26 @@ class CarriedResourceDescriptionModel(ResourceDescriptionModel):
             drop_to_nowhere=resource_description.drop_to_nowhere,
             harvest_cost_per_tile=resource_description.harvest_cost_per_tile,
             harvest_production_per_tile=resource_description.harvest_production_per_tile,
+        )
+
+    @classmethod
+    def lambda_(
+        cls,
+    ) -> "CarriedResourceDescriptionModel":
+        return cls(
+            id=LAMBDA_RESOURCE_ID,
+            name="LAMBDA",
+            weight=0.0,
+            material_type="n/a",
+            unit=Unit.UNIT,
+            clutter=0.0,
+            quantity=0.0,
+            descriptions=[],
+            illustration=None,
+            grow_speed=None,
+            drop_to_nowhere=False,
+            harvest_cost_per_tile=None,
+            harvest_production_per_tile=None,
         )
 
     def get_full_description(self, kernel: "Kernel") -> str:

@@ -16,6 +16,9 @@ if typing.TYPE_CHECKING:
     from rolling.kernel import Kernel
 
 
+LAMBDA_STUFF_ID = "LAMBDA"
+
+
 @dataclasses.dataclass
 class StuffProperties:
     id: str
@@ -125,6 +128,16 @@ class StuffModel:
     classes: typing.List[str] = serpyco.field(default_factory=list)
     used_by: typing.Optional[str] = None
     illustration: typing.Optional[str] = None
+    is_lambda: bool = False
+
+    @classmethod
+    def lambda_(cls) -> "StuffModel":
+        return cls(
+            id=0,
+            stuff_id=LAMBDA_STUFF_ID,
+            name="LAMBDA",
+            is_lambda=True,
+        )
 
     @property
     def ready_for_use(self) -> bool:
