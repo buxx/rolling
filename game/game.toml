@@ -42,7 +42,7 @@ Vous ne vous rappelez pas de grand chose..."""
 fresh_water_resource_id = "FRESH_WATER"
 liquid_material_id = "LIQUID"
 fill_with_material_ids = ["LIQUID", "SANDY"]
-default_weight_capacity = 20000.0
+default_weight_capacity = 50000.0
 default_clutter_capacity = 5.0
 cheats = {"*"=["increase_ap", "reduce_tiredness"]}
 create_character_skills = ["crafts", "hunting_gathering"]
