@@ -19,7 +19,8 @@ from rolling import util
 from rolling.action.base import ActionDescriptionModel
 from rolling.action.base import get_with_stuff_action_url
 from rolling.action.base import get_with_resource_action_url
-from rolling.bonus import Bonus, Bonuses
+from rolling.availability import Availability
+from rolling.bonus import Bonus
 from rolling.exception import CannotMoveToZoneError, CharacterHaveNoAccountId
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughActionPoints
@@ -45,7 +46,6 @@ from rolling.model.stuff import StuffModel
 from rolling.model.zone import MoveZoneInfos
 from rolling.rolling_types import ActionType
 from rolling.server.action import ActionFactory
-from rolling.server.controller.url import DESCRIBE_BUILD
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_CHARACTER_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_RESOURCE_URL
 from rolling.server.controller.url import DESCRIBE_LOOK_AT_STUFF_URL
@@ -67,7 +67,6 @@ from rolling.server.document.message import MessageDocument
 from rolling.server.document.skill import CharacterSkillDocument
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.link import CharacterActionLink, ExploitableTile
-from rolling.server.util import register_image
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import filter_action_links
 from rolling.util import get_coming_from
@@ -1528,6 +1527,8 @@ class CharacterLib:
 
     def get_resume_text(self, character_id: str) -> typing.List[ItemModel]:
         character = self.get(character_id)
+        availability = Availability.new(self._kernel, character)
+
         followers_count = self.get_follower_count(
             character_id, row_i=character.world_row_i, col_i=character.world_col_i
         )
@@ -1562,7 +1563,7 @@ class CharacterLib:
                     can_drink_str = "Faible"
 
         can_eat_str = "Non"
-        eatables = self.get_eatables(character)
+        eatables = availability.eatables()
         eatables_total_ticks = 0
         for carried_eatable, carried_action_description in eatables:
             eatable_total_ticks = (
@@ -1953,26 +1954,27 @@ class CharacterLib:
         None,
         None,
     ]:
-        exclude_resource_ids = exclude_resource_ids or []
-        # With inventory resources
-        for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
-            resource_properties = self._kernel.game.config.resources[
-                carried_resource.id
-            ]
+        pass
+        # exclude_resource_ids = exclude_resource_ids or []
+        # # With inventory resources
+        # for carried_resource in self._kernel.resource_lib.get_carried_by(character.id):
+        #     resource_properties = self._kernel.game.config.resources[
+        #         carried_resource.id
+        #     ]
 
-            if resource_properties.id in exclude_resource_ids:
-                continue
+        #     if resource_properties.id in exclude_resource_ids:
+        #         continue
 
-            for description in resource_properties.descriptions:
-                if (
-                    description.action_type == ActionType.EAT_RESOURCE
-                    and resource_properties.id
-                    in [
-                        rd.id
-                        for rd in description.properties.get("accept_resources", [])
-                    ]
-                ):
-                    yield carried_resource, description
+        #     for description in resource_properties.descriptions:
+        #         if (
+        #             description.action_type == ActionType.EAT_RESOURCE
+        #             and resource_properties.id
+        #             in [
+        #                 rd.id
+        #                 for rd in description.properties.get("accept_resources", [])
+        #             ]
+        #         ):
+        #             yield carried_resource, description
 
     def get_with_fighters_count(self, character_id: str) -> int:
         here_ids = []

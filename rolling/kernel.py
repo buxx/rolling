@@ -237,7 +237,13 @@ class Kernel:
             for col_i, _ in enumerate(row):
                 self._caches[row_i][col_i] = ContextVar("RequestCache", default=None)
 
-    def cache(self, world_point: WorldPoint) -> "RequestCache":
+    def cache(self, world_point: WorldPoint, force_new: bool = False) -> "RequestCache":
+        if force_new:
+            return RequestCache(
+                self,
+                world_point,
+            )
+
         cache = self._caches[world_point[0]][world_point[1]]
         if cache.get() is None:
             cache.set(

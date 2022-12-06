@@ -1,4 +1,5 @@
 # coding: utf-8
+from itertools import cycle
 from logging import Logger
 import random
 from sqlalchemy.orm.exc import NoResultFound
@@ -18,6 +19,7 @@ from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.util import character_can_drink_in_its_zone
 from rolling.util import get_stuffs_filled_with_resource_id
+from rolling.availability import Availability
 
 
 class TurnLib:
@@ -36,8 +38,6 @@ class TurnLib:
         self._disable_natural_needs = disable_natural_needs
 
     def execute_turn(self) -> None:
-        # FIXME: update stuff generation for hour ticks
-        # self._generate_stuff()
         if not self._disable_natural_needs:
             self._provide_for_natural_needs()
         self._improve_conditions()
@@ -246,14 +246,13 @@ class TurnLib:
                 character_document.hunger
                 > self._kernel.game.config.stop_auto_eat_hunger
             ):
+                availability = Availability.with_no_cache(self._kernel, character)
+                eatables = cycle(availability.eatables())
+
                 have_eat = False
 
                 try:
-                    carried_resource, action_description = next(
-                        self._kernel.character_lib.get_eatables(
-                            character, exclude_resource_ids=eat_resource_ids
-                        )
-                    )
+                    carried_resource, action_description = next(eatables)
                     have_eat = True
                     try:
                         EatResourceAction.eat(
@@ -276,6 +275,7 @@ class TurnLib:
                     self._logger.info("Have no eat")
                     break
 
+            character_document = self._character_lib.get_document(character_id)
             # Hungry ! Losing LP
             if (
                 float(character_document.hunger)

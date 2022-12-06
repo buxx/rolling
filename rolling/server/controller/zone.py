@@ -31,6 +31,7 @@ from rolling.server.lib.character import CharacterLib
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.lib.zone import ZoneLib
 from rolling.server.processor import RollingSerpycoProcessor
+from rolling.availability import Availability
 
 
 class ZoneController(BaseController):
@@ -187,6 +188,13 @@ class ZoneController(BaseController):
                     )
                 )
 
+        if characters_parts:
+            characters_parts.insert(
+                0, Part(text=f"Dans cette zone se trouvent les personnages suivants:")
+            )
+        else:
+            characters_parts = [Part("Vous êtes seul dans la zone.")]
+
         affinities_parts = []
         for affinity_relation in self._kernel.affinity_lib.get_accepted_affinities(
             character.id
@@ -237,6 +245,50 @@ class ZoneController(BaseController):
                 )
             )
 
+        if affinities_parts:
+            affinities_parts.insert(0, Part(""))
+
+        availability = Availability.new(self._kernel, character)
+        availability_parts = [Part("")]
+
+        if protectorate_affinity := availability.under_protectorate():
+            availability_parts.append(
+                Part(
+                    f"Cette zone est soumise au protectorat de {protectorate_affinity.name} "
+                    "Les accès aux biens de cette zone sont les suivants :"
+                ),
+            )
+        else:
+            availability_parts.append(
+                Part(
+                    "Cette zone n'est pas soumise à un protectorat. "
+                    "Les accès aux biens de cette zone sont les suivants :"
+                ),
+            )
+
+        if availability.can_pickup_from_ground():
+            availability_parts.append(Part("  ✅ Prendre le matériel déposé au sol"))
+        else:
+            availability_parts.append(
+                Part("  ❌ Vous ne pouvez pas prendre matériel déposé au sol")
+            )
+
+        if availability.can_extract():
+            availability_parts.append(Part("  ✅ Exploiter les ressources naturelles"))
+        else:
+            availability_parts.append(
+                Part("  ❌ Vous ne pouvez pas exploiter les ressources naturelles")
+            )
+
+        if availability.can_use_builds():
+            availability_parts.append(Part("  ✅ Utiliser les bâtiments"))
+        else:
+            availability_parts.append(
+                Part("  ❌ Vous ne pouvez pas utiliser les bâtiments")
+            )
+
+        availability_parts.append(Part(""))
+
         return Description(
             title=tile_type.get_name(),
             illustration_name=zone_properties.illustration,
@@ -245,7 +297,7 @@ class ZoneController(BaseController):
                 Part(text=zone_properties.description),
             ]
             + affinities_parts
-            + [Part(text=f"Dans cette zone se trouvent les personnages suivants:")]
+            + availability_parts
             + characters_parts,
             can_be_back_url=True,
         )
@@ -256,8 +308,7 @@ class ZoneController(BaseController):
     @hapic.input_query(GetZoneMessageQueryModel)
     @hapic.output_body(Description)
     async def messages(self, request: Request, hapic_data: HapicData) -> Description:
-        # FIXME BS: manage pagination
-        # FIXME BS: secured character_id
+        assert request["account_character_id"] == hapic_data.query.character_id
         messages = self._kernel.message_lib.get_character_zone_messages(
             character_id=hapic_data.query.character_id
         )

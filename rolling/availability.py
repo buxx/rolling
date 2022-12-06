@@ -1,7 +1,9 @@
 import abc
 import dataclasses
 import typing
+from rolling.action.base import ActionDescriptionModel
 from rolling.exception import NoCarriedResource, NotEnoughResource
+from rolling.rolling_types import ActionType
 
 from rolling.types import WorldPoint
 from guilang.description import Part
@@ -118,14 +120,28 @@ class ResourceReduction:
 class Availability:
     @classmethod
     def new(cls, kernel: "Kernel", character: "CharacterModel") -> "Availability":
-        return cls(kernel, character)
+        return cls(kernel, character, use_cache=True)
 
-    def __init__(self, kernel: "Kernel", character: "CharacterModel") -> None:
+    @classmethod
+    def with_no_cache(
+        cls, kernel: "Kernel", character: "CharacterModel"
+    ) -> "Availability":
+        return cls(kernel, character, use_cache=False)
+
+    def __init__(
+        self, kernel: "Kernel", character: "CharacterModel", use_cache: bool
+    ) -> None:
         self._kernel = kernel
         self._character = character
         self._world_point = WorldPoint(
             (self._character.world_row_i, self._character.world_col_i)
         )
+        self._use_cache = use_cache
+
+    def under_protectorate(self) -> typing.Optional["AffinityDocument"]:
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
+        protectorate_state = cache.protectorat_state()
+        return protectorate_state.affinity()
 
     def resources(
         self,
@@ -133,7 +149,7 @@ class Availability:
     ) -> ResourcesAvailability:
         origins = []
         resource_docs = []
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
 
         resource_docs.extend(cache.get_carried_resources(self._character.id))
         origins.append(Inventory())
@@ -157,6 +173,32 @@ class Availability:
             resources,
             origins,
         )
+
+    def eatables(
+        self,
+    ) -> typing.List[
+        typing.Tuple[CarriedResourceDescriptionModel, ActionDescriptionModel]
+    ]:
+        eatable_resources = []
+        resource_availability = self.resources()
+
+        for carried_resource in resource_availability.resources:
+            resource_properties = self._kernel.game.config.resources[
+                carried_resource.id
+            ]
+            for description in resource_properties.descriptions:
+                if (
+                    description.action_type == ActionType.EAT_RESOURCE
+                    and resource_properties.id
+                    in [
+                        rd.id
+                        for rd in description.properties.get("accept_resources", [])
+                    ]
+                ):
+                    eatable_resources.append((carried_resource, description))
+                    break
+
+        return eatable_resources
 
     def resource(
         self, resource_id: "ResourceId", empty_object_if_not: bool = True
@@ -190,7 +232,7 @@ class Availability:
     ) -> StuffsAvailability:
         origins = []
         stuffs = []
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
 
         stuffs.extend(cache.get_carried_stuffs(self._character.id))
         origins.append(Inventory())
@@ -216,7 +258,7 @@ class Availability:
         self, under_construction: typing.Optional[bool] = None
     ) -> typing.List["BuildDocument"]:
         builds = []
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
 
         protectorate_state = cache.protectorat_state()
         if protectorate_state.allow_use_builds(self._character):
@@ -230,7 +272,7 @@ class Availability:
     def reduce_resource(self, resource_id: str, quantity: float) -> ResourceReductions:
         to_reduce = quantity
         reductions = []
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
         self._kernel.server_db_session.begin_nested()
 
         protectorate_state = cache.protectorat_state()
@@ -277,7 +319,7 @@ class Availability:
 
     def take_from_parts(self) -> typing.List[Part]:
         parts = [Part(text="Les ressources et objets seront utilisés depuis :")]
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
         protectorate_state = cache.protectorat_state()
 
         if protectorate_state.allow_ground_stuffs(self._character):
@@ -289,7 +331,7 @@ class Availability:
 
     def take_from_one_line_txt(self) -> typing.List[Part]:
         parts = []
-        cache = self._kernel.cache(self._world_point)
+        cache = self._kernel.cache(self._world_point, force_new=not self._use_cache)
         protectorate_state = cache.protectorat_state()
 
         if protectorate_state.allow_ground_stuffs(self._character):
@@ -332,3 +374,12 @@ class Availability:
             abilities,
             origins,
         )
+
+    def can_pickup_from_ground(self) -> bool:
+        return True  # Because not yet implemented
+
+    def can_extract(self) -> bool:
+        return True  # Because not yet implemented
+
+    def can_use_builds(self) -> bool:
+        return True  # Because not yet implemented

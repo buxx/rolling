@@ -1904,7 +1904,9 @@ class CharacterController(BaseController):
     ) -> Description:
         stuff = self._stuff_lib.get_stuff(hapic_data.path.stuff_id)
         actions = self._character_lib.get_on_stuff_actions(
-            character_id=hapic_data.path.character_id, stuff_id=hapic_data.path.stuff_id, from_inventory_only=True
+            character_id=hapic_data.path.character_id,
+            stuff_id=hapic_data.path.stuff_id,
+            from_inventory_only=True,
         )
         text_lines = stuff.get_full_description(self._kernel)
         props = self._kernel.game.stuff_manager.get_stuff_properties_by_id(
