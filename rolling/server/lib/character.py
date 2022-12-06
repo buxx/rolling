@@ -323,6 +323,7 @@ class CharacterLib:
             tracim_user_id=character_document.tracim_user_id,
             tracim_home_space_id=character_document.tracim_home_space_id,
             tracim_password=character_document.tracim_password,
+            spritesheet_id=character_document.spritesheet_id,
         )
 
     def get_multiple(

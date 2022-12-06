@@ -9,6 +9,7 @@ from rolling.action.utils import fill_base_action_properties
 from rolling.exception import ConfigurationError
 from rolling.game.stuff import StuffManager
 from rolling.game.world import WorldManager
+from rolling.game.spritesheets import SpriteSheets, CreateCharacterSource
 from rolling.map.type.world import WorldMapTileType
 from rolling.map.type.zone import ZoneMapTileType
 from rolling.map.type.zone import MapTileType
@@ -492,6 +493,14 @@ class Game:
             path.join(config_folder, "stuff.toml"), config=self._config
         )
         self._world = self._create_world_manager(path.join(config_folder, "world.toml"))
+
+        spritesheets = toml.load(path.join(config_folder, "spritesheets.toml"))
+        self._spritesheets = SpriteSheets(
+            create_character=[
+                CreateCharacterSource(**config)
+                for config in spritesheets["character"]["create"]["sources"]
+            ]
+        )
 
     @property
     def config(self) -> GameConfig:

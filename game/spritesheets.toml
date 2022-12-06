@@ -1,0 +1,49 @@
+[character]
+    [character.create]
+        [[character.create.sources]]
+            name = "Corp"
+            variant = true
+            identifiers = [
+                "body::bodies::child::*",
+                "body::bodies::female::*",
+                "body::bodies::male::*",
+                "body::bodies::muscular::*",
+                "body::bodies::teen::*",
+            ]
+
+# create_character_allowed_lpcg_identifiers = [
+#   [
+#     "Corp",
+#     true,
+#     [
+#       "body::bodies::child::*",
+#       "body::bodies::female::*",
+#       "body::bodies::male::*",
+#       "body::bodies::muscular::*",
+#       "body::bodies::teen::*",
+#     ]
+#   ],
+#   [
+#     "Tête",
+#     true,
+#     [
+#       "head::heads::human_child::*",
+#       "head::heads::human_female::*",
+#       "head::heads::human_male::*",
+#     ]
+#   ],
+#   [
+#     "Yeux",
+#     false,
+#     [
+#       "eyes::*"
+#     ]
+#   ],
+#   [
+#     "Cheveux",
+#     false,
+#     [
+#       "hair::*"
+#     ]
+#   ]
+# ]

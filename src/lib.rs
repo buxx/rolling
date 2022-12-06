@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use spritesheets::{error::SpritesheetError, CharacterSpriteSheetGenerator};
 use tracim::{
     account::Account,
     config::Config,
@@ -9,11 +10,13 @@ use tracim::{
     },
 };
 
+pub mod spritesheets;
 pub mod tracim;
 
 #[pymodule]
 fn rrolling(py: Python, root_module: &PyModule) -> PyResult<()> {
     let tracim_module = PyModule::new(py, "tracim")?;
+    let spritesheets_module = PyModule::new(py, "spritesheets")?;
 
     tracim_module.add("TracimError", py.get_type::<TracimError>())?;
     tracim_module.add(
@@ -33,7 +36,11 @@ fn rrolling(py: Python, root_module: &PyModule) -> PyResult<()> {
     tracim_module.add_class::<SpaceId>()?;
     tracim_module.add_class::<SpaceName>()?;
 
+    spritesheets_module.add("SpritesheetError", py.get_type::<SpritesheetError>())?;
+    spritesheets_module.add_class::<CharacterSpriteSheetGenerator>()?;
+
     root_module.add_submodule(tracim_module)?;
+    root_module.add_submodule(spritesheets_module)?;
 
     Ok(())
 }

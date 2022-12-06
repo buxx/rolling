@@ -2352,6 +2352,7 @@ class CharacterController(BaseController):
                     character_id=character_id,
                     zone_row_i=character_doc.zone_row_i,
                     zone_col_i=character_doc.zone_col_i,
+                    spritesheet_id=character_doc.spritesheet_id,
                 ),
             ),
         )
@@ -2514,6 +2515,7 @@ class CharacterController(BaseController):
                         character_id=character_.id,
                         zone_row_i=character_doc.zone_row_i,
                         zone_col_i=character_doc.zone_col_i,
+                        spritesheet_id=character_doc.spritesheet_id,
                     ),
                 ),
             )
@@ -3037,6 +3039,24 @@ class CharacterController(BaseController):
 
         return response
 
+    @hapic.with_api_doc()
+    @hapic.input_path(GetCharacterPathModel)
+    @hapic.output_body(Description)
+    async def spritesheet_setup(
+        self, request: Request, hapic_data: HapicData
+    ) -> Description:
+        character_id = hapic_data.path.character_id
+        character_doc = self._kernel.character_lib.get_document(character_id)
+        assert character_doc.spritesheet_id is None
+        illustration_name = self._kernel.spritesheet_illustration(
+            "body::bodies::female::taupe head::heads::human_female::taupe"
+        ).name
+
+        return Description(
+            title="Apparence du personnage",
+            illustration_name=illustration_name,
+        )
+
     def bind(self, app: Application) -> None:
         app.add_routes(
             [
@@ -3194,6 +3214,10 @@ class CharacterController(BaseController):
                 web.post("/character/{character_id}/send-around", self.send_around),
                 web.post("/character/{character_id}/open-rp", self.open_rp),
                 web.get("/character/{character_id}/open-rp", self.open_rp),
+                web.post(
+                    "/character/{character_id}/spritesheet-setup",
+                    self.spritesheet_setup,
+                ),
                 web.get(
                     "/character/{character_id}/unread-messages-count",
                     self.unread_messages_count,

@@ -69,6 +69,7 @@ class CharacterEnterZoneData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
     character_id: str
+    spritesheet_id: typing.Optional[str]
 
 
 @dataclasses.dataclass
