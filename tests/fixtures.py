@@ -510,7 +510,7 @@ def worldmapc_xena_stone(
 
 
 @pytest.fixture
-def worldmapc_xena_haxe_weapon(
+async def worldmapc_xena_haxe_weapon(
     worldmapc_xena_model: CharacterModel,
     worldmapc_kernel: Kernel,
     worldmapc_xena_haxe: StuffModel,
@@ -519,7 +519,7 @@ def worldmapc_xena_haxe_weapon(
     kernel = worldmapc_kernel
     haxe = worldmapc_xena_haxe
 
-    kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe.id)
+    await kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe.id)
     return haxe
 
 
@@ -536,7 +536,7 @@ def worldmapc_arthur_leather_jacket(
 
 
 @pytest.fixture
-def worldmapc_arthur_leather_jacket_armor(
+async def worldmapc_arthur_leather_jacket_armor(
     worldmapc_arthur_model: CharacterModel,
     worldmapc_kernel: Kernel,
     worldmapc_arthur_leather_jacket: StuffModel,
@@ -545,7 +545,7 @@ def worldmapc_arthur_leather_jacket_armor(
     kernel = worldmapc_kernel
     leather_jacket = worldmapc_arthur_leather_jacket
 
-    kernel.stuff_lib.set_as_used_as_armor(arthur.id, leather_jacket.id)
+    await kernel.stuff_lib.set_as_used_as_armor(arthur.id, leather_jacket.id)
     return leather_jacket
 
 

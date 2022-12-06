@@ -16,6 +16,7 @@ class ZoneEventType(Enum):
     CLIENT_WANT_CLOSE = "CLIENT_WANT_CLOSE"
     SERVER_PERMIT_CLOSE = "SERVER_PERMIT_CLOSE"
     CHARACTER_ENTER_ZONE = "CHARACTER_ENTER_ZONE"
+    CHARACTER_SPRITESHEET_CHANGE = "CHARACTER_SPRITESHEET_CHANGE"
     CHARACTER_EXIT_ZONE = "CHARACTER_EXIT_ZONE"
     CLIENT_REQUIRE_AROUND = "CLIENT_REQUIRE_AROUND"
     THERE_IS_AROUND = "THERE_IS_AROUND"
@@ -69,6 +70,13 @@ class CharacterEnterZoneData(WebSocketEventData):
     zone_row_i: int
     zone_col_i: int
     character_id: str
+    spritesheet_filename: typing.Optional[str]
+
+
+@dataclasses.dataclass
+class CharacterSpritesheetChangeData(WebSocketEventData):
+    character_id: str
+    spritesheet_filename: str
 
 
 @dataclasses.dataclass
@@ -240,6 +248,7 @@ zone_event_data_types: typing.Dict[ZoneEventType, typing.Type[WebSocketEventData
     ZoneEventType.CLIENT_WANT_CLOSE: EmptyData,
     ZoneEventType.SERVER_PERMIT_CLOSE: EmptyData,
     ZoneEventType.CHARACTER_ENTER_ZONE: CharacterEnterZoneData,
+    ZoneEventType.CHARACTER_SPRITESHEET_CHANGE: CharacterSpritesheetChangeData,
     ZoneEventType.CHARACTER_EXIT_ZONE: CharacterExitZoneData,
     ZoneEventType.CLIENT_REQUIRE_AROUND: ClientRequireAroundData,
     ZoneEventType.THERE_IS_AROUND: ThereIsAroundData,

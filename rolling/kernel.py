@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 import typing
+from PIL import Image
 
 from rolling.exception import ComponentNotPrepared
 from rolling.exception import NoZoneMapError
@@ -45,7 +46,10 @@ from rolling.server.lib.account import AccountLib
 from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
-from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.character import (
+    DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS,
+    CharacterLib,
+)
 from rolling.server.lib.corpse import AnimatedCorpseLib
 from rolling.server.lib.door import DoorLib
 from rolling.server.lib.farming import FarmingLib
@@ -68,6 +72,11 @@ from rolling.server.chat import State as ChatState
 from rolling.cache import RequestCache
 
 import rrolling
+
+
+@dataclasses.dataclass
+class LpcgConfig:
+    spritesheets: str
 
 
 @dataclasses.dataclass
@@ -96,6 +105,7 @@ class ServerConfig:
     zones: str
     tracim_config: rrolling.tracim.Config
     tracim_common_spaces: typing.List[typing.Tuple[int, str]]
+    lpcg_config: LpcgConfig
 
     @classmethod
     def from_config_file_path(
@@ -124,9 +134,13 @@ class ServerConfig:
             space_id, role = item.split(":")
             tracim_common_space_id.append((int(space_id), role))
 
+        lpcg_spritesheets = server_config_reader["lpcg"]["spritesheets"]
+        lpcg_config = LpcgConfig(spritesheets=lpcg_spritesheets)
+
         return ServerConfig(
             tracim_config=tracim_config,
             tracim_common_spaces=tracim_common_space_id,
+            lpcg_config=lpcg_config,
             **server_config_reader["default"],
         )
 
@@ -209,6 +223,16 @@ class Kernel:
         self._spawn_point_lib: typing.Optional[SpawnPointLib] = None
         self._protectorate_lib: typing.Optional[ProtectorateLib] = None
 
+        self.character_spritesheets_generator = (
+            rrolling.spritesheets.CharacterSpriteSheetGenerator(
+                self.server_config.lpcg_config.spritesheets
+            )
+        )
+        kernel_logger.info("")
+        self._character_spritesheets_identifiers: typing.Optional[
+            typing.List[str]
+        ] = None
+        type(self.character_spritesheets_identifiers)
         self.event_serializer_factory = ZoneEventSerializerFactory()
         self.chat_state = ChatState(3600 * 24 * 4)
 
@@ -307,6 +331,15 @@ class Kernel:
         self._tile_maps_by_position[(row_i, col_i)] = ZoneMap(
             row_i, col_i, ZoneMapSource(self, tile_map_source_raw)
         )
+
+    @property
+    def character_spritesheets_identifiers(self) -> typing.List[str]:
+        if self._character_spritesheets_identifiers is None:
+            self._character_spritesheets_identifiers = (
+                self.character_spritesheets_generator.identifiers()
+            )
+
+        return self._character_spritesheets_identifiers
 
     @property
     def zone_maps_folder(self) -> str:
@@ -695,3 +728,35 @@ class Kernel:
                         kernel_logger.error(
                             f"Character '{character_id}' cant be refreshed"
                         )
+
+    def spritesheet_path(self, identifiers: typing.Optional[str]) -> pathlib.Path:
+        identifiers = identifiers or DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS
+        image_id = hashlib.md5(identifiers.encode()).hexdigest()
+        image_path = pathlib.Path(f"game/media/character_spritesheet_{image_id}.png")
+        if image_path.exists():
+            return image_path
+        self.character_spritesheets_generator.build(
+            identifiers=identifiers,
+            output=str(image_path),
+        )
+        return image_path
+
+    def spritesheet_illustration(self, identifiers: str) -> pathlib.Path:
+        spritesheet_path = self.spritesheet_path(identifiers)
+        image_path = (
+            spritesheet_path.parent / f"{spritesheet_path.name}_illustration.png"
+        )
+        if pathlib.Path(image_path).exists():
+            return image_path
+
+        spritesheet_image = Image.open(spritesheet_path)
+        image = spritesheet_image.crop((0, 640, 0 + 65, 640 + 65))
+        image = image.resize((130, 130))
+        back = Image.new(mode="RGB", size=(768, 300))
+        back.paste(
+            image,
+            ((768 // 2) - (image.width // 2), (300 // 2) - (image.height // 2)),
+        )
+        back.save(image_path)
+
+        return image_path

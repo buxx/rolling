@@ -611,32 +611,32 @@ class TestFightAction:
         if frw_weapon:
             stuff = create_stuff(kernel, frw_weapon)
             kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
-            kernel.stuff_lib.set_as_used_as_weapon(france_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_weapon(france_warlord.id, stuff.id)
 
         if frw_shield:
             stuff = create_stuff(kernel, frw_shield)
             kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
-            kernel.stuff_lib.set_as_used_as_shield(france_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_shield(france_warlord.id, stuff.id)
 
         if frw_armor:
             stuff = create_stuff(kernel, frw_armor)
             kernel.stuff_lib.set_carried_by(stuff.id, france_warlord.id)
-            kernel.stuff_lib.set_as_used_as_armor(france_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_armor(france_warlord.id, stuff.id)
 
         if enw_weapon:
             stuff = create_stuff(kernel, enw_weapon)
             kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
-            kernel.stuff_lib.set_as_used_as_weapon(england_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_weapon(england_warlord.id, stuff.id)
 
         if enw_shield:
             stuff = create_stuff(kernel, enw_shield)
             kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
-            kernel.stuff_lib.set_as_used_as_shield(england_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_shield(england_warlord.id, stuff.id)
 
         if enw_armor:
             stuff = create_stuff(kernel, enw_armor)
             kernel.stuff_lib.set_carried_by(stuff.id, england_warlord.id)
-            kernel.stuff_lib.set_as_used_as_armor(england_warlord.id, stuff.id)
+            await kernel.stuff_lib.set_as_used_as_armor(england_warlord.id, stuff.id)
 
         while True:
             try:

@@ -118,6 +118,7 @@ game/media/bg
 game/media/pool_avatar__*
 game/media/character_avatar__*
 game/media/loading__*
+game/media/character_spritesheet_*
 server.ini
 .vscode
 avatars
@@ -125,3 +126,4 @@ static/graphics.png
 static/engine.wasm
 static/rollgui2.js
 game/media/root.png
+/spritesheets

@@ -1,4 +1,5 @@
 # coding: utf-8
+import asyncio
 import sqlalchemy
 from sqlalchemy import Column
 from sqlalchemy.orm import Query
@@ -271,6 +272,7 @@ class StuffLib:
             ),
             illustration=stuff_properties.illustration,
             damages=stuff_properties.damages,
+            sprite_sheet_identifiers=stuff_properties.sprite_sheet_identifiers,
         )
 
     def get_carried_by(
@@ -326,6 +328,12 @@ class StuffLib:
     def set_carried_by__from_doc(
         self, stuff_doc: StuffDocument, character_id: str, commit: bool = True
     ) -> None:
+        carried_by = any(
+            stuff_doc.used_as_shield_by_id
+            or stuff_doc.used_as_armor_by_id
+            or stuff_doc.used_as_weapon_by_id
+        )
+
         stuff_doc.carried_by_id = character_id
         stuff_doc.used_as_shield_by_id = None
         stuff_doc.used_as_armor_by_id = None
@@ -333,6 +341,12 @@ class StuffLib:
         stuff_doc.in_built_id = None
         if commit:
             self._kernel.server_db_session.commit()
+
+        if carried_by:
+            loop = asyncio.get_event_loop()
+            loop.run_in_executor(
+                None, self._kernel.character_lib.signal_spritesheet_change, carried_by
+            )
 
     def get_carrying_actions(
         self,
@@ -408,7 +422,7 @@ class StuffLib:
             self._kernel.server_db_session.commit()
 
     # FIXME: exclude crafting stuff
-    def set_as_used_as_weapon(
+    async def set_as_used_as_weapon(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
@@ -424,8 +438,10 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
+
     # FIXME: exclude crafting stuff
-    def set_as_used_as_armor(
+    async def set_as_used_as_armor(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
@@ -440,8 +456,10 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
+
     # FIXME: exclude crafting stuff
-    def set_as_used_as_shield(
+    async def set_as_used_as_shield(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         # FIXME BS NOW: replace query by shared query (ready stuff)
@@ -455,6 +473,8 @@ class StuffLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
 
     def unset_as_used_as_bag(
         self, character_id: str, stuff_id: int, commit: bool = True
@@ -470,7 +490,7 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_weapon(
+    async def unset_as_used_as_weapon(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         stuff_doc: StuffDocument = (
@@ -484,7 +504,9 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_shield(
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
+
+    async def unset_as_used_as_shield(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         stuff_doc: StuffDocument = (
@@ -498,7 +520,9 @@ class StuffLib:
         if commit:
             self._kernel.server_db_session.commit()
 
-    def unset_as_used_as_armor(
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
+
+    async def unset_as_used_as_armor(
         self, character_id: str, stuff_id: int, commit: bool = True
     ) -> None:
         stuff_doc: StuffDocument = (
@@ -511,6 +535,8 @@ class StuffLib:
 
         if commit:
             self._kernel.server_db_session.commit()
+
+        await self._kernel.character_lib.signal_spritesheet_change(character_id)
 
     def drop(
         self,

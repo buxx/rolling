@@ -174,6 +174,8 @@ class SystemController(BaseController):
             tiredness=0,
             thirst=0.0,
             hunger=0.0,
+            spritesheet_filename="",
+            spritesheet_set=False,
         )
 
         for skill in self._kernel.game.config.skills.values():

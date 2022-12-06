@@ -51,6 +51,7 @@ class StuffProperties:
     skills_bonus: typing.List[str] = serpyco.field(default_factory=list)
     illustration: typing.Optional[str] = None
     bonuses: typing.Dict[str, typing.Any] = serpyco.field(default_factory=dict)
+    sprite_sheet_identifiers: typing.Optional[typing.List[str]] = None
 
     def have_abilities(self, abilities: typing.List[str]) -> typing.List[str]:
         have_abilities = []
@@ -129,6 +130,7 @@ class StuffModel:
     used_by: typing.Optional[str] = None
     illustration: typing.Optional[str] = None
     is_lambda: bool = False
+    sprite_sheet_identifiers: typing.Optional[typing.List[str]] = None
 
     @classmethod
     def lambda_(cls) -> "StuffModel":

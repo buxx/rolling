@@ -31,3 +31,6 @@ api_key=xxxxxxxxxxxxxxxxxxxxxxxx
 admin_email=admin@admin.admin
 # tracim_common_spaces=42:reader,442:contributor
 tracim_common_spaces=
+
+[lpcg]
+spritesheets=./spritesheets

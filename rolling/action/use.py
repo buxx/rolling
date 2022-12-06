@@ -177,7 +177,7 @@ class UseAsWeaponAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
+        await self._kernel.stuff_lib.set_as_used_as_weapon(character.id, stuff.id)
         return Description(title="Action effectué")
 
 
@@ -229,7 +229,7 @@ class NotUseAsWeaponAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
+        await self._kernel.stuff_lib.unset_as_used_as_weapon(character.id, stuff.id)
         return Description(title="Action effectué")
 
 
@@ -285,7 +285,7 @@ class UseAsShieldAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
+        await self._kernel.stuff_lib.set_as_used_as_shield(character.id, stuff.id)
         return Description(title="Action effectué")
 
 
@@ -337,7 +337,7 @@ class NotUseAsShieldAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
+        await self._kernel.stuff_lib.unset_as_used_as_shield(character.id, stuff.id)
         return Description(title="Action effectué")
 
 
@@ -393,7 +393,7 @@ class UseAsArmorAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
+        await self._kernel.stuff_lib.set_as_used_as_armor(character.id, stuff.id)
         return Description(title="Action effectué")
 
 
@@ -445,5 +445,5 @@ class NotUseAsArmorAction(WithStuffAction):
     async def perform(
         self, character: "CharacterModel", stuff: "StuffModel", input_: EmptyModel
     ) -> Description:
-        self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)
+        await self._kernel.stuff_lib.unset_as_used_as_armor(character.id, stuff.id)
         return Description(title="Action effectué")

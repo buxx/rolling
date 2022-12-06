@@ -306,9 +306,9 @@ class TestTransfertGround:
         haxe1 = create_stuff(kernel, "STONE_HAXE")
         haxe2 = create_stuff(kernel, "STONE_HAXE")
         haxe3 = create_stuff(kernel, "STONE_HAXE")
-        kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe1.id)
-        kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe2.id)
-        kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe3.id)
+        await kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe1.id)
+        await kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe2.id)
+        await kernel.stuff_lib.set_as_used_as_weapon(xena.id, haxe3.id)
 
         def get_on_ground_quantity() -> int:
             return kernel.stuff_lib.count_zone_stuffs(

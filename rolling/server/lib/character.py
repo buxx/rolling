@@ -32,6 +32,7 @@ from rolling.model.character import FIGHT_AP_CONSUME
 from rolling.model.character import MINIMUM_BEFORE_EXHAUSTED
 from rolling.model.data import ItemModel, ListOfItemModel
 from rolling.model.event import (
+    CharacterSpritesheetChangeData,
     NewResumeTextData,
     StoryPage,
     WebSocketEvent,
@@ -79,6 +80,9 @@ if typing.TYPE_CHECKING:
 
 DEFAULT_LOG_BASE = 4
 STARING_LIFE_POINTS = 3.0  # + endurance
+DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS = (
+    "body::bodies::female::taupe head::heads::human_female::taupe"
+)
 
 
 class CharacterLib:
@@ -323,6 +327,8 @@ class CharacterLib:
             tracim_user_id=character_document.tracim_user_id,
             tracim_home_space_id=character_document.tracim_home_space_id,
             tracim_password=character_document.tracim_password,
+            spritesheet_filename=self.spritesheet_filename(character_document),
+            spritesheet_set=character_document.spritesheet_set,
         )
 
     def get_multiple(
@@ -2157,3 +2163,41 @@ class CharacterLib:
             .filter(CharacterDocument.account_id == account_id)
             .all()
         )
+
+    async def signal_spritesheet_change(self, character_id: str):
+        character_doc = self.get_document(character_id)
+        spritesheet_filename = self.spritesheet_filename(character_doc)
+        await self._kernel.send_to_zone_sockets(
+            character_doc.world_row_i,
+            character_doc.world_col_i,
+            event=WebSocketEvent(
+                type=ZoneEventType.CHARACTER_SPRITESHEET_CHANGE,
+                world_row_i=character_doc.world_row_i,
+                world_col_i=character_doc.world_col_i,
+                data=CharacterSpritesheetChangeData(
+                    character_id=character_doc.id,
+                    spritesheet_filename=spritesheet_filename,
+                ),
+            ),
+        )
+
+    def spritesheet_filename(self, character: CharacterDocument) -> str:
+        identifiers = character.spritesheet_identifiers
+        identifiers = identifiers or DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS
+        additional_identifiers = []
+
+        if armor := character.used_as_armor:
+            stuff_properties = (
+                self._kernel.game.stuff_manager.get_stuff_properties_by_id(
+                    armor.stuff_id
+                )
+            )
+            for identifier in stuff_properties.sprite_sheet_identifiers:
+                additional_identifiers.append(
+                    identifier.format(body_type=character.spritesheet_body_type)
+                )
+
+        if additional_identifiers:
+            identifiers = f"{identifiers} {' '.join(additional_identifiers)}"
+
+        return self._kernel.spritesheet_path(identifiers).name

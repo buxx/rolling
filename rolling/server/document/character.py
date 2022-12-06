@@ -77,6 +77,9 @@ class CharacterDocument(CorpseMixin, Document):
     tracim_password = Column(String(255), nullable=True)
     tracim_user_id = Column(Integer(), nullable=True)
     tracim_home_space_id = Column(Integer(), nullable=True)
+    spritesheet_identifiers = Column(Text(), nullable=True)
+    spritesheet_body_type = Column(String(255), nullable=True)
+    spritesheet_set = Column(Boolean(), default=False, nullable=False)
 
     @property
     def is_alive(self) -> bool:
