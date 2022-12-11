@@ -314,6 +314,11 @@ class PostTakeStuffModelModel:
 
 
 @dataclasses.dataclass
+class SetupCharacterSpritesheetQuery:
+    validate: typing.Optional[str] = None
+
+
+@dataclasses.dataclass
 class GetLookStuffModelModel:
     character_id: str
     stuff_id: int = serpyco.number_field(cast_on_load=True)
@@ -421,6 +426,7 @@ class CharacterModel:
 
     alive: bool
 
+    spritesheet_filename: str
     background_story: str
     max_life_comp: float
     hunting_and_collecting_comp: float
@@ -473,7 +479,6 @@ class CharacterModel:
     # Must match with data/character_avatar/{uuid}.png
     avatar_uuid: typing.Optional[str] = None
     avatar_is_validated: bool = False
-    spritesheet_id: typing.Optional[str] = None
 
     tracim_user_id: typing.Optional[int] = None
     tracim_home_space_id: typing.Optional[int] = None
@@ -622,7 +627,7 @@ class CharacterModelApi:
 
     avatar_uuid: typing.Optional[str] = None
     avatar_is_validated: bool = False
-    spritesheet_id: typing.Optional[str] = None
+    spritesheet_filename: typing.Optional[str] = None
 
 
 @dataclasses.dataclass

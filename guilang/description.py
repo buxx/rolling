@@ -56,6 +56,7 @@ class Part:
     display_int_buttons: bool = False
     cost: typing.Optional[float] = None
     use_classes2_for_button: bool = False
+    dont_wrap: bool = False
 
     @classmethod
     def from_dataclass_fields(
@@ -133,3 +134,4 @@ class Description(serpyco.SerializerMixin):
     reload_zone: bool = False
     reload_inventory: bool = False
     open_new_tab: typing.Optional[str] = None
+    force_tight: bool = False

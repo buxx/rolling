@@ -26,13 +26,8 @@ impl CharacterSpriteSheetGenerator {
         self.inspector.identifiers()
     }
 
-    pub fn build(
-        &self,
-        identifiers: &str,
-        output: String,
-        variant: Option<String>,
-    ) -> PyResult<Vec<String>> {
-        let input = match lpcg::input::Input::from_str(identifiers, variant) {
+    pub fn build(&self, identifiers: &str, output: String) -> PyResult<Vec<String>> {
+        let input = match lpcg::input::Input::from_str(identifiers) {
             Ok(input) => input,
             Err(error) => {
                 return Err(SpritesheetError::new_err(format!(

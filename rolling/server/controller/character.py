@@ -1,15 +1,15 @@
+import hashlib
 import pathlib
 from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
-import aiohttp_jinja2
 from hapic import HapicData
 import json
-import math
 import serpyco
 from sqlalchemy.orm.exc import NoResultFound
 import typing
+import urllib.parse
 
 import random
 from guilang.description import Description, DescriptionType
@@ -37,6 +37,7 @@ from rolling.model.character import (
     ExplodeTakeQuery,
     GetCharacterQueryModel,
     OnPlaceActionQuery,
+    SetupCharacterSpritesheetQuery,
 )
 from rolling.model.character import CharacterModel
 from rolling.model.character import ChooseBetweenStuffInventoryStuffModelModel
@@ -97,7 +98,10 @@ from rolling.server.document.build import DOOR_MODE__CLOSED_EXCEPT_FOR
 from rolling.server.document.build import DoorDocument
 from rolling.server.effect import EffectManager
 from rolling.server.extension import hapic
-from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.character import (
+    DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS,
+    CharacterLib,
+)
 from rolling.server.lib.stuff import StuffLib
 from rolling.server.transfer import TransferStuffOrResources
 from rolling.util import (
@@ -2341,6 +2345,9 @@ class CharacterController(BaseController):
             message=f"<p>{self._kernel.game.config.create_character_event_story_text}</p>",
         )
 
+        spritesheet_filename = self._kernel.character_lib.spritesheet_filename(
+            character_doc
+        )
         await self._kernel.send_to_zone_sockets(
             character_doc.world_row_i,
             character_doc.world_col_i,
@@ -2352,7 +2359,7 @@ class CharacterController(BaseController):
                     character_id=character_id,
                     zone_row_i=character_doc.zone_row_i,
                     zone_col_i=character_doc.zone_col_i,
-                    spritesheet_id=character_doc.spritesheet_id,
+                    spritesheet_filename=spritesheet_filename,
                 ),
             ),
         )
@@ -2368,7 +2375,6 @@ class CharacterController(BaseController):
     @hapic.input_path(GetCharacterPathModel)
     @hapic.output_body(CharacterModelApi)
     async def get(self, request: Request, hapic_data: HapicData) -> CharacterModel:
-
         return self._character_lib.get(
             hapic_data.path.character_id,
             compute_unread_event=bool(hapic_data.query.compute_unread_event),
@@ -2504,6 +2510,9 @@ class CharacterController(BaseController):
                 to_world_row=hapic_data.query.to_world_row,
                 to_world_col=hapic_data.query.to_world_col,
             )
+            spritesheet_filename = self._kernel.character_lib.spritesheet_filename(
+                character_doc
+            )
             await self._kernel.send_to_zone_sockets(
                 hapic_data.query.to_world_row,
                 hapic_data.query.to_world_col,
@@ -2515,7 +2524,7 @@ class CharacterController(BaseController):
                         character_id=character_.id,
                         zone_row_i=character_doc.zone_row_i,
                         zone_col_i=character_doc.zone_col_i,
-                        spritesheet_id=character_doc.spritesheet_id,
+                        spritesheet_filename=spritesheet_filename,
                     ),
                 ),
             )
@@ -3041,20 +3050,120 @@ class CharacterController(BaseController):
 
     @hapic.with_api_doc()
     @hapic.input_path(GetCharacterPathModel)
+    @hapic.input_query(SetupCharacterSpritesheetQuery)
     @hapic.output_body(Description)
     async def spritesheet_setup(
         self, request: Request, hapic_data: HapicData
     ) -> Description:
         character_id = hapic_data.path.character_id
         character_doc = self._kernel.character_lib.get_document(character_id)
-        assert character_doc.spritesheet_id is None
-        illustration_name = self._kernel.spritesheet_illustration(
-            "body::bodies::female::taupe head::heads::human_female::taupe"
-        ).name
+        assert character_doc.spritesheet_identifiers is None
+        layers = []
+        character_identifiers = DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS
+        data = {}
 
+        try:
+            data = await request.json()
+            pass
+        except json.JSONDecodeError:
+            pass
+
+        parts = [Part("Choisissez parmi les possibilités ci-dessous")]
+        form_part = Part(
+            is_form=True,
+            form_action=f"/character/{character_id}/spritesheet-setup",
+            submit_label="Aperçu",
+        )
+        parts.append(form_part)
+
+        for create_character in self._kernel.game.spritesheets.create_character:
+            form_part.items.append(Part(""))
+            form_part.items.append(Part(create_character.name))
+            if create_character.group_by_variant:
+                values = create_character.values(
+                    self._kernel.character_spritesheets_identifiers
+                )
+
+                if create_character.permit_none:
+                    values = dict([("NONE", "Aucun(e)")] + list(values.items()))
+
+                if create_character.take_variant_from is None:
+                    variants = create_character.variants(
+                        self._kernel.character_spritesheets_identifiers
+                    )
+                    if create_character.allowed_variants is not None:
+                        variants = [
+                            variant
+                            for variant in variants
+                            if variant in create_character.allowed_variants
+                        ]
+
+                    variant_value = data.get(
+                        f"{create_character.name}_variant",
+                        create_character.default_variant,
+                    )
+                    form_part.items.append(Part("Nuance de couleur"))
+                    form_part.items.append(
+                        Part(
+                            label="Nuance de couleur",
+                            choices=variants,
+                            name=f"{create_character.name}_variant",
+                            value=variant_value,
+                        )
+                    )
+                else:
+                    variant_value = data.get(
+                        f"{create_character.take_variant_from}_variant",
+                        create_character.default_variant,
+                    )
+
+                if create_character.take_variant_from is None:
+                    form_part.items.append(Part("Type"))
+                value = data.get(
+                    create_character.name, values[create_character.default_value]
+                )
+                form_part.items.append(
+                    Part(
+                        label=create_character.name,
+                        choices=values.values(),
+                        name=create_character.name,
+                        value=value,
+                        dont_wrap=create_character.dont_wrap,
+                    )
+                )
+
+                if variant_value and value and value != "Aucun(e)":
+                    layers.append(
+                        f"{list(values.keys())[list(values.values()).index(value)]}({variant_value})"
+                    )
+
+        if layers:
+            character_identifiers = " ".join(layers)
+
+        parts.append(
+            Part(
+                is_link=True,
+                label="Valider définitivement",
+                form_action=f"/character/{character_id}/spritesheet-setup?validate={urllib.parse.quote(character_identifiers)}",
+            )
+        )
+
+        reload_zone = False
+        if identifiers := hapic_data.query.validate:
+            character_doc.spritesheet_identifiers = identifiers
+            self._kernel.server_db_session.add(character_doc)
+            self._kernel.server_db_session.commit()
+            reload_zone = True
+
+        illustration_name = self._kernel.spritesheet_illustration(
+            character_identifiers,
+        ).name
         return Description(
             title="Apparence du personnage",
             illustration_name=illustration_name,
+            items=parts,
+            force_tight=True,
+            reload_zone=reload_zone,
         )
 
     def bind(self, app: Application) -> None:

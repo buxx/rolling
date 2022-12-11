@@ -18,9 +18,9 @@ depends_on = None
 
 def upgrade():
     op.add_column(
-        "character", sa.Column("spritesheet_id", sa.String(length=255), nullable=True)
+        "character", sa.Column("spritesheet_identifiers", sa.Text(), nullable=True)
     )
 
 
 def downgrade():
-    op.drop_column("character", "spritesheet_id")
+    op.drop_column("character", "spritesheet_identifiers")

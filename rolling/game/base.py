@@ -499,12 +499,16 @@ class Game:
             create_character=[
                 CreateCharacterSource(**config)
                 for config in spritesheets["character"]["create"]["sources"]
-            ]
+            ],
         )
 
     @property
     def config(self) -> GameConfig:
         return self._config
+
+    @property
+    def spritesheets(self) -> SpriteSheets:
+        return self._spritesheets
 
     @property
     def stuff_manager(self) -> StuffManager:

@@ -46,7 +46,10 @@ from rolling.server.lib.account import AccountLib
 from rolling.server.lib.affinity import AffinityLib
 from rolling.server.lib.build import BuildLib
 from rolling.server.lib.business import BusinessLib
-from rolling.server.lib.character import CharacterLib
+from rolling.server.lib.character import (
+    DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS,
+    CharacterLib,
+)
 from rolling.server.lib.corpse import AnimatedCorpseLib
 from rolling.server.lib.door import DoorLib
 from rolling.server.lib.farming import FarmingLib
@@ -726,9 +729,8 @@ class Kernel:
                             f"Character '{character_id}' cant be refreshed"
                         )
 
-    def spritesheet_path(
-        self, identifiers: str, variant: typing.Optional[str] = None
-    ) -> pathlib.Path:
+    def spritesheet_path(self, identifiers: typing.Optional[str]) -> pathlib.Path:
+        identifiers = identifiers or DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS
         image_id = hashlib.md5(identifiers.encode()).hexdigest()
         image_path = pathlib.Path(f"game/media/character_spritesheet_{image_id}.png")
         if image_path.exists():
@@ -736,14 +738,11 @@ class Kernel:
         self.character_spritesheets_generator.build(
             identifiers=identifiers,
             output=str(image_path),
-            variant=variant,
         )
         return image_path
 
-    def spritesheet_illustration(
-        self, identifiers: str, variant: typing.Optional[str] = None
-    ) -> pathlib.Path:
-        spritesheet_path = self.spritesheet_path(identifiers, variant)
+    def spritesheet_illustration(self, identifiers: str) -> pathlib.Path:
+        spritesheet_path = self.spritesheet_path(identifiers)
         image_path = (
             spritesheet_path.parent / f"{spritesheet_path.name}_illustration.png"
         )

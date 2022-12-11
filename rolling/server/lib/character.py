@@ -79,6 +79,9 @@ if typing.TYPE_CHECKING:
 
 DEFAULT_LOG_BASE = 4
 STARING_LIFE_POINTS = 3.0  # + endurance
+DEFAULT_CHARACTER_SPRITESHEETS_IDENTIFIERS = (
+    "body::bodies::female::taupe head::heads::human_female::taupe"
+)
 
 
 class CharacterLib:
@@ -323,7 +326,7 @@ class CharacterLib:
             tracim_user_id=character_document.tracim_user_id,
             tracim_home_space_id=character_document.tracim_home_space_id,
             tracim_password=character_document.tracim_password,
-            spritesheet_id=character_document.spritesheet_id,
+            spritesheet_filename=self.spritesheet_filename(character_document),
         )
 
     def get_multiple(
@@ -2158,3 +2161,7 @@ class CharacterLib:
             .filter(CharacterDocument.account_id == account_id)
             .all()
         )
+
+    def spritesheet_filename(self, character: CharacterDocument) -> str:
+        # TODO : According to weapons, clothes, etc
+        return self._kernel.spritesheet_path(character.spritesheet_identifiers).name
