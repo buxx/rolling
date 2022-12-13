@@ -14,4 +14,4 @@ reqwest = { version = "0.11.12", features = ["blocking", "json", "stream", "mult
 serde = "1.0.147"
 serde_derive = "1.0.147"
 serde_json = "1.0.87"
-lpcg = {path="../lpcg"}
+lpcg = "0.3.0"
