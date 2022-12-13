@@ -463,6 +463,8 @@ dependencies = [
 [[package]]
 name = "lpcg"
 version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ce3a0c0d72780936f13f88ae963e46b80eff2e8dc0af0beff8964a15ebfb43d"
 dependencies = [
  "image",
  "rand",
