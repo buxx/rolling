@@ -60,7 +60,8 @@ class RequestCache:
             return self._carried_stuffs[character_id]
 
         self._carried_stuffs[character_id] = self._kernel.stuff_lib.get_carried_by(
-            character_id
+            character_id,
+            exclude_crafting=False,
         )
         return self._carried_stuffs[character_id]
 
