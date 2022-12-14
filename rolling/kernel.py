@@ -1,4 +1,5 @@
 # coding: utf-8
+import collections
 from contextvars import ContextVar
 import copy
 import dataclasses
@@ -255,11 +256,9 @@ class Kernel:
         self.loadings_medias_names = []
         kernel_logger.info(f"Found {len(self.loadings_paths)} loading screens")
 
-        self._caches = {}
-        for row_i, row in enumerate(self._world_map_source.geography.rows):
-            self._caches[row_i] = {}
-            for col_i, _ in enumerate(row):
-                self._caches[row_i][col_i] = ContextVar("RequestCache", default=None)
+        self._caches = collections.defaultdict(
+            lambda: ContextVar("RequestCache", default=None)
+        )
 
     def cache(self, world_point: WorldPoint, force_new: bool = False) -> "RequestCache":
         if force_new:
@@ -268,7 +267,7 @@ class Kernel:
                 world_point,
             )
 
-        cache = self._caches[world_point[0]][world_point[1]]
+        cache = self._caches[(world_point[0], world_point[1])]
         if cache.get() is None:
             cache.set(
                 RequestCache(
