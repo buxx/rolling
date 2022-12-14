@@ -155,6 +155,7 @@ class DropStuffAction(WithStuffAction):
             title="Laisser quelque-chose ici",
             redirect=input_.then_redirect_url,
             success_parts=[],
+            from_inventory_only=True,
         )
 
 

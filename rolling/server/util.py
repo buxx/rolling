@@ -66,11 +66,13 @@ async def with_multiple_carried_stuffs(
     success_parts: typing.List["Part"],
     redirect: typing.Optional[str] = None,
     under_construction: typing.Optional[bool] = None,
+    from_inventory_only: bool = False,
 ) -> Description:
     availability = Availability.new(kernel, character)
     all_carried = availability.stuffs(
         under_construction=under_construction,
         stuff_id=stuff.stuff_id,
+        from_inventory_only=from_inventory_only,
     ).stuffs
 
     if (
