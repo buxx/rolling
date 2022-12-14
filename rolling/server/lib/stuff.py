@@ -328,7 +328,7 @@ class StuffLib:
     def set_carried_by__from_doc(
         self, stuff_doc: StuffDocument, character_id: str, commit: bool = True
     ) -> None:
-        carried_by = any(
+        carried_by = (
             stuff_doc.used_as_shield_by_id
             or stuff_doc.used_as_armor_by_id
             or stuff_doc.used_as_weapon_by_id
