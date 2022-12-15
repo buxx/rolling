@@ -8,6 +8,7 @@ from guilang.description import Description
 from guilang.description import Part
 from rolling.action.base import WithResourceAction
 from rolling.action.base import get_with_resource_action_url
+from rolling.availability import Availability
 from rolling.exception import ImpossibleAction
 from rolling.exception import NotEnoughResource
 from rolling.exception import WrongInputError
@@ -140,16 +141,16 @@ class EatResourceAction(WithResourceAction):
         all_possible: bool,
         consume_per_tick: float,
     ) -> None:
+        character = kernel.character_lib.get(character_doc.id)
+        availability = Availability.new(kernel, character)
+
         while True:
             not_enough_resource_exc = None
 
             try:
-                kernel.resource_lib.reduce_carried_by(
-                    character_doc.id,
+                availability.reduce_resource(
                     resource_id,
-                    quantity=consume_per_tick,
-                    commit=False,
-                    force_before_raise=True,
+                    consume_per_tick,
                 )
             except NotEnoughResource as exc:
                 not_enough_resource_exc = exc
