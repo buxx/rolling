@@ -1,0 +1,96 @@
+[character]
+    [character.create]
+        [[character.create.sources]]
+            name = "Corp"
+            group_by_variant = true
+            identifiers = [
+                "body::bodies::female::*",
+                "body::bodies::male::*",
+                "body::bodies::muscular::*",
+            ]
+            allowed_variants = [
+                "amber",
+                "black",
+                "bronze",
+                "brown",
+                "fur_black",
+                "fur_brown",
+                "fur_copper",
+                "fur_gold",
+                "fur_grey",
+                "fur_tan",
+                "fur_white",
+                "light",
+                "olive",
+                "taupe",
+            ]
+            default_variant = "taupe"
+            default_value = "body::bodies::female::*"
+            extract_body_type_from = 2
+        [[character.create.sources]]
+            name = "Tête"
+            group_by_variant = true
+            identifiers = [
+                "head::heads::human_female::*",
+                "head::heads::human_male::*",
+            ]
+            take_variant_from = "Corp"
+            default_variant = "taupe"
+            default_value = "head::heads::human_female::*"
+        [[character.create.sources]]
+            name = "Yeux"
+            group_by_variant = true
+            identifiers = [
+                "eyes::*"
+            ]
+            default_value = "eyes::female::*"
+            build_value_names_with_levels = [1]
+        [[character.create.sources]]
+            name = "Oreilles"
+            group_by_variant = true
+            identifiers = [
+                "head::ears::big::*",
+                "head::ears::long::*",
+            ]
+            take_variant_from = "Corp"
+            default_value = "head::ears::long::*"
+            build_value_names_with_levels = [2]
+        [[character.create.sources]]
+            name = "Cheveux"
+            group_by_variant = true
+            identifiers = [
+                "hair::*"
+            ]
+            default_variant = "gray"
+            default_value = "hair::long::female::*"
+            build_value_names_with_levels = [1, 2]
+            dont_wrap = true
+        [[character.create.sources]]
+            name = "Nez"
+            group_by_variant = true
+            identifiers = [
+                "head::nose::*"
+            ]
+            take_variant_from = "Corp"
+            default_value = "head::nose::elderly::*"
+            build_value_names_with_levels = [2]
+        [[character.create.sources]]
+            name = "Barbe"
+            group_by_variant = true
+            identifiers = [
+                "beards::*"
+            ]
+            default_variant = "blonde"
+            permit_none = true
+            default_value = "NONE"
+            build_value_names_with_levels = [1]
+        [[character.create.sources]]
+            name = "Rides"
+            group_by_variant = true
+            identifiers = [
+                "head::wrinkles::*"
+            ]
+            take_variant_from = "Corp"
+            permit_none = true
+            default_value = "NONE"
+            build_value_names_with_levels = [1]

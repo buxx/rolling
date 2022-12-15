@@ -244,7 +244,7 @@ class TurnLib:
             eat_resource_ids = []
             while (
                 character_document.hunger
-                >= self._kernel.game.config.stop_auto_eat_hunger
+                > self._kernel.game.config.stop_auto_eat_hunger
             ):
                 availability = Availability.with_no_cache(self._kernel, character)
                 eatables = cycle(availability.eatables())
